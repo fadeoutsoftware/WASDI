@@ -6,16 +6,10 @@
  */
 package wasdi.shared.opensearch;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import org.apache.abdera.i18n.templates.Template;
-import org.apache.commons.net.io.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -238,95 +232,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 			Utils.debugLog(s_sClassName + ".buildResultViewModel: " + oE);
 		}
 		return null;
-	}
-
-	private String httpGetResults(String sUrl) {
-		Utils.debugLog(s_sClassName + ".httpGetResults( " + sUrl + " )");
-		String sResult = null;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
-
-			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
-
-			long lStart = System.nanoTime();
-			int iResponseSize = 0;
-			try {
-				int responseCode =  oConnection.getResponseCode();
-				Utils.debugLog(s_sClassName + ".httpGetResults: Response Code : " + responseCode);
-				iResponseSize = oConnection.getContentLength();
-				if(200 == responseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					//begin version 1:
-					
-					if(null!=oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-					}
-					//end version 1
-					
-					//version 0:
-	//				BufferedReader in = new BufferedReader(new InputStreamReader(oInputStream));
-	//				String inputLine;
-	//
-	//				StringBuffer oResponseStringBuffer = new StringBuffer();
-	//				while ((inputLine = in.readLine()) != null) {
-	//					oResponseStringBuffer.append(inputLine);
-	//				}
-	//				in.close();
-	//				sResult = oResponseStringBuffer.toString();
-					//end version 0:
-					
-					if(!Utils.isNullOrEmpty(sResult)) {
-						Utils.debugLog(s_sClassName + ".httpGetResults: Response " + sResult.substring(0, Math.min(200, sResult.length())) + "...");
-						if(iResponseSize <= 0) {
-							iResponseSize = sResult.getBytes().length;
-						}
-					} else {
-						Utils.debugLog(s_sClassName + ".httpGetResults: reponse is empty");
-					}
-				} else {
-					Utils.debugLog(s_sClassName + ".httpGetResults: ONDA did not return 200 but "+responseCode+
-							" (1/2) and the following message: " + oConnection.getResponseMessage());
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-					String sMessage = oBytearrayOutputStream.toString();
-					Utils.debugLog(s_sClassName + ".httpGetResults: ONDA did not return 200 but "+responseCode+
-							" (2/2) and this is the content of the error stream: " + sMessage);
-					if(iResponseSize <= 0) {
-						iResponseSize = sMessage.getBytes().length;
-					}
-				}
-			} catch (SocketTimeoutException oE) {
-				Utils.debugLog(s_sClassName + ".httpGetResults: " + oE);
-			}
-			
-			long lEnd = System.nanoTime();
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-			String sQueryType = "";
-			if(sUrl.contains("count")) {
-				sQueryType+="count";
-			} else {
-				sQueryType+="search";
-			}
-			double dSpeed = 0;
-			if(iResponseSize > 0) {
-				dSpeed = ( (double) iResponseSize ) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutionONDA.httpGetResults: " + sQueryType+" ([ms,B,B/s]): "+dMillis+"," + iResponseSize + "," + dSpeed);
-		}
-		catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".httpGetResults: " + oE);
-		}
-		return sResult;
 	}
 
 }

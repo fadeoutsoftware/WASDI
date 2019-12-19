@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
+import org.apache.commons.net.io.Util;
 
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
@@ -39,6 +41,8 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
 
+	protected static String s_sClassName;
+	
 	protected String m_sDownloadProtocol;
 	protected boolean m_bMustCollectMetadata;
 	protected String m_sProvider; 
@@ -48,7 +52,6 @@ public abstract class QueryExecutor {
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
 
-	protected static String s_sClassName;
 
 	void setMustCollectMetadata(boolean bGetMetadata) {
 		m_bMustCollectMetadata = bGetMetadata;
@@ -336,15 +339,17 @@ public abstract class QueryExecutor {
 			}
 	
 			Utils.debugLog("QueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
+			long lStart = System.nanoTime();
 			ClientResponse response = oClient.get(sUrl, oOptions);
-	
+			long lEnd = System.nanoTime();
+			long lTimeElapsed = lEnd - lStart;
+			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
 	
 			if (response.getType() != ResponseType.SUCCESS) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: Response ERROR: " + response.getType());
+				Utils.debugLog("QueryExecutor.executeAndRetrieve: Response ERROR after " + dMillis + "ms : " + response.getType());
 				return null;
 			}
-	
-			Utils.debugLog("QueryExecutor.executeAndRetrieve: Response Success");		
+				
 	
 			// Get The Result as a string
 			BufferedReader oBuffRead = null;
@@ -366,6 +371,18 @@ public abstract class QueryExecutor {
 			}
 	
 			String sResultAsString = oResponseStringBuilder.toString();
+			
+			//stats
+			int iResponseLength = 0;
+			iResponseLength = sResultAsString.length();
+
+			double dSpeed = 0;
+			if(iResponseLength > 0) {
+				dSpeed = ( (double) iResponseLength ) / dMillis;
+				dSpeed *= 1000.0;
+			}
+			Utils.debugLog("QueryExecutor.executeAndRetrieve success: ([ms,B,B/s]): "+dMillis+"," + iResponseLength + "," + dSpeed);
+			
 			//		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
 			//		Utils.printToFile(sTmpFilePath, sResultAsString);
 	
@@ -419,6 +436,81 @@ public abstract class QueryExecutor {
 			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
 		}
 
+	}
+
+	protected String httpGetResults(String sUrl) {
+		Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + " )");
+		String sResult = null;
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+	
+			// optional default is GET
+			oConnection.setRequestMethod("GET");
+			oConnection.setRequestProperty("Accept", "*/*");
+	
+			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
+	
+			long lStart = System.nanoTime();
+			int iResponseSize = -1;
+			try {
+				int responseCode =  oConnection.getResponseCode();
+				Utils.debugLog("QueryExecutor.httpGetResults: Response Code : " + responseCode);
+				if(200 == responseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					if(null!=oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+					}
+					
+					if(!Utils.isNullOrEmpty(sResult)) {
+						String sResponseExtract = null;
+						if(sResult.length() > 200 ) {
+							sResponseExtract = sResult.substring(0, 200) + "...";
+						} else {
+							sResponseExtract = new String(sResult);
+						}
+						Utils.debugLog("QueryExecutor.httpGetResults: Response " + sResponseExtract);
+						iResponseSize = sResult.length();
+					} else {
+						Utils.debugLog("QueryExecutor.httpGetResults: reponse is empty");
+					}
+				} else {
+					Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
+							" (1/2) and the following message: " + oConnection.getResponseMessage());
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+					String sMessage = oBytearrayOutputStream.toString();
+					Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
+							" (2/2) and this is the content of the error stream: " + sMessage);
+					if(iResponseSize <= 0) {
+						iResponseSize = sMessage.length();
+					}
+				}
+			} catch (SocketTimeoutException oE) {
+				Utils.debugLog("QueryExecutor.httpGetResults: " + oE);
+			}
+			
+			long lEnd = System.nanoTime();
+			long lTimeElapsed = lEnd - lStart;
+			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
+			String sQueryType = "search";
+			if(sUrl.contains("count")) {
+				sQueryType ="count";
+			}
+			double dSpeed = 0;
+			if(iResponseSize > 0) {
+				dSpeed = ( (double) iResponseSize ) / dMillis;
+				dSpeed *= 1000.0;
+			}
+			Utils.debugLog("QueryExecutor.httpGetResults: " + sQueryType+" ([ms,B,B/s]): "+dMillis+"," + iResponseSize + "," + dSpeed);
+		}
+		catch (Exception oE) {
+			Utils.debugLog("QueryExecutor.httpGetResults: " + oE);
+		}
+		return sResult;
 	}
 
 	public static void main(String[] args) {
