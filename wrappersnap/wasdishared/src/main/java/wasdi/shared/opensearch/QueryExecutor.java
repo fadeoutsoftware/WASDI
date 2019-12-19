@@ -242,6 +242,8 @@ public abstract class QueryExecutor {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
 			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
+			
+/*
 			//		if (sProvider.equals("SENTINEL"))
 			//		sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
 			//if (sProvider.equals("MATERA"))
@@ -294,7 +296,9 @@ public abstract class QueryExecutor {
 			//	if (element.getQName().getLocalPart() 
 			//	} 
 			//String sTotalResults = oFeed.getAttributeValue("opensearch:totalResults");
-	
+
+*/
+			String sResponse = httpGetResults(sUrl, "count");
 			int iResult = 0;
 			try {
 				iResult = Integer.parseInt(sResponse);
@@ -310,7 +314,6 @@ public abstract class QueryExecutor {
 	}
 
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		//XXX log instead
 		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
 		if(null == oQuery) {
 			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
@@ -318,9 +321,10 @@ public abstract class QueryExecutor {
 		}
 		try {
 			String sUrl = buildUrl(oQuery );
-	
+
 			//create abdera client
 			Abdera oAbdera = new Abdera();
+
 			AbderaClient oClient = new AbderaClient(oAbdera);
 			oClient.setConnectionTimeout(15000);
 			oClient.setSocketTimeout(40000);
@@ -337,7 +341,7 @@ public abstract class QueryExecutor {
 				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 				oOptions.setAuthorization(sBasicAuth);			
 			}
-	
+/*	
 			Utils.debugLog("QueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
 			long lStart = System.nanoTime();
 			ClientResponse response = oClient.get(sUrl, oOptions);
@@ -369,6 +373,7 @@ public abstract class QueryExecutor {
 				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe2);
 				return null;
 			}
+			
 	
 			String sResultAsString = oResponseStringBuilder.toString();
 			
@@ -387,7 +392,9 @@ public abstract class QueryExecutor {
 			//		Utils.printToFile(sTmpFilePath, sResultAsString);
 	
 			//		Utils.debugLog(sResultAsString);
-	
+*/
+
+			String sResultAsString = httpGetResults(sUrl, "search");
 			// build the parser
 			Parser oParser = oAbdera.getParser();
 			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
@@ -439,7 +446,16 @@ public abstract class QueryExecutor {
 	}
 
 	protected String httpGetResults(String sUrl) {
-		Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + " )");
+		String sQueryType = "search";
+		if(sUrl.contains("count")) {
+			sQueryType ="count";
+		}
+		return httpGetResults(sUrl, sQueryType);
+	}
+	
+	//todo add parameter to distinguish type of call: search or count
+	protected String httpGetResults(String sUrl, String sQueryType) {
+		Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + ", " + sQueryType + " )");
 		String sResult = null;
 		try {
 			URL oURL = new URL(sUrl);
@@ -448,6 +464,12 @@ public abstract class QueryExecutor {
 			// optional default is GET
 			oConnection.setRequestMethod("GET");
 			oConnection.setRequestProperty("Accept", "*/*");
+			
+			if (m_sUser!=null && m_sPassword!=null) {
+				String sUserCredentials = m_sUser + ":" + m_sPassword;
+				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
+				oConnection.setRequestProperty ("Authorization", sBasicAuth);
+			}
 	
 			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
 	
@@ -456,6 +478,7 @@ public abstract class QueryExecutor {
 			try {
 				int responseCode =  oConnection.getResponseCode();
 				Utils.debugLog("QueryExecutor.httpGetResults: Response Code : " + responseCode);
+				String sResponseExtract = null;
 				if(200 == responseCode) {
 					InputStream oInputStream = oConnection.getInputStream();
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
@@ -465,26 +488,28 @@ public abstract class QueryExecutor {
 					}
 					
 					if(!Utils.isNullOrEmpty(sResult)) {
-						String sResponseExtract = null;
 						if(sResult.length() > 200 ) {
 							sResponseExtract = sResult.substring(0, 200) + "...";
 						} else {
 							sResponseExtract = new String(sResult);
 						}
-						Utils.debugLog("QueryExecutor.httpGetResults: Response " + sResponseExtract);
+						Utils.debugLog("QueryExecutor.httpGetResults: Response extract: " + sResponseExtract);
 						iResponseSize = sResult.length();
 					} else {
 						Utils.debugLog("QueryExecutor.httpGetResults: reponse is empty");
 					}
 				} else {
 					Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
-							" (1/2) and the following message: " + oConnection.getResponseMessage());
+							" (1/2) and the following message:\n" + oConnection.getResponseMessage());
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					InputStream oErrorStream = oConnection.getErrorStream();
 					Util.copyStream(oErrorStream, oBytearrayOutputStream);
 					String sMessage = oBytearrayOutputStream.toString();
+					if(null!=sMessage) {
+						sResponseExtract = sMessage.substring(0,  200) + "...";
+					}
 					Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
-							" (2/2) and this is the content of the error stream: " + sMessage);
+							" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
 					if(iResponseSize <= 0) {
 						iResponseSize = sMessage.length();
 					}
@@ -496,10 +521,6 @@ public abstract class QueryExecutor {
 			long lEnd = System.nanoTime();
 			long lTimeElapsed = lEnd - lStart;
 			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-			String sQueryType = "search";
-			if(sUrl.contains("count")) {
-				sQueryType ="count";
-			}
 			double dSpeed = 0;
 			if(iResponseSize > 0) {
 				dSpeed = ( (double) iResponseSize ) / dMillis;
