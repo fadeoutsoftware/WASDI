@@ -63,7 +63,6 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel login(LoginInfo oLoginInfo) {
 		Utils.debugLog("AuthResource.Login");
-		//TODO captcha
 		
 		if (oLoginInfo == null) {
 			Utils.debugLog("Auth.Login: login info null, user not authenticated");
@@ -176,7 +175,7 @@ public class AuthResource {
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("AuthResource.CheckSession");
+		Utils.debugLog("AuthResource.CheckSession SessioId: " + sSessionId);
 		
 		if(null == sSessionId) {
 			Utils.debugLog("AuthResource.CheckSession: null sSessionId");
@@ -272,7 +271,7 @@ public class AuthResource {
 		}
 		
 		// Sent the credentials to the user
-		if(!sendPasswordEmail(sEmail, sAccount, sPassword)) {
+		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	    
@@ -312,7 +311,9 @@ public class AuthResource {
 	@Path("/upload/list")
 	@Produces({"application/json", "text/xml"})
 	public String[] listSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+		
 		Utils.debugLog("AuthService.ListSftpAccount");
+		
 		if(! m_oCredentialPolicy.validSessionId(sSessionId) ) {
 			return null;
 		}
@@ -362,7 +363,9 @@ public class AuthResource {
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
 	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
-		Utils.debugLog("AuthService.UpdateSftpPassword");
+		
+		Utils.debugLog("AuthService.UpdateSftpPassword Mail: " + sEmail);
+		
 		if(!m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -388,7 +391,7 @@ public class AuthResource {
 		}
 		
 		// Send password to the user
-		if(!sendPasswordEmail(sEmail, sAccount, sPassword)) {
+		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -450,6 +453,8 @@ public class AuthResource {
 					  //the user is stored in DB
 					  //get user from database (i do it only for consistency)
 					  oWasdiUser = oUserRepository.GoogleLogin(sGoogleIdToken , sEmail, sAuthProvider);
+					  
+					  notifyNewUserInWasdi(oWasdiUser, true, true);
 				  }
 			  }
 			  
@@ -600,7 +605,7 @@ public class AuthResource {
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
-		Utils.debugLog("AuthService.validateNewUser");
+		Utils.debugLog("AuthService.validateNewUser UserId: " + sUserId + " Token: " + sToken);
 	
 		
 		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
@@ -699,8 +704,7 @@ public class AuthResource {
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult changeUserPassword(@HeaderParam("x-session-token") String sSessionId,
-			ChangeUserPasswordViewModel oChPasswViewModel) {
+	public PrimitiveResult changeUserPassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChPasswViewModel) {
 		
 		Utils.debugLog("AuthService.ChangeUserPassword"  );
 		
@@ -752,40 +756,54 @@ public class AuthResource {
 	@Path("/lostPassword")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
-		Utils.debugLog("AuthService.lostPassword");
+		
+		Utils.debugLog("AuthService.lostPassword: sUserId: " + sUserId);
+		
 		if(null == sUserId ) {
 			return PrimitiveResult.getInvalid();
 		}
+		
 		if(!m_oCredentialPolicy.validUserId(sUserId)) {
 			return PrimitiveResult.getInvalid();
 		}
+		
 		UserRepository oUserRepository = new UserRepository();
 		User oUser = oUserRepository.GetUser(sUserId);
+		
 		if(null == oUser) {
 			return PrimitiveResult.getInvalid();
-		} else {
+		} 
+		else {
 			if(null != oUser.getAuthServiceProvider()){
 				if( m_oCredentialPolicy.authenticatedByWasdi(oUser.getAuthServiceProvider()) ){
+					
 					if(m_oCredentialPolicy.validEmail(oUser.getUserId()) ) {
+						
 						String sPassword = Utils.generateRandomPassword();
 						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
 						oUser.setPassword(sHashedPassword);
+						
 						if(oUserRepository.UpdateUser(oUser)) {
+							
 							if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
 								return PrimitiveResult.getInvalid(); 
 							}
+							
 							PrimitiveResult oResult = new PrimitiveResult();
 							oResult.setBoolValue(true);
 							oResult.setIntValue(0);
 							return oResult;
-						} else {
+						} 
+						else {
 							return PrimitiveResult.getInvalid();
 						}
-					} else {
+					} 
+					else {
 						//older users did not necessarily specified an email
 						return PrimitiveResult.getInvalid();
 					}
-				} else {
+				} 
+				else {
 					return PrimitiveResult.getInvalid();
 				}
 			} else {
@@ -808,13 +826,13 @@ public class AuthResource {
 			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 			Message oMessage = new Message();
 			
-			//TODO read the message subject title from servlet config file
-			//e.g.
-			//String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
-			String sTitle = "Welcome to WASDI";
+			String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+			
+			if (Utils.isNullOrEmpty(sTitle)) {
+				sTitle = "Welcome to WASDI";
+			}
 			oMessage.setTilte(sTitle);
 			
-			//TODO read the sender from the servlet config file
 			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 			if (sSender==null) {
 				sSender = "wasdi@wasdi.net";
@@ -862,15 +880,28 @@ public class AuthResource {
 		}
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
-		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
+		
+		
 		Message oMessage = new Message();
-		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+		String sTitle = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_TITLE");
+		
+		if (Utils.isNullOrEmpty(sTitle)) {
+			sTitle = "WASDI Password Recovery";
+		}
 		oMessage.setTilte(sTitle);
-		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+		
+		
+		String sSender = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_SENDER");
 		if (sSender==null) sSender = "wasdi@wasdi.net";
 		oMessage.setSender(sSender);
 		
-		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
+		String sMessage = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_TEXT");
+		
+		if (Utils.isNullOrEmpty(sMessage)) {
+			sMessage = "Your password has been regenerated. Please find here your new credentials:";
+		}
+		
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
 		try {
@@ -883,6 +914,50 @@ public class AuthResource {
 		}
 		return false;
 	}
+	
+	
+	private Boolean sendSftpPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
+		Utils.debugLog("AuthResource.sendSFTPPasswordEmail");
+		if(null == sRecipientEmail || null == sPassword ) {
+			Utils.debugLog("AuthResource.sendPasswordEmail: null input, not enough information to send email");
+			return false;
+		}
+		//send email with new password
+		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
+		
+		
+		Message oMessage = new Message();
+		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+		
+		if (Utils.isNullOrEmpty(sTitle)) {
+			sTitle = "WASDI SFTP Account";
+		}
+		oMessage.setTilte(sTitle);
+		
+		
+		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+		if (sSender==null) sSender = "wasdi@wasdi.net";
+		oMessage.setSender(sSender);
+		
+		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
+		
+		if (Utils.isNullOrEmpty(sMessage)) {
+			sMessage = "Your password has been regenerated. Please find here your new credentials:";
+		}
+		
+		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
+		oMessage.setMessage(sMessage);
+		try {
+			if(oMercuriusAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
+				return true;
+			}
+		} catch (Exception e) {
+			Utils.debugLog("sendSFTPPasswordEmail: " + e.toString());
+			return false;
+		}
+		return false;
+	}
 
 	
 	/**
@@ -891,6 +966,15 @@ public class AuthResource {
 	 * @return
 	 */
 	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed) {
+		 return notifyNewUserInWasdi(oUser,bConfirmed,false);
+	}
+	
+	/**
+	 * Send a notification email to the administrators
+	 * @param oUser
+	 * @return
+	 */
+	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed, boolean bGoogle) {
 		
 		Utils.debugLog("AuthResource.notifyNewUserInWasdi");
 		 
@@ -912,6 +996,8 @@ public class AuthResource {
 			Message oMessage = new Message();
 			
 			String sTitle = "New WASDI User";
+			
+			if (bGoogle) sTitle = "New Google WASDI User";
 			
 			oMessage.setTilte(sTitle);
 			

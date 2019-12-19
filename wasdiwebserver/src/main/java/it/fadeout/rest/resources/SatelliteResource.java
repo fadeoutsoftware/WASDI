@@ -23,10 +23,9 @@ public class SatelliteResource {
 	@Path("/track/{satellitename}")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
-	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
-			@PathParam("satellitename") String sSatname) {
+	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitename") String sSatname) {
 
-		Utils.debugLog("SatelliteResource.getSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
+		Utils.debugLog("SatelliteResource.getSatelliteTrack( Session: " + sSessionId + ", Sat: " + sSatname + " )");
 
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
 		String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
