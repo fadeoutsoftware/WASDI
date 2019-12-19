@@ -58,7 +58,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<CoverageSwathResultViewModel> search(@HeaderParam("x-session-token") String sSessionId,
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
-		Utils.debugLog("OpportunitySearchResource.Search( " + sSessionId + ", ... )");
+		Utils.debugLog("OpportunitySearchResource.Search( Session: " + sSessionId + ", ... )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -386,8 +386,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_XML)
 	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
 			@QueryParam("footPrint") String sFootPrint) {
-		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( " + sSessionId + ", " + sText + ", " + sFootPrint
-				+ " )");
+		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Session: " + sSessionId + ", Text: " + sText + ", Footprint: " + sFootPrint + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -511,7 +510,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(
 			@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " )");
+		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( Session: " + sSessionId + " )");
 		// if(! m_oCredentialPolicy.validSessionId(sSessionId)) {
 		// //todo retur error
 		// //Satellite oSatellite = new

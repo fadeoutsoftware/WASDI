@@ -56,7 +56,7 @@ public class WorkspaceResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<WorkspaceListInfoViewModel> getWorkspaceListByProductName(
 			@HeaderParam("x-session-token") String sSessionId, @QueryParam("productname") String sProductName) {
-		Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( " + sSessionId + ", " + sProductName + " )");
+		Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( Session: " + sSessionId + ", Product: " + sProductName + " )");
 
 		// input validation
 		if (null == sSessionId || null == sProductName) {
@@ -109,7 +109,7 @@ public class WorkspaceResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
-		Utils.debugLog("WorkspaceResource.GetListByUser( " + sSessionId + " )");
+		Utils.debugLog("WorkspaceResource.GetListByUser( Session: " + sSessionId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -215,7 +215,7 @@ public class WorkspaceResource {
 	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( " + sWorkspaceId + " )");
+		Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + " )");
 
 		WorkspaceEditorViewModel oVM = new WorkspaceEditorViewModel();
 
@@ -283,7 +283,7 @@ public class WorkspaceResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId) {
 
-		Utils.debugLog("WorkspaceResource.CreateWorkspace( " + sSessionId + " )");
+		Utils.debugLog("WorkspaceResource.CreateWorkspace( Session: " + sSessionId + " )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -321,7 +321,7 @@ public class WorkspaceResource {
 	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			WorkspaceEditorViewModel oViewModel) {
 
-		Utils.debugLog("WorkspaceResource.UpdateWorkspace( " + sSessionId + ", ... )");
+		Utils.debugLog("WorkspaceResource.UpdateWorkspace( Session: " + sSessionId + ", ... )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -366,7 +366,7 @@ public class WorkspaceResource {
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer,
 			@QueryParam("bDeleteFile") Boolean bDeleteFile) {
 
-		Utils.debugLog("WorkspaceResource.DeleteWorkspace( " + sSessionId + ", " + sWorkspaceId + ", " + bDeleteLayer+ ", " + bDeleteFile + " )");
+		Utils.debugLog("WorkspaceResource.DeleteWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer+ ", DeleteFile: " + bDeleteFile + " )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -513,7 +513,7 @@ public class WorkspaceResource {
 	public PrimitiveResult shareWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sUserId") String sUserId) {
 
-		Utils.debugLog("WorkspaceResource.ShareWorkspace( " + sSessionId + ", " + sWorkspaceId + ", " + sUserId + " )");
+		Utils.debugLog("WorkspaceResource.ShareWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", User: " + sUserId + " )");
 
 		// Validate Session
 		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
@@ -571,7 +571,7 @@ public class WorkspaceResource {
 	public List<WorkspaceSharing> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
 		// Validate Session
 		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
@@ -607,8 +607,7 @@ public class WorkspaceResource {
 	public PrimitiveResult deleteUserSharedWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sUserId") String sUserId) {
 
-		Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace( " + sSessionId + ", " + sWorkspaceId + ", "
-				+ sUserId + " )");
+		Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session

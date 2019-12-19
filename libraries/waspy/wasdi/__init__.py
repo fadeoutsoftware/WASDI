@@ -6,11 +6,23 @@ so please be patient and do not trust anyone's life with the library (not yet)
 
 This is WASPY, the WASDI Python lib.
 
-Last Update: 28/10/2019
+Last Update: 18/12/2019
 
 Tested with: Python 2.7, Python 3.7
 
 History
+
+0.1.31 [18/12/2019]
+    Added multiSubset support
+    Added the console input of user, pw and workspace if config is not specified
+
+0.1.30 [10/12/2019]
+    Added asynch version of the import Products Method
+    Added import Product for a list of files
+    Added get Product Bounding Box 
+    Fixed bug on Verbose Flag
+    Added first version of importAndPreprocess Version
+
 
 0.1.29 [05/11/2019]
     fixed possible infinite loop in addFileToWASDI 
@@ -66,6 +78,7 @@ Created on 11 Jun 2018
 @author: p.campanella
 """
 from time import sleep
+from click.termui import prompt
 
 name = "wasdi"
 
@@ -77,6 +90,8 @@ import traceback
 import zipfile
 import requests
 import collections
+import getpass
+import sys
 
 m_sUser = None
 m_sPassword = None
@@ -386,6 +401,8 @@ def getProcId():
 
 
 def _log(sLog):
+    global m_bVerbose
+    
     if m_bVerbose:
         print(sLog)
 
@@ -504,7 +521,24 @@ def init(sConfigFilePath=None):
         bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
         if bConfigOk is True:
             _loadParams()
-
+            
+    if m_sUser is None and m_sPassword is None:
+        
+        if (sys.version_info > (3, 0)):
+            m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
+        else:            
+            m_sUser = raw_input('[INFO] waspy.init: Please Insert WASDI User:')
+        
+        m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
+        
+        m_sUser = m_sUser.rstrip()
+        m_sPassword = m_sPassword.rstrip()
+        
+        if (sys.version_info > (3, 0)):
+            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+        else:            
+            sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+    
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
               '  ******************************************************************************')
@@ -1472,13 +1506,42 @@ def _unzip(sAttachmentName, sPath):
     return
 
 
-# todo split into 2 functions
+def getProductBBOX(sFileName):
+    """
+    Gets the bounding box of a file
+    :param sFileName: name of the file to query for bounding box
+    :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
+    """
+    
+    sUrl = getBaseUrl()
+    sUrl += "/product/byname?sProductName="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
+    
+    asHeaders = _getStandardHeaders()
+
+    oResponse = requests.get(sUrl, headers=asHeaders)
+    
+    if oResponse is None:
+        print('[ERROR] waspy.getProductBBOX: cannot get bbox for product' +
+              '  ******************************************************************************')
+    elif oResponse.ok is not True:
+        print('[ERROR] waspy.getProductBBOX: cannot get bbox product, server returned: ' + str(oResponse.status_code) +
+              '  ******************************************************************************')
+    else:
+        oJsonResponse = oResponse.json()
+        if ("bbox" in oJsonResponse):
+            return oJsonResponse["bbox"]
+    
+    return ""
+
 def importProductByFileUrl(sFileUrl=None, sBoundingBox=None):
     """
     Imports a product from a Provider in WASDI
-    :param sFileUrl:
-    :param sBoundingBox:
-    :return: execution status
+    :param sFileUrl: url of the file to import
+    :param sBoundingBox: declared bounding box of the file to import
+    :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
 
     _log('[INFO] waspy.importProductByFileUrl( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ' )')
@@ -1515,14 +1578,105 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None):
                 sProcessId = str(oJsonResponse["stringValue"])
                 sReturn = waitProcess(sProcessId)
 
-    return sReturn    
+    return sReturn
+
+def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None):
+    """
+    Imports a product from a Provider in WASDI
+    :param sFileUrl: url of the file to import
+    :param sBoundingBox: declared bounding box of the file to import
+    :return: ProcessId of the Download Operation or "ERROR" if there is any problem
+    """
+
+    _log('[INFO] waspy.importProductByFileUrl( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ' )')
+
+    sReturn = "ERROR"
+
+    if sFileUrl is None:
+        print('[ERROR] waspy.importProductByFileUrl: cannot find a link to download the requested product' +
+              '  ******************************************************************************')
+        return sReturn
+
+    sUrl = getBaseUrl()
+    sUrl += "/filebuffer/download?sFileUrl="
+    sUrl += sFileUrl
+    sUrl += "&sProvider=ONDA&sWorkspaceId="
+    sUrl += getActiveWorkspaceId()
+    if sBoundingBox is not None:
+        sUrl += "&sBoundingBox="
+        sUrl += sBoundingBox
+
+    asHeaders = _getStandardHeaders()
+
+    oResponse = requests.get(sUrl, headers=asHeaders)
+    if oResponse is None:
+        print('[ERROR] waspy.importProductByFileUrl: cannot import product' +
+              '  ******************************************************************************')
+    elif oResponse.ok is not True:
+        print('[ERROR] waspy.importProductByFileUrl: cannot import product, server returned: ' + str(oResponse.status_code) +
+              '  ******************************************************************************')
+    else:
+        oJsonResponse = oResponse.json()
+        if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
+            if "stringValue" in oJsonResponse:
+                sReturn = str(oJsonResponse["stringValue"])
+
+    return sReturn   
+
+
+def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix = "_proc.tif"):
+    """
+    Imports in WASDI and apply a SNAP Workflow to an array of EO Images
+    :param aoImages: array of images to import as returned by searchEOImages
+    :param sWorkflow: name of the workflow to apply to each imported images
+    :return: 
+    """
+    
+    
+    asOriginalFiles = []
+    asPreProcessedFiles = []
+    asRunningProcList = []
+    
+    #For each image found
+    for oImage in aoImages:
+
+        #Get the file name
+        sFile = oImage["properties"]["filename"]
+        wasdiLog("Importing Image " + sFile)
+
+        #Import in WASDI
+        sStatus = importProduct(oImage)
+
+        #Import done?
+        if sStatus == "DONE":
+            # Add the file to the list of original files
+            asOriginalFiles.append(sFile)
+            # Generate the output name
+            sOutputFile = sFile.replace(".zip", sPreProcSuffix)
+
+            # Add the pre processed file to the list
+            asPreProcessedFiles.append(sOutputFile)
+
+            wasdiLog(sFile + " imported, starting workflow to get " + sOutputFile)
+
+            # Is already there for any reason?
+            if not fileExistsOnWasdi(sOutputFile):
+                # No, start the workflow
+                sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
+                asRunningProcList.append(sProcId)
+        else:
+            wasdiLog("File " + sFile + " not imported in wasdi. Jump to the next")
+    
+    # Checkpoint: wait for all asynch workflows to finish
+    wasdiLog("All image imported, waiting for all workflows to finish")
+    waitProcesses(asRunningProcList)        
 
 
 def importProduct(asProduct):
     """
     Imports a product from a Provider in WASDI
     :param asProduct: product dictionary as returned by searchEOImages
-    :return: final process status
+    :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
     
     if asProduct is None:
@@ -1541,7 +1695,102 @@ def importProduct(asProduct):
     except Exception as e:
         print("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
+    
+    
+def asynchImportProduct(asProduct):
+    """
+    Imports a product from a Provider in WASDI
+    :param asProduct: product dictionary as returned by searchEOImages
+    :return: ProcessId of the Download Operation or "ERROR" if there is any problem
+    """
+    
+    if asProduct is None:
+        print("[ERROR] waspy.importProduct: input asPRoduct is none")
+        return "ERROR"
+    
+    _log('[INFO] waspy.importProduct( ' + str(asProduct) + ' )')
+    
+    try:
+        sBoundingBox = None
+        sFileUrl = asProduct["link"]
+        if "footprint" in asProduct:
+            sBoundingBox = asProduct["footprint"]
+    
+        return asynchImportProductByFileUrl(sFileUrl, sBoundingBox)
+    except Exception as e:
+        print("[ERROR] waspy.importProduct: exception " + str(e))
+        return "ERROR"
+            
+def importProductList(aasProduct):
+    """
+    Imports a list of product from a Provider in WASDI
+    :param aasProduct: Array of product dictionary as returned by searchEOImages
+    :return: execution status as an array of  STRINGs, one for each product in input. Can be DONE, ERROR, STOPPED.
+    """
+    
+    if aasProduct is None:
+        print("[ERROR] waspy.importProductList: input asPRoduct is none")
+        return "ERROR"
+    
+    _log('[INFO] waspy.importProductList( ' + str(aasProduct) + ' )')
+    
+    asReturnList = []
+    
+    # For Each product in input
+    for asProduct in aasProduct:
+        try:
+            # Get BBOX and Link from the dictionary
+            sBoundingBox = None
+            sFileUrl = asProduct["link"]
+            if "footprint" in asProduct:
+                sBoundingBox = asProduct["footprint"]
+            
+            # Start the download propagating the Asynch Flag
+            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox)
+            # Append the process id to the list
+            asReturnList.append(sReturn)
+        except Exception as e:
+            # Error!!
+            print("[ERROR] waspy.importProductList: exception " + str(e))
+            asReturnList.append("ERROR")
+            
+    return waitProcesses(asReturnList)
 
+def asynchImportProductList(aasProduct):
+    """
+    Imports a list of product from a Provider in WASDI
+    :param aasProduct: Array of product dictionary as returned by searchEOImages
+    :return: array of the ProcessId of the Download Operations. An element can be "ERROR" if there was any problem
+    """
+    
+    if aasProduct is None:
+        print("[ERROR] waspy.importProductList: input asPRoduct is none")
+        return "ERROR"
+    
+    _log('[INFO] waspy.importProductList( ' + str(aasProduct) + ' )')
+    
+    asReturnList = []
+    
+    # For Each product in input
+    for asProduct in aasProduct:
+        try:
+            # Get BBOX and Link from the dictionary
+            sBoundingBox = None
+            sFileUrl = asProduct["link"]
+            if "footprint" in asProduct:
+                sBoundingBox = asProduct["footprint"]
+            
+            # Start the download propagating the Asynch Flag
+            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox)
+            # Append the process id to the list
+            asReturnList.append(sReturn)
+        except Exception as e:
+            # Error!!
+            print("[ERROR] waspy.importProductList: exception " + str(e))
+            asReturnList.append("ERROR")
+            
+    # In the ASYNCH MODE return the list of process Id
+    return asReturnList
 
 def asynchExecuteProcessor(sProcessorName, aoParams={}):
     """
@@ -1686,8 +1935,12 @@ def waitProcesses(asProcIdList):
             
             # Get the id
             sProcessId = asProcessesToCheck[iProcessIndex]
-            # Get the status
-            sStatus = getProcessStatus(sProcessId) 
+            
+            if sProcessId == "ERROR":
+                sStatus = "ERROR"
+            else:
+                # Get the status
+                sStatus = getProcessStatus(sProcessId) 
             
             #Check if is done
             if sStatus == "DONE" or sStatus == "STOPPED" or sStatus == "ERROR":
@@ -1886,6 +2139,63 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
         return ''
     if oResponse.ok is not True:
         print('[ERROR] waspy.subset: failed, server returned ' + str(oResponse.status_code) +
+              '  ******************************************************************************')
+        return ''
+    else:
+        oJson = oResponse.json()
+        if oJson is not None:
+            if 'stringValue' in oJson:
+                sProcessId = oJson['stringValue']
+                return waitProcess(sProcessId)
+
+    return ''
+
+
+def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
+    _log('[INFO] waspy.multiSubset( ' + str(sInputFile) + ', ' + str(asOutputFiles) + ', ' +
+         str(adLatN) + ', ' + str(adLonW) + ', ' + str(adLatS) + ', ' + str(adLonE) + ' )')
+
+    if sInputFile is None:
+        print('[ERROR] waspy.multiSubset: input file must not be None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if len(sInputFile) < 1:
+        print('[ERROR] waspy.multiSubset: input file name must not have zero length, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if asOutputFiles is None:
+        print('[ERROR] waspy.multiSubset: output files must not be None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if len(asOutputFiles) < 1:
+        print('[ERROR] waspy.multiSubset: output file names len must not have zero length, aborting' +
+              '  ******************************************************************************')
+        return ''
+
+    sUrl = m_sBaseUrl + "/processing/geometric/multisubset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
+           sInputFile + "&sWorkspaceId=" + m_sActiveWorkspace
+    
+    aoBody = {}
+    
+    aoBody["outputNames"] = asOutputFiles;
+    aoBody["latNList"] = adLatN;
+    aoBody["lonWList"] = adLonW;
+    aoBody["latSList"] = adLatS;
+    aoBody["lonEList"] = adLonE;
+    
+    
+    sSubsetSetting = json.dumps(aoBody)
+    asHeaders = _getStandardHeaders()
+    
+    oResponse = requests.post(sUrl, headers=asHeaders, data=sSubsetSetting)
+    
+    if oResponse is None:
+        print('[ERROR] waspy.multiSubset: cannot contact server' +
+              '  ******************************************************************************')
+        return ''
+    
+    if oResponse.ok is not True:
+        print('[ERROR] waspy.multiSubset: failed, server returned ' + str(oResponse.status_code) +
               '  ******************************************************************************')
         return ''
     else:
