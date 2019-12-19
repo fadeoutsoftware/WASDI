@@ -89,60 +89,10 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 				oOptions.setAuthorization(sBasicAuth);			
 			}
-			
-			
-			Utils.debugLog("QueryExecutorSENTINEL.executeCount: Sending 'GET' request to URL : " + sUrl);
-			long lStart = System.nanoTime();
-			ClientResponse oResponse = oClient.get(sUrl, oOptions);
-			long lEnd = System.nanoTime();
-			
 			Document<Feed> oDocument = null;
+			String sResultAsString = null;
 			
-			
-			if (oResponse.getType() != ResponseType.SUCCESS) {
-				Utils.debugLog(s_sClassName + ".executeCount: Response ERROR: " + oResponse.getType());
-				return -1;
-			}
-			
-			//stats
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-
-			
-			
-			
-			// Get The Result as a string
-			BufferedReader oBuffRead = null;
-			try {
-				oBuffRead = new BufferedReader(oResponse.getReader());
-			} catch (IOException oIo0) {
-				Utils.debugLog(s_sClassName + ".executeCount: " + oIo0);
-				return -1;
-			}
-			String sResponseLine = null;
-			StringBuilder oResponseStringBuilder = new StringBuilder();
-			try {
-				while ((sResponseLine = oBuffRead.readLine()) != null) {
-				    oResponseStringBuilder.append(sResponseLine);
-				}
-			} catch (IOException oIo1) {
-				Utils.debugLog(s_sClassName + ".executeCount: " + oIo1);
-				return -1;
-			}
-			
-			String sResultAsString = oResponseStringBuilder.toString();
-			if(null==sResultAsString) {
-				Utils.debugLog(s_sClassName + "executeCount: response is null");
-				return -1;
-			}
-
-			double dSpeed = 0;
-			int iResponseLength = sResultAsString.length();
-			if(iResponseLength > 0) {
-				dSpeed = ( (double) iResponseLength ) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutorSENTINEL.httpGetResults success: ([ms,B,B/s]): " + dMillis + "," + iResponseLength + "," + dSpeed);
+			sResultAsString = httpGetResults(sUrl, "count");
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
 				Utils.debugLog(s_sClassName + ".executeCount: Document response null, aborting");
