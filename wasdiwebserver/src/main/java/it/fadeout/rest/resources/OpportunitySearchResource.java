@@ -334,7 +334,7 @@ public class OpportunitySearchResource {
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("satellitename") String sSatname) {
 
-		Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
+		//Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 
 		// set nfs properties download
 		String sUserHome = System.getProperty("user.home");
@@ -373,8 +373,8 @@ public class OpportunitySearchResource {
 			tm = oSat.getOrbitCore().getTimeLead();
 			for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
 				oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
-		} catch (Exception e) {
-			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack: " + e);
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): " + oE);
 		}
 		return oReturnViewModel;
 	}
