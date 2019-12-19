@@ -253,7 +253,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @return true if available false otherwise
 	 */
 	private Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
-		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
+		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sFileURL + ", " + sDownloadUser + ", ************** )");
 		String sUUID = extractProductUUID(sFileURL);
 		return checkProductAvailabilityFromUUID(sUUID, sDownloadUser, sDownloadPassword);
 	}
@@ -266,7 +266,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @return true if available false otherwise
 	 */
 	private Boolean checkProductAvailabilityFromUUID(String sUUID, String sDownloadUser, String sDownloadPassword) {
-		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
+		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sUUID + ", " + sDownloadUser + ", ************** )");
 		
 		String sCheckUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(" + sUUID + ")?$select=offline,downloadable";
 		
@@ -291,7 +291,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					}
 					oHttpConn.disconnect();
 	        	}catch (Exception oE) {
-	    			m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + " ): error retrieving  reply: " + oE);
+	    			m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", *************** ): error retrieving  reply: " + oE);
 	    			return null;
 	        	}
 	        	//then parse json
@@ -308,23 +308,23 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 						} else if(oJson.has("downloadable")) {
 							bAvailable = oJson.optBoolean("downloadable"); 
 						} else {
-							m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): cannot infer availability from json" );
+							m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", *************): cannot infer availability from json" );
 						}
 					}
 					return bAvailable;
 	        	}catch (Exception oE) {
-	        		m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): during parse: " + oE);
+	        		m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", **************): during parse: " + oE);
 	    			return null;
 	        	}
 	        } else {
-	        	m_oLogger.info( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): Server replied with HTTP code: " + iResponseCode);
+	        	m_oLogger.info( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", **********): Server replied with HTTP code: " + iResponseCode);
 	            InputStream oErrorStream = oHttpConn.getErrorStream();
 	            if(null!=oErrorStream) {
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					Util.copyStream(oErrorStream, oBytearrayOutputStream);
 					String sError = oBytearrayOutputStream.toString();
 					if(!Utils.isNullOrEmpty(sError)) {
-						m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): additional error info: " + sError );
+						m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", **********): additional error info: " + sError );
 					}
 				}
 	            oHttpConn.disconnect();
@@ -355,7 +355,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		String sOrderUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(" + sUUID + ")/Ens.Order";
 		
-		m_oLogger.debug("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
+		m_oLogger.debug("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", ********* )");
 		
 		if (sDownloadUser != null) {
 			Authenticator.setDefault(new Authenticator() {
@@ -363,7 +363,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					try {
 						return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
 					} catch (Exception oEx) {
-						m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " ): " + oEx);
+						m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", *********** ): " + oEx);
 					}
 					return null;
 				}
@@ -396,22 +396,22 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 						}
 			        	return sDate;
 	        		} catch (Exception oEx) {
-	        			m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " ): JSON creation failed: " + oEx);
+	        			m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", ******* ): JSON creation failed: " + oEx);
 	        		}	        		
 	        	} else {
-	        		m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " ): JSON string is null or empty");
+	        		m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", **************): JSON string is null or empty");
 	        	}
 	        } else {
-	        	m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " ): server returned status: " + iResponseCode );
+	        	m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", ************* ): server returned status: " + iResponseCode );
         		InputStream  oErrorStream = oHttpConn.getErrorStream();
         		ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
         		Util.copyStream(oErrorStream, oBytearrayOutputStream);
         		String sError = oBytearrayOutputStream.toString();
-        		m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " ): additional message: " + sError );
+        		m_oLogger.error("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", *********** ): additional message: " + sError );
         		return null;
 	        }
 		} catch (Exception oEx) {
-			m_oLogger.debug("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " ): connection failed: " + oEx);
+			m_oLogger.debug("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", *********** ): connection failed: " + oEx);
 			return null;
 		}
 		return null;

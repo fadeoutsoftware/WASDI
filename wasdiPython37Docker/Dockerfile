@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 #Add Python 3.x Repo
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 
-# Install Python 3.4
+# Install Python 3.7
 RUN apt-get update && apt-get install -y \
 	python3.7
 

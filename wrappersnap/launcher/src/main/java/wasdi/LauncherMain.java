@@ -1363,10 +1363,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Read File Name
 			String sFile = oParameter.getFileName();
 			
-			String sFullPath = getWorspacePath(oParameter) + sFile;
+			// Generate full path name
+			String sPath = getWorspacePath(oParameter);
+			sFile = sPath + sFile;
 
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath);
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFile);
 			
 			if (oDownloadedFile == null)   {
 				s_oLogger.error("Downloaded file is null!! Return empyt layer id for ["+ sFile +"]");
@@ -1376,14 +1378,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Keep the product name
 			String sProductName = oDownloadedFile.getProductViewModel().getName();
 
-			// Generate full path name
-			//String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-			//if (!sPath.endsWith("/")) sPath += "/";
-			//sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace()+ "/";
-			String sPath = getWorspacePath(oParameter);
-			sFile = sPath + sFile;
-
-
 			// Check integrity
 			if (Utils.isNullOrEmpty(sFile))
 			{
@@ -1392,14 +1386,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				String sError = "Input File path is null";
 
 				// Send KO to Rabbit
-				if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+				if (s_oSendToRabbit!=null) {
+					s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+				}
 
 				return  sLayerId;
 			}
 
 			s_oLogger.debug( "LauncherMain.PublishBandImage:  File = " + sFile);
 
-			// Create file
+			// Create file object
 			File oFile = new File(sFile);
 			String sInputFileNameOnly = oFile.getName();
 
@@ -1519,19 +1515,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					//MultiLevelImage oBandImage = oBand.getSourceImage();
 					RenderedImage oBandImage = oBand.getSourceImage();
 					
-					// Check if the Color Model is present					
+					// Check if the Colour Model is present					
 					ColorModel oColorModel = oBandImage.getColorModel();
 					
 					// Tested for Copernicus Marine - netcdf files
 					if(oColorModel == null) {
 						
-						// Color Model not present: try a different way to get the Image
+						// Colour Model not present: try a different way to get the Image
 						BandImageManager oImgManager = new BandImageManager(oProduct);
 						
 						// Create full dimension and View port
 						Dimension oOutputImageSize = new Dimension(oBand.getRasterWidth(), oBand.getRasterHeight());
 						
-						// Rendere the image
+						// Render the image
 						oBandImage = oImgManager.buildImageWithMasks(oBand, oOutputImageSize, null, false, true);
 					}
 					
@@ -1663,9 +1659,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 		}
-		finally{
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		finally {
 			
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			BandImageManager.stopChacheThread();
 		}
 

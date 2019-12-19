@@ -144,7 +144,7 @@ public class CatalogResources {
 	 */
 	private File getEntryFile(String sFileName, String sUserId, String sWorkspace)
 	{
-		Utils.debugLog("CatalogResources.getEntryFile( " + sFileName + " )");
+		Utils.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
 				
 		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
@@ -177,7 +177,7 @@ public class CatalogResources {
 			@QueryParam("workspace") String sWorkspace)
 	{			
 
-		Utils.debugLog("CatalogResources.DownloadEntryByName( " + sSessionId + ", "+ sTokenSessionId + ", " + sFileName + ", " + sWorkspace);
+		Utils.debugLog("CatalogResources.DownloadEntryByName( Session: " + sSessionId + ", TokenSession: "+ sTokenSessionId + ", FileName: " + sFileName + ", Ws: " + sWorkspace);
 		
 		try {
 			
@@ -558,7 +558,7 @@ public class CatalogResources {
 	@Produces({"application/json", "text/xml"})
 	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
 
-		Utils.debugLog("CatalogResource.IngestFile");
+		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspace);
 
 		// Check user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -626,7 +626,7 @@ public class CatalogResources {
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
 
-		Utils.debugLog("CatalogResource.IngestFileInWorkspace");
+		Utils.debugLog("CatalogResource.IngestFileInWorkspace: file " + sFile + " workspace: " + sWorkspace);
 
 		// Check the user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -637,10 +637,13 @@ public class CatalogResources {
 		}
 		
 		// Get the user account
-		String sUserId = oUser.getUserId();		
+		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
 		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+		
+		Utils.debugLog("CatalogResource.IngestFileInWorkspace: computed file path: " + sFilePath);
+		
 		File oFilePath = new File(sFilePath);
 		
 		// Check if the file exists 
