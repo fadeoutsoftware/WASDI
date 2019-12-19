@@ -1,11 +1,9 @@
 package wasdi.shared.opensearch;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -526,7 +524,7 @@ public abstract class QueryExecutor {
 				dSpeed = ( (double) iResponseSize ) / dMillis;
 				dSpeed *= 1000.0;
 			}
-			Utils.debugLog("QueryExecutor.httpGetResults: " + sQueryType+" ([ms,B,B/s]): "+dMillis+"," + iResponseSize + "," + dSpeed);
+			Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + ", " + sQueryType + " ) performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
 		}
 		catch (Exception oE) {
 			Utils.debugLog("QueryExecutor.httpGetResults: " + oE);
