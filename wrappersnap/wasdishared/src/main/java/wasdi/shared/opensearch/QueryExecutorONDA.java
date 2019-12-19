@@ -38,7 +38,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 	 */
 	@Override
 	protected String[] getUrlPath() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -47,7 +46,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 	 */
 	@Override
 	protected Template getTemplate() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -118,7 +116,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		}
 
 		String sOrderBy = oQuery.getSortedBy();
-		//TODO do not use hardcoded values
+		//XXX do not use hardcoded values
 		sOrderBy = "$orderby=creationDate";
 		if(!Utils.isNullOrEmpty(sOrderBy)) {
 			sUrl += "&" + sOrderBy;
@@ -134,7 +132,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		int iResult = 0;
 		String sResult = "0";
 		try {
-			sResult = httpGetResults(sUrl);
+			sResult = httpGetResults(sUrl, "count");
 			if(null!=sResult) {
 				iResult = Integer.parseInt(sResult);
 			} else {
@@ -159,19 +157,19 @@ public class QueryExecutorONDA extends QueryExecutor {
 			} else {
 				sUrl = buildUrlForList(oQuery);
 			}
-			sResult = httpGetResults(sUrl);		
+			sResult = httpGetResults(sUrl, "search");		
 			ArrayList<QueryResultViewModel> aoResult = null;
 			if(!Utils.isNullOrEmpty(sResult)) {
 				aoResult = buildResultViewModel(sResult, bFullViewModel);
 				if(null==aoResult) {
 					throw new NullPointerException(s_sClassName + ".executeAndRetrieve: aoResult is null"); 
 				}
-				if(!bFullViewModel) {
-					//XXX we can probably get rid of this, but let's keep it for safety until thoroughly tested
-					for (QueryResultViewModel oViewModel : aoResult) {
-						oViewModel.setPreview(null);
-					}
-				}
+//				if(!bFullViewModel) {
+//					//XXX we can probably get rid of this, but let's keep it for safety until thoroughly tested
+//					for (QueryResultViewModel oViewModel : aoResult) {
+//						oViewModel.setPreview(null);
+//					}
+//				}
 			} else {
 				Utils.debugLog(s_sClassName + ".executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
 			}
