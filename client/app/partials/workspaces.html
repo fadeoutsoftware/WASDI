@@ -9,12 +9,14 @@
                 <i class="fa fa-plus" aria-hidden="true"></i>{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}
             </button>
         </div>
-        <div class="col-v4-auto pl-2">
-            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)"
-                    ng-disabled="(m_oController.m_oWorkspaceSelected === null) || (m_oController.m_oRabbitStompService.isReadyState() === false) ">
-                <i class="fa fa-pencil" aria-hidden="true"></i>Edit Workspace
-            </button>
-        </div>
+        <!--OLD VERSION COMMENTED-->
+        <!--        ng-disabled="(m_oController.m_oWorkspaceSelected === null) || (m_oController.m_oRabbitStompService.isReadyState() === false) "-->
+<!--        <div class="col-v4-auto pl-2">-->
+<!--            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)"-->
+<!--                   >-->
+<!--                <i class="fa fa-pencil" aria-hidden="true"></i>Edit Workspace-->
+<!--            </button>-->
+<!--        </div>-->
     </div>
     <div class="spacer"></div>
 
@@ -48,36 +50,53 @@
                     <th>#</th>
                     <th>{{"WORKSPACES_THEAD_WORKSPACES"|translate}}</th>
                     <th>{{"WORKSPACES_THEAD_OWNER"|translate}}</th>
-                    <th ng-hide="m_oController.m_oWorkspaceSelected === null"></th>
-                    <th ng-hide="m_oController.m_oWorkspaceSelected === null"></th>
+                    <!--OLD VERSION COMMENTED-->
+                    <!--ng-hide="m_oController.m_oWorkspaceSelected === null"-->
+                    <!--ng-hide="m_oController.m_oWorkspaceSelected === null"-->
+                    <th ></th>
+                    <th ></th>
                     </thead>
                     <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"
                         class="workspaces-list-item"
                         ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}">
-                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >{{$index + 1}}</td>
-                        <td  ng-click="m_oController.loadProductList(oWSListItem)" > {{oWSListItem.workspaceName}}  <!--b class="cursor" style="margin-left: 0px" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" id="cursor">H</b--></td>
-                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >{{oWSListItem.ownerUserId}}</td>
+                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >
+                            {{$index + 1}}
+                        </td>
+                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >
+                            <span class="ellipsis">
+                                {{oWSListItem.workspaceName}}
+                            </span>
+                        </td> <!--b class="cursor" style="margin-left: 0px" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" id="cursor">H</b-->
+                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >
+                            <span class="ellipsis">
+                                {{oWSListItem.ownerUserId}}
+                            </span>
+                        </td>
 
                         <!--<td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">-->
                             <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
                         <!--</td>-->
 
+                            <!--OLD VERSION COMMENTED-->
+<!--                        ng-class="{'disabled' : m_oController.isRabbitConnected() === false}"-->
+<!--                        ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"-->
                         <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
-                            ng-class="{'disabled' : m_oController.isRabbitConnected() == false}"
-                            ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"
                             ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">
                             <div>
-                                <i  ng-hide="m_oController.isLoadingIconVisible() == true">
+                                <!--OLD VERSION COMMENTED-->
+                                <i  ><!--ng-hide="m_oController.isLoadingIconVisible() == true"-->
                                     open
                                     <i class="fa fa-sign-in fa-lg" style="margin-left: 10px;" aria-hidden="true"  ></i>
                                 </i>
                             </div>
-                            <div class="loadIcon"  ng-hide="m_oController.isLoadingIconVisible() === false">
-                                <smallinvaderfixed> </smallinvaderfixed>
-                            </div>
+                            <!--OLD VERSION COMMENTED-->
+                            <!--<div class="loadIcon"  ng-hide="m_oController.isLoadingIconVisible() === false">-->
+<!--                                <smallinvaderfixed> </smallinvaderfixed>-->
+<!--                            </div>-->
                         </td>
+                        <!--OLD VERSION COMMENTED-->
+                        <!--                        ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"-->
                         <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_DELETE'|translate}}"
-                                                            ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"
                                                             ng-click="m_oController.DeleteWorkspace(oWSListItem.workspaceId)">
                             <!--<i class="fa fa-times fa-lg" aria-hidden="true" ng-click="m_oController.DeleteWorkspace(oWSListItem.workspaceId)"></i>-->
                             <i class="fa fa-trash fa-lg" aria-hidden="true" ></i>

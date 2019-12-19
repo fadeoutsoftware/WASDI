@@ -94,28 +94,17 @@
                     color: white;
                 }
             }
-
+            tr{
+                .ellipsis{
+                    max-width: 150px;
+                }
+            }
             .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
                 background-color: #44536C;
                 color: white;
                 cursor: pointer;
             }
-            // COLOR OVER A TD
-            //.over-color
-            //{
-            //  background-color: $wasdi-white;
-            //  color: $wasdi-blue-logo;
-            //
-            //  &:hover{
-            //    cursor:pointer;
-            //    i:hover {
-            //
-            //      //background-color:white;
-            //      color:$wasdi-over-icon;
-            //    }
-            //  }
-            //
-            //}
+
             .selected-row {
 
                 background-color: #44536C;

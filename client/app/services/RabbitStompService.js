@@ -79,7 +79,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
             this.notifyConnectionStateChange = function(connectionState)
             {
-                 this.m_iConnectionState = connectionState;
+                this.m_iConnectionState = connectionState;
                 var msgHlp = MessageHelper.getInstance($rootScope);
                 msgHlp.notifyRabbitConnectionStateChange(connectionState);
             }
@@ -141,7 +141,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                         oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
                     }
                 });
-            }
+            };
 
             this.unsubscribe = function () {
                 if (this.m_oSubscription)
@@ -149,7 +149,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                     this.m_sWorkspaceId = "";
                     this.m_oSubscription.unsubscribe();
                 }
-            }
+            };
 
             this.getConnectionState = function()
             {

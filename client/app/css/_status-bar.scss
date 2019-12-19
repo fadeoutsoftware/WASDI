@@ -50,7 +50,7 @@
                 font-size: 12px
             }
 
-            &.disconnected{
+            .disconnected{
                 .icon{
                     background-color: $color-connection-status-lost;
                 }

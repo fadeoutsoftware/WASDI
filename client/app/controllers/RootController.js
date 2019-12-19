@@ -76,7 +76,7 @@ var RootController = (function() {
         var msgHlp = MessageHelper.getInstanceWithAnyScope($scope);
         msgHlp.subscribeToRabbitConnectionStateChange(function(event, args) {
             _this.updateRabbitConnectionState();
-        })
+        });
         // then immediatly check rabbit connection state
         this.updateRabbitConnectionState(true);
 
@@ -352,6 +352,8 @@ var RootController = (function() {
     {
         //console.debug("Rabbit is connected?", this.m_isRabbitConnected);
         return this.m_isRabbitConnected;
+        // return false;
+        // return true;
     }
 
     RootController.prototype.onClickProcess = function()
