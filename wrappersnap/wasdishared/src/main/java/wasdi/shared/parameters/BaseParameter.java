@@ -90,9 +90,6 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.DOWNLOAD.name())) {
 			oParam = new DownloadFileParameter();
 		}
-		else if (sOperationType.equals(LauncherOperations.DOWNLOADANDPUBLISH.name())) {
-			oParam = new DownloadFileParameter();
-		}
 		else if (sOperationType.equals(LauncherOperations.FILTER.name())) {
 			oParam = new FilterParameter();
 		}

@@ -75,8 +75,8 @@ public class ProcessorsResource {
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion,
 			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample, @QueryParam("public") Integer iPublic) throws Exception {
 
-		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sName + ", " + sVersion + 
-				sDescription + ", " + sType + ", " + sParamsSample + " )");
+		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
+				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
@@ -190,7 +190,7 @@ public class ProcessorsResource {
 	public List<DeployedProcessorViewModel> getDeployedProcessors(@HeaderParam("x-session-token") String sSessionId) throws Exception {
 
 		ArrayList<DeployedProcessorViewModel> aoRet = new ArrayList<>(); 
-		Utils.debugLog("ProcessorsResource.getDeployedProcessors( " + sSessionId + " )");
+		Utils.debugLog("ProcessorsResource.getDeployedProcessors( Session: " + sSessionId + " )");
 		
 		try {
 			// Check User 
@@ -237,7 +237,7 @@ public class ProcessorsResource {
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId) throws Exception {
-		Utils.debugLog("ProcessorsResource.run( " + sSessionId + ", " + sName + ", encodedJson, " + sWorkspaceId + " )");
+		Utils.debugLog("ProcessorsResource.run( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
 		
@@ -318,7 +318,7 @@ public class ProcessorsResource {
 	@GET
 	@Path("/help")
 	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("ProcessorsResource.help( " + sSessionId + ", " + sName + " )");
+		Utils.debugLog("ProcessorsResource.help( Session: " + sSessionId + ", Name: " + sName + " )");
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 		oPrimitiveResult.setBoolValue(false);
 		
@@ -384,7 +384,7 @@ public class ProcessorsResource {
 	@Path("/status")
 	public RunningProcessorViewModel status(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processingId") String sProcessingId) throws Exception {
-		Utils.debugLog("ProcessorsResource.status( " + sSessionId + ", " + sProcessingId + " )");
+		Utils.debugLog("ProcessorsResource.status( Session: " + sSessionId + ", ProcessingId: " + sProcessingId + " )");
 		RunningProcessorViewModel oRunning = new RunningProcessorViewModel();
 		oRunning.setStatus(ProcessStatus.ERROR.toString());
 		try {
@@ -499,7 +499,7 @@ public class ProcessorsResource {
 	@Path("/logs/count")
 	public int countLogs(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processworkspace") String sProcessWorkspaceId){
-		Utils.debugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId + " )");
+		Utils.debugLog("ProcessorResource.countLogs( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + " )");
 		int iResult = -1;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
@@ -542,7 +542,7 @@ public class ProcessorsResource {
 			//note: range extremes are included
 			@QueryParam("startrow") Integer iStartRow, @QueryParam("endrow") Integer iEndRow) {
 		
-		Utils.debugLog("ProcessorsResource.getLogs( " + sSessionId + ", " + sProcessWorkspaceId + ", " + iStartRow + ", " + iEndRow + " )");
+		Utils.debugLog("ProcessorsResource.getLogs( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + ", Start: " + iStartRow + ", End: " + iEndRow + " )");
 		ArrayList<ProcessorLogViewModel> aoRetList = new ArrayList<>();
 		try {
 			
@@ -599,7 +599,7 @@ public class ProcessorsResource {
 	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
-		Utils.debugLog("ProcessorResources.deleteProcessor( " + sSessionId + ", " + sProcessorId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProcessorResources.deleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
@@ -668,7 +668,7 @@ public class ProcessorsResource {
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 		
-		Utils.debugLog("ProcessorResources.updateProcessor( " + sSessionId + ", " + sProcessorId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProcessorResources.updateProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
@@ -719,7 +719,7 @@ public class ProcessorsResource {
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId) throws Exception {
 
-		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " )");
+		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {

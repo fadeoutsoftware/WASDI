@@ -294,25 +294,32 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseSentinel2(String sQuery) {
 		String sSentinel2 = "";
 		if(sQuery.contains("platformname:Sentinel-2")) {
-			sSentinel2 = "( name:S2* AND ";
+			//sSentinel2 = "( name:S2* AND ";
+			sSentinel2 = "( platformName:Sentinel-2 AND ";
+			//platformSerialIdentifier
 			if(sQuery.contains("filename:S2A_*")){
-				sSentinel2+="name:S2A_* AND ";
+				//sSentinel2+="name:S2A_* AND ";
+				sSentinel2+="platformSerialIdentifier:2A* AND ";
 			} else if(sQuery.contains("filename:S2B_*")){
-				sSentinel2+="name:S2B_* AND ";
+				//sSentinel2+="name:S2B_* AND ";
+				sSentinel2+="platformSerialIdentifier:2B* AND ";
 			} else {
-				sSentinel2+="name:* AND ";
+				sSentinel2+="platformSerialIdentifier:* AND ";
 			}
 
 			if(sQuery.contains("producttype:S2MSI1C")) {
-				sSentinel2+="name:*MSI1C*";
+				//sSentinel2+="name:*MSI1C*";
+				sSentinel2+="productType:S2MSI1C";
 			} else if(sQuery.contains("producttype:S2MSI2Ap")) {
-				sSentinel2+="name:*MSIL2Ap*";
+				//sSentinel2+="name:*MSIL2Ap*";
+				sSentinel2+="productType:S2MSIL2Ap";
 			} else if(sQuery.contains("producttype:S2MSI2A")) {
-				sSentinel2+="name:*MSIL2A*";
+				//sSentinel2+="name:*MSIL2A*";
+				sSentinel2+="productType:S2MSI2A";
 			} else {
 				sSentinel2+="name:*";
 			}
-			sSentinel2+=" )";
+			
 
 			//cloudCoverPercentage make sure to read the query for s2 and not for landsat
 			int iFrom = sQuery.indexOf("platformname:Sentinel-2");
@@ -333,6 +340,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				sSentinel2 +=" AND cloudCoverPercentage:[ " + sLow + " TO " + sHi + " ]";
 
 			}
+			
+			sSentinel2+=" )";
 		}
 		
 		return sSentinel2;

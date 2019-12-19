@@ -56,7 +56,7 @@ public class WorkspaceResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<WorkspaceListInfoViewModel> getWorkspaceListByProductName(
 			@HeaderParam("x-session-token") String sSessionId, @QueryParam("productname") String sProductName) {
-		Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( " + sSessionId + ", " + sProductName + " )");
+		Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( Session: " + sSessionId + ", Product: " + sProductName + " )");
 
 		// input validation
 		if (null == sSessionId || null == sProductName) {
@@ -109,7 +109,7 @@ public class WorkspaceResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
-		Utils.debugLog("WorkspaceResource.GetListByUser( " + sSessionId + " )");
+		Utils.debugLog("WorkspaceResource.GetListByUser( Session: " + sSessionId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -215,7 +215,7 @@ public class WorkspaceResource {
 	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( " + sWorkspaceId + " )");
+		Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + " )");
 
 		WorkspaceEditorViewModel oVM = new WorkspaceEditorViewModel();
 
@@ -259,8 +259,7 @@ public class WorkspaceResource {
 			}
 
 			// Get Sharings
-			List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository
-					.GetWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+			List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository.GetWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
 
 			// Add Sharings to View Model
 			if (aoSharings != null) {
@@ -284,7 +283,7 @@ public class WorkspaceResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId) {
 
-		Utils.debugLog("WorkspaceResource.CreateWorkspace( " + sSessionId + " )");
+		Utils.debugLog("WorkspaceResource.CreateWorkspace( Session: " + sSessionId + " )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -322,7 +321,7 @@ public class WorkspaceResource {
 	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			WorkspaceEditorViewModel oViewModel) {
 
-		Utils.debugLog("WorkspaceResource.UpdateWorkspace( " + sSessionId + ", ... )");
+		Utils.debugLog("WorkspaceResource.UpdateWorkspace( Session: " + sSessionId + ", ... )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -367,15 +366,12 @@ public class WorkspaceResource {
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer,
 			@QueryParam("bDeleteFile") Boolean bDeleteFile) {
 
-		Utils.debugLog("WorkspaceResource.DeleteWorkspace( " + sSessionId + ", " + sWorkspaceId + ", " + bDeleteLayer
-				+ ", " + bDeleteFile + " )");
+		Utils.debugLog("WorkspaceResource.DeleteWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer+ ", DeleteFile: " + bDeleteFile + " )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null)
-			return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return null;
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
 		try {
 			// repositories
@@ -388,35 +384,102 @@ public class WorkspaceResource {
 
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
-				Utils.debugLog("User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner
-						+ "]: delete the sharing, not the ws");
+				Utils.debugLog("User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.DeleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
 
 			// get workspace path
-			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
+			String sWorkspacePath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
+			
+			Utils.debugLog("ProductResource.DeleteProduct: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
+			// Delete Workspace Db Entry
 			if (oWorkspaceRepository.DeleteWorkspace(sWorkspaceId)) {
-				// get all product in workspace
-				List<ProductWorkspace> aoProducts = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+				
+				// Get all Products in workspace
+				List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
 
+				// Do we need to delete layers?
+				if (bDeleteLayer) {
+					
+					Utils.debugLog("ProductResource.DeleteProduct: Deleting workspace layers");
+
+					// GeoServer Manager Object
+					GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
+					
+					// For each product in the workspace
+					for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
+						
+						// Get the downloaded file
+						DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(oProductWorkspace.getProductName());
+						
+						// Is the product used also in other workspaces?
+						List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.GetDownloadedFileListByName(oDownloadedFile.getFileName());
+						
+						if (aoDownloadedFileList.size()>1) {
+							// Yes, it is in other Ws, jump
+							Utils.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
+							continue;
+						}
+						
+						// We need the View Model product name: start from file name
+						String sProductName = oDownloadedFile.getFileName();
+						
+						// If view model is available (should be), get the name from the view model
+						if (oDownloadedFile.getProductViewModel() != null) {
+							sProductName = oDownloadedFile.getProductViewModel().getName();
+						}
+						
+						// Get the list of published bands by product name
+						List<PublishedBand> aoPublishedBands = oPublishRepository.GetPublishedBandsByProductName(sProductName);
+						
+						// For each published band
+						for (PublishedBand oPublishedBand : aoPublishedBands) {
+							
+							try {
+								// Remove Geoserver layer (and file)
+								if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+									Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+								}
+
+								try {									
+									// delete published band on database
+									oPublishRepository.DeleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+								} 
+								catch (Exception oEx) {
+									Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting published band on data base " + oEx.toString());}
+
+							} catch (Exception oEx) {
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting layer id " + oEx.toString());
+							}
+
+						}
+					}
+
+				}				
+				
+				
 				if (bDeleteFile) {
 					try {
 
-						Utils.debugLog("WorkspaceResource.DeleteWorkspace: Delete workspace " + sDownloadPath);
+						Utils.debugLog("WorkspaceResource.DeleteWorkspace: Delete workspace folder " + sWorkspacePath);
+						
 						// delete directory
-						FileUtils.deleteDirectory(new File(sDownloadPath));
-						// delete download on data base
-						for (ProductWorkspace oProductWorkspace : aoProducts) {
+						FileUtils.deleteDirectory(new File(sWorkspacePath));
+						
+						// delete download file on database
+						for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
+							
 							try {
-								String sFilePath = sDownloadPath + oProductWorkspace.getProductName();
-								oDownloadedFilesRepository.DeleteByFilePath(sFilePath);
-							} catch (Exception oEx) {
-								Utils.debugLog(
-										"WorkspaceResource.DeleteWorkspace: Error deleting download on data base: "
-												+ oEx);
+								
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: Deleting file " + oProductWorkspace.getProductName());
+								oDownloadedFilesRepository.DeleteByFilePath(oProductWorkspace.getProductName());
+								
+							} 
+							catch (Exception oEx) {
+								Utils.debugLog( "WorkspaceResource.DeleteWorkspace: Error deleting download on data base: " + oEx);
 							}
 						}
 
@@ -424,49 +487,9 @@ public class WorkspaceResource {
 						Utils.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting workspace directory: " + oEx);
 					}
 				}
-
-				if (bDeleteLayer) {
-
-					GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"),
-							m_oServletConfig.getInitParameter("GS_USER"),
-							m_oServletConfig.getInitParameter("GS_PASSWORD"));
-					String gsWorkspace = m_oServletConfig.getInitParameter("GS_WORKSPACE");
-					Utils.debugLog("WorkspaceResource.DeleteWorkspace: gsWorkspace = " + gsWorkspace);
-
-					for (ProductWorkspace oProductWorkspace : aoProducts) {
-						List<PublishedBand> aoPublishedBands = oPublishRepository
-								.GetPublishedBandsByProductName(oProductWorkspace.getProductName());
-						for (PublishedBand oPublishedBand : aoPublishedBands) {
-							try {
-
-								if (!gsManager.removeLayer(oPublishedBand.getLayerId())) {
-									Utils.debugLog("ProductResource.DeleteProduct: error deleting layer "
-											+ oPublishedBand.getLayerId() + " from geoserver");
-								}
-
-								try {
-
-									DownloadedFile oDownloadedFile = oDownloadedFilesRepository
-											.GetDownloadedFileByPath(oProductWorkspace.getProductName());
-									// delete published band on data base
-									oPublishRepository.DeleteByProductNameLayerId(
-											oDownloadedFile.getProductViewModel().getName(),
-											oPublishedBand.getLayerId());
-								} catch (Exception oEx) {
-									Utils.debugLog(
-											"WorkspaceResource.DeleteWorkspace: error deleting published band on data base "
-													+ oEx.toString());
-								}
-
-							} catch (Exception oEx) {
-								Utils.debugLog(
-										"WorkspaceResource.DeleteWorkspace: error deleting layer id " + oEx.toString());
-							}
-
-						}
-					}
-
-				}
+				
+				// Delete Product Workspace entry 
+				oProductWorkspaceRepository.DeleteByWorkspaceId(sWorkspaceId);
 				
 				// Delete also the sharings, it is deleted by the owner..
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
@@ -490,7 +513,7 @@ public class WorkspaceResource {
 	public PrimitiveResult shareWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sUserId") String sUserId) {
 
-		Utils.debugLog("WorkspaceResource.ShareWorkspace( " + sSessionId + ", " + sWorkspaceId + ", " + sUserId + " )");
+		Utils.debugLog("WorkspaceResource.ShareWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", User: " + sUserId + " )");
 
 		// Validate Session
 		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
@@ -548,7 +571,7 @@ public class WorkspaceResource {
 	public List<WorkspaceSharing> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
 		// Validate Session
 		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
@@ -584,8 +607,7 @@ public class WorkspaceResource {
 	public PrimitiveResult deleteUserSharedWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sUserId") String sUserId) {
 
-		Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace( " + sSessionId + ", " + sWorkspaceId + ", "
-				+ sUserId + " )");
+		Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
