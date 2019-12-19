@@ -40,7 +40,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		Utils.debugLog("QueryExecutorPROBAV");
 		m_sProvider = "PROBAV";
 	}
-	
+
 	@Override
 	protected String[] getUrlPath() {
 		Utils.debugLog("QueryExecutorPROBAV.getUrlPath");
@@ -87,7 +87,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 							if (!sPoints.equals(""))
 								sPoints+=",";
 							sPoints += sCoord.replace(" ", ",");
-							
+
 						}
 						sPolygon = String.format("geometry=polygon((%s))", sPoints);						
 					}
@@ -110,7 +110,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 					sCollection = String.format("collection=%s",asNameColletion[0]);
 				}
 
-				
+
 				if (sItem.contains("cloudcoverpercentage"))
 				{
 					String sRefString = sItem;
@@ -124,7 +124,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
 					sSnowCover = String.format("snowCover=[0,%s]",asNameColletion[0]);
 				}
-				
+
 			}
 
 		}
@@ -153,7 +153,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		Utils.debugLog("QueryExecutorPROBAV.executeCount");
 		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
 		String sUrl = buildUrl(oQuery);
-		
+
 		//create abdera client
 		Abdera oAbdera = new Abdera();
 		AbderaClient oClient = new AbderaClient(oAbdera);
@@ -189,7 +189,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 
 		if (response.getType() != ResponseType.SUCCESS) {
-			Utils.debugLog("Response ERROR: " + response.getType());
+			Utils.debugLog("QueryExecutor.executeCount: Response ERROR: " + response.getType());
 			return 0;
 		}
 
@@ -268,7 +268,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 					}
 				}
 			}
-			*/
+			 */
 
 			oResult.setPreview(null);
 
@@ -282,13 +282,13 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		
+
 		Utils.debugLog("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		Map<String, String> oMap = getFootprint(oDocument);
-		
+
 		//set new connction timeout
 		oClient.setConnectionTimeout(2000);
 		//oClient.setSocketTimeout(2000);
@@ -318,7 +318,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 			//retrieve the footprint and all others properties
 			oResult.setFootprint(oMap.get(oResult.getId()));
-			
+
 			/*
 			List<Element> aoElements = oEntry.getElements();
 			for (Element element : aoElements) {
@@ -369,17 +369,24 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 		return aoResults;
 	}
-	
+
 	private Map<String, String> getFootprint(Document<Feed> oDocument){
 		Utils.debugLog("QueryExecutorPROBAV.getFootprint");
 		Map<String, String> oMap = new HashMap<String, String>();
-		
+
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 		try {
 			oDocument.getRoot().writeTo(outStream);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (IOException oE) {
+			String sDocSummary = null;
+			if( null != oDocument) {
+				sDocSummary = oDocument.toString();
+				if(null!=sDocSummary) {
+					sDocSummary = sDocSummary.substring(0, 200);
+					sDocSummary += "...";
+				}
+			}
+			Utils.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE);
 		}
 		InputStream reader = new ByteArrayInputStream(outStream.toByteArray());
 		DocumentBuilderFactory f = 
@@ -401,9 +408,9 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 					String sFootprint = "";
 					for (int k = 0; k < items.item(i).getChildNodes().getLength(); k++)
 					{
-						
+
 						Node oPolygon = items.item(i).getChildNodes().item(k);
-						
+
 						if (oPolygon.getNodeName().equals("atom:id"))
 						{
 							sEntryId = oPolygon.getChildNodes().item(0).getNodeValue();
@@ -419,16 +426,16 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 								{
 									//switch lat and lon
 									sFootprint += String.format("%s %s", asPoints[iPointCount + 1], asPoints[iPointCount]);
-									
+
 									if (iPointCount + 2 < asPoints.length)
 										sFootprint += ",";
 								}
 							}
-							
+
 							sFootprint = String.format("POLYGON ((%s))", sFootprint);
 						}
 					}
-					
+
 					if (sEntryId != null)
 					{
 						oMap.put(sEntryId, sFootprint);
@@ -437,9 +444,16 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 				}
 			}
 
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception oE1) {
+			String sDocSummary = null;
+			if( null != oDocument) {
+				sDocSummary = oDocument.toString();
+				if(null!=sDocSummary) {
+					sDocSummary = sDocSummary.substring(0, 200);
+					sDocSummary += "...";
+				}
+			}
+			Utils.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE1);
 		}
 		return oMap;
 	}
