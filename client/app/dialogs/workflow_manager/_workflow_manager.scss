@@ -15,14 +15,61 @@
             }
 
             .modal-body {
-                //textarea {
-                //  resize: none;
-                //  background-color: $wasdi-white;
-                //  border-color:$wasdi-input-text-border-color ;
-                //
-                //}
+
 
                 height: $size-modals-max-height;
+                .workflows-container{
+                    h3,h4{
+                        color:$wasdi-green-logo;
+                        margin-top: 0;
+                    }
+                    .list-of-workflows{
+                        overflow-y: auto;
+                        max-height: 55vh;
+
+                        //label{
+                        //    color:$wasdi-green-logo;
+                        //}
+                        .well{
+                            border-color:$wasdi-blue-logo;
+                            border-radius: 0;
+                            &:hover{
+                                border: 2px solid $wasdi-green-logo;
+                            }
+                        }
+                        .selectedWorkflow {
+                            //background-color: $wasdi-grey;
+                            //border-color: $wasdi-green-logo;
+                            border: 2px solid $wasdi-green-logo;
+                            //border: 3px $wasdi-green-logo;
+                        }
+                        .buttons-container{
+                            height: 20px;
+                        }
+
+                    }
+                    .input-nodes{
+                        border-bottom: 1px solid $wasdi-grey;
+                        margin-bottom: 5px;
+                    }
+                    .dropdown{
+                        margin-bottom: 15px;
+                        .dropdown-menu{
+                            left: -100px !important;
+
+                        }
+                    }
+                    .selected-input{
+                        margin-bottom: 15px;
+                    }
+                    .multiselect-directive .list-group {
+                        max-height: none;
+                        height: 300px;
+                    }
+
+
+                }
+
 
                 .tab-content{
                     height: 85%;
