@@ -451,7 +451,6 @@ public abstract class QueryExecutor {
 		return httpGetResults(sUrl, sQueryType);
 	}
 	
-	//todo add parameter to distinguish type of call: search or count
 	protected String httpGetResults(String sUrl, String sQueryType) {
 		Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + ", " + sQueryType + " )");
 		String sResult = null;

@@ -31,6 +31,7 @@ public class QueryExecutorFactory {
 		aoMap.put("MATERA", QueryExecutorMATERA::new);
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
 		aoMap.put("FEDEO", QueryExecutorFEDEO::new);
+		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		Utils.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
