@@ -194,11 +194,11 @@ public class QueryExecutorONDA extends QueryExecutor {
 		Utils.debugLog(s_sClassName + ".buildResultViewModel( sJson, " + bFullViewModel + " )");
 		if(null==sJson ) {
 			Utils.debugLog("QueryExecutor.buildResultLightViewModel: passed a null string");
-			return null;
+			throw new NullPointerException("QueryExecutor.buildResultLightViewModel: passed a null string");
 		}
+		ArrayList<QueryResultViewModel> aoResult = new ArrayList<>();
 		try {
 			JSONObject oJsonOndaResponse = new JSONObject(sJson);
-			ArrayList<QueryResultViewModel> aoResult = new ArrayList<QueryResultViewModel>();
 			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
 			if(null!=aoJsonArray) {
 				if(aoJsonArray.length()<=0) {
@@ -207,7 +207,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 					for (Object oObject : aoJsonArray) {
 						if(null!=oObject) {
 							JSONObject oOndaFullEntry = new JSONObject("{}");
-							String sEntryKey = "entry";
 							JSONObject oOndaEntry = (JSONObject)(oObject);
 							if(!bFullViewModel) {
 								String sQuicklook = oOndaEntry.optString("quicklook");
@@ -215,6 +214,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 									oOndaEntry.put("quicklook", (String)null);
 								}
 							}
+							String sEntryKey = "entry";
 							oOndaFullEntry.put(sEntryKey, oOndaEntry);
 							QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaFullEntry, m_sDownloadProtocol);
 							aoResult.add(oRes);
@@ -222,14 +222,13 @@ public class QueryExecutorONDA extends QueryExecutor {
 					}
 				}
 			}
-			if(aoResult.isEmpty()) {
-				Utils.debugLog(s_sClassName + ".buildResultViewModel: no results");
-			}
-			return aoResult;
 		} catch (Exception oE) {
 			Utils.debugLog(s_sClassName + ".buildResultViewModel: " + oE);
 		}
-		return null;
+		if(aoResult.isEmpty()) {
+			Utils.debugLog(s_sClassName + ".buildResultViewModel: no results");
+		}
+		return aoResult;
 	}
 
 }
