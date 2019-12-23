@@ -32,6 +32,8 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import com.sleepycat.je.dbi.CursorImpl.WithCursor;
+
 import wasdi.shared.business.UserSession;
 
 /**
@@ -235,25 +237,23 @@ public class Utils {
 
 	public static boolean doesThisStringMeansTrue(String sString) {
 		// default value is arbitrary!
-		if (isNullOrEmpty(sString)) {
-			return true;
-		} else if (sString.equalsIgnoreCase("true")) {
-			return true;
-		} else if (sString.equalsIgnoreCase("1")) {
-			return true;
-		}
-		return false;
+		return (
+				isNullOrEmpty(sString) ||
+				sString.equalsIgnoreCase("true") ||
+				sString.equalsIgnoreCase("1")
+		);
 	}
 
 	public static void printToFile(String sFilePath, String sToBePrinted) {
-		FileWriter oFileWeriter;
-		try {
-			oFileWeriter = new FileWriter(sFilePath);
+		if(null == sFilePath || null == sToBePrinted) {
+			throw new NullPointerException("printToFile: null pointer");
+		}
+		try( FileWriter oFileWeriter = new FileWriter(sFilePath) ) {
 			oFileWeriter.write(sToBePrinted);
 			oFileWeriter.flush();
-			oFileWeriter.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+			//note: no need to close: closing resources is handled automatically by the try with resources
+		} catch (Exception oE) {
+			debugLog( "Utils.printToFile: " + oE );
 		}
 	}
 
