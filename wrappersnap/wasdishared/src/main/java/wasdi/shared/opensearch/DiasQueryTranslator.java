@@ -19,14 +19,13 @@ public abstract class DiasQueryTranslator {
 	protected HashMap<String, String> keyMapping;
 	protected HashMap<String, String> valueMapping;
 
-	protected String translateAndEncode(String sQuery) {
+	public String translateAndEncode(String sQuery) {
 		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQuery));
 	}
 	
 	//translates from WASDI query (OpenSearch) to <derived class> format
 	protected abstract String translate(String sQuery);
-
 
 	protected String encode( String sDecoded ) {
 		String sResult = new String(sDecoded); 

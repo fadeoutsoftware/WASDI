@@ -60,7 +60,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	 * 
 	 */
 	@Override
-	public String translate(String sQueryFromClient) {
+	protected String translate(String sQueryFromClient) {
 		if(Utils.isNullOrEmpty(sQueryFromClient)) {
 			return new String("");
 		}
@@ -417,7 +417,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sSentinel1;
 	}
 
-	String getNextDateTime(String sSubQuery) {
+	private String getNextDateTime(String sSubQuery) {
 		String sDateTime = "";
 		String sDateTimePattern = "(\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d\\:\\d\\d:\\d\\d\\.\\d\\d\\dZ)"; 
 		Pattern oDateTimePattern = Pattern.compile(sDateTimePattern);
