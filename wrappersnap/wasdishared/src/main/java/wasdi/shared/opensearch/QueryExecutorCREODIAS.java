@@ -8,6 +8,8 @@ package wasdi.shared.opensearch;
 
 import org.apache.abdera.i18n.templates.Template;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * @author c.nattero
  *
@@ -18,7 +20,10 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	 * 
 	 */
 	public QueryExecutorCREODIAS() {
-		// TODO Auto-generated constructor stub
+		Utils.debugLog(s_sClassName);
+		m_sProvider="CREODIAS";
+		this.m_oQueryTranslator = new DiasQueryTranslatorCREODIAS();
+		this.m_oResponseTranslator = new DiasResponseTranslatorCREODIAS();
 	}
 
 	/* (non-Javadoc)
