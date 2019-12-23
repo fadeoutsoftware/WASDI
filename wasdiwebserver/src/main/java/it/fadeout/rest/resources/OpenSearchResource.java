@@ -442,14 +442,18 @@ public class OpenSearchResource {
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							QueryExecutor oExecutor = getExecutor(sProviders);
-							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
-							if (aoTmp != null && !aoTmp.isEmpty()) {
-								iObtainedResults += aoTmp.size();
-								aoResults.addAll(aoTmp);
-								Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
-										" results for Query#" + iQueries +" for " + sProvider);
-							} else {
-								Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+							try {
+								ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
+								if (aoTmp != null && !aoTmp.isEmpty()) {
+									iObtainedResults += aoTmp.size();
+									aoResults.addAll(aoTmp);
+									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
+											" results for Query#" + iQueries +" for " + sProvider);
+								} else {
+									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+								}
+							} catch (Exception oE4s) {
+								Utils.debugLog(s_sClassName + ".SearchList: " + oE4s);
 							}
 						}
 					}
