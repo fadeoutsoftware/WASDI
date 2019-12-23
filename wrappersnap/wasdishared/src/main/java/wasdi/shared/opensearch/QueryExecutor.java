@@ -50,20 +50,6 @@ public abstract class QueryExecutor {
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
 
-
-	void setMustCollectMetadata(boolean bGetMetadata) {
-		m_bMustCollectMetadata = bGetMetadata;
-
-	}	
-
-	public void setUser(String m_sUser) {
-		this.m_sUser = m_sUser;
-	}
-
-	public void setPassword(String m_sPassword) {
-		this.m_sPassword = m_sPassword;
-	}
-
 	
 	public int executeCount(String sQuery) throws IOException {
 		try {
@@ -271,6 +257,20 @@ public abstract class QueryExecutor {
 		}
 
 	}
+
+	public void setMustCollectMetadata(boolean bGetMetadata) {
+		m_bMustCollectMetadata = bGetMetadata;
+
+	}	
+
+	private void setUser(String m_sUser) {
+		this.m_sUser = m_sUser;
+	}
+
+	private void setPassword(String m_sPassword) {
+		this.m_sPassword = m_sPassword;
+	}
+
 	
 
 	protected String buildUrl(PaginatedQuery oQuery) {
