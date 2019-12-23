@@ -28,11 +28,11 @@ public abstract class DiasQueryTranslator {
 	protected abstract String translate(String sQuery);
 
 	protected String encode( String sDecoded ) {
-		String sResult = new String(sDecoded); 
-		sResult = sResult.replaceAll(" ", "%20");
+		String sResult = sDecoded; 
+		sResult = sResult.replace(" ", "%20");
 		sResult = sResult.replaceAll("\"", "%22");
 		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
 		return sResult;
-	};
+	}
 	
 }
