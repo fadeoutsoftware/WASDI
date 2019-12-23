@@ -109,13 +109,18 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 	//TODO change the method signature to get rid of the protocol
 	public QueryResultViewModel translate(JSONObject oInJson, String sProtocol) {
+		if(null == oInJson) {
+			throw new NullPointerException("DiasResponseTranslatorONDA.translate: null json");
+		}
+		if (null == sProtocol ) {
+			//default protocol to https, trying to stay safe
+			sProtocol = "https";
+		}
 		QueryResultViewModel oResult = null;
 		try {			
-			String sInJson = oInJson.toString();
-
 			JSONObject oOndaJson = oInJson.optJSONObject("entry");
 			if(null!=oOndaJson) {
-				String sJson = oOndaJson.toString();
+				oOndaJson.toString();
 				oResult = parseBaseData(sProtocol, oOndaJson);
 			}
 			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
