@@ -142,8 +142,6 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			sUrl+="&startIndex=" + oQuery.getOffset();
 		if (oQuery.getLimit() != null)
 			sUrl+="&count=" + oQuery.getLimit();
-
-		//addUrlParams(oParamsMap);
 		return sUrl;
 	}
 
