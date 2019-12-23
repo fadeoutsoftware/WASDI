@@ -64,178 +64,7 @@ public abstract class QueryExecutor {
 		this.m_sPassword = m_sPassword;
 	}
 
-
-	protected String buildUrl(PaginatedQuery oQuery) {
-		//Utils.debugLog("QueryExecutor.buildUrl( " + oQuery + " )");
-		if(null==oQuery) {
-			Utils.debugLog("QueryExecutor.buildUrl: oQuery is null");
-			return null;
-		}
-		Template oTemplate = getTemplate();
-		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
-		oParamsMap.put("scheme", getUrlSchema());
-		oParamsMap.put("path", getUrlPath());
-		oParamsMap.put("start", oQuery.getOffset() );
-		oParamsMap.put("rows", oQuery.getLimit() );
-		oParamsMap.put("orderby", oQuery.getSortedBy() + " " + oQuery.getOrder() );
-		oParamsMap.put("q", oQuery.getQuery() );
-		addUrlParams(oParamsMap);
-		return oTemplate.expand(oParamsMap);
-
-	}
-
-	//todo make this method abstract
-	protected void addUrlParams(Map<String, Object> oParamsMap) {
-	}
-
-
-	protected String getUrlSchema() {
-		return "http";
-	}
-
-	protected abstract String[] getUrlPath();
-
-
-	protected abstract Template getTemplate();
-
-	protected abstract String getCountUrl(String sQuery);	
-
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		Utils.debugLog("QueryExecutor.buildResultViewModel(3 args)");
-		if(oDocument == null) {
-			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
-			return null;
-		}
-		if(oClient == null) {
-			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): AbderaClient oClient is null, aborting");
-			return null;
-		}
-		if(oOptions == null) {
-			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): RequestOptions oOptions is null, aborting");
-			return null;
-		}
-		
-		//int iStreamSize = 1000000;
-		Feed oFeed = (Feed) oDocument.getRoot();
-
-		//set new connction timeout
-		oClient.setConnectionTimeout(2000);
-		//oClient.setSocketTimeout(2000);
-		oClient.setConnectionManagerTimeout(2000);
-
-		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
-
-		for (Entry oEntry : oFeed.getEntries()) {
-
-			QueryResultViewModel oResult = new QueryResultViewModel();
-			oResult.setProvider(m_sProvider);
-			//			Utils.debugLog("QueryExecutor.buildResultViewModel: Parsing new Entry");
-
-			//retrive the title
-			oResult.setTitle(oEntry.getTitle());			
-
-			//retrive the summary
-			oResult.setSummary(oEntry.getSummary());
-
-			//retrieve the id
-			oResult.setId(oEntry.getId().toString());
-
-			//retrieve the link
-			//			List<Link> aoLinks = oEntry.getLinks();
-			Link oLink = oEntry.getAlternateLink();
-			if (oLink != null)oResult.setLink(oLink.getHref().toString());
-
-			//retrieve the footprint and all others properties
-			List<Element> aoElements = oEntry.getElements();
-			for (Element element : aoElements) {
-				String sName = element.getAttributeValue("name");
-				if (sName != null) {
-					if (sName.equals("footprint")) {
-						oResult.setFootprint(element.getText());
-					} else {
-						oResult.getProperties().put(sName, element.getText());
-					}
-				}
-			}
-
-			//retrieve the icon
-			oLink = oEntry.getLink("icon");			
-			if (oLink != null) {
-				//				Utils.debugLog("QueryExecutor.buildResultViewModel: Icon Link: " + oLink.getHref().toString());
-
-				try {
-					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-					//					Utils.debugLog("QueryExecutor.buildResultViewModel: Response Got from the client");
-					if (oImageResponse.getType() == ResponseType.SUCCESS) {
-						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Success: saving image preview");
-						InputStream oInputStreamImage = oImageResponse.getInputStream();
-						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
-						ByteArrayOutputStream bas = new ByteArrayOutputStream();
-						ImageIO.write(oImage, "png", bas);
-						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Image Saved");
-					}				
-				}
-				catch (Exception e) {
-					Utils.debugLog("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
-				}					
-			} else {
-				Utils.debugLog("QueryExecutor.buildResultViewModel: Link Not Available" );
-			}
-			aoResults.add(oResult);
-		} 
-		Utils.debugLog("QueryExecutor.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
-		return aoResults;
-	}
-
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args)");
-		if(oDocument == null) {
-			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
-			return null;
-		}
-		if(oClient == null) {
-			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): AbderaClient oClient is null, aborting");
-			return null;
-		}
-		if(oOptions == null) {
-			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): RequestOptions oOptions is null, aborting");
-			return null;
-		}
-		Feed oFeed = (Feed) oDocument.getRoot();
-		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
-		for (Entry oEntry : oFeed.getEntries()) {
-			QueryResultViewModel oResult = new QueryResultViewModel();
-			oResult.setProvider(m_sProvider);
-			//retrieve the title
-			oResult.setTitle(oEntry.getTitle());			
-			//retrieve the summary
-			oResult.setSummary(oEntry.getSummary());
-			//retrieve the id
-			oResult.setId(oEntry.getId().toString());
-			//retrieve the link
-			Link oLink = oEntry.getAlternateLink();
-			if (oLink != null)oResult.setLink(oLink.getHref().toString());
-
-			//retrieve the footprint and all others properties
-			List<Element> aoElements = oEntry.getElements();
-			for (Element element : aoElements) {
-				String sName = element.getAttributeValue("name");
-				if (sName != null) {
-					if (sName.equals("footprint")) {
-						oResult.setFootprint(element.getText());
-					} else {
-						oResult.getProperties().put(sName, element.getText());
-					}
-				}
-			}
-			oResult.setPreview(null);
-			aoResults.add(oResult);
-		} 
-		Utils.debugLog("QueryExecutor.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
-		return aoResults;
-	}
-
+	
 	public int executeCount(String sQuery) throws IOException {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
@@ -442,6 +271,173 @@ public abstract class QueryExecutor {
 		}
 
 	}
+	
+
+	protected String buildUrl(PaginatedQuery oQuery) {
+		//Utils.debugLog("QueryExecutor.buildUrl( " + oQuery + " )");
+		if(null==oQuery) {
+			Utils.debugLog("QueryExecutor.buildUrl: oQuery is null");
+			return null;
+		}
+		Template oTemplate = getTemplate();
+		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
+		oParamsMap.put("scheme", getUrlSchema());
+		oParamsMap.put("path", getUrlPath());
+		oParamsMap.put("start", oQuery.getOffset() );
+		oParamsMap.put("rows", oQuery.getLimit() );
+		oParamsMap.put("orderby", oQuery.getSortedBy() + " " + oQuery.getOrder() );
+		oParamsMap.put("q", oQuery.getQuery() );
+		return oTemplate.expand(oParamsMap);
+
+	}
+
+	protected String getUrlSchema() {
+		return "http";
+	}
+
+	protected abstract String[] getUrlPath();
+
+
+	protected abstract Template getTemplate();
+
+	protected abstract String getCountUrl(String sQuery);	
+
+	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		Utils.debugLog("QueryExecutor.buildResultViewModel(3 args)");
+		if(oDocument == null) {
+			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
+			return null;
+		}
+		if(oClient == null) {
+			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): AbderaClient oClient is null, aborting");
+			return null;
+		}
+		if(oOptions == null) {
+			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): RequestOptions oOptions is null, aborting");
+			return null;
+		}
+		
+		//int iStreamSize = 1000000;
+		Feed oFeed = (Feed) oDocument.getRoot();
+
+		//set new connction timeout
+		oClient.setConnectionTimeout(2000);
+		//oClient.setSocketTimeout(2000);
+		oClient.setConnectionManagerTimeout(2000);
+
+		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+
+		for (Entry oEntry : oFeed.getEntries()) {
+
+			QueryResultViewModel oResult = new QueryResultViewModel();
+			oResult.setProvider(m_sProvider);
+			//			Utils.debugLog("QueryExecutor.buildResultViewModel: Parsing new Entry");
+
+			//retrive the title
+			oResult.setTitle(oEntry.getTitle());			
+
+			//retrive the summary
+			oResult.setSummary(oEntry.getSummary());
+
+			//retrieve the id
+			oResult.setId(oEntry.getId().toString());
+
+			//retrieve the link
+			//			List<Link> aoLinks = oEntry.getLinks();
+			Link oLink = oEntry.getAlternateLink();
+			if (oLink != null)oResult.setLink(oLink.getHref().toString());
+
+			//retrieve the footprint and all others properties
+			List<Element> aoElements = oEntry.getElements();
+			for (Element element : aoElements) {
+				String sName = element.getAttributeValue("name");
+				if (sName != null) {
+					if (sName.equals("footprint")) {
+						oResult.setFootprint(element.getText());
+					} else {
+						oResult.getProperties().put(sName, element.getText());
+					}
+				}
+			}
+
+			//retrieve the icon
+			oLink = oEntry.getLink("icon");			
+			if (oLink != null) {
+				//				Utils.debugLog("QueryExecutor.buildResultViewModel: Icon Link: " + oLink.getHref().toString());
+
+				try {
+					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+					//					Utils.debugLog("QueryExecutor.buildResultViewModel: Response Got from the client");
+					if (oImageResponse.getType() == ResponseType.SUCCESS) {
+						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Success: saving image preview");
+						InputStream oInputStreamImage = oImageResponse.getInputStream();
+						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+						ByteArrayOutputStream bas = new ByteArrayOutputStream();
+						ImageIO.write(oImage, "png", bas);
+						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
+						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Image Saved");
+					}				
+				}
+				catch (Exception e) {
+					Utils.debugLog("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
+				}					
+			} else {
+				Utils.debugLog("QueryExecutor.buildResultViewModel: Link Not Available" );
+			}
+			aoResults.add(oResult);
+		} 
+		Utils.debugLog("QueryExecutor.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
+		return aoResults;
+	}
+
+	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args)");
+		if(oDocument == null) {
+			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
+			return null;
+		}
+		if(oClient == null) {
+			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): AbderaClient oClient is null, aborting");
+			return null;
+		}
+		if(oOptions == null) {
+			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): RequestOptions oOptions is null, aborting");
+			return null;
+		}
+		Feed oFeed = (Feed) oDocument.getRoot();
+		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		for (Entry oEntry : oFeed.getEntries()) {
+			QueryResultViewModel oResult = new QueryResultViewModel();
+			oResult.setProvider(m_sProvider);
+			//retrieve the title
+			oResult.setTitle(oEntry.getTitle());			
+			//retrieve the summary
+			oResult.setSummary(oEntry.getSummary());
+			//retrieve the id
+			oResult.setId(oEntry.getId().toString());
+			//retrieve the link
+			Link oLink = oEntry.getAlternateLink();
+			if (oLink != null)oResult.setLink(oLink.getHref().toString());
+
+			//retrieve the footprint and all others properties
+			List<Element> aoElements = oEntry.getElements();
+			for (Element element : aoElements) {
+				String sName = element.getAttributeValue("name");
+				if (sName != null) {
+					if (sName.equals("footprint")) {
+						oResult.setFootprint(element.getText());
+					} else {
+						oResult.getProperties().put(sName, element.getText());
+					}
+				}
+			}
+			oResult.setPreview(null);
+			aoResults.add(oResult);
+		} 
+		Utils.debugLog("QueryExecutor.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
+		return aoResults;
+	}
+
 
 	protected String httpGetResults(String sUrl) {
 		String sQueryType = "search";
