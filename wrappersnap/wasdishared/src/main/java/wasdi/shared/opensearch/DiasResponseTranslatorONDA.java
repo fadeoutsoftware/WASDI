@@ -24,15 +24,8 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 	private static final Map<String,String> m_asOndaToSentinel;
 	private static final String m_sPropertyPrefix;
-	private static final String m_sLinkPrefix;
-	private static final String m_sLinkSuffix;
-
 	static {
 		m_sPropertyPrefix = "properties."; 
-		//https://catalogue.onda-dias.eu/dias-catalogue/Products(6374d3e9-8318-4bf6-aab6-1a2360b1b32f)/$value
-		m_sLinkPrefix = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
-		m_sLinkSuffix = ")/$value";
-
 		final Map<String, String> asTempMap = new HashMap<>();
 		//productinfo
 		asTempMap.put("quicklook", "preview");
@@ -246,7 +239,6 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	//XXX move this method to some shared class
 	protected String getNormalizedSize(Long lSize) {
 		Double dSize = -1.0;
-		String sChosenUnit = "ZZ";
 		String sSize = null;
 		if(null != lSize) {
 			dSize = (double)lSize;
