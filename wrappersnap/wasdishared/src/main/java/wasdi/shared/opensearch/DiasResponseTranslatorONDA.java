@@ -122,12 +122,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			if(null!=oOndaJson) {
 				oOndaJson.toString();
 				oResult = parseBaseData(sProtocol, oOndaJson);
+				JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
+				if(null!=aoMetadata) {
+					parseMetadataArray(oResult, aoMetadata);
+				}
+				finalizeViewModel(oResult);
 			}
-			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
-			if(null!=aoMetadata) {
-				parseMetadataArray(oResult, aoMetadata);
-			}
-			finalizeViewModel(oResult);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -187,7 +187,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				//MAYBE change the Launcher so that all pseudopaths can be passed (maybe iterate through them...)
 				sPath += sIntermediate[0]; 
 				sPath += "/" + sProductFileName + "/.value";
-				
+
 				//this hack is needed because ONDA serves ENVISAT images from file system only
 				if(sProductFileName.startsWith("EN1")) {
 					oResult.getProperties().put("link", sPath);
