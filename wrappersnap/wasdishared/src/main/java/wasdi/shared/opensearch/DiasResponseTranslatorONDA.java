@@ -22,6 +22,8 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  */
 public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
+	private static final String SFILENAME = "filename";
+	private static final String SCREATION_DATE = "creationDate";
 	private static final String SFOOTPRINT = "footprint";
 	private static final String SFORMAT = "format";
 	private static final Map<String,String> m_asOndaToSentinel;
@@ -47,7 +49,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		asTempMap.put("lastRelativeOrbitNumber", m_sPropertyPrefix + "lastrelativeorbitnumber");
 		asTempMap.put(DiasResponseTranslatorONDA.SFORMAT, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFORMAT);
 		asTempMap.put("instrumentName", m_sPropertyPrefix + "instrumentname");
-		asTempMap.put("filename", m_sPropertyPrefix + "filename");
+		asTempMap.put(DiasResponseTranslatorONDA.SFILENAME, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFILENAME);
 		asTempMap.put(DiasResponseTranslatorONDA.SFOOTPRINT, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFOOTPRINT);
 		asTempMap.put("size", m_sPropertyPrefix + "size"); //note: expressed in Bytes, it must be converted
 		asTempMap.put("timeliness", m_sPropertyPrefix + "timeliness");
@@ -86,12 +88,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		//    resolutionDetail
 	}
 
-	/**
-	 * 
-	 */
-	public DiasResponseTranslatorONDA() {
-
-	}
+//	/**
+//	 * 
+//	 */
+//	public DiasResponseTranslatorONDA() {
+//
+//	}
 
 
 	/* (non-Javadoc)
@@ -103,8 +105,8 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		try {
 			JSONObject oJson = (JSONObject)oObject;
 			oResult = translate(oJson, sProtocol);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorONDA.translate( Object, " + sProtocol + " ): " + oE);
 		}
 		return oResult;
 	}
@@ -130,8 +132,8 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				}
 				finalizeViewModel(oResult);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorONDA.translate( JSONObject, " + sProtocol + " ): " + oE);
 		}
 
 		return oResult;
@@ -178,7 +180,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 		String sProductFileName = oJsonOndaResult.optString("name");
 		if(!Utils.isNullOrEmpty(sProductFileName)) {
-			oResult.getProperties().put("filename", sProductFileName);
+			oResult.getProperties().put(DiasResponseTranslatorONDA.SFILENAME, sProductFileName);
 
 			String sPath = "";
 			String sPseudopath = oJsonOndaResult.optString("pseudopath");
@@ -215,9 +217,9 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		setSize(oResult, lSize);
 
 		//ONDA
-		String sCreationDate = oJsonOndaResult.optString("creationDate");
+		String sCreationDate = oJsonOndaResult.optString(DiasResponseTranslatorONDA.SCREATION_DATE);
 		if(null!= sCreationDate) {
-			oResult.getProperties().put("creationDate", sCreationDate);
+			oResult.getProperties().put(DiasResponseTranslatorONDA.SCREATION_DATE, sCreationDate);
 		}
 		String sOffline = oJsonOndaResult.optString("offline");
 		if(sOffline != null) {
@@ -291,7 +293,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 	protected void setTitle(QueryResultViewModel oResult) {
 
-		String sTitle = oResult.getProperties().get("filename");
+		String sTitle = oResult.getProperties().get(DiasResponseTranslatorONDA.SFILENAME);
 		if(null == sTitle) {
 			sTitle = oResult.getProperties().get("name");
 		}
@@ -388,7 +390,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	}
 
 	private void buildSummary(QueryResultViewModel oResult) {
-		String sDate = oResult.getProperties().get("creationDate");
+		String sDate = oResult.getProperties().get(DiasResponseTranslatorONDA.SCREATION_DATE);
 		String sSummary = "Date: " + sDate + ", ";
 		String sInstrument = oResult.getProperties().get("instrumentshortname");
 		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
