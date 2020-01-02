@@ -22,6 +22,8 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  */
 public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
+	private static final String SFOOTPRINT = "footprint";
+	private static final String SFORMAT = "format";
 	private static final Map<String,String> m_asOndaToSentinel;
 	private static final String m_sPropertyPrefix;
 	static {
@@ -43,10 +45,10 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		asTempMap.put("lastOrbitNumber", m_sPropertyPrefix + "lastorbitnumber");
 		asTempMap.put("relativeOrbitNumber", m_sPropertyPrefix + "relativeorbitnumber");
 		asTempMap.put("lastRelativeOrbitNumber", m_sPropertyPrefix + "lastrelativeorbitnumber");
-		asTempMap.put("format", m_sPropertyPrefix + "format");
+		asTempMap.put(DiasResponseTranslatorONDA.SFORMAT, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFORMAT);
 		asTempMap.put("instrumentName", m_sPropertyPrefix + "instrumentname");
 		asTempMap.put("filename", m_sPropertyPrefix + "filename");
-		asTempMap.put("footprint", m_sPropertyPrefix + "footprint");
+		asTempMap.put(DiasResponseTranslatorONDA.SFOOTPRINT, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFOOTPRINT);
 		asTempMap.put("size", m_sPropertyPrefix + "size"); //note: expressed in Bytes, it must be converted
 		asTempMap.put("timeliness", m_sPropertyPrefix + "timeliness");
 		asTempMap.put("orbitDirection", m_sPropertyPrefix + "orbitdirection");
@@ -140,7 +142,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		QueryResultViewModel oResult;
 		oResult = new QueryResultViewModel();
 		oResult.setProvider("ONDA");
-		String sFootprint = oJsonOndaResult.optString("footprint","");
+		String sFootprint = oJsonOndaResult.optString(DiasResponseTranslatorONDA.SFOOTPRINT,"");
 		oResult.setFootprint( sFootprint );
 		String sProductId = oJsonOndaResult.optString("id","");
 		String sLink = "";
@@ -171,7 +173,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 		String sProductFileFormat = oJsonOndaResult.optString("@odata.mediaContentType");
 		if(null!=sProductFileFormat) {
-			oResult.getProperties().put("format", sProductFileFormat );
+			oResult.getProperties().put(DiasResponseTranslatorONDA.SFORMAT, sProductFileFormat );
 		}
 
 		String sProductFileName = oJsonOndaResult.optString("name");
@@ -232,7 +234,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	private String pruneFileExtension(String sFileName) {
 		String sResult = sFileName;
 		if(sResult.contains(".")) {
-			sResult = sFileName.substring(0, sFileName.lastIndexOf(".")); //eliminate the file extension .ZIP, .SAFE...
+			sResult = sFileName.substring(0, sFileName.lastIndexOf('.')); //eliminate the file extension .ZIP, .SAFE...
 		}
 		//now handle cases like: "*.tar.gz", "*.tar.bz" 
 		if(sResult.endsWith(".tar")) {
@@ -369,7 +371,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 							case "link":
 								oResult.setLink(sMetaValue);
 								break;
-							case "footprint":
+							case DiasResponseTranslatorONDA.SFOOTPRINT:
 								oResult.setLink(sMetaValue);
 								break;
 							case "provider":
