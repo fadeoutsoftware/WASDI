@@ -164,12 +164,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 				if(null==aoResult) {
 					throw new NullPointerException(s_sClassName + ".executeAndRetrieve: aoResult is null"); 
 				}
-//				if(!bFullViewModel) {
-//					//XXX we can probably get rid of this, but let's keep it for safety until thoroughly tested
-//					for (QueryResultViewModel oViewModel : aoResult) {
-//						oViewModel.setPreview(null);
-//					}
-//				}
 			} else {
 				Utils.debugLog(s_sClassName + ".executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
 			}
