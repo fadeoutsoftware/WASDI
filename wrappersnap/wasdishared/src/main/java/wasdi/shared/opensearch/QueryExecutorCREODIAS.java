@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.abdera.i18n.templates.Template;
+import org.json.JSONObject;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
@@ -29,10 +30,10 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		this.m_oQueryTranslator = new DiasQueryTranslatorCREODIAS();
 		this.m_oResponseTranslator = new DiasResponseTranslatorCREODIAS();
 	}
-	
-	
+
+
 	@Override
-	public int executeCount(String sQuery) throws IOException {
+	public int executeCount(String sQuery) {
 		Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
 		if(null == sQuery) {
 			throw new NullPointerException("QueryExecutorCREODIAS.getCountURL: sQuery is null");
@@ -43,8 +44,17 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 			String sResult = null;
 			try {
 				sResult = httpGetResults(sUrl, "count");
-				//todo parse json response: 
-				// properties.totalResults
+				if(!Utils.isNullOrEmpty(sResult)) {
+					//parse response as json
+					JSONObject oJson = new JSONObject(sResult);
+					if(null!=oJson) {
+						JSONObject oProperties = oJson.optJSONObject("properties");
+						if(null!=oProperties) {
+							//properties.totalResults
+							iResult = oProperties.optInt("totalResults", -1);
+						}
+					}
+				}
 			} catch (Exception oE) {
 				Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " ): " + oE.getMessage());
 				iResult = -1;
@@ -60,14 +70,14 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery> )");
 		return executeAndRetrieve(oQuery,true);
 	}
-	
+
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
 		//String sUrl = getUrl(sQuery)
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
 	 */
@@ -92,9 +102,20 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	@Override
 	protected String getCountUrl(String sQuery) {
 		//todo replace value in string: maxRecords=n -> maxRecords=1
-		return getUrl(sQuery);
+		String sTempUrl = getUrl(sQuery);
+		String sMaxRecords = "maxRecords";
+		String sUrl = sTempUrl;
+		int iIndexOfEquals = sTempUrl.indexOf(sMaxRecords) + sMaxRecords.length() + 1;
+		if( iIndexOfEquals > 0 ) {
+			sUrl = sTempUrl.substring(0, iIndexOfEquals + 1) + "1";
+			int iEnd = sTempUrl.indexOf('&', iIndexOfEquals);
+			if(iEnd >= 0) {
+				sUrl += sTempUrl.substring(iEnd);
+			}
+		}
+		return sUrl;
 	}
-	
+
 	private String getUrl(String sQuery) {
 		//Utils.debugLog(s_sClassName + "getCountUrl");
 		if(Utils.isNullOrEmpty(sQuery)) {
