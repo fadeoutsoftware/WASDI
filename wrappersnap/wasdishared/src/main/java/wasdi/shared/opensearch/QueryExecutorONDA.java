@@ -64,10 +64,8 @@ public class QueryExecutorONDA extends QueryExecutor {
 		return sUrl;
 	}
 
-	//append:
-	// /Products/$count?$search="name:S2*"
 	@Override
-	protected String buildUrl(PaginatedQuery oQuery){
+	protected String getSearchUrl(PaginatedQuery oQuery){
 		//Utils.debugLog(s_sClassName + ".BuildUrl( " + oQuery + " )");
 		if(null==oQuery) {
 			Utils.debugLog(s_sClassName + ".buildUrl: oQuery is null");
@@ -82,7 +80,8 @@ public class QueryExecutorONDA extends QueryExecutor {
 		return sUrl;
 	}
 
-	private String buildUrlForList(PaginatedQuery oQuery) {
+	@Override
+	protected String getSearchListUrl(PaginatedQuery oQuery) {
 		//Utils.debugLog(s_sClassName + ".buildUrlForList( " + oQuery + " )");
 		if(null==oQuery) {
 			Utils.debugLog(s_sClassName + ".buildUrlForList: oQuery is null");
@@ -153,9 +152,9 @@ public class QueryExecutorONDA extends QueryExecutor {
 		String sUrl = null;
 		try {
 			if(bFullViewModel) {
-				sUrl = buildUrl(oQuery);
+				sUrl = getSearchUrl(oQuery);
 			} else {
-				sUrl = buildUrlForList(oQuery);
+				sUrl = getSearchListUrl(oQuery);
 			}
 			sResult = httpGetResults(sUrl, "search");		
 			ArrayList<QueryResultViewModel> aoResult = null;

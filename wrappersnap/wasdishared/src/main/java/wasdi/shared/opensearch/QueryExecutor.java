@@ -133,7 +133,7 @@ public abstract class QueryExecutor {
 			return null;
 		}
 		try {
-			String sUrl = buildUrl(oQuery );
+			String sUrl = getSearchUrl(oQuery );
 
 			//create abdera client
 			Abdera oAbdera = new Abdera();
@@ -173,8 +173,11 @@ public abstract class QueryExecutor {
 				return null;
 			}
 	
-			if (bFullViewModel) return buildResultViewModel(oDocument, oClient, oOptions);
-			else return buildResultLightViewModel(oDocument, oClient, oOptions);
+			if (bFullViewModel) {
+				return buildResultViewModel(oDocument, oClient, oOptions);
+			} else {
+				return buildResultLightViewModel(oDocument, oClient, oOptions);
+			}
 		} catch (NumberFormatException oE) {
 			Utils.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
 			return null;
@@ -219,9 +222,12 @@ public abstract class QueryExecutor {
 		this.m_sPassword = m_sPassword;
 	}
 
+	protected String getSearchListUrl(PaginatedQuery oQuery) {
+		return getSearchUrl(oQuery);
+	}
 	
 
-	protected String buildUrl(PaginatedQuery oQuery) {
+	protected String getSearchUrl(PaginatedQuery oQuery) {
 		//Utils.debugLog("QueryExecutor.buildUrl( " + oQuery + " )");
 		if(null==oQuery) {
 			Utils.debugLog("QueryExecutor.buildUrl: oQuery is null");
