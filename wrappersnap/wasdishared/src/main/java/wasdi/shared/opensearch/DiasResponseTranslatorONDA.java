@@ -6,6 +6,7 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +95,40 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 //	public DiasResponseTranslatorONDA() {
 //
 //	}
+	
+	
+	public ArrayList<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol){
+		ArrayList<QueryResultViewModel> aoResult = new ArrayList<>();
+		try {
+			JSONObject oJsonOndaResponse = new JSONObject(sJson);
+			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
+			if(null!=aoJsonArray) {
+				if(aoJsonArray.length()<=0) {
+					Utils.debugLog("DiasResponseTranslatorONDA.buildResultViewModel: JSON string contains an empty array");
+				} else {
+					for (Object oObject : aoJsonArray) {
+						if(null!=oObject) {
+							JSONObject oOndaFullEntry = new JSONObject("{}");
+							JSONObject oOndaEntry = (JSONObject)(oObject);
+							if(!bFullViewModel) {
+								String sQuicklook = oOndaEntry.optString("quicklook");
+								if(!Utils.isNullOrEmpty(sQuicklook)) {
+									oOndaEntry.put("quicklook", (String)null);
+								}
+							}
+							String sEntryKey = "entry";
+							oOndaFullEntry.put(sEntryKey, oOndaEntry);
+							QueryResultViewModel oRes = translate(oOndaFullEntry, sDownloadProtocol);
+							aoResult.add(oRes);
+						}
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorONDA.buildResultViewModel: " + oE);
+		}
+		return aoResult;
+	}
 
 
 	/* (non-Javadoc)
