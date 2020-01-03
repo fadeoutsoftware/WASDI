@@ -154,58 +154,6 @@ public abstract class QueryExecutor {
 				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 				oOptions.setAuthorization(sBasicAuth);			
 			}
-/*	
-			Utils.debugLog("QueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
-			long lStart = System.nanoTime();
-			ClientResponse response = oClient.get(sUrl, oOptions);
-			long lEnd = System.nanoTime();
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-	
-			if (response.getType() != ResponseType.SUCCESS) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: Response ERROR after " + dMillis + "ms : " + response.getType());
-				return null;
-			}
-				
-	
-			// Get The Result as a string
-			BufferedReader oBuffRead = null;
-			try {
-				oBuffRead = new BufferedReader(response.getReader());
-			} catch (IOException oe1) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe1);
-				return null;
-			}
-			String sResponseLine = null;
-			StringBuilder oResponseStringBuilder = new StringBuilder();
-			try {
-				while ((sResponseLine = oBuffRead.readLine()) != null) {
-					oResponseStringBuilder.append(sResponseLine);
-				}
-			} catch (IOException oe2) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe2);
-				return null;
-			}
-			
-	
-			String sResultAsString = oResponseStringBuilder.toString();
-			
-			//stats
-			int iResponseLength = 0;
-			iResponseLength = sResultAsString.length();
-
-			double dSpeed = 0;
-			if(iResponseLength > 0) {
-				dSpeed = ( (double) iResponseLength ) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutor.executeAndRetrieve success: ([ms,B,B/s]): "+dMillis+"," + iResponseLength + "," + dSpeed);
-			
-			//		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
-			//		Utils.printToFile(sTmpFilePath, sResultAsString);
-	
-			//		Utils.debugLog(sResultAsString);
-*/
 
 			String sResultAsString = httpGetResults(sUrl, "search");
 			// build the parser
