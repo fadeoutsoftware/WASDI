@@ -392,6 +392,12 @@ public abstract class QueryExecutor {
 		return aoResults;
 	}
 
+	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+		return null;
+	}
+	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
+		return null;
+	}
 
 	protected String httpGetResults(String sUrl) {
 		String sQueryType = "search";
