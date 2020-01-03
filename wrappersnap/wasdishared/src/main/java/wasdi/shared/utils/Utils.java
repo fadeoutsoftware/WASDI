@@ -240,7 +240,10 @@ public class Utils {
 		return (
 				isNullOrEmpty(sString) ||
 				sString.equalsIgnoreCase("true") ||
-				sString.equalsIgnoreCase("1")
+				sString.equalsIgnoreCase("t") ||
+				sString.equalsIgnoreCase("1") ||
+				sString.equalsIgnoreCase("yes") ||
+				sString.equalsIgnoreCase("y")
 		);
 	}
 
