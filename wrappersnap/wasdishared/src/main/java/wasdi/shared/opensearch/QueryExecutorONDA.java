@@ -10,9 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.abdera.i18n.templates.Template;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -97,7 +94,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	private String buildUrlPrefix(PaginatedQuery oQuery) {
 		//Utils.debugLog(s_sClassName + ".BuildBaseUrl( " + oQuery + " )");
 		if(null==oQuery) {
-			throw new NullPointerException("QueryExecutorONDA.buildBaseUrl: oQuery is null");
+			throw new NullPointerException(s_sClassName + ".buildBaseUrl: oQuery is null");
 		}
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) + "%22";
@@ -178,9 +175,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
 		Utils.debugLog(s_sClassName + ".executeAndRetrieve("+ oQuery_AssumeFullviewModel + ")");
 		return executeAndRetrieve(oQuery_AssumeFullviewModel, true);
-
-		////use this to test with just 3 results
-		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
 	}
 
 	
@@ -188,39 +182,13 @@ public class QueryExecutorONDA extends QueryExecutor {
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		Utils.debugLog(s_sClassName + ".buildResultViewModel( sJson, " + bFullViewModel + " )");
 		if(null==sJson ) {
-			Utils.debugLog("QueryExecutor.buildResultLightViewModel: passed a null string");
-			throw new NullPointerException("QueryExecutor.buildResultLightViewModel: passed a null string");
+			Utils.debugLog(s_sClassName + ".buildResultLightViewModel: passed a null string");
+			throw new NullPointerException(s_sClassName + ".buildResultLightViewModel: passed a null string");
 		}
-		ArrayList<QueryResultViewModel> aoResult = new ArrayList<>();
-		try {
-			JSONObject oJsonOndaResponse = new JSONObject(sJson);
-			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
-			if(null!=aoJsonArray) {
-				if(aoJsonArray.length()<=0) {
-					Utils.debugLog(s_sClassName + ".buildResultViewModel: JSON string contains an empty array");
-				} else {
-					for (Object oObject : aoJsonArray) {
-						if(null!=oObject) {
-							JSONObject oOndaFullEntry = new JSONObject("{}");
-							JSONObject oOndaEntry = (JSONObject)(oObject);
-							if(!bFullViewModel) {
-								String sQuicklook = oOndaEntry.optString("quicklook");
-								if(!Utils.isNullOrEmpty(sQuicklook)) {
-									oOndaEntry.put("quicklook", (String)null);
-								}
-							}
-							String sEntryKey = "entry";
-							oOndaFullEntry.put(sEntryKey, oOndaEntry);
-							QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaFullEntry, m_sDownloadProtocol);
-							aoResult.add(oRes);
-						}
-					}
-				}
-			}
-		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".buildResultViewModel: " + oE);
-		}
-		if(aoResult.isEmpty()) {
+		
+		ArrayList<QueryResultViewModel> aoResult = m_oResponseTranslator.translateBatch(sJson, bFullViewModel, m_sDownloadProtocol);
+		
+		if(null == aoResult || aoResult.isEmpty()) {
 			Utils.debugLog(s_sClassName + ".buildResultViewModel: no results");
 		}
 		return aoResult;
