@@ -55,62 +55,6 @@ public abstract class QueryExecutor {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
 			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
-			
-/*
-			//		if (sProvider.equals("SENTINEL"))
-			//		sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
-			//if (sProvider.equals("MATERA"))
-			//sUrl = "https://collaborative.mt.asi.it/api/stub/products/count?filter=";
-	
-			final String sUserAgent = "Mozilla/5.0";
-	
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-	
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-	
-			//add request header
-			oConnection.setRequestProperty("User-Agent", sUserAgent);
-			if (m_sUser!=null && m_sPassword!=null) {
-				String sUserCredentials = m_sUser + ":" + m_sPassword;
-				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
-				oConnection.setRequestProperty ("Authorization", sBasicAuth);
-			}
-	
-			Utils.debugLog("QueryExecutor.executeCount: Sending 'GET' request to URL : " + sUrl);
-			//int responseCode = -1;
-			//try
-			//{
-			//	responseCode = oConnection.getResponseCode();
-			//}
-			//catch(IOException oEx)
-			//{
-			//	Utils.debugLog("QueryExecutor.executeCount: Exception Get response : " + oEx.getMessage());	
-			//}
-			int responseCode =  oConnection.getResponseCode();
-			Utils.debugLog("QueryExecutor.executeCount: Response Code : " + responseCode);
-	
-			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-	
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
-			}
-			in.close();
-			String sResponse = response.toString();
-	
-			//print result
-			Utils.debugLog("QueryExecutor.executeCount: Count Done: Response " + sResponse);
-	
-			//for (Element element : oFeed.getElements()) {
-			//String sText = element.getText();
-			//	if (element.getQName().getLocalPart() 
-			//	} 
-			//String sTotalResults = oFeed.getAttributeValue("opensearch:totalResults");
-
-*/
 			String sResponse = httpGetResults(sUrl, "count");
 			int iResult = 0;
 			try {
