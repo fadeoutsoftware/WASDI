@@ -62,7 +62,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected String buildUrl(PaginatedQuery oQuery){
+	protected String getSearchUrl(PaginatedQuery oQuery){
 		Utils.debugLog("QueryExecutorPROBAV.buildUrl");
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
@@ -150,7 +150,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	{
 		Utils.debugLog("QueryExecutorPROBAV.executeCount");
 		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
-		String sUrl = buildUrl(oQuery);
+		String sUrl = getSearchUrl(oQuery);
 
 		//create abdera client
 		Abdera oAbdera = new Abdera();

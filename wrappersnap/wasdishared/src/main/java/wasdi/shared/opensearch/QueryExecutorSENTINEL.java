@@ -60,7 +60,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 		try {
 			Utils.debugLog(s_sClassName + ".executeCount ( " + sQuery + " )");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
-			String sUrl = buildUrl(oQuery);
+			String sUrl = getSearchUrl(oQuery);
 			//create abdera client
 			Abdera oAbdera = new Abdera();
 			AbderaClient oClient = new AbderaClient(oAbdera);
