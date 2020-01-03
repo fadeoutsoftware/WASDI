@@ -74,7 +74,20 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
-		//String sUrl = getUrl(sQuery)
+		String sUrl = getSearchUrl(oQuery);
+		
+		String sResult = httpGetResults(sUrl, "count");
+
+		return buildResultViewModel(sResult, bFullViewModel);
+	}
+	
+	@Override
+	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+		return null;
+	}
+	
+	@Override
+	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
 		return null;
 	}
 
@@ -101,21 +114,29 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	 */
 	@Override
 	protected String getCountUrl(String sQuery) {
-		//todo replace value in string: maxRecords=n -> maxRecords=1
+		
 		String sTempUrl = getUrl(sQuery);
-		String sMaxRecords = "maxRecords";
-		String sUrl = sTempUrl;
-		int iIndexOfEquals = sTempUrl.indexOf(sMaxRecords) + sMaxRecords.length() + 1;
-		if( iIndexOfEquals > 0 ) {
-			sUrl = sTempUrl.substring(0, iIndexOfEquals + 1) + "1";
-			int iEnd = sTempUrl.indexOf('&', iIndexOfEquals);
-			if(iEnd >= 0) {
-				sUrl += sTempUrl.substring(iEnd);
-			}
-		}
+		String sUrl = sTempUrl + "&maxRecords=1";
+
+		
 		return sUrl;
 	}
 
+	@Override
+	protected String getSearchListUrl(PaginatedQuery oQuery) {
+		return getSearchUrl(oQuery);
+	}
+	
+	@Override
+	protected String getSearchUrl(PaginatedQuery oQuery) {
+		String sUrl = getUrl(oQuery.getQuery());
+		sUrl += "&maxRecords=" + oQuery.getLimit();
+		sUrl += "&sortParam=" + oQuery.getSortedBy(); //"startDate"
+		sUrl += "&sortOrder=" + oQuery.getOrder(); //"descending"
+		sUrl += "&status=all&dataset=ESA-DATASET";
+		return sUrl;
+	}
+	
 	private String getUrl(String sQuery) {
 		//Utils.debugLog(s_sClassName + "getCountUrl");
 		if(Utils.isNullOrEmpty(sQuery)) {
@@ -123,7 +144,6 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		}
 		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
 		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
-		sUrl+="%22";
 		return sUrl;
 	}
 
