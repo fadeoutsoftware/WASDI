@@ -70,7 +70,7 @@ public abstract class QueryExecutor {
 		}
 	}
 
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
 		if(null == oQuery) {
 			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
@@ -128,7 +128,7 @@ public abstract class QueryExecutor {
 		}
 	}
 
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
 		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
 		return executeAndRetrieve(oQuery,true);
 	}
@@ -200,7 +200,7 @@ public abstract class QueryExecutor {
 
 	protected abstract String getCountUrl(String sQuery);	
 
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 		Utils.debugLog("QueryExecutor.buildResultViewModel(3 args)");
 		if(oDocument == null) {
 			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
@@ -288,7 +288,7 @@ public abstract class QueryExecutor {
 		return aoResults;
 	}
 
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 		Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args)");
 		if(oDocument == null) {
 			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
@@ -336,10 +336,10 @@ public abstract class QueryExecutor {
 		return aoResults;
 	}
 
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		return null;
 	}
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
+	protected List<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
 		return null;
 	}
 

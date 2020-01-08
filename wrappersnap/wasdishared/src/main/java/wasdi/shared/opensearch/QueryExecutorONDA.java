@@ -7,9 +7,10 @@
 package wasdi.shared.opensearch;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
+
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -143,7 +144,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 
 	@Override
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
 		String sResult = null;
 		String sUrl = null;
@@ -154,7 +155,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 				sUrl = getSearchListUrl(oQuery);
 			}
 			sResult = httpGetResults(sUrl, "search");		
-			ArrayList<QueryResultViewModel> aoResult = null;
+			List<QueryResultViewModel> aoResult = null;
 			if(!Utils.isNullOrEmpty(sResult)) {
 				aoResult = buildResultViewModel(sResult, bFullViewModel);
 				if(null==aoResult) {
@@ -172,21 +173,21 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 
 	@Override
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
 		Utils.debugLog(s_sClassName + ".executeAndRetrieve("+ oQuery_AssumeFullviewModel + ")");
 		return executeAndRetrieve(oQuery_AssumeFullviewModel, true);
 	}
 
 	
 	@Override
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		Utils.debugLog(s_sClassName + ".buildResultViewModel( sJson, " + bFullViewModel + " )");
 		if(null==sJson ) {
 			Utils.debugLog(s_sClassName + ".buildResultLightViewModel: passed a null string");
 			throw new NullPointerException(s_sClassName + ".buildResultLightViewModel: passed a null string");
 		}
 		
-		ArrayList<QueryResultViewModel> aoResult = m_oResponseTranslator.translateBatch(sJson, bFullViewModel, m_sDownloadProtocol);
+		List<QueryResultViewModel> aoResult = m_oResponseTranslator.translateBatch(sJson, bFullViewModel, m_sDownloadProtocol);
 		
 		if(null == aoResult || aoResult.isEmpty()) {
 			Utils.debugLog(s_sClassName + ".buildResultViewModel: no results");

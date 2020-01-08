@@ -6,7 +6,7 @@
  */
 package wasdi.shared.opensearch;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -17,6 +17,6 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 public interface DiasResponseTranslator {
 	
 	public QueryResultViewModel translate( Object oResponseViewModel, String sProtocol );
-	public ArrayList<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol);
+	public List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol);
 	
 }

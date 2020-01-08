@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -223,7 +224,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
 		Utils.debugLog("QueryExecutorPROBAV.buildResultLightViewModel");
 		Feed oFeed = (Feed) oDocument.getRoot();
@@ -279,7 +280,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
 		Utils.debugLog("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;

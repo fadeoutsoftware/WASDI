@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -279,7 +280,7 @@ public class OpenSearchResource {
 					QueryExecutor oExecutor = getExecutor(sProviders);
 					try {
 						PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
-						ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
+						List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
 						if (aoTmp != null && !aoTmp.isEmpty()) {
 							aoResults.addAll(aoTmp);
 							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
@@ -443,7 +444,7 @@ public class OpenSearchResource {
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							QueryExecutor oExecutor = getExecutor(sProviders);
 							try {
-								ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
+								List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
 								if (aoTmp != null && !aoTmp.isEmpty()) {
 									iObtainedResults += aoTmp.size();
 									aoResults.addAll(aoTmp);
