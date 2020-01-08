@@ -71,31 +71,52 @@ public class ProcessorsResource {
 	@POST
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessor(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
+	public PrimitiveResult uploadProcessor(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion,
 			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample, @QueryParam("public") Integer iPublic) throws Exception {
 
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: session is null or empty, aborting");
-				return Response.status(401).build();
+				oResult.setIntValue(401);
+				return oResult;
 			}
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: user (from session) is null, aborting");
-				return Response.status(401).build();
+				oResult.setIntValue(401);
+				return oResult;
 			}
 			String sUserId = oUser.getUserId();
 			if (Utils.isNullOrEmpty(sUserId)) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: userid of user (from session) is null or empty, aborting");
-				return Response.status(401).build();
+				oResult.setIntValue(401);
+				return oResult;
 			}
 			
+			// Put the processor as Public by default
 			if (iPublic == null) {
 				iPublic = new Integer(1);
+			}
+			
+			// Force the name to lower case
+			sName = sName.toLowerCase();
+			// Remove spaces at beginning or end
+			sName.trim();
+			
+			// There are still spaces?
+			if (sName.contains(" ")) {
+				// Error
+				oResult.setIntValue(500);
+				oResult.setStringValue("Processor Name MUST be lower case and without any space");
+				return oResult;				
 			}
 			
 			// Set the processor path
@@ -103,12 +124,19 @@ public class ProcessorsResource {
 			if (!sDownloadRootPath.endsWith("/")) {
 				sDownloadRootPath = sDownloadRootPath + "/";
 			}
+			
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
 			
 			// Create folders
 			if (!oProcessorPath.exists()) {
 				oProcessorPath.mkdirs();
-			} // TODO: else: it shouldn't exist. Shall we overwrite it?
+			}
+			else {
+				// If the path exists, the name of the processor is already used
+				oResult.setIntValue(500);
+				oResult.setStringValue("Processor Name Already in Use");
+				return oResult;
+			}
 			
 			// Create file
 			String sProcessorId =  UUID.randomUUID().toString();
@@ -171,16 +199,20 @@ public class ProcessorsResource {
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DEPLOYPROCESSOR.name(), sName, sPath, oDeployProcessorParameter);
 			
 			if (oRes.getBoolValue()) {
-				return Response.ok().build();
+				oResult.setIntValue(200);
+				oResult.setBoolValue(true);
+				return oResult;
 			}
 			else {
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+				oResult.setIntValue(500);
+				return oResult;				
 			}
 		}
 		
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.uploadProcessor:" + oEx);
-			return Response.serverError().build();
+			oResult.setIntValue(500);
+			return oResult;
 		}
 		
 	}

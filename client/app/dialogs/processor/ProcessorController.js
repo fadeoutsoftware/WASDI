@@ -149,8 +149,20 @@ var ProcessorController = (function() {
         }
 
         this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody).success(function (data) {
-            var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE");
-            utilsVexCloseDialogAfter(4000,oDialog);
+
+            sMessage = ""
+            if (data.boolValue == true) {
+                sMessage = "PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE"
+            }
+            else {
+                sMessage = "ERROR UPLOADING PROCESSOR<br>ERROR CODE: " + data.intValue;
+                if (!utilsIsStrNullOrEmpty(data.stringValue)) {
+                    sMessage += "<br>"+data.stringValue;
+                }
+            }
+
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
+            utilsVexCloseDialogAfter(5000,oDialog);
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DEPLOYING THE PROCESSOR");
         });

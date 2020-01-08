@@ -58,7 +58,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 	}
 
 	@Override
-	public boolean DeployProcessor(ProcessorParameter oParameter) {		
+	public boolean deploy(ProcessorParameter oParameter) {		
 		LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: start");
 		
 		if (oParameter == null) return false;
