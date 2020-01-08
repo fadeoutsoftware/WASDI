@@ -430,7 +430,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		}
 	}
 
-	private void buildSummary(QueryResultViewModel oResult) {
+	protected void buildSummary(QueryResultViewModel oResult) {
 		String sDate = oResult.getProperties().get(DiasResponseTranslatorONDA.SCREATION_DATE);
 		String sSummary = "Date: " + sDate + ", ";
 		String sInstrument = oResult.getProperties().get("instrumentshortname");
