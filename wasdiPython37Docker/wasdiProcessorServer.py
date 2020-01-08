@@ -4,11 +4,10 @@ from flask import jsonify
 from flask import request
 import os
 import wasdi
-import myProcessor
 import json
-import threading
 import urllib.parse
 import subprocess
+import myProcessor
 
 app = Flask(__name__)
 
