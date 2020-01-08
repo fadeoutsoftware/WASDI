@@ -1,7 +1,5 @@
 package wasdi.shared.opensearch;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Base64;
 
@@ -12,9 +10,7 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.parser.Parser;
 import org.apache.abdera.parser.ParserOptions;
-import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.abdera.protocol.client.AbderaClient;
-import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.utils.Utils;
