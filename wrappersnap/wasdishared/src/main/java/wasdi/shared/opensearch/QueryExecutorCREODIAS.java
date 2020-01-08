@@ -8,6 +8,7 @@ package wasdi.shared.opensearch;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
 import org.json.JSONObject;
@@ -66,13 +67,13 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	}
 
 	@Override
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
 		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery> )");
 		return executeAndRetrieve(oQuery,true);
 	}
 
 	@Override
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
 		String sUrl = getSearchUrl(oQuery);
 		
@@ -82,9 +83,36 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	}
 	
 	@Override
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
-		return null;
+	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+		return m_oResponseTranslator.translateBatch(sJson, bFullViewModel, m_sDownloadProtocol);
 	}
+	
+
+	@Override
+	protected String getSearchListUrl(PaginatedQuery oQuery) {
+		return getSearchUrl(oQuery);
+	}
+	
+	@Override
+	protected String getSearchUrl(PaginatedQuery oQuery) {
+		String sUrl = getUrl(oQuery.getQuery());
+		sUrl += "&maxRecords=" + oQuery.getLimit();
+		sUrl += "&sortParam=" + oQuery.getSortedBy(); //"startDate"
+		sUrl += "&sortOrder=" + oQuery.getOrder(); //"descending"
+		sUrl += "&status=all&dataset=ESA-DATASET";
+		return sUrl;
+	}
+	
+	private String getUrl(String sQuery) {
+		//Utils.debugLog(s_sClassName + "getCountUrl");
+		if(Utils.isNullOrEmpty(sQuery)) {
+			Utils.debugLog(s_sClassName + ".getUrl: sQuery is null");
+		}
+		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
+		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
+		return sUrl;
+	}
+
 	
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
@@ -121,30 +149,5 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		
 		return sUrl;
 	}
-
-	@Override
-	protected String getSearchListUrl(PaginatedQuery oQuery) {
-		return getSearchUrl(oQuery);
-	}
 	
-	@Override
-	protected String getSearchUrl(PaginatedQuery oQuery) {
-		String sUrl = getUrl(oQuery.getQuery());
-		sUrl += "&maxRecords=" + oQuery.getLimit();
-		sUrl += "&sortParam=" + oQuery.getSortedBy(); //"startDate"
-		sUrl += "&sortOrder=" + oQuery.getOrder(); //"descending"
-		sUrl += "&status=all&dataset=ESA-DATASET";
-		return sUrl;
-	}
-	
-	private String getUrl(String sQuery) {
-		//Utils.debugLog(s_sClassName + "getCountUrl");
-		if(Utils.isNullOrEmpty(sQuery)) {
-			Utils.debugLog(s_sClassName + ".getUrl: sQuery is null");
-		}
-		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
-		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
-		return sUrl;
-	}
-
 }

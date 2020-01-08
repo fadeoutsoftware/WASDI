@@ -9,6 +9,7 @@ package wasdi.shared.opensearch;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -97,8 +98,13 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 //	}
 	
 	
-	public ArrayList<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol){
-		ArrayList<QueryResultViewModel> aoResult = new ArrayList<>();
+	public List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol){
+		ArrayList<QueryResultViewModel> aoResult = null;
+		if(sJson == null) {
+			throw new NullPointerException("DiasResponseTranslatorONDA.translateBatch: sJson is null");
+		}
+		
+		aoResult = new ArrayList<>();
 		try {
 			JSONObject oJsonOndaResponse = new JSONObject(sJson);
 			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
