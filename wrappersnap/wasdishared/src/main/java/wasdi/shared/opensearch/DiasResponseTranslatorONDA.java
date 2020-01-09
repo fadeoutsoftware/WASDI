@@ -293,28 +293,10 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		if(null != lSize) {
 			dSize = (double)lSize;
 		}
-		sSize = getNormalizedSize(dSize);
+		sSize = Utils.getNormalizedSize(dSize);
 		return sSize;
 	}
 
-	//XXX move this method to some shared class
-	protected String getNormalizedSize(Double dSize) {
-		String sChosenUnit = null;
-		String sSize = null;
-		String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
-		int iUnitIndex = 0;
-		int iLim = sUnits.length -1;
-		while(iUnitIndex < iLim && dSize >= 1024) {
-			dSize = dSize / 1024;
-			iUnitIndex++;
-
-			//now, round it to two decimal digits
-			dSize = Math.round(dSize*100)/100.0; 
-			sChosenUnit = sUnits[iUnitIndex];
-			sSize = String.valueOf(dSize) + " " + sChosenUnit;
-		}
-		return sSize;
-	}
 
 	//XXX move this method to some shared class
 	protected void setSize(QueryResultViewModel oResult, Long lSize) {
@@ -392,7 +374,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 							if(null!=sPrevious) {
 								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: sKey : "+sPrevious);
 								if(sTmpKey.equals("size")) {
-									sMetaValue = getNormalizedSize(Double.parseDouble(sMetaValue));
+									sMetaValue = Utils.getNormalizedSize(Double.parseDouble(sMetaValue));
 								}
 							}
 							oResult.getProperties().put(sTmpKey, sMetaValue);
