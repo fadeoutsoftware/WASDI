@@ -473,4 +473,21 @@ public class Utils {
 		}
 	}
 
+	public static String getNormalizedSize(Double dSize) {
+		String sChosenUnit = null;
+		String sSize = null;
+		String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
+		int iUnitIndex = 0;
+		int iLim = sUnits.length -1;
+		while(iUnitIndex < iLim && dSize >= 1024.0) {
+			dSize = dSize / 1024.0;
+			iUnitIndex++;
+
+			//now, round it to two decimal digits
+			dSize = Math.round(dSize*100.0)/100.0; 
+			sChosenUnit = sUnits[iUnitIndex];
+			sSize = String.valueOf(dSize) + " " + sChosenUnit;
+		}
+		return sSize;
+	}
 }
