@@ -23,6 +23,11 @@ import com.google.common.base.Preconditions;
  */
 public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 
+	private static final String SSIZE = "size";
+	private static final String SPLATFORM = "platform";
+	private static final String SSENSOR_MODE = "sensorMode";
+	private static final String SINSTRUMENT = "instrument";
+	private static final String SDATE = "date";
 	private static final String STYPE = "type";
 
 	/* (non-Javadoc)
@@ -174,8 +179,6 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			return;
 		}
 
-		
-
 		//title
 		if(!oProperties.isNull("title")) {
 			oResult.setTitle(oProperties.optString("title", null));
@@ -191,20 +194,49 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			}
 		}
 		
-		
 		//	todo link: create procedure to provide link
 		sBuffer = oProperties.optString("startDate", null);
 		if(null!=sBuffer) {
-			oResult.getProperties().put("date", sBuffer);
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SDATE, sBuffer);
 			oResult.getProperties().put("startDate", sBuffer);
 		}
 		
-		//instrument
-		sBuffer = oProperties.optString("instrument", null);
-		oProperties.has("");
-		// mode
-		// satellite
-		// size
+		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SINSTRUMENT)) {
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SINSTRUMENT, oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
+		}
+
+		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SSENSOR_MODE)) {
+			oResult.getProperties().put((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
+		}
+
+		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPLATFORM)) {
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SPLATFORM, oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
+		}
+
+		// todo size ->
+		/*
+
+		"services": {
+         	"download": {
+				"url": "https://zipper.creodias.eu/download/221165ce-4e4e-5b52-8c34-1af8f6b7154e",
+                "mimeType": "application/unknown",
+                "size": 1716760163
+			}
+		},
+
+		*/
+		JSONObject oTemp = oProperties.optJSONObject("services");
+		if(null != oTemp) {
+			oTemp = oTemp.optJSONObject("download");
+			if(null!=oTemp) {
+				long lSize = oTemp.optLong(DiasResponseTranslatorCREODIAS.SSIZE, -1);
+				if(0<=lSize) {
+					double dTmp = (double) lSize;
+					String sSize = Utils.getNormalizedSize(dTmp);
+					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE, sSize);
+				}
+			}
+		}
 
 	}
 	
@@ -215,16 +247,18 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 		//"summary": "Date: 2020-01-03T06:01:45.74Z, Instrument: SAR-C SAR, Mode: VV VH, Satellite: Sentinel-1, Size: 1.64 GB",
 		
 		
-		String sDate = ""; //oResult.getProperties().get(DiasResponseTranslatorONDA.SCREATION_DATE);
+		String sDate = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SDATE);
 		String sSummary = "Date: " + sDate + ", ";
-		String sInstrument = oResult.getProperties().get("instrumentshortname");
+		String sInstrument = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SINSTRUMENT);
 		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
-		String sMode = oResult.getProperties().get("sensoroperationalmode");
+		
+		//todo sensorMode
+		String sMode = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSENSOR_MODE);
 		sSummary = sSummary + "Mode: " + sMode + ", ";
 		//TODO infer Satellite from filename
-		String sSatellite = oResult.getProperties().get("platformname");
+		String sSatellite = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SPLATFORM);
 		sSummary = sSummary + "Satellite: " + sSatellite + ", ";
-		String sSize = oResult.getProperties().get("size");
+		String sSize = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE);
 		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
 		oResult.setSummary(sSummary);
 	}
