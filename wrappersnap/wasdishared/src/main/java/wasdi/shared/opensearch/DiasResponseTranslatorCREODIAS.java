@@ -47,7 +47,7 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			for (Object oItem : aoFeatures) {
 				if(null!=oItem) {
 					JSONObject oJsonItem = (JSONObject)(oItem);
-					QueryResultViewModel oViewModel = translate(oJsonItem, sDownloadProtocol);
+					QueryResultViewModel oViewModel = translate(oJsonItem, sDownloadProtocol, bFullViewModel);
 					if(null != oViewModel) {
 						aoResults.add(oViewModel);
 					}
@@ -84,16 +84,13 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 	private void parseMainInfo(JSONObject oInJson, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.addMainInfo: input json is null");
 		Preconditions.checkNotNull(oResult,"DiasResponseTranslatorCREODIAS.addMainInfo: QueryResultViewModel is null");
-		
-		String sBuffer = null;
-		
+				
 		if(!oInJson.isNull("id")) {
 			oResult.setId(oInJson.optString("id", null));
 		}
 		
-		sBuffer = oInJson.optString(DiasResponseTranslatorCREODIAS.STYPE);
-		if(null!=sBuffer) {
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STYPE, sBuffer);
+		if(!oInJson.isNull(DiasResponseTranslatorCREODIAS.STYPE)){
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STYPE, oInJson.optString(DiasResponseTranslatorCREODIAS.STYPE, null));
 		}
 	}
 
@@ -105,7 +102,7 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.parseFootPrint: input json is null");
 		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorCREODIAS.parseFootPrint: QueryResultViewModel is null");
 		
-		String sBuffer;
+		String sBuffer = null;
 		JSONObject oGeometry = oInJson.optJSONObject("geometry");
 		if(null!=oGeometry) {
 			/*
@@ -126,6 +123,7 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			*/
 			
 			sBuffer = oGeometry.optString(DiasResponseTranslatorCREODIAS.STYPE, null);
+
 			if(null != sBuffer) {
 				String sFootPrint = sBuffer.toUpperCase();
 				sFootPrint += " (((";
@@ -133,7 +131,7 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 				if(null!=aoCoordinates) {
 					aoCoordinates = aoCoordinates.optJSONArray(0); //1
 					if(null!=aoCoordinates) {
-						aoCoordinates.optJSONArray(0); //2
+						aoCoordinates = aoCoordinates.optJSONArray(0); //2
 						if(null!=aoCoordinates) {
 							for (Object oItem: aoCoordinates) {
 								if(null!=oItem) {
@@ -145,7 +143,7 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 											sFootPrint += dx;
 											sFootPrint += " ";
 											sFootPrint += dy;
-											sFootPrint += ",";
+											sFootPrint += ", ";
 										}
 									}
 								}
@@ -153,8 +151,11 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 						}
 					}
 				}
-				if(sFootPrint.endsWith(",") ) {			
+				//remove ending spaces and commas in excess 
+				sFootPrint = sFootPrint.trim();
+				while(sFootPrint.endsWith(",") ) {			
 					sFootPrint = sFootPrint.substring(0,  sFootPrint.length() - 1 );
+					sFootPrint = sFootPrint.trim();
 				}
 				sFootPrint += ")))";
 				oResult.setFootprint(sFootPrint);
@@ -173,15 +174,15 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			return;
 		}
 
-		String sBuffer = null;
+		
 
 		//title
-		sBuffer = oProperties.optString("title", null);
-		if(null != sBuffer) {
-			oResult.setTitle(sBuffer);
-			oResult.getProperties().put("title", sBuffer);
+		if(!oProperties.isNull("title")) {
+			oResult.setTitle(oProperties.optString("title", null));
+			oResult.getProperties().put("title", oProperties.optString("title", null));
 		}
 
+		String sBuffer = null;
 		//preview
 		if(bFullViewModel) {
 			sBuffer = oProperties.optString("quicklook", null);
