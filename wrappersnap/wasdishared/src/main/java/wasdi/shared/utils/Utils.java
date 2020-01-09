@@ -32,8 +32,6 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
-import com.sleepycat.je.dbi.CursorImpl.WithCursor;
-
 import wasdi.shared.business.UserSession;
 
 /**
