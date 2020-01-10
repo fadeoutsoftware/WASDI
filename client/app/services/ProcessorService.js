@@ -81,4 +81,8 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
 
         return this.m_oHttp.post(this.APIURL + '/processors/updatefiles?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody ,oOptions);
     };
+
+    this.readGDACS = function () {
+        return this.m_oHttp.get("https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP?eventtypes=VO");
+    };
 }]);
