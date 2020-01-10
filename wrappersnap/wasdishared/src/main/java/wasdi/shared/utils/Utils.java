@@ -479,7 +479,7 @@ public class Utils {
 		String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
 		int iUnitIndex = 0;
 		int iLim = sUnits.length -1;
-		while(iUnitIndex < iLim && dSize >= 1024.0) {
+		while(iUnitIndex < iLim && dSize >= 900.0) {
 			dSize = dSize / 1024.0;
 			iUnitIndex++;
 
