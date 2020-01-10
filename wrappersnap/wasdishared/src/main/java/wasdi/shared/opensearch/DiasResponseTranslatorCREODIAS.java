@@ -23,6 +23,9 @@ import com.google.common.base.Preconditions;
  */
 public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 
+	private static final String SURL = "url";
+	private static final String SPOLARISATION = "polarisation";
+	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
 	private static final String SSIZE = "size";
 	private static final String SPLATFORM = "platform";
 	private static final String SSENSOR_MODE = "sensorMode";
@@ -178,6 +181,16 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			Utils.debugLog("DiasResponseTranslatorCREDODIAS.addProperties: input json has null properties");
 			return;
 		}
+		
+		String sBuffer = null;
+		
+		//load most properties
+		for (String sKey : oProperties.keySet()) {
+			sBuffer = oProperties.optString(sKey, null);
+			if(null!=sBuffer) {
+				oResult.getProperties().put(sKey, sBuffer);
+			}
+		}
 
 		//title
 		if(!oProperties.isNull("title")) {
@@ -185,7 +198,6 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			oResult.getProperties().put("title", oProperties.optString("title", null));
 		}
 
-		String sBuffer = null;
 		//preview
 		if(bFullViewModel) {
 			sBuffer = oProperties.optString("quicklook", null);
@@ -199,21 +211,35 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 		if(null!=sBuffer) {
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SDATE, sBuffer);
 			oResult.getProperties().put("startDate", sBuffer);
+			oResult.getProperties().put("beginposition", sBuffer);
 		}
 		
 		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SINSTRUMENT)) {
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SINSTRUMENT, oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
+			oResult.getProperties().put("instrumentshortname", oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
 		}
 
 		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SSENSOR_MODE)) {
 			oResult.getProperties().put((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
+			oResult.getProperties().put("sensoroperationalmode", oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
 		}
 
 		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPLATFORM)) {
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SPLATFORM, oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
+			oResult.getProperties().put("platformname", oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
 		}
 
-		// todo size ->
+		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER)) {
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
+			oResult.getProperties().put("relativeorbitnumber", oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
+		}
+		
+		//todo  -> polarisationmode
+		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPOLARISATION)){
+			oResult.getProperties().put("polarisationmode", oProperties.optString(DiasResponseTranslatorCREODIAS.SPOLARISATION, null));
+		}
+		
+		//size
 		/*
 
 		"services": {
@@ -235,6 +261,10 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 					String sSize = Utils.getNormalizedSize(dTmp);
 					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE, sSize);
 				}
+				if(!oTemp.isNull(DiasResponseTranslatorCREODIAS.SURL)) {
+					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, oProperties.optString(DiasResponseTranslatorCREODIAS.SURL, null));
+				}
+				
 			}
 		}
 
