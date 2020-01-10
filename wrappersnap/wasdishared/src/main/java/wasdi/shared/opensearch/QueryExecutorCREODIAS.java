@@ -103,6 +103,8 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		return sUrl;
 	}
 	
+	
+	
 	private String getUrl(String sQuery) {
 		//Utils.debugLog(s_sClassName + "getCountUrl");
 		if(Utils.isNullOrEmpty(sQuery)) {
