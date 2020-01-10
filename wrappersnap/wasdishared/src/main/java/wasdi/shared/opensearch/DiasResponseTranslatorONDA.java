@@ -176,9 +176,10 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorONDA.translate( JSONObject, " + sProtocol + " ): " + oE);
 		}
-
+		
 		return oResult;
 	}
+
 
 
 	protected QueryResultViewModel parseBaseData(String sInProtocol, JSONObject oJsonOndaResult) {

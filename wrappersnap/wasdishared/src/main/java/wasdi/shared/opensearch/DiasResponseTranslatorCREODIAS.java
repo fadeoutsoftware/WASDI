@@ -6,9 +6,14 @@
  */
 package wasdi.shared.opensearch;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.net.io.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -84,7 +89,11 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 		
 		buildSummary(oResult);
 
-
+		//todo remove from here, move into the code for downloading
+		//the keycloak token lasts 600 seconds only, so generate it just right before downloading
+		String sKeycloakToken = obtainKeycloakToken(oResult);
+		System.out.println(sKeycloakToken);
+		
 		return oResult;
 	}
 
@@ -291,6 +300,44 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 		String sSize = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE);
 		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
 		oResult.setSummary(sSummary);
+	}
+	
+	private String obtainKeycloakToken(QueryResultViewModel oResult) {
+		try {
+			URL oURL = new URL("https://auth.creodias.eu/auth/realms/dias/protocol/openid-connect/token");
+
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			oConnection.setDoOutput(true);
+			oConnection.getOutputStream().write("client_id=CLOUDFERRO_PUBLIC&password=<PASSWORDHERE>&username=<USERHERE>&grant_type=password".getBytes());
+			int iStatus = oConnection.getResponseCode();
+			System.out.println("Response status: " + iStatus);
+			if( iStatus == 200) {
+				InputStream oInputStream = oConnection.getInputStream();
+				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+				if(null!=oInputStream) {
+					Util.copyStream(oInputStream, oBytearrayOutputStream);
+					String sResult = oBytearrayOutputStream.toString();
+					System.out.println(sResult);
+					return sResult;
+				}
+			} else {
+				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+				InputStream oErrorStream = oConnection.getErrorStream();
+				Util.copyStream(oErrorStream, oBytearrayOutputStream);
+				String sMessage = oBytearrayOutputStream.toString();
+				System.out.println(sMessage);
+				
+			}
+			
+			
+		} catch (Exception oE) {
+			// TODO Auto-generated catch block
+			oE.printStackTrace();
+		}
+		
+		return null;
 	}
 
 }
