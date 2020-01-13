@@ -220,8 +220,6 @@
         //this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
         oMap.addLayer(this.m_oDrawnItems);
 
-
-
         var oOptions={
             position:'topright',//position of menu
             draw:{// what kind of shapes are disable/enable
@@ -250,11 +248,11 @@
             oController.m_oBoundingBox.northEast = layer._bounds._northEast;
             oController.m_oBoundingBox.southWest = layer._bounds._southWest;
             //remove old shape
-            if(this.m_oDrawnItems && this.m_oDrawnItems.getLayers().length!==0){
-                this.m_oDrawnItems.clearLayers();
+            if(oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length!==0){
+                oController.m_oDrawnItems.clearLayers();
             }
             //save new shape in map
-            this.m_oDrawnItems.addLayer(layer);
+            oController.m_oDrawnItems.addLayer(layer);
         });
 
         oMap.on(L.Draw.Event.DELETESTOP, function (event) {
