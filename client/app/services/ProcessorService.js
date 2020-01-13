@@ -83,6 +83,6 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     };
 
     this.readGDACS = function () {
-        return this.m_oHttp.get("https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP?eventtypes=VO");
+        return this.m_oHttp.get("https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP?eventtypes=FL");
     };
 }]);
