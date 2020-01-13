@@ -421,7 +421,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
 			m_oLogger.fatal("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
