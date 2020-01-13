@@ -46,8 +46,22 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 */
 	@Override
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		//todo fail instead
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			m_oLogger.fatal("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
+			return 0l;
+		}
+		
+		long lSizeInBytes = 0;
+		String sResult = "";
+		try {
+		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
+		lSizeInBytes = Long.parseLong(sResult);
+		} catch (Exception oE) {
+			this.m_oLogger.error(oE);
+		}
+		
+		return lSizeInBytes;
 	}
 
 	/* (non-Javadoc)
@@ -65,6 +79,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 */
 	@Override
 	public String GetFileName(String sFileURL) throws Exception {
+		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.fatal("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
