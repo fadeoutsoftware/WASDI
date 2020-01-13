@@ -1,4 +1,4 @@
-s/**
+/**
  * Created by Cristiano Nattero on 2018-12-18
  * 
  * Fadeout software
