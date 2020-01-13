@@ -137,10 +137,6 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasResponseTranslator#translate(java.lang.Object)
-	 */
-	@Override
 	public QueryResultViewModel translate(Object oObject, String sProtocol) {
 		QueryResultViewModel oResult = null;
 		try {
