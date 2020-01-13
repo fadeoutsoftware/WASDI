@@ -708,8 +708,6 @@ public class ProcessorsResource {
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
-
-			String sUserId = oUser.getUserId();
 			
 			Utils.debugLog("ProcessorsResource.updateProcessor: get Processor " + sProcessorId);	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();

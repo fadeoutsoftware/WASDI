@@ -39,8 +39,8 @@ var ProcessorController = (function() {
         $scope.close = function() {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
-        $scope.add = function() {
 
+        $scope.add = function() {
             if (oController.m_bEditMode == true) {
                 var oFile = null;
                 if (oController.m_oFile!=null) {
@@ -86,7 +86,7 @@ var ProcessorController = (function() {
             return true;
         }
 
-        if (this.m_sTypeIdOnly === "ubuntu_idl372")  {
+        if (this.m_sTypeIdOnly === "ubuntu_idl372" || this.m_sTypeIdOnly === "ubuntu_python37_snap")  {
             return true;
         }
         return false;

@@ -111,8 +111,6 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
-			
-			// P.Campanella 20200108: try to build with a shell script?
 			ArrayList<String> asArgs = new ArrayList<>();
 			String sCommand = "docker";
 
@@ -136,8 +134,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// P.Campanella 11/06/2018: mounted volume
 			// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 			asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
-			//asArgs.add("--mount");
-			//asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");
+			asArgs.add("--mount");
+			asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");
 			asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
 			asArgs.add(sDockerName);
 			
@@ -366,7 +364,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				String sDownloadRootPath = m_sWorkingRootPath;
 				if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 				
-				//String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;				
+				String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;				
 				
 				// Set the docker Name
 				String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
@@ -380,8 +378,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				// P.Campanella 11/06/2018: mounted volume
 				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
-				//asArgs.add("--mount");
-				//asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");				
+				asArgs.add("--mount");
+				asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");				
 				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
 				asArgs.add(sDockerName);
 				
