@@ -1,4 +1,4 @@
-/**
+s/**
  * Created by Cristiano Nattero on 2018-12-18
  * 
  * Fadeout software
@@ -14,19 +14,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.io.Util;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-
-import com.sleepycat.je.rep.impl.TextProtocol.OK;
 
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
