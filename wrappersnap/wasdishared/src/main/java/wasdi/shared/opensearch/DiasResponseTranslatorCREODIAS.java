@@ -6,21 +6,16 @@
  */
 package wasdi.shared.opensearch;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.net.io.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.common.base.Preconditions;
+
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
-
-import com.google.common.base.Preconditions;
 
 /**
  * @author c.nattero
@@ -28,6 +23,18 @@ import com.google.common.base.Preconditions;
  */
 public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 
+	private static final String STITLE = "title";
+
+	//String constants to be used elsewhere
+	public static final String SLINK_SEPARATOR_CREODIAS = ",";
+	public static final String SLINK = "link";
+	public static final int IPOSITIONOF_LINK = 0;
+	public static final int IPOSITIONOF_FILENAME = 1;
+	public static final int IPOSITIONOF_SIZEINBYTES = 2;
+
+	//private string constants
+	private static final String SSIZE_IN_BYTES = "sizeInBytes";
+	private static final String SHREF = "href";
 	private static final String SURL = "url";
 	private static final String SPOLARISATION = "polarisation";
 	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
@@ -38,14 +45,6 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 	private static final String SDATE = "date";
 	private static final String STYPE = "type";
 
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasResponseTranslator#translate(java.lang.Object, java.lang.String)
-	 */
-	@Override
-	public QueryResultViewModel translate(Object oResponseViewModel, String sProtocol) {
-		// TODO translate single entry into a view model
-		return null;
-	}
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol) {
@@ -53,7 +52,7 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
 
-		//todo isolate single entry, pass it to translate and append the result
+		//isolate single entry, pass it to translate and append the result
 		try {
 			JSONObject oJson = new JSONObject(sJson);
 			JSONArray aoFeatures = oJson.optJSONArray("features");
@@ -76,24 +75,22 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 	public QueryResultViewModel translate(JSONObject oInJson, String sDownloadProtocol, boolean bFullViewModel) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.translate: null json");
 
+		QueryResultViewModel oResult = new QueryResultViewModel();
+		oResult.setProvider("CREODIAS");
 		if (null == sDownloadProtocol ) {
 			//default protocol to https, trying to stay safe
 			sDownloadProtocol = "https";
 		}
-		QueryResultViewModel oResult = new QueryResultViewModel();
-		oResult.setProvider("CREODIAS");
-		
+		oResult.getProperties().put("protocol", sDownloadProtocol);
+
+
 		parseMainInfo(oInJson, oResult);		
 		parseFootPrint(oInJson, oResult);
 		parseProperties(oInJson, bFullViewModel, oResult);
-		
+
+		buildLink(oResult);
 		buildSummary(oResult);
 
-		//todo remove from here, move into the code for downloading
-		//the keycloak token lasts 600 seconds only, so generate it just right before downloading
-		String sKeycloakToken = obtainKeycloakToken(oResult);
-		System.out.println(sKeycloakToken);
-		
 		return oResult;
 	}
 
@@ -101,11 +98,11 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 	private void parseMainInfo(JSONObject oInJson, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.addMainInfo: input json is null");
 		Preconditions.checkNotNull(oResult,"DiasResponseTranslatorCREODIAS.addMainInfo: QueryResultViewModel is null");
-				
+
 		if(!oInJson.isNull("id")) {
 			oResult.setId(oInJson.optString("id", null));
 		}
-		
+
 		if(!oInJson.isNull(DiasResponseTranslatorCREODIAS.STYPE)){
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STYPE, oInJson.optString(DiasResponseTranslatorCREODIAS.STYPE, null));
 		}
@@ -115,60 +112,22 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 	 * @param oInJson
 	 * @param oResult
 	 */
-	protected void parseFootPrint(JSONObject oInJson, QueryResultViewModel oResult) {
+	private void parseFootPrint(JSONObject oInJson, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.parseFootPrint: input json is null");
 		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorCREODIAS.parseFootPrint: QueryResultViewModel is null");
-		
+
 		String sBuffer = null;
 		JSONObject oGeometry = oInJson.optJSONObject("geometry");
 		if(null!=oGeometry) {
-			/*
-			"geometry": {
-                "type": "MultiPolygon",
-                "coordinates":
-                //0
-				[
-					//1
-                	[
-                	 	//2
-                		[
-                			[9.5857, 43.772], [10.1173, 45.7206], [6.9613, 46.0018], [6.536, 44.0496], [9.5857, 43.772]
-            			]
-                	]
-                ]
-            },
-			*/
-			
 			sBuffer = oGeometry.optString(DiasResponseTranslatorCREODIAS.STYPE, null);
-
 			if(null != sBuffer) {
-				String sFootPrint = sBuffer.toUpperCase();
-				sFootPrint += " (((";
-				JSONArray aoCoordinates = oGeometry.optJSONArray("coordinates"); //0
-				if(null!=aoCoordinates) {
-					aoCoordinates = aoCoordinates.optJSONArray(0); //1
-					if(null!=aoCoordinates) {
-						aoCoordinates = aoCoordinates.optJSONArray(0); //2
-						if(null!=aoCoordinates) {
-							for (Object oItem: aoCoordinates) {
-								if(null!=oItem) {
-									JSONArray aoPoint = (JSONArray) oItem;
-									if( null != aoPoint ) {
-										Double dx = aoPoint.optDouble(0);
-										Double dy = aoPoint.optDouble(1);
-										if(!Double.isNaN(dx) && !Double.isNaN(dy) ){
-											sFootPrint += dx;
-											sFootPrint += " ";
-											sFootPrint += dy;
-											sFootPrint += ", ";
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				//remove ending spaces and commas in excess 
+				StringBuilder oFootPrint = new StringBuilder(sBuffer.toUpperCase());
+				oFootPrint.append(" (((");
+				
+				parseCoordinates(oGeometry, oFootPrint);
+				
+				//remove ending spaces and commas in excess
+				String sFootPrint = oFootPrint.toString();
 				sFootPrint = sFootPrint.trim();
 				while(sFootPrint.endsWith(",") ) {			
 					sFootPrint = sFootPrint.substring(0,  sFootPrint.length() - 1 );
@@ -177,7 +136,60 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 				sFootPrint += ")))";
 				oResult.setFootprint(sFootPrint);
 			}
-			
+
+		}
+	}
+
+
+	/**
+	 * @param oGeometry
+	 * @param oFootPrint
+	 */
+	private void parseCoordinates(JSONObject oGeometry, StringBuilder oFootPrint) {
+		/*
+		"geometry": {
+		    "type": "MultiPolygon",
+		    "coordinates":
+		    //0
+			[
+				//1
+		    	[
+		    	 	//2
+		    		[
+		    			[9.5857, 43.772], [10.1173, 45.7206], [6.9613, 46.0018], [6.536, 44.0496], [9.5857, 43.772]
+					]
+		    	]
+		    ]
+		},
+		 */
+		JSONArray aoCoordinates = oGeometry.optJSONArray("coordinates"); //0
+		if(null!=aoCoordinates) {
+			aoCoordinates = aoCoordinates.optJSONArray(0); //1
+			if(null!=aoCoordinates) {
+				aoCoordinates = aoCoordinates.optJSONArray(0); //2
+				if(null!=aoCoordinates) {
+					loadCoordinates(oFootPrint, aoCoordinates);
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * @param oFootPrint
+	 * @param aoCoordinates
+	 */
+	private void loadCoordinates(StringBuilder oFootPrint, JSONArray aoCoordinates) {
+		for (Object oItem: aoCoordinates) {
+			//instanceof returns false for null, so no need to check it
+			if(oItem instanceof JSONArray) {
+				JSONArray aoPoint = (JSONArray) oItem;
+				Double dx = aoPoint.optDouble(0);
+				Double dy = aoPoint.optDouble(1);
+				if(!Double.isNaN(dx) && !Double.isNaN(dy) ){
+					oFootPrint.append(dx).append(" ").append(dy).append(", ");
+				}
+			}
 		}
 	}
 
@@ -190,21 +202,16 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			Utils.debugLog("DiasResponseTranslatorCREDODIAS.addProperties: input json has null properties");
 			return;
 		}
-		
+
 		String sBuffer = null;
-		
-		//load most properties
-		for (String sKey : oProperties.keySet()) {
-			sBuffer = oProperties.optString(sKey, null);
-			if(null!=sBuffer) {
-				oResult.getProperties().put(sKey, sBuffer);
-			}
-		}
+
+		loadMostProperties(oResult, oProperties);
 
 		//title
-		if(!oProperties.isNull("title")) {
-			oResult.setTitle(oProperties.optString("title", null));
-			oResult.getProperties().put("title", oProperties.optString("title", null));
+		oResult.setTitle("");
+		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.STITLE)) {
+			oResult.setTitle(oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
 		}
 
 		//preview
@@ -214,15 +221,14 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 				oResult.setPreview(sBuffer);
 			}
 		}
-		
-		//	todo link: create procedure to provide link
+
 		sBuffer = oProperties.optString("startDate", null);
 		if(null!=sBuffer) {
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SDATE, sBuffer);
 			oResult.getProperties().put("startDate", sBuffer);
 			oResult.getProperties().put("beginposition", sBuffer);
 		}
-		
+
 		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SINSTRUMENT)) {
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SINSTRUMENT, oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
 			oResult.getProperties().put("instrumentshortname", oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
@@ -242,15 +248,47 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
 			oResult.getProperties().put("relativeorbitnumber", oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
 		}
-		
-		//todo  -> polarisationmode
+
+		//polarisationmode
 		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPOLARISATION)){
 			oResult.getProperties().put("polarisationmode", oProperties.optString(DiasResponseTranslatorCREODIAS.SPOLARISATION, null));
 		}
-		
+
+		//links
+		if(!oProperties.isNull("links")) {
+			JSONObject oLinks = oProperties.optJSONObject("links");
+			if(!oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+			}
+		}
+
+		parseServices(oResult, oProperties);
+	}
+
+
+	/**
+	 * @param oResult
+	 * @param oProperties
+	 */
+	private void loadMostProperties(QueryResultViewModel oResult, JSONObject oProperties) {
+		String sBuffer;
+		//load most properties
+		for (String sKey : oProperties.keySet()) {
+			sBuffer = oProperties.optString(sKey, null);
+			if(null!=sBuffer) {
+				oResult.getProperties().put(sKey, sBuffer);
+			}
+		}
+	}
+
+
+	/**
+	 * @param oResult
+	 * @param oProperties
+	 */
+	private void parseServices(QueryResultViewModel oResult, JSONObject oProperties) {
 		//size
 		/*
-
 		"services": {
          	"download": {
 				"url": "https://zipper.creodias.eu/download/221165ce-4e4e-5b52-8c34-1af8f6b7154e",
@@ -258,13 +296,13 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
                 "size": 1716760163
 			}
 		},
-
-		*/
+		 */
 		JSONObject oTemp = oProperties.optJSONObject("services");
 		if(null != oTemp) {
 			oTemp = oTemp.optJSONObject("download");
 			if(null!=oTemp) {
 				long lSize = oTemp.optLong(DiasResponseTranslatorCREODIAS.SSIZE, -1);
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES, ""+lSize);
 				if(0<=lSize) {
 					double dTmp = (double) lSize;
 					String sSize = Utils.getNormalizedSize(dTmp);
@@ -273,71 +311,41 @@ public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
 				if(!oTemp.isNull(DiasResponseTranslatorCREODIAS.SURL)) {
 					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, oProperties.optString(DiasResponseTranslatorCREODIAS.SURL, null));
 				}
-				
 			}
 		}
-
 	}
-	
+
+	private void buildLink(QueryResultViewModel oResult) {
+		StringBuilder oLink = new StringBuilder(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL)); //0
+		oLink.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
+		.append(oResult.getTitle()) //1
+		.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
+		.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)); //2
+
+		oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
+	}
+
 	protected void buildSummary(QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorCREDODIAS.buildSummary: QueryResultViewModel is null");
-		
+
 		//summary
 		//"summary": "Date: 2020-01-03T06:01:45.74Z, Instrument: SAR-C SAR, Mode: VV VH, Satellite: Sentinel-1, Size: 1.64 GB",
-		
-		
+
+
 		String sDate = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SDATE);
 		String sSummary = "Date: " + sDate + ", ";
 		String sInstrument = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SINSTRUMENT);
 		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
-		
-		//todo sensorMode
+
 		String sMode = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSENSOR_MODE);
 		sSummary = sSummary + "Mode: " + sMode + ", ";
-		//TODO infer Satellite from filename
 		String sSatellite = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SPLATFORM);
 		sSummary = sSummary + "Satellite: " + sSatellite + ", ";
 		String sSize = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE);
 		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
 		oResult.setSummary(sSummary);
 	}
-	
-	private String obtainKeycloakToken(QueryResultViewModel oResult) {
-		try {
-			URL oURL = new URL("https://auth.creodias.eu/auth/realms/dias/protocol/openid-connect/token");
 
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			oConnection.setDoOutput(true);
-			oConnection.getOutputStream().write("client_id=CLOUDFERRO_PUBLIC&password=<PASSWORDHERE>&username=<USERHERE>&grant_type=password".getBytes());
-			int iStatus = oConnection.getResponseCode();
-			System.out.println("Response status: " + iStatus);
-			if( iStatus == 200) {
-				InputStream oInputStream = oConnection.getInputStream();
-				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-				if(null!=oInputStream) {
-					Util.copyStream(oInputStream, oBytearrayOutputStream);
-					String sResult = oBytearrayOutputStream.toString();
-					System.out.println(sResult);
-					return sResult;
-				}
-			} else {
-				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-				InputStream oErrorStream = oConnection.getErrorStream();
-				Util.copyStream(oErrorStream, oBytearrayOutputStream);
-				String sMessage = oBytearrayOutputStream.toString();
-				System.out.println(sMessage);
-				
-			}
-			
-			
-		} catch (Exception oE) {
-			// TODO Auto-generated catch block
-			oE.printStackTrace();
-		}
-		
-		return null;
-	}
+
 
 }
