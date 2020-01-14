@@ -48,7 +48,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.fatal("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
+			m_oLogger.fatal("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 		
@@ -70,8 +70,32 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	@Override
 	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
-		// TODO Auto-generated method stub
+		// TODO fail instead
+		if(Utils.isNullOrEmpty(sFileURL)) {
+			m_oLogger.fatal("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty");
+			return null;
+		}
+		//todo check remaining parameters (can assume default values?)
+		try {
+			String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
+			//reconstruct appropriate url
+			StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL) );
+			oUrl.append("?token=").append(sKeyCloakToken);
+			return downloadViaHttp(oUrl.toString(), sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+		} catch (Exception oE) {
+			m_oLogger.error(oE);
+		}
 		return null;
+	}
+
+	private String getZipperUrl(String sFileURL) {
+		String sResult = "";
+		try {
+		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
+		} catch (Exception oE) {
+			this.m_oLogger.error(oE);
+		}
+		return sResult;
 	}
 
 	/* (non-Javadoc)
@@ -96,7 +120,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 	
-	private String obtainKeycloakToken(QueryResultViewModel oResult) {
+	private String obtainKeycloakToken(String sDownloadUser, String sDownloadPassword) {
 		try {
 			URL oURL = new URL("https://auth.creodias.eu/auth/realms/dias/protocol/openid-connect/token");
 
@@ -104,7 +128,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			oConnection.setDoOutput(true);
-			oConnection.getOutputStream().write("client_id=CLOUDFERRO_PUBLIC&password=<PASSWORDHERE>&username=<USERHERE>&grant_type=password".getBytes());
+			oConnection.getOutputStream().write(("client_id=CLOUDFERRO_PUBLIC&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password").getBytes());
 			int iStatus = oConnection.getResponseCode();
 			System.out.println("Response status: " + iStatus);
 			if( iStatus == 200) {
