@@ -59,7 +59,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>wasdi.scheduler.Scheduler</mainClass>
+							<mainClass>wasdi.scheduler.WasdiScheduler</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
