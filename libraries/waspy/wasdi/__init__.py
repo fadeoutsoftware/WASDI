@@ -22,6 +22,9 @@ Tested with: Python 2.7, Python 3.7
 
 History
 
+0.2.0 [15/10/2020]
+    Added Support to WAITING and READY Process State
+
 0.1.34 [20/12/2019]
     Added createWorkspace
     Fixed asynchExecuteProcess bug
@@ -40,7 +43,6 @@ History
     Added get Product Bounding Box 
     Fixed bug on Verbose Flag
     Added first version of importAndPreprocess Version
-
 
 0.1.29 [05/11/2019]
     fixed possible infinite loop in addFileToWASDI 
@@ -999,7 +1001,7 @@ def getProcessStatus(sProcessId):
     :param sProcessId: Id of the process to query
     :return: the status or '' if there was any error
 
-    STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+    STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
     """
     global m_sBaseUrl
     global m_sSessionId
@@ -1024,7 +1026,7 @@ def getProcessStatus(sProcessId):
     return sStatus
 
 
-def updateProcessStatus(sProcessId, sStatus, iPerc):
+def updateProcessStatus(sProcessId, sStatus, iPerc = -1):
     """
     Update the status of a process
     :param sProcessId: Id of the process to update
@@ -1054,10 +1056,10 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
         print('[ERROR] waspy.updateProcessStatus: iPerc > 100 not valid' +
               '  ******************************************************************************')
         return ''
-    elif sStatus not in {'CREATED', 'RUNNING', 'STOPPED', 'DONE', 'ERROR'}:
+    elif sStatus not in {'CREATED', 'RUNNING', 'STOPPED', 'DONE', 'ERROR', 'WAITING', 'READY'}:
         print(
             '[ERROR] waspy.updateProcessStatus: sStatus must be a string in: ' +
-            '{CREATED,  RUNNING,  STOPPED,  DONE,  ERROR' +
+            '{CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY' +
             '  ******************************************************************************')
         return ''
     elif sProcessId == '':
@@ -1084,14 +1086,19 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
 
     return sStatus
 
-def updateStatus(sStatus, iPerc):
+def updateStatus(sStatus, iPerc = -1):
     """
     Update the status of the running process
     :param sStatus: new status
-    :param iPerc: new Percentage
+    :param iPerc: new Percentage.-1 By default, means no change percentage
     :return: the updated status as a String or '' if there was any problem
     """
     try:
+        
+        if m_bIsOnServer is False:
+            _log("[INFO] Running Locally, will not update status on server")
+            return sStatus
+        
         return updateProcessStatus(getProcId(), sStatus, iPerc)
     except Exception as oEx:
         print("[ERROR] waspy.updateStatus: exception " + str(oEx))
@@ -1107,25 +1114,28 @@ def updateProgressPerc(iPerc):
     try:
         _log('[INFO] waspy.updateProgressPerc( ' + str(iPerc) + ' )')
         if iPerc is None:
-            print('[ERROR] waspy.updateProgressPerc: Passed None, expected a percentage' +
+            _log('[ERROR] waspy.updateProgressPerc: Passed None, expected a percentage' +
                   '  ******************************************************************************')
             return ''
     
         if (getProcId() is None) or (len(getProcId()) < 1):
-            print('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
+            _log('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
                   '  ******************************************************************************')
             return ''
     
         if 0 > iPerc or 100 < iPerc:
-            print('[WARNING] waspy.updateProgressPerc: passed' + str(iPerc) + ', automatically resetting in [0, 100]')
+            _log('[WARNING] waspy.updateProgressPerc: passed' + str(iPerc) + ', automatically resetting in [0, 100]')
             if iPerc < 0:
                 iPerc = 0
             if iPerc > 100:
                 iPerc = 100
     
+        if m_bIsOnServer is False:
+            _log("[INFO] Running locally, will not updateProgressPerc on server")
+            return "RUNNING"
+        
         sStatus = "RUNNING"
-        sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(
-            iPerc) + "&sendrabbit=1"
+        sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(sUrl, headers=asHeaders)
         sResult = ""
@@ -1152,7 +1162,6 @@ def setProcessPayload(sProcessId, data):
     global m_sSessionId
     
     try:
-
         asHeaders = _getStandardHeaders()
         payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
     
@@ -2004,22 +2013,50 @@ def waitProcess(sProcessId):
     :return: output status of the process
     """
     if sProcessId is None:
-        print('[ERROR] waspy.waitProcess: Passed None, expected a process ID' +
+        _log('[ERROR] waspy.waitProcess: Passed None, expected a process ID' +
               '  ******************************************************************************')
         return "ERROR"
 
     if sProcessId == '':
-        print('[ERROR] waspy.waitProcess: Passed empty, expected a process ID' +
+        _log('[ERROR] waspy.waitProcess: Passed empty, expected a process ID' +
               '  ******************************************************************************')
         return "ERROR"
-
-    sStatus = ''
-
-    while sStatus not in {"DONE", "STOPPED", "ERROR"}:
-        sStatus = getProcessStatus(sProcessId)
-        time.sleep(2)
-
+    
+    # Put this processor in WAITING
+    updateStatus("WAITING")
+    
+    try:    
+        sStatus = ''
+    
+        while sStatus not in {"DONE", "STOPPED", "ERROR"}:
+            sStatus = getProcessStatus(sProcessId)
+            time.sleep(2)
+    except:
+        _log("[ERROR] Exception in the waitProcess")
+    
+    # Wait to be resumed
+    _waitForResume()
+        
     return sStatus
+
+def _waitForResume():
+    
+    if m_bIsOnServer:        
+        #Put this processor as READY
+        updateStatus("READY")
+    
+        try:
+            #Wait for the WASDI Scheduler to resume us
+            _log("[INFO] Waiting for the scheduler to resume this process")
+            sStatus = ''
+        
+            while sStatus not in {"RUNNING"}:
+                sStatus = getProcessStatus(getProcId())
+                time.sleep(2)
+            
+            _log("[INFO] Process Resumed, let's go!")
+        except:
+            _log("Exception in the _waitForResume")
 
 def waitProcesses(asProcIdList):
     """
@@ -2051,6 +2088,9 @@ def waitProcesses(asProcIdList):
     
     iTotalTime = 0
     asNewList = []
+    
+    #Put this process in WAITING
+    updateStatus("WAITING")
     
     # While there are processes to wait for
     while (iProcessCount > 0):
@@ -2102,6 +2142,9 @@ def waitProcesses(asProcIdList):
         sStatus = getProcessStatus(sProcessId)
         # Save status in the output list
         asReturnStatus.append(sStatus)
+    
+    # Wait to be resumed
+    _waitForResume()
     
     # Return the list of status
     return asReturnStatus
@@ -2479,8 +2522,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
               '  ******************************************************************************')
         return ''
 
-    _log('[INFO] waspy._internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' +
-         str(aoDictPayload))
+    _log('[INFO] waspy._internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' + str(aoDictPayload))
     asHeaders = _getStandardHeaders()
     oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload))
     if oResponse is None:

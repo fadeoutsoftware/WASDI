@@ -40,7 +40,7 @@ public class WASDIExecuteProcessor implements GeoServerProcess {
 		
 		try {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sProcessorName);
+			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sProcessorName);
 
 			// Schedule the process to run the processor
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -72,7 +72,7 @@ public class WASDIExecuteProcessor implements GeoServerProcess {
 				oProcessWorkspace.setUserId(sUserId);
 				oProcessWorkspace.setProcessObjId(sProcessObjId);
 				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcessWorkspace);
+				oRepository.insertProcessWorkspace(oProcessWorkspace);
 								
 				oRunning.setJsonEncodedResult("");
 				oRunning.setName(sProcessorName);

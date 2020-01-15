@@ -190,7 +190,9 @@ var RootController = (function() {
 
                 for(var iIndexProcess = 0; iIndexProcess < iNumberOfProcesses;iIndexProcess++ )
                 {
-                    if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING") {
+                    if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING" ||
+                        $scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="WAITING" ||
+                        $scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="READY") {
                          $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
                     }
                 }
@@ -286,7 +288,9 @@ var RootController = (function() {
         var iTotalProcessesNumber = aoProcessesRunning.length;
         // Search the last one that is in running state
         for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++) {
-            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING") {
+            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING"||
+                aoProcessesRunning[iIndexNewProcess].status === "WAITING"||
+                aoProcessesRunning[iIndexNewProcess].status === "READY") {
                 oLastProcessRunning = aoProcessesRunning[iIndexNewProcess];
             }
         }

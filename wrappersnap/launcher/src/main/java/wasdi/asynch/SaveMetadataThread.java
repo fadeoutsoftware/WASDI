@@ -25,21 +25,18 @@ public class SaveMetadataThread extends Thread {
 	
 	public void run() {
 		try {
-			//LauncherMain.s_oLogger.debug("Start SaveMetadataThread");
 			
 			MetadataViewModel oMetadataViewModel = m_oReadProduct.getProductMetadataViewModel(m_oProductFile);
 			
 			if (oMetadataViewModel != null) {
 				SerializationUtils.serializeObjectToXML(m_sMetadataFilePath, oMetadataViewModel);
 			}
-			
-			//LauncherMain.s_oLogger.debug("SaveMetadataThread: metadata saved, bye");
-		} catch (IOException e) {
-			//LauncherMain.s_oLogger.error("SaveMetadataThread Exception " + e.toString());
-			e.printStackTrace();
-		} catch (Exception e) {
-			//LauncherMain.s_oLogger.error("SaveMetadataThread Exception " + e.toString());
-			e.printStackTrace();
+		} 
+		catch (IOException oEx) {
+			oEx.printStackTrace();
+		} 
+		catch (Exception oEx) {
+			oEx.printStackTrace();
 		}
 	}
 }

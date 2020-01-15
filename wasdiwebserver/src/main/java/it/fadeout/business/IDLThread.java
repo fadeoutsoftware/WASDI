@@ -17,7 +17,7 @@ public class IDLThread extends ProcessingThread {
 
 	@Override
 	protected List<ProcessWorkspace> getQueuedProcess() {
-		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedIDLByNode(Wasdi.s_sMyNodeCode);
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.getCreatedIDLByNode(Wasdi.s_sMyNodeCode);
 		
 		// Reverse the collection, otherwise the older will dead of starvation
 		Collections.reverse(queuedProcess);

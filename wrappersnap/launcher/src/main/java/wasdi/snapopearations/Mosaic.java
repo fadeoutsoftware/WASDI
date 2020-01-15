@@ -89,7 +89,7 @@ public class Mosaic {
 		}
 		
 		m_oProcessRepository = new ProcessWorkspaceRepository();
-		m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		m_oProcess = m_oProcessRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 	}
 	
 	/**

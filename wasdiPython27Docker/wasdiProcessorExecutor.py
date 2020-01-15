@@ -10,6 +10,7 @@ import sys
 #import urllib.parse
 import urllib
 import json
+import traceback
 
 def executeProcessor(parameters, processId): 
     
@@ -84,6 +85,7 @@ def executeProcessor(parameters, processId):
     except Exception as oEx:
         wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
         wasdi.wasdiLog(repr(oEx))
+        wasdi.wasdiLog(traceback.format_exc())
     except:
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
     finally:

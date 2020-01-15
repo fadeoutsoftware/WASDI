@@ -1,21 +1,14 @@
 package wasdi.shared.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.mongodb.client.FindIterable;
-
 import wasdi.shared.business.Node;
-import wasdi.shared.business.ProcessorLog;
-import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
 
 public class NodeRepository extends MongoRepository {
 	
-	   public String InsertNode(Node oNode) {
+	   public String insertNode(Node oNode) {
 	        try {
 	        	if(null == oNode) {
 	        		Utils.debugLog("NodeRepository.InsertNode: oNode is null");
@@ -33,7 +26,7 @@ public class NodeRepository extends MongoRepository {
 	        return "";
 	    }
 
-	    public boolean DeleteNode(String sId) {
+	    public boolean deleteNode(String sId) {
 	        try {
 	            getCollection("node").deleteOne(new Document("_id", new ObjectId(sId)));
 
@@ -46,7 +39,7 @@ public class NodeRepository extends MongoRepository {
 	        return false;
 	    }
 
-	    public Node GetNodeByCode(String sCode) {
+	    public Node getNodeByCode(String sCode) {
 
 	        try {
 	            Document oWSDocument = getCollection("node").find(new Document("nodeCode", sCode)).first();
