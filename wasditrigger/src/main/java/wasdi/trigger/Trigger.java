@@ -22,15 +22,28 @@ import wasdi.shared.utils.Utils;
 
 public class Trigger {
 	
+	/**
+	 * Default Base Path
+	 */
 	String m_sBasePath = "/data/wasdi/";
+	/**
+	 * Default Base Url
+	 */
 	String m_sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest/";
+	/**
+	 * Static Logger that references the "Trigger" logger
+	 */
+	public static Logger s_oLogger = Logger.getLogger(Trigger.class);
+	
 	
 	public Trigger() {
 		try {
+			// Read Mongo configuration
 			MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
 			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+			// Read base path and url
 			m_sBasePath = ConfigReader.getPropValue("BASE_PATH", "/data/wasdi/");
 			m_sBaseUrl = ConfigReader.getPropValue("BASE_URL", "http://www.wasdi.net/wasdiwebserver/rest/");
 		} 
@@ -39,10 +52,6 @@ public class Trigger {
 		} 
 	}
 
-	/**
-	 * Static Logger that references the "MyApp" logger
-	 */
-	public static Logger s_oLogger = Logger.getLogger(Trigger.class);
 	
 	public static void main(String[] args) {
 		System.out.println("WASDI TRIGGER START");
@@ -55,10 +64,10 @@ public class Trigger {
 			DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
 
 		}
-		catch(Exception exp)
+		catch(Exception oEx)
 		{
 			//no log4j configuration
-			System.err.println( "Trigger - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
+			System.err.println( "Trigger - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
 			System.exit(-1);
 		}
 
@@ -97,8 +106,8 @@ public class Trigger {
 
 			s_oLogger.debug(new EndMessageProvider().getGood());
 		}
-		catch( ParseException exp ) {
-			s_oLogger.error("Trigger Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+		catch( ParseException oEx ) {
+			s_oLogger.error("Trigger Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 			System.exit(-1);
 		}
 	}
@@ -111,7 +120,7 @@ public class Trigger {
 		ScheduleRepository oScheduleRepository = new ScheduleRepository();
 		
 		// Get the schedule
-		Schedule oSchedule = oScheduleRepository.GetSchedule(sScheduleId);
+		Schedule oSchedule = oScheduleRepository.getSchedule(sScheduleId);
 		
 		if (oSchedule == null) {
 			s_oLogger.debug("schedule does not exists " + sScheduleId);
@@ -127,7 +136,7 @@ public class Trigger {
 		oUserSession.setLoginDate((double) new Date().getTime());
 		oUserSession.setLastTouch((double) new Date().getTime());
 		
-		oSessionRepository.InsertSession(oUserSession);
+		oSessionRepository.insertSession(oUserSession);
 		
 		// Create the wasdi lib
 		WasdiLib oWasdiLib = new WasdiLib();

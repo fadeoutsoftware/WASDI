@@ -82,7 +82,7 @@ public class AuthResource {
 			
 			UserRepository oUserRepository = new UserRepository();
 
-			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
+			User oWasdiUser = oUserRepository.getUser(oLoginInfo.getUserId());
 			
 			if( oWasdiUser == null ) {
 				Utils.debugLog("AuthResource.Login: User Id Not availalbe " + oLoginInfo.getUserId());
@@ -121,10 +121,10 @@ public class AuthResource {
 						oSession.setLastTouch((double) new Date().getTime());
 						
 						oWasdiUser.setLastLogin((new Date()).toString());
-						oUserRepository.UpdateUser(oWasdiUser);
+						oUserRepository.updateUser(oWasdiUser);
 						
 						SessionRepository oSessionRepo = new SessionRepository();
-						Boolean bRet = oSessionRepo.InsertSession(oSession);
+						Boolean bRet = oSessionRepo.insertSession(oSession);
 						if (!bRet) {
 							return oUserVM;
 						}
@@ -161,10 +161,10 @@ public class AuthResource {
 	 */
 	private void clearUserExpiredSessions(User oUser) {
 		SessionRepository oSessionRepository = new SessionRepository();
-		List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oUser.getUserId());
+		List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oUser.getUserId());
 		for (UserSession oUserSession : aoEspiredSessions) {
 			//delete data base session
-			if (!oSessionRepository.DeleteSession(oUserSession)) {
+			if (!oSessionRepository.deleteSession(oUserSession)) {
 				
 				Utils.debugLog("AuthService.Login: Error deleting session.");
 			}
@@ -213,11 +213,11 @@ public class AuthResource {
 		}
 		PrimitiveResult oResult = null;
 		SessionRepository oSessionRepository = new SessionRepository();
-		UserSession oSession = oSessionRepository.GetSession(sSessionId);
+		UserSession oSession = oSessionRepository.getSession(sSessionId);
 		if(oSession != null) {
 			oResult = new PrimitiveResult();
 			oResult.setStringValue(sSessionId);
-			if(oSessionRepository.DeleteSession(oSession)) {
+			if(oSessionRepository.deleteSession(oSession)) {
 				
 				Utils.debugLog("AuthService.Logout: Session data base deleted.");
 				oResult.setBoolValue(true);
@@ -442,17 +442,17 @@ public class AuthResource {
 
 			  UserRepository oUserRepository = new UserRepository();
 			  String sAuthProvider = "google";
-			  User oWasdiUser = oUserRepository.GetUser(sEmail);
+			  User oWasdiUser = oUserRepository.getUser(sEmail);
 			  //save new user 
 			  if(oWasdiUser == null) {
 				  User oUser = new User();
 				  oUser.setAuthServiceProvider(sAuthProvider);
 				  oUser.setUserId(sEmail);
 				  oUser.setGoogleIdToken(sGoogleIdToken);
-				  if(oUserRepository.InsertUser(oUser) == true) {
+				  if(oUserRepository.insertUser(oUser) == true) {
 					  //the user is stored in DB
 					  //get user from database (i do it only for consistency)
-					  oWasdiUser = oUserRepository.GoogleLogin(sGoogleIdToken , sEmail, sAuthProvider);
+					  oWasdiUser = oUserRepository.googleLogin(sGoogleIdToken , sEmail, sAuthProvider);
 					  
 					  notifyNewUserInWasdi(oWasdiUser, true, true);
 				  }
@@ -461,10 +461,10 @@ public class AuthResource {
 			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google")) {
 				  //get all expired sessions
 				  SessionRepository oSessionRepository = new SessionRepository();
-				  List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
+				  List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oWasdiUser.getUserId());
 				  for (UserSession oUserSession : aoEspiredSessions) {
 					  //delete data base session
-					  if (!oSessionRepository.DeleteSession(oUserSession)) {
+					  if (!oSessionRepository.deleteSession(oUserSession)) {
 						  //XXX log instead
 						  Utils.debugLog("AuthService.LoginGoogleUser: Error deleting session.");
 					  }
@@ -483,7 +483,7 @@ public class AuthResource {
 				  oSession.setLoginDate((double) new Date().getTime());
 				  oSession.setLastTouch((double) new Date().getTime());
 
-				  Boolean bRet = oSessionRepository.InsertSession(oSession);
+				  Boolean bRet = oSessionRepository.insertSession(oSession);
 				  if (!bRet) {
 					  return UserViewModel.getInvalid();
 				  }
@@ -529,7 +529,7 @@ public class AuthResource {
 				}
 				
 				UserRepository oUserRepository = new UserRepository();
-				User oWasdiUser = oUserRepository.GetUser(oRegistrationInfoViewModel.getUserId());
+				User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
 				
 				//if oWasdiUser is a new user -> oWasdiUser == null
 				if(oWasdiUser == null) {
@@ -547,7 +547,7 @@ public class AuthResource {
 					oNewUser.setFirstAccessUUID(sToken);
 					
 					PrimitiveResult oResult = null;
-					if(oUserRepository.InsertUser(oNewUser)) {
+					if(oUserRepository.insertUser(oNewUser)) {
 						//the user is stored in DB
 						oResult = new PrimitiveResult();
 						oResult.setBoolValue(true);
@@ -572,7 +572,7 @@ public class AuthResource {
 						//problem sending the email: either the given address is invalid
 						//or the mail server failed for some reason
 						//in both cases the user must be removed from DB
-						if( !oUserRepository.DeleteUser(oNewUser.getUserId()) ) {
+						if( !oUserRepository.deleteUser(oNewUser.getUserId()) ) {
 							throw new Exception("failed removal of newly created user");
 						}
 						//and the client should be informed
@@ -616,7 +616,7 @@ public class AuthResource {
 		}
 		
 		UserRepository oUserRepo = new UserRepository();
-		User oUser = oUserRepo.GetUser(sUserId);
+		User oUser = oUserRepo.getUser(sUserId);
 		if( null == oUser.getValidAfterFirstAccess()) {
 			Utils.debugLog("AuthResources.validateNewUser: unexpected null first access validation flag");
 			return PrimitiveResult.getInvalid();
@@ -633,7 +633,7 @@ public class AuthResource {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUser.setConfirmationDate( (new Date()).toString() );
-					oUserRepo.UpdateUser(oUser);
+					oUserRepo.updateUser(oUser);
 					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oUser.getUserId());
@@ -681,7 +681,7 @@ public class AuthResource {
 			oUserId.setName(oInputUserVM.getName());
 			oUserId.setSurname(oInputUserVM.getSurname());
 			UserRepository oUR = new UserRepository();
-			oUR.UpdateUser(oUserId);
+			oUR.updateUser(oUserId);
 			
 			//respond
 			UserViewModel oOutputUserVM = new UserViewModel();
@@ -738,7 +738,7 @@ public class AuthResource {
 			} else {
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChPasswViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();
-				oUR.UpdateUser(oUserId);
+				oUR.updateUser(oUserId);
 				oResult = new PrimitiveResult();
 				oResult.setBoolValue(true);
 			}
@@ -768,7 +768,7 @@ public class AuthResource {
 		}
 		
 		UserRepository oUserRepository = new UserRepository();
-		User oUser = oUserRepository.GetUser(sUserId);
+		User oUser = oUserRepository.getUser(sUserId);
 		
 		if(null == oUser) {
 			return PrimitiveResult.getInvalid();
@@ -783,7 +783,7 @@ public class AuthResource {
 						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
 						oUser.setPassword(sHashedPassword);
 						
-						if(oUserRepository.UpdateUser(oUser)) {
+						if(oUserRepository.updateUser(oUser)) {
 							
 							if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
 								return PrimitiveResult.getInvalid(); 

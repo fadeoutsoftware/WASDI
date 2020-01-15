@@ -373,7 +373,7 @@ public class ProcessingResources {
 			}
 
 			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-			oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);
+			oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResources.uploadGraph: " + oEx);
 			return Response.serverError().build();
@@ -414,7 +414,7 @@ public class ProcessingResources {
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 		ArrayList<SnapWorkflowViewModel> aoRetWorkflows = new ArrayList<>();
 
-		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.GetSnapWorkflowPublicAndByUser(sUserId);
+		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.getSnapWorkflowPublicAndByUser(sUserId);
 
 		for (int i = 0; i < aoDbWorkflows.size(); i++) {
 			SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
@@ -459,7 +459,7 @@ public class ProcessingResources {
 
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 
-		SnapWorkflow oWorkflow = oSnapWorkflowRepository.GetSnapWorkflow(sWorkflowId);
+		SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
 		if (oWorkflow == null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -479,7 +479,7 @@ public class ProcessingResources {
 			Utils.debugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
 		}
 
-		oSnapWorkflowRepository.DeleteSnapWorkflow(sWorkflowId);
+		oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
 
 		return Response.ok().build();
 	}
@@ -580,7 +580,7 @@ public class ProcessingResources {
 		String sGraphXml;
 
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(oSnapWorkflowViewModel.getWorkflowId());
+		SnapWorkflow oWF = oSnapWorkflowRepository.getSnapWorkflow(oSnapWorkflowViewModel.getWorkflowId());
 
 		if (oWF == null) {
 			oResult.setBoolValue(false);
@@ -1536,7 +1536,7 @@ public class ProcessingResources {
 					+ "/processors/wasdi_matlab_test_01/config.properties";
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			File oFile = new File(sParamFullPath);
 			File oConfigFile = new File(sConfigFullPath);
@@ -1687,7 +1687,7 @@ public class ProcessingResources {
 					+ "/processors/wasdi_matlab_test_02/config.properties";
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			File oFile = new File(sParamFullPath);
 			File oConfigFile = new File(sConfigFullPath);
@@ -1840,7 +1840,7 @@ public class ProcessingResources {
 					+ "/processors/wasdi_matlab_test_03/config.properties";
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			File oFile = new File(sParamFullPath);
 			File oConfigFile = new File(sConfigFullPath);

@@ -3,6 +3,7 @@ package wasdi.shared.data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
@@ -22,11 +23,19 @@ import wasdi.shared.utils.Utils;
  */
 public class ProcessWorkspaceRepository extends MongoRepository {
 
-    public String InsertProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+	/**
+	 * Insert a new Process Workspace 
+	 * @param oProcessWorkspace Process Workpsace to insert
+	 * @return Mongo obj id
+	 */
+    public String insertProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
 
         try {
         	
         	Utils.debugLog("Inserting Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	
+        	// Initialize the Last State Change Date
+        	oProcessWorkspace.setLastStateChangeDate(Utils.GetFormatDate(new Date()));
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document oDocument = Document.parse(sJSON);
@@ -40,7 +49,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return "";
     }
 
-    public boolean DeleteProcessWorkspace(String sId) {
+    /**
+     * Delete an Entity by Mongo Id
+     * @param sId Process Workspace Mongo Id
+     * @return
+     */
+    public boolean deleteProcessWorkspace(String sId) {
 
         try {
             getCollection("processworkpsace").deleteOne(new Document("_id", new ObjectId(sId)));
@@ -54,7 +68,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }
 
-    public boolean DeleteProcessWorkspaceByPid(int iPid) {
+    /**
+     * Delete Process Workspace by PID
+     * @param iPid
+     * @return
+     */
+    public boolean deleteProcessWorkspaceByPid(int iPid) {
 
         try {
             getCollection("processworkpsace").deleteOne(new Document("pid", iPid));
@@ -68,7 +87,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }
 
-    public boolean DeleteProcessWorkspaceByProcessObjId(String sProcessObjId) {
+    /**
+     * Delete Process Workspace by WASDI ID
+     * @param sProcessObjId
+     * @return
+     */
+    public boolean deleteProcessWorkspaceByProcessObjId(String sProcessObjId) {
 
         try {
             getCollection("processworkpsace").deleteOne(new Document("processObjId", sProcessObjId));
@@ -82,7 +106,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }    
 
-    public List<ProcessWorkspace> GetProcessByWorkspace(String sWorkspaceId) {
+    /**
+     * Get List of Process Workspaces in a Workspace
+     * @param sWorkspaceId
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -97,7 +126,14 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessWorkspace> GetProcessByWorkspace(String sWorkspaceId, int iStartIndex, int iEndIndex) {
+    /**
+     * Get paginated list of process workspace in a workspace
+     * @param sWorkspaceId
+     * @param iStartIndex
+     * @param iEndIndex
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, int iStartIndex, int iEndIndex) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -112,7 +148,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public long CountByWorkspace(String sWorkspaceId) {
+    /**
+     * Get the total count of pw in a workspace
+     * @param sWorkspaceId
+     * @return
+     */
+    public long countByWorkspace(String sWorkspaceId) {
     	try {
     		long lCount = getCollection("processworkpsace").count(new Document("workspaceId", sWorkspaceId));
     		return lCount;
@@ -124,7 +165,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     	return 0;
     }
     
-    public List<ProcessWorkspace> GetProcessByUser(String sUserId) {
+    /**
+     * Get the list of process workspace for a user
+     * @param sUserId
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessByUser(String sUserId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -140,7 +186,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
 
     
-    public List<ProcessWorkspace> GetQueuedProcess() {
+    /**
+     * Get the list of created processes NOT Download or IDL
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedProcesses() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -162,7 +212,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessWorkspace> GetQueuedProcessByNode(String sComputingNodeCode) {
+    /**
+     * Get the list of created processes NOT Download or IDL in a NODE
+     * @param sComputingNodeCode
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedProcessesByNode(String sComputingNodeCode) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -185,7 +240,39 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessWorkspace> GetRunningProcess() {
+    /**
+     * Get the list of processes not Download or IDL in ready state for a specific node
+     * @param sComputingNodeCode
+     * @return
+     */
+    public List<ProcessWorkspace> getReadyProcessesByNode(String sComputingNodeCode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.READY.name()),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name())),
+            				Filters.eq("nodeCode", sComputingNodeCode)
+            				)
+            		)
+            		.sort(new Document("lastStateChangeDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    /**
+     * Get the list of processes not download or idl in running state
+     * @return
+     */
+    public List<ProcessWorkspace> getRunningProcesses() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -206,9 +293,40 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+    
+    /**
+     * Get the list of processes not download or idl in running state in a specific node
+     * @param sComputingNodeCode
+     * @return
+     */
+    public List<ProcessWorkspace> getRunningProcessesByNode(String sComputingNodeCode) {
 
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
 
-    public List<ProcessWorkspace> GetQueuedDownloads() {
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.RUNNING.name()),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name())),
+            				Filters.eq("nodeCode", sComputingNodeCode)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }    
+    
+    /**
+     * Get the list of created download processes
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedDownloads() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -229,7 +347,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessWorkspace> GetQueuedDownloadsByNode(String sComputingNodeCode) {
+    /**
+     * Get the list of created download processes in specific node
+     * @param sComputingNodeCode
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedDownloadsByNode(String sComputingNodeCode) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -251,7 +374,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessWorkspace> GetQueuedIDL() {
+    /**
+     * Get the list of created idl processes
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedIDL() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -271,8 +398,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
-    
-    public List<ProcessWorkspace> GetQueuedIDLByNode(String sComputingNode) {
+
+    /**
+     * Get the list of created idl processes in a specific node
+     * @param sComputingNode
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedIDLByNode(String sComputingNode) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -293,8 +425,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
-
-    public List<ProcessWorkspace> GetRunningDownloads() {
+    
+    /**
+     * Get the list of running download processes
+     * @return
+     */
+    public List<ProcessWorkspace> getRunningDownloads() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -315,7 +451,91 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessWorkspace> GetRunningIDL() {
+    /**
+     * Get the list of running download processes in a specific node
+     * @param sComputingNode
+     * @return
+     */
+    public List<ProcessWorkspace> getRunningDownloadsByNode(String sComputingNode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.RUNNING.name()),
+            				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()),
+            				Filters.eq("nodeCode", sComputingNode)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    /**
+     * Get the list of ready download processes
+     * @return
+     */
+    public List<ProcessWorkspace> getReadyDownloads() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.READY.name()),
+            				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
+            				)
+            		)
+            		.sort(new Document("lastStateChangeDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    /**
+     * Get the list of ready download processes in a specific node
+     * @param sComputingNode
+     * @return
+     */
+    public List<ProcessWorkspace> getReadyDownloadsByNode(String sComputingNode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.READY.name()),
+            				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()),
+            				Filters.eq("nodeCode", sComputingNode)
+            				)
+            		)
+            		.sort(new Document("lastStateChangeDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    
+    /**
+     * Get the list of running IDL
+     * @return
+     */
+    public List<ProcessWorkspace> getRunningIDL() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -336,6 +556,84 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    /**
+     * Get the list of running IDL in a specific node
+     * @param sComputingNode
+     * @return
+     */
+    public List<ProcessWorkspace> getRunningIDLByNode(String sComputingNode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.RUNNING.name()),
+            				Filters.eq("operationType", LauncherOperations.RUNIDL.name()),
+            				Filters.eq("nodeCode", sComputingNode)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+    /**
+     * Get the list of ready IDL
+     * @return
+     */
+    public List<ProcessWorkspace> getReadyIDL() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.READY.name()),
+            				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
+            				)
+            		)
+            		.sort(new Document("lastStateChangeDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    /**
+     * Get the list of ready IDL in a specific node
+     * @param sComputingNode
+     * @return
+     */
+    public List<ProcessWorkspace> getReadyIDLByNode(String sComputingNode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.READY.name()),
+            				Filters.eq("operationType", LauncherOperations.RUNIDL.name()),
+            				Filters.eq("nodeCode", sComputingNode)
+            				)
+            		)
+            		.sort(new Document("lastStateChangeDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
     
 	private void fillList(final ArrayList<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
 		oWSDocuments.forEach(new Block<Document>() {
@@ -353,7 +651,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		});
 	}
 
-    public List<ProcessWorkspace> GetLastProcessByWorkspace(String sWorkspaceId) {
+    public List<ProcessWorkspace> getLastProcessByWorkspace(String sWorkspaceId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -371,7 +669,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
 
-    public List<ProcessWorkspace> GetLastProcessByUser(String sUserId) {
+    public List<ProcessWorkspace> getLastProcessByUser(String sUserId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -390,7 +688,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
     
     
-    public ProcessWorkspace GetProcessByProductName(String sProductName) {
+    public ProcessWorkspace getProcessByProductName(String sProductName) {
         ProcessWorkspace oProcessWorkspace = null;
         try {
 
@@ -412,7 +710,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return oProcessWorkspace;
     }
 
-    public List<ProcessWorkspace> GetProcessByProductNameAndWorkspace(String sProductName, String sWorkspace) {
+    public List<ProcessWorkspace> getProcessByProductNameAndWorkspace(String sProductName, String sWorkspace) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
@@ -433,7 +731,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public ProcessWorkspace GetProcessByProcessObjId(String sProcessObjId) {
+    public ProcessWorkspace getProcessByProcessObjId(String sProcessObjId) {
         ProcessWorkspace oProcessWorkspace = null;
         try {
 
@@ -455,9 +753,20 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return oProcessWorkspace;
     }
 
-    public boolean UpdateProcess(ProcessWorkspace oProcessWorkspace) {
+    /**
+     * Update a process Workspace. If there is a state change, the system will update also update lastStateChangeDate 
+     * @param oProcessWorkspace Process Workpsace to update
+     * @return
+     */
+    public boolean updateProcess(ProcessWorkspace oProcessWorkspace) {
 
         try {
+        	
+        	ProcessWorkspace oOriginal = getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+        	
+        	if (oOriginal.getStatus().equals(oProcessWorkspace.getStatus()) == false) {
+        		oProcessWorkspace.setLastStateChangeDate(Utils.GetFormatDate(new Date()));
+        	}
         	
         	Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
         	
@@ -475,7 +784,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }
     
-    public boolean CleanQueue() {
+    public boolean cleanQueue() {
 
         try {
         	
@@ -495,7 +804,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
 
 
-    public boolean ExistsPidProcessWorkspace(Integer iPid) {
+    public boolean existsPidProcessWorkspace(Integer iPid) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         boolean bExists = false;

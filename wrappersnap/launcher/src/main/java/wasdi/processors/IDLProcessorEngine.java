@@ -69,7 +69,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -320,7 +320,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			// Get My Own Process Workspace
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -348,7 +348,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			// Get The workspace name for parameters
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			List<Workspace> aoWorkspaces = oWorkspaceRepository.GetWorkspaceByUser(oParameter.getUserId());
+			List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspaceByUser(oParameter.getUserId());
 			
 			String sWorkspaceName = "";
 			for (int iWorkspaces = 0; iWorkspaces<aoWorkspaces.size(); iWorkspaces++) {
@@ -364,14 +364,14 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				// Get the list of workspace shared with this user
 				List<WorkspaceSharing> aoSharedWorkspaces = oWorkspaceSharingRepository
-						.GetWorkspaceSharingByUser(oParameter.getUserId());
+						.getWorkspaceSharingByUser(oParameter.getUserId());
 
 				if (aoSharedWorkspaces.size() > 0) {
 					// For each
 					for (int iWorkspaces = 0; iWorkspaces < aoSharedWorkspaces.size(); iWorkspaces++) {
 
 						// Create View Model
-						Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+						Workspace oWorkspace = oWorkspaceRepository.getWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
 
 						if (oWorkspace == null) {
 							Utils.debugLog("IDLProcessorEngine.run: WS Shared not available " + aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
@@ -526,7 +526,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 
 		try {
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -535,7 +535,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			String sProcessorId = oParameter.getProcessorID();
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
 			// Check processor
 			if (oProcessor == null) { 
@@ -566,7 +566,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor Db Entry");
 			// delete the db entry
-			oProcessorRepository.DeleteProcessor(oProcessor.getProcessorId());
+			oProcessorRepository.deleteProcessor(oProcessor.getProcessorId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);			
 		}

@@ -25,11 +25,11 @@ import wasdi.shared.utils.Utils;
  */
 public class ProductWorkspaceRepository extends MongoRepository {
 
-    public boolean InsertProductWorkspace(ProductWorkspace oProductWorkspace) {
+    public boolean insertProductWorkspace(ProductWorkspace oProductWorkspace) {
 
         try {
             //check if product exists
-            boolean bExists = ExistsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId());
+            boolean bExists = existsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId());
             if (bExists) {
                 return true;
             }
@@ -46,7 +46,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return false;
     }
 
-    public List<ProductWorkspace> GetProductsByWorkspace(String sWorkspaceId) {
+    public List<ProductWorkspace> getProductsByWorkspace(String sWorkspaceId) {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         if(Utils.isNullOrEmpty(sWorkspaceId)) {
         	Utils.debugLog("ProductWorkspaceRepository.GetProductsByWorkspace( "+sWorkspaceId + " ): null workspace");
@@ -97,7 +97,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
 		return asWorkspaces ;
     }
 
-    public boolean ExistsProductWorkspace(String sProductId, String sWorkspaceId) {
+    public boolean existsProductWorkspace(String sProductId, String sWorkspaceId) {
 
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         boolean bExists = false;
@@ -129,7 +129,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return bExists;
     }
 
-    public ProductWorkspace GetProductWorkspace(String sProductId, String sWorkspaceId) {
+    public ProductWorkspace getProductWorkspace(String sProductId, String sWorkspaceId) {
 
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         
@@ -161,7 +161,8 @@ public class ProductWorkspaceRepository extends MongoRepository {
 
         return null;
     }
-    public int DeleteByWorkspaceId(String sWorkspaceId) {
+    
+    public int deleteByWorkspaceId(String sWorkspaceId) {
 
         try {
 
@@ -179,7 +180,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return 0;
     }
 
-    public int DeleteByProductNameWorkspace(String sProductName, String sWorkspaceId) {
+    public int deleteByProductNameWorkspace(String sProductName, String sWorkspaceId) {
 
         try {
 
@@ -197,7 +198,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return 0;
     }
     
-    public int DeleteByProductName(String sProductName) {
+    public int deleteByProductName(String sProductName) {
 
         try {
 
@@ -243,7 +244,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return aoReturnList;    	
     }
     
-    public boolean UpdateProductWorkspace(ProductWorkspace oProductWorkspace, String sOldProductName) {
+    public boolean updateProductWorkspace(ProductWorkspace oProductWorkspace, String sOldProductName) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oProductWorkspace);
             
@@ -262,7 +263,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return  false;
     }
     
-    public boolean UpdateProductWorkspace(ProductWorkspace oProductWorkspace) {
+    public boolean updateProductWorkspace(ProductWorkspace oProductWorkspace) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oProductWorkspace);
             
@@ -290,7 +291,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return  false;
     }
     
-    public List<ProductWorkspace> GetProductWorkspaceListByPath(String sFilePath) {
+    public List<ProductWorkspace> getProductWorkspaceListByPath(String sFilePath) {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         try {
 

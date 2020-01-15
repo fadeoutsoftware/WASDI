@@ -178,7 +178,7 @@ public class ProcessorsResource {
 			
 			// Store in the db
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			oProcessorRepository.InsertProcessor(oProcessor);
+			oProcessorRepository.insertProcessor(oProcessor);
 			
 			// Schedule the processworkspace to deploy the processor
 			
@@ -233,7 +233,7 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			List<Processor> aoDeployed = oProcessorRepository.GetDeployedProcessors();
+			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
 				DeployedProcessorViewModel oVM = new DeployedProcessorViewModel();
@@ -285,7 +285,7 @@ public class ProcessorsResource {
 		
 			Utils.debugLog("ProcessorsResource.run: get Processor");	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
+			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 			
 			if (oProcessorToRun == null) {
 				Utils.debugLog("ProcessorsResource.run: unable to find processor " + sName);
@@ -367,7 +367,7 @@ public class ProcessorsResource {
 			Utils.debugLog("ProcessorsResource.help: read Processor " +sName);
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
+			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 			
 			// Call localhost:port
 			String sUrl = "http://localhost:"+oProcessorToRun.getPort()+"/run/--help";
@@ -434,7 +434,7 @@ public class ProcessorsResource {
 			
 			// Get Process-Workspace
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(sProcessingId);
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessingId);
 			
 			// Check not null
 			if (oProcessWorkspace == null) {
@@ -456,7 +456,7 @@ public class ProcessorsResource {
 			
 			// Get the processor from the db
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.GetProcessor(oProcessWorkspace.getProductName());
+			Processor oProcessor = oProcessorRepository.getProcessor(oProcessWorkspace.getProductName());
 			
 			// Set name, id, running id and status
 			oRunning.setName(oProcessor.getName());
@@ -512,7 +512,7 @@ public class ProcessorsResource {
 			oLog.setLogRow(sLog);
 			
 			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-			String sResult = oProcessorLogRepository.InsertProcessLog(oLog);
+			String sResult = oProcessorLogRepository.insertProcessLog(oLog);
 			if(!Utils.isNullOrEmpty(sResult)) {
 				Utils.debugLog("ProcessorResource.addLog: added log row to processid " + sProcessWorkspaceId);
 			} else {
@@ -554,7 +554,7 @@ public class ProcessorsResource {
 			
 			CounterRepository oCounterRepository = new CounterRepository();
 			Counter oCounter = null;
-			oCounter = oCounterRepository.GetCounterBySequence(sProcessWorkspaceId);
+			oCounter = oCounterRepository.getCounterBySequence(sProcessWorkspaceId);
 			if(null == oCounter) {
 				Utils.debugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId +
 						" ): CounterRepository returned a null Counter");
@@ -600,7 +600,7 @@ public class ProcessorsResource {
 			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 			List<ProcessorLog> aoLogs = null;
 			if(null==iStartRow || null==iEndRow) {
-				aoLogs = oProcessorLogRepository.GetLogsByProcessWorkspaceId(sProcessWorkspaceId);
+				aoLogs = oProcessorLogRepository.getLogsByProcessWorkspaceId(sProcessWorkspaceId);
 			} else {
 				aoLogs = oProcessorLogRepository.getLogsByWorkspaceIdInRange(sProcessWorkspaceId, iStartRow, iEndRow);
 			}
@@ -644,7 +644,7 @@ public class ProcessorsResource {
 			
 			Utils.debugLog("ProcessorsResource.deleteProcessor: get Processor");	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToDelete = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessorToDelete = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToDelete == null) {
 				Utils.debugLog("ProcessorsResource.deleteProcessor: unable to find processor " + sProcessorId);
@@ -711,7 +711,7 @@ public class ProcessorsResource {
 			
 			Utils.debugLog("ProcessorsResource.updateProcessor: get Processor " + sProcessorId);	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToUpdate = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToUpdate == null) {
 				Utils.debugLog("ProcessorsResource.updateProcessor: unable to find processor " + sProcessorId);
@@ -729,7 +729,7 @@ public class ProcessorsResource {
 			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getiTimeoutMs());
 			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
-			oProcessorRepository.UpdateProcessor(oProcessorToUpdate);
+			oProcessorRepository.updateProcessor(oProcessorToUpdate);
 			
 			Utils.debugLog("ProcessorsResource.updateProcessor: Updated Processor " + sProcessorId);
 			
@@ -769,7 +769,7 @@ public class ProcessorsResource {
 			}
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToUpdate = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToUpdate == null) {
 				Utils.debugLog("ProcessorsResource.updateProcessor: unable to find processor " + sProcessorId);

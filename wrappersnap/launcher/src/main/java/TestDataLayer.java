@@ -139,7 +139,7 @@ public class TestDataLayer {
 	private static void eDriftValidation() {
 		
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-        List<ProcessWorkspace> aoChains = oProcessWorkspaceRepository.GetProcessByProductNameAndWorkspace("mosaic_tile", "7d05edb2-bb7a-48fb-8c65-1939e1663afc");
+        List<ProcessWorkspace> aoChains = oProcessWorkspaceRepository.getProcessByProductNameAndWorkspace("mosaic_tile", "7d05edb2-bb7a-48fb-8c65-1939e1663afc");
         
         for (ProcessWorkspace oProcess : aoChains) {
         	

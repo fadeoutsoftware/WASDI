@@ -17,7 +17,7 @@ public class DownloadsThread extends ProcessingThread {
 
 	@Override
 	protected List<ProcessWorkspace> getQueuedProcess() {
-		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedDownloadsByNode(Wasdi.s_sMyNodeCode);
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.getCreatedDownloadsByNode(Wasdi.s_sMyNodeCode);
 		
 //		Wasdi.debugLog("DownloadsThread: read download queue. size: " + queuedProcess.size());
 //		for (ProcessWorkspace p : queuedProcess) {

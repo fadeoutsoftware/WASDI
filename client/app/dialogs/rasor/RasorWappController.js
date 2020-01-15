@@ -91,7 +91,7 @@ var RasorWappController = (function() {
                     oLinkToController.m_sResultFromServer = "RASOR App is waiting to start";
                     oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'RUNNING') {
+                else if (data.status == 'RUNNING' || data.status == 'WAITING' || data.status == 'READY') {
                     console.log('---------------------------------Run Rasor - RUNNING');
                     oLinkToController.m_sResultFromServer = "RASOR App is Running";
                     oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
@@ -162,7 +162,7 @@ var RasorWappController = (function() {
                     oLinkToController.m_sResultFromServer = "eDRIFT RASOR App is waiting to start";
                     oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'RUNNING') {
+                else if (data.status == 'RUNNING' || data.status == 'WAITING' || data.status == 'READY') {
                     console.log('---------------------------------Run Rasor - RUNNING');
                     oLinkToController.m_sResultFromServer = "eDRIFT RASOR App is Running";
                     oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);

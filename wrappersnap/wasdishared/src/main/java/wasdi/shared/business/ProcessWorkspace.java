@@ -36,6 +36,10 @@ public class ProcessWorkspace {
      */
     private String operationEndDate;
     /**
+     * Date and time when the process status was modified
+     */
+    private String lastStateChangeDate;
+    /**
      * Unique identifier of the job
      */
     private String processObjId;
@@ -174,6 +178,14 @@ public class ProcessWorkspace {
 
 	public void setPayload(String payload) {
 		this.payload = payload;
+	}
+
+	public String getLastStateChangeDate() {
+		return lastStateChangeDate;
+	}
+
+	public void setLastStateChangeDate(String lastStateChangeDate) {
+		this.lastStateChangeDate = lastStateChangeDate;
 	}
 
 }
