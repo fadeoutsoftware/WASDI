@@ -43,7 +43,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Deploy a new Processor in WASDI
 	 * @param oParameter
 	 */
-	public boolean DeployProcessor(ProcessorParameter oParameter) {
+	public boolean deploy(ProcessorParameter oParameter) {
 		
 		LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: start");
 		
@@ -111,9 +111,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
-			String sCommand = "docker";
 			ArrayList<String> asArgs = new ArrayList<>();
-			
+			String sCommand = "docker";
+
 			asArgs.add("build");
 			//asArgs.add("--no-cache");
 			asArgs.add("-t"+sDockerName);
@@ -134,6 +134,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// P.Campanella 11/06/2018: mounted volume
 			// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 			asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
+			asArgs.add("--mount");
+			asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");
 			asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
 			asArgs.add(sDockerName);
 			
@@ -358,7 +360,13 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				
 				// Try to start Again the docker
 				
+				// Set the processor path
+				String sDownloadRootPath = m_sWorkingRootPath;
+				if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 				
+				String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;				
+				
+				// Set the docker Name
 				String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 				
 				ArrayList<String> asArgs = new ArrayList<>();
@@ -370,6 +378,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				// P.Campanella 11/06/2018: mounted volume
 				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
+				asArgs.add("--mount");
+				asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");				
 				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
 				asArgs.add(sDockerName);
 				

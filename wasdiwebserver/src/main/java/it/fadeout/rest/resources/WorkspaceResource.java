@@ -281,7 +281,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("create")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId) {
+	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 
 		Utils.debugLog("WorkspaceResource.CreateWorkspace( Session: " + sSessionId + " )");
 
@@ -294,11 +294,15 @@ public class WorkspaceResource {
 
 		// Create New Workspace
 		Workspace oWorkspace = new Workspace();
+		
+		if (Utils.isNullOrEmpty(sName)) {
+			sName = "Untitled Workspace";
+		}
 
 		// Default values
 		oWorkspace.setCreationDate((double) new Date().getTime());
 		oWorkspace.setLastEditDate((double) new Date().getTime());
-		oWorkspace.setName("Untitled Workspace");
+		oWorkspace.setName(sName);
 		oWorkspace.setUserId(oUser.getUserId());
 		oWorkspace.setWorkspaceId(Utils.GetRandomName());
 

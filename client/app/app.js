@@ -61,6 +61,7 @@ var wasdiApp = angular.module('wasdi', [
     'angularModalService',//modal
     'ngFileUpload',//upload
     'colorpicker',
+    'rzSlider'
     // 'btorfs.multiselect'//multi select
 
 ]);

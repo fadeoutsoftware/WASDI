@@ -39,8 +39,8 @@ var ProcessorController = (function() {
         $scope.close = function() {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
-        $scope.add = function() {
 
+        $scope.add = function() {
             if (oController.m_bEditMode == true) {
                 var oFile = null;
                 if (oController.m_oFile!=null) {
@@ -86,7 +86,7 @@ var ProcessorController = (function() {
             return true;
         }
 
-        if (this.m_sTypeIdOnly === "ubuntu_idl372")  {
+        if (this.m_sTypeIdOnly === "ubuntu_idl372" || this.m_sTypeIdOnly === "ubuntu_python37_snap")  {
             return true;
         }
         return false;
@@ -149,8 +149,20 @@ var ProcessorController = (function() {
         }
 
         this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody).success(function (data) {
-            var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE");
-            utilsVexCloseDialogAfter(4000,oDialog);
+
+            sMessage = ""
+            if (data.boolValue == true) {
+                sMessage = "PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE"
+            }
+            else {
+                sMessage = "ERROR UPLOADING PROCESSOR<br>ERROR CODE: " + data.intValue;
+                if (!utilsIsStrNullOrEmpty(data.stringValue)) {
+                    sMessage += "<br>"+data.stringValue;
+                }
+            }
+
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
+            utilsVexCloseDialogAfter(5000,oDialog);
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DEPLOYING THE PROCESSOR");
         });

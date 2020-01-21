@@ -3,12 +3,15 @@ Created on 14 Jun 2019
 
 @author: p.campanella
 '''
-import myProcessor
+
 import wasdi
 import os
 import sys
 import urllib.parse
 import json
+import traceback
+import myProcessor
+
 
 def executeProcessor(parameters, processId): 
     
@@ -74,7 +77,6 @@ def executeProcessor(parameters, processId):
     #Run the processor
     try:
         wasdi.wasdiLog("wasdi.executeProcessor RUN " + processId)
-        #myProcessor.run(parameters,processId)
         myProcessor.run()
         wasdi.wasdiLog("wasdi.executeProcessor Done")
         
@@ -83,6 +85,7 @@ def executeProcessor(parameters, processId):
     except Exception as oEx:
         wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
         wasdi.wasdiLog(repr(oEx))
+        wasdi.wasdiLog(traceback.format_exc())
     except:
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
     finally:

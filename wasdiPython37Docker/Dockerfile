@@ -20,23 +20,10 @@ RUN apt-get update && apt-get install -y python3.7-dev
 
 # Go at Home and copy files
 WORKDIR "/root"
-#COPY ./esa-snap_sentinel_unix_6_0.sh /root/
-#COPY ./response.varfile /root/
 COPY ./get-pip.py /root/
 
 # Install PIP
 RUN /usr/bin/python3.7 /root/get-pip.py
-#RUN /usr/bin/python3.7 -m pip install --upgrade
-
-# Install SNAP
-#RUN chmod 777 ./esa-snap_sentinel_unix_6_0.sh
-#RUN ./esa-snap_sentinel_unix_6_0.sh -q -varfile "./response.varfile"
-
-# Configure SNAPPY
-#WORKDIR "/usr/local/snap/bin"
-#RUN ./snappy-conf /usr/bin/python3.7
-#WORKDIR "/root/.snap/snap-python/snappy"
-#RUN python setup.py install
 
 # Install Flask
 RUN pip install flask
@@ -50,6 +37,9 @@ RUN pip install requests
 # Install Numpy
 RUN pip install numpy
 
+# Install Pandas
+RUN pip install pandas
+
 #Add Python 3.4 Repo
 RUN add-apt-repository -y ppa:ubuntugis/ppa  && apt-get update && apt-get update
 
@@ -62,12 +52,15 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal
 RUN export C_INCLUDE_PATH=/usr/include/gdal
 
 RUN /usr/bin/python3.7 -m pip install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
-#RUN pip install GDAL
+
+# Install Rasterio
+#RUN pip install rasterio
+
 
 #CREATE PYTHON LINK
 RUN ln -sf /usr/bin/python3.7 /usr/bin/python
 
-# Copy User Files
+# Copy WASDI Server Files
 COPY ./ /root/
 
 # Install Wasdi
@@ -83,6 +76,5 @@ RUN pip install `cat /root/pip.txt | tr "\n" " "`; exit 0
 WORKDIR /root
 
 # Start the server
-#CMD ["gunicorn" , "-w 1", "--max-requests 1" , "-t 3600", "-b 0.0.0.0:5000", "wasdiProcessorServer:app"]
 RUN chmod 777 ./runServer.sh
 CMD ./runServer.sh

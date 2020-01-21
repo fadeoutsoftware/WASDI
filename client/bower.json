@@ -35,7 +35,9 @@
     "plotly.js": "1.31.2",
     "angular-colorpicker-directive": "~1.2.0",
     "json-edit": "0.2.1",
-    "angular-directive.g-signin": "0.1.1"
+    "angular-directive.g-signin": "0.1.1",
+      "angularjs-slider": "7.0.0",
+      "showdown": "1.x"
   },
   "resolutions": {
     "angular": ">=1.5 <1.6"

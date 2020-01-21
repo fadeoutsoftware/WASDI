@@ -16,7 +16,7 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sDockerTemplatePath = "";
 	
 	
-	public static WasdiProcessorEngine GetProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
+	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
 			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
@@ -45,7 +45,7 @@ public abstract class WasdiProcessorEngine {
 	 * Deploy a new Processor in WASDI
 	 * @param oParameter
 	 */
-	public abstract boolean DeployProcessor(ProcessorParameter oParameter);
+	public abstract boolean deploy(ProcessorParameter oParameter);
 	
 	public abstract boolean run(ProcessorParameter oParameter);
 	
