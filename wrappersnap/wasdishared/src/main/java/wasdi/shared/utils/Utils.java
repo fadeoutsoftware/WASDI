@@ -235,25 +235,26 @@ public class Utils {
 
 	public static boolean doesThisStringMeansTrue(String sString) {
 		// default value is arbitrary!
-		if (isNullOrEmpty(sString)) {
-			return true;
-		} else if (sString.equalsIgnoreCase("true")) {
-			return true;
-		} else if (sString.equalsIgnoreCase("1")) {
-			return true;
-		}
-		return false;
+		return (
+				isNullOrEmpty(sString) ||
+				sString.equalsIgnoreCase("true") ||
+				sString.equalsIgnoreCase("t") ||
+				sString.equalsIgnoreCase("1") ||
+				sString.equalsIgnoreCase("yes") ||
+				sString.equalsIgnoreCase("y")
+		);
 	}
 
 	public static void printToFile(String sFilePath, String sToBePrinted) {
-		FileWriter oFileWeriter;
-		try {
-			oFileWeriter = new FileWriter(sFilePath);
+		if(null == sFilePath || null == sToBePrinted) {
+			throw new NullPointerException("printToFile: null pointer");
+		}
+		try( FileWriter oFileWeriter = new FileWriter(sFilePath) ) {
 			oFileWeriter.write(sToBePrinted);
 			oFileWeriter.flush();
-			oFileWeriter.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+			//note: no need to close: closing resources is handled automatically by the try with resources
+		} catch (Exception oE) {
+			debugLog( "Utils.printToFile: " + oE );
 		}
 	}
 
@@ -472,4 +473,21 @@ public class Utils {
 		}
 	}
 
+	public static String getNormalizedSize(Double dSize) {
+		String sChosenUnit = null;
+		String sSize = null;
+		String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
+		int iUnitIndex = 0;
+		int iLim = sUnits.length -1;
+		while(iUnitIndex < iLim && dSize >= 900.0) {
+			dSize = dSize / 1024.0;
+			iUnitIndex++;
+
+			//now, round it to two decimal digits
+			dSize = Math.round(dSize*100.0)/100.0; 
+			sChosenUnit = sUnits[iUnitIndex];
+			sSize = String.valueOf(dSize) + " " + sChosenUnit;
+		}
+		return sSize;
+	}
 }

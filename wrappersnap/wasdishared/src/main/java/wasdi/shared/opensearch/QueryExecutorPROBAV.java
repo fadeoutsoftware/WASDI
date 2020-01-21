@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -62,7 +63,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected String buildUrl(PaginatedQuery oQuery){
+	protected String getSearchUrl(PaginatedQuery oQuery){
 		Utils.debugLog("QueryExecutorPROBAV.buildUrl");
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
@@ -142,8 +143,6 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			sUrl+="&startIndex=" + oQuery.getOffset();
 		if (oQuery.getLimit() != null)
 			sUrl+="&count=" + oQuery.getLimit();
-
-		//addUrlParams(oParamsMap);
 		return sUrl;
 	}
 
@@ -152,7 +151,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	{
 		Utils.debugLog("QueryExecutorPROBAV.executeCount");
 		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
-		String sUrl = buildUrl(oQuery);
+		String sUrl = getSearchUrl(oQuery);
 
 		//create abdera client
 		Abdera oAbdera = new Abdera();
@@ -225,7 +224,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
 		Utils.debugLog("QueryExecutorPROBAV.buildResultLightViewModel");
 		Feed oFeed = (Feed) oDocument.getRoot();
@@ -281,7 +280,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
 		Utils.debugLog("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;

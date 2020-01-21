@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -116,7 +117,7 @@ public class DownloadManager {
 			
 			try {
 				PaginatedQuery oQuery = new PaginatedQuery(sFootprintQuery, "0", m_squeryLimit, m_squerySortedBy, m_squeryOrder ); 
-				ArrayList<QueryResultViewModel> aoResults = oExecutor.executeAndRetrieve(oQuery);
+				List<QueryResultViewModel> aoResults = oExecutor.executeAndRetrieve(oQuery);
 				if (aoResults == null) {
 					System.out.println("\tno results found");
 					continue;

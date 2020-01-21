@@ -60,7 +60,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	 * 
 	 */
 	@Override
-	public String translate(String sQueryFromClient) {
+	protected String translate(String sQueryFromClient) {
 		if(Utils.isNullOrEmpty(sQueryFromClient)) {
 			return new String("");
 		}
@@ -417,20 +417,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sSentinel1;
 	}
 
-
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasQueryTranslator#encode(java.lang.String)
-	 */
-	@Override
-	public String encode(String sDecoded) {
-		String sResult = new String(sDecoded); 
-		sResult = sResult.replaceAll(" ", "%20");
-		sResult = sResult.replaceAll("\"", "%22");
-		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
-		return sResult;
-	}
-
-	String getNextDateTime(String sSubQuery) {
+	private String getNextDateTime(String sSubQuery) {
 		String sDateTime = "";
 		String sDateTimePattern = "(\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d\\:\\d\\d:\\d\\d\\.\\d\\d\\dZ)"; 
 		Pattern oDateTimePattern = Pattern.compile(sDateTimePattern);
