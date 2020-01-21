@@ -10,14 +10,17 @@ import org.apache.commons.collections.FactoryUtils;
 
 import wasdi.ConfigReader;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -330,6 +333,60 @@ public class dbUtils {
 	}
 
 	
+	private static void password() {
+		try {
+			
+	        System.out.println("Ok, what we do with Password?");
+	        
+	        System.out.println("\t1 - Encrypt Password");
+	        System.out.println("\t2 - Force Update User Password");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        PasswordAuthentication oAuth = new PasswordAuthentication();
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Insert the password to Encrypt:");
+	        	String sInputPw = oScanner.nextLine();
+	        	
+	    		String sToChanget = oAuth.hash(sInputPw.toCharArray());
+	    		System.out.println("Encrypted Password:");
+	    		System.out.println(sToChanget);
+      	
+	        }
+	        else if (sInputString.equals("2")) {
+
+	        	System.out.println("Insert the user Id:");
+	        	String sUserId = oScanner.nextLine();
+
+	        	System.out.println("Insert the password to Encrypt:");
+	        	String sInputPw = oScanner.nextLine();
+	        	
+	        	UserRepository oUserRepo = new UserRepository();
+	        	User oUser = oUserRepo.GetUser(sUserId);
+	        	
+	        	if (oUser == null) {
+	        		System.out.println("User [" + sUserId + "] not found");
+	        		return;
+	        	}
+	        	
+	        	oUser.setPassword(oAuth.hash(sInputPw.toCharArray()));
+	        	
+	        	oUserRepo.UpdateUser(oUser);
+	        	
+	        	System.out.println("Update password for user [" + sUserId + "]");
+
+	        }
+		}
+		catch (Exception oEx) {
+			System.out.println("password Exception: " + oEx);
+			oEx.printStackTrace();
+		}
+	}
+	
 	public static void sample() {
 		System.out.println("sample method running");
 	}
@@ -357,6 +414,7 @@ public class dbUtils {
 		        System.out.println("\t2 - Product Workspace");
 		        System.out.println("\t3 - Logs");
 		        System.out.println("\t4 - Metadata");
+		        System.out.println("\t5 - Password");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -374,6 +432,9 @@ public class dbUtils {
 		        }		        
 		        else if (sInputString.equals("4")) {
 		        	metadata();
+		        }		       
+		        else if (sInputString.equals("5")) {
+		        	password();
 		        }		        
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;
@@ -394,5 +455,7 @@ public class dbUtils {
 			e.printStackTrace();
 		}
 	}
+
+
 
 }

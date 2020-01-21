@@ -200,8 +200,8 @@ var WappsController = (function() {
                 if(utilsIsObjectNullOrUndefined(sHelpMessage) === false )
                 {
                     try {
-                        sHelpMessage = data.stringValue.replace("\\n", "<br>");
-                        sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
+                        //sHelpMessage = data.stringValue.replace("\\n", "<br>");
+                        //sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
                         oHelp = JSON.parse(sHelpMessage);
                         sHelpMessage = oHelp.help;
                     }
@@ -219,8 +219,11 @@ var WappsController = (function() {
                 {
                     sHelpMessage = "There isn't any help message."
                 }
+
+                var oConverter = new showdown.Converter();
+
                 // utilsVexDialogAlertTop(sHelpMessage);
-                utilsVexDialogBigAlertTop(sHelpMessage);
+                utilsVexDialogBigAlertTop(oConverter.makeHtml(sHelpMessage));
             }
             else
             {

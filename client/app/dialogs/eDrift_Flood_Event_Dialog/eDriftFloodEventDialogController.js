@@ -24,14 +24,50 @@
             "DAYSBACK": "15",
             "DAYSFORWARD": "15"
         };
+
         this.m_oBoundingBox = {
             northEast: "",
             southWest: ""
         };
 
+        this.m_oDrawnItems = {};
+
         this.m_oSelectedDate = moment();
         $scope.m_oController = this;
 
+        this.m_aoGdacsOptions = [];
+        this.m_sSelectedGdacs = "";
+
+        this.m_oSlider = {
+            value: 0,
+            options: {
+                floor: 0,
+                ceil: 100,
+                showTicksValues: true,
+                stepsArray: [
+                    {value: 0, legend: 'Long Flood'},
+                    {value: 10},
+                    {value: 20},
+                    {value: 30},
+                    {value: 40},
+                    {value: 50},
+                    {value: 60},
+                    {value: 70},
+                    {value: 80},
+                    {value: 90},
+                    {value: 100, legend: 'Flash Flood'}
+                ],
+                ticksTooltip: function(v) {
+                    if (v==0) {
+                        return 'For long lasting floods: faster with less noise'
+                    }
+                    else if (v==100) {
+                        return 'For flash floods: slower with more noise'
+                    }
+                    else  return '';
+                }
+            }
+        };
         var oController = this;
 
         $scope.close = function(result) {
@@ -39,8 +75,10 @@
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
+        var oScope = $scope;
         setTimeout(function() {
             oController.initMap("mappaedriftfloodevent");
+            oScope.$broadcast('rzSliderForceRender');
         }, 500);
     }
     /*************** METHODS ***************/
@@ -48,6 +86,7 @@
         return this.m_oBoundingBox;
       // alert("North East " + this.m_oBoundingBox.northEast + " South West " + this.m_oBoundingBox.southWest);
     };
+
     eDriftFloodEventDialogController.prototype.getDate = function(){
       return this.m_oSelectedDate;
     };
@@ -63,7 +102,81 @@
         }
      };
 
-    eDriftFloodEventDialogController.prototype.initMap = function(sMapDiv) {
+     eDriftFloodEventDialogController.prototype.readGDACS = function(){
+         var oController = this;
+
+         this.m_oProcessorService.readGDACS().success(function (data) {
+
+             if(utilsIsObjectNullOrUndefined(data) == false)
+             {
+                 for (iFeature = 0; iFeature<data.features.length; iFeature++) {
+                     var oFeature = data.features[iFeature];
+                     var oComboFeature = {};
+                     oComboFeature.name = oFeature.properties.name;
+                     oComboFeature.bbox = oFeature.bbox;
+                     oComboFeature.id = ""+iFeature;
+
+                     oController.m_aoGdacsOptions.push(oComboFeature)
+                 }
+             }
+             else
+             {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING GDACS EVENTS");
+             }
+         }).error(function (error) {
+
+             if (error.status == 404) {
+                 utilsVexDialogAlertTop("NO FLOOD EVENTS<br> FOUND IN GDACS");
+             }
+             else {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING GDACS EVENTS");
+             }
+
+         });
+
+         return this.m_oSelectedDate;
+     };
+
+
+     eDriftFloodEventDialogController.prototype.selectedGdacsElement = function(){
+
+         var sSelected = this.m_sSelectedGdacs;
+
+         if (sSelected == "") return;
+
+         var iIndex = parseInt(sSelected);
+         var oSelectedElement = this.m_aoGdacsOptions[iIndex];
+
+         if (oSelectedElement != null) {
+             console.log("" + oSelectedElement.bbox[0] + ";" + oSelectedElement.bbox[1] + ";" + oSelectedElement.bbox[2] + ";" + oSelectedElement.bbox[3]);
+
+             if (oSelectedElement.bbox[1] == oSelectedElement.bbox[3]) {
+                 oSelectedElement.bbox[1] = oSelectedElement.bbox[1] - 0.1;
+                 oSelectedElement.bbox[3] = oSelectedElement.bbox[3] + 0.1;
+             }
+
+             if (oSelectedElement.bbox[0] == oSelectedElement.bbox[2]) {
+                 oSelectedElement.bbox[0] = oSelectedElement.bbox[0] - 0.1;
+                 oSelectedElement.bbox[2] = oSelectedElement.bbox[2] + 0.1;
+             }
+
+             var aoBounds = [[oSelectedElement.bbox[3], oSelectedElement.bbox[2]], [oSelectedElement.bbox[1], oSelectedElement.bbox[0]]];
+             // create an orange rectangle
+             var oLayer = L.rectangle(aoBounds, {color: "#ff7800", weight: 1});
+             this.m_oBoundingBox.northEast = oLayer._bounds._northEast;
+             this.m_oBoundingBox.southWest = oLayer._bounds._southWest;
+             //remove old shape
+             if(this.m_oDrawnItems && this.m_oDrawnItems.getLayers().length!==0){
+                 this.m_oDrawnItems.clearLayers();
+             }
+             //save new shape in map
+             this.m_oDrawnItems.addLayer(oLayer);
+
+             this.m_oMap.fitBounds(aoBounds);
+         }
+     };
+
+     eDriftFloodEventDialogController.prototype.initMap = function(sMapDiv) {
 
         oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
@@ -103,11 +216,9 @@
         oMap.setZoom(3);
 
         //add draw.search (opensearch)
-        var drawnItems = new L.FeatureGroup();
+        this.m_oDrawnItems = new L.FeatureGroup();
         //this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
-        oMap.addLayer(drawnItems);
-
-
+        oMap.addLayer(this.m_oDrawnItems);
 
         var oOptions={
             position:'topright',//position of menu
@@ -120,7 +231,7 @@
             },
 
             edit: {
-                featureGroup: drawnItems,//draw items are the "voice" of menu
+                featureGroup: this.m_oDrawnItems,//draw items are the "voice" of menu
                 edit: false,// hide edit button
                 remove: false// hide remove button
             }
@@ -137,11 +248,11 @@
             oController.m_oBoundingBox.northEast = layer._bounds._northEast;
             oController.m_oBoundingBox.southWest = layer._bounds._southWest;
             //remove old shape
-            if(drawnItems && drawnItems.getLayers().length!==0){
-                drawnItems.clearLayers();
+            if(oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length!==0){
+                oController.m_oDrawnItems.clearLayers();
             }
             //save new shape in map
-            drawnItems.addLayer(layer);
+            oController.m_oDrawnItems.addLayer(layer);
         });
 
         oMap.on(L.Draw.Event.DELETESTOP, function (event) {
@@ -170,6 +281,10 @@
          var oController = this;
 
          var oParams = this.m_oParameters;
+
+         var iSensitivity = this.m_oSlider.value;
+
+         oParams.MINIMALBLOBREMOVAL = (((150.0-30.0) / 100.0) * iSensitivity) + 30;
 
          var asParams = [];
          asParams.push('"ASHMAN_COEFF":"'+ oParams.BIMODALITYCOEFFICENT + '"');

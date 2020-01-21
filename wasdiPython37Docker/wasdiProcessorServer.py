@@ -4,11 +4,11 @@ from flask import jsonify
 from flask import request
 import os
 import wasdi
-import myProcessor
 import json
-import threading
 import urllib.parse
 import subprocess
+from distutils.dir_util import copy_tree
+from os.path import sys
 
 app = Flask(__name__)
 
@@ -17,14 +17,61 @@ def run(processId):
 	
 	print("wasdiProcessorServer Started - ProcId = " + processId)
 	
+	# First of all be sure to be in the right path
+	dir_path = os.path.dirname(os.path.realpath(__file__))	
+	os.chdir(dir_path)
+	print("wasdiProcessorServer: processor folder set")
+	
+	try:
+		# Copy updated files from processor folder to the docker
+		copy_tree("/wasdi", "/root", update=1)
+		print("wasdiProcessorServer: processors files updated")
+	except:
+		print("wasdiProcessorServer: Unexpected error ", repr(sys.exc_info()[0]))
+	
 	# Check if this is a help request
 	if processId == '--help':
 		
-		print("wasdiProcessorServer Help Request: calling procesor Help")
+		print("wasdiProcessorServer Help Request: calling processor Help")
 		
 		#Try to get help from the processor
 		try:
-			sHelp = myProcessor.WasdiHelp()
+			sHelpFileName = ""
+			
+			if os.path.isfile("readme.md"):
+				sHelpFileName = "readme.md"
+			elif os.path.isfile("README.md"):
+				sHelpFileName = "README.md"
+			elif os.path.isfile("README.MD"):
+				sHelpFileName = "README.MD"
+			elif os.path.isfile("readme.MD"):
+				sHelpFileName = "readme.MD"
+			elif os.path.isfile("help.md"):
+				sHelpFileName = "help.md"
+			elif os.path.isfile("help.MD"):
+				sHelpFileName = "help.MD"
+			elif os.path.isfile("HELP.MD"):
+				sHelpFileName = "HELP.MD"
+			if os.path.isfile("readme.txt"):
+				sHelpFileName = "readme.txt"
+			elif os.path.isfile("README.txt"):
+				sHelpFileName = "README.txt"
+			elif os.path.isfile("README.TXT"):
+				sHelpFileName = "README.TXT"
+			elif os.path.isfile("readme.TXT"):
+				sHelpFileName = "readme.TXT"
+			elif os.path.isfile("help.txt"):
+				sHelpFileName = "help.txt"
+			elif os.path.isfile("help.TXT"):
+				sHelpFileName = "help.TXT"
+			elif os.path.isfile("HELP.TXT"):
+				sHelpFileName = "HELP.TXT"
+			
+			sHelp = ""
+			if not sHelpFileName == "":
+				with open(sHelpFileName, 'r') as oHelpFile:
+					sHelp = oHelpFile.read()
+								
 		except AttributeError:
 			print("wasdiProcessorServer Help not available")
 			sHelp = "No help available. Just try."
@@ -35,11 +82,7 @@ def run(processId):
 	
 	print("wasdiProcessorServer run request")
 	
-	# This is not a help request but a run request. First of all be sure to be in the right path
-	dir_path = os.path.dirname(os.path.realpath(__file__))	
-	os.chdir(dir_path)
-	
-	print("wasdiProcessorServer: processor folder set")
+	# This is not a help request but a run request.
 	
 	# Copy request json in the parameters array
 	parameters = request.json
