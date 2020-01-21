@@ -58,7 +58,7 @@ public abstract class QueryExecutor {
 			String sResponse = httpGetResults(sUrl, "count");
 			int iResult = 0;
 			try {
-				iResult = Integer.parseInt(sResponse);
+				iResult = Integer.parseInt(extractNumberOfResults(sResponse));
 			} catch (NumberFormatException oNfe) {
 				Utils.debugLog("QueryExecutor.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
 				return -1;
@@ -223,7 +223,7 @@ public abstract class QueryExecutor {
 		//oClient.setSocketTimeout(2000);
 		oClient.setConnectionManagerTimeout(2000);
 
-		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 
 		for (Entry oEntry : oFeed.getEntries()) {
 
@@ -303,7 +303,7 @@ public abstract class QueryExecutor {
 			return null;
 		}
 		Feed oFeed = (Feed) oDocument.getRoot();
-		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 		for (Entry oEntry : oFeed.getEntries()) {
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
@@ -445,5 +445,9 @@ public abstract class QueryExecutor {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	protected String extractNumberOfResults(String sResponse) {
+		return sResponse;
 	}
 }
