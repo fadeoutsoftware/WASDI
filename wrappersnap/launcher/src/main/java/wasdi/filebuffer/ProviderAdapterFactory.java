@@ -28,6 +28,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("MATERA", DhUSProviderAdapter::new);
 		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
 		aoDownloaders.put("FEDEO", DhUSProviderAdapter::new);
+		aoDownloaders.put("CREODIAS", CREODIASProviderAdapter::new);
 		
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}

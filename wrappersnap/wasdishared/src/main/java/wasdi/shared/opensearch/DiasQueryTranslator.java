@@ -18,14 +18,21 @@ public abstract class DiasQueryTranslator {
 	
 	protected HashMap<String, String> keyMapping;
 	protected HashMap<String, String> valueMapping;
-		
-	//translates from WASDI query (OpenSearch) to <derived class> format
-	public abstract String translate(String sQuery);
-	public abstract String encode( String sDecoded );
-	
+
 	public String translateAndEncode(String sQuery) {
 		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQuery));
+	}
+	
+	//translates from WASDI query (OpenSearch) to <derived class> format
+	protected abstract String translate(String sQuery);
+
+	protected String encode( String sDecoded ) {
+		String sResult = sDecoded; 
+		sResult = sResult.replace(" ", "%20");
+		sResult = sResult.replaceAll("\"", "%22");
+		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
+		return sResult;
 	}
 	
 }
