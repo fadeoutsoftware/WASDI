@@ -82,7 +82,8 @@ public class QueryExecutorONDA extends QueryExecutor {
 		return sUrl;
 	}
 
-	private String buildUrlForList(PaginatedQuery oQuery) {
+	@Override
+	protected String buildUrlForList(PaginatedQuery oQuery) {
 		//Utils.debugLog(s_sClassName + ".buildUrlForList( " + oQuery + " )");
 		if(null==oQuery) {
 			Utils.debugLog(s_sClassName + ".buildUrlForList: oQuery is null");
@@ -95,13 +96,22 @@ public class QueryExecutorONDA extends QueryExecutor {
 		return sUrl;
 	}
 
-	private String buildUrlPrefix(PaginatedQuery oQuery) {
+	@Override
+	protected String buildUrlPrefix(PaginatedQuery oQuery) {
 		//Utils.debugLog(s_sClassName + ".BuildBaseUrl( " + oQuery + " )");
 		if(null==oQuery) {
-			throw new NullPointerException("QueryExecutorONDA.buildBaseUrl: oQuery is null");
+			throw new NullPointerException("QueryExecutorONDA.buildUrlPrefix( PaginatedQuery ): oQuery is null");
+		}
+		return buildUrlPrefix(oQuery.getQuery());
+	}
+	
+	@Override
+	protected String buildUrlPrefix(String sQuery) {
+		if(null == sQuery) {
+			throw new NullPointerException("QueryExecutorONDA.buildUrlPrefix( String ): sQuery is null");
 		}
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
-		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) + "%22";
+		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery) + "%22";
 		return sUrl;
 	}
 
