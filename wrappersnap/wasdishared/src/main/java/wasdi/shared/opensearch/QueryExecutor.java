@@ -239,64 +239,9 @@ public abstract class QueryExecutor {
 	public int executeCount(String sQuery) throws IOException {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
-			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
-			
-/*
-			//		if (sProvider.equals("SENTINEL"))
-			//		sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
-			//if (sProvider.equals("MATERA"))
-			//sUrl = "https://collaborative.mt.asi.it/api/stub/products/count?filter=";
-	
-			final String sUserAgent = "Mozilla/5.0";
-	
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-	
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-	
-			//add request header
-			oConnection.setRequestProperty("User-Agent", sUserAgent);
-			if (m_sUser!=null && m_sPassword!=null) {
-				String sUserCredentials = m_sUser + ":" + m_sPassword;
-				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
-				oConnection.setRequestProperty ("Authorization", sBasicAuth);
-			}
-	
-			Utils.debugLog("QueryExecutor.executeCount: Sending 'GET' request to URL : " + sUrl);
-			//int responseCode = -1;
-			//try
-			//{
-			//	responseCode = oConnection.getResponseCode();
-			//}
-			//catch(IOException oEx)
-			//{
-			//	Utils.debugLog("QueryExecutor.executeCount: Exception Get response : " + oEx.getMessage());	
-			//}
-			int responseCode =  oConnection.getResponseCode();
-			Utils.debugLog("QueryExecutor.executeCount: Response Code : " + responseCode);
-	
-			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-	
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
-			}
-			in.close();
-			String sResponse = response.toString();
-	
-			//print result
-			Utils.debugLog("QueryExecutor.executeCount: Count Done: Response " + sResponse);
-	
-			//for (Element element : oFeed.getElements()) {
-			//String sText = element.getText();
-			//	if (element.getQName().getLocalPart() 
-			//	} 
-			//String sTotalResults = oFeed.getAttributeValue("opensearch:totalResults");
-
-*/
+			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));			
 			String sResponse = httpGetResults(sUrl, "count");
+			sResponse = extractNumberOfResults(sResponse);
 			int iResult = 0;
 			try {
 				iResult = Integer.parseInt(sResponse);
@@ -309,6 +254,10 @@ public abstract class QueryExecutor {
 			Utils.debugLog("QueryExecutor.executeCount: " + oE);
 			return -1;
 		}
+	}
+
+	protected String extractNumberOfResults(String sResponse) {
+		return sResponse;
 	}
 
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
@@ -531,20 +480,36 @@ public abstract class QueryExecutor {
 		}
 		return sResult;
 	}
-
-	public static void main(String[] args) {
-
-		QueryExecutorFactory oFactory = new QueryExecutorFactory();
-		//change the following with your user and password (and don't commit them!)
-		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
-		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true");
-
-		try {
-			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
-
-			Utils.debugLog(""+oExecutor.executeCount(sQuery));			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	
+	protected String buildUrlForList(PaginatedQuery oQuery) {
+		return null;
 	}
+	
+	protected String buildUrlPrefix(PaginatedQuery oQuery) {
+		return null;
+	}
+	
+	protected String buildUrlPrefix(String sQuery) {
+		return null;
+	}
+	
+
+//	public static void main(String[] args) {
+//
+//		QueryExecutorFactory oFactory = new QueryExecutorFactory();
+//		//change the following with your user and password (and don't commit them!)
+//		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
+//		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true");
+//
+//		try {
+//			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
+//
+//			Utils.debugLog(""+oExecutor.executeCount(sQuery));			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
+
+	
 }
