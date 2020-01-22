@@ -205,8 +205,8 @@ var EditPanelController = (function() {
         ];
 
         this.getFilters();
-
-        this.getProductColorManipulation(this.m_oProduct.fileName,this.m_oBand.name,true,this.m_sWorkspaceId);
+        // TODO BUGGED METHOD
+        // this.getProductColorManipulation(this.m_oProduct.fileName,this.m_oBand.name,true,this.m_sWorkspaceId);
 
         var oController = this;
         $scope.close = function(oReturnValue) {
