@@ -339,6 +339,7 @@ public abstract class QueryExecutor {
 	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		return null;
 	}
+	
 	protected List<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
 		return null;
 	}
