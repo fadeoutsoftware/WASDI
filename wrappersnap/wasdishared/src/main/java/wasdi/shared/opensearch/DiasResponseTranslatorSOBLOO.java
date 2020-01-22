@@ -51,7 +51,74 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 
 	private QueryResultViewModel translate(JSONObject oJsonItem, String sDownloadProtocol, boolean bFullViewModel) {
 		// TODO Auto-generated method stub
+		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.translate: JSONObject is null");
+		
+		QueryResultViewModel oResult = new QueryResultViewModel();
+		parseMd(oJsonItem, oResult);
+		parseData(oJsonItem, oResult);
+		
 		return null;
 	}
 
+
+	private void parseMd(JSONObject oJsonItem, QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.parseMd: JSONObject is null");
+		try {
+			if(oJsonItem.has("md")) {
+				oJsonItem = oJsonItem.optJSONObject("md");
+				String sBuffer = null;
+				long lBuffer = -1l;
+				JSONObject oJsonBuffer = null;
+				JSONArray aoArrayBuffer = null;
+				
+				sBuffer = oJsonItem.optString("id", null);
+				if(!Utils.isNullOrEmpty(sBuffer)) {
+					oResult.setId(sBuffer);
+				}
+				
+				lBuffer = oJsonItem.optLong("timestamp", -1l);
+				sBuffer = "" + lBuffer;
+				if(!Utils.isNullOrEmpty(sBuffer)) {
+					oResult.getProperties().put("timestamp", sBuffer);
+				}
+				
+				oJsonBuffer = oJsonItem.optJSONObject("geometry");
+				if(oJsonBuffer != null) {
+					sBuffer = oJsonBuffer.optString("type", null);
+					if(null!=sBuffer && sBuffer.equals("Polygon")) {
+						aoArrayBuffer = oJsonBuffer.optJSONArray("coordinates");
+						if(aoArrayBuffer != null) {
+							parseCoordinates(aoArrayBuffer, oResult);
+						}
+					}
+				}
+				
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorSOBLOO.parseMd( " + oJsonItem + ", QueryResultViewModel )" + oE);
+		}
+		
+	}
+
+	private void parseCoordinates(JSONArray aoArrayBuffer, QueryResultViewModel oResult) {
+		try {
+			aoArrayBuffer = (JSONArray) aoArrayBuffer.opt(0);
+			String sCoordinates = "";
+			for (Object oItem : aoArrayBuffer) {
+				JSONArray aDCooordinatesPair = (JSONArray) oItem; 
+				double dX = aDCooordinatesPair.optDouble(0);
+				double dY = aDCooordinatesPair.optDouble(1);
+				
+			}
+			
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorSOBLOO.parseCoordinates: " + oE);
+		}
+	}
+
+	private void parseData(JSONObject oJsonItem, QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.parseMd: JSONObject is null");
+		//TODO implement
+	}
+	
 }
