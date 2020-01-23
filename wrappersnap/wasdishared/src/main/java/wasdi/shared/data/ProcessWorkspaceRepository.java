@@ -635,6 +635,39 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    
+    
+    
+    
+    /**
+     * Get the list of processes not download or idl in running state in a specific node
+     * @param sComputingNodeCode
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessesByStateNode(String sProcessStatus, String sComputingNodeCode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", sProcessStatus),
+            				Filters.eq("nodeCode", sComputingNodeCode)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }    
+    
+    
+    
+    
 	private void fillList(final ArrayList<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
 		oWSDocuments.forEach(new Block<Document>() {
 		    public void apply(Document document) {

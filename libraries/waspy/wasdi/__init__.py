@@ -22,7 +22,7 @@ Tested with: Python 2.7, Python 3.7
 
 History
 
-0.2.0 [15/10/2020]
+0.2.3 [23/01/2020]
     Added Support to WAITING and READY Process State
 
 0.1.34 [20/12/2019]
@@ -1036,24 +1036,14 @@ def updateProcessStatus(sProcessId, sStatus, iPerc = -1):
     """
 
     if sProcessId is None:
-        print('[ERROR] waspy.updateProcessStatus: cannot update status, process ID is None' +
+        print('[ERROR] waspy.updateProcessStatus: cannot update status, process ID is None' +              
               '  ******************************************************************************')
         return ''
+    elif sProcessId == '':
+        return ''
+    
     if sStatus is None:
         print('[ERROR] waspy.updateProcessStatus: cannot update status, status is None' +
-              '  ******************************************************************************')
-        return ''
-    if iPerc is None:
-        print('[ERROR] waspy.updateProcessStatus: percentage is None' +
-              '  ******************************************************************************')
-        return ''
-
-    if iPerc < 0:
-        print('[ERROR] waspy.updateProcessStatus: iPerc < 0 not valid' +
-              '  ******************************************************************************')
-        return ''
-    elif iPerc > 100:
-        print('[ERROR] waspy.updateProcessStatus: iPerc > 100 not valid' +
               '  ******************************************************************************')
         return ''
     elif sStatus not in {'CREATED', 'RUNNING', 'STOPPED', 'DONE', 'ERROR', 'WAITING', 'READY'}:
@@ -1062,7 +1052,22 @@ def updateProcessStatus(sProcessId, sStatus, iPerc = -1):
             '{CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY' +
             '  ******************************************************************************')
         return ''
-    elif sProcessId == '':
+    
+    if iPerc is None:
+        print('[ERROR] waspy.updateProcessStatus: percentage is None' +
+              '  ******************************************************************************')
+        return ''
+    
+    if iPerc < 0:
+        if iPerc != -1:
+            print('[ERROR] waspy.updateProcessStatus: iPerc < 0 not valid' +
+                  '  ******************************************************************************')
+            return ''
+        else:
+            print('[INFO] waspy.updateProcessStatus: iPerc = -1 - Not considered')
+    elif iPerc > 100:
+        print('[ERROR] waspy.updateProcessStatus: iPerc > 100 not valid' +
+              '  ******************************************************************************')
         return ''
 
     global m_sBaseUrl
@@ -2105,6 +2110,8 @@ def waitProcesses(asProcIdList):
             
             if sProcessId == "ERROR":
                 sStatus = "ERROR"
+            elif sProcessId == "":
+                sStatus = "ERROR"
             else:
                 # Get the status
                 sStatus = getProcessStatus(sProcessId) 
@@ -2116,10 +2123,7 @@ def waitProcesses(asProcIdList):
             else:
                 # Not yet, we still need to wait this
                 asNewList.append(sProcessId)
-            
-            # Check the next one
-            #iProcessIndex = iProcessIndex +1
-        
+                    
         # Update the list 
         asProcessesToCheck = asNewList.copy()
         # Clean the temp one
@@ -2138,8 +2142,15 @@ def waitProcesses(asProcIdList):
     for iProcessIndex in range(0, iProcessCount):
         # Get Proc id
         sProcessId = asProcIdList[iProcessIndex]
-        # Get status
-        sStatus = getProcessStatus(sProcessId)
+        
+        if sProcessId == "ERROR":
+            sStatus = "ERROR"
+        elif sProcessId == "":
+            sStatus = "ERROR"
+        else:
+            # Get the status
+            sStatus = getProcessStatus(sProcessId) 
+        
         # Save status in the output list
         asReturnStatus.append(sStatus)
     

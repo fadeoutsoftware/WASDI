@@ -113,7 +113,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			ArrayList<String> asArgs = new ArrayList<>();
 			String sCommand = "docker";
-
+			/*
 			asArgs.add("build");
 			//asArgs.add("--no-cache");
 			asArgs.add("-t"+sDockerName);
@@ -122,6 +122,29 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			handleBuildCommand(sCommand, asArgs);
 			
 			shellExec(sCommand,asArgs);
+			*/
+			
+			
+			String sRunFile = sProcessorFolder+"deploywasdidocker.sh";
+			
+			File oRunFile = new File(sRunFile);
+			
+			BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
+			
+			if(null!= oRunWriter) {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating "+sRunFile+" file");
+
+				oRunWriter.write("#!/bin/bash");
+				oRunWriter.newLine();
+				oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 >/dev/null 2>1");
+				oRunWriter.newLine();
+				oRunWriter.flush();
+				oRunWriter.close();
+			}			
+			
+			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
+
+			shellExec(sRunFile, asArgs);
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: created image " + sDockerName);
@@ -258,15 +281,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
 			
-			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
-			//pb.redirectErrorStream(true);
-			Process process = pb.start();
+			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+			//oProcessBuilder.redirectErrorStream(true);
+			Process oProcess = oProcessBuilder.start();
 			if (bWait) {
-//				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//				String line;
-//				while ((line = reader.readLine()) != null)
-//					LauncherMain.s_oLogger.debug("[docker]: " + line);
-				process.waitFor();				
+				//BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+				//String sLine;
+				//while ((sLine = oReader.readLine()) != null)
+					//LauncherMain.s_oLogger.debug("[docker]: " + sLine);
+				oProcess.waitFor();				
 			}
 		}
 		catch (Exception e) {
@@ -346,7 +369,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			OutputStream oOutputStream = null;
 			try {
 				
-				// Try to fet the result from docker
+				// Try to fetch the result from docker
 				oOutputStream = oConnection.getOutputStream();
 				oOutputStream.write(sJson.getBytes());
 				oOutputStream.flush();
@@ -482,6 +505,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 						
 						// Yes
 						LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine version > 1.0: wait for the processor to finish");
+						
+						// Check the processId
+						String sProcId = oOutputJsonMap.get("processId");
+						
+						if (sProcId.equals("ERROR")) {
+							// Force cycle to exit, leave flag as it is to send a rabbit message
+							sStatus = ProcessStatus.ERROR.name();
+							oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+						}
 						
 						// Wait for the process to finish, while checking timeout
 						while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {

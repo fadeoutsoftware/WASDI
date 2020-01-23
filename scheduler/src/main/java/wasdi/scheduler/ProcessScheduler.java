@@ -2,6 +2,7 @@ package wasdi.scheduler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,11 @@ public class ProcessScheduler extends Thread {
 	 */
 	private volatile boolean m_bRunning = true;
 	
+	/**
+	 * List of operation types supported by this scheduler
+	 */
+	protected ArrayList<String> m_asOperationTypes = new ArrayList<String>();
+	
 	public boolean init(String sSchedulerKey) {
 		
 		try {
@@ -95,6 +101,26 @@ public class ProcessScheduler extends Thread {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			// Read Operation Type supported 
+			try {
+				// Get the string from config
+				String sOperationTypes = ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_OP_TYPES", "");
+				
+				// Split on comma
+				String [] asTypes = sOperationTypes.split(",");
+				
+				
+				// Add each element to the member list
+				if (asTypes != null) {
+					for (String sType : asTypes) {
+						m_asOperationTypes.add(sType);
+					}
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
 			
 			
 			try {
@@ -126,8 +152,20 @@ public class ProcessScheduler extends Thread {
 			return false;
 		}
 		return true;
-		
 	}
+	
+	public List<String> getSupportedTypes() {
+		return m_asOperationTypes;
+	}
+	
+	public void removeSupportedType(String sSupportedType) {
+		m_asOperationTypes.remove(sSupportedType);
+	}
+	
+	public void addSupportedType(String sSupportedType) {
+		m_asOperationTypes.add(sSupportedType);
+	}
+	
 	
 	@Override
 	public void run() {
@@ -141,7 +179,7 @@ public class ProcessScheduler extends Thread {
 				// Get the updated list of running processes
 				List<ProcessWorkspace> aoRunningList = getRunningList();
 				
-				WasdiScheduler.log(m_sLogPrefix + aoRunningList.size() + " Running Processes");
+				//WasdiScheduler.log(m_sLogPrefix + aoRunningList.size() + " Running Processes");
 				
 				// Do we have any free slot?
 				if (aoRunningList.size() < m_iNumberOfConcurrentProcess) {
@@ -217,12 +255,32 @@ public class ProcessScheduler extends Thread {
 		}
 	}
 	
+	
+	/**
+	 * Filter the list of operations with the supported types
+	 * @param aoInputList
+	 * @return
+	 */
+	protected List<ProcessWorkspace> filterOperationTypes(List<ProcessWorkspace> aoInputList) {
+		
+		for (int iProcWs = aoInputList.size()-1; iProcWs>=0; iProcWs--) {
+			
+			if (!m_asOperationTypes.contains(aoInputList.get(iProcWs).getOperationType())) {
+				aoInputList.remove(iProcWs);
+			}
+		}
+		
+		return aoInputList;
+	}
+	
 	/**
 	 * Get the list of running processes
 	 * @return list of running processes
 	 */
 	protected List<ProcessWorkspace> getRunningList() {
-		return m_oProcessWorkspaceRepository.getRunningProcessesByNode(m_sWasdiNode);
+		
+		List<ProcessWorkspace> aoRunning = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.RUNNING.name(), m_sWasdiNode);
+		return filterOperationTypes(aoRunning);
 	}
 	
 	/**
@@ -230,7 +288,8 @@ public class ProcessScheduler extends Thread {
 	 * @return list of created processes
 	 */
 	protected List<ProcessWorkspace> getCreatedList() {
-		return m_oProcessWorkspaceRepository.getCreatedProcessesByNode(m_sWasdiNode);
+		List<ProcessWorkspace> aoCreated = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.CREATED.name(), m_sWasdiNode);
+		return filterOperationTypes(aoCreated);
 	}
 	
 	/**
@@ -238,7 +297,8 @@ public class ProcessScheduler extends Thread {
 	 * @return list of ready processes
 	 */
 	protected List<ProcessWorkspace> getReadyList() {
-		return m_oProcessWorkspaceRepository.getReadyProcessesByNode(m_sWasdiNode);
+		List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode);
+		return filterOperationTypes(aoReady);
 	}	
 	
 	/**
