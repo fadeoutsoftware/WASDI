@@ -1,7 +1,10 @@
 package wasdi.scheduler;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +32,10 @@ public class ProcessScheduler extends Thread {
 	 * sleeping time between iterations
 	 */
 	protected long m_lWaitProcessStartMS = 2000;
+	/**
+	 * sleeping time between iterations
+	 */
+	protected long m_lTimeOutMs = -1;	
 	/**
 	 * number concurrent process
 	 */
@@ -102,6 +109,13 @@ public class ProcessScheduler extends Thread {
 				e.printStackTrace();
 			}
 			
+			// Read Timeout of this scheduler 
+			try {
+				long lTimeout = Long.parseLong(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_TIMEOUT_MS"));
+				if (lTimeout>0) m_lSleepingTimeMS = lTimeout;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			// Read Operation Type supported 
 			try {
 				// Get the string from config
@@ -166,7 +180,6 @@ public class ProcessScheduler extends Thread {
 		m_asOperationTypes.add(sSupportedType);
 	}
 	
-	
 	@Override
 	public void run() {
 		
@@ -179,7 +192,65 @@ public class ProcessScheduler extends Thread {
 				// Get the updated list of running processes
 				List<ProcessWorkspace> aoRunningList = getRunningList();
 				
-				//WasdiScheduler.log(m_sLogPrefix + aoRunningList.size() + " Running Processes");
+				for (ProcessWorkspace oRunningPws : aoRunningList) {
+					
+					// All processes in running can be removed from the launched list
+					if (m_aoLaunchedProcesses.containsKey(oRunningPws.getProcessObjId())) {
+						m_aoLaunchedProcesses.remove(oRunningPws.getProcessObjId());
+					}
+					
+					// Get the PID
+					String sPid = "" + oRunningPws.getPid();
+					
+					// Check if it is alive
+					if (!Utils.isNullOrEmpty(sPid)) {
+						if (!Utils.isProcessStillAllive(sPid)) {
+							// PID does not exists: recheck and remove
+							WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + " but the process does not exists");
+							
+							// Read Again to be sure
+							ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
+							if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())) {
+								oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+								
+								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
+									oCheckProcessWorkspace.setOperationDate(Utils.GetFormatDate(new Date()));
+								}
+								
+								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
+								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
+							}							
+						}
+					}
+					else {
+						WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " has null PID");
+					}
+					
+					// Check the last state change
+					if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeDate())) {
+						
+						Date oLastChange = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(oRunningPws.getLastStateChangeDate());
+						Date oNow = new Date();
+						long lTimeSpan = oNow.getTime() - oLastChange.getTime();
+						
+						// Is there a timeout?
+						if (m_lTimeOutMs != -1) {
+							// We ran over?
+							if (lTimeSpan > m_lTimeOutMs) {
+								// Change the status to STOPPED
+								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " is in Timeout");
+								oRunningPws.setStatus(ProcessStatus.STOPPED.name());
+								
+								if (Utils.isNullOrEmpty(oRunningPws.getOperationEndDate())) {
+									oRunningPws.setOperationDate(Utils.GetFormatDate(new Date()));
+								}
+
+								m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
+								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
+							}
+						}
+					}
+				}
 				
 				// Do we have any free slot?
 				if (aoRunningList.size() < m_iNumberOfConcurrentProcess) {
@@ -219,20 +290,44 @@ public class ProcessScheduler extends Thread {
 						// Get the Created process
 						ProcessWorkspace oCreatedProcess = aoCreatedList.get(0);
 						
-						// Update the status to running
-						oCreatedProcess.setStatus(ProcessStatus.RUNNING.name());
-						m_oProcessWorkspaceRepository.updateProcess(oCreatedProcess);
-						
-						// Execute the process
-						executeProcess(oCreatedProcess);
-						WasdiScheduler.log(m_sLogPrefix + "Lauched " + oCreatedProcess.getProcessObjId());
-						// Give a little bit of time to the launcher to start
-						waitForProcessToStart();
-						
-						// Move The process in the running list
-						aoCreatedList.remove(0);
-						aoRunningList.add(oCreatedProcess);
-						
+						// Check if we did not launch this before
+						if (!m_aoLaunchedProcesses.containsKey(oCreatedProcess.getProcessObjId())) {
+							// Execute the process
+							executeProcess(oCreatedProcess);						
+							
+							WasdiScheduler.log(m_sLogPrefix + "Lauched " + oCreatedProcess.getProcessObjId());
+							// Give a little bit of time to the launcher to start
+							waitForProcessToStart();
+							
+							// Move The process in the running list
+							aoCreatedList.remove(0);
+							aoRunningList.add(oCreatedProcess);							
+						}
+						else {
+							// We already triggered the execution: check if it is not starting...
+							
+							// Get Now and Starting date
+							Date oNow = new Date();
+							Date oStartDate = m_aoLaunchedProcesses.get(oCreatedProcess.getProcessObjId());
+							long lTimeSpan = oNow.getTime()-oStartDate.getTime();
+							
+							// Wait 10 time more than standard waiting
+							if (lTimeSpan > 100*m_lWaitProcessStartMS) {
+								// No good, set as ERROR
+								WasdiScheduler.log(m_sLogPrefix + "Process " + oCreatedProcess.getProcessObjId() + " has been triggered but it is still created.. kill it");
+								oCreatedProcess.setStatus(ProcessStatus.ERROR.name());
+								
+								if (Utils.isNullOrEmpty(oCreatedProcess.getOperationEndDate())) {
+									oCreatedProcess.setOperationDate(Utils.GetFormatDate(new Date()));
+								}
+								
+								m_oProcessWorkspaceRepository.updateProcess(oCreatedProcess);
+								// Remove from created
+								aoCreatedList.remove(0);
+								// And from Launched
+								m_aoLaunchedProcesses.remove(oCreatedProcess.getProcessObjId());
+							}
+						}
 					}
 				}
 				else {

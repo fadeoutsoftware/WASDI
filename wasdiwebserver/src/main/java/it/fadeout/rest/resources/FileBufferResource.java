@@ -42,7 +42,7 @@ public class FileBufferResource {
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -88,7 +88,7 @@ public class FileBufferResource {
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
 			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sFileUrl, sPath, oParameter);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
 			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
@@ -104,7 +104,7 @@ public class FileBufferResource {
 	@GET
 	@Path("publish")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId) throws IOException
+	public Response publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
 	{
 		try {
 			
@@ -131,7 +131,7 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISH.name(), sFileUrl, sPath, oParameter);
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISH.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -157,7 +157,7 @@ public class FileBufferResource {
 												@QueryParam("sFileUrl") String sFileUrl,
 												@QueryParam("sWorkspaceId") String sWorkspaceId,
 												@QueryParam("sBand") String sBand,
-												@QueryParam("sStyle") String sStyle) throws IOException {
+												@QueryParam("sStyle") String sStyle, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
@@ -217,7 +217,7 @@ public class FileBufferResource {
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
-			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter);
+			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		}catch (IOException e) {
 			Utils.debugLog("DownloadResource.PublishBand: " + e);

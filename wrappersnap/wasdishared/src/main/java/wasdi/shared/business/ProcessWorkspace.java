@@ -67,6 +67,16 @@ public class ProcessWorkspace {
      * Code of the computing node of the operation
      */
     private String nodeCode="wasdi";
+    
+    /**
+     * Parent Process Workspace Id
+     */
+    private String parentId;
+    
+    /**
+     * Id of an eventual sub process started from launcher
+     */
+	private int subprocessPid;
 
 	public String getProductName() {
         return productName;
@@ -187,5 +197,22 @@ public class ProcessWorkspace {
 	public void setLastStateChangeDate(String lastStateChangeDate) {
 		this.lastStateChangeDate = lastStateChangeDate;
 	}
+	
+   public String getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
+	}
+
+	public int getSubprocessPid() {
+		return subprocessPid;
+	}
+
+	public void setSubprocessPid(int subprocessPid) {
+		this.subprocessPid = subprocessPid;
+	}
+
 
 }

@@ -556,7 +556,7 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
-	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId) {
 
 		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspace);
 
@@ -594,7 +594,7 @@ public class CatalogResources {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter);
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -621,7 +621,7 @@ public class CatalogResources {
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -690,7 +690,7 @@ public class CatalogResources {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 
 		} catch (Exception e) {
 			Utils.debugLog("CatalogueResource.IngestFileInWorkspace: " + e);
@@ -704,7 +704,7 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,  @QueryParam("workspace") String sWorkspace, FtpTransferViewModel oFtpTransferVM) {
+	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,  @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, FtpTransferViewModel oFtpTransferVM) {
 		Utils.debugLog("CatalogResource.ftpTransferFile");
 
 		//input validation
@@ -764,7 +764,7 @@ public class CatalogResources {
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 						
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParams);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParams, sParentProcessWorkspaceId);
 
 		} catch (Exception e) {
 			Utils.debugLog("CatalogueResource.ftpTransferFile: " + e);

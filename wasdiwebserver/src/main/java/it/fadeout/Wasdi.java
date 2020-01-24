@@ -396,9 +396,13 @@ public class Wasdi extends ResourceConfig {
 			return "";
 		String sWorkspaceOwner = oWorkspace.getUserId();
 		return sWorkspaceOwner;
-	}	
+	}
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationId, sProductName, sSerializationPath, oParameter, null);
+	}
+	
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
 		
 		// Get the Ob Id
 		String sProcessObjId = oParameter.getProcessObjId();
@@ -423,7 +427,7 @@ public class Wasdi extends ResourceConfig {
 			
 			if (Utils.isNullOrEmpty(sMyNodeCode)) sMyNodeCode = "wasdi";
 					
-			// Is the worspace here?
+			// Is the workspace here?
 			if (!oWorkspace.getNodeCode().equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
@@ -449,6 +453,11 @@ public class Wasdi extends ResourceConfig {
 				if (sUrl.endsWith("/") == false) sUrl += "/";
 				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName);
 				
+				// Is there a parent?
+				if (!Utils.isNullOrEmpty(sParentId)) {
+					sUrl += "&parent=" + URLEncoder.encode(sParentId);
+				}
+				
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
 				Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
@@ -461,7 +470,8 @@ public class Wasdi extends ResourceConfig {
 		            PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
 
 		            return oPrimitiveResult;
-		        } catch (Exception oEx) {
+		        } 
+		        catch (Exception oEx) {
 		            oEx.printStackTrace();
 					Utils.debugLog("Wasdi.runProcess: exception " + oEx);
 					oResult.setBoolValue(false);
@@ -475,8 +485,7 @@ public class Wasdi extends ResourceConfig {
 				// Serialization Path
 				String sPath = sSerializationPath;
 
-				if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
-					sPath += "/";
+				if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
 				sPath = sPath + sProcessObjId;
 
 				SerializationUtils.serializeObjectToXML(sPath, oParameter);
@@ -492,6 +501,7 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
 					oProcess.setProcessObjId(sProcessObjId);
+					if (!Utils.isNullOrEmpty(sParentId)) oProcess.setParentId(sParentId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
 					oProcess.setNodeCode(oWorkspace.getNodeCode());
 					oRepository.insertProcessWorkspace(oProcess);
