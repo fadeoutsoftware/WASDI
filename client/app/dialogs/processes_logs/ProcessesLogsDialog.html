@@ -49,7 +49,7 @@
 
                                 <tr ng-repeat="oProcess in m_oController.m_aoProcessesLogs  | orderBy:'+' | filter: m_oController.filterTable track by $index ">
                                     <td>
-                                        <invaderfixed ng-show="oProcess.status === 'RUNNING'"></invaderfixed>
+                                        <invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'"></invaderfixed>
                                         <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
                                         <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
                                         <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
