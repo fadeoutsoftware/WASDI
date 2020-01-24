@@ -336,7 +336,7 @@ public class WasdiGraph {
 		    m_oLogger.debug("WasdiGraph.execute: File size [Gb] = " + oFormat.format(dInputFileSizeGiga));
 		    m_oProcess.setFileSize(oFormat.format(dInputFileSizeGiga));
 		    //set process pid, status and progress
-			m_oProcess.setPid(GetProcessId());
+			//m_oProcess.setPid(GetProcessId());
 			m_oProcess.setStatus(ProcessStatus.RUNNING.name());
 			m_oProcess.setProgressPerc(0);
 			//update the process

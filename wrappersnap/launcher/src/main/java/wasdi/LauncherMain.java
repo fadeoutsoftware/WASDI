@@ -240,6 +240,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
 			oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
 			oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+			oProcessWorkspace.setPid(getProcessId());
 			
 			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
 				s_oLogger.debug("LauncherMain: Error setting ProcessWorkspace start date");
@@ -653,7 +654,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
 				//get process pid
-				oProcessWorkspace.setPid(getProcessId());
+				//oProcessWorkspace.setPid(getProcessId());
 
 			} 
 			else {
@@ -1045,7 +1046,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
 				//get process pid
-				oProcessWorkspace.setPid(getProcessId());
+				//oProcessWorkspace.setPid(getProcessId());
 
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			} 
@@ -1236,7 +1237,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 
 				//get process pid
-				oProcessWorkspace.setPid(getProcessId());
+				//oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -1345,7 +1346,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(getProcessId());
+				//oProcessWorkspace.setPid(getProcessId());
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			}
 
@@ -1673,7 +1674,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(getProcessId());
+				//oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -1756,7 +1757,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(getProcessId());
+				//oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -2750,7 +2751,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Get the id of the process
 	 * @return
 	 */
-	private Integer getProcessId()
+	private static Integer getProcessId()
 	{
 		Integer iPid = 0;
 		try {

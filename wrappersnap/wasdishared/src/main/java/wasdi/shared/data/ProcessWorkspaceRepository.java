@@ -869,5 +869,44 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return bExists;
     }
 
+    
+    public List<ProcessWorkspace> getRunningSummary() {
 
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.or(
+            				Filters.eq("status", ProcessStatus.RUNNING.name()),
+            				Filters.eq("status", ProcessStatus.WAITING.name()),
+            				Filters.eq("status", ProcessStatus.READY.name())
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+    public List<ProcessWorkspace> getWaitingSummary() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            			Filters.eq("status", ProcessStatus.CREATED.name())
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
 }

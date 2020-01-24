@@ -131,14 +131,23 @@ public class ProcessWorkspaceResource {
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
 			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				//oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			else {
-				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				//oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			
-			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
-			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
+				//oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+			}
+			
+			//oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+			//oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			oViewModel.setOperationType(oProcess.getOperationType());
 			oViewModel.setProductName(oProcess.getProductName());
 			oViewModel.setUserId(oProcess.getUserId());
@@ -264,7 +273,37 @@ public class ProcessWorkspaceResource {
 			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			// Get all CREATED
+			List<ProcessWorkspace> aoWaitingList = oRepository.getWaitingSummary();
+			oSummaryViewModel.setAllProcessWaiting(aoWaitingList.size());
+			
+			int iUserWaiting = 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoWaitingList.size(); iProcess++) {
+				// Get the process
+				ProcessWorkspace oProcess = aoWaitingList.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserWaiting ++;
+			}
+			
+			oSummaryViewModel.setUserProcessWaiting(iUserWaiting);
+			
+			// Get all RUNNING, WAITING, READY
+			List<ProcessWorkspace> aoRunningList = oRepository.getRunningSummary();
+			oSummaryViewModel.setAllProcessRunning(aoRunningList.size());
+			
+			int iUserRunning = 0;
+			
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoRunningList.size(); iProcess++) {
+				// Get the process
+				ProcessWorkspace oProcess = aoRunningList.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserRunning ++;
+			}
+			
+			oSummaryViewModel.setUserProcessRunning(iUserRunning);
 
+/*			
 			// Get Download Waiting Process List
 			List<ProcessWorkspace> aoQueuedDownloads = oRepository.getCreatedDownloads();
 
@@ -355,7 +394,7 @@ public class ProcessWorkspaceResource {
 			}
 			
 			oSummaryViewModel.setUserIDLRunning(iUserIDLRunning);
-			
+*/			
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.GetSummary: " + oEx);

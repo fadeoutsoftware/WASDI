@@ -268,7 +268,8 @@ public class ProcessorsResource {
 	@Path("/run")
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
-			@QueryParam("workspace") String sWorkspaceId) throws Exception {
+			@QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("parent") String sParentProcessWorkspaceId) throws Exception {
 		Utils.debugLog("ProcessorsResource.run( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
@@ -315,7 +316,7 @@ public class ProcessorsResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, sPath, oProcessorParameter);
+			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, sPath, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
 				Utils.debugLog("ProcessorsResource.run: create task");
