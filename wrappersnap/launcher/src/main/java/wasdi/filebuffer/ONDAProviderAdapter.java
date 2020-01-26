@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import com.sleepycat.je.rep.impl.TextProtocol.OK;
 
 import wasdi.LauncherMain;
+import wasdi.LoggerWrapper;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
@@ -49,7 +50,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	/**
 	 * @param logger
 	 */
-	public ONDAProviderAdapter(Logger logger) {
+	public ONDAProviderAdapter(LoggerWrapper logger) {
 		super(logger);
 	}
 
@@ -87,7 +88,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	}
 
 
-	/* (non-Javadoc)
+	/**
 	 * @see wasdi.filebuffer.DownloadFile#ExecuteDownloadFile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, wasdi.shared.business.ProcessWorkspace)
 	 */
 	@Override
@@ -425,8 +426,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
-			m_oLogger.fatal("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
+			m_oLogger.error("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
 

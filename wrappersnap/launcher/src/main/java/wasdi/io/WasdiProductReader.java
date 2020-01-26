@@ -217,23 +217,32 @@ public class WasdiProductReader {
     {
         LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: start");
 
-        Product exportProduct = readSnapProduct(oFile, null);
+        Product oExportProduct = null;
+        
+        try {
+            oExportProduct =readSnapProduct(oFile, null);
 
-        if (exportProduct == null) {
-        	
-            LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: read snap product returns null: try shape file");
-            
-            ProductViewModel oRetValue = getShapeFileProductViewModel(oFile);
-            
-            //Here we can add new file types
-            
-            return oRetValue;
+            if (oExportProduct == null) {
+            	
+                LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: read snap product returns null: try shape file");
+                
+                ProductViewModel oRetValue = getShapeFileProductViewModel(oFile);
+                
+                //Here we can add new file types
+                
+                return oRetValue;
+            }
+
+            ProductViewModel oViewModel = getProductViewModel(oExportProduct, oFile);
+
+            LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
+            return  oViewModel;        	
         }
-
-        ProductViewModel oViewModel = getProductViewModel(exportProduct, oFile);
-
-        LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
-        return  oViewModel;
+        finally {
+        	if (oExportProduct != null) {
+        		oExportProduct.dispose();
+        	}
+        }
     }
 
     /**
@@ -295,8 +304,9 @@ public class WasdiProductReader {
 			return "";
 		}
 		
+		Product oProduct = null;
 		try {
-			Product oProduct = ProductIO.readProduct(oProductFile);
+			oProduct = ProductIO.readProduct(oProductFile);
 			
 			if (oProduct == null) {
 				// Not a SNAP product. Try shape file
@@ -322,6 +332,45 @@ public class WasdiProductReader {
 		} catch (Exception e) {
 			LauncherMain.s_oLogger.error("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
 		}
+		finally {
+			if (oProduct != null) {
+				oProduct.dispose();
+			}
+		}
+		
+		return "";
+	}
+	
+	/**
+	 * Get Product Bounding Box from a File
+	 * @param oProductFile
+	 * @return "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
+	 */
+	public String getProductBoundingBox(Product oProduct) {
+		
+		if (oProduct == null) {
+			LauncherMain.s_oLogger.info("WasdiProductReader.getProductBoundingBox: product is null return empty ");
+			return "";
+		}
+		
+		try {
+			
+			// Snap Bounding Box
+			GeoCoding oGeocoding = oProduct.getSceneGeoCoding();
+			if (oGeocoding!=null) {
+				Dimension oDim = oProduct.getSceneRasterSize();		
+				GeoPos oMin = oGeocoding.getGeoPos(new PixelPos(0,0), null);
+				GeoPos oMax = oGeocoding.getGeoPos(new PixelPos(oDim.getWidth(), oDim.getHeight()), null);
+				float fMinX = (float) Math.min(oMin.lon, oMax.lon);
+				float fMinY = (float) Math.min(oMin.lat, oMax.lat);
+				float fMaxX = (float) Math.max(oMin.lon, oMax.lon);
+				float fMaxY = (float) Math.max(oMin.lat, oMax.lat);
+				
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", fMinY, fMinX, fMinY, fMaxX, fMaxY, fMaxX, fMaxY, fMinX, fMinY, fMinX);
+			}							
+		} catch (Exception e) {
+			LauncherMain.s_oLogger.error("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
+		}
 		
 		return "";
 	}
@@ -332,7 +381,7 @@ public class WasdiProductReader {
 	 */
 	public String getProductBoundingBox() {
 		
-		return getProductBoundingBox(m_oProductFile);
+		return getProductBoundingBox(m_oProduct);
 	}
 	
 	/**

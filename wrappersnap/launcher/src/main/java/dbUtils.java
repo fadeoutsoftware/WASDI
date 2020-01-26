@@ -75,11 +75,11 @@ public class dbUtils {
 					else {
 						
 						System.out.println("DELETING " + oDownloadedFile.getFileName() + " - FILE DOES NOT EXISTS " + oDownloadedFile.getFilePath());
-						oDownloadedFilesRepository.DeleteByFilePath(oDownloadedFile.getFilePath());
+						oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 						
 						// Delete Product Workspace
 						ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-						oProductWorkspaceRepository.DeleteByProductName(oDownloadedFile.getFilePath());
+						oProductWorkspaceRepository.deleteByProductName(oDownloadedFile.getFilePath());
 
 						System.out.println("DELETED " + oDownloadedFile.getFileName());
 					}
@@ -144,11 +144,11 @@ public class dbUtils {
 	        	
 	        	for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
 					
-	        		Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(oProductWorkspace.getWorkspaceId());
+	        		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProductWorkspace.getWorkspaceId());
 	        		
 	        		if (oWorkspace == null) {
 	        			System.out.println("productWorkspace: workspace " + oProductWorkspace.getWorkspaceId() + " does not exist, delete entry");
-	        			oProductWorkspaceRepository.DeleteByProductName(oProductWorkspace.getProductName());
+	        			oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
 	        			iDeleted++;
 	        		}
 				}
@@ -171,11 +171,11 @@ public class dbUtils {
 	        	
 	        	for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
 					
-	        		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(oProductWorkspace.getProductName());
+	        		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oProductWorkspace.getProductName());
 	        		
 	        		if (oDownloadedFile == null) {
 	        			System.out.println("productWorkspace: Downloaded File " + oProductWorkspace.getProductName() + " does not exist, delete entry");
-	        			oProductWorkspaceRepository.DeleteByProductName(oProductWorkspace.getProductName());
+	        			oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
 	        			iDeleted++;
 	        		}
 				}
@@ -218,7 +218,7 @@ public class dbUtils {
 	        	
 				System.out.println("Extracting Log of Processor " + sProcessWorkspaceId + " in " + sOuptutFile);
 				
-				List<ProcessorLog> aoLogs = oProcessorLogRepository.GetLogsByProcessWorkspaceId(sProcessWorkspaceId);
+				List<ProcessorLog> aoLogs = oProcessorLogRepository.getLogsByProcessWorkspaceId(sProcessWorkspaceId);
 				
 				if (aoLogs == null) {
 					System.out.println("Log row list is null, exit");
@@ -249,7 +249,7 @@ public class dbUtils {
 	        }
 	        else if (sInputString.equals("2")) {
 	        	System.out.println("Deleting logs of " + sProcessWorkspaceId);
-	        	oProcessorLogRepository.DeleteLogsByProcessWorkspaceId(sProcessWorkspaceId);
+	        	oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcessWorkspaceId);
 	        	System.out.println(sProcessWorkspaceId + " logs DELETED");
 	        }
 		}
@@ -366,7 +366,7 @@ public class dbUtils {
 	        	String sInputPw = oScanner.nextLine();
 	        	
 	        	UserRepository oUserRepo = new UserRepository();
-	        	User oUser = oUserRepo.GetUser(sUserId);
+	        	User oUser = oUserRepo.getUser(sUserId);
 	        	
 	        	if (oUser == null) {
 	        		System.out.println("User [" + sUserId + "] not found");
@@ -375,7 +375,7 @@ public class dbUtils {
 	        	
 	        	oUser.setPassword(oAuth.hash(sInputPw.toCharArray()));
 	        	
-	        	oUserRepo.UpdateUser(oUser);
+	        	oUserRepo.updateUser(oUser);
 	        	
 	        	System.out.println("Update password for user [" + sUserId + "]");
 

@@ -212,7 +212,7 @@ public class ProcessingThread extends Thread {
 	 */
 	protected List<ProcessWorkspace> getQueuedProcess() {
 		checkRepo();
-		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedProcessByNode(Wasdi.s_sMyNodeCode);
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.getCreatedProcessesByNode(Wasdi.s_sMyNodeCode);
 				
 		// Reverse the collection, otherwise the olders will dead of starvation
 		Collections.reverse(queuedProcess);
@@ -254,7 +254,7 @@ public class ProcessingThread extends Thread {
 			try {
 				checkRepo();
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-				m_oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);				
+				m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);				
 				Utils.debugLog(m_sLogPrefix + " executeProcess : Error status set");
 			}
 			catch (Exception oInnerEx) {
@@ -279,7 +279,7 @@ public class ProcessingThread extends Thread {
 	 */
 	private boolean isProcessDone(int i) {
 		String procId = m_asRunningProcessesSlots[i];
-		ProcessWorkspace process = m_oProcessWorkspaceRepository.GetProcessByProcessObjId(procId);
+		ProcessWorkspace process = m_oProcessWorkspaceRepository.getProcessByProcessObjId(procId);
 		boolean ret = process==null || process.getStatus().equalsIgnoreCase(ProcessStatus.DONE.name()) || process.getStatus().equalsIgnoreCase(ProcessStatus.ERROR.name()) || process.getStatus().equalsIgnoreCase(ProcessStatus.STOPPED.name());
 		if (ret) m_asRunningProcessesSlots[i] = null;
 		

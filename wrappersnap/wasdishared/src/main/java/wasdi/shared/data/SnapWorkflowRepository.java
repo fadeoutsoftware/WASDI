@@ -16,7 +16,7 @@ import wasdi.shared.business.SnapWorkflow;
 
 public class SnapWorkflowRepository extends  MongoRepository {
 	
-    public boolean InsertSnapWorkflow(SnapWorkflow oWorkflow) {
+    public boolean insertSnapWorkflow(SnapWorkflow oWorkflow) {
 
         try {
             String sJSON = s_oMapper.writeValueAsString(oWorkflow);
@@ -31,7 +31,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
         return false;
     }
 
-    public SnapWorkflow GetSnapWorkflow(String sWorkflowId) {
+    public SnapWorkflow getSnapWorkflow(String sWorkflowId) {
 
         try {
             Document oWSDocument = getCollection("snapworkflows").find(new Document("workflowId", sWorkflowId)).first();
@@ -49,7 +49,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
     }
 
 
-    public List<SnapWorkflow> GetSnapWorkflowPublicAndByUser(String sUserId) {
+    public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {
 
         final ArrayList<SnapWorkflow> aoReturnList = new ArrayList<SnapWorkflow>();
         try {
@@ -79,7 +79,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
         return aoReturnList;
     }
 
-    public boolean DeleteSnapWorkflow(String sWorkflowId) {
+    public boolean deleteSnapWorkflow(String sWorkflowId) {
 
         try {
 
@@ -100,7 +100,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
         return  false;
     }
 
-    public int DeleteSnapWorkflowByUser(String sUserId) {
+    public int deleteSnapWorkflowByUser(String sUserId) {
 
         try {
 

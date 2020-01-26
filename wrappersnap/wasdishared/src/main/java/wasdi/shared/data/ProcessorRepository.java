@@ -16,7 +16,7 @@ import wasdi.shared.business.Processor;
 
 public class ProcessorRepository extends  MongoRepository {
 	
-    public boolean InsertProcessor(Processor oProcessor) {
+    public boolean insertProcessor(Processor oProcessor) {
 
         try {
             String sJSON = s_oMapper.writeValueAsString(oProcessor);
@@ -31,7 +31,7 @@ public class ProcessorRepository extends  MongoRepository {
         return false;
     }
 
-    public Processor GetProcessor(String sProcessorId) {
+    public Processor getProcessor(String sProcessorId) {
 
         try {
             Document oWSDocument = getCollection("processors").find(new Document("processorId", sProcessorId)).first();
@@ -48,7 +48,7 @@ public class ProcessorRepository extends  MongoRepository {
         return  null;
     }
 
-    public Processor GetProcessorByName(String sName) {
+    public Processor getProcessorByName(String sName) {
 
         try {
             Document oWSDocument = getCollection("processors").find(new Document("name", sName)).first();
@@ -66,7 +66,7 @@ public class ProcessorRepository extends  MongoRepository {
     }
 
     
-    public boolean UpdateProcessor(Processor oProcessor) {
+    public boolean updateProcessor(Processor oProcessor) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oProcessor);
             
@@ -84,7 +84,7 @@ public class ProcessorRepository extends  MongoRepository {
         return  false;
     }
 
-    public List<Processor> GetProcessorByUser(String sUserId) {
+    public List<Processor> getProcessorByUser(String sUserId) {
 
         final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
         try {
@@ -112,7 +112,7 @@ public class ProcessorRepository extends  MongoRepository {
         return aoReturnList;
     }
     
-    public int GetNextProcessorPort() {
+    public int getNextProcessorPort() {
     	
     	int iPort = -1;
 
@@ -131,7 +131,7 @@ public class ProcessorRepository extends  MongoRepository {
         return iPort;
     }
 
-    public boolean DeleteProcessor(String sProcessorId) {
+    public boolean deleteProcessor(String sProcessorId) {
 
         try {
 
@@ -152,7 +152,7 @@ public class ProcessorRepository extends  MongoRepository {
         return  false;
     }
 
-    public int DeleteProcessorByUser(String sUserId) {
+    public int deleteProcessorByUser(String sUserId) {
 
         try {
 
@@ -171,7 +171,7 @@ public class ProcessorRepository extends  MongoRepository {
     }
     
     
-    public List<Processor> GetDeployedProcessors() {
+    public List<Processor> getDeployedProcessors() {
 
         final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
         try {

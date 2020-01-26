@@ -28,6 +28,7 @@ import com.bc.ceres.binding.dom.XppDomElement;
 import sun.management.VMManagement;
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
+import wasdi.LoggerWrapper;
 import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
@@ -67,7 +68,7 @@ public class WasdiGraph {
 	/**
 	 * Logger
 	 */
-	private Logger m_oLogger = LauncherMain.s_oLogger;
+	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
 	/**
 	 * ProcessWorkspaceRepository 
 	 */
@@ -112,7 +113,7 @@ public class WasdiGraph {
 		
 		//retrieve wasdi process
         m_oProcessRepository = new ProcessWorkspaceRepository();
-        m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParams.getProcessObjId());
+        m_oProcess = m_oProcessRepository.getProcessByProcessObjId(oParams.getProcessObjId());
         
         m_oLogger.info("WasdiGraph: call find IO Nodes");
         findIONodes();
@@ -307,7 +308,7 @@ public class WasdiGraph {
 				
 	            // Get the original Bounding Box
 	            DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-	            DownloadedFile oDownloadedFile = oDownloadedRepo.GetDownloadedFileByPath(m_oInputFile.getAbsolutePath()) ;
+	            DownloadedFile oDownloadedFile = oDownloadedRepo.getDownloadedFileByPath(m_oInputFile.getAbsolutePath()) ;
 	            
 	            String sBbox = "";            
 	            if (oDownloadedFile != null) {
@@ -336,11 +337,11 @@ public class WasdiGraph {
 		    m_oLogger.debug("WasdiGraph.execute: File size [Gb] = " + oFormat.format(dInputFileSizeGiga));
 		    m_oProcess.setFileSize(oFormat.format(dInputFileSizeGiga));
 		    //set process pid, status and progress
-			m_oProcess.setPid(GetProcessId());
+			//m_oProcess.setPid(GetProcessId());
 			m_oProcess.setStatus(ProcessStatus.RUNNING.name());
 			m_oProcess.setProgressPerc(0);
 			//update the process
-		    if (!m_oProcessRepository.UpdateProcess(m_oProcess)) {
+		    if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		    	m_oLogger.error("WasdiGraph.execute: Error during process update (pip + starting)");
 		    } else {
 		    	m_oLogger.debug("WasdiGraph.execute: Updated process  " + m_oProcess.getProcessObjId());
@@ -364,7 +365,7 @@ public class WasdiGraph {
 				m_oProcess.setProgressPerc(100);
 				m_oProcess.setStatus(ProcessStatus.DONE.name());
 				m_oProcess.setOperationEndDate(Utils.GetFormatDate(new Date()));
-		        if (!m_oProcessRepository.UpdateProcess(m_oProcess)) {
+		        if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		        	m_oLogger.error("WasdiGraph: Error during process update (terminated)");
 		        }
 		        //send update process message
@@ -432,7 +433,7 @@ public class WasdiGraph {
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-        DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFileByPath(oProductFile.getAbsolutePath());
+        DownloadedFile oCheck = oDownloadedRepo.getDownloadedFileByPath(oProductFile.getAbsolutePath());
         
         boolean bAddProductToWS = true;
         
@@ -464,7 +465,7 @@ public class WasdiGraph {
     			e.printStackTrace();
     		}            
             
-            if (!oDownloadedRepo.InsertDownloadedFile(oOutputProduct)) {
+            if (!oDownloadedRepo.insertDownloadedFile(oOutputProduct)) {
             	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }
             else {
@@ -498,7 +499,7 @@ public class WasdiGraph {
 		ProductWorkspaceRepository oProductRepository = new ProductWorkspaceRepository();
 		
 		// Check if product is already in the Workspace
-		if (!oProductRepository.ExistsProductWorkspace(sProductName, m_oParams.getWorkspace())) {
+		if (!oProductRepository.existsProductWorkspace(sProductName, m_oParams.getWorkspace())) {
 			
     		// Create the entity
     		ProductWorkspace oProductWorkspaceEntity = new ProductWorkspace();
@@ -507,7 +508,7 @@ public class WasdiGraph {
     		oProductWorkspaceEntity.setBbox(sBbox);
     		
     		// Try to insert
-    		if (!oProductRepository.InsertProductWorkspace(oProductWorkspaceEntity)) {        			
+    		if (!oProductRepository.insertProductWorkspace(oProductWorkspaceEntity)) {        			
     			m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Error adding " + sProductName + " in WS " + m_oParams.getWorkspace());
     			throw new Exception("unable to insert product in workspace");
     		}

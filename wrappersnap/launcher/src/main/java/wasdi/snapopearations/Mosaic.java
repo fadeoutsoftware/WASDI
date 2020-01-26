@@ -22,6 +22,7 @@ import org.esa.snap.core.gpf.common.MosaicOp.Variable;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 
 import wasdi.LauncherMain;
+import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.MosaicParameter;
@@ -43,7 +44,7 @@ public class Mosaic {
 	/**
 	 * Logger
 	 */
-	private Logger m_oLogger = LauncherMain.s_oLogger;
+	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
 	
 	/**
 	 * Local WASDI base path
@@ -89,7 +90,7 @@ public class Mosaic {
 		}
 		
 		m_oProcessRepository = new ProcessWorkspaceRepository();
-		m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		m_oProcess = m_oProcessRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 	}
 	
 	/**
