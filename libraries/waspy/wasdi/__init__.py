@@ -16,16 +16,17 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Last Update: 20/12/2019
+Last Update: 25/01/2020
 
 Tested with: Python 2.7, Python 3.7
 
 History
 
-0.2.6 [24/01/2020]
+0.2.7 [25/01/2020]
     Added Support to Provider selection for search and import
     Added generic getPath method for both writing and reading
-    Added exception handling in getProductBBOX: 
+    Added exception handling in getProductBBOX
+    Added limit to 10 tiles in multiSubset 
 
 0.2.3 [23/01/2020]
     Added Support to WAITING and READY Process State
@@ -2421,7 +2422,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
 
 def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
     """
-    Creates a Many Subsets from an image:
+    Creates a Many Subsets from an image. MAX 10 TILES PER CALL
     :param sInputFile: Input file 
     :param sOutputFile: Array of Output File Names
     :param dLatN: Array of Latitude north of the subset
@@ -2450,6 +2451,11 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
         print('[ERROR] waspy.multiSubset: output file names len must not have zero length, aborting' +
               '  ******************************************************************************')
         return ''
+    
+    if len(asOutputFiles) > 10:
+        print('[ERROR] waspy.multiSubset: max allowed 10 tiles per call' +
+              '  ******************************************************************************')
+        return ''        
 
     sUrl = m_sBaseUrl + "/processing/geometric/multisubset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
            sInputFile + "&sWorkspaceId=" + m_sActiveWorkspace

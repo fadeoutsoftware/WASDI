@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 2.0.3
+; IDL WASDI Lib Version 2.0.4
 ; Last Update: 
 ;
 ; History
+; 2.0.4 - 2020-01-26
+;   Added time stamp to internal log
+;
 ; 2.0.3 - 2020-01-23
 ;   Added support to WAITING and READY states
 ;
@@ -1508,7 +1511,8 @@ PRO WASDILOG, sLog
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
 	
-	print, '[', myprocid, ']: ', sLog
+	sTimestamp = SYSTIME()
+	print, '[', myprocid, '] - ', sTimestamp,': ', sLog
 	IF (isonserver EQ '1') THEN BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/processors/logs/add?processworkspace='+myprocid

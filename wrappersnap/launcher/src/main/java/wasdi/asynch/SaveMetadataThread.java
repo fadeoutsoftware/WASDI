@@ -31,6 +31,10 @@ public class SaveMetadataThread extends Thread {
 			if (oMetadataViewModel != null) {
 				SerializationUtils.serializeObjectToXML(m_sMetadataFilePath, oMetadataViewModel);
 			}
+			
+			if (m_oReadProduct.getSnapProduct() != null) {
+				m_oReadProduct.getSnapProduct().dispose();
+			}
 		} 
 		catch (IOException oEx) {
 			oEx.printStackTrace();

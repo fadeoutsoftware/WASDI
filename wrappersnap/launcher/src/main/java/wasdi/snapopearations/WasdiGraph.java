@@ -28,6 +28,7 @@ import com.bc.ceres.binding.dom.XppDomElement;
 import sun.management.VMManagement;
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
+import wasdi.LoggerWrapper;
 import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
@@ -67,7 +68,7 @@ public class WasdiGraph {
 	/**
 	 * Logger
 	 */
-	private Logger m_oLogger = LauncherMain.s_oLogger;
+	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
 	/**
 	 * ProcessWorkspaceRepository 
 	 */

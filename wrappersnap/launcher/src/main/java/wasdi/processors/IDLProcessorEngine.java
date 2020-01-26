@@ -479,8 +479,10 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 //            }
             
             LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: waiting for the process to exit");
+            
+            int iExitStatus = oProc.waitFor(); 
 			
-			if (oProc.waitFor() == 0) {
+			if (iExitStatus == 0) {
 				// ok
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: process done with code 0");
 				if (oProcessWorkspace != null) {
@@ -490,7 +492,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			}
 			else {
 				// errore
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: process done with code != 0");
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.run: process done with ERROR code = " + iExitStatus);
 				if (oProcessWorkspace != null) {
 					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);

@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -129,13 +130,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	/**
 	 * Static Logger that references the "MyApp" logger
 	 */
-	public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
+	//public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
+	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(LauncherMain.class));
 
 	/**
 	 * Static reference to Send To Rabbit utility class
 	 */
 	public static Send s_oSendToRabbit = null;
-
+	
 	/**
 	 * WASDI Launcher Main Entry Point
 	 * 
@@ -215,6 +217,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				System.exit(-1);
 			}
 			
+			// Set the process object id
+			s_oLogger.setPrefix("[" + oProcessWorkspace.getProcessObjId() + "]");
+			
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 			
 			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "0");
@@ -243,9 +248,21 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			oProcessWorkspace.setPid(getProcessId());
 			
 			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
-				s_oLogger.debug("LauncherMain: Error setting ProcessWorkspace start date");
-			}		
-
+				s_oLogger.error("LauncherMain: ERROR setting ProcessWorkspace start date and RUNNING STATE");
+			}	
+			else {
+				s_oLogger.debug("LauncherMain: RUNNING state and operationStartDate updated");
+			}
+			
+			/*
+			s_oLogger.debug("******************************Environment Vars*****************************");
+            Map<String, String> enviorntmentVars  = System.getenv();
+            
+            for (String string : enviorntmentVars.keySet()) {
+            	s_oLogger.debug(string + ": " + enviorntmentVars.get(string));
+			}            
+			*/
+			
 			// And Run
 			oLauncher.executeOperation(sOperation,sParameter);
 
@@ -2148,19 +2165,27 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			int iTileCount = oSettings.getOutputNames().size();
 			
+			if (iTileCount>15) {
+				s_oLogger.error("LauncherMain.executeGDALMultiSubset: More than 15 tiles: it hangs, need to refuse");
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return;
+			}
+			
 			int iStepPerTile = 100;
 			
 			if (iTileCount>0) {
-				iStepPerTile = 100/iTileCount;;
+				iStepPerTile = 100/iTileCount;
 			}
 			
 			int iProgress = 0;
 	        
+			// For all the tiles
 	        for (int iTiles = 0; iTiles<oSettings.getOutputNames().size(); iTiles ++) {
 	        	
-	        	
+	        	// Get the output name
 	        	String sOutputProduct = oSettings.getOutputNames().get(iTiles);
 	        	
+	        	// Check th bbox
 	        	if (oSettings.getLatNList().size()<=iTiles) {
 	        		s_oLogger.debug("Lat N List does not have " + iTiles + " element. continue");
 	        		continue;
@@ -2183,6 +2208,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 	        	s_oLogger.debug("Computing tile " + sOutputProduct);
 	        	
+	        	// Translate
 	        	String sGdalTranslateCommand = "gdal_translate";
 	        	
 				ArrayList<String> asArgs = new ArrayList<String>();
@@ -2225,8 +2251,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				//	s_oLogger.debug("[gdal]: " + sLine);
 				
 				oProcess.waitFor();
-
-
+				
 				File oTileFile = new File(getWorspacePath(oParameter) + sOutputProduct);
 				
 		        if (oTileFile.exists()) {
@@ -2680,6 +2705,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
 				oVM = oReadProduct.getProductViewModel();
 				
+				// P.Campanella 20200126: ma non sarebbe forse più corretto il contrario?!?
 				if (oVM.getMetadata() != null) {
 					if (bAsynchMetadata) {
 						// Asynch Metadata Save
@@ -2731,7 +2757,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
 		}
 
-		// The Add Produt to Workspace is safe. No need to check if the product is already in the workspace
+		// The Add Product to Workspace is safe. No need to check if the product is already in the workspace
 		addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace,sBBox);
 
 		if (bSendToRabbit) {
