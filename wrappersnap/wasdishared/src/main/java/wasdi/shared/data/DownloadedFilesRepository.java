@@ -31,7 +31,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 	 * @param oFile
 	 * @return
 	 */
-    public boolean InsertDownloadedFile(DownloadedFile oFile) {
+    public boolean insertDownloadedFile(DownloadedFile oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
             getCollection("downloadedfiles").insertOne(Document.parse(sJSON));
@@ -50,7 +50,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @param oFile
      * @return
      */
-    public boolean UpdateDownloadedFile(DownloadedFile oFile) {
+    public boolean updateDownloadedFile(DownloadedFile oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
             
@@ -74,7 +74,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @param sFileName
      * @return
      */
-    public DownloadedFile GetDownloadedFile(String sFileName) {
+    public DownloadedFile getDownloadedFile(String sFileName) {
         try {
             Document oSessionDocument = getCollection("downloadedfiles").find(new Document("fileName", sFileName)).first();
 
@@ -99,7 +99,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @return
      */
 
-    public DownloadedFile GetDownloadedFileByPath(String sFileFullPath) {
+    public DownloadedFile getDownloadedFileByPath(String sFileFullPath) {
         try {
             Document oSessionDocument = getCollection("downloadedfiles").find(new Document("filePath", sFileFullPath)).first();
 
@@ -117,7 +117,7 @@ public class DownloadedFilesRepository extends MongoRepository {
         return  null;
     }          
 
-    public List<DownloadedFile> GetDownloadedFileListByName(String sFileName) {
+    public List<DownloadedFile> getDownloadedFileListByName(String sFileName) {
         final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
         try {
 
@@ -145,7 +145,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 
     }
     
-    public List<DownloadedFile> GetDownloadedFileListByPath(String sFilePath) {
+    public List<DownloadedFile> getDownloadedFileListByPath(String sFilePath) {
         final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
         try {
 
@@ -185,7 +185,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @param sCategory category
      * @return
      */
-    public List<DownloadedFile> Search(Date oDateFrom, Date oDateTo, String sFreeText, String sCategory) {
+    public List<DownloadedFile> search(Date oDateFrom, Date oDateTo, String sFreeText, String sCategory) {
     	final List<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
     	List<Bson> aoFilters = new ArrayList<Bson>();
     	
@@ -231,9 +231,9 @@ public class DownloadedFilesRepository extends MongoRepository {
     /**
      * Delete by file path
      * @param sFilePath
-     * @return
+     * @return Number of deleted elements
      */
-    public int DeleteByFilePath(String sFilePath) {
+    public int deleteByFilePath(String sFilePath) {
 
         try {
 

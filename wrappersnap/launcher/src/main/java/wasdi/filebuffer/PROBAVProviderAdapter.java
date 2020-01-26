@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import wasdi.ConfigReader;
+import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -39,7 +40,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	}
 
-	public PROBAVProviderAdapter(Logger logger) {
+	public PROBAVProviderAdapter(LoggerWrapper logger) {
 		super(logger);
 	}
 

@@ -14,7 +14,7 @@ public class ScheduleRepository extends MongoRepository {
 	 * @param oSchedule Schedule Entity to insert
 	 * @return Schedule Id
 	 */
-    public String InsertSchedule(Schedule oSchedule) {
+    public String insertSchedule(Schedule oSchedule) {
 
         try {
         	
@@ -36,7 +36,7 @@ public class ScheduleRepository extends MongoRepository {
      * @param sScheduleId
      * @return
      */
-    public boolean DeleteScheduleById(String sScheduleId) {
+    public boolean deleteScheduleById(String sScheduleId) {
 
         try {
             getCollection("schedule").deleteOne(new Document("scheduleId", new ObjectId(sScheduleId)));
@@ -55,7 +55,7 @@ public class ScheduleRepository extends MongoRepository {
      * @param sScheduleId Schedule Id
      * @return
      */
-    public Schedule GetSchedule(String sScheduleId) {
+    public Schedule getSchedule(String sScheduleId) {
         try {
             Document oSessionDocument = getCollection("schedule").find(new Document("scheduleId", sScheduleId)).first();
 

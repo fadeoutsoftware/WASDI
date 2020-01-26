@@ -55,7 +55,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -107,13 +107,13 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			handleUnzippedProcessor(sProcessorFolder);
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
 			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
 			ArrayList<String> asArgs = new ArrayList<>();
 			String sCommand = "docker";
-
+			/*
 			asArgs.add("build");
 			//asArgs.add("--no-cache");
 			asArgs.add("-t"+sDockerName);
@@ -122,12 +122,36 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			handleBuildCommand(sCommand, asArgs);
 			
 			shellExec(sCommand,asArgs);
+			*/
+			
+			
+			String sRunFile = sProcessorFolder+"deploywasdidocker.sh";
+			
+			File oRunFile = new File(sRunFile);
+			
+			BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
+			
+			if(null!= oRunWriter) {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating "+sRunFile+" file");
+
+				oRunWriter.write("#!/bin/bash");
+				oRunWriter.newLine();
+				//oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 >/dev/null 2>1");
+				oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 > /usr/lib/wasdi/launcher/logs/deploy.txt 2>1");
+				oRunWriter.newLine();
+				oRunWriter.flush();
+				oRunWriter.close();
+			}			
+			
+			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
+
+			shellExec(sRunFile, asArgs);
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: created image " + sDockerName);
 			
 			// Run the container
-			int iProcessorPort = oProcessorRepository.GetNextProcessorPort();
+			int iProcessorPort = oProcessorRepository.getNextProcessorPort();
 			//docker run -it -p 8888:5000 fadeout/wasdi:0.6
 			asArgs.clear();
 			asArgs.add("run");
@@ -146,7 +170,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Save Processor Port in the Repo
 			oProcessor.setPort(iProcessorPort);
-			oProcessorRepository.UpdateProcessor(oProcessor);
+			oProcessorRepository.updateProcessor(oProcessor);
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: container " + sDockerName + " is running");
 			
@@ -258,15 +282,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
 			
-			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
-			//pb.redirectErrorStream(true);
-			Process process = pb.start();
+			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+			//oProcessBuilder.redirectErrorStream(true);
+			Process oProcess = oProcessBuilder.start();
 			if (bWait) {
-//				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//				String line;
-//				while ((line = reader.readLine()) != null)
-//					LauncherMain.s_oLogger.debug("[docker]: " + line);
-				process.waitFor();				
+				//BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+				//String sLine;
+				//while ((sLine = oReader.readLine()) != null)
+					//LauncherMain.s_oLogger.debug("[docker]: " + sLine);
+				oProcess.waitFor();				
 			}
 		}
 		catch (Exception e) {
@@ -290,7 +314,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Get Repo and Process Workspace
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -299,7 +323,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorId = oParameter.getProcessorID();
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
 			// Check processor
 			if (oProcessor == null) {
@@ -346,7 +370,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			OutputStream oOutputStream = null;
 			try {
 				
-				// Try to fet the result from docker
+				// Try to fetch the result from docker
 				oOutputStream = oConnection.getOutputStream();
 				oOutputStream.write(sJson.getBytes());
 				oOutputStream.flush();
@@ -428,7 +452,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			oConnection.disconnect();
 			
 			// Read Again Process Workspace: the user may have changed it!
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 			
 			// Here we can wait for the process to finish with the status check
 			// we can also handle a timeout, that is property (with default) of the processor
@@ -483,9 +507,18 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 						// Yes
 						LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine version > 1.0: wait for the processor to finish");
 						
+						// Check the processId
+						String sProcId = oOutputJsonMap.get("processId");
+						
+						if (sProcId.equals("ERROR")) {
+							// Force cycle to exit, leave flag as it is to send a rabbit message
+							sStatus = ProcessStatus.ERROR.name();
+							oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+						}
+						
 						// Wait for the process to finish, while checking timeout
 						while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
-							oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+							oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 							
 							sStatus = oProcessWorkspace.getStatus();
 							try {
@@ -537,19 +570,19 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			}
 			
-			
+			// Check and set the operation end-date
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				// P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
+				//LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
 			}
 		}
 		catch (Exception oEx) {
-			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.run Exception", oEx);
 			try {
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-			} catch (JsonProcessingException e) {
-				LauncherMain.s_oLogger.error("DockerProcessorEngine.run Exception", e);
+			} catch (Exception oInnerEx) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.run Exception", oInnerEx);
 			}
 			
 			return false;
@@ -573,7 +606,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -582,7 +615,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorId = oParameter.getProcessorID();
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
 			// Check processor
 			if (oProcessor == null) { 
@@ -649,7 +682,12 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
 			
 			// delete the db entry
-			oProcessorRepository.DeleteProcessor(oProcessor.getProcessorId());
+			oProcessorRepository.deleteProcessor(oProcessor.getProcessorId());
+			
+			// Check and set the operation end-date
+			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+			}			
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
@@ -658,6 +696,11 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.delete Exception", oEx);
 			try {
+				// Check and set the operation end-date
+				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				}			
+				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			} catch (Exception e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete Exception", e);

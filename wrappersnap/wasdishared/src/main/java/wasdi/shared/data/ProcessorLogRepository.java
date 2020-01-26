@@ -20,7 +20,7 @@ import wasdi.shared.utils.Utils;
 public class ProcessorLogRepository extends MongoRepository {
 	
 
-    public String InsertProcessLog(ProcessorLog oProcessLog) {
+    public String insertProcessLog(ProcessorLog oProcessLog) {
         try {
         	if(null == oProcessLog) {
         		Utils.debugLog("ProcessorLogRepository.InsertProcessLog: oProcessorLog is null");
@@ -42,7 +42,7 @@ public class ProcessorLogRepository extends MongoRepository {
         return "";
     }
 
-    public boolean DeleteProcessorLog(String sId) {
+    public boolean deleteProcessorLog(String sId) {
         try {
             getCollection("processorlog").deleteOne(new Document("_id", new ObjectId(sId)));
 
@@ -55,7 +55,7 @@ public class ProcessorLogRepository extends MongoRepository {
         return false;
     }
 
-    public List<ProcessorLog> GetLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
+    public List<ProcessorLog> getLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
 
         final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
         if(!Utils.isNullOrEmpty(sProcessWorkspaceId)) {
@@ -72,7 +72,7 @@ public class ProcessorLogRepository extends MongoRepository {
     }
     
     
-    public boolean DeleteLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
+    public boolean deleteLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
         
         if(!Utils.isNullOrEmpty(sProcessWorkspaceId)) {
         	
@@ -86,7 +86,7 @@ public class ProcessorLogRepository extends MongoRepository {
         return false;
     }
     
-    public List<ProcessorLog> GetLogRowsByText(String sLogText) {
+    public List<ProcessorLog> getLogRowsByText(String sLogText) {
 
         final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
         if(!Utils.isNullOrEmpty(sLogText)) {
@@ -106,7 +106,7 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    public List<ProcessorLog> GetLogRowsByTextAndProcessId(String sLogText, String sProcessWorkspaceId) {
+    public List<ProcessorLog> getLogRowsByTextAndProcessId(String sLogText, String sProcessWorkspaceId) {
 
         final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
         if(!Utils.isNullOrEmpty(sLogText)) {
@@ -134,9 +134,15 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    
-    //note iLo and iUp are included
-	public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp){
+	/**
+	 * Get a list of logs row in a range
+	 * iLo and iUp are included
+	 * @param sProcessWorkspaceId Process Workpsace Id
+	 * @param iLo Lower Bound
+	 * @param iUp Upper Bound
+	 * @return List of Log Rows in the range
+	 */
+    public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp){
 		if(null == sProcessWorkspaceId || iLo == null || iUp == null) {
 			throw new NullPointerException("ProcessorLogRepository.getLogsByWorkspaceIdInRange( " +
 					sProcessWorkspaceId + ", " + iLo + ", " + iUp + " ): null argument passed");

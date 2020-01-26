@@ -17,7 +17,7 @@ public class WASDIProcessStatus implements GeoServerProcess{
 		
 		try {
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWS = oProcessWorkspaceRepository.GetProcessByProcessObjId(sProcessId);
+			ProcessWorkspace oProcessWS = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessId);
 			
 			if (oProcessWS != null) {
 				sStatus = oProcessWS.getStatus();

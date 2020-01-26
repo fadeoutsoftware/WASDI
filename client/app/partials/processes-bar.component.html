@@ -85,7 +85,7 @@
                         <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning  | orderBy:'-' track by $index ">
                             <td>
                                 <!--<invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>-->
-                                <smallinvaderfixed ng-show="oProcess.status === 'RUNNING'"></smallinvaderfixed>
+                                <smallinvaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'"></smallinvaderfixed>
                                 <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
                                 <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
                                 <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
@@ -119,7 +119,7 @@
                                 {{oProcess.timeRunning | date:'HH:mm:ss'}}
                             </td>
                             <td >
-                                <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING'">
+                                <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'">
                                     <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
                                 </div>
                             </td>

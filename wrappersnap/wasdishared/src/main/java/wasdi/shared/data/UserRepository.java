@@ -19,7 +19,7 @@ import wasdi.shared.business.User;
  */
 public class UserRepository extends  MongoRepository{
 
-    public boolean InsertUser(User oUser) {
+    public boolean insertUser(User oUser) {
 
         try {
             String sJSON = s_oMapper.writeValueAsString(oUser);
@@ -35,7 +35,7 @@ public class UserRepository extends  MongoRepository{
     }
 
 
-    public User GetUser(String sUserId) {
+    public User getUser(String sUserId) {
 
         try {
             Document oUserDocument = getCollection("users").find(new Document("userId", sUserId)).first();
@@ -55,11 +55,10 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
-    //TODO check: remove?
-    //method never used
-    public User Login(String sUserId, String sPassword) {
+    
+    public User login(String sUserId, String sPassword) {
         try {
-            User oUser = GetUser(sUserId);
+            User oUser = getUser(sUserId);
 
             if (oUser != null)
             {
@@ -81,9 +80,9 @@ public class UserRepository extends  MongoRepository{
     }
     
     //TODO check: can we get rid of sEmail? @sergin13 @kr1zz
-    public User GoogleLogin(String sGoogleIdToken, String sEmail, String sAuthProvider) {
+    public User googleLogin(String sGoogleIdToken, String sEmail, String sAuthProvider) {
         try {
-            User oUser = GetUser(sEmail);
+            User oUser = getUser(sEmail);
 
             if (oUser != null){
             	if ( oUser.getUserId() != null &&
@@ -104,7 +103,7 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
-    public boolean DeleteUser(String sUserId) {
+    public boolean deleteUser(String sUserId) {
 
         try {
 
@@ -125,7 +124,7 @@ public class UserRepository extends  MongoRepository{
         return  false;
     }
    
-    public boolean UpdateUser (User oUser)
+    public boolean updateUser(User oUser)
     {
     	String sJSON;
 		try 
@@ -139,7 +138,6 @@ public class UserRepository extends  MongoRepository{
 		} 
 		catch (JsonProcessingException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		 return  false;
@@ -170,14 +168,14 @@ public class UserRepository extends  MongoRepository{
     	return aoReturnList;
     }
     
-    public void UpdateAllUsers (ArrayList<User> aoUsers)
+    public void updateAllUsers(ArrayList<User> aoUsers)
     {
     	try
     	{
     		for (int i = 0; i < aoUsers.size(); i++) 
     		{
     			User oUser = aoUsers.get(i);	
-    			UpdateUser(oUser);
+    			updateUser(oUser);
     		}
     	}
     	catch(Exception oEx)
