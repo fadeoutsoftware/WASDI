@@ -136,7 +136,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 				oRunWriter.write("#!/bin/bash");
 				oRunWriter.newLine();
-				oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 >/dev/null 2>1");
+				//oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 >/dev/null 2>1");
+				oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 > /usr/lib/wasdi/launcher/logs/deploy.txt 2>1");
 				oRunWriter.newLine();
 				oRunWriter.flush();
 				oRunWriter.close();

@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
+import wasdi.LoggerWrapper;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.shared.business.ProcessWorkspace;
@@ -29,7 +30,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 	protected final int BUFFER_SIZE = 4096;
     protected final int MAX_NUM_ZEORES_DURING_READ = 20;
-    protected Logger m_oLogger;
+    protected LoggerWrapper m_oLogger;
     protected int m_iLastError = 0;
 	
     protected String m_sProviderUser;
@@ -50,7 +51,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * Constructor with user defined logger
      * @param logger
      */
-    public ProviderAdapter(Logger logger) {
+    public ProviderAdapter(LoggerWrapper logger) {
 		this.m_oLogger = logger;
 		m_aoSubscribers = new ArrayList<ProcessWorkspaceUpdateSubscriber>();
 	}
