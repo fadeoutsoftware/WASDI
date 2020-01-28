@@ -19,29 +19,75 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: start " + sFileURL);
 		
 		long lLenght = 0L;
-		
-		if(sFileURL.startsWith("file:")) {
-
-			String sPrefix = "file:";
-			// Remove the prefix
-			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
-			String sPath = sFileURL.substring(iStart);
-
-			m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: full path " + sPath);
-			File oSourceFile = new File(sPath);
-			lLenght = oSourceFile.length();
-			if (!oSourceFile.exists()) {
-				m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: FILE DOES NOT EXISTS");
-			}
-			m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: Found length " + lLenght);
-		} else if(sFileURL.startsWith("https:")) {
-			//lLenght = getSizeViaHttp(sFileURL);
+//		
+//		if(sFileURL.startsWith("file:")) {
+//
+//			String sPrefix = "file:";
+//			// Remove the prefix
+//			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
+//			String sPath = sFileURL.substring(iStart);
+//
+//			m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: full path " + sPath);
+//			File oSourceFile = new File(sPath);
+//			lLenght = oSourceFile.length();
+//			if (!oSourceFile.exists()) {
+//				m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: FILE DOES NOT EXISTS");
+//			}
+//			m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: Found length " + lLenght);
+//		} else if(sFileURL.startsWith("https:")) {
+//			//lLenght = getSizeViaHttp(sFileURL);
 			lLenght = getDownloadFileSizeViaHttp(sFileURL);
-		}
+//		}
 		
 		return lLenght;
 	}
+	
+	@Override
+	protected long getDownloadFileSizeViaHttp(String sFileURL)  throws Exception  {
+		long lLenght = 0L;
+	    // Domain check
+        if (Utils.isNullOrEmpty(sFileURL)) {
+            m_oLogger.debug("SOBLOOProviderAdapter.getDownloadFileSizeViaHttp: sFileURL is null");
+            return lLenght;
+        }
+		
+		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 
+		
+		m_oLogger.debug("SOBLOOProviderAdapter.fileSizeViaHttp: sDownloadUser = " + m_sProviderUser);
+		
+		m_oLogger.debug("SOBLOOProviderAdapter.fileSizeViaHttp: FileUrl = " + sFileURL);
+		
+		URL oUrl = new URL(sFileURL);
+		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+		oHttpConn.setRequestMethod("GET");
+		oHttpConn.setRequestProperty("Accept", "*/*");
+		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+		
+		//DEBUG
+		// Basic HTTP Authentication "by hand"
+		String sBasicAuth = "Apikey " + m_sProviderPassword;
+
+		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
+
+		int responseCode = oHttpConn.getResponseCode();
+		
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+
+            lLenght = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
+
+            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
+
+            return lLenght;
+
+        } else {
+            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
+            m_iLastError = responseCode;
+        }
+        oHttpConn.disconnect();
+        return lLenght;
+	}
+	
 	@Override
 	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
