@@ -284,7 +284,7 @@
 
          var iSensitivity = this.m_oSlider.value;
 
-         oParams.MINIMALBLOBREMOVAL = (((150.0-30.0) / 100.0) * iSensitivity) + 30;
+         oParams.MINIMALBLOBREMOVAL = (((150.0-30.0) / 100.0) * (100-iSensitivity)) + 30;
 
          var asParams = [];
          asParams.push('"ASHMAN_COEFF":"'+ oParams.BIMODALITYCOEFFICENT + '"');

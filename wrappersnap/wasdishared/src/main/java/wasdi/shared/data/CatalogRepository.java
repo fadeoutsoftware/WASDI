@@ -22,7 +22,7 @@ public class CatalogRepository extends MongoRepository{
 	 * @param oCatalog
 	 * @return
 	 */
-    public boolean InsertCatalogEntry(Catalog oCatalog) {
+    public boolean insertCatalogEntry(Catalog oCatalog) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oCatalog);
             getCollection("catalog").insertOne(Document.parse(sJSON));
@@ -40,7 +40,7 @@ public class CatalogRepository extends MongoRepository{
      * Get All catalogues
      * @return
      */
-    public List<Catalog> GetCatalogs() {
+    public List<Catalog> getCatalogs() {
 
         final ArrayList<Catalog> aoReturnList = new ArrayList<Catalog>();
         try {
@@ -73,7 +73,7 @@ public class CatalogRepository extends MongoRepository{
      * @param sDate
      * @return
      */
-    public Catalog GetCatalogsByDate(String sDate) {
+    public Catalog getCatalogsByDate(String sDate) {
 
         Catalog oCatalog = null;
         try {

@@ -19,7 +19,7 @@ import wasdi.shared.business.PublishedBand;
  */
 public class PublishedBandsRepository extends MongoRepository {
 
-    public boolean InsertPublishedBand(PublishedBand oFile) {
+    public boolean insertPublishedBand(PublishedBand oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
             getCollection("publishedbands").insertOne(Document.parse(sJSON));
@@ -33,7 +33,7 @@ public class PublishedBandsRepository extends MongoRepository {
         return false;
     }
 
-    public PublishedBand GetPublishedBand(String sProductName, String sBandName) {
+    public PublishedBand getPublishedBand(String sProductName, String sBandName) {
         try {
             BasicDBObject oQuery = new BasicDBObject();
             List<BasicDBObject> aoAndList = new ArrayList<>();
@@ -57,7 +57,7 @@ public class PublishedBandsRepository extends MongoRepository {
         return  null;
     }
 
-    public List<PublishedBand> GetPublishedBandsByProductName(String sProductName) {
+    public List<PublishedBand> getPublishedBandsByProductName(String sProductName) {
 
         final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
         try {
@@ -86,7 +86,7 @@ public class PublishedBandsRepository extends MongoRepository {
     }
     
 
-    public List<PublishedBand> GetList() {
+    public List<PublishedBand> getList() {
 
         final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
         try {
@@ -115,7 +115,7 @@ public class PublishedBandsRepository extends MongoRepository {
     }
 
 
-    public int DeleteByProductName(String sProductName) {
+    public int deleteByProductName(String sProductName) {
 
         try {
 
@@ -133,7 +133,7 @@ public class PublishedBandsRepository extends MongoRepository {
         return 0;
     }
 
-    public int DeleteByProductNameLayerId(String sProductName, String sLayerId) {
+    public int deleteByProductNameLayerId(String sProductName, String sLayerId) {
 
         try {
 

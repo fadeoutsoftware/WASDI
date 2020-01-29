@@ -14,6 +14,7 @@ import java.net.URL;
 import org.apache.commons.net.io.Util;
 import org.apache.log4j.Logger;
 
+import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.DiasResponseTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
@@ -36,7 +37,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	/**
 	 * @param logger
 	 */
-	public CREODIASProviderAdapter(Logger logger) {
+	public CREODIASProviderAdapter(LoggerWrapper logger) {
 		super(logger);
 		// TODO Auto-generated constructor stub
 	}
@@ -48,7 +49,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.fatal("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
+			m_oLogger.error("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 		
@@ -58,7 +59,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
 		lSizeInBytes = Long.parseLong(sResult);
 		} catch (Exception oE) {
-			this.m_oLogger.error(oE);
+			this.m_oLogger.error(oE.toString());
 		}
 		
 		return lSizeInBytes;
@@ -72,7 +73,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
 		// TODO fail instead
 		if(Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.fatal("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty");
+			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty");
 			return null;
 		}
 		//todo check remaining parameters (can assume default values?)
@@ -83,7 +84,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oUrl.append("?token=").append(sKeyCloakToken);
 			return downloadViaHttp(oUrl.toString(), sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 		} catch (Exception oE) {
-			m_oLogger.error(oE);
+			m_oLogger.error(oE.toString());
 		}
 		return null;
 	}
@@ -93,7 +94,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
 		} catch (Exception oE) {
-			this.m_oLogger.error(oE);
+			this.m_oLogger.error(oE.toString());
 		}
 		return sResult;
 	}
@@ -105,7 +106,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public String GetFileName(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.fatal("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
+			m_oLogger.error("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
 		
@@ -114,7 +115,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 		} catch (Exception oE) {
-			this.m_oLogger.error(oE);
+			this.m_oLogger.error(oE.toString());
 		}
 		
 		return sResult;

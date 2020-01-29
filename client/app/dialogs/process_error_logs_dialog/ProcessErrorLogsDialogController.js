@@ -24,15 +24,9 @@
         var oController = this;
 
         $scope.close = function(result) {
+
             // Make sure that the interval is destroyed too
-            /*if (angular.isDefined($scope.m_oController.m_oTick)) {
-                $interval.cancel($scope.m_oController.m_oTick);
-                $scope.m_oController.m_oTick = undefined;
-            }
-             */
-
             oController.stopTick(oController);
-
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
@@ -44,11 +38,6 @@
 
         $scope.$on('$destroy', function() {
             // Make sure that the interval is destroyed too
-            /*if (angular.isDefined($scope.m_oController.m_oTick)) {
-                $interval.cancel($scope.m_oController.m_oTick);
-                $scope.m_oController.m_oTick = undefined;
-            }
-             */
             oController.stopTick(oController);
         });
 
