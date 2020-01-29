@@ -44,7 +44,7 @@ public class WASDIExecuteSNAPWorkflow implements GeoServerProcess {
 		String graphXml;
 		
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(sWorkflowId);
+		SnapWorkflow oWF = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 		
 		if (oWF == null) return "-1";
 		
@@ -83,7 +83,7 @@ public class WASDIExecuteSNAPWorkflow implements GeoServerProcess {
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				sProcessId = oRepository.insertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
 				System.out.println("SnapOperations.ExecuteOperation: Error updating process list " + oEx.getMessage());

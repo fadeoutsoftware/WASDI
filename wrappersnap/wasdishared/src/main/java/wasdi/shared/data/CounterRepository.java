@@ -8,23 +8,23 @@ import wasdi.shared.utils.Utils;
 public class CounterRepository extends MongoRepository {
 
 	public int getNextValue(String sSequence) {
-		Counter oCounter = GetCounterBySequence(sSequence);
+		Counter oCounter = getCounterBySequence(sSequence);
 		if (oCounter == null) {
 			oCounter = new Counter();
 			oCounter.setSequence(sSequence);
 			oCounter.setValue(0);
-			InsertCounter(oCounter);
+			insertCounter(oCounter);
 			return 0;
 		}
 		else {
 			int iNext = oCounter.getValue()+1;
 			oCounter.setValue(iNext);
-			UpdateCounter(oCounter);
+			updateCounter(oCounter);
 			return iNext;
 		}
 	}
 
-	public String InsertCounter(Counter oCounter) {
+	public String insertCounter(Counter oCounter) {
 		String sResult = "";
 		if(oCounter != null) {
 			try {
@@ -41,7 +41,7 @@ public class CounterRepository extends MongoRepository {
 	}
 
 
-	public Counter GetCounterBySequence(String sSequence) {
+	public Counter getCounterBySequence(String sSequence) {
 		Counter oCounter = null;
 		if(!Utils.isNullOrEmpty(sSequence)) {
 			try {
@@ -55,7 +55,7 @@ public class CounterRepository extends MongoRepository {
 		return oCounter;
 	}
 
-	public boolean UpdateCounter(Counter oCounter) {
+	public boolean updateCounter(Counter oCounter) {
 		if(oCounter!=null) {
 			try {
 	
