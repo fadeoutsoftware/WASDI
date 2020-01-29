@@ -290,7 +290,10 @@ public class WasdiLib {
 		this.m_bVerbose = bVerbose;
 	}
 
-	// Get Params HashMap
+	/**
+	 * Get Params HashMap
+	 * @return Params Dictionary
+	 */
 	public HashMap<String, String> getParams() {
 		return m_aoParams;
 	}
@@ -317,7 +320,7 @@ public class WasdiLib {
 	
 	/**
 	 * Log
-	 * @param sLog
+	 * @param sLog Log row
 	 */
 	protected void log(String sLog) {
 		if (m_bVerbose == false) return;
@@ -327,7 +330,7 @@ public class WasdiLib {
 	
 	/**
 	 * Get Parameters file path
-	 * @return
+	 * @return parameters file path
 	 */
 	public String getParametersFilePath() {
 		return m_sParametersFilePath;
@@ -335,7 +338,7 @@ public class WasdiLib {
 
 	/**
 	 * Set Parameters file path
-	 * @param sParametersFilePath
+	 * @param sParametersFilePath parameters file path
 	 */
 	public void setParametersFilePath(String sParametersFilePath) {
 		this.m_sParametersFilePath = sParametersFilePath;
@@ -1006,7 +1009,7 @@ public class WasdiLib {
 	/**
 	 * Get WASDI Process Status 
 	 * @param sProcessId Process Id
-	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
 	 */
 	public String getProcessStatus(String sProcessId) {
 		try {
@@ -1023,6 +1026,32 @@ public class WasdiLib {
 			return "";
 		}	  
 	}
+
+	/**
+	 *  Update the status of the current process
+	 * @param sStatus Status to set
+	 * @param iPerc Progress in %
+	 * @return updated status as a String or '' if there was any problem
+	 */
+	public String updateStatus(String sStatus) {
+		
+		if (m_bIsOnServer == false) return sStatus;
+		
+		return updateStatus(sStatus,-1);
+	}
+	
+	/**
+	 *  Update the status of the current process
+	 * @param sStatus Status to set
+	 * @param iPerc Progress in %
+	 * @return updated status as a String or '' if there was any problem
+	 */
+	public String updateStatus(String sStatus,int iPerc) {
+		
+		if (m_bIsOnServer == false) return sStatus;
+		
+		return updateProcessStatus(getMyProcId(),sStatus,iPerc);
+	}
 	
 	/**
 	 *  Update the status of a process
@@ -1033,19 +1062,15 @@ public class WasdiLib {
 	 */
 	public String updateProcessStatus(String sProcessId,String sStatus,int iPerc) {
 		try {
-			
-			if (iPerc<0 || iPerc>100) {
-				System.out.println("Percentage must be between 0 and 100 included");
-				return "";
-			}
+			// iPerc not controlled: can be -1 to "not update"
 			
 			if (sStatus == null) {
 				System.out.println("sStatus must not be null");
 				return "";				
 			}
 			
-			if (!(sStatus.equals("CREATED") ||  sStatus.equals("RUNNING") ||  sStatus.equals("STOPPED")||  sStatus.equals("DONE")||  sStatus.equals("ERROR"))) {
-				System.out.println("sStatus must be a string like one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR");
+			if (!(sStatus.equals("CREATED") ||  sStatus.equals("RUNNING") ||  sStatus.equals("STOPPED")||  sStatus.equals("DONE")||  sStatus.equals("ERROR")||  sStatus.equals("WAITING")||  sStatus.equals("READY"))) {
+				System.out.println("sStatus must be a string like one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY");
 				return "";
 			}
 			
@@ -1078,6 +1103,9 @@ public class WasdiLib {
 	 * @return updated status as a String or '' if there was any problem
 	 */
 	public String updateProgressPerc(int iPerc) {
+		
+		if (m_bIsOnServer == false) return "RUNNING";
+		
 		try {
 			
 			if (iPerc<0 || iPerc>100) {
@@ -1114,6 +1142,10 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String waitProcess(String sProcessId) {
+		
+		
+		updateStatus("WAITING");
+		
 		String sStatus = "";
 		while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
 			sStatus = getProcessStatus(sProcessId);
@@ -1124,8 +1156,33 @@ public class WasdiLib {
 			}
 		}
 		
+		waitForResume();
+		
 		return sStatus;
 	}
+	
+	/**
+	 * Wait for a process to finish
+	 * @param sProcessId
+	 * @return
+	 */
+	protected void waitForResume() {
+		
+		if (!m_bIsOnServer) return;
+		
+		updateStatus("READY");
+		
+		String sStatus = "";
+		while ( ! (sStatus.equals("RUNNING"))) {
+			sStatus = getProcessStatus(getMyProcId());
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	
 	/**
 	 * Adds output payload to a process
@@ -1143,6 +1200,8 @@ public class WasdiLib {
 			if (sProcessId.equals("")) {
 				System.out.println("sProcessId must not be empty");
 			}
+			
+			if (!m_bIsOnServer) return "RUNNING";
 
 		    String sUrl = m_sBaseUrl + "/process/setpayload?sProcessId="+sProcessId+"&payload="+sData;
 		    

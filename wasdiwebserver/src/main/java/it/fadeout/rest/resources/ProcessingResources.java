@@ -135,9 +135,10 @@ public class ProcessingResources {
 	public PrimitiveResult terrainCorrection(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, RangeDopplerGeocodingSetting oSetting) throws IOException {
 		Utils.debugLog("ProcessingResources.TerrainCorrection( Session " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN, sParentId);
 	}
 
 	@POST
@@ -146,10 +147,10 @@ public class ProcessingResources {
 	public PrimitiveResult applyOrbit(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, ApplyOrbitSetting oSetting) throws IOException {
 		Utils.debugLog("ProcessingResources.ApplyOrbit( Session: " + sSessionId + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.APPLYORBIT);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT, sParentId);
 	}
 
 	@POST
@@ -158,11 +159,10 @@ public class ProcessingResources {
 	public PrimitiveResult calibrate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Calibrate( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: "
-				+ sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.CALIBRATE);
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, CalibratorSetting oSetting) throws IOException {
+		Utils.debugLog("ProcessingResources.Calibrate( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE, sParentId);
 	}
 
 	@POST
@@ -171,11 +171,10 @@ public class ProcessingResources {
 	public PrimitiveResult multilooking(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Multilooking( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: "
-				+ sDestinationProductName + ", Ws: " + sWorkspaceId + ")");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.MULTILOOKING);
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, MultilookingSetting oSetting) throws IOException {
+		Utils.debugLog("ProcessingResources.Multilooking( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ")");
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTILOOKING, sParentId);
 
 	}
 
@@ -185,11 +184,10 @@ public class ProcessingResources {
 	public PrimitiveResult NDVI(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, NDVISetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.NDVI( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Destination: "
-				+ sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.NDVI);
+			@QueryParam("sWorkspaceId") String sWorkspaceId,
+			@QueryParam("parent") String sParentId, NDVISetting oSetting) throws IOException {
+		Utils.debugLog("ProcessingResources.NDVI( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Destination: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI, sParentId);
 	}
 
 	@POST
@@ -197,11 +195,10 @@ public class ProcessingResources {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, MosaicSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Mosaic( Session: " + sSessionId + ", Destination: " + sDestinationProductName + ", Ws:"
-				+ sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.MOSAIC);
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
+		Utils.debugLog("ProcessingResources.Mosaic( Session: " + sSessionId + ", Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
 	}
 
 	@POST
@@ -209,10 +206,10 @@ public class ProcessingResources {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult regrid(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, RegridSetting oSetting) throws IOException {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, RegridSetting oSetting) throws IOException {
 		Utils.debugLog("ProcessingResources.Regrid( Session: " + sSessionId + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.REGRID);
+		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
 	}
 
 	@POST
@@ -221,10 +218,10 @@ public class ProcessingResources {
 	public PrimitiveResult subset(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, SubsetSetting oSetting) throws IOException {
+			@QueryParam("sWorkspaceId") String sWorkspaceId,
+			@QueryParam("parent") String sParentId, SubsetSetting oSetting) throws IOException {
 		Utils.debugLog("ProcessingResources.Subset( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.SUBSET);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
 	}
 
 	@POST
@@ -233,17 +230,16 @@ public class ProcessingResources {
 	public PrimitiveResult multiSubset(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, MultiSubsetSetting oSetting) throws IOException {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, MultiSubsetSetting oSetting) throws IOException {
 		Utils.debugLog("ProcessingResources.MultiSubset( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
-				LauncherOperations.MULTISUBSET);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
 	}
 
 	@GET
 	@Path("parameters")
 	@Produces({ "application/json" })
-	public SnapOperatorParameterViewModel[] operatorParameters(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sOperation") String sOperation) throws IOException {
+	public SnapOperatorParameterViewModel[] operatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException {
 		Utils.debugLog("ProcessingResources.operatorParameters( Session: " + sSessionId + ", Operation: " + sOperation + " )");
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
 
@@ -373,7 +369,7 @@ public class ProcessingResources {
 			}
 
 			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-			oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);
+			oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResources.uploadGraph: " + oEx);
 			return Response.serverError().build();
@@ -414,7 +410,7 @@ public class ProcessingResources {
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 		ArrayList<SnapWorkflowViewModel> aoRetWorkflows = new ArrayList<>();
 
-		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.GetSnapWorkflowPublicAndByUser(sUserId);
+		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.getSnapWorkflowPublicAndByUser(sUserId);
 
 		for (int i = 0; i < aoDbWorkflows.size(); i++) {
 			SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
@@ -459,7 +455,7 @@ public class ProcessingResources {
 
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 
-		SnapWorkflow oWorkflow = oSnapWorkflowRepository.GetSnapWorkflow(sWorkflowId);
+		SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
 		if (oWorkflow == null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -479,7 +475,7 @@ public class ProcessingResources {
 			Utils.debugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
 		}
 
-		oSnapWorkflowRepository.DeleteSnapWorkflow(sWorkflowId);
+		oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
 
 		return Response.ok().build();
 	}
@@ -500,7 +496,7 @@ public class ProcessingResources {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public PrimitiveResult executeGraph(@FormDataParam("file") InputStream fileInputStream,
 			@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace,
-			@QueryParam("source") String sSourceProductName, @QueryParam("destination") String sDestinationProdutName)
+			@QueryParam("source") String sSourceProductName, @QueryParam("destination") String sDestinationProdutName, @QueryParam("parent") String sParentProcessWorkspaceId)
 					throws Exception {
 
 		Utils.debugLog("ProcessingResources.ExecuteGraph( InputStream, " + sSessionId + ", Ws: " + sWorkspace + ", Source: "
@@ -531,8 +527,7 @@ public class ProcessingResources {
 		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		oSettings.setGraphXml(sGraphXml);
 
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oSettings,
-				LauncherOperations.GRAPH);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
 
 	}
 
@@ -551,7 +546,7 @@ public class ProcessingResources {
 	@POST
 	@Path("/graph_id")
 	public PrimitiveResult executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sWorkspace, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
+			@QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Session: " + sSessionId + ", Ws: " + sWorkspace + ", ... )");
@@ -580,7 +575,7 @@ public class ProcessingResources {
 		String sGraphXml;
 
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(oSnapWorkflowViewModel.getWorkflowId());
+		SnapWorkflow oWF = oSnapWorkflowRepository.getSnapWorkflow(oSnapWorkflowViewModel.getWorkflowId());
 
 		if (oWF == null) {
 			oResult.setBoolValue(false);
@@ -615,8 +610,7 @@ public class ProcessingResources {
 			sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
 		}
 
-		return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings,
-				LauncherOperations.GRAPH);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
 	}
 
 	@GET
@@ -1306,9 +1300,25 @@ public class ProcessingResources {
 	 * @return
 	 */
 	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation) {
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, oOperation, null);
+	}
+
+	/**
+	 * Trigger the execution in the launcher of a SNAP Operation
+	 * 
+	 * @param sSessionId              User Session Id
+	 * @param sSourceProductName      Source Product Name
+	 * @param sDestinationProductName Target Product Name
+	 * @param sWorkspaceId            Active Workspace
+	 * @param oSetting                Generic Operation Setting
+	 * @param oOperation              Launcher Operation Type
+	 * @param sParentProcessWorkspaceId Id of the parent Process Workspace or null
+	 * @return
+	 */
+	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation, String sParentProcessWorkspaceId) {
 
 		Utils.debugLog("ProsessingResources.executeOperation( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Destination: "
-				+ sDestinationProductName + ", WS: " + sWorkspaceId + ", ISetting, LauncherOperations )");
+				+ sDestinationProductName + ", WS: " + sWorkspaceId + ", Parent: " + sParentProcessWorkspaceId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = "";
 
@@ -1349,7 +1359,7 @@ public class ProcessingResources {
 			// Serialization Path
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
-			return Wasdi.runProcess(sUserId, sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter);
+			return Wasdi.runProcess(sUserId, sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
 			Utils.debugLog("ProsessingResources.ExecuteOperation: " + e);
@@ -1371,7 +1381,7 @@ public class ProcessingResources {
 	@Path("run")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, String sParameter) throws IOException {
+			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, String sParameter) throws IOException {
 			//@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
 
 		
@@ -1407,7 +1417,7 @@ public class ProcessingResources {
 			oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
 		
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter);
+			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -1536,7 +1546,7 @@ public class ProcessingResources {
 					+ "/processors/wasdi_matlab_test_01/config.properties";
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			File oFile = new File(sParamFullPath);
 			File oConfigFile = new File(sConfigFullPath);
@@ -1687,7 +1697,7 @@ public class ProcessingResources {
 					+ "/processors/wasdi_matlab_test_02/config.properties";
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			File oFile = new File(sParamFullPath);
 			File oConfigFile = new File(sConfigFullPath);
@@ -1840,7 +1850,7 @@ public class ProcessingResources {
 					+ "/processors/wasdi_matlab_test_03/config.properties";
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			File oFile = new File(sParamFullPath);
 			File oConfigFile = new File(sConfigFullPath);

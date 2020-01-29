@@ -10,5 +10,7 @@ public enum ProcessStatus {
 	RUNNING,
 	STOPPED,
 	DONE,
-	ERROR
+	ERROR,
+	WAITING,
+	READY
 }

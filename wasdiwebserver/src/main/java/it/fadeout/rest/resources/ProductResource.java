@@ -75,7 +75,7 @@ public class ProductResource {
 
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
-		if (oProductWorkspaceRepository.ExistsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
+		if (oProductWorkspaceRepository.existsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
 			Utils.debugLog("ProductResource.AddProductToWorkspace:  Product already in the workspace");
 
 			// Ok done
@@ -85,7 +85,7 @@ public class ProductResource {
 		}
 		
 		DownloadedFilesRepository oDownFileRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownFile = oDownFileRepo.GetDownloadedFileByPath(oProductWorkspace.getProductName());
+		DownloadedFile oDownFile = oDownFileRepo.getDownloadedFileByPath(oProductWorkspace.getProductName());
 		
 		if (oDownFile != null) {
 			GeorefProductViewModel oGeoRefViewModel = new GeorefProductViewModel(oDownFile.getProductViewModel());
@@ -93,7 +93,7 @@ public class ProductResource {
 		}
 
 		// Try to insert
-		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
+		if (oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
 
 			Utils.debugLog("ProductResource.AddProductToWorkspace:  Inserted");
 
@@ -130,7 +130,7 @@ public class ProductResource {
 
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath + sProductName);
+		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath + sProductName);
 
 		Utils.debugLog("ProductResource.GetByProductName: search file " + sFullPath + sProductName);
 
@@ -173,7 +173,7 @@ public class ProductResource {
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oDownloadedFilesRepository
-				.GetDownloadedFileByPath(sProductPath + sProductName);
+				.getDownloadedFileByPath(sProductPath + sProductName);
 
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
@@ -245,7 +245,7 @@ public class ProductResource {
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoProductWorkspace.size());
 
@@ -253,7 +253,7 @@ public class ProductResource {
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
 
 				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
 
 				// Add View model to return list
 				if (oDownloaded != null) {
@@ -273,7 +273,7 @@ public class ProductResource {
 									BandViewModel oBand = aoBands.get(iBands);
 
 									if (oBand != null) {
-										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oGeoRefProductViewModel.getName(), oBand.getName());
+										PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oGeoRefProductViewModel.getName(), oBand.getName());
 
 										if (oPublishBand != null) {
 											oBand.setPublished(true);
@@ -342,7 +342,7 @@ public class ProductResource {
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.getLightListByWorkspace: found " + aoProductWorkspace.size());
 
@@ -393,7 +393,7 @@ public class ProductResource {
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.getNamesByWorkspace: found " + aoProductWorkspace.size());
 
@@ -401,7 +401,7 @@ public class ProductResource {
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
 
 				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
 
 				// Add View model to return list
 				if (oDownloaded != null) {
@@ -453,7 +453,7 @@ public class ProductResource {
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
 			DownloadedFile oDownlaoded = oDownloadedFilesRepository
-					.GetDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
+					.getDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
 
 			if (oDownlaoded == null) {
 				Utils.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
@@ -467,7 +467,7 @@ public class ProductResource {
 			oDownlaoded.setProductViewModel(oProductViewModel);
 
 			// Save
-			if (oDownloadedFilesRepository.UpdateDownloadedFile(oDownlaoded) == false) {
+			if (oDownloadedFilesRepository.updateDownloadedFile(oDownlaoded) == false) {
 				Utils.debugLog("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
 				return Response.status(500).build();
 			}
@@ -613,7 +613,7 @@ public class ProductResource {
 			if (bDeleteFile || bDeleteLayer) {
 				// Get all bands files
 				aoPublishedBands = oPublishedBandsRepository
-						.GetPublishedBandsByProductName(sProductNameWithoutExtension);
+						.getPublishedBandsByProductName(sProductNameWithoutExtension);
 			}
 
 			// get files that begin with the product name
@@ -672,7 +672,7 @@ public class ProductResource {
 				// Delete layerId on Geoserver
 
 				DownloadedFile oDownloadedFile = oDownloadedFilesRepository
-						.GetDownloadedFileByPath(sFullPath + sProductName);
+						.getDownloadedFileByPath(sFullPath + sProductName);
 				GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"),
 						m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
 
@@ -688,7 +688,7 @@ public class ProductResource {
 
 						try {
 							// delete published band on data base
-							oPublishedBandsRepository.DeleteByProductNameLayerId(
+							oPublishedBandsRepository.deleteByProductNameLayerId(
 									oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 						} catch (Exception oEx) {
 							Utils.debugLog(
@@ -704,8 +704,8 @@ public class ProductResource {
 			// delete product record on db
 			try {
 				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
-				oDownloadedFilesRepository.DeleteByFilePath(sDownloadPath + sProductName);
+				oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
+				oDownloadedFilesRepository.deleteByFilePath(sDownloadPath + sProductName);
 			} catch (Exception oEx) {
 				Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
 				oReturn.setIntValue(500);

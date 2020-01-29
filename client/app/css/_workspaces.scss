@@ -99,6 +99,13 @@
                     max-width: 150px;
                 }
             }
+            td{
+                &:hover{
+                    i{
+                        color:$wasdi-over-icon;
+                    }
+                }
+            }
             .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
                 background-color: #44536C;
                 color: white;
@@ -109,27 +116,26 @@
 
                 background-color: #44536C;
                 color: white;
-
-                // COLOR OVER A TD
-                .over-color {
-                    background-color: $wasdi-white !important;
-                    color: $wasdi-blue-logo !important;
-                    border-top: none;
-
-                    &:not(.disabled) {
-                        &:hover {
-
-                            background-color: $wasdi-grey !important;
-                            cursor: pointer;
-                            //color:$wasdi-over-icon !important;
-                            i:hover {
-
-                                //background-color:white;
-                                color: $wasdi-over-icon;
-                            }
-                        }
-                    }
-                }
+                //
+                //// COLOR OVER A TD
+                //.over-color {
+                //    background-color: $wasdi-white !important;
+                //    color: $wasdi-blue-logo !important;
+                //    border-top: none;
+                //
+                //    &:not(.disabled) {
+                //        &:hover {
+                //            background-color: $wasdi-grey !important;
+                //            cursor: pointer;
+                //            color:$wasdi-over-icon !important;
+                //            i:hover {
+                //
+                //                //background-color:white;
+                //                color: $wasdi-over-icon;
+                //            }
+                //        }
+                //    }
+                //}
             }
         }
     }

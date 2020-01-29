@@ -2,10 +2,16 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.1.16
+; IDL WASDI Lib Version 2.0.4
 ; Last Update: 
 ;
 ; History
+; 2.0.4 - 2020-01-26
+;   Added time stamp to internal log
+;
+; 2.0.3 - 2020-01-23
+;   Added support to WAITING and READY states
+;
 ; 0.1.16
 ;	Removed debug prints
 ;
@@ -516,9 +522,13 @@ FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 END
 
 FUNCTION WASDIWAITPROCESS, sProcessID
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+
 	sStatus=' '
 	
 	print, 'Waiting for scheduled process to finish'
+	;WASDIUPDATEPROCESSSTATUS(myprocid, 'WAITING', -1)
 	
 	iTotalTime = 0
 	WHILE sStatus ne 'DONE' and sStatus ne 'STOPPED' and sStatus ne 'ERROR' DO BEGIN
@@ -528,15 +538,21 @@ FUNCTION WASDIWAITPROCESS, sProcessID
 	ENDWHILE
 	
 	print, 'Process Done (took ', STRTRIM(STRING(iTotalTime),2), ' seconds)'
+	
+	;WASDIUPDATEPROCESSSTATUS(myprocid, 'READY', -1)
 
 	RETURN, sStatus
 END
 
 
 FUNCTION WASDIWAITPROCESSES, asProcessIDs
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	
 	sStatus=''
 	
 	print, 'Waiting for ', STRTRIM(STRING(N_ELEMENTS(asProcessIDs)),2), ' processes to finish'
+	;WASDIUPDATEPROCESSSTATUS(myprocid, 'WAITING', -1)
 	
 	asProcessToCeck = [asProcessIDs]
 	asNewList = []
@@ -586,6 +602,7 @@ FUNCTION WASDIWAITPROCESSES, asProcessIDs
 	ENDFOR
 	
 	print, 'All Processes Are Done (took approx ', STRTRIM(STRING(iTotalTime),2), '  seconds)'
+	;WASDIUPDATEPROCESSSTATUS(myprocid, 'READY', -1)
 
 	RETURN, asResults
 END
@@ -1494,7 +1511,8 @@ PRO WASDILOG, sLog
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
 	
-	print, '[', myprocid, ']: ', sLog
+	sTimestamp = SYSTIME()
+	print, '[', myprocid, '] - ', sTimestamp,': ', sLog
 	IF (isonserver EQ '1') THEN BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/processors/logs/add?processworkspace='+myprocid

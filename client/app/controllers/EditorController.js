@@ -76,19 +76,19 @@ var EditorController = (function () {
         this.m_aoNavBarMenu = [];
 
         this.m_oUndoRedoBoundigBoxesZoom = {
-            actualLayerId:"",
-            actualBoundingBox:"",
-            actualBoundingBoxType:"",
-            undoLayerId:"",
-            undoBoundingBox:"",
-            undoBoundingBoxType:"",
+            actualLayerId: "",
+            actualBoundingBox: "",
+            actualBoundingBoxType: "",
+            undoLayerId: "",
+            undoBoundingBox: "",
+            undoBoundingBoxType: "",
         };
 
         this.m_oAreHideBars = {
-            mainBar:false,
-            radarBar:true,
-            opticalBar:true,
-            processorBar:true
+            mainBar: false,
+            radarBar: true,
+            opticalBar: true,
+            processorBar: true
         };
         //we save the masks selected
         this.m_oMasksSaved = null;
@@ -114,7 +114,7 @@ var EditorController = (function () {
         // Actual User
         this.m_oUser = this.m_oConstantsService.getUser();
         //{}
-        this.m_aoProductsLayersIn3DMapArentGeoreferenced =[];
+        this.m_aoProductsLayersIn3DMapArentGeoreferenced = [];
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
         oMapService.removeLayersFromMap();
@@ -128,13 +128,11 @@ var EditorController = (function () {
             if (!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace))) {
                 // Open workspace
                 this.openWorkspace(this.m_oState.params.workSpace);
-            }
-            else {
+            } else {
                 // go to workspaces section
                 this.m_oState.go("root.workspaces");
             }
-        }
-        else {
+        } else {
             // Load Processes
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         }
@@ -143,13 +141,11 @@ var EditorController = (function () {
         this.getProductListByWorkspace();
 
         // Subscribe Rabbit
-        this._subscribeToRabbit = function()
-        {
-            if (this.m_oRabbitStompService.isSubscrbed() == false && !utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace))
-            {
+        this._subscribeToRabbit = function () {
+            if (this.m_oRabbitStompService.isSubscrbed() == false && !utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) {
                 var _this = this;
                 this.m_oRabbitStompService.waitServiceIsReady()
-                    .then(function(){
+                    .then(function () {
                         console.log('EditorController: Web Stomp is ready --> subscribe');
                         _this.m_oRabbitStompService.subscribe(_this.m_oActiveWorkspace.workspaceId);
                     })
@@ -175,205 +171,205 @@ var EditorController = (function () {
         //this.openImageEditorDialog();
         var oThat = this;
 
-        angular.element($window).bind('resize', function(){
+        angular.element($window).bind('resize', function () {
 
-             $scope.width = $window.innerWidth;
+            $scope.width = $window.innerWidth;
             oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
 
             // manuall $digest required as resize event
             // is outside of angular
-             $scope.$digest();
+            $scope.$digest();
         });
     }
+
     /********************************************************* TRANSLATE SERVICE ********************************************************/
-    EditorController.prototype.generateDefaultNavBarMenu = function()
-    {
+    EditorController.prototype.generateDefaultNavBarMenu = function () {
         this.m_aoNavBarMenu = [
             // --- Workflow ---
             {
-                name:"",
-                icon:"fa fa-file-code-o",
-                caption_i18n : "EDITOR_OPERATION_TITLE_WORKFLOW",
-                subMenu:[],
+                name: "",
+                icon: "fa fa-file-code-o",
+                caption_i18n: "EDITOR_OPERATION_TITLE_WORKFLOW",
+                subMenu: [],
                 onClick: this.openWorkflowManagerDialog
             },
-                // --- Import ---
+            // --- Import ---
             {
-                name:"",
-                icon:"fa fa-upload",
-                caption_i18n : "EDITOR_OPERATION_TITLE_IMPORT",
-                subMenu:[],
+                name: "",
+                icon: "fa fa-upload",
+                caption_i18n: "EDITOR_OPERATION_TITLE_IMPORT",
+                subMenu: [],
                 onClick: this.openImportsDialog
             },
             {
-                name:"",//WAPPS
-                caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
-                subMenu:[],
+                name: "",//WAPPS
+                caption_i18n: "EDITOR_OPERATION_TITLE_WAPPS",
+                subMenu: [],
                 onClick: this.openWappsDialog,
-                icon:"fa fa-lg fa-rocket"
+                icon: "fa fa-lg fa-rocket"
             },
 
             // --- Processor ---
             {
-                name:"",
-                icon:"icon-document-gear",
-                caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
+                name: "",
+                icon: "icon-document-gear",
+                caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
                 onClick: "",
-                subMenu:[
+                subMenu: [
 
                     {
-                        name:"",// New Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
-                        subMenu:[],
+                        name: "",// New Processor
+                        caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                        subMenu: [],
                         onClick: this.openProcessorDialog,
-                        icon:"fa fa-lg fa-plus-square"
+                        icon: "fa fa-lg fa-plus-square"
                     },
                     {
-                        name:"",// E DRIFT FOOD EVENT
-                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_EVENT",
-                        subMenu:[],
+                        name: "",// E DRIFT FOOD EVENT
+                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_EVENT",
+                        subMenu: [],
                         onClick: this.open_eDriftFloodEventDialog,
-                        icon:"fa fa-lg fa-rocket"
+                        icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name:"",//EDriftFloodAutomaticChainController
-                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
-                        subMenu:[],
+                        name: "",//EDriftFloodAutomaticChainController
+                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
+                        subMenu: [],
                         onClick: this.openEDriftFloodAutomaticChain,
-                        icon:"fa fa-lg fa-rocket"
+                        icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name:"",//LIST FLOOD AREA DETECTION
-                        caption_i18n : "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
-                        subMenu:[],
+                        name: "",//LIST FLOOD AREA DETECTION
+                        caption_i18n: "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
+                        subMenu: [],
                         onClick: this.openListtFloodAreaDetectionDialog,
-                        icon:"fa fa-lg fa-rocket"
+                        icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name:"",//EDriftCheckImagesAvailability
-                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
-                        subMenu:[],
+                        name: "",//EDriftCheckImagesAvailability
+                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
+                        subMenu: [],
                         onClick: this.openEDriftCheckImagesAvailability,
-                        icon:"fa fa-lg fa-rocket"
+                        icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name:"",//mida
-                        caption_i18n : "EDITOR_OPERATION_TITLE_MIDA",
-                        subMenu:[],
+                        name: "",//mida
+                        caption_i18n: "EDITOR_OPERATION_TITLE_MIDA",
+                        subMenu: [],
                         onClick: this.openMergeDialogInNavBar,
-                        icon:"fa fa-lg fa-rocket"
+                        icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name:"",//OPERA
-                        caption_i18n : "EDITOR_OPERATION_TITLE_OPERA",
-                        subMenu:[],
+                        name: "",//OPERA
+                        caption_i18n: "EDITOR_OPERATION_TITLE_OPERA",
+                        subMenu: [],
                         onClick: this.openWappDialog,
-                        icon:"fa fa-lg fa-tint"
+                        icon: "fa fa-lg fa-tint"
                     },
                     {
-                        name:"",//RASOR
-                        caption_i18n : "EDITOR_OPERATION_TITLE_RASOR",
-                        subMenu:[],
+                        name: "",//RASOR
+                        caption_i18n: "EDITOR_OPERATION_TITLE_RASOR",
+                        subMenu: [],
                         onClick: this.openRasorDialog,
-                        icon:"fa fa-lg fa-users"
+                        icon: "fa fa-lg fa-users"
                     },
                     {
-                        name:"",//JRC Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_JRC_WORKFLOW",
-                        subMenu:[],
+                        name: "",//JRC Processor
+                        caption_i18n: "EDITOR_OPERATION_TITLE_JRC_WORKFLOW",
+                        subMenu: [],
                         onClick: this.openJRCWorkflowDialog,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon: "fa fa-lg fa-file-code-o"
                     },
                     {
-                        name:"",//JRC Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_JRC_CLASSIFICATION",
-                        subMenu:[],
+                        name: "",//JRC Processor
+                        caption_i18n: "EDITOR_OPERATION_TITLE_JRC_CLASSIFICATION",
+                        subMenu: [],
                         onClick: this.openJRCClassificationDialog,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon: "fa fa-lg fa-file-code-o"
                     },
                     {
-                        name:"",//JRC Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_JRCS2_TEST_PROCESSOR",
-                        subMenu:[],
+                        name: "",//JRC Processor
+                        caption_i18n: "EDITOR_OPERATION_TITLE_JRCS2_TEST_PROCESSOR",
+                        subMenu: [],
                         onClick: this.openJRCS2TestProcessor,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon: "fa fa-lg fa-file-code-o"
                     },
                     // --- WPS ---
                     {
-                        name:"WPS",
-                        icon:"fa fa-tasks",
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_WPS",
+                        name: "WPS",
+                        icon: "fa fa-tasks",
+                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_WPS",
                         onClick: this.openWPSDialog,
-                        subMenu:[]
+                        subMenu: []
                     },
                     {
-                        name:"Mosaic",
-                        icon:"fa fa-tasks",
-                        caption_i18n : "EDITOR_OPERATION_TITLE_MOSAIC",
+                        name: "Mosaic",
+                        icon: "fa fa-tasks",
+                        caption_i18n: "EDITOR_OPERATION_TITLE_MOSAIC",
                         onClick: this.openMosaicDialog,
-                        subMenu:[]
+                        subMenu: []
                     }
                 ]
             },
             // --- Optical ---
             {
-                name:"",
-                icon:"icon-eye",
-                caption_i18n : "EDITOR_TOOLTIP_ICON_EYE",
+                name: "",
+                icon: "icon-eye",
+                caption_i18n: "EDITOR_TOOLTIP_ICON_EYE",
                 onClick: "",
-                subMenu:[
+                subMenu: [
                     {
-                        name:"",//range doppler terrain correction
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI",
-                        subMenu:[],
+                        name: "",//range doppler terrain correction
+                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI",
+                        subMenu: [],
                         onClick: this.openNDVIDialogInNavBar,
-                        icon:""
+                        icon: ""
                     }
                 ]
             },
             // --- Radar ---
             {
-                name:"",
-                icon:"icon-radar",
-                caption_i18n : "EDITOR_TOOLTIP_ICON_RADAR",
+                name: "",
+                icon: "icon-radar",
+                caption_i18n: "EDITOR_TOOLTIP_ICON_RADAR",
                 onClick: "",
-                subMenu:[
+                subMenu: [
                     {
-                        name:"",//apply orbit
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_ORBIT",
-                        subMenu:[],
+                        name: "",//apply orbit
+                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_ORBIT",
+                        subMenu: [],
                         onClick: this.openApplyOrbitDialogInNavBar,
-                        icon:"icon-applyorbit-operations"
+                        icon: "icon-applyorbit-operations"
                     },
                     {
-                        name:"",//multilooking
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING",
-                        subMenu:[],
+                        name: "",//multilooking
+                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING",
+                        subMenu: [],
                         onClick: this.openMultilookingDialogInNavBar,
-                        icon:"icon-multilooking-operations"
+                        icon: "icon-multilooking-operations"
                     },
                     {
-                        name:"",// radiometric calibrate
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE",
-                        subMenu:[],
+                        name: "",// radiometric calibrate
+                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE",
+                        subMenu: [],
                         onClick: this.openRadiometricCalibrationDialogInNavBar,
-                        icon:"icon-radiometriccalibrate-operations"
+                        icon: "icon-radiometriccalibrate-operations"
                     },
                     {
-                        name:"",//range doppler terrain correction
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
-                        subMenu:[],
+                        name: "",//range doppler terrain correction
+                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
+                        subMenu: [],
                         onClick: this.rangeDopplerTerrainCorrectionDialogInNavBar,
-                        icon:"icon-range-doppler-terrain-correction-operations"
+                        icon: "icon-range-doppler-terrain-correction-operations"
                     }
                 ]
             },
             {
-                name:"",//WAPPS
-                caption_i18n : "EDITOR_OPERATION_TITLE_SHARE",
-                subMenu:[],
+                name: "",//WAPPS
+                caption_i18n: "EDITOR_OPERATION_TITLE_SHARE",
+                subMenu: [],
                 onClick: this.openShareDialog,
-                icon:"fa fa-share-alt fa-lg"
+                icon: "fa fa-share-alt fa-lg"
             }
 
         ]
@@ -381,25 +377,21 @@ var EditorController = (function () {
         this.translateToolbarMenuList(this.m_aoNavBarMenu);
     };
 
-    EditorController.prototype.isToolbarBtnDropdown = function(btn)
-    {
+    EditorController.prototype.isToolbarBtnDropdown = function (btn) {
         return btn.subMenu.length != 0;
     }
 
-    EditorController.prototype.translateToolbarMenu = function(menuItem)
-    {
-        this.m_oTranslate(menuItem.caption_i18n).then(function(text){
+    EditorController.prototype.translateToolbarMenu = function (menuItem) {
+        this.m_oTranslate(menuItem.caption_i18n).then(function (text) {
             menuItem.name = text;
         })
     }
 
-    EditorController.prototype.translateToolbarMenuList = function(menuList)
-    {
-        for(var i = 0; i < menuList.length; i++)
-        {
+    EditorController.prototype.translateToolbarMenuList = function (menuList) {
+        for (var i = 0; i < menuList.length; i++) {
             var menuItem = menuList[i];
             this.translateToolbarMenu(menuItem);
-            if( this.isToolbarBtnDropdown(menuItem) == true){
+            if (this.isToolbarBtnDropdown(menuItem) == true) {
                 this.translateToolbarMenuList(menuItem.subMenu);
             }
         }
@@ -489,11 +481,11 @@ var EditorController = (function () {
 
     /*********************************************************** VIEW METHODS**********************************************************/
 
-    EditorController.prototype.onEditBtnClick = function(){
+    EditorController.prototype.onEditBtnClick = function () {
         this.openImageEditorDialog();
     }
 
-    EditorController.prototype.openImageEditorDialog = function(){
+    EditorController.prototype.openImageEditorDialog = function () {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/image_editor/image-editor.component.html",
@@ -502,12 +494,12 @@ var EditorController = (function () {
                 extras: ""
             }
 
-        }).then(function(modal){
+        }).then(function (modal) {
             modal.element.modal({
                 backdrop: 'static',
                 keyboard: false
             });
-            modal.close.then(function(result) {
+            modal.close.then(function (result) {
                 // if(utilsIsObjectNullOrUndefined(result) === true || result.length === 0)
                 // {
                 //     //oController.m_sTypeOfFilterSelected = 'Time period';
@@ -536,24 +528,21 @@ var EditorController = (function () {
      * Set the active tab between Navigation, Colour manipulation, Preview
      * @param iTab
      */
-    EditorController.prototype.setActiveTab = function (iTab)
-    {
+    EditorController.prototype.setActiveTab = function (iTab) {
         if (this.m_iActiveMapPanelTab === iTab) return;
 
         this.m_iActiveMapPanelTab = iTab;
         // if was clicked the tab color manipulation && the active band isn't null && there isn't any saved colour manipulation, get colour manipulation
-        if( (iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
-            (this.m_bIsLoadingColourManipulation === false) )
-        {
+        if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
+            (this.m_bIsLoadingColourManipulation === false)) {
             var oBand = this.m_oActiveBand;
             var sFileName = this.m_aoProducts[oBand.productIndex].fileName
-            this.getProductColorManipulation(sFileName,oBand.name,true,this.m_oActiveWorkspace.workspaceId);
+            this.getProductColorManipulation(sFileName, oBand.name, true, this.m_oActiveWorkspace.workspaceId);
 
         }
         //if was clicked the tab preview && the active band isn't null && there isn't any saved preview image, preview image
-        if ( (iTab === 2) && (this.m_oActiveBand !== null) && ( utilsIsStrNullOrEmpty(this.m_sPreviewUrlSelectedBand) === true || this.m_sPreviewUrlSelectedBand === "empty") &&
-            (this.m_bIsLoadedPreviewBandImage === true))
-        {
+        if ((iTab === 2) && (this.m_oActiveBand !== null) && (utilsIsStrNullOrEmpty(this.m_sPreviewUrlSelectedBand) === true || this.m_sPreviewUrlSelectedBand === "empty") &&
+            (this.m_bIsLoadedPreviewBandImage === true)) {
             // Initialize Image Preview
 
             var oBand = this.m_oActiveBand;
@@ -566,13 +555,13 @@ var EditorController = (function () {
 
             // TODO: here the tab is not shown yet. So H and W are still 0.
             // This code should run after the tab is shown
-            if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
-            if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
+            if (heightImagePreview == 0) heightImagePreview = 280;//default value canvas
+            if (widthImagePreview == 0) widthImagePreview = 560;//default value canvas
 
-            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,
-                                    widthImagePreview,heightImagePreview,oBand.colorManipulation);
+            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName, oBand.name, null, 0, 0, oBand.width, oBand.height,
+                widthImagePreview, heightImagePreview, oBand.colorManipulation);
 
-             this.processingGetBandPreview(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
+            this.processingGetBandPreview(oBodyImagePreview, this.m_oActiveWorkspace.workspaceId);
         }
     };
 
@@ -602,25 +591,21 @@ var EditorController = (function () {
                 // Load Layers
                 for (var iIndexLayers = 0; iIndexLayers < oController.m_aoVisibleBands.length; iIndexLayers++) {
                     // Check if it is a valid layer
-                    if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId))
-                    {
-                        var sColor="#f22323";
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
+                        var sColor = "#f22323";
                         var sGeoserverBBox = oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox;
-                        var oRectangleIsNotGeoreferencedProduct = oController.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox,oController.m_aoVisibleBands[iIndexLayers].bbox,
-                                                    oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox, oController.m_aoVisibleBands[iIndexLayers].layerId);
-                        if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
-                        {
+                        var oRectangleIsNotGeoreferencedProduct = oController.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox, oController.m_aoVisibleBands[iIndexLayers].bbox,
+                            oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox, oController.m_aoVisibleBands[iIndexLayers].layerId);
+                        if (utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false) {
                             oController.addLayerMap3DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                             var oLayer3DMap = {
-                                id : oController.m_aoVisibleBands[iIndexLayers].layerId,
-                                rectangle : oRectangleIsNotGeoreferencedProduct
+                                id: oController.m_aoVisibleBands[iIndexLayers].layerId,
+                                rectangle: oRectangleIsNotGeoreferencedProduct
                             };
                             oController.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
+                        } else {
+                            oController.addLayerMap3DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                         }
-                       else
-                       {
-                           oController.addLayerMap3DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
-                       }
                     }
 
                     var sNodeId = oController.m_aoVisibleBands[iIndexLayers].productName + "_" + oController.m_aoVisibleBands[iIndexLayers].bandName;
@@ -629,8 +614,8 @@ var EditorController = (function () {
 
                 // Load External Layers
                 for (var iExternals = 0; iExternals < oController.m_aoExternalLayers.length; iExternals++) {
-                    if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)){
-                        oController.addLayerMap3DByServer(oController.m_aoExternalLayers[iExternals].Name,oController.m_aoExternalLayers[iExternals].sServerLink);
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)) {
+                        oController.addLayerMap3DByServer(oController.m_aoExternalLayers[iExternals].Name, oController.m_aoExternalLayers[iExternals].sServerLink);
                     }
                 }
 
@@ -638,18 +623,16 @@ var EditorController = (function () {
                 oController.m_oMapService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
 
                 // Zoom on the active band
-                if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand)==false) {
+                if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) == false) {
                     oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
                     oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
-                }
-                else {
+                } else {
                     // Zoom on the workspace
                     oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
                     oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
                 }
             }, 400);
-        }
-        else {
+        } else {
             //We are going in 2D MAP
             this.m_oMapService.clearMap();
             this.m_oGlobeService.clearGlobe();
@@ -665,7 +648,7 @@ var EditorController = (function () {
                     // Check if it is a valid layer
                     if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
 
-                        var sColor="#f22323";
+                        var sColor = "#f22323";
                         var sGeoserverBBox = oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox;
                         // if( oController.m_oMapService.isProductGeoreferenced( oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox ) === false )
                         // {
@@ -674,7 +657,7 @@ var EditorController = (function () {
                         //     oRectangleBoundingBox.options.layers = "wasdi:" + oController.m_aoVisibleBands[iIndexLayers].layerId;
                         // }
                         //
-                        oController.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].layerId);
+                        oController.productIsNotGeoreferencedRectangle2DMap(sColor, sGeoserverBBox, oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].layerId);
                         oController.addLayerMap2DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                     }
 
@@ -684,8 +667,8 @@ var EditorController = (function () {
 
                 // Load External Layers
                 for (var iExternals = 0; iExternals < oController.m_aoExternalLayers.length; iExternals++) {
-                    if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)){
-                        oController.addLayerMap2DByServer(oController.m_aoExternalLayers[iExternals].Name,oController.m_aoExternalLayers[iExternals].sServerLink);
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)) {
+                        oController.addLayerMap2DByServer(oController.m_aoExternalLayers[iExternals].Name, oController.m_aoExternalLayers[iExternals].sServerLink);
                     }
                 }
 
@@ -693,12 +676,11 @@ var EditorController = (function () {
                 oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
 
                 // Zoom on the active band
-                if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand)==false) {
+                if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) == false) {
                     oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
                     oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
 
-                }
-                else {
+                } else {
                     // Zoom on the workspace
                     oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
                     oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
@@ -709,21 +691,17 @@ var EditorController = (function () {
         }
     };
 
-    EditorController.prototype.productIsNotGeoreferencedRectangle2DMap = function(sColor,sGeoserverBBox,asBbox,sLayerId)
-    {
-        if( this.m_oMapService.isProductGeoreferenced( asBbox,sGeoserverBBox) === false )
-        {
-            var oRectangleBoundingBoxMap = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
+    EditorController.prototype.productIsNotGeoreferencedRectangle2DMap = function (sColor, sGeoserverBBox, asBbox, sLayerId) {
+        if (this.m_oMapService.isProductGeoreferenced(asBbox, sGeoserverBBox) === false) {
+            var oRectangleBoundingBoxMap = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox, sColor);
             //the options.layers property is used for remove the rectangle to the map
             oRectangleBoundingBoxMap.options.layers = "wasdi:" + sLayerId;
         }
     };
 
-    EditorController.prototype.productIsNotGeoreferencedRectangle3DMap = function(sGeoserverBBox,asBbox,sLayerId)
-    {
+    EditorController.prototype.productIsNotGeoreferencedRectangle3DMap = function (sGeoserverBBox, asBbox, sLayerId) {
         var oRectangle = null;
-        if( this.m_oMapService.isProductGeoreferenced( asBbox,sGeoserverBBox) === false )
-        {
+        if (this.m_oMapService.isProductGeoreferenced(asBbox, sGeoserverBBox) === false) {
             oRectangle = this.m_oGlobeService.addRectangleOnGLobeByGeoserverBoundingBox(sGeoserverBBox);
             //the options.layers property is used for remove the rectangle to the map
             // oRectangleBoundingBoxMap.options.layers = "wasdi:" + sLayerId;
@@ -745,22 +723,20 @@ var EditorController = (function () {
 
             this.switchToGeographicMode();
 
-        }
-        else {
+        } else {
             // We are going in Editor Mode
             this.switchToEditorMode();
 
         }
     };
 
-    EditorController.prototype.switchToGeographicMode = function()
-    {
+    EditorController.prototype.switchToGeographicMode = function () {
         this.clearImageEditor();
 
         //Check if there is a visible layer and if it is already published
         for (var iIndexLayer = 0; iIndexLayer < this.m_aoVisibleBands.length; iIndexLayer++) {
             // var bIsProductGeoreferenced = false;
-            var sColor="#f22323";
+            var sColor = "#f22323";
             var sGeoserverBBox = this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox;
 
             //check if the layer has the layer Id
@@ -769,43 +745,36 @@ var EditorController = (function () {
                 if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].layerId)) {
 
                     // show the layer
-                    if (this.m_b2DMapModeOn)
-                    {
+                    if (this.m_b2DMapModeOn) {
                         this.addLayerMap2DByServer(this.m_aoVisibleBands[iIndexLayer].layerId, this.m_aoVisibleBands[iIndexLayer].geoserverUrl);
-                        this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox,this.m_aoVisibleBands[iIndexLayer].layerId);
-                    }
-                    else
-                    {
+                        this.productIsNotGeoreferencedRectangle2DMap(sColor, sGeoserverBBox, this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
+                    } else {
                         this.addLayerMap3DByServer(this.m_aoVisibleBands[iIndexLayer].layerId, this.m_aoVisibleBands[iIndexLayer].geoserverUrl);
-                        var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
-                        if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
-                        {
+                        var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox, this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
+                        if (utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false) {
                             // this.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayer].layerId);
                             var oLayer3DMap = {
-                                id : this.m_aoVisibleBands[iIndexLayer].layerId,
-                                rectangle : oRectangleIsNotGeoreferencedProduct
+                                id: this.m_aoVisibleBands[iIndexLayer].layerId,
+                                rectangle: oRectangleIsNotGeoreferencedProduct
                             };
                             this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
                         }
                     }
 
                     // Check for geoserver bounding box
-                    if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox))
-                    {
+                    if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
                         this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
                         this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
-                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox,'geoserverBB',  this.m_aoVisibleBands[iIndexLayer].layerId);
-                    }
-                    else {
+                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
+                    } else {
                         // Try with the generic product bounding box
                         this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
                         this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
-                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox,'BB',  this.m_aoVisibleBands[iIndexLayer].layerId);
+                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
 
                     }
                 }
-            }
-            else {
+            } else {
 
                 var oController = this;
                 // should always be 0 ...
@@ -821,10 +790,9 @@ var EditorController = (function () {
                         // Publish the band
                         oController.openBandImage(oBand);
                         return true;
-                    }
-                    else {
+                    } else {
                         oController.removeBandFromVisibleList(oBand);
-                        var sNode = oBand.productName+"_"+oBand.name;
+                        var sNode = oBand.productName + "_" + oBand.name;
                         oController.setTreeNodeAsDeselected(sNode);
                         return false;
                     }
@@ -853,8 +821,8 @@ var EditorController = (function () {
         }
     };
 
-    EditorController.prototype.addExternalLayersOnMaps = function(){
-        for (var iExternals = 0; iExternals<this.m_aoExternalLayers.length; iExternals++) {
+    EditorController.prototype.addExternalLayersOnMaps = function () {
+        for (var iExternals = 0; iExternals < this.m_aoExternalLayers.length; iExternals++) {
             var oLayer = this.m_aoExternalLayers[iExternals];
 
             // Add to the map External Layer
@@ -863,7 +831,7 @@ var EditorController = (function () {
         }
     };
 
-    EditorController.prototype.switchToEditorMode = function(){
+    EditorController.prototype.switchToEditorMode = function () {
 
         var iNumberOfLayers = this.m_aoVisibleBands.length;
 
@@ -874,19 +842,14 @@ var EditorController = (function () {
             else this.m_oGlobeService.removeAllEntities();
         }
 
-        if (iNumberOfLayers == 0)
-        {
+        if (iNumberOfLayers == 0) {
             // If there are no layers go to the workspace bounding box
             if (this.m_b2DMapModeOn) this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             else this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-        }
-        else if (iNumberOfLayers == 1)
-        {
+        } else if (iNumberOfLayers == 1) {
             //if there is only one layer open it
             this.openBandImage(this.m_aoVisibleBands[0]);
-        }
-        else
-        {
+        } else {
             //if there are 2 or more layers remove all but the Active One
             var oController = this;
 
@@ -895,11 +858,10 @@ var EditorController = (function () {
                     // Clear the Map
                     if (oController.m_b2DMapModeOn) {
                         oController.m_oMapService.removeLayersFromMap();
-                    }
-                    else {
+                    } else {
 
                         oController.removeAllRedSquareBoundingBox();
-                         // oController.m_oGlobeService.removeAllEntities();
+                        // oController.m_oGlobeService.removeAllEntities();
                     }
 
                     var iNumberOfLayers = oController.m_aoVisibleBands.length;
@@ -909,10 +871,10 @@ var EditorController = (function () {
                             var sNodeId = oController.m_aoVisibleBands[iIndexLayer].productName + "_" + oController.m_aoVisibleBands[iIndexLayer].name;
                             oController.setTreeNodeAsDeselected(sNodeId);
 
-                            if (oController.m_b2DMapModeOn === false){
+                            if (oController.m_b2DMapModeOn === false) {
                                 //if there are bands not georeferenced we need to remove layers
                                 //(because oController.m_oGlobeService.removeAllEntities(); remove only the red square)
-                                 oController.removeBandLayersIn3dMaps("wasdi:" + oController.m_aoVisibleBands[iIndexLayer].layerId);
+                                oController.removeBandLayersIn3dMaps("wasdi:" + oController.m_aoVisibleBands[iIndexLayer].layerId);
                             }
 
                         }
@@ -920,26 +882,21 @@ var EditorController = (function () {
 
                     // Clear the list
 
-                    if( utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === true )
-                    {
-                        if(utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands) === false && oController.m_aoVisibleBands.length > 0)
-                        {
+                    if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === true) {
+                        if (utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands) === false && oController.m_aoVisibleBands.length > 0) {
                             //insert new active layer
                             oController.m_oActiveBand = oController.m_aoVisibleBands[oController.m_aoVisibleBands.length - 1];
-                            oController.m_aoVisibleBands.splice(0,oController.m_aoVisibleBands.length - 1);
+                            oController.m_aoVisibleBands.splice(0, oController.m_aoVisibleBands.length - 1);
                         }
 
-                    }
-                    else
-                    {
+                    } else {
                         oController.m_aoVisibleBands = [];
                         oController.m_aoVisibleBands.push(oController.m_oActiveBand);
                     }
                     // Reopen only the active one
                     oController.openBandImage(oController.m_oActiveBand);
                     return true;
-                }
-                else {
+                } else {
                     //revert status
                     oController.m_bIsActiveGeoraphicalMode = !oController.m_bIsActiveGeoraphicalMode;
                     return false;
@@ -963,9 +920,9 @@ var EditorController = (function () {
 
         // heightMapContainer = heightMapContainer;
         // widthMapContainer = widthMapContainer;
-        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
-            this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY,this.m_oImagePreviewDirectivePayload.viewportWidth,
-            this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer,this.m_oActiveBand.colorManipulation);
+        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name, this.m_oActiveBand.actualFilter,
+            this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY, this.m_oImagePreviewDirectivePayload.viewportWidth,
+            this.m_oImagePreviewDirectivePayload.viewportHeight, widthMapContainer, heightMapContainer, this.m_oActiveBand.colorManipulation);
 
         this.m_bIsEditorZoomingOnExistingImage = true;
 
@@ -992,9 +949,9 @@ var EditorController = (function () {
         var heightMapContainer = oMapContainerSize.height;
         var widthMapContainer = oMapContainerSize.width;
 
-        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
-            0, 0,this.m_oImagePreviewDirectivePayload.originalBandWidth, this.m_oImagePreviewDirectivePayload.originalBandHeight,
-            widthMapContainer,heightMapContainer,this.m_oActiveBand.colorManipulation);
+        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name, this.m_oActiveBand.actualFilter,
+            0, 0, this.m_oImagePreviewDirectivePayload.originalBandWidth, this.m_oImagePreviewDirectivePayload.originalBandHeight,
+            widthMapContainer, heightMapContainer, this.m_oActiveBand.colorManipulation);
 
         // Add user selected masks, if available
         oGetBandImageBody.productMasks = this.m_oActiveBand.productMasks;
@@ -1016,27 +973,27 @@ var EditorController = (function () {
     EditorController.prototype.receivedRabbitMessage = function (oMessage, oController) {
 
         // Check if the message is valid
-       if (oMessage == null) return;
+        if (oMessage == null) return;
 
         // Check the Result
         if (oMessage.messageResult == "KO") {
 
             var sOperation = "null";
-            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false) sOperation = oMessage.messageCode;
 
             var sErrorDescription = "";
 
             if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
-            if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
+            if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>" + sErrorDescription;
 
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS' + sErrorDescription);
             utilsVexCloseDialogAfter(10000, oDialog);
 
             // P.Campanella: 20191125: the loadProcessesFromServer is called by the rabbit stomp service
             //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
-            if (oMessage.messageCode =="PUBLISHBAND") {
-                if (utilsIsObjectNullOrUndefined(oMessage.payload)==false) {
+            if (oMessage.messageCode == "PUBLISHBAND") {
+                if (utilsIsObjectNullOrUndefined(oMessage.payload) == false) {
                     if (utilsIsObjectNullOrUndefined(oMessage.payload.productName) == false && utilsIsObjectNullOrUndefined(oMessage.payload.bandName) == false) {
                         var sNodeName = oMessage.payload.productName + "_" + oMessage.payload.bandName;
                         this.setTreeNodeAsDeselected(sNodeName);
@@ -1048,7 +1005,7 @@ var EditorController = (function () {
         }
 
         // Switch the Code
-        switch(oMessage.messageCode) {
+        switch (oMessage.messageCode) {
             case "PUBLISH":
                 oController.receivedPublishMessage(oMessage);
                 break;
@@ -1117,7 +1074,7 @@ var EditorController = (function () {
         var oPublishedBand = oMessage.payload;
 
         // Check if it is valid
-         if (utilsIsObjectNullOrUndefined(oPublishedBand)) {
+        if (utilsIsObjectNullOrUndefined(oPublishedBand)) {
             console.log("EditorController.receivedPublishBandMessage: Error Published band is empty...");
             return false;
         }
@@ -1137,7 +1094,7 @@ var EditorController = (function () {
         // Update the Band informations
         oBand.bVisibleNow = true;
         oBand.layerId = oPublishedBand.layerId;
-        oBand.published=true;
+        oBand.published = true;
         oBand.bbox = oPublishedBand.boundingBox;
         oBand.geoserverBoundingBox = oPublishedBand.geoserverBoundingBox;
         oBand.geoserverUrl = oPublishedBand.geoserverUrl;
@@ -1149,50 +1106,42 @@ var EditorController = (function () {
         if (this.m_bIsActiveGeoraphicalMode == false) {
             console.log("EditorController.receivedPublishBandMessage: we are not in geographical mode. Just update the band and return..");
             return false;
-        }
-        else {
+        } else {
             // Add layer in list
             // check if the background is in Editor Mode or in Georeferenced Mode
-            if (this.m_b2DMapModeOn == false)
-            {
-                var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(oBand.geoserverBoundingBox,oBand.bbox,  oBand.layerId);
-                if(utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
-                {
+            if (this.m_b2DMapModeOn == false) {
+                var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(oBand.geoserverBoundingBox, oBand.bbox, oBand.layerId);
+                if (utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false) {
                     this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
                     var oLayer3DMap = {
-                        id : oBand.layerId,
-                        rectangle : oRectangleIsNotGeoreferencedProduct
+                        id: oBand.layerId,
+                        rectangle: oRectangleIsNotGeoreferencedProduct
                     };
                     this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
                 }
 
                 //if we are in 3D put the layer on the globe
                 this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
-            }
-            else
-            {
-                var sColor="#f22323";
-                var sGeoserverBBox =oBand.geoserverBoundingBox;
-                this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,oBand.bbox,oBand.layerId);
+            } else {
+                var sColor = "#f22323";
+                var sGeoserverBBox = oBand.geoserverBoundingBox;
+                this.productIsNotGeoreferencedRectangle2DMap(sColor, sGeoserverBBox, oBand.bbox, oBand.layerId);
                 //if we are in 2D put it on the map
-                this.addLayerMap2DByServer(oBand.layerId,oBand.geoserverUrl);
+                this.addLayerMap2DByServer(oBand.layerId, oBand.geoserverUrl);
 
             }
 
             this.m_aoVisibleBands.push(oBand);
 
             //if there isn't Bounding Box is impossible to zoom
-            if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox))
-            {
+            if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
                 this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                 this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.saveBoundingBoxUndo(oBand.geoserverBoundingBox,'geoserverBB',oBand.layerId);
-            }
-            else
-            {
+                this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
+            } else {
                 this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
                 this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                this.saveBoundingBoxUndo(oBand.bbox,'BB',oBand.layerId);
+                this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
             }
 
         }
@@ -1204,20 +1153,16 @@ var EditorController = (function () {
      * @param sType
      * @returns {boolean}
      */
-    EditorController.prototype.saveBoundingBoxUndo = function (sBoundingBox,sType,sLayerId)
-    {
-        if(utilsIsStrNullOrEmpty(sBoundingBox) === true || utilsIsStrNullOrEmpty(sType) === true || utilsIsStrNullOrEmpty(sLayerId) )
-        {
+    EditorController.prototype.saveBoundingBoxUndo = function (sBoundingBox, sType, sLayerId) {
+        if (utilsIsStrNullOrEmpty(sBoundingBox) === true || utilsIsStrNullOrEmpty(sType) === true || utilsIsStrNullOrEmpty(sLayerId)) {
             return false;
         }
-        if( sType !== 'geoserverBB' && sType !== 'BB')
-        {
+        if (sType !== 'geoserverBB' && sType !== 'BB') {
             return false;
         }
 
 
-        if( utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox) === false)
-        {
+        if (utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox) === false) {
             this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox = this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox;
             this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType = this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType;
             this.m_oUndoRedoBoundigBoxesZoom.undoLayerId = this.m_oUndoRedoBoundigBoxesZoom.actualLayerId;
@@ -1240,13 +1185,11 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.isActiveUndoMode = function()
-    {
+    EditorController.prototype.isActiveUndoMode = function () {
         return utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox) === false;
     };
 
-    EditorController.prototype.isActiveRedoMode = function()
-    {
+    EditorController.prototype.isActiveRedoMode = function () {
         return utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox) === false;
     };
 
@@ -1254,10 +1197,8 @@ var EditorController = (function () {
      *
      * @param sLayerdId
      */
-    EditorController.prototype.removeUndoBoundingBox = function(sLayerId)
-    {
-        if( (utilsIsStrNullOrEmpty(sLayerId) === false) && (this.m_oUndoRedoBoundigBoxesZoom.undoLayerId === sLayerId) )
-        {
+    EditorController.prototype.removeUndoBoundingBox = function (sLayerId) {
+        if ((utilsIsStrNullOrEmpty(sLayerId) === false) && (this.m_oUndoRedoBoundigBoxesZoom.undoLayerId === sLayerId)) {
             this.m_oUndoRedoBoundigBoxesZoom.undoLayerId = "";
             this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox = "";
             this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType = "";
@@ -1268,13 +1209,11 @@ var EditorController = (function () {
      *
      * @param sLayerdId
      */
-    EditorController.prototype.removeActualBoundingBox = function(sLayerId)
-    {
-        if( (utilsIsStrNullOrEmpty(sLayerId) === false) && (this.m_oUndoRedoBoundigBoxesZoom.actualLayerId === sLayerId) )
-        {
+    EditorController.prototype.removeActualBoundingBox = function (sLayerId) {
+        if ((utilsIsStrNullOrEmpty(sLayerId) === false) && (this.m_oUndoRedoBoundigBoxesZoom.actualLayerId === sLayerId)) {
             this.m_oUndoRedoBoundigBoxesZoom.actualLayerId = this.m_oUndoRedoBoundigBoxesZoom.undoLayerId;
             this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox = this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox;
-            this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType =  this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType;
+            this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType = this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType;
 
             this.m_oUndoRedoBoundigBoxesZoom.undoLayerId = "";
             this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox = "";
@@ -1286,14 +1225,10 @@ var EditorController = (function () {
     /**
      *
      */
-    EditorController.prototype.clickOnUndoZoom2DMap = function ()
-    {
-        if(  this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType === "geoserverBB" )
-        {
+    EditorController.prototype.clickOnUndoZoom2DMap = function () {
+        if (this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType === "geoserverBB") {
             this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
-        }
-        else
-        {
+        } else {
             this.m_oMapService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
         }
     };
@@ -1301,42 +1236,30 @@ var EditorController = (function () {
     /**
      *
      */
-    EditorController.prototype.clickOnUndoZoom3DGLobe = function ()
-    {
-        if(  this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType === "geoserverBB" )
-        {
+    EditorController.prototype.clickOnUndoZoom3DGLobe = function () {
+        if (this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType === "geoserverBB") {
             this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
-        }
-        else
-        {
+        } else {
             this.m_oGlobeService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
         }
     };
     /**
      *
      */
-    EditorController.prototype.clickOnRedoZoom2DMap = function()
-    {
-        if(  this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType === "geoserverBB" )
-        {
+    EditorController.prototype.clickOnRedoZoom2DMap = function () {
+        if (this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType === "geoserverBB") {
             this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
-        }
-        else
-        {
+        } else {
             this.m_oMapService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
         }
     };
     /**
      *
      */
-    EditorController.prototype.clickOnRedoZoom3DGlobe = function()
-    {
-        if(  this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType === "geoserverBB" )
-        {
+    EditorController.prototype.clickOnRedoZoom3DGlobe = function () {
+        if (this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType === "geoserverBB") {
             this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
-        }
-        else
-        {
+        } else {
             this.m_oGlobeService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
         }
     };
@@ -1378,7 +1301,6 @@ var EditorController = (function () {
     };
 
 
-
     /**
      * Get a list of bands for a product
      * @param oProductItem
@@ -1405,8 +1327,7 @@ var EditorController = (function () {
 
             if (!utilsIsObjectNullOrUndefined(aoBands[i].published)) {
                 oBandItem.published = aoBands[i].published;
-            }
-            else {
+            } else {
                 if (utilsIsStrNullOrEmpty(aoBands[i].layerId)) oBandItem.published = false;
                 else oBandItem.published = true;
             }
@@ -1440,9 +1361,8 @@ var EditorController = (function () {
                 for (var iIndex = 0; iIndex < data.length; iIndex++) {
 
                     //check if friendly file name isn't null
-                    if(utilsIsObjectNullOrUndefined(data[iIndex].productFriendlyName) == true)
-                    {
-                        data[iIndex].productFriendlyName =  data[iIndex].name;
+                    if (utilsIsObjectNullOrUndefined(data[iIndex].productFriendlyName) == true) {
+                        data[iIndex].productFriendlyName = data[iIndex].name;
                     }
 
                     // Add the product to the list
@@ -1498,19 +1418,16 @@ var EditorController = (function () {
      * @param sFileNameInput
      * @returns {*}
      */
-    EditorController.prototype.findProductByFileName = function(sFileNameInput)
-    {
-        if ( (utilsIsObjectNullOrUndefined(sFileNameInput) == true) && (utilsIsStrNullOrEmpty(sFileNameInput) == true))  return null;
-        if (utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)  return null;
+    EditorController.prototype.findProductByFileName = function (sFileNameInput) {
+        if ((utilsIsObjectNullOrUndefined(sFileNameInput) == true) && (utilsIsStrNullOrEmpty(sFileNameInput) == true)) return null;
+        if (utilsIsObjectNullOrUndefined(this.m_aoProducts) == true) return null;
 
         var iNumberOfProducts = this.m_aoProducts.length;
 
-        if(this.m_aoProducts.length == 0) return null;
+        if (this.m_aoProducts.length == 0) return null;
 
-        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
-        {
-            if( this.m_aoProducts[iIndexProduct].fileName == sFileNameInput )
-            {
+        for (var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++) {
+            if (this.m_aoProducts[iIndexProduct].fileName == sFileNameInput) {
                 return this.m_aoProducts[iIndexProduct];
             }
         }
@@ -1525,7 +1442,7 @@ var EditorController = (function () {
      * Called from the tree to open a band
      * @param oBand
      */
-    EditorController.prototype.openBandImage = function (oBand ) {
+    EditorController.prototype.openBandImage = function (oBand) {
 
         var oController = this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
@@ -1537,7 +1454,7 @@ var EditorController = (function () {
         //set navigation tab
         this.m_iActiveMapPanelTab = 0;
         //set default value for preview image
-        this.m_sPreviewUrlSelectedBand="empty";
+        this.m_sPreviewUrlSelectedBand = "empty";
 
         // CHECK THE ACTUAL MODE
         if (this.m_bIsActiveGeoraphicalMode) {
@@ -1553,30 +1470,25 @@ var EditorController = (function () {
                 if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
                     /*if the band was published*/
 
-                    if (data.messageCode === "PUBLISHBAND")
-                    {
+                    if (data.messageCode === "PUBLISHBAND") {
                         // Already published: we already have the View Model
                         oController.receivedPublishBandMessage(data);
-                    }
-                    else
-                    {
+                    } else {
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         // It is publishing: we will receive Rabbit Message
-                        if (data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
+                        if (data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
                     }
 
-                }
-                else {
+                } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
-                    oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
+                    oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
                 }
             }).error(function (data, status) {
                 console.log('publish band error');
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
-                oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
+                oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
             });
-        }
-        else {
+        } else {
 
             // Get Dimension of the Canvas
             var oMapContainerSize = this.getMapContainerSize(this.m_iPanScalingValue);
@@ -1584,8 +1496,8 @@ var EditorController = (function () {
             var widthMapContainer = oMapContainerSize.width;
 
             // Create body to get big image
-            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, oBand.actualFilter, 0,0,
-                                        oBand.width,oBand.height,widthMapContainer, heightMapContainer,oBand.colorManipulation);
+            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName, oBand.name, oBand.actualFilter, 0, 0,
+                oBand.width, oBand.height, widthMapContainer, heightMapContainer, oBand.colorManipulation);
             // this.m_oImageMapDirectivePayload = oBodyMapContainer;
             // Disable the not till the end of the API
             var sNode = this.m_aoProducts[oBand.productIndex].productName + "_" + oBand.bandName;
@@ -1602,7 +1514,7 @@ var EditorController = (function () {
             // There was a band visualized before?
             if (utilsIsObjectNullOrUndefined(oLastActiveBand) == false) {
                 // Deselect the node
-                var sOldNodeId = oLastActiveBand.productName+"_"+oLastActiveBand.name;
+                var sOldNodeId = oLastActiveBand.productName + "_" + oLastActiveBand.name;
                 // Deselect it
                 oController.setTreeNodeAsDeselected(sOldNodeId);
                 // Remove it from Visible Layer List
@@ -1635,15 +1547,15 @@ var EditorController = (function () {
         //     // Yes call API also for preview
         //     var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,
         //                             widthImagePreview, heightImagePreview,oBand.colorManipulation);
-            // // Show it
-            // oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
+        // // Show it
+        // oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
         // }
     };
 
     /**
      * Clears the image editor both versions: the big image and the image preview
      */
-    EditorController.prototype.clearImageEditor = function() {
+    EditorController.prototype.clearImageEditor = function () {
         // Clear the preview
         this.m_sPreviewUrlSelectedBand = "empty";
         // Clear the Editor Image
@@ -1656,19 +1568,16 @@ var EditorController = (function () {
      * @param workspaceId
      * @returns {boolean}
      */
-    EditorController.prototype.processingGetBandPreview = function(oBody, workspaceId)
-    {
-        if(utilsIsObjectNullOrUndefined(oBody) === true) return false;
-        if(utilsIsStrNullOrEmpty(workspaceId) === true) return false;
+    EditorController.prototype.processingGetBandPreview = function (oBody, workspaceId) {
+        if (utilsIsObjectNullOrUndefined(oBody) === true) return false;
+        if (utilsIsStrNullOrEmpty(workspaceId) === true) return false;
 
         var oController = this;
         this.m_bIsLoadedPreviewBandImage = false;
 
-        this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
-            if (data != null)
-            {
-                if (data != undefined)
-                {
+        this.m_oFilterService.getProductBand(oBody, workspaceId).success(function (data, status) {
+            if (data != null) {
+                if (data != undefined) {
                     var blob = new Blob([data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sPreviewUrlSelectedBand = objectUrl;
@@ -1692,29 +1601,26 @@ var EditorController = (function () {
      * @param workspaceId
      * @returns {boolean}
      */
-    EditorController.prototype.processingGetBandImage = function(oBody, workspaceId)
-    {
-        if(utilsIsStrNullOrEmpty(workspaceId) === true) return false;
+    EditorController.prototype.processingGetBandImage = function (oBody, workspaceId) {
+        if (utilsIsStrNullOrEmpty(workspaceId) === true) return false;
 
         var oController = this;
         this.m_bIsLoadedViewBandImage = false;
         var sUrl = null;
 
         // P.Campanella 20/11/2019: TODO Test the redirect of the getProductBand to the node that hosts the workspace
-        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false ) {
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
             sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
         }
-        this.m_oFilterService.getProductBand(oBody,workspaceId, sUrl).success(function (data, status) {
+        this.m_oFilterService.getProductBand(oBody, workspaceId, sUrl).success(function (data, status) {
 
             // Anyway this is not more a zoom.
             oController.m_bIsEditorZoomingOnExistingImage = false;
             // Stop the waiter
             oController.m_bIsLoadedViewBandImage = true;
 
-            if (data != null)
-            {
-                if (data != undefined)
-                {
+            if (data != null) {
+                if (data != undefined) {
                     // Create the link to the stream
                     var blob = new Blob([data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
@@ -1765,8 +1671,8 @@ var EditorController = (function () {
      * @param iOutputHeight Height of the output image
      * @returns {{productFileName: *, bandName: *, filterVM: *, vp_x: *, vp_y: *, vp_w: *, vp_h: *, img_w: *, img_h: *}}
      */
-    EditorController.prototype.createBodyForProcessingBandImage = function(sFileName, sBandName, sFilters, iRectangleX, iRectangleY,
-                                                                           iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight,oColorManipulation){
+    EditorController.prototype.createBodyForProcessingBandImage = function (sFileName, sBandName, sFilters, iRectangleX, iRectangleY,
+                                                                            iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight, oColorManipulation) {
 
         var oBandImageBody = {
             "productFileName": sFileName,
@@ -1778,7 +1684,7 @@ var EditorController = (function () {
             "vp_h": iRectangleHeight,
             "img_w": iOutputWidth,
             "img_h": iOutputHeight,
-            "colorManiputalion":oColorManipulation
+            "colorManiputalion": oColorManipulation
         };
 
         return oBandImageBody;
@@ -1797,8 +1703,7 @@ var EditorController = (function () {
             return false;
         }
 
-        if(utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false)
-        {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) {
             //delete color manipulation in jstree (the colour manipulation is passed with reference)
             delete this.m_oActiveBand.colorManipulation;
         }
@@ -1832,8 +1737,7 @@ var EditorController = (function () {
                 this.removeUndoBoundingBox(oBand.layerId);
                 // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
                 // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-            }
-            else {
+            } else {
 
                 // We Are in editor mode
 
@@ -1845,8 +1749,7 @@ var EditorController = (function () {
                 // Fly Home
                 // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
-        }
-        else {
+        } else {
 
             this.removeBandLayersIn3dMaps(sLayerId);
 
@@ -1879,7 +1782,7 @@ var EditorController = (function () {
         }
 
         // Deselect the node
-        var sOldNodeId = oBand.productName+"_"+oBand.name;
+        var sOldNodeId = oBand.productName + "_" + oBand.name;
         // Deselect it
         this.setTreeNodeAsDeselected(sOldNodeId);
         // Remove it from Visible Layer List
@@ -1887,40 +1790,37 @@ var EditorController = (function () {
 
     };
 
-    EditorController.prototype.removeRedSquareIn3DMap = function(sLayerId){
+    EditorController.prototype.removeRedSquareIn3DMap = function (sLayerId) {
         var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
-        for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
-        {
+        for (var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++) {
 
             var sProductLayerId = "";
-            if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
-                utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
-            {
+            if (this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
+                utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false) {
                 sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
             }
-            if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
+            if (utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
             {
                 this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
-                utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
+                utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced, this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
                 break;
             }
         }
     }
-    EditorController.prototype.removeAllRedSquareBoundingBox = function(){
+    EditorController.prototype.removeAllRedSquareBoundingBox = function () {
         this.m_oGlobeService.removeAllEntities();
     };
 
-    EditorController.prototype.removeBandLayersIn3dMaps = function(sLayerId){
+    EditorController.prototype.removeBandLayersIn3dMaps = function (sLayerId) {
         // We are in 3d Mode
         var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
         // var oGlobe = this.m_oGlobeService.getGlobe();
 
         //Remove band layer
-        for (var iIndexLayer=0; iIndexLayer<aoGlobeLayers.length; iIndexLayer++) {
+        for (var iIndexLayer = 0; iIndexLayer < aoGlobeLayers.length; iIndexLayer++) {
             var oLayer = aoGlobeLayers.get(iIndexLayer);
 
-            if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId)
-            {
+            if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId) {
                 oLayer = aoGlobeLayers.remove(oLayer);
                 // oLayer = oGlobe.remove(oLayer);
                 //break;
@@ -1934,18 +1834,17 @@ var EditorController = (function () {
      * Removes a band from the list of visible Bands
      * @param oBand
      */
-    EditorController.prototype.removeBandFromVisibleList = function(oBand) {
+    EditorController.prototype.removeBandFromVisibleList = function (oBand) {
         var iVisibleBandCount = 0;
 
         if (utilsIsObjectNullOrUndefined(this.m_aoVisibleBands) == false) iVisibleBandCount = this.m_aoVisibleBands.length;
 
-        for (var iIndex = 0; iIndex < iVisibleBandCount; ) {
+        for (var iIndex = 0; iIndex < iVisibleBandCount;) {
 
             if (this.m_aoVisibleBands[iIndex].productName == oBand.productName && this.m_aoVisibleBands[iIndex].name == oBand.name) {
-                this.m_aoVisibleBands.splice(iIndex,1);
+                this.m_aoVisibleBands.splice(iIndex, 1);
                 iVisibleBandCount--;
-            }
-            else iIndex++;
+            } else iIndex++;
         }
     };
 
@@ -1968,7 +1867,7 @@ var EditorController = (function () {
 
         //it set the zindex of layer in map
         wmsLayer.setZIndex(1000);
-       // .leaflet-tile { border: solid black 5px; }
+        // .leaflet-tile { border: solid black 5px; }
         wmsLayer.addTo(oMap);
 
         return true;
@@ -2003,22 +1902,22 @@ var EditorController = (function () {
      * Add layer on 3d map from a specific server
      * @param sLayerId
      */
-    EditorController.prototype.addLayerMap3DByServer = function (sLayerId,sServer) {
+    EditorController.prototype.addLayerMap3DByServer = function (sLayerId, sServer) {
         if (sLayerId == null) return false;
-        if(sServer == null) return this.addLayerMap3D(sLayerId);
+        if (sServer == null) return this.addLayerMap3D(sLayerId);
 
-        var oGlobeLayers=this.m_oGlobeService.getGlobeLayers();
+        var oGlobeLayers = this.m_oGlobeService.getGlobeLayers();
 
-        var oWMSOptions= { // wms options
+        var oWMSOptions = { // wms options
             transparent: true,
             format: 'image/png'
         };
 
         // WMS get GEOSERVER
         var oProvider = new Cesium.WebMapServiceImageryProvider({
-            url : sServer,
+            url: sServer,
             layers: sLayerId,
-            parameters : oWMSOptions
+            parameters: oWMSOptions
 
         });
 
@@ -2029,9 +1928,9 @@ var EditorController = (function () {
      * Add a layer from a specific server on the 2D map
      * @param sLayerId
      */
-    EditorController.prototype.addLayerMap2DByServer = function (sLayerId,sServer) {
+    EditorController.prototype.addLayerMap2DByServer = function (sLayerId, sServer) {
         // Chech input data
-        if(sServer == null) return this.addLayerMap2D(sLayerId);
+        if (sServer == null) return this.addLayerMap2D(sLayerId);
         if (sLayerId == null) return false;
 
         var oMap = this.m_oMapService.getMap();
@@ -2040,7 +1939,7 @@ var EditorController = (function () {
             layers: sLayerId,
             format: 'image/png',
             transparent: true,
-            noWrap:true
+            noWrap: true
         });
         wmsLayer.setZIndex(1000);//it set the zindex of layer in map
         wmsLayer.addTo(oMap);
@@ -2090,11 +1989,10 @@ var EditorController = (function () {
 
         if (this.m_bIsVisiblePixelInfo == true) {
             $('.leaflet-popup-pane').css({"visibility": "visible"});
-            $('.leaflet-container').css('cursor','crosshair');
-        }
-        else {
+            $('.leaflet-container').css('cursor', 'crosshair');
+        } else {
             $('.leaflet-popup-pane').css({"visibility": "hidden"});
-            $('.leaflet-container').css('cursor','');
+            $('.leaflet-container').css('cursor', '');
         }
     };
 
@@ -2105,8 +2003,7 @@ var EditorController = (function () {
     EditorController.prototype.goWorkspaceHome = function () {
         if (this.m_b2DMapModeOn) {
             this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-        }
-        else {
+        } else {
             this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
     };
@@ -2141,15 +2038,12 @@ var EditorController = (function () {
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openMergeDialog = function (oSelectedProduct,oWindow) {
+    EditorController.prototype.openMergeDialog = function (oSelectedProduct, oWindow) {
 
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         this.m_oModalService.showModal({
@@ -2177,32 +2071,28 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.openMergeDialogInNavBar = function(oWindow)
-    {
+    EditorController.prototype.openMergeDialogInNavBar = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
-        oWindow.openMergeDialog(null,oController);
+        oWindow.openMergeDialog(null, oController);
     };
 
     /**
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openWorkflowDialog = function(){
+    EditorController.prototype.openWorkflowDialog = function () {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_operation/WorkFlowView.html",
             controller: "WorkFlowController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts
+                    products: oController.m_aoProducts
                 }
             }
         }).then(function (modal) {
@@ -2219,14 +2109,11 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openProcessorDialog = function(oWindow){
+    EditorController.prototype.openProcessorDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2235,7 +2122,7 @@ var EditorController = (function () {
             controller: "ProcessorController",
             inputs: {
                 extras: {
-                    processor:null
+                    processor: null
                 }
             }
         }).then(function (modal) {
@@ -2251,14 +2138,11 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.open_eDriftFloodEventDialog = function(oWindow){
+    EditorController.prototype.open_eDriftFloodEventDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2267,7 +2151,7 @@ var EditorController = (function () {
             controller: "eDriftFloodEventDialogController",
             inputs: {
                 extras: {
-                    processor:null
+                    processor: null
                 }
             }
         }).then(function (modal) {
@@ -2276,7 +2160,7 @@ var EditorController = (function () {
                 keyboard: false
             });
             modal.close.then(function (oResult) {
-                var i=0;
+                var i = 0;
                 i++;
             });
         });
@@ -2287,15 +2171,11 @@ var EditorController = (function () {
      * openWPSDialog
      * @returns {boolean}
      */
-    EditorController.prototype.openWPSDialog = function(oWindow)
-    {
+    EditorController.prototype.openWPSDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2322,15 +2202,11 @@ var EditorController = (function () {
      * openWPSDialog
      * @returns {boolean}
      */
-    EditorController.prototype.openMosaicDialog = function(oWindow)
-    {
+    EditorController.prototype.openMosaicDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2340,7 +2216,7 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     // products:oController.m_aoProducts
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
 
                 }
             }
@@ -2359,14 +2235,11 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openWorkflowManagerDialog = function(oWindow){
+    EditorController.prototype.openWorkflowManagerDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2375,8 +2248,8 @@ var EditorController = (function () {
             controller: "WorkFlowManagerController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
-                    workflowId:oController.m_oActiveWorkspace.workspaceId
+                    products: oController.m_aoProducts,
+                    workflowId: oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
@@ -2395,14 +2268,11 @@ var EditorController = (function () {
      * @param oWindow
      * @returns {boolean}
      */
-    EditorController.prototype.openImportsDialog = function(oWindow){
+    EditorController.prototype.openImportsDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2437,9 +2307,8 @@ var EditorController = (function () {
      * @param oFunctionSuccess
      * @param oFunctionError
      */
-    EditorController.prototype.getApplyOrbit = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
-    {
-        oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    EditorController.prototype.getApplyOrbit = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
+        oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
     };
     /**
      * getMultilooking
@@ -2451,9 +2320,8 @@ var EditorController = (function () {
      * @param oFunctionSuccess
      * @param oFunctionError
      */
-    EditorController.prototype.getMultilooking = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
-    {
-        oController.m_oSnapOperationService.Multilooking(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    EditorController.prototype.getMultilooking = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
+        oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
     };
     /**
      * getRadiometricCalibration
@@ -2465,9 +2333,8 @@ var EditorController = (function () {
      * @param oFunctionSuccess
      * @param oFunctionError
      */
-    EditorController.prototype.getRadiometricCalibration = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
-    {
-        oController.m_oSnapOperationService.Calibrate(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    EditorController.prototype.getRadiometricCalibration = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
+        oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
     };
     /**
      * getRangeDopplerTerrainCorrection
@@ -2479,14 +2346,12 @@ var EditorController = (function () {
      * @param oFunctionSuccess
      * @param oFunctionError
      */
-    EditorController.prototype.getRangeDopplerTerrainCorrection = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
-    {
-        oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    EditorController.prototype.getRangeDopplerTerrainCorrection = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
+        oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
     };
 
-    EditorController.prototype.getNDVI = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
-    {
-        oController.m_oSnapOperationService.NDVI(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    EditorController.prototype.getNDVI = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
+        oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
     };
 
     /**
@@ -2496,11 +2361,9 @@ var EditorController = (function () {
      * @param oOperationServerRequest
      * @returns {boolean}
      */
-    EditorController.prototype.openGenerateOperationDialog = function(oOperation,sName,oOperationServerRequest)
-    {
-        if( (utilsIsObjectNullOrUndefined(oOperation) === true) || (utilsIsStrNullOrEmpty(sName) === true) ||
-            (utilsIsObjectNullOrUndefined(oOperationServerRequest) === true) )
-        {
+    EditorController.prototype.openGenerateOperationDialog = function (oOperation, sName, oOperationServerRequest) {
+        if ((utilsIsObjectNullOrUndefined(oOperation) === true) || (utilsIsStrNullOrEmpty(sName) === true) ||
+            (utilsIsObjectNullOrUndefined(oOperationServerRequest) === true)) {
             return false;
         }
         // oOperationServerRequest = this.m_oSnapOperationService.ApplyOrbit();
@@ -2510,36 +2373,34 @@ var EditorController = (function () {
             controller: "GenerateAutomaticOperationDialogController",
             inputs: {
                 extras: {
-                    getParameters:oOperation,
-                    products:oController.m_aoProducts,
-                    nameDialog:sName
-                //     products:oController.m_aoProducts,
-                //     workflowId:oController.m_oActiveWorkspace.workspaceId
+                    getParameters: oOperation,
+                    products: oController.m_aoProducts,
+                    nameDialog: sName
+                    //     products:oController.m_aoProducts,
+                    //     workflowId:oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE " + sName.toUpperCase() + " OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
 
-                if(oResult == "close")
+                if (oResult == "close")
                     return false;
 
                 var iNumberOfProduct = oResult.length;
-                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
-                {
+                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
                     var oFunctionSuccess = function (data) {
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                     };
                     var oFunctionError = function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION " + sName.toUpperCase()  +" DOESN'T WORK");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION " + sName.toUpperCase() + " DOESN'T WORK");
                     }
-                    oOperationServerRequest(oController,oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options,oFunctionSuccess,oFunctionError);
+                    oOperationServerRequest(oController, oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
+                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options, oFunctionSuccess, oFunctionError);
                 }
                 return true;
             });
@@ -2553,7 +2414,7 @@ var EditorController = (function () {
     EditorController.prototype.openMaskManagerFromImageEditor = function () {
         if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
         var oFoundProduct = this.m_aoProducts[this.m_oActiveBand.productIndex];
-        this.openMaskManager(this.m_oActiveBand,oFoundProduct);
+        this.openMaskManager(this.m_oActiveBand, oFoundProduct);
     };
 
     /**
@@ -2562,7 +2423,7 @@ var EditorController = (function () {
     EditorController.prototype.openEditPanelFromImageEditor = function () {
         if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
         var oFoundProduct = this.m_aoProducts[this.m_oActiveBand.productIndex];
-        this.openEditPanelDialog(this.m_oActiveBand,oFoundProduct);
+        this.openEditPanelDialog(this.m_oActiveBand, oFoundProduct);
     };
 
     /**
@@ -2576,7 +2437,7 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openMaskManager = function(oBand,oProduct){
+    EditorController.prototype.openMaskManager = function (oBand, oProduct) {
         var oController = this;
         var oFinalBand = oBand;
 
@@ -2585,10 +2446,10 @@ var EditorController = (function () {
             controller: "MaskManagerController",
             inputs: {
                 extras: {
-                    band:oBand,
-                    product:oProduct,
+                    band: oBand,
+                    product: oProduct,
                     workspaceId: oController.m_oActiveWorkspace.workspaceId,
-                    masksSaved:oController.m_oMasksSaved
+                    masksSaved: oController.m_oMasksSaved
                 }
             }
         }).then(function (modal) {
@@ -2596,8 +2457,8 @@ var EditorController = (function () {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                if(utilsIsObjectNullOrUndefined(oResult) === true) return false;
-                if(utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
+                if (utilsIsObjectNullOrUndefined(oResult) === true) return false;
+                if (utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
 
                 //sav filter
                 oController.m_oMasksSaved = oResult.listOfMasks;
@@ -2609,12 +2470,9 @@ var EditorController = (function () {
                 oFinalBand.rangeMasks = oResult.body.rangeMasks;
                 oFinalBand.mathMasks = oResult.body.mathMasks;
                 oController.m_bIsLoadedViewBandImage = false;
-                oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status)
-                {
-                    if (data != null)
-                    {
-                        if (data != undefined)
-                        {
+                oController.m_oFilterService.getProductBand(oResult.body, oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+                    if (data != null) {
+                        if (data != undefined) {
                             // Create the link to the stream
                             var blob = new Blob([data], {type: "octet/stream"});
                             var objectUrl = URL.createObjectURL(blob);
@@ -2634,42 +2492,32 @@ var EditorController = (function () {
         return true;
     };
 
-    EditorController.prototype.openWappsDialog = function(oWindow)
-    {
+    EditorController.prototype.openWappsDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/wapps/WappsViewDialog.html",
             controller: "WappsController",
             inputs: {
-                extras: {
-
-                }
+                extras: {}
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
     };
 
-    EditorController.prototype.openShareDialog = function(oWindow)
-    {
+    EditorController.prototype.openShareDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         oController.m_oModalService.showModal({
@@ -2677,12 +2525,12 @@ var EditorController = (function () {
             controller: "ShareWorkspaceController",
             inputs: {
                 extras: {
-                    workspace:oController.m_oActiveWorkspace
+                    workspace: oController.m_oActiveWorkspace
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
@@ -2692,15 +2540,11 @@ var EditorController = (function () {
      * openListtFloodAreaDetectionDialog
      * @param oWindow
      */
-    EditorController.prototype.openListtFloodAreaDetectionDialog = function(oWindow)
-    {
+    EditorController.prototype.openListtFloodAreaDetectionDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2709,26 +2553,22 @@ var EditorController = (function () {
             controller: "ListFloodAreaDetectionController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
     };
 
-    EditorController.prototype.openJRCClassificationDialog = function(oWindow)
-    {
+    EditorController.prototype.openJRCClassificationDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2737,25 +2577,21 @@ var EditorController = (function () {
             controller: "JRCClassificationController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
     };
-    EditorController.prototype.openJRCS2TestProcessor = function(oWindow)
-    {
+    EditorController.prototype.openJRCS2TestProcessor = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2764,26 +2600,22 @@ var EditorController = (function () {
             controller: "JRCS2Controller",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
     };
 
-    EditorController.prototype.openEDriftCheckImagesAvailability = function(oWindow)
-    {
+    EditorController.prototype.openEDriftCheckImagesAvailability = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2792,27 +2624,23 @@ var EditorController = (function () {
             controller: "EdriftCheckImagesTool",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
     };
 
 
-    EditorController.prototype.openEDriftFloodAutomaticChain = function(oWindow)
-    {
+    EditorController.prototype.openEDriftFloodAutomaticChain = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2821,12 +2649,12 @@ var EditorController = (function () {
             controller: "EDriftFloodAutomaticChainController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
@@ -2835,15 +2663,11 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.openJRCWorkflowDialog = function(oWindow)
-    {
+    EditorController.prototype.openJRCWorkflowDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2852,26 +2676,22 @@ var EditorController = (function () {
             controller: "JRCWorkflowController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
     };
 
-    EditorController.prototype.openUploadFileDialog = function(oWindow)
-    {
+    EditorController.prototype.openUploadFileDialog = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
 
@@ -2880,12 +2700,12 @@ var EditorController = (function () {
             controller: "UploadFileController",
             inputs: {
                 extras: {
-                    workflowId:oController.m_oActiveWorkspace.workspaceId
+                    workflowId: oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function(oResult){
+            modal.close.then(function (oResult) {
 
             });
         });
@@ -2896,15 +2716,12 @@ var EditorController = (function () {
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct,oWindow) {
+    EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct, oWindow) {
 
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         this.m_oModalService.showModal({
@@ -2912,30 +2729,28 @@ var EditorController = (function () {
             controller: "ApplyOrbitController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
-                    selectedProduct:oSelectedProduct
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
-                if(oResult == "close")
+                if (oResult == "close")
                     return false;
                 var iNumberOfProduct = oResult.length;
-                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
-                {
+                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
                     // oController.m_oScope.Result = oResult;
                     oController.m_oSnapOperationService.ApplyOrbit(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                                                                    oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options)
+                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
                         .success(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
-                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
                     });
                 }
 
@@ -2954,12 +2769,9 @@ var EditorController = (function () {
     EditorController.prototype.openRasorDialog = function (oWindow) {
 
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         oController.m_oModalService.showModal({
@@ -2967,15 +2779,14 @@ var EditorController = (function () {
             controller: "RasorWappController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
 
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
@@ -2995,12 +2806,9 @@ var EditorController = (function () {
     EditorController.prototype.openWappDialog = function (oWindow) {
 
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         oController.m_oModalService.showModal({
@@ -3008,15 +2816,14 @@ var EditorController = (function () {
             controller: "OperaWappController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products: oController.m_aoProducts,
 
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
@@ -3032,32 +2839,25 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.openApplyOrbitDialogInNavBar = function(oWindow)
-    {
+    EditorController.prototype.openApplyOrbitDialogInNavBar = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
-        oWindow.openApplyOrbitDialog(null,oController);
+        oWindow.openApplyOrbitDialog(null, oController);
     }
     /**
      *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openRadiometricCalibrationDialog = function (oSelectedProduct,oWindow) {
+    EditorController.prototype.openRadiometricCalibrationDialog = function (oSelectedProduct, oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         this.m_oModalService.showModal({
@@ -3065,27 +2865,25 @@ var EditorController = (function () {
             controller: "RadiometricCalibrationController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
-                    selectedProduct:oSelectedProduct
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE NDVI OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
-                if(oResult == "close")
+                if (oResult == "close")
                     return false;
                 var iNumberOfProduct = oResult.length;
-                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
-                {
+                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
                     // oController.m_oScope.Result = oResult;
                     oController.m_oSnapOperationService.Calibrate(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                                                                oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
+                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
                         .success(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
@@ -3102,32 +2900,25 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.openRadiometricCalibrationDialogInNavBar = function(oWindow)
-    {
+    EditorController.prototype.openRadiometricCalibrationDialogInNavBar = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
-        oWindow.openRadiometricCalibrationDialog(null,oController);
+        oWindow.openRadiometricCalibrationDialog(null, oController);
     }
     /**
      *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openMultilookingDialog = function (oSelectedProduct,oWindow) {
+    EditorController.prototype.openMultilookingDialog = function (oSelectedProduct, oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         this.m_oModalService.showModal({
@@ -3135,27 +2926,25 @@ var EditorController = (function () {
             controller: "MultilookingController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
-                    selectedProduct:oSelectedProduct
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE MULTILOOKING OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
-                if(oResult == "close")
+                if (oResult == "close")
                     return false;
 
                 var iNumberOfProduct = oResult.length;
-                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
-                {
+                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
                     oController.m_oSnapOperationService.Multilooking(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                                            oController.m_oActiveWorkspace.workspaceId,oResult[[iIndexProduct]].options)
+                        oController.m_oActiveWorkspace.workspaceId, oResult[[iIndexProduct]].options)
                         .success(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
@@ -3164,7 +2953,7 @@ var EditorController = (function () {
                 }
 
                 return true;
-                    // oController.m_oScope.Result = oResult;
+                // oController.m_oScope.Result = oResult;
                 // oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                 //     .success(function (data) {
                 //
@@ -3182,32 +2971,25 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.openMultilookingDialogInNavBar = function(oWindow)
-    {
+    EditorController.prototype.openMultilookingDialogInNavBar = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
-        oWindow.openMultilookingDialog(null,oController);
+        oWindow.openMultilookingDialog(null, oController);
     }
     /**
      *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openNDVIDialog = function (oSelectedProduct,oWindow) {
+    EditorController.prototype.openNDVIDialog = function (oSelectedProduct, oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         oController.m_oModalService.showModal({
@@ -3215,26 +2997,24 @@ var EditorController = (function () {
             controller: "NDVIController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
-                    selectedProduct:oSelectedProduct
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE NDVI OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
-                if(oResult == "close")
+                if (oResult == "close")
                     return false;
                 var iNumberOfSelectedProducts = oResult.length;
-                for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts ; iIndexSelectedProduct++)
-                {
+                for (var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts; iIndexSelectedProduct++) {
                     var oProduct = oResult[iIndexSelectedProduct];
-                    oController.m_oSnapOperationService.NDVI(oProduct.sourceFileName, oProduct.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oProduct.options)
+                    oController.m_oSnapOperationService.NDVI(oProduct.sourceFileName, oProduct.destinationFileName, oController.m_oActiveWorkspace.workspaceId, oProduct.options)
                         .success(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
@@ -3259,18 +3039,14 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.openNDVIDialogInNavBar = function(oWindow)
-    {
+    EditorController.prototype.openNDVIDialogInNavBar = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
-        oWindow.openNDVIDialog(null,oController);
+        oWindow.openNDVIDialog(null, oController);
     }
     /**
      * When user right click on a product and choose 'Properties' a dialog
@@ -3278,21 +3054,20 @@ var EditorController = (function () {
      * @param oProductInput
      * @returns {boolean}
      */
-    EditorController.prototype.openProductInfoDialog = function (oProductInput)
-    {
+    EditorController.prototype.openProductInfoDialog = function (oProductInput) {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
             controller: "ProductEditorInfoController",
             inputs: {
                 extras: {
-                    product:oProductInput
+                    product: oProductInput
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
-                if(utilsIsObjectNullOrUndefined(result)===true)
+                if (utilsIsObjectNullOrUndefined(result) === true)
                     return false;
                 //TODO ADD FILENAME = RESULT
                 // oController.m_oScope.Result = result;
@@ -3308,15 +3083,11 @@ var EditorController = (function () {
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct,oWindow)
-    {
+    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct, oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
         this.m_oModalService.showModal({
@@ -3324,28 +3095,26 @@ var EditorController = (function () {
             controller: "RangeDopplerTerrainCorrectionController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
-                    selectedProduct:oSelectedProduct
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                if(utilsIsObjectNullOrUndefined(oResult) == true)
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) == true) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE RANGE DOPPLER TERRAIN CORRECTION OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
-                if(oResult == "close")
+                if (oResult == "close")
                     return false;
 
                 var iNumberOfProduct = oResult.length;
-                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
-                {
+                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
                     // oController.m_oScope.Result = oResult;
                     oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                                                                                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
+                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
                         .success(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
@@ -3362,27 +3131,22 @@ var EditorController = (function () {
      *
      * @param oWindow
      */
-    EditorController.prototype.rangeDopplerTerrainCorrectionDialogInNavBar = function(oWindow)
-    {
+    EditorController.prototype.rangeDopplerTerrainCorrectionDialogInNavBar = function (oWindow) {
         var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
             oController = this;
-        }
-        else
-        {
+        } else {
             oController = oWindow;
         }
-        oWindow.rangeDopplerTerrainCorrectionDialog(null,oController);
+        oWindow.rangeDopplerTerrainCorrectionDialog(null, oController);
     }
     /**
      *
      * @param oSelectedBand
      * @returns {boolean}
      */
-    EditorController.prototype.filterBandDialog = function (oSelectedBand)
-    {
-        if(utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
+    EditorController.prototype.filterBandDialog = function (oSelectedBand) {
+        if (utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
 
         var oController = this;
         var oFinalSelectedBand = oSelectedBand;
@@ -3392,15 +3156,15 @@ var EditorController = (function () {
             controller: "FilterBandController",
             inputs: {
                 extras: {
-                    workspaceId : this.m_oActiveWorkspace.workspaceId,
+                    workspaceId: this.m_oActiveWorkspace.workspaceId,
                     selectedBand: oSelectedBand
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                if(utilsIsObjectNullOrUndefined(oResult) === true)  return false;
-                if(utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
+                if (utilsIsObjectNullOrUndefined(oResult) === true) return false;
+                if (utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
 
                 // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
                 var oMapContainerSize = oController.getMapContainerSize(oController.m_iPanScalingValue);
@@ -3413,8 +3177,8 @@ var EditorController = (function () {
 
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
 
-                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,
-                                    oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer,oResult.band.colorManipulation);
+                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName, oResult.band.name, oResult.filter, 0, 0,
+                    oResult.band.width, oResult.band.height, widthMapContainer, heightMapContainer, oResult.band.colorManipulation);
 
                 // Filters does not apply in the preview
 
@@ -3435,8 +3199,7 @@ var EditorController = (function () {
     };
 
 
-    EditorController.prototype.openEditPanelDialog = function (oBand,oProduct)
-    {
+    EditorController.prototype.openEditPanelDialog = function (oBand, oProduct) {
         // if(utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
 
         var oController = this;
@@ -3447,18 +3210,18 @@ var EditorController = (function () {
             controller: "EditPanelController",
             inputs: {
                 extras: {
-                    maskManager:{
-                        band:oBand,
-                        product:oProduct,
+                    maskManager: {
+                        band: oBand,
+                        product: oProduct,
                         workspaceId: oController.m_oActiveWorkspace.workspaceId,
-                        masksSaved:oController.m_oMasksSaved,
+                        masksSaved: oController.m_oMasksSaved,
                     },
-                    filterBand:{
+                    filterBand: {
                         workspaceId: oController.m_oActiveWorkspace.workspaceId,
-                        selectedBand:oBand
+                        selectedBand: oBand
                     },
-                    colorManipulation:{
-                        panScalingValue:oController.m_iPanScalingValue
+                    colorManipulation: {
+                        panScalingValue: oController.m_iPanScalingValue
                     }
 
                 }
@@ -3467,24 +3230,20 @@ var EditorController = (function () {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                if(utilsIsObjectNullOrUndefined(oResult) || utilsIsString(oResult))
-                {
+                if (utilsIsObjectNullOrUndefined(oResult) || utilsIsString(oResult)) {
                     return false;
                 }
 
-                if(oResult.hasOwnProperty("listOfMasks") === true)
-                {
-                    oController.runMaskManager(oResult,oController,oFinalSelectedBand);
+                if (oResult.hasOwnProperty("listOfMasks") === true) {
+                    oController.runMaskManager(oResult, oController, oFinalSelectedBand);
                     return true;
 
                 }
-                if(oResult.hasOwnProperty("filter") === true)
-                {
-                    oController.runFilterBand(oResult,oController,oFinalSelectedBand);
+                if (oResult.hasOwnProperty("filter") === true) {
+                    oController.runFilterBand(oResult, oController, oFinalSelectedBand);
                     return true;
                 }
-                if(oResult.hasOwnProperty("bodyMapContainer") === true)
-                {
+                if (oResult.hasOwnProperty("bodyMapContainer") === true) {
                     oController.processingGetBandImage(oResult.bodyMapContainer, oResult.workspaceId);
                 }
                 return false;
@@ -3493,9 +3252,9 @@ var EditorController = (function () {
         return true;
     };
 
-    EditorController.prototype.runMaskManager = function(oResult,oController,oFinalBand){
-        if(utilsIsObjectNullOrUndefined(oResult) === true) return false;
-        if(utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
+    EditorController.prototype.runMaskManager = function (oResult, oController, oFinalBand) {
+        if (utilsIsObjectNullOrUndefined(oResult) === true) return false;
+        if (utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
 
         //sav filter
         oController.m_oMasksSaved = oResult.listOfMasks;
@@ -3507,12 +3266,9 @@ var EditorController = (function () {
         oFinalBand.rangeMasks = oResult.body.rangeMasks;
         oFinalBand.mathMasks = oResult.body.mathMasks;
         oController.m_bIsLoadedViewBandImage = false;
-        oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status)
-        {
-            if (data != null)
-            {
-                if (data != undefined)
-                {
+        oController.m_oFilterService.getProductBand(oResult.body, oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+            if (data != null) {
+                if (data != undefined) {
                     // Create the link to the stream
                     var blob = new Blob([data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
@@ -3523,9 +3279,9 @@ var EditorController = (function () {
         });
     };
 
-    EditorController.prototype.runFilterBand = function (oResult,oController,oFinalSelectedBand) {
-        if(utilsIsObjectNullOrUndefined(oResult) === true)  return false;
-        if(utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
+    EditorController.prototype.runFilterBand = function (oResult, oController, oFinalSelectedBand) {
+        if (utilsIsObjectNullOrUndefined(oResult) === true) return false;
+        if (utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
 
         // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
         var oMapContainerSize = oController.getMapContainerSize(oController.m_iPanScalingValue);
@@ -3538,8 +3294,8 @@ var EditorController = (function () {
 
         var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
 
-        var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,
-            oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer,oResult.band.colorManipulation);
+        var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName, oResult.band.name, oResult.filter, 0, 0,
+            oResult.band.width, oResult.band.height, widthMapContainer, heightMapContainer, oResult.band.colorManipulation);
 
         // Filters does not apply in the preview
 
@@ -3556,68 +3312,56 @@ var EditorController = (function () {
         return true;
     };
 
-    EditorController.prototype.getMapContainerSize = function( iScalingValue){
+    EditorController.prototype.getMapContainerSize = function (iScalingValue) {
         var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
         var heightMapContainer = elementMapContainer[0].offsetHeight * iScalingValue;
         var widthMapContainer = elementMapContainer[0].offsetWidth * iScalingValue;
 
         return {
-            height:heightMapContainer,
-            width:widthMapContainer
+            height: heightMapContainer,
+            width: widthMapContainer
         };
 
     }
     /*********************************************************** OPERATION MENU ***********************************************************/
 
 
-    EditorController.prototype.hideOperationMainBar= function()
-    {
+    EditorController.prototype.hideOperationMainBar = function () {
         this.m_oAreHideBars.mainBar = true;
     };
-    EditorController.prototype.hideOperationRadarBar = function()
-    {
+    EditorController.prototype.hideOperationRadarBar = function () {
         this.m_oAreHideBars.radarBar = true;
     };
-    EditorController.prototype.hideProcessorBar = function()
-    {
+    EditorController.prototype.hideProcessorBar = function () {
         this.m_oAreHideBars.processorBar = true;
     };
-    EditorController.prototype.hideOperationOpticalBar= function()
-    {
+    EditorController.prototype.hideOperationOpticalBar = function () {
         this.m_oAreHideBars.opticalBar = true;
     };
-    EditorController.prototype.showOperationMainBar= function()
-    {
+    EditorController.prototype.showOperationMainBar = function () {
         this.m_oAreHideBars.mainBar = false;
     };
-    EditorController.prototype.showOperationRadarBar = function()
-    {
+    EditorController.prototype.showOperationRadarBar = function () {
         this.m_oAreHideBars.radarBar = false;
     };
-    EditorController.prototype.showOperationOpticalBar= function()
-    {
+    EditorController.prototype.showOperationOpticalBar = function () {
         this.m_oAreHideBars.opticalBar = false;
     };
-    EditorController.prototype.showOperationProcessor= function()
-    {
+    EditorController.prototype.showOperationProcessor = function () {
         this.m_oAreHideBars.processorBar = false;
     };
 
-    EditorController.prototype.isHiddenOperationMainBar= function()
-    {
+    EditorController.prototype.isHiddenOperationMainBar = function () {
         return this.m_oAreHideBars.mainBar;
     };
-    EditorController.prototype.isHiddenOperationRadarBar = function()
-    {
+    EditorController.prototype.isHiddenOperationRadarBar = function () {
         return this.m_oAreHideBars.radarBar;
     };
-    EditorController.prototype.isHiddenProcessorBar = function()
-    {
+    EditorController.prototype.isHiddenProcessorBar = function () {
         return this.m_oAreHideBars.processorBar;
     };
 
-    EditorController.prototype.isHiddenOperationOpticalBar= function()
-    {
+    EditorController.prototype.isHiddenOperationOpticalBar = function () {
         return this.m_oAreHideBars.opticalBar;
     };
 
@@ -3625,38 +3369,31 @@ var EditorController = (function () {
     /*********************************************************** CSS CHANGE ***********************************************************/
 
 
-    EditorController.prototype.changeClassBtnSwitchGeographic = function()
-    {
-        if(this.m_sClassBtnSwitchGeographic === "btn-switch-not-geographic"  )
-        {
+    EditorController.prototype.changeClassBtnSwitchGeographic = function () {
+        if (this.m_sClassBtnSwitchGeographic === "btn-switch-not-geographic") {
             this.m_sClassBtnSwitchGeographic = "btn-switch-geographic";
             this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
-        }
-        else
-        {
+        } else {
             this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
             this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
         }
     };
 
 
-    EditorController.prototype.changeModeOnOffPixelInfo = function()
-    {
+    EditorController.prototype.changeModeOnOffPixelInfo = function () {
         this.m_bIsModeOnPixelInfo = !this.m_bIsModeOnPixelInfo;
     };
 
-    EditorController.prototype.getClassPixelInfo = function()
-    {
-        if( this.m_bIsModeOnPixelInfo )
+    EditorController.prototype.getClassPixelInfo = function () {
+        if (this.m_bIsModeOnPixelInfo)
             return "#009036";//green
         else
             return "#43516A";//white
 
     };
 
-    EditorController.prototype.goSearch = function()
-    {
-        this.m_oState.go("root.import", { });
+    EditorController.prototype.goSearch = function () {
+        this.m_oState.go("root.import", {});
     };
 
 
@@ -3667,22 +3404,20 @@ var EditorController = (function () {
      * @param sNameDiv
      * @returns {boolean}
      */
-    EditorController.prototype.drawColourManipulationHistogram = function(sNameDiv,afValues)
-    {
+    EditorController.prototype.drawColourManipulationHistogram = function (sNameDiv, afValues) {
 
-        if(utilsIsStrNullOrEmpty(sNameDiv) === true)
+        if (utilsIsStrNullOrEmpty(sNameDiv) === true)
             return false;
-        if(utilsIsObjectNullOrUndefined(afValues) === true)
+        if (utilsIsObjectNullOrUndefined(afValues) === true)
             return false;
         //todo test
-        var x = utilsGenerateArrayWithFirstNIntValue(0,afValues.length);
-        if(utilsIsObjectNullOrUndefined(x) === true)
-        {
+        var x = utilsGenerateArrayWithFirstNIntValue(0, afValues.length);
+        if (utilsIsObjectNullOrUndefined(x) === true) {
             return false;
         }
 
         var trace = {
-            x: x ,
+            x: x,
             y: afValues,
             // type: 'histogram'
             type: 'bar',
@@ -3694,13 +3429,13 @@ var EditorController = (function () {
         var layout = {
             // title: "Colour Manipolation",
             showlegend: false,
-            height:200,
-            width:500,
+            height: 200,
+            width: 500,
             xaxis: {
                 showgrid: true,
                 zeroline: true,
             },
-            paper_bgcolor:"#000000",
+            paper_bgcolor: "#000000",
             // paper_bgcolor:"#EF4343",
             margin: {
                 l: 5,
@@ -3711,7 +3446,7 @@ var EditorController = (function () {
             },
 
         };
-        Plotly.newPlot(sNameDiv, data,layout,{staticPlot: true});//,layout,{staticPlot: true}
+        Plotly.newPlot(sNameDiv, data, layout, {staticPlot: true});//,layout,{staticPlot: true}
 
         return true;
     };
@@ -3721,16 +3456,14 @@ var EditorController = (function () {
      * @param oColorManipulation
      * @returns {boolean}
      */
-    EditorController.prototype.adjust95percentageColourManipulation = function(oColorManipulation)
-    {
-        if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
-        {
+    EditorController.prototype.adjust95percentageColourManipulation = function (oColorManipulation) {
+        if (utilsIsObjectNullOrUndefined(oColorManipulation) === true) {
             return false;
         }
         //min value
         oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
         //average value
-        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
+        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2);
         //max value
         oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
 
@@ -3738,9 +3471,11 @@ var EditorController = (function () {
 
         return true;
     };
-    EditorController.prototype.equalizeHistogram = function(src, dst) {
+    EditorController.prototype.equalizeHistogram = function (src, dst) {
         var srcLength = src.length;
-        if (!dst) { dst = src; }
+        if (!dst) {
+            dst = src;
+        }
 
         // Compute histogram and histogram sum:
         var hist = new Float32Array(512);
@@ -3764,21 +3499,19 @@ var EditorController = (function () {
         return dst;
     }
 
-    EditorController.prototype.adjust100percentageColourManipulation = function(oColorManipulation)
-    {
-        if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
-        {
+    EditorController.prototype.adjust100percentageColourManipulation = function (oColorManipulation) {
+        if (utilsIsObjectNullOrUndefined(oColorManipulation) === true) {
             return false;
         }
         //min value
         oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
         //average value
-        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
+        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2);
         //max value
         oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
 
         var test = [];
-        this.equalizeHistogram(oColorManipulation.histogramBins,test);
+        this.equalizeHistogram(oColorManipulation.histogramBins, test);
 
         //processing product with the new color manipulation
     };
@@ -3805,78 +3538,64 @@ var EditorController = (function () {
     //     this.averageSliderColourManipulation(aoSlidersColors);
     // };
 
-    EditorController.prototype.minSliderColourManipulation = function(aoSlidersColors)
-    {
+    EditorController.prototype.minSliderColourManipulation = function (aoSlidersColors) {
         var iMaxValue = parseInt(aoSlidersColors[2].value);
         var iMinValue = parseInt(aoSlidersColors[0].value);
         var iAverageValue = parseInt(aoSlidersColors[1].value);
         // the min value can't be bigger average
-        if(iMinValue >= iAverageValue)
-        {
+        if (iMinValue >= iAverageValue) {
             aoSlidersColors[1].value = parseInt(aoSlidersColors[0].value);
-            if(iAverageValue >= iMaxValue)
-            {
+            if (iAverageValue >= iMaxValue) {
                 //set max value with average
                 aoSlidersColors[2].value = parseInt(aoSlidersColors[1].value);
             }
         }
     };
-    EditorController.prototype.maxSliderColourManipulation = function(aoSlidersColors)
-    {
+    EditorController.prototype.maxSliderColourManipulation = function (aoSlidersColors) {
         var iMaxValue = parseInt(aoSlidersColors[2].value);
         var iMinValue = parseInt(aoSlidersColors[0].value);
         var iAverageValue = parseInt(aoSlidersColors[1].value);
 
         // the max value can't be smaller average
-        if(iMaxValue <= iAverageValue)
-        {
+        if (iMaxValue <= iAverageValue) {
             //set average with max value
             aoSlidersColors[1].value = parseInt(aoSlidersColors[2].value);
-            if(iAverageValue <= iMinValue)
-            {
+            if (iAverageValue <= iMinValue) {
                 //set min value with average
                 aoSlidersColors[0].value = parseInt(aoSlidersColors[1].value);
             }
 
         }
     };
-    EditorController.prototype.averageSliderColourManipulation = function(aoSlidersColors)
-    {
+    EditorController.prototype.averageSliderColourManipulation = function (aoSlidersColors) {
         var iMaxValue = parseInt(aoSlidersColors[2].value);
         var iMinValue = parseInt(aoSlidersColors[0].value);
         var iAverageValue = parseInt(aoSlidersColors[1].value);
         // the average must be bigger than min value and smaller than max value
-        if( iAverageValue >= iMaxValue )
-        {
+        if (iAverageValue >= iMaxValue) {
             //set max value with average
             aoSlidersColors[2].value = parseInt(aoSlidersColors[1].value);
         }
-        if( iAverageValue <= iMinValue )
-        {
+        if (iAverageValue <= iMinValue) {
             //set min value with average
             aoSlidersColors[0].value = parseInt(aoSlidersColors[1].value);
         }
 
     };
 
-    EditorController.prototype.getProductColorManipulation = function(sFile,sBand,bAccurate,sWorkspaceId)
-    {
-        if( utilsIsStrNullOrEmpty(sFile) === true || utilsIsStrNullOrEmpty(sBand) === true || utilsIsStrNullOrEmpty(sWorkspaceId) === true || utilsIsObjectNullOrUndefined(bAccurate) === true )
-        {
+    EditorController.prototype.getProductColorManipulation = function (sFile, sBand, bAccurate, sWorkspaceId) {
+        if (utilsIsStrNullOrEmpty(sFile) === true || utilsIsStrNullOrEmpty(sBand) === true || utilsIsStrNullOrEmpty(sWorkspaceId) === true || utilsIsObjectNullOrUndefined(bAccurate) === true) {
             return false;
         }
         var oController = this;
         this.m_bIsLoadingColourManipulation = true;
-        this.m_oSnapOperationService.getProductColorManipulation(sFile,sBand,bAccurate,sWorkspaceId).success(function (data, status) {
-            if (data != null)
-            {
-                if (data != undefined)
-                {
+        this.m_oSnapOperationService.getProductColorManipulation(sFile, sBand, bAccurate, sWorkspaceId).success(function (data, status) {
+            if (data != null) {
+                if (data != undefined) {
                     // oController.m_oColorManipulation = data;
-                    if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === false)
-                    {
+                    if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === false) {
                         oController.m_oActiveBand.colorManipulation = data;
-                        oController.drawColourManipulationHistogram("colourManipulationDiv",data.histogramBins);
+                        oController.drawColourManipulationHistogram("colourManipulationDiv", data.histogramBins);
 
                     }
                 }
@@ -3893,11 +3612,10 @@ var EditorController = (function () {
     /**
      * processingProductColorManipulation
      */
-    EditorController.prototype.processingProductColorManipulation = function()
-    {
+    EditorController.prototype.processingProductColorManipulation = function () {
         if (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === true) return;
 
-        var sWorkspaceId,oBand;
+        var sWorkspaceId, oBand;
         oBand = this.m_oActiveBand;
         sWorkspaceId = this.m_oActiveWorkspace.workspaceId;
 
@@ -3908,15 +3626,13 @@ var EditorController = (function () {
 
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
         //get body
-        var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name,oBand.actualFilter,0,0,
-                                                oBand.width, oBand.height,widthMapContainer, heightMapContainer, oBand.colorManipulation);
+        var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName, oBand.name, oBand.actualFilter, 0, 0,
+            oBand.width, oBand.height, widthMapContainer, heightMapContainer, oBand.colorManipulation);
         //processing image with color manipulation
         this.processingGetBandImage(oBodyMapContainer, sWorkspaceId);
     }
-    EditorController.prototype.getDefaultProductColorManipulation = function()
-    {
-        if(utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation ) === false)
-        {
+    EditorController.prototype.getDefaultProductColorManipulation = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === false) {
             delete this.m_oActiveBand.colorManipulation;
             //without the property body.colorManipulation the server return default colorManipulation
         }
@@ -3924,20 +3640,17 @@ var EditorController = (function () {
         this.processingProductColorManipulation()
     }
 
-    EditorController.prototype.generateColor = function(oColors)
-    {
-        if( utilsIsObjectNullOrUndefined(oColors) === true )
-        {
+    EditorController.prototype.generateColor = function (oColors) {
+        if (utilsIsObjectNullOrUndefined(oColors) === true) {
             return "";
         }
 
-        return "rgb(" + oColors.colorBlue + "," + oColors.colorGreen + "," + oColors.colorRed +")";
+        return "rgb(" + oColors.colorBlue + "," + oColors.colorGreen + "," + oColors.colorRed + ")";
     };
     /********************************************************** TREE FUNCTIONS *********************************************************************/
 
-    EditorController.prototype.isHideTree = function()
-    {
-        return ( (this.m_oTree === null) || (this.m_oTree.core.data.length === 0) );
+    EditorController.prototype.isHideTree = function () {
+        return ((this.m_oTree === null) || (this.m_oTree.core.data.length === 0));
     };
 
 
@@ -3947,21 +3660,18 @@ var EditorController = (function () {
      * @param oNewTree
      * @param iIndexNewTreeAttribute
      */
-    EditorController.prototype.generateMetadatadTree = function(oElement,oNewTree,iIndexNewTreeAttribute)
-    {
-        if (typeof oElement != "undefined" && oElement != null)
-        {
+    EditorController.prototype.generateMetadatadTree = function (oElement, oNewTree, iIndexNewTreeAttribute) {
+        if (typeof oElement != "undefined" && oElement != null) {
             var oNode = new Object();
-            oNode.text=oElement.name;
-            oNode.children= [];
+            oNode.text = oElement.name;
+            oNode.children = [];
             oNewTree.push(oNode);
 
-            if(oElement.elements != null)// if is a leaf
+            if (oElement.elements != null)// if is a leaf
             {
                 // i call the algorithm for all child
-                for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
-                {
-                    this.generateMetadatadTree(oElement.elements[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
+                for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++) {
+                    this.generateMetadatadTree(oElement.elements[iIndexNumberElements], oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
                 }
             }
         }
@@ -3972,9 +3682,9 @@ var EditorController = (function () {
      * Set a node as deselected
      * @param sNode
      */
-    EditorController.prototype.setTreeNodeAsDeselected = function(sNode) {
+    EditorController.prototype.setTreeNodeAsDeselected = function (sNode) {
         $("#jstree").jstree().enable_node(sNode);
-        $('#jstree').jstree(true).set_icon(sNode,'assets/icons/uncheck_20x20.png');
+        $('#jstree').jstree(true).set_icon(sNode, 'assets/icons/uncheck_20x20.png');
 
         // It is no more visible now
         var oNode = $('#jstree').jstree(true).get_node(sNode);
@@ -3986,9 +3696,9 @@ var EditorController = (function () {
      * Set a node as selected
      * @param sNode
      */
-    EditorController.prototype.setTreeNodeAsSelected = function(sNode) {
+    EditorController.prototype.setTreeNodeAsSelected = function (sNode) {
         $("#jstree").jstree().enable_node(sNode);
-        $('#jstree').jstree(true).set_icon(sNode,'assets/icons/check_20x20.png');
+        $('#jstree').jstree(true).set_icon(sNode, 'assets/icons/check_20x20.png');
 
         var oNode = $('#jstree').jstree(true).get_node(sNode); //oLayer.layerId
         if (utilsIsObjectNullOrUndefined(oNode.original) == false) oNode.original.band.bVisibleNow = true;
@@ -3999,10 +3709,10 @@ var EditorController = (function () {
      * Set a node as published
      * @param sNode
      */
-    EditorController.prototype.setTreeNodeAsPublished = function(sNode) {
+    EditorController.prototype.setTreeNodeAsPublished = function (sNode) {
         var sLabelText = $("#jstree").jstree().get_text(sNode);
         sLabelText = sLabelText.replace("band-not-published-label", "band-published-label");
-        utilsJstreeUpdateLabelNode(sNode,sLabelText);
+        utilsJstreeUpdateLabelNode(sNode, sLabelText);
     };
 
 
@@ -4010,7 +3720,7 @@ var EditorController = (function () {
      * Enable a Node (is possible to click)
      * @param sNode
      */
-    EditorController.prototype.setTreeNodeEnabled = function(sNode) {
+    EditorController.prototype.setTreeNodeEnabled = function (sNode) {
         $("#jstree").jstree().enable_node(sNode);
     };
 
@@ -4018,7 +3728,7 @@ var EditorController = (function () {
      * Disable a Node (impossible to click)
      * @param sNode
      */
-    EditorController.prototype.setTreeNodeDisabled = function(sNode) {
+    EditorController.prototype.setTreeNodeDisabled = function (sNode) {
         $("#jstree").jstree().disable_node(sNode);
     };
 
@@ -4042,15 +3752,15 @@ var EditorController = (function () {
      * @returns {boolean}
      */
     EditorController.prototype.selectNodeByFileNameInTree = function (sFileName) {
-        if(utilsIsObjectNullOrUndefined(sFileName) == true)  return false;
+        if (utilsIsObjectNullOrUndefined(sFileName) == true) return false;
 
         var treeInst = $('#jstree').jstree(true);
         var m = treeInst._model.data;
         for (var i in m) {
-            if (!utilsIsObjectNullOrUndefined(m[i].original)  && m[i].original.fileName == sFileName) {//&& !utilsIsObjectNullOrUndefined(m[i].original.band)
+            if (!utilsIsObjectNullOrUndefined(m[i].original) && m[i].original.fileName == sFileName) {//&& !utilsIsObjectNullOrUndefined(m[i].original.band)
                 $("#jstree").jstree(true).deselect_all();
                 // CARE WE CAN'T DO OPEN_NODE AND SELECET_NODE AT THE SAME TIME
-                $("#jstree").jstree(true).select_node(m[i].id,true);
+                $("#jstree").jstree(true).select_node(m[i].id, true);
                 // $("#jstree").jstree(true).open_node(m[i].id,true);
                 break;
             }
@@ -4064,20 +3774,19 @@ var EditorController = (function () {
      * @param sNewNameInput
      * @returns {boolean}
      */
-    EditorController.prototype.renameNodeInTree = function (sFileName,sNewNameInput) {
-        if((utilsIsObjectNullOrUndefined(sNewNameInput) == true) || (utilsIsStrNullOrEmpty(sNewNameInput) == true)) return false;
+    EditorController.prototype.renameNodeInTree = function (sFileName, sNewNameInput) {
+        if ((utilsIsObjectNullOrUndefined(sNewNameInput) == true) || (utilsIsStrNullOrEmpty(sNewNameInput) == true)) return false;
 
         var treeInst = $('#jstree').jstree(true);
         var m = treeInst._model.data;
         for (var i in m) {
             if (!utilsIsObjectNullOrUndefined(m[i].original) && m[i].original.fileName == sFileName) {
-                $("#jstree").jstree(true).rename_node(m[i].id,sNewNameInput);
+                $("#jstree").jstree(true).rename_node(m[i].id, sNewNameInput);
                 break;
             }
         }
         return true;
     };
-
 
 
     /**
@@ -4119,11 +3828,11 @@ var EditorController = (function () {
         var oTree =
             {
                 'core': {'data': [], "check_callback": true},
-                "state" : { "key" : "state_tree" },
-                "plugins": ["contextmenu","state","search"], // all plugin in use
-                "search":{
-                    "show_only_matches":true,
-                    "show_only_matches_children":true
+                "state": {"key": "state_tree"},
+                "plugins": ["contextmenu", "state", "search"], // all plugin in use
+                "search": {
+                    "show_only_matches": true,
+                    "show_only_matches_children": true
                 },
                 "contextmenu": { // my right click menu
                     "items": function ($node) {
@@ -4139,7 +3848,7 @@ var EditorController = (function () {
                                     "Radar": {
                                         "label": "Radar",
                                         "action": false,
-                                        "icon":"radar-icon-context-menu-jstree",
+                                        "icon": "radar-icon-context-menu-jstree",
                                         "submenu":
                                             {
                                                 //APPLY ORBIT
@@ -4147,14 +3856,14 @@ var EditorController = (function () {
                                                     "label": "Apply Orbit",
                                                     "action": function (obj) {
                                                         var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false)  oController.openApplyOrbitDialog(oFoundProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openApplyOrbitDialog(oFoundProduct);
                                                     }
                                                 },
                                                 "Multilooking": {
                                                     "label": "Multilooking",
                                                     "action": function (obj) {
                                                         var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false)  oController.openMultilookingDialog(oFoundProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openMultilookingDialog(oFoundProduct);
                                                     }
                                                 },
 
@@ -4163,7 +3872,7 @@ var EditorController = (function () {
                                                     "action": function (obj) {
                                                         var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
-                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFoundProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFoundProduct);
                                                     }
                                                 },
 
@@ -4171,7 +3880,7 @@ var EditorController = (function () {
                                                     "label": "Calibrate",
                                                     "action": function (obj) {
                                                         var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openRadiometricCalibrationDialog(oFoundProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openRadiometricCalibrationDialog(oFoundProduct);
 
                                                     }
                                                 }
@@ -4180,41 +3889,41 @@ var EditorController = (function () {
                                     "Optical": {
                                         "label": "Optical",
                                         "action": false,
-                                        "icon":"optical-icon-context-menu-jstree",
+                                        "icon": "optical-icon-context-menu-jstree",
                                         "submenu":
                                             {
                                                 "NDVI": {
                                                     "label": "NDVI",
                                                     "action": function (obj) {
                                                         var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openNDVIDialog(oFoundProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openNDVIDialog(oFoundProduct);
                                                     }
                                                 }
                                             }
                                     },
-                                    "Workflow":{
+                                    "Workflow": {
                                         "label": "Workflow",
                                         "action": function (obj) {
                                             var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
-                                            if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowManagerDialog();
+                                            if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowManagerDialog();
                                         }
 
                                     },
-                                    "Filter Band":{
+                                    "Filter Band": {
                                         "label": "Filter Band",
-                                        "action" : function(pbj){
-                                            if(utilsIsObjectNullOrUndefined(oBand) == false)
+                                        "action": function (pbj) {
+                                            if (utilsIsObjectNullOrUndefined(oBand) == false)
                                                 oController.filterBandDialog(oBand);
                                         },
                                         "_disabled": !$node.original.band.bVisibleNow
                                     },
-                                    "Mask Manager":{
-                                    "label": "Mask Manager",
-                                    "action" : function(pbj){
-                                        if(utilsIsObjectNullOrUndefined(oBand) == false)
-                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                            oController.openMaskManager(oBand,oFoundProduct);
+                                    "Mask Manager": {
+                                        "label": "Mask Manager",
+                                        "action": function (pbj) {
+                                            if (utilsIsObjectNullOrUndefined(oBand) == false)
+                                                var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                            oController.openMaskManager(oBand, oFoundProduct);
                                         },
                                         "_disabled": !$node.original.band.bVisibleNow
                                     },
@@ -4226,30 +3935,30 @@ var EditorController = (function () {
                                             }
                                         },
                                         // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
-                                        "_disabled": ( oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode()=== true )
+                                        "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
                                     },
-                                    "Zoom3D" : {
-                                        "label" : "Zoom Band 3D Map",
-                                        "action" : function (obj) {
-                                            if(utilsIsObjectNullOrUndefined(oBand) == false) {
+                                    "Zoom3D": {
+                                        "label": "Zoom Band 3D Map",
+                                        "action": function (obj) {
+                                            if (utilsIsObjectNullOrUndefined(oBand) == false) {
                                                 oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
                                             }
                                         },
                                         // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
-                                        "_disabled": (  oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode()=== true )
+                                        "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
                                     },
                                     "Properties": {
                                         "label": "Properties ",
-                                        "icon":"info-icon-context-menu-jstree",
-                                        "separator_before":true,
+                                        "icon": "info-icon-context-menu-jstree",
+                                        "separator_before": true,
                                         "action": function (obj) {
                                             var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                            if (utilsIsObjectNullOrUndefined(oFoundProduct)==false) oController.openProductInfoDialog(oFoundProduct);
+                                            if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
                                         }
                                     },
                                     "DeleteProduct": {
                                         "label": "Delete Product",
-                                        "icon":"delete-icon-context-menu-jstree",
+                                        "icon": "delete-icon-context-menu-jstree",
 
                                         "action": function (obj) {
 
@@ -4257,7 +3966,7 @@ var EditorController = (function () {
                                                 var bDeleteFile = false;
                                                 var bDeleteLayer = false;
                                                 if (value) {
-                                                    if (value.files == 'on')  bDeleteFile = true;
+                                                    if (value.files == 'on') bDeleteFile = true;
                                                     if (value.geoserver == 'on') bDeleteLayer = true;
                                                     this.temp = $node.parents[1];
                                                     var that = this;
@@ -4268,16 +3977,13 @@ var EditorController = (function () {
                                                         var iLengthLayer = oController.m_aoVisibleBands.length;
                                                         var iLengthChildren_d = that.temp.children_d.length;
 
-                                                        for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
-                                                        {
+                                                        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
                                                             oController.removeAllRedSquareBoundingBox();
                                                             oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                            for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
-                                                            {
+                                                            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
 
 
-                                                                if( that.temp.children_d[iIndexChildren] ===  oController.m_aoVisibleBands[iIndexLayer].layerId)
-                                                                {
+                                                                if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
                                                                     oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
                                                                     break;
                                                                 }
@@ -4307,7 +4013,7 @@ var EditorController = (function () {
                                     "Radar": {
                                         "label": "Radar",
                                         "action": false,
-                                        "icon":"radar-icon-context-menu-jstree",
+                                        "icon": "radar-icon-context-menu-jstree",
                                         "submenu":
                                             {
                                                 //APPLY ORBIT
@@ -4317,7 +4023,7 @@ var EditorController = (function () {
                                                         var sSourceFileName = $node.original.fileName;
                                                         var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)  oController.openApplyOrbitDialog(oFindedProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openApplyOrbitDialog(oFindedProduct);
 
                                                     }
                                                 },
@@ -4327,7 +4033,7 @@ var EditorController = (function () {
                                                         var sSourceFileName = $node.original.fileName;
                                                         var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)  oController.openMultilookingDialog(oFindedProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openMultilookingDialog(oFindedProduct);
                                                     }
                                                 },
 
@@ -4337,7 +4043,7 @@ var EditorController = (function () {
                                                         var sSourceFileName = $node.original.fileName;
                                                         var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
+                                                        if (utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
                                                     }
                                                 },
 
@@ -4347,7 +4053,7 @@ var EditorController = (function () {
                                                         var sSourceFileName = $node.original.fileName;
                                                         var oFound = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openRadiometricCalibrationDialog(oFound);
+                                                        if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openRadiometricCalibrationDialog(oFound);
 
                                                     }
                                                 }
@@ -4356,7 +4062,7 @@ var EditorController = (function () {
                                     "Optical": {
                                         "label": "Optical",
                                         "action": false,
-                                        "icon":"optical-icon-context-menu-jstree",
+                                        "icon": "optical-icon-context-menu-jstree",
                                         "submenu":
                                             {
                                                 "NDVI": {
@@ -4365,25 +4071,25 @@ var EditorController = (function () {
                                                         var sSourceFileName = $node.original.fileName;
                                                         var oFound = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openNDVIDialog(oFound);
+                                                        if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openNDVIDialog(oFound);
                                                     }
                                                 }
                                             }
                                     },
-                                    "Workflow":{
+                                    "Workflow": {
                                         "label": "Workflow",
                                         "action": function (obj) {
                                             var sSourceFileName = $node.original.fileName;
                                             var oFound = oController.findProductByFileName(sSourceFileName);
 
-                                            if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowManagerDialog();
+                                            if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowManagerDialog();
                                         }
                                     },
-                                    "Filter Band":{
+                                    "Filter Band": {
                                         "label": "Filter Band",
                                         "_disabled": true
                                     },
-                                    "Mask Manager":{
+                                    "Mask Manager": {
                                         "label": "Mask Manager",
                                         "_disabled": true
                                     },
@@ -4391,23 +4097,20 @@ var EditorController = (function () {
                                         "label": "Zoom Band 2D Map",
                                         "_disabled": true
                                     },
-                                    "Zoom3D" : {
-                                        "label" : "Zoom Band 3D Map",
+                                    "Zoom3D": {
+                                        "label": "Zoom Band 3D Map",
                                         "_disabled": true
                                     },
                                     "Properties": {
                                         "label": "Properties ",
-                                        "icon":"info-icon-context-menu-jstree",
-                                        "separator_before":true,
+                                        "icon": "info-icon-context-menu-jstree",
+                                        "separator_before": true,
                                         "action": function (obj) {
                                             //$node.original.fileName;
-                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
-                                            {
+                                            if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
                                                 var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
-                                                {
-                                                    if( oController.m_aoProducts[iIndexProduct].fileName == $node.original.fileName)
-                                                    {
+                                                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts; iIndexProduct++) {
+                                                    if (oController.m_aoProducts[iIndexProduct].fileName == $node.original.fileName) {
                                                         oController.openProductInfoDialog(oController.m_aoProducts[iIndexProduct]);
                                                         break;
                                                     }
@@ -4419,25 +4122,24 @@ var EditorController = (function () {
                                     },
                                     "Download": {
                                         "label": "Download",
-                                        "icon":"fa fa-download",
+                                        "icon": "fa fa-download",
                                         "action": function (obj) {
                                             //$node.original.fileName;
-                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
-                                            {
+                                            if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
                                                 var oProduct = oController.findProductByName($node.original.fileName);
                                                 var oEntry = {
-                                                    "fileName":oProduct.fileName,
-                                                    "filePath":oProduct.filePath
+                                                    "fileName": oProduct.fileName,
+                                                    "filePath": oProduct.filePath
                                                 };
                                                 // oController.downloadEntry(oEntry);
-                                                 oController.downloadProductByName($node.original.fileName);
+                                                oController.downloadProductByName($node.original.fileName);
                                             }
                                         }
                                     },
 
                                     "DeleteProduct": {
                                         "label": "Delete Product",
-                                        "icon":"delete-icon-context-menu-jstree",
+                                        "icon": "delete-icon-context-menu-jstree",
 
                                         "action": function (obj) {
 
@@ -4445,34 +4147,31 @@ var EditorController = (function () {
                                                 var bDeleteFile = false;
                                                 var bDeleteLayer = false;
                                                 if (value) {
-                                                    if (value.files == 'on')  bDeleteFile = true;
+                                                    if (value.files == 'on') bDeleteFile = true;
                                                     if (value.geoserver == 'on') bDeleteLayer = true;
                                                     this.temp = $node;
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
-                                                            var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                            var iLengthChildren_d = that.temp.children_d.length;
+                                                        var iLengthLayer = oController.m_aoVisibleBands.length;
+                                                        var iLengthChildren_d = that.temp.children_d.length;
 
-                                                            for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
-                                                            {
-                                                                oController.removeAllRedSquareBoundingBox();
-                                                                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                                for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
-                                                                {
-                                                                    if( that.temp.children_d[iIndexChildren] ===  oController.m_aoVisibleBands[iIndexLayer].layerId)
-                                                                    {
-                                                                        oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                                        break;
-                                                                    }
-
+                                                        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
+                                                            oController.removeAllRedSquareBoundingBox();
+                                                            oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                                                            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
+                                                                if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
+                                                                    oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
+                                                                    break;
                                                                 }
 
                                                             }
 
-                                                            //reload product list
-                                                            oController.getProductListByWorkspace();
+                                                        }
 
-                                                        }).error(function (error) {
+                                                        //reload product list
+                                                        oController.getProductListByWorkspace();
+
+                                                    }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                     });
                                                 }
@@ -4501,15 +4200,15 @@ var EditorController = (function () {
             this.m_aoProducts[iIndexProduct].selfIndex = iIndexProduct;
             oNode.productIndex = iIndexProduct;
 
-            var oController=this;
+            var oController = this;
 
             oNode.children = [
                 {
-                    "text":"Metadata",
+                    "text": "Metadata",
                     "icon": "assets/icons/metadata-24.png",
                     "children": [],
-                    "clicked":false,//semaphore
-                    "url" : oController.m_oProductService.getApiMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
+                    "clicked": false,//semaphore
+                    "url": oController.m_oProductService.getApiMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
                 },
                 {
                     "text": "Bands",
@@ -4529,9 +4228,8 @@ var EditorController = (function () {
                 //LABEL NODE
                 if (oaBandsItems[iIndexBandsItems].published) {
                     oNode.text = "<span class='band-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
-                }
-                else {
-                    oNode.text = "<span class='band-not-published-label'>" +  oaBandsItems[iIndexBandsItems].name + "</span>";
+                } else {
+                    oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
 
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
@@ -4552,9 +4250,8 @@ var EditorController = (function () {
      * @param oEntry
      * @returns {boolean}
      */
-    EditorController.prototype.downloadEntry = function(oEntry)
-    {
-        if(utilsIsObjectNullOrUndefined(oEntry)) return false;
+    EditorController.prototype.downloadEntry = function (oEntry) {
+        if (utilsIsObjectNullOrUndefined(oEntry)) return false;
         // if(this.m_bIsDownloadingProduct === true)
         //     return false;
 
@@ -4568,8 +4265,7 @@ var EditorController = (function () {
         var oController = this;
         // this.m_sProductNameInDownloadingStatus = oEntry.fileName;
         this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
-            {
+            if (utilsIsObjectNullOrUndefined(data) == false) {
                 var blob = new Blob([data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
             }
@@ -4583,10 +4279,8 @@ var EditorController = (function () {
 
         return true;
     };
-    EditorController.prototype.downloadProductByName = function(sFileName)
-    {
-        if(utilsIsStrNullOrEmpty(sFileName) === true )
-        {
+    EditorController.prototype.downloadProductByName = function (sFileName) {
+        if (utilsIsStrNullOrEmpty(sFileName) === true) {
             return false;
         }
 
@@ -4600,17 +4294,14 @@ var EditorController = (function () {
      * @param sFileName
      * @returns {*}
      */
-    EditorController.prototype.findProductByName = function(sFileName){
-        if(utilsIsStrNullOrEmpty(sFileName) === true)
-        {
+    EditorController.prototype.findProductByName = function (sFileName) {
+        if (utilsIsStrNullOrEmpty(sFileName) === true) {
             return null;
         }
         var iNumberOfProducts = this.m_aoProducts.length;
         var oSelectedProduct = null;
-        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
-        {
-            if( this.m_aoProducts[iIndexProduct].fileName === sFileName)
-            {
+        for (var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++) {
+            if (this.m_aoProducts[iIndexProduct].fileName === sFileName) {
                 oSelectedProduct = this.m_aoProducts[iIndexProduct];
                 break;
             }
@@ -4620,28 +4311,24 @@ var EditorController = (function () {
 
     };
 
-    EditorController.prototype.isEnable2DZoomInTreeInEditorMode = function(){
-       if(this.isActiveEditorMode() )
-       {
-           return this.m_b2DMapModeOn;
-       }
+    EditorController.prototype.isEnable2DZoomInTreeInEditorMode = function () {
+        if (this.isActiveEditorMode()) {
+            return this.m_b2DMapModeOn;
+        }
         return false;
     };
 
-    EditorController.prototype.isEnable3DZoomInTreeInEditorMode= function(){
-        if(this.isActiveEditorMode() )
-        {
+    EditorController.prototype.isEnable3DZoomInTreeInEditorMode = function () {
+        if (this.isActiveEditorMode()) {
             return !this.m_b2DMapModeOn;
         }
         return false;
     };
-    EditorController.prototype.isActiveEditorMode = function()
-    {
+    EditorController.prototype.isActiveEditorMode = function () {
         return this.m_bIsActiveGeoraphicalMode === false;
     }
-    EditorController.prototype.filterTree = function(sTextQuery){
-        if(utilsIsObjectNullOrUndefined(sTextQuery) === true)
-        {
+    EditorController.prototype.filterTree = function (sTextQuery) {
+        if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
             sTextQuery = "";
         }
 

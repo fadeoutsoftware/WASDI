@@ -21,7 +21,7 @@ import wasdi.shared.utils.Utils;
  */
 public class SessionRepository extends MongoRepository {
 
-    public boolean InsertSession(UserSession oSession) {
+    public boolean insertSession(UserSession oSession) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oSession);
             getCollection("sessions").insertOne(Document.parse(sJSON));
@@ -35,7 +35,7 @@ public class SessionRepository extends MongoRepository {
         return false;
     }
 
-    public UserSession GetSession(String sSessionId) {
+    public UserSession getSession(String sSessionId) {
         try {
             Document oSessionDocument = getCollection("sessions").find(new Document("sessionId", sSessionId)).first();
 
@@ -53,7 +53,7 @@ public class SessionRepository extends MongoRepository {
         return  null;
     }
 
-    public List<UserSession> GetAllActiveSessions(String sUserId) {
+    public List<UserSession> getAllActiveSessions(String sUserId) {
         final ArrayList<UserSession> aoReturnList = new ArrayList<>();
         try {
             long lNow = new Date().getTime();
@@ -79,7 +79,7 @@ public class SessionRepository extends MongoRepository {
         return aoReturnList;
     }
 
-    public List<UserSession> GetAllExpiredSessions(String sUserId) {
+    public List<UserSession> getAllExpiredSessions(String sUserId) {
         final ArrayList<UserSession> aoReturnList = new ArrayList<>();
         try {
             long lNow = new Date().getTime();
@@ -105,7 +105,7 @@ public class SessionRepository extends MongoRepository {
         return aoReturnList;
     }
 
-    public boolean TouchSession(UserSession oSession) {
+    public boolean touchSession(UserSession oSession) {
         try {
             UpdateResult oResult = getCollection("sessions").updateOne(Filters.eq("sessionId",oSession.getSessionId()), Updates.set("lastTouch", (double)new Date().getTime()));
 
@@ -118,7 +118,7 @@ public class SessionRepository extends MongoRepository {
         return  false;
     }
 
-    public boolean DeleteSession(UserSession oSession) {
+    public boolean deleteSession(UserSession oSession) {
         try {
             if (oSession == null || Utils.isNullOrEmpty(oSession.getSessionId()))
                 return true;

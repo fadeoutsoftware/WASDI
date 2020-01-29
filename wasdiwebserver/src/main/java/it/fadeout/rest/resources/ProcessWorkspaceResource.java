@@ -36,8 +36,8 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Start: " +
-				iStartIndex + ", End: " + iEndIndex);
+		
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Start: " + iStartIndex + ", End: " + iEndIndex);
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -55,8 +55,6 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-//			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
-
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
@@ -64,10 +62,10 @@ public class ProcessWorkspaceResource {
 			List<ProcessWorkspace> aoProcess = null;
 			
 			if (iStartIndex != null && iEndIndex != null) {
-				aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId, iStartIndex, iEndIndex);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, iStartIndex, iEndIndex);
 			}
 			else {
-				aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId);
 			}
 
 			// For each
@@ -106,13 +104,11 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-			//Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByUser: process for User " + oUser.getUserId());
-
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.GetProcessByUser(oUser.getUserId());
+			List<ProcessWorkspace> aoProcess = oRepository.getProcessByUser(oUser.getUserId());
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
@@ -135,14 +131,23 @@ public class ProcessWorkspaceResource {
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
 			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				//oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			else {
-				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				//oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			
-			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
-			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
+				//oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+				oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+			}
+			
+			//oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+			//oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			oViewModel.setOperationType(oProcess.getOperationType());
 			oViewModel.setProductName(oProcess.getProductName());
 			oViewModel.setUserId(oProcess.getUserId());
@@ -162,8 +167,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/lastbyws")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
 		Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -185,14 +190,11 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-
-			//Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
-
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.GetLastProcessByWorkspace(sWorkspaceId);
+			List<ProcessWorkspace> aoProcess = oRepository.getLastProcessByWorkspace(sWorkspaceId);
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
@@ -228,14 +230,12 @@ public class ProcessWorkspaceResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProcessList;
 			}
-
-			//Wasdi.DebugLog("ProcessWorkspaceResource.GetLastProcessByUser: process for user " + oUser.getUserId());
-
+			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.GetLastProcessByUser(oUser.getUserId());
+			List<ProcessWorkspace> aoProcess = oRepository.getLastProcessByUser(oUser.getUserId());
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
@@ -256,7 +256,9 @@ public class ProcessWorkspaceResource {
 	@Path("/summary")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
+		
 		Utils.debugLog("ProcessWorkspaceResource.GetSummary( Session: " + sSessionId + " )");
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
@@ -268,14 +270,42 @@ public class ProcessWorkspaceResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return oSummaryViewModel;
 			}
-
-			//Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary: process for user " + oUser.getUserId());
-
+			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			// Get all CREATED
+			List<ProcessWorkspace> aoWaitingList = oRepository.getWaitingSummary();
+			oSummaryViewModel.setAllProcessWaiting(aoWaitingList.size());
+			
+			int iUserWaiting = 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoWaitingList.size(); iProcess++) {
+				// Get the process
+				ProcessWorkspace oProcess = aoWaitingList.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserWaiting ++;
+			}
+			
+			oSummaryViewModel.setUserProcessWaiting(iUserWaiting);
+			
+			// Get all RUNNING, WAITING, READY
+			List<ProcessWorkspace> aoRunningList = oRepository.getRunningSummary();
+			oSummaryViewModel.setAllProcessRunning(aoRunningList.size());
+			
+			int iUserRunning = 0;
+			
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoRunningList.size(); iProcess++) {
+				// Get the process
+				ProcessWorkspace oProcess = aoRunningList.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserRunning ++;
+			}
+			
+			oSummaryViewModel.setUserProcessRunning(iUserRunning);
 
+/*			
 			// Get Download Waiting Process List
-			List<ProcessWorkspace> aoQueuedDownloads = oRepository.GetQueuedDownloads();
+			List<ProcessWorkspace> aoQueuedDownloads = oRepository.getCreatedDownloads();
 
 			oSummaryViewModel.setAllDownloadWaiting(aoQueuedDownloads.size());
 			
@@ -291,7 +321,7 @@ public class ProcessWorkspaceResource {
 			
 			
 			// Get Processing Waiting Process List
-			List<ProcessWorkspace> aoQueuedProcessing = oRepository.GetQueuedProcess();
+			List<ProcessWorkspace> aoQueuedProcessing = oRepository.getCreatedProcesses();
 
 			oSummaryViewModel.setAllProcessWaiting(aoQueuedProcessing.size());
 			
@@ -306,7 +336,7 @@ public class ProcessWorkspaceResource {
 			oSummaryViewModel.setUserProcessWaiting(iUserProcessWaiting);
 			
 			// Get IDL Waiting Process List
-			List<ProcessWorkspace> aoQueuedIDL= oRepository.GetQueuedIDL();
+			List<ProcessWorkspace> aoQueuedIDL= oRepository.getCreatedIDL();
 
 			oSummaryViewModel.setAllIDLWaiting(aoQueuedIDL.size());
 			
@@ -320,10 +350,8 @@ public class ProcessWorkspaceResource {
 			
 			oSummaryViewModel.setUserIDLWaiting(iUserIDLWaiting);
 			
-			
-			
 			// Get Processing Running  List
-			List<ProcessWorkspace> aoRunningProcessing = oRepository.GetRunningProcess();
+			List<ProcessWorkspace> aoRunningProcessing = oRepository.getRunningProcesses();
 
 			oSummaryViewModel.setAllProcessRunning(aoRunningProcessing.size());
 			
@@ -338,7 +366,7 @@ public class ProcessWorkspaceResource {
 			oSummaryViewModel.setUserProcessRunning(iUserProcessRunning);
 			
 			// Get Download Running Process List
-			List<ProcessWorkspace> aoRunningDownload= oRepository.GetRunningDownloads();
+			List<ProcessWorkspace> aoRunningDownload= oRepository.getRunningDownloads();
 
 			oSummaryViewModel.setAllDownloadRunning(aoRunningDownload.size());
 			
@@ -353,7 +381,7 @@ public class ProcessWorkspaceResource {
 			oSummaryViewModel.setUserDownloadRunning(iUserDownloadRunning);
 
 			// Get IDL Running  List
-			List<ProcessWorkspace> aoRunningIDL= oRepository.GetRunningIDL();
+			List<ProcessWorkspace> aoRunningIDL= oRepository.getRunningIDL();
 
 			oSummaryViewModel.setAllIDLRunning(aoRunningIDL.size());
 			
@@ -366,7 +394,7 @@ public class ProcessWorkspaceResource {
 			}
 			
 			oSummaryViewModel.setUserIDLRunning(iUserIDLRunning);
-			
+*/			
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.GetSummary: " + oEx);
@@ -392,7 +420,7 @@ public class ProcessWorkspaceResource {
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessToDelete = oRepository.GetProcessByProcessObjId(sProcessObjId);
+			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sProcessObjId);
 			
 			if (oProcessToDelete != null)
 			{
@@ -418,12 +446,12 @@ public class ProcessWorkspaceResource {
 				// set process state to STOPPED only if CREATED or RUNNING
 				String sPrecSatus = oProcessToDelete.getStatus();
 				
-				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name())) {
+				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
 					
 					oProcessToDelete.setStatus(ProcessStatus.STOPPED.name());
 					oProcessToDelete.setOperationEndDate(Utils.GetFormatDate(new Date()));
 					
-					if (!oRepository.UpdateProcess(oProcessToDelete)) {
+					if (!oRepository.updateProcess(oProcessToDelete)) {
 						Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
 					}
 					
@@ -454,8 +482,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel getProcessById(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sProcessId") String sProcessWorkspaceId) {
+	public ProcessWorkspaceViewModel getProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId) {
+		
 		Utils.debugLog("ProcessWorkspaceResource.GetProcessById( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -473,14 +501,12 @@ public class ProcessWorkspaceResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return oProcess;
 			}
-
-			//Wasdi.DebugLog("ProcessWorkspaceResource.getProcessById: process id " + sProcessWorkspaceId);
-
+			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
+			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessWorkspaceId);
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
 
 		}
@@ -496,11 +522,11 @@ public class ProcessWorkspaceResource {
 	@Path("/updatebyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceViewModel updateProcessById(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sStatus,
+			@QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sNewStatus,
 			@QueryParam("perc") int iPerc, @QueryParam("sendrabbit") String sSendToRabbit) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( Session: " + sSessionId + ", ProcWsId: " +
-				sProcessWorkspaceId + ", Status: " + sStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
+				sProcessWorkspaceId + ", Status: " + sNewStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -521,9 +547,9 @@ public class ProcessWorkspaceResource {
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
+			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessWorkspaceId);
 			
-			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ) && (sStatus.equals(ProcessStatus.DONE.name()) || sStatus.equals(ProcessStatus.ERROR.name()) || sStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
+			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ) && (sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
 				// The process finished
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 					// No end-date set: put it here
@@ -531,10 +557,14 @@ public class ProcessWorkspaceResource {
 				}
 			}
 			
-			oProcessWorkspace.setStatus(sStatus);
-			oProcessWorkspace.setProgressPerc(iPerc);
+			oProcessWorkspace.setStatus(sNewStatus);
+			
+			if (iPerc>=0 && iPerc<=100) {
+				oProcessWorkspace.setProgressPerc(iPerc);
+			}
+			
 
-			oRepository.UpdateProcess(oProcessWorkspace);
+			oRepository.updateProcess(oProcessWorkspace);
 			
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
 
@@ -595,11 +625,11 @@ public class ProcessWorkspaceResource {
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
+			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessWorkspaceId);
 			
 			oProcessWorkspace.setPayload(sPayload);
 
-			oRepository.UpdateProcess(oProcessWorkspace);
+			oRepository.updateProcess(oProcessWorkspace);
 			
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
 
@@ -634,7 +664,7 @@ public class ProcessWorkspaceResource {
 			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			oRepository.CleanQueue();
+			oRepository.cleanQueue();
 			
 		}
 		catch (Exception oEx) {

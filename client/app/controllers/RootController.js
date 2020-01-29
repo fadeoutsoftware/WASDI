@@ -8,9 +8,6 @@ var RootController = (function() {
     function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,
                             $timeout,oModalService,oRabbitStompService, $window) {
 
-        //
-
-
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -35,8 +32,6 @@ var RootController = (function() {
         var oController = this;
 
 
-
-
         this.updateRabbitConnectionState = function(forceNotification)
         {
             if( forceNotification == null || forceNotification === undefined){
@@ -57,29 +52,27 @@ var RootController = (function() {
                     }
                 }
             }
-        }
+        };
 
 
         this.signalRabbitConnectionLost = function()
         {
             var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
             utilsVexCloseDialogAfter(5000, dialog);
-        }
-
+        };
 
 
         // Subscribe to 'rabbit service connection changes'
         var _this = this;
-        // $scope.$on('rabbitConnectionStateChanged', function(event, args) {
-        //     _this.updateRabbitConnectionState();
-        // });
+
         var msgHlp = MessageHelper.getInstanceWithAnyScope($scope);
+
         msgHlp.subscribeToRabbitConnectionStateChange(function(event, args) {
             _this.updateRabbitConnectionState();
         });
+
         // then immediatly check rabbit connection state
         this.updateRabbitConnectionState(true);
-
 
         /**
          * Check user session
@@ -96,13 +89,8 @@ var RootController = (function() {
                 oController.m_oUser = oController.m_oConstantsService.getUser();
             }
         }).error(function (data,status) {
-            //TODO use vex for error message
-            //alert('error in check id session');
-            oController.onClickLogOut();
             utilsVexDialogAlertTop('ERROR IN CHECK ID SESSION');
-            // oController.m_oConstantsService.logOut();
-            // oController.m_oState.go("home");
-            // oController.m_oState.go("home");
+            oController.onClickLogOut();
         });
 
         //if user is logged
@@ -117,7 +105,6 @@ var RootController = (function() {
             if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
             {
                 this.openWorkspace(this.m_oState.params.workSpace);
-                //this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
             else
             {
@@ -190,7 +177,9 @@ var RootController = (function() {
 
                 for(var iIndexProcess = 0; iIndexProcess < iNumberOfProcesses;iIndexProcess++ )
                 {
-                    if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING") {
+                    if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING" ||
+                        $scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="WAITING" ||
+                        $scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="READY") {
                          $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
                     }
                 }
@@ -224,7 +213,7 @@ var RootController = (function() {
 
         for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++)
         {
-            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING" )//aoProcessesRunning[iIndexNewProcess].status === "CREATED" ||
+            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING" || aoProcessesRunning[iIndexNewProcess].status === "WAITING" || aoProcessesRunning[iIndexNewProcess].status === "READY")
             {
                 if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
                     // add start time (useful if the page was reloaded)
@@ -286,7 +275,9 @@ var RootController = (function() {
         var iTotalProcessesNumber = aoProcessesRunning.length;
         // Search the last one that is in running state
         for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++) {
-            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING") {
+            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING"||
+                aoProcessesRunning[iIndexNewProcess].status === "WAITING"||
+                aoProcessesRunning[iIndexNewProcess].status === "READY") {
                 oLastProcessRunning = aoProcessesRunning[iIndexNewProcess];
             }
         }

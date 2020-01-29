@@ -10,7 +10,8 @@ public class ProcessWorkspaceViewModel {
     private String operationDate;
     private String operationStartDate;
     private String operationEndDate;
-    private String userId;
+    private String lastChangeDate;
+	private String userId;
     private String fileSize;
     private String status;
     private int progressPerc;
@@ -115,4 +116,12 @@ public class ProcessWorkspaceViewModel {
 		this.operationEndDate = operationEndDate;
 	}
     
+    public String getLastChangeDate() {
+		return lastChangeDate;
+	}
+
+	public void setLastChangeDate(String lastChangeDate) {
+		this.lastChangeDate = lastChangeDate;
+	}
+
 }
