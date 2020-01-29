@@ -7,13 +7,12 @@
 package wasdi.shared.opensearch;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
-
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -50,19 +49,20 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 	}
 
 	private QueryResultViewModel translate(JSONObject oJsonItem, String sDownloadProtocol, boolean bFullViewModel) {
-		// TODO Auto-generated method stub
 		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.translate: JSONObject is null");
 		
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		parseMd(oJsonItem, oResult);
 		parseData(oJsonItem, oResult);
 		
+		finalizeViewModel(oResult);
 		return null;
 	}
 
 
 	private void parseMd(JSONObject oJsonItem, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.parseMd: JSONObject is null");
+		
 		try {
 			if(oJsonItem.has("md")) {
 				oJsonItem = oJsonItem.optJSONObject("md");
@@ -105,20 +105,132 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 			aoArrayBuffer = (JSONArray) aoArrayBuffer.opt(0);
 			String sCoordinates = "";
 			for (Object oItem : aoArrayBuffer) {
-				JSONArray aDCooordinatesPair = (JSONArray) oItem; 
-				double dX = aDCooordinatesPair.optDouble(0);
-				double dY = aDCooordinatesPair.optDouble(1);
-				
+				try{
+					JSONArray aDCooordinatesPair = (JSONArray) oItem; 
+					double dX = aDCooordinatesPair.optDouble(0);
+					double dY = aDCooordinatesPair.optDouble(1);
+					sCoordinates += dX + " " + dY + ", ";
+				} catch (Exception oE) {
+					Utils.debugLog("DiasResponseTranslatorSOBLOO.parseCoordinates: " + oE);
+				}
+						
 			}
-			
+			while(sCoordinates.endsWith(", ")) {
+				sCoordinates = sCoordinates.substring(0, sCoordinates.length() - 2);
+			}
+			sCoordinates = "MULTIPOLYGON (((" + sCoordinates + ")))";
+			oResult.setFootprint(sCoordinates);
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorSOBLOO.parseCoordinates: " + oE);
 		}
 	}
 
 	private void parseData(JSONObject oJsonItem, QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.parseMd: JSONObject is null");
-		//TODO implement
+		Preconditions.checkNotNull(oJsonItem, "DiasResponseTranslatorSOBLOO.parseData: JSONObject is null");
+
+		String sBuffer = null;
+		int iBuffer = 0;
+		long lBuffer = 0;
+		
+		if(oJsonItem.has("identification")) {
+			JSONObject oJsonIdentification = oJsonItem.optJSONObject("identification");
+			if(oJsonIdentification != null) {
+				sBuffer = oJsonIdentification.optString("externalId", null);
+				if(!Utils.isNullOrEmpty(sBuffer)) {
+					oResult.setTitle(sBuffer);
+				} else {
+					throw new NullPointerException("DiasResponseTranslatorSOBLOO.parseData: could not find file name in the response, failing");
+				}
+			}
+		}
+		
+		if(oJsonItem.has("archive")) {
+			JSONObject oJsonArchive = oJsonItem.optJSONObject("archive");
+			if(null!=oJsonArchive) {
+				iBuffer = 0;
+				iBuffer = oJsonArchive.optInt("size", 0);
+				//the size is in MB, convert it in B 
+				lBuffer = iBuffer * 1024 * 1024;
+				oResult.getProperties().put("size", ""+lBuffer);
+			}
+		}
+		
+		if(oJsonItem.has("acquisition")){
+			JSONObject oJsonAcquisition = oJsonItem.optJSONObject("acquisition");
+			Iterator<String> oKeys = oJsonAcquisition.keys();
+			while(oKeys.hasNext()) {
+				String sKey = oKeys.next();
+				if(!Utils.isNullOrEmpty(sKey)) {
+					switch (sKey) {
+					case "endViewingDate":
+						addPositiveLongToProperties(oJsonAcquisition, sKey, oResult);
+						break;
+					case "beginViewingDate":
+						addPositiveLongToProperties(oJsonAcquisition, sKey, oResult);
+						break;
+					default:
+						addStringToProperties(oJsonAcquisition, sKey, oResult);
+						break;
+					}
+				}
+			}
+		}
+		
+	}
+
+	private void addStringToProperties(JSONObject oJson, String sKey, QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oJson);
+		Preconditions.checkNotNull(sKey);
+		Preconditions.checkNotNull(oResult);
+		
+		String sBuffer = null;
+		sBuffer = oJson.optString(sKey, null);
+		if(!Utils.isNullOrEmpty(sBuffer)) {
+			oResult.getProperties().put(sKey, sBuffer);
+		}
+		
+	}
+
+	/**
+	 * @param oJson
+	 * @param sKey
+	 * @param oResult
+	 */
+	protected void addPositiveLongToProperties(JSONObject oJson, String sKey, QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oJson);
+		Preconditions.checkNotNull(sKey);
+		Preconditions.checkNotNull(oResult);
+		
+		
+		long lBuffer = -1;
+		lBuffer = oJson.optLong(sKey, -1);
+		if(0<lBuffer) {
+			oResult.getProperties().put(sKey, ""+lBuffer);
+		}
+	}
+
+	private void finalizeViewModel(QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorSOBLOO: QueryResultViewModel is null");
+		
+		String sDate = oResult.getProperties().get("timestamp");
+		String sSummary = "Date: " + sDate + ", ";
+		String sInstrument = oResult.getProperties().get("sensorId");
+		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
+		String sMode = oResult.getProperties().get("sensorMode");
+		sSummary = sSummary + "Mode: " + sMode + ", ";
+
+		String sSatellite = oResult.getProperties().get("missionName");
+		sSummary = sSummary + "Satellite: " + sSatellite + ", ";
+		String sSize = oResult.getProperties().get("size");
+		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
+		oResult.setSummary(sSummary);
+		
+		String sLink = "https://sobloo.eu/api/v1/services/download/" + oResult.getId();
+		oResult.setLink(sLink);
+		
+		sLink += "|||fileName=" + oResult.getTitle() + "|||size=" + oResult.getProperties().get("size");
+		oResult.getProperties().put("hackedLink", sLink);
+		
 	}
 	
 }
