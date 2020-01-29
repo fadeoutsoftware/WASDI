@@ -75,7 +75,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
             lLenght = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
-
+//            long lContentLength = oHttpConn.getContentLengthLong();
             m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
 
             return lLenght;
@@ -164,6 +164,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 			String sContentType = oHttpConn.getContentType();
 			long lContentLength = oHttpConn.getContentLengthLong();
+//			long lTestLength = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
 
 			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
