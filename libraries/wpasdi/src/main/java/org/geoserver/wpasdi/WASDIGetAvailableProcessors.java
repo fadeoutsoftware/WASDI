@@ -26,7 +26,7 @@ public class WASDIGetAvailableProcessors implements GeoServerProcess {
 		
 		try {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			List<Processor> aoAvailableProcessors = oProcessorRepository.GetDeployedProcessors();
+			List<Processor> aoAvailableProcessors = oProcessorRepository.getDeployedProcessors();
 			
 			for (int iProcs = 0; iProcs<aoAvailableProcessors.size(); iProcs++) {
 				

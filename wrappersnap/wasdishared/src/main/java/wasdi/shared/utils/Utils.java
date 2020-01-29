@@ -4,22 +4,27 @@ import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -158,7 +163,29 @@ public class Utils {
 
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
+	
+	/**
+	 * Gets the local time offset from UTC
+	 * @return
+	 */
+	public static String getLocalDateOffsetFromUTCForJS() {
+		TimeZone oTimeZone = TimeZone.getDefault();
+		Calendar oCalendar = GregorianCalendar.getInstance(oTimeZone);
+		int iOffsetInMillis = oTimeZone.getOffset(oCalendar.getTimeInMillis());
+		
+		if (iOffsetInMillis == 0) return "Z";
+		
+		String sOffset = String.format("%02d:%02d", Math.abs(iOffsetInMillis / 3600000), Math.abs((iOffsetInMillis / 60000) % 60));
+		sOffset = (iOffsetInMillis >= 0 ? "+" : "-") + sOffset;
+		return sOffset;
+	}
+	
 
+	/**
+	 * Format in a human readable way a file dimension in bytes
+	 * @param bytes
+	 * @return
+	 */
 	public static String GetFormatFileDimension(long bytes) {
 		int unit = 1024;
 		if (bytes < unit)
@@ -167,6 +194,50 @@ public class Utils {
 		String pre = ("KMGTPE").charAt(exp - 1) + "";
 		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
+	
+	/**
+	 * Check if a process is alive starting from PID
+	 * @param sPidStr
+	 * @return
+	 */
+	public static boolean isProcessStillAllive(String sPidStr) {
+	    String sOS = System.getProperty("os.name").toLowerCase();
+	    String sCommand = null;
+	    if (sOS.indexOf("win") >= 0) {
+	    	//("Check alive Windows mode. Pid: " + sPidStr);
+	        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
+	    } else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
+	    	//("Check alive Linux/Unix mode. Pid: " + sPidStr);
+	        sCommand = "ps -p " + sPidStr;            
+	    } else {
+	    	//("Unsuported OS: go on Linux");
+	    	sCommand = "ps -p " + sPidStr;
+	    }
+	    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation
+	}
+	
+	private static boolean isProcessIdRunning(String sPid, String sCommand) {
+		//("Command " + sCommand );
+	    try {
+	        Runtime oRunTime = Runtime.getRuntime();
+	        Process oProcess = oRunTime.exec(sCommand);
+
+	        InputStreamReader oInputStreamReader = new InputStreamReader(oProcess.getInputStream());
+	        BufferedReader oBufferedReader = new BufferedReader(oInputStreamReader);
+	        String sLine = null;
+	        while ((sLine= oBufferedReader.readLine()) != null) {
+	            if (sLine.contains(sPid + " ")) {
+	                return true;
+	            }
+	        }
+
+	        return false;
+	    } catch (Exception oEx) {
+	    	Utils.debugLog("Got exception using system command [{}] " + sCommand);
+	        return true;
+	    }
+	}
+
 
 	private static char randomChar() {
 		Random r = new Random();

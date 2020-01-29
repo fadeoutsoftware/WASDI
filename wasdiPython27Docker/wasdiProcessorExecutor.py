@@ -10,6 +10,7 @@ import sys
 #import urllib.parse
 import urllib
 import json
+import traceback
 
 def executeProcessor(parameters, processId): 
     
@@ -57,7 +58,15 @@ def executeProcessor(parameters, processId):
         wasdi.openWorkspaceById(sWorkspaceId)
         print("wasdi.executeProcessor Workspace Id available in params " + sWorkspaceId)
     except:
-        print('wasdi.executeProcessor Workspace Id not available in parameters.')        
+        print('wasdi.executeProcessor Workspace Id not available in parameters.')
+        
+    #Try to get the base url
+    try:
+        sBaseUrl = parameters['baseurl']
+        wasdi.setBaseUrl(sBaseUrl)
+        print("wasdi.executeProcessor Base Url in params " + sBaseUrl)
+    except:
+        print('wasdi.executeProcessor Using default base url')                
     
     #Init Wasdi
     print("wasdi.executeProcessor: init waspy lib")
@@ -84,6 +93,7 @@ def executeProcessor(parameters, processId):
     except Exception as oEx:
         wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
         wasdi.wasdiLog(repr(oEx))
+        wasdi.wasdiLog(traceback.format_exc())
     except:
         wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
     finally:

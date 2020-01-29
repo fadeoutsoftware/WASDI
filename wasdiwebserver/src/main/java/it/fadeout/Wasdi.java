@@ -321,21 +321,21 @@ public class Wasdi extends ResourceConfig {
 			// Create Session Repository
 			SessionRepository oSessionRepo = new SessionRepository();
 			// Get The User Session
-			UserSession oSession = oSessionRepo.GetSession(sSessionId);
+			UserSession oSession = oSessionRepo.getSession(sSessionId);
 
 			if (Utils.isValidSession(oSession)) {
 				// Create User Repo
 				UserRepository oUserRepo = new UserRepository();
 				// Get the user from the session
-				User oUser = oUserRepo.GetUser(oSession.getUserId());
+				User oUser = oUserRepo.getUser(oSession.getUserId());
 
-				oSessionRepo.TouchSession(oSession);
+				oSessionRepo.touchSession(oSession);
 
 				return oUser;
 			}
 
 			// Session not valid
-			oSessionRepo.DeleteSession(oSession);
+			oSessionRepo.deleteSession(oSession);
 
 			// No Session, No User
 			return null;
@@ -391,14 +391,18 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static String getWorkspaceOwner(String sWorkspaceId) {
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-		Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 		if (oWorkspace == null)
 			return "";
 		String sWorkspaceOwner = oWorkspace.getUserId();
 		return sWorkspaceOwner;
-	}	
+	}
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationId, sProductName, sSerializationPath, oParameter, null);
+	}
+	
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
 		
 		// Get the Ob Id
 		String sProcessObjId = oParameter.getProcessObjId();
@@ -409,7 +413,7 @@ public class Wasdi extends ResourceConfig {
 			
 			// Take the Workspace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(oParameter.getWorkspace());
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oParameter.getWorkspace());
 			
 			if (oWorkspace == null) {
 				Utils.debugLog("Wasdi.runProcess: ws not found. Return 500");
@@ -423,7 +427,7 @@ public class Wasdi extends ResourceConfig {
 			
 			if (Utils.isNullOrEmpty(sMyNodeCode)) sMyNodeCode = "wasdi";
 					
-			// Is the worspace here?
+			// Is the workspace here?
 			if (!oWorkspace.getNodeCode().equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
@@ -431,7 +435,7 @@ public class Wasdi extends ResourceConfig {
 				
 				// Get the Node
 				NodeRepository oNodeRepository = new NodeRepository();
-				wasdi.shared.business.Node oDestinationNode = oNodeRepository.GetNodeByCode(oWorkspace.getNodeCode());
+				wasdi.shared.business.Node oDestinationNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
 				
 				if (oDestinationNode==null) {
 					Utils.debugLog("Wasdi.runProcess: Node [" + oWorkspace.getNodeCode()+"] not found. Return 500");
@@ -449,6 +453,11 @@ public class Wasdi extends ResourceConfig {
 				if (sUrl.endsWith("/") == false) sUrl += "/";
 				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName);
 				
+				// Is there a parent?
+				if (!Utils.isNullOrEmpty(sParentId)) {
+					sUrl += "&parent=" + URLEncoder.encode(sParentId);
+				}
+				
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
 				Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
@@ -461,7 +470,8 @@ public class Wasdi extends ResourceConfig {
 		            PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
 
 		            return oPrimitiveResult;
-		        } catch (Exception oEx) {
+		        } 
+		        catch (Exception oEx) {
 		            oEx.printStackTrace();
 					Utils.debugLog("Wasdi.runProcess: exception " + oEx);
 					oResult.setBoolValue(false);
@@ -475,8 +485,7 @@ public class Wasdi extends ResourceConfig {
 				// Serialization Path
 				String sPath = sSerializationPath;
 
-				if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
-					sPath += "/";
+				if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
 				sPath = sPath + sProcessObjId;
 
 				SerializationUtils.serializeObjectToXML(sPath, oParameter);
@@ -492,9 +501,10 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
 					oProcess.setProcessObjId(sProcessObjId);
+					if (!Utils.isNullOrEmpty(sParentId)) oProcess.setParentId(sParentId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
 					oProcess.setNodeCode(oWorkspace.getNodeCode());
-					oRepository.InsertProcessWorkspace(oProcess);
+					oRepository.insertProcessWorkspace(oProcess);
 					Utils.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
 				} catch (Exception oEx) {
 					Utils.debugLog("Wasdi.runProcess: " + oEx);

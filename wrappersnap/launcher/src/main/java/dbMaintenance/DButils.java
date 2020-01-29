@@ -24,7 +24,7 @@ public class DButils {
 		//update password
 		ArrayList<User> aoUsers = oUserRepository.getAllUsers();
 		aoUsers = UpdateHashUsersPassword(aoUsers);
-		oUserRepository.UpdateAllUsers(aoUsers);
+		oUserRepository.updateAllUsers(aoUsers);
 	}
 
 
@@ -61,7 +61,7 @@ public class DButils {
 			//oDbUtils.updatePasswordInDB(new UserRepository());
 			
 			SnapWorkflowRepository oRepo = new SnapWorkflowRepository();
-			List<SnapWorkflow> aoRet = oRepo.GetSnapWorkflowPublicAndByUser("paolo");
+			List<SnapWorkflow> aoRet = oRepo.getSnapWorkflowPublicAndByUser("paolo");
 			
 			System.out.println("tot " + aoRet.size());
  

@@ -16,7 +16,7 @@ import static com.mongodb.client.model.Filters.eq;
  */
 public class WorkspaceRepository extends  MongoRepository{
 
-    public boolean InsertWorkspace(Workspace oWorkspace) {
+    public boolean insertWorkspace(Workspace oWorkspace) {
 
         try {
             String sJSON = s_oMapper.writeValueAsString(oWorkspace);
@@ -31,7 +31,7 @@ public class WorkspaceRepository extends  MongoRepository{
         return false;
     }
 
-    public boolean UpdateWorkspace(Workspace oWorkspace) {
+    public boolean updateWorkspace(Workspace oWorkspace) {
 
         try {
             getCollection("workspaces").updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("name",oWorkspace.getName())));
@@ -46,7 +46,7 @@ public class WorkspaceRepository extends  MongoRepository{
     }
 
 
-    public Workspace GetWorkspace(String sWorkspaceId) {
+    public Workspace getWorkspace(String sWorkspaceId) {
 
         try {
             Document oWSDocument = getCollection("workspaces").find(new Document("workspaceId", sWorkspaceId)).first();
@@ -67,7 +67,7 @@ public class WorkspaceRepository extends  MongoRepository{
     }
 
 
-    public List<Workspace> GetWorkspaceByUser(String sUserId) {
+    public List<Workspace> getWorkspaceByUser(String sUserId) {
 
         final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
         try {
@@ -95,7 +95,7 @@ public class WorkspaceRepository extends  MongoRepository{
         return aoReturnList;
     }
 
-    public boolean DeleteWorkspace(String sWorkspaceId) {
+    public boolean deleteWorkspace(String sWorkspaceId) {
 
         try {
 
@@ -116,7 +116,7 @@ public class WorkspaceRepository extends  MongoRepository{
         return  false;
     }
 
-    public int DeleteByUser(String sUserId) {
+    public int deleteByUser(String sUserId) {
 
         try {
 
@@ -133,32 +133,5 @@ public class WorkspaceRepository extends  MongoRepository{
 
         return 0;
     }
-
-	/*public ArrayList<Workspace> getWorkspaceListByProductName(String sProductName) {
-		
-		final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection("workspaces").find(new Document("productName", sProductName));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Workspace oWorkspace = null;
-                    try {
-                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-                        aoReturnList.add(oWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        return aoReturnList;
-	}*/
+    
 }

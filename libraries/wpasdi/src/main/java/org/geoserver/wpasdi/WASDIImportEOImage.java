@@ -66,7 +66,7 @@ public class WASDIImportEOImage implements GeoServerProcess{
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
+				oRepository.insertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
 				System.out.println("WPASDI.ImportEOImage: Error updating process list " + oEx.getMessage());

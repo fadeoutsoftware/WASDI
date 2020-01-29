@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 
 /**
@@ -17,7 +18,7 @@ public class DhUSProviderAdapter extends ProviderAdapter {
 		super();
 	}
     
-    public DhUSProviderAdapter(Logger logger) {
+    public DhUSProviderAdapter(LoggerWrapper logger) {
 		super(logger);
 	}
 

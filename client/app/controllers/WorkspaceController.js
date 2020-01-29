@@ -113,10 +113,15 @@ var WorkspaceController = (function() {
             {
                 if (data != undefined)
                 {
-                    oController.m_oRabbitStompService.subscribe(sWorkspaceId);
+                    try {
+                        oController.m_oRabbitStompService.subscribe(sWorkspaceId);
+                    }
+                    catch(error) {
+                        console.error(error);
+                    }
+                    // oController.m_oRabbitStompService.subscribe(sWorkspaceId);
                     oController.m_oState.go("root.editor", { workSpace : sWorkspaceId });//use workSpace when reload editor page
                     oController.m_oConstantsService.setActiveWorkspace(data);
-                    //oController.m_oLocation.path('editor');
                 }
             }
         }).error(function (data,status) {
