@@ -42,7 +42,7 @@ public class FileBufferResource {
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox, @QueryParam("sProductName") String sProductName) throws IOException
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -84,11 +84,11 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-			if( sProductName != null && !sProductName.isEmpty() ){
-				oParameter.setProductName(sProductName);
-			} else {
-				oParameter.setProductName(null);
-			}
+//			if( sProductName != null && !sProductName.isEmpty() ){
+//				oParameter.setProductName(sProductName);
+//			} else {
+//				oParameter.setProductName(null);
+//			}
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			

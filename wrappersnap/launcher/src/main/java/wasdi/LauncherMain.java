@@ -691,13 +691,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Get the file name
 				String sFileNameWithoutPath;
 //				String sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
-				if( oParameter.getProductName() != null && !oParameter.getProductName().isEmpty()){
+//				if( oParameter.getProductName() != null && !oParameter.getProductName().isEmpty()){
 					//get filename as parameter
-					sFileNameWithoutPath = oParameter.getProductName();
-				}else {
+//					sFileNameWithoutPath = oParameter.getProductName();
+//				}else {
 					//get filename from download url 
 					sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
-				}
+//				}
 
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
 				
