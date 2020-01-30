@@ -12,32 +12,61 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
+	private static final String SEPARATOR = "\\|\\|\\|";
 
+//	public String GetSize(String sFileURL) {
+//		if(sFileURL== null || sFileURL.isEmpty() == true)
+//		{
+//			throw new IllegalArgumentException("The argument cannot be null or empty"); 
+//		}
+//		
+//		String[] asTokens = sFileURL.split(SEPARATOR);
+//		
+//		if(asTokens.length < 3)
+//		{
+//			throw new IllegalArgumentException("The URL is in the wrong format"); 
+//		}
+//		
+//		return asTokens[2];
+//	}
+	
+	public String GetUrl(String sFileURL) {
+		if(sFileURL== null || sFileURL.isEmpty() == true)
+		{
+			throw new IllegalArgumentException("The argument cannot be null or empty"); 
+		}
+		
+		String[] asTokens = sFileURL.split(SEPARATOR);
+		
+		if(asTokens.length < 3)
+		{
+			throw new IllegalArgumentException("The URL is in the wrong format"); 
+		}
+		
+		return asTokens[0];
+	}
+	
+	
 	@Override
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
 		
 		m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: start " + sFileURL);
 		
 		long lLenght = 0L;
-//		
-//		if(sFileURL.startsWith("file:")) {
-//
-//			String sPrefix = "file:";
-//			// Remove the prefix
-//			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
-//			String sPath = sFileURL.substring(iStart);
-//
-//			m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: full path " + sPath);
-//			File oSourceFile = new File(sPath);
-//			lLenght = oSourceFile.length();
-//			if (!oSourceFile.exists()) {
-//				m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: FILE DOES NOT EXISTS");
-//			}
-//			m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: Found length " + lLenght);
-//		} else if(sFileURL.startsWith("https:")) {
-//			//lLenght = getSizeViaHttp(sFileURL);
-			lLenght = getDownloadFileSizeViaHttp(sFileURL);
-//		}
+
+		if(sFileURL== null || sFileURL.isEmpty() == true)
+		{
+			throw new IllegalArgumentException("The argument cannot be null or empty"); 
+		}
+		
+		String[] asTokens = sFileURL.split(SEPARATOR);
+		
+		if(asTokens.length < 3)
+		{
+			throw new IllegalArgumentException("The URL is in the wrong format"); 
+		}
+		
+		lLenght = Long.valueOf(asTokens[2]);
 		
 		return lLenght;
 	}
@@ -122,8 +151,19 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 	@Override
 	public String GetFileName(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		if(sFileURL== null || sFileURL.isEmpty() == true)
+		{
+			throw new IllegalArgumentException("The argument cannot be null or empty"); 
+		}
+		
+		String[] asTokens = sFileURL.split(SEPARATOR);
+		
+		if(asTokens.length < 3)
+		{
+			throw new IllegalArgumentException("The URL is in the wrong format"); 
+		}
+		
+		return asTokens[1];
 	}
 	
 	@Override
@@ -133,13 +173,14 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 
+		String sURL = GetUrl(sFileURL);
 		
 		m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
 		
-		m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+		m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: FileUrl = " + sURL);
 		
 //		sFileURL = "https://sobloo.eu/api/v1/services/search?f=acquisition.missionName:eq:Sentinel-1A";//DEBUG 
-		URL oUrl = new URL(sFileURL);
+		URL oUrl = new URL(sURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 		oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");
@@ -148,9 +189,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		//DEBUG
 		// Basic HTTP Authentication "by hand"
 		String sBasicAuth = "Apikey " + sDownloadPassword;
-//		String sEncoded = Base64.getEncoder().encodeToString(sBasicAuth.getBytes());
-//		
-//		oHttpConn.setRequestProperty("Authorization",sEncoded);
+
 		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
 
 		int responseCode = oHttpConn.getResponseCode();
@@ -163,8 +202,14 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			String sFileName = "";
 			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 			String sContentType = oHttpConn.getContentType();
-			long lContentLength = oHttpConn.getContentLengthLong();
-//			long lTestLength = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
+			long lContentLength = 0;
+			try {
+				lContentLength = GetDownloadFileSize(sFileURL);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 
 			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
@@ -176,7 +221,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				}
 			} else {
 				// extracts file name from URL
-				sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
+				sFileName = sURL.substring(sURL.lastIndexOf("/") + 1, sURL.length());
 			}
 
 			m_oLogger.debug("Content-Type = " + sContentType);
