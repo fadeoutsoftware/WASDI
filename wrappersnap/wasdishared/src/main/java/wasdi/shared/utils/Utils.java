@@ -377,20 +377,35 @@ public class Utils {
 		}
 		return false;
 	}
+	
+	
+	//////////////////////// All about log
+	
 
+	public static void debugLog(int iValue) {
+		debugLog("" + iValue);
+	}
+	
 	/**
 	 * Debug Log
 	 * 
 	 * @param sMessage
 	 */
 	public static void debugLog(String sMessage) {
-		LocalDateTime oNow = LocalDateTime.now();
-		System.out.println(oNow + ": " + sMessage);
+		log("", sMessage);
 	}
 	
-	public static void debugLog(int iValue) {
-		debugLog("" + iValue);
+	public static void log(String sLevel, String sMessage) {
+		String sPrefix = "";
+		if(!Utils.isNullOrEmpty(sLevel)) {
+			sPrefix = "[" + sLevel + "] ";
+		}
+		LocalDateTime oNow = LocalDateTime.now();
+		System.out.println( sPrefix + oNow + ": " + sMessage);
 	}
+	
+	///////// end log
+	
 	
 	
 	/**
