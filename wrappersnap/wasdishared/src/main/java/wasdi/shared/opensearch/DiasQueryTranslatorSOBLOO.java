@@ -12,13 +12,14 @@ package wasdi.shared.opensearch;
  */
 public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 
+	//TODO one class per mission, w/ 2 maps: WASDI to SOBLOO keys, and WASDI to SOBLOO values 
+	
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
 	 */
 	@Override
 	protected String translate(String sQuery) {
-		// TODO Auto-generated method stub
-		return null;
+		return "f=acquisition.missionName:eq:Sentinel-1A";
 	}
 
 }
