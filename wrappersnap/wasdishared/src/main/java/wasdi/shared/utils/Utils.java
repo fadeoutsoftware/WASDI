@@ -558,12 +558,30 @@ public class Utils {
 			}
 		}
 	}
+	
+	///////// units conversion
 
+	private static String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O
+	
+	public static String getNormalizedSize(double dSize, String sInputUnit) {
+		for(int i = 0; i < sUnits.length; ++i) {
+			if((sUnits[i]).equals(sInputUnit)) {
+				return getNormalizedSize(dSize, i);
+			}
+		}
+		Utils.log("WARNING", "Utils.getNormalizedSize( " + dSize + ", " + sInputUnit + " ): could not find requested unit");
+		return "";
+	}
+	
 	public static String getNormalizedSize(Double dSize) {
+		return getNormalizedSize(dSize, 0);
+	}
+	
+	public static String getNormalizedSize(Double dSize, int iStartingIndex) {
 		String sChosenUnit = null;
 		String sSize = null;
-		String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
-		int iUnitIndex = 0;
+		 
+		int iUnitIndex = Math.max(0, iStartingIndex);
 		int iLim = sUnits.length -1;
 		while(iUnitIndex < iLim && dSize >= 900.0) {
 			dSize = dSize / 1024.0;
