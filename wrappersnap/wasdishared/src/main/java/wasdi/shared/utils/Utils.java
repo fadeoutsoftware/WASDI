@@ -561,4 +561,9 @@ public class Utils {
 		}
 		return sSize;
 	}
+
+	public static String fromTimestampToDate(long lEpochSeconds) {
+	    SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
+	    return oSimpleDateFormat.format(new Date(lEpochSeconds));
+	}
 }
