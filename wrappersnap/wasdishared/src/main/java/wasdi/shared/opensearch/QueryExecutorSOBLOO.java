@@ -34,6 +34,9 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		m_sProvider="SOBLOO";
 		//this.m_oQueryTranslator = new DiasQueryTranslatorSOBLOO();
 		this.m_oResponseTranslator = new DiasResponseTranslatorSOBLOO();
+		
+		this.m_sUser = null;
+		this.m_sPassword = null;
 	}
 
 	/* (non-Javadoc)
@@ -72,6 +75,8 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 			} else {
 				sUrl = getSearchListUrl(oQuery);
 			}
+			this.m_sUser = null;
+			this.m_sPassword = null;
 			sResult = httpGetResults(sUrl, "search");		
 			List<QueryResultViewModel> aoResult = null;
 			if(!Utils.isNullOrEmpty(sResult)) {
@@ -116,7 +121,15 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 
 
 	private String sMockUrlGen() {
-		return s_sBaseUrl + "f=acquisition.missionName:eq:Sentinel-1A";
+		return s_sBaseUrl + "f=acquisition.missionName:eq:Sentinel-1A&size=2";
+	}
+	
+	
+	@Override
+	public int executeCount(String sQuery) throws IOException {
+		m_sUser = null;
+		m_sPassword = null;
+		return super.executeCount(sQuery);
 	}
 
 
