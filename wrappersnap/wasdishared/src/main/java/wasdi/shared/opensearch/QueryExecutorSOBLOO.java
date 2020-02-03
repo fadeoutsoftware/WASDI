@@ -32,7 +32,7 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	public QueryExecutorSOBLOO() {
 		Utils.debugLog(s_sClassName);
 		m_sProvider="SOBLOO";
-		//this.m_oQueryTranslator = new DiasQueryTranslatorSOBLOO();
+		this.m_oQueryTranslator = new DiasQueryTranslatorSOBLOO();
 		this.m_oResponseTranslator = new DiasResponseTranslatorSOBLOO();
 		
 		this.m_sUser = null;
@@ -98,14 +98,12 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 
 	@Override
 	protected String getSearchUrl(PaginatedQuery oQuery){
-		//todo implement
-		return sMockUrlGen();
+		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
 	}
 
 	@Override
 	protected String getSearchListUrl(PaginatedQuery oQuery) {
-		//TODO implement
-		return sMockUrlGen();
+		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
 	}
 
 
@@ -116,13 +114,9 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	protected String getCountUrl(String sQuery) {
 		Preconditions.checkNotNull(sQuery, "QueryExecutorSOBLOO.getCountUrl: sQuery is null");
 
-		return s_sBaseUrl + "f=acquisition.missionName:eq:Sentinel-1A";
+		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(sQuery);
 	}
 
-
-	private String sMockUrlGen() {
-		return s_sBaseUrl + "f=acquisition.missionName:eq:Sentinel-1A&size=2";
-	}
 	
 	
 	@Override
