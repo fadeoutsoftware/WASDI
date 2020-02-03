@@ -98,12 +98,14 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 
 	@Override
 	protected String getSearchUrl(PaginatedQuery oQuery){
-		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
+		//todo pagination
+		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) + "&size=2";
 	}
 
 	@Override
 	protected String getSearchListUrl(PaginatedQuery oQuery) {
-		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
+		//todo pagination
+		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery() + "&size=2");
 	}
 
 
