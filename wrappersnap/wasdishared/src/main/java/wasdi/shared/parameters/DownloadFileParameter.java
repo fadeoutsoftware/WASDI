@@ -34,13 +34,6 @@ public class DownloadFileParameter extends BaseParameter{
 
     private String productName;
 
-	public String getProductName() {
-		return productName;
-	}
-
-	public void setProductName(String productName) {
-		this.productName = productName;
-	}
 
 	public String getUrl() { return url; }
 
