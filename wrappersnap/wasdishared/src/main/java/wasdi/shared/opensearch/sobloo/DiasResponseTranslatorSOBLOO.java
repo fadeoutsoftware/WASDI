@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -136,7 +137,6 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 				oJsonItem = oJsonItem.optJSONObject("data");
 				String sBuffer = null;
 				int iBuffer = 0;
-				long lBuffer = 0;
 
 				if(oJsonItem.has("identification")) {
 					JSONObject oJsonIdentification = oJsonItem.optJSONObject("identification");
