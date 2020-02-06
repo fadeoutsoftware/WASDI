@@ -4,11 +4,12 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.onda;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -17,9 +18,6 @@ import wasdi.shared.utils.Utils;
  */
 public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
-	//see issue #32
-	//TODO make a JSON file with query configuration
-	//TODO write the path of the JSON file in the configuration file (web.xml, filename read and passed from the server?)
 
 	public DiasQueryTranslatorONDA() {
 		/*

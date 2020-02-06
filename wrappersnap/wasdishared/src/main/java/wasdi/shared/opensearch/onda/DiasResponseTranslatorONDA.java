@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.onda;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +15,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 

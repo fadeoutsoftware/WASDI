@@ -4,13 +4,15 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.onda;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
 
+import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
