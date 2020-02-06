@@ -4,7 +4,9 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.creodias;
+
+import wasdi.shared.opensearch.DiasQueryTranslator;
 
 /**
  * @author c.nattero

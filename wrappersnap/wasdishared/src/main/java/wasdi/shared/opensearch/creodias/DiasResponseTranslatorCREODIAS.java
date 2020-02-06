@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.creodias;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
