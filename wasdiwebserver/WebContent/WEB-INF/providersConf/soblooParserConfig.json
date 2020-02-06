@@ -1,0 +1,18 @@
+{
+	"footprint": {
+		
+	}
+	"Sentinel-1": {
+		"keys": {
+			"platformname": "identification.collection",
+			"filename": "acquisition.missionCode"
+		},
+		"values": {
+			"filename": {
+				"format": ""
+				"S1A_*": "S1A",
+				"S1B_*": "S1B"
+			}
+		}
+	}
+}
