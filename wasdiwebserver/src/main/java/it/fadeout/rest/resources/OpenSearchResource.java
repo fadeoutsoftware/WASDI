@@ -484,11 +484,13 @@ public class OpenSearchResource {
 				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 				String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
 	
+				String sParserConfigPath = m_oServletConfig.getInitParameter(sProvider+".parserConfig");
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
 						oCredentials,
 						//TODO change into config method
-						sDownloadProtocol, sGetMetadata);
+						sDownloadProtocol, sGetMetadata,
+						sParserConfigPath);
 			}
 		} catch (Exception oE) {
 			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
