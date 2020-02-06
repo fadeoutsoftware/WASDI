@@ -76,26 +76,28 @@ public class QueryTranslationParser {
 				Iterator<Object> oIterator = m_aoFilters.iterator();
 				while( oIterator.hasNext()) {
 					JSONObject oFilter = (JSONObject) oIterator.next();
-					if(sWasdiQueryKey.equals(oFilter.optString("indexname", null)) ) {
-						String sRegex = oFilter.optString("regex", null);
-						if(".*".equals(sRegex)) {
-							String sIndexValues = oFilter.optString("indexvalues", null);
-							if(!"".equals(sIndexValues)) {
-								JSONObject oValues = m_oValuesTranslation.optJSONObject(sWasdiQueryKey);
-								if(null==oValues) {
-									Utils.log("ERROR", "QueryTranslationParser.parse( " + sQuery + " ): could not translate value for key: " + sWasdiQueryKey);
-									break;
-								}
-								 //sProviderValue = 
-							} else {
-								//then it can be:
-								//a number
-								//an interval -> hint contains "TO"
-								//todo check index min and max 
-							}
+					if(!sWasdiQueryKey.equals(oFilter.optString("indexname", null)) ) {
+						continue;
+					}
+					
+					String sRegex = oFilter.optString("regex", null);
+					String sIndexValues = oFilter.optString("indexvalues", null);
+					
+					if(".*".equals(sRegex) && !"".equals(sIndexValues)) {
+						JSONObject oValues = m_oValuesTranslation.optJSONObject(sWasdiQueryKey);
+						if(null==oValues) {
+							Utils.log("ERROR", "QueryTranslationParser.parse( " + sQuery + " ): could not translate value for key: " + sWasdiQueryKey);
+							break;
 						}
+						 //sProviderValue =
+					} else {
+						//then it can be:
+						//a number
+						//an interval -> hint contains "TO"
+						//todo check index min and max 
 					}
 				}
+				
 				if(null == sProviderValue) {
 					//todo log an error
 					continue;
