@@ -4,13 +4,21 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.sobloo;
+
+import org.json.JSONObject;
+
+import com.google.common.base.Preconditions;
+
+import wasdi.shared.opensearch.DiasQueryTranslator;
 
 /**
  * @author c.nattero
  *
  */
 public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
+	
+	private JSONObject m_oJSONConf;
 
 	//TODO one class per mission, w/ 2 maps: WASDI to SOBLOO keys, and WASDI to SOBLOO values 
 	

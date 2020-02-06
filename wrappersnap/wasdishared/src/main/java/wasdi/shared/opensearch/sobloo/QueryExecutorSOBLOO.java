@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.sobloo;
 
 import java.io.IOException;
 import java.util.List;
