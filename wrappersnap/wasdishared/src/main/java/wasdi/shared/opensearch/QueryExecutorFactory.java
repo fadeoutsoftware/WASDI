@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import wasdi.shared.opensearch.onda.QueryExecutorONDA;
+import wasdi.shared.opensearch.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 
@@ -55,14 +57,10 @@ public class QueryExecutorFactory {
 		return oExecutor;	
 	}
 
-	public QueryExecutor getExecutor(
-			String sProvider,
-			AuthenticationCredentials oCredentials,
-			String sDownloadProtocol, String sGetMetadata) {
-		Utils.debugLog("QueryExecutorFactory.getExecutor( " +
-				sProvider + ", <credentials>, " +
-				sDownloadProtocol + ", " + sGetMetadata + " )..."
-				);
+	public QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials,
+			String sDownloadProtocol, String sGetMetadata, String sParserConfigPath) {
+		Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + ", <credentials>, " +
+				sDownloadProtocol + ", " + sGetMetadata + " )...");
 		QueryExecutor oExecutor = null;
 
 		try {
@@ -75,6 +73,7 @@ public class QueryExecutorFactory {
 				oExecutor.setCredentials(oCredentials);
 				oExecutor.setMustCollectMetadata(Utils.doesThisStringMeansTrue(sGetMetadata));
 				oExecutor.setDownloadProtocol(sDownloadProtocol);
+				oExecutor.setParserConfigPath(sParserConfigPath);
 			} catch (Exception oE1) {
 				Utils.debugLog("QueryExecutorFactory.getExecutor: " + oE1 );
 			}

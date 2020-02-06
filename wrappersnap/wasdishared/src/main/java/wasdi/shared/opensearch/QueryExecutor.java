@@ -46,9 +46,11 @@ public abstract class QueryExecutor {
 	protected String m_sProvider; 
 	protected String m_sUser; 
 	protected String m_sPassword;
-
+	protected String m_sParserConfigPath;
+	
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
+
 
 	
 	public int executeCount(String sQuery) throws IOException {
@@ -437,7 +439,7 @@ public abstract class QueryExecutor {
 		QueryExecutorFactory oFactory = new QueryExecutorFactory();
 		//change the following with your user and password (and don't commit them!)
 		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
-		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true");
+		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true", null);
 
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
@@ -450,5 +452,9 @@ public abstract class QueryExecutor {
 
 	protected String extractNumberOfResults(String sResponse) {
 		return sResponse;
+	}
+
+	public void setParserConfigPath(String sParserConfigPath) {
+		m_sParserConfigPath = sParserConfigPath;
 	}
 }
