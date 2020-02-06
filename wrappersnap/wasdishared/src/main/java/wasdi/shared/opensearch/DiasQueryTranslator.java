@@ -19,6 +19,7 @@ public abstract class DiasQueryTranslator {
 	protected HashMap<String, String> keyMapping;
 	protected HashMap<String, String> valueMapping;
 	protected String m_sParserConfigPath;
+	protected String m_sAppConfigPath;
 
 	public String translateAndEncode(String sQueryFromClient) {
 		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
@@ -56,6 +57,10 @@ public abstract class DiasQueryTranslator {
 	}
 
 	public void setParserConfigPath(String sParserConfigPath) {
-		m_sParserConfigPath = sParserConfigPath;
+		this.m_sParserConfigPath = sParserConfigPath;
+	}
+	
+	public void setAppconfigPath(String sAppConfigPath) {
+		this.m_sAppConfigPath = sAppConfigPath;
 	}
 }
