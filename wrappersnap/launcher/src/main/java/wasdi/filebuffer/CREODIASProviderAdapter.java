@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.opensearch.DiasResponseTranslatorCREODIAS;
+import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
