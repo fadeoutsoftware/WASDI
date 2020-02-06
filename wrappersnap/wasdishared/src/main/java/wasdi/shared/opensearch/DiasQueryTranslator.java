@@ -18,14 +18,15 @@ public abstract class DiasQueryTranslator {
 	
 	protected HashMap<String, String> keyMapping;
 	protected HashMap<String, String> valueMapping;
+	protected String m_sParserConfigPath;
 
-	public String translateAndEncode(String sQuery) {
+	public String translateAndEncode(String sQueryFromClient) {
 		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
-		return encode(translate(sQuery));
+		return encode(translate(sQueryFromClient));
 	}
 	
 	//translates from WASDI query (OpenSearch) to <derived class> format
-	protected abstract String translate(String sQuery);
+	protected abstract String translate(String sQueryFromClient);
 
 	protected String encode( String sDecoded ) {
 		String sResult = sDecoded; 
@@ -35,4 +36,26 @@ public abstract class DiasQueryTranslator {
 		return sResult;
 	}
 	
+	protected String prepareQuery(String sInput) {
+		String sQuery = new String(sInput);
+		//insert space before and after round brackets
+		sQuery = sQuery.replaceAll("\\(", " \\( ");
+		sQuery = sQuery.replaceAll("\\)", " \\) ");
+		//remove space before and after square brackets 
+		sQuery = sQuery.replaceAll(" \\[", "\\[");
+		sQuery = sQuery.replaceAll("\\[ ", "\\[");
+		sQuery = sQuery.replaceAll(" \\]", "\\]");
+		sQuery = sQuery.replaceAll("\\] ", "\\]");
+		sQuery = sQuery.replaceAll("POLYGON", "POLYGON ");
+		sQuery = sQuery.replaceAll("\\: ", "\\:");
+		sQuery = sQuery.replaceAll(" \\: ", "\\:");
+
+		sQuery = sQuery.replaceAll("AND", " AND ");
+		sQuery = sQuery.trim().replaceAll(" +", " ");
+		return sQuery;
+	}
+
+	public void setParserConfigPath(String sParserConfigPath) {
+		m_sParserConfigPath = sParserConfigPath;
+	}
 }
