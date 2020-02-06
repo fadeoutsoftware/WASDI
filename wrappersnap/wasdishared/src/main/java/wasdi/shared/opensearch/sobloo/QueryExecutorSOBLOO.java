@@ -14,6 +14,8 @@ import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -33,6 +35,7 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		Utils.debugLog(s_sClassName);
 		m_sProvider="SOBLOO";
 		this.m_oQueryTranslator = new DiasQueryTranslatorSOBLOO();
+		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
 		this.m_oResponseTranslator = new DiasResponseTranslatorSOBLOO();
 		
 		this.m_sUser = null;
@@ -98,14 +101,20 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 
 	@Override
 	protected String getSearchUrl(PaginatedQuery oQuery){
-		//todo pagination
-		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) + "&size=2";
+		Preconditions.checkNotNull(oQuery, s_sClassName + ".getSearchUrl: query is null");
+		
+		//todo add thumbnail
+		return getSearchListUrl(oQuery);
+		
 	}
 
 	@Override
 	protected String getSearchListUrl(PaginatedQuery oQuery) {
-		//todo pagination
-		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery() + "&size=2");
+		Preconditions.checkNotNull(oQuery, s_sClassName + ".getSearchListUrl: query is null");
+		
+		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) +
+				"&size=" + oQuery.getLimit()+ "&from=" + oQuery.getOffset() +
+				"&pretty=false&flat=false&sort=-timeStamp,uid&max-age-cache=120";
 	}
 
 
@@ -115,8 +124,13 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	@Override
 	protected String getCountUrl(String sQuery) {
 		Preconditions.checkNotNull(sQuery, "QueryExecutorSOBLOO.getCountUrl: sQuery is null");
-
-		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(sQuery);
+		String sUrl = "";
+		try {
+			sUrl = s_sBaseUrl + m_oQueryTranslator.translateAndEncode(sQuery);
+		} catch (Exception oE) {
+			Utils.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
+		}
+		return sUrl;
 	}
 
 	
