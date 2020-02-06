@@ -491,24 +491,4 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sFootprint;
 	}
 
-	protected String prepareQuery(String sInput) {
-		String sQuery = new String(sInput);
-		//insert space before and after round brackets
-		sQuery = sQuery.replaceAll("\\(", " \\( ");
-		sQuery = sQuery.replaceAll("\\)", " \\) ");
-		//remove space before and after square brackets 
-		sQuery = sQuery.replaceAll(" \\[", "\\[");
-		sQuery = sQuery.replaceAll("\\[ ", "\\[");
-		sQuery = sQuery.replaceAll(" \\]", "\\]");
-		sQuery = sQuery.replaceAll("\\] ", "\\]");
-		sQuery = sQuery.replaceAll("POLYGON", "POLYGON ");
-		sQuery = sQuery.replaceAll("\\: ", "\\:");
-		sQuery = sQuery.replaceAll(" \\: ", "\\:");
-
-		sQuery = sQuery.replaceAll("AND", " AND ");
-		sQuery = sQuery.trim().replaceAll(" +", " ");
-		return sQuery;
-	}
-
-
 }
