@@ -58,7 +58,7 @@ public class QueryExecutorFactory {
 	}
 
 	public QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials,
-			String sDownloadProtocol, String sGetMetadata, String sParserConfigPath) {
+			String sDownloadProtocol, String sGetMetadata, String sParserConfigPath, String sAppConfigPath) {
 		Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + ", <credentials>, " +
 				sDownloadProtocol + ", " + sGetMetadata + " )...");
 		QueryExecutor oExecutor = null;
@@ -74,6 +74,7 @@ public class QueryExecutorFactory {
 				oExecutor.setMustCollectMetadata(Utils.doesThisStringMeansTrue(sGetMetadata));
 				oExecutor.setDownloadProtocol(sDownloadProtocol);
 				oExecutor.setParserConfigPath(sParserConfigPath);
+				oExecutor.setAppconfigPath(sAppConfigPath);
 			} catch (Exception oE1) {
 				Utils.debugLog("QueryExecutorFactory.getExecutor: " + oE1 );
 			}
