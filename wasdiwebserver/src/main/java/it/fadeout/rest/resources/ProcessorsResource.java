@@ -3,7 +3,9 @@ package it.fadeout.rest.resources;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -826,6 +828,70 @@ public class ProcessorsResource {
 		}
 		return Response.ok().build();
 	}	
+	
+	
+	@POST
+	@Path("/uploadProcessorLogo")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+
+		// Check the user session
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			return Response.status(401).build();
+		}
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) {
+			return Response.status(401).build();
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return Response.status(401).build();
+		}
+		if(Utils.isNullOrEmpty(sProcessorId)) {
+			return Response.status(400).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		//TODO CHECK IF USER CHE MODIFY THE LOGO 
+		//TODO CHECK SIZE OF IMAGE
+		//TODO CHECK FORMAT OF IMAGE 
+		
+		// Take path
+		String sPath = "C:\\temp\\wasdi\\data\\processors\\" + oProcessor.getName() + "\\logo\\";
+		File oDirectory = new File(sPath);
+		//create directory
+	    if (! oDirectory.exists()){
+	    	oDirectory.mkdir();
+	    }
+	    
+	    File oOutputFilePath = new File(sPath + "logo.jpg");
+		// Copy the stream
+		int iRead = 0;
+		byte[] ayBytes = new byte[1024];
+		OutputStream oOutStream;
+		try {
+			oOutStream = new FileOutputStream(oOutputFilePath);
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutStream.write(ayBytes, 0, iRead);
+			}
+			oOutStream.flush();
+			oOutStream.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+		return Response.status(200).build();
+		
+	}
 	
 	public boolean UnzipProcessor(File oProcessorZipFile) {
 		try {

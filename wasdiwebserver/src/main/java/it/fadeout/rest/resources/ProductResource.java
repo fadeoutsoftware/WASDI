@@ -481,7 +481,8 @@ public class ProductResource {
 
 		return Response.status(200).build();
 	}
-
+	
+	
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
