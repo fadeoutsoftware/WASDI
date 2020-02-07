@@ -15,6 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.json.simple.parser.JSONParser;
 
 import com.google.common.base.Preconditions;
@@ -70,9 +71,9 @@ public class WasdiFileUtils {
 		try(
 				FileReader oReader = new FileReader(sFileFullPath);
 				){
-			JSONParser oParser = new JSONParser();
-			Object oObj = oParser.parse(oReader);
-			oJson = (JSONObject) oObj;
+			
+			JSONTokener oTokener = new JSONTokener(oReader);
+			oJson = new JSONObject(oTokener);
 		} catch (FileNotFoundException oFnf) {
 			Utils.log("ERROR", "WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
 		} catch (Exception oE) {
