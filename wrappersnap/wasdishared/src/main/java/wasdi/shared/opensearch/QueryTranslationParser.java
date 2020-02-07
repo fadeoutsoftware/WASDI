@@ -60,41 +60,89 @@ public class QueryTranslationParser {
 			String[] asKeysAndValues = sQuery.split(" AND ");
 			for (String sQueryItem : asKeysAndValues) {
 				
+				//todo translate mission/product first of all
+				String sName = m_oAppConf.optString("name");
+				String sIndexname = m_oAppConf.optString("indexname", null);
+				String sIndexvalue = m_oAppConf.optString("indexvalue", null);
+				if(sQueryItem.equals(sIndexname+':'+sIndexvalue)) {
+					//todo translate key and value
+					String sProviderKey = this.m_oKeysTranslation.optString(sIndexname);
+					JSONObject oIndexJson = this.m_oValuesTranslation.optJSONObject("indexvalue");
+					if(null == oIndexJson) {
+						throw new NullPointerException("QueryTranslationParser.parse( " + sQuery + " ): cannot map collection name, aborting");
+					} 
+					String sProviderValue = oIndexJson.optString(sIndexvalue);
+					sResult += "&f=" + sProviderKey + ":eq:" + sProviderValue;
+					continue;
+				}
+				
+				//now proceed parsing the rest
+				
+				
 				String[] asWasdiKeyValuePair = sQueryItem.split(":");
 				
 				//translate key
 				String sWasdiQueryKey = asWasdiKeyValuePair[0];
+				String sWasdiQueryValue = asWasdiKeyValuePair[1];
 				String sProviderKey = m_oKeysTranslation.optString(sWasdiQueryKey, null);
 				if(null == sProviderKey) {
 					//todo log an error
 					continue;
 				}
 				
-				String sProviderValue = null; 
-						
-				//verify value format before translating
+				String sProviderValue = null;
+				
+				
+				
+				
+				//translate filter
 				Iterator<Object> oIterator = m_aoFilters.iterator();
 				while( oIterator.hasNext()) {
 					JSONObject oFilter = (JSONObject) oIterator.next();
-					if(!sWasdiQueryKey.equals(oFilter.optString("indexname", null)) ) {
+					sIndexname = oFilter.optString("indexname", null);
+					if(!sWasdiQueryKey.equals(sIndexname) ) {
 						continue;
 					}
 					
+					String sIndexlabel = oFilter.optString("indexlabel", null);
+					if(null == sIndexlabel) {
+						Utils.log("ERROR", "QueryTranslationParser.parse( "+ sQuery + " ): indexlabel is null, configuration does not look good");
+						continue;
+					}
+					//this one might absent
+					String sIndexhint = oFilter.optString("indexhint", null);
+					String sIndexvalues = oFilter.optString("indexvalues", null);
+					if(null == sIndexvalues) {
+						Utils.log("ERROR", "QueryTranslationParser.parse( "+ sQuery + " ): indexvalues is null, configuration does not look good");
+						continue;
+					}
 					String sRegex = oFilter.optString("regex", null);
-					String sIndexValues = oFilter.optString("indexvalues", null);
+					if(null == sRegex) {
+						Utils.log("ERROR", "QueryTranslationParser.parse( "+ sQuery + " ): regex is null, configuration does not look good");
+						continue;
+					}
+					//these might be absent
+					int iIndexmin = oFilter.optInt("indexmin", -1);
+					int iIndexmax = oFilter.optInt("indexmax", -1);
+
 					
-					if(".*".equals(sRegex) && !"".equals(sIndexValues)) {
+					if(".*".equals(sRegex) && !"".equals(sIndexvalues)) {
 						JSONObject oValues = m_oValuesTranslation.optJSONObject(sWasdiQueryKey);
 						if(null==oValues) {
 							Utils.log("ERROR", "QueryTranslationParser.parse( " + sQuery + " ): could not translate value for key: " + sWasdiQueryKey);
 							break;
 						}
-						 //sProviderValue =
-					} else {
+						
+						sProviderValue = oValues.optString(sWasdiQueryValue, null);
+						sResult += "&f=" + sProviderKey + ":eq:" + sProviderValue;
+						
+					} else if( "".equals(sIndexvalues) ){
 						//then it can be:
 						//a number
 						//an interval -> hint contains "TO"
 						//todo check index min and max 
+						
+						//todo handle this case
 					}
 				}
 				
@@ -104,18 +152,16 @@ public class QueryTranslationParser {
 				}
 
 				
-				//sWasdiQueryValue = asWasdiKeyValuePair[1];
+				//
 				
 
-//				sProviderKey = m_oParseConf.optString(key)
-//				sResult += "&f=" + 
-//				for( )
+				//todo finalize
+
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			Utils.log("ERROR", "QueryTranslationParser( " + sQuery + " ): could not complete translation, aborting");
 		}
 		
-		sResult = "f=acquisition.missionName:eq:Sentinel-1A";
 		return sResult;
 		
 		

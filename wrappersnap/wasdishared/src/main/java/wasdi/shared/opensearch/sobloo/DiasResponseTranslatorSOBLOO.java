@@ -180,6 +180,8 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 						}
 					}
 				}
+				
+				//todo relative orbit number
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorSobloo.parseData: " + oE);
