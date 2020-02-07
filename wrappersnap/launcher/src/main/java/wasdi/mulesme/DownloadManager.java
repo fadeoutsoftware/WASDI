@@ -102,7 +102,7 @@ public class DownloadManager {
 		AuthenticationCredentials oCredentials = new AuthenticationCredentials(m_sproviderUser, m_sproviderPassword);
 		QueryExecutor oExecutor = oFactory.getExecutor(m_sproviderName, oCredentials,
 				//"0", m_squeryLimit, m_squerySortedBy, m_squeryOrder,
-				sDownloadProtocol, "true", null);
+				sDownloadProtocol, "true", null, null);
 		
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
