@@ -30,25 +30,37 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 	@Override
 	protected String translate(String sQueryFromClient) {
 		Preconditions.checkNotNull(sQueryFromClient, "DiasQueryTranslatorSOBLOO.translate: query is null");
+		Preconditions.checkNotNull(m_sAppConfigPath, "DiasQueryTranslatorSOBLOO.translate: app config path is null");
+		Preconditions.checkNotNull(m_sParserConfigPath, "DiasQueryTranslatorSOBLOO.translate: parser config is null");
 		
 		String sResult = null;
 		try {
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
 			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
 			String sQuery = this.prepareQuery(sQueryFromClient);
+			
+			sResult = "";
 			//TODO parse footprint
+			sResult += parseFootprint(sQuery);
 			//TODO parse time frame
-
+			
+			
 			for (Object oObject : oAppConf.optJSONArray("missions")) {
 				JSONObject oJson = (JSONObject) oObject;
+				String sName = oJson.optString("indexname", null);
 				String sValue = oJson.optString("indexvalue", null);
-				if(sQuery.contains(sValue)) {
+				String sToken = sName + ':' + sValue; 
+				if(sQuery.contains(sToken)) {
 					//todo isolate relevant portion of query
-					int iStart = sQuery.indexOf(sValue);
+					int iStart = Math.max(0, sQuery.indexOf(sToken));
 					int iEnd = sQuery.indexOf(')', iStart);
-					String sQueryPart = sQuery.substring(iStart, iEnd);
+					if(0>iEnd) {
+						iEnd = sQuery.length();
+					}
+					String sQueryPart = sQuery.substring(iStart, iEnd).trim();
 					QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oJson);
-					sResult += oParser.parse(sQueryPart);
+					String sLocalPart = oParser.parse(sQueryPart); 
+					sResult += sLocalPart;
 				}
 			}
 			
@@ -58,5 +70,28 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 
 		return sResult;
 	}
+
+	private String parseFootprint(String sQuery) {
+		String sResult = "";
+		if(sQuery.contains("footprint")) {
+			String sIntro = "( footprint:\"intersects ( POLYGON ( ( ";
+			int iStart = sQuery.indexOf(sIntro);
+			if(iStart >= 0) {
+				iStart += sIntro.length();
+			}
+			int iEnd = sQuery.indexOf(')', iStart);
+			if(0>iEnd) {
+				iEnd = sQuery.length();
+			}
+			
+			String sCoordinates = sQuery.substring(iStart, iEnd).replace(' ', ',');
+			sResult = "f=gintersect=" + sCoordinates;
+		}
+		return sResult;
+	}
+	
+//	private String parseTimeFrame(String sQuery) {
+//		
+//	}
 
 }
