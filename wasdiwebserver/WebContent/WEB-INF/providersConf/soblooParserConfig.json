@@ -8,6 +8,9 @@
 			"filename": "acquisition.missionCode"
 		},
 		"values": {
+			"indexvalue": {
+				"Sentinel-1": "Sentinel-1"
+			},				
 			"filename": {
 				"format": "",
 				"S1A_*": "S1A",
