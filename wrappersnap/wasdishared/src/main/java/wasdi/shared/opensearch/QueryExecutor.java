@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -46,7 +47,9 @@ public abstract class QueryExecutor {
 	protected String m_sProvider; 
 	protected String m_sUser; 
 	protected String m_sPassword;
+	
 	protected String m_sParserConfigPath;
+	protected String m_sAppConfigPath;
 	
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
@@ -56,7 +59,8 @@ public abstract class QueryExecutor {
 	public int executeCount(String sQuery) throws IOException {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
-			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
+			sQuery = encodeAsRequired(sQuery); 
+			String sUrl = getCountUrl(sQuery);
 			String sResponse = httpGetResults(sUrl, "count");
 			int iResult = 0;
 			try {
@@ -72,6 +76,16 @@ public abstract class QueryExecutor {
 		}
 	}
 
+	/**
+	 * @param sUrl
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	protected String encodeAsRequired(String sUrl) throws UnsupportedEncodingException {
+		String sResult = URLEncoder.encode(sUrl, "UTF-8");
+		return sResult;
+	}
+	
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
 		if(null == oQuery) {
@@ -160,14 +174,20 @@ public abstract class QueryExecutor {
 
 	}	
 
-	private void setUser(String m_sUser) {
-		this.m_sUser = m_sUser;
+	public void setParserConfigPath(String sParserConfigPath) {
+		m_sParserConfigPath = sParserConfigPath;
 	}
 
-	private void setPassword(String m_sPassword) {
-		this.m_sPassword = m_sPassword;
+	public void setAppconfigPath(String sAppconfigPath) {
+		this.m_sAppConfigPath = sAppconfigPath;
 	}
-
+	
+	
+	protected String extractNumberOfResults(String sResponse) {
+		return sResponse;
+	}
+	
+	
 	protected String getSearchListUrl(PaginatedQuery oQuery) {
 		return getSearchUrl(oQuery);
 	}
@@ -434,12 +454,21 @@ public abstract class QueryExecutor {
 		return sResult;
 	}
 
+	protected void setUser(String m_sUser) {
+		this.m_sUser = m_sUser;
+	}
+
+	protected void setPassword(String m_sPassword) {
+		this.m_sPassword = m_sPassword;
+	}
+	
+
 	public static void main(String[] args) {
 
 		QueryExecutorFactory oFactory = new QueryExecutorFactory();
 		//change the following with your user and password (and don't commit them!)
 		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
-		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true", null);
+		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true", null, null);
 
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
@@ -450,11 +479,4 @@ public abstract class QueryExecutor {
 		}
 	}
 
-	protected String extractNumberOfResults(String sResponse) {
-		return sResponse;
-	}
-
-	public void setParserConfigPath(String sParserConfigPath) {
-		m_sParserConfigPath = sParserConfigPath;
-	}
 }

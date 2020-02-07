@@ -7,6 +7,8 @@
 package wasdi.shared.opensearch.sobloo;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
@@ -26,7 +28,7 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 public class QueryExecutorSOBLOO extends QueryExecutor {
 
 	protected String s_sBaseUrl = "https://sobloo.eu/api/v1/services/search?";
-
+	
 	static {
 		s_sClassName = "QueryExecutorSOBLOO";
 	}
@@ -35,7 +37,6 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		Utils.debugLog(s_sClassName);
 		m_sProvider="SOBLOO";
 		this.m_oQueryTranslator = new DiasQueryTranslatorSOBLOO();
-		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
 		this.m_oResponseTranslator = new DiasResponseTranslatorSOBLOO();
 		
 		this.m_sUser = null;
@@ -69,6 +70,12 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	 */
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+		Preconditions.checkNotNull(this.m_sAppConfigPath, "QueryExecutorSOBLOO.executeAndRetrieve: app config path is null");
+		Preconditions.checkNotNull(this.m_sParserConfigPath, "QueryExecutorSOBLOO.executeAndRetrieve: parser config path is null");
+		
+		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
+		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
+		
 		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
 		String sResult = null;
 		String sUrl = null;
@@ -110,7 +117,10 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 
 	@Override
 	protected String getSearchListUrl(PaginatedQuery oQuery) {
+		Utils.debugLog("QueryExecutorSOBLOO.getSearchListUrl( " + oQuery.getQuery() + " )");
+		
 		Preconditions.checkNotNull(oQuery, s_sClassName + ".getSearchListUrl: query is null");
+		readyQueryTranslator();
 		
 		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) +
 				"&size=" + oQuery.getLimit()+ "&from=" + oQuery.getOffset() +
@@ -123,14 +133,41 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	 */
 	@Override
 	protected String getCountUrl(String sQuery) {
+		Utils.debugLog("QueryExecutorSOBLOO.getCountUrl( " + sQuery + " )");
+		
+		Preconditions.checkNotNull(m_sAppConfigPath, "QueryExecutorSOBLOO.getCountUrl: app config path is null");
+		Preconditions.checkNotNull(m_sParserConfigPath, "QueryExecutorSOBLOO.getCountUrl: parser config path is null");
+		
 		Preconditions.checkNotNull(sQuery, "QueryExecutorSOBLOO.getCountUrl: sQuery is null");
 		String sUrl = "";
 		try {
+			readyQueryTranslator();
 			sUrl = s_sBaseUrl + m_oQueryTranslator.translateAndEncode(sQuery);
 		} catch (Exception oE) {
 			Utils.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
 		}
 		return sUrl;
+	}
+	
+	/**
+	 * @param sUrl
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	@Override
+	protected String encodeAsRequired(String sUrl) throws UnsupportedEncodingException {
+		return sUrl;
+	}
+
+	/**
+	 * 
+	 */
+	protected void readyQueryTranslator() {
+		Preconditions.checkNotNull(m_sAppConfigPath, "QueryExecutorSOBLOO.readyQueryTranslator: app config path is null");
+		Preconditions.checkNotNull(m_sParserConfigPath, "QueryExecutorSOBLOO.readyQueryTranslator: parser config path is null");
+		
+		m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
+		m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
 	}
 
 	
@@ -146,8 +183,14 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 
 	@Override
 	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
-		Utils.debugLog("QueryExecutorSOBLOO.buildResultViewModel( sJson, " + bFullViewModel + " )");
 		Preconditions.checkNotNull(sJson, s_sClassName + ".buildResultLightViewModel: passed a null string");
+
+		
+		Utils.debugLog("QueryExecutorSOBLOO.buildResultViewModel( sJson, " + bFullViewModel + " )");
+		
+		
+		
+		
 
 		List<QueryResultViewModel> aoResult = m_oResponseTranslator.translateBatch(sJson, bFullViewModel, m_sDownloadProtocol);
 

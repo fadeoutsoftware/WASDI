@@ -7,6 +7,8 @@
 package wasdi.shared.opensearch.onda;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
@@ -124,26 +126,36 @@ public class QueryExecutorONDA extends QueryExecutor {
 	}
 
 
-	@Override
-	public int executeCount(String sQuery) throws IOException {
-		Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
-		String sUrl = getCountUrl(sQuery);
-		int iResult = 0;
-		String sResult = "0";
-		try {
-			sResult = httpGetResults(sUrl, "count");
-			if(null!=sResult) {
-				iResult = Integer.parseInt(sResult);
-			} else {
-				iResult = -1;
-			}
-		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " ): " + oE.getMessage());
-			iResult = -1;
-		}
-		return iResult;
-	}
+//	@Override
+//	public int executeCount(String sQuery) throws IOException {
+//		Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
+//		String sUrl = getCountUrl(sQuery);
+//		int iResult = 0;
+//		String sResult = "0";
+//		try {
+//			sResult = httpGetResults(sUrl, "count");
+//			if(null!=sResult) {
+//				iResult = Integer.parseInt(sResult);
+//			} else {
+//				iResult = -1;
+//			}
+//		} catch (Exception oE) {
+//			Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " ): " + oE.getMessage());
+//			iResult = -1;
+//		}
+//		return iResult;
+//	}
 
+
+	/**
+	 * @param sUrl
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	@Override
+	protected String encodeAsRequired(String sUrl) throws UnsupportedEncodingException {
+		return sUrl;
+	}
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
