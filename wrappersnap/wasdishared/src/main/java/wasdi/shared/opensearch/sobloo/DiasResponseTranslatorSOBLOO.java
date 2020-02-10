@@ -223,7 +223,7 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorSOBLOO: QueryResultViewModel is null");
 
 		String sDate = oResult.getProperties().get("timestamp");
-		sDate = "" + Utils.fromTimestampToDate(Long.parseLong(sDate));
+		sDate = "" + Utils.fromTimestampToDateString(Long.parseLong(sDate));
 		
 		String sSummary = "Date: " + sDate + ", ";
 		String sInstrument = oResult.getProperties().get("sensorId");
