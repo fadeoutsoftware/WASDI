@@ -5,7 +5,11 @@
 	"Sentinel-1": {
 		"keys": {
 			"platformname": "identification.collection",
-			"filename": "acquisition.missionCode"
+			"filename": "acquisition.missionCode",
+			"producttype": "identification.type",
+			"polarisationmode": "acquisition.polarization",
+			"sensoroperationalmode": "acquisition.sensorMode",
+			"relativeorbitnumber": "orbit.relativeNumber"
 		},
 		"values": {
 			"indexvalue": {
@@ -15,6 +19,26 @@
 				"format": "",
 				"S1A_*": "S1A",
 				"S1B_*": "S1B"
+			},
+			"producttype": {
+				"GRD": "GRD",
+				"SLC": "SLC",
+				"RAW": "RAW",
+				"OCN": "OCN"
+			},
+			"polarisationmode": {
+				"HH": "HH",
+				"VV": "VV",
+				"HV": "HV",
+				"VH": "VH",
+				"HH+HV": "HH HV",
+				"VV+VH": "VV VH"
+			},
+			"sensoroperationalmode": {
+				"SM": "SM",
+				"IW": "IW",
+				"EW": "EW",
+				"WV": "WV"
 			}
 		}
 	}
