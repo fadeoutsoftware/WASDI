@@ -69,6 +69,7 @@ public class ProcessorsResource {
 	final String[] LOGO_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
 	final String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
 	final Integer LOGO_SIZE = 180;
+
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -850,33 +851,24 @@ public class ProcessorsResource {
 		String sExt;
 		String sFileName;
 		
+		User oUser = getUser(sSessionId);
 		// Check the user session
-		if (Utils.isNullOrEmpty(sSessionId)) {
+		if(oUser == null){
 			return Response.status(401).build();
 		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return Response.status(401).build();
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			return Response.status(401).build();
-		}
-		if(Utils.isNullOrEmpty(sProcessorId)) {
-			return Response.status(400).build();
-		}
-
+		
 		String sUserId = oUser.getUserId();
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		Processor oProcessor = getProcessor(sProcessorId);
 		
 		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			return Response.status(400).build();
 		}
 		
-		//check if the user is the owner of the processor TODO REMOVE COMMENT 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
+		//check if the user is the owner of the processor 
+//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+//			return Response.status(401).build();
+//		}
 		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
@@ -885,6 +877,7 @@ public class ProcessorsResource {
 		} else {
 			return Response.status(400).build();
 		}
+		
 		boolean bIsAValidExtension = false;
 		//Check if the extension is valid
 		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
@@ -939,6 +932,82 @@ public class ProcessorsResource {
 		return Response.status(200).build();
 		
 	}
+	
+	@GET
+	@Path("/getlogo")
+//	@Produces("image/png")
+	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+
+		Processor oProcessor = getProcessor(sProcessorId);
+		if(oProcessor == null){
+			return Response.status(401).build();
+		}
+			
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sPathLogoFolder = PROCESSORS_PATH + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		File oLogo = getLogoInFolder(sPathLogoFolder);
+		//todo controllare nella upload se il logo c'è già e se si eliminare quello vecchio (se hanno estensioni diverse)
+		
+		return Response.status(200).build();
+//		BufferedImage image = ;
+//
+//	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//	    ImageIO.write(image, "png", baos);
+//	    byte[] imageData = baos.toByteArray();
+//
+//	    // uncomment line below to send non-streamed
+////	     return Response.ok(imageData).build();
+//
+//	    // uncomment line below to send streamed
+//	    // return Response.ok(new ByteArrayInputStream(imageData)).build();
+	}
+	
+	private File getLogoInFolder(String sPathLogoFolder){
+		File oLogo = null;
+		//Check for each extension if there is the logo (logo.jpg, logo.png, logo.svg)
+		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
+			oLogo = new File(sPathLogoFolder + DEFAULT_LOGO_PROCESSOR_NAME + "." + sValidExtension );
+			//create directory
+		    if (oLogo.exists()){
+		    	break;
+		    }
+
+		}
+		return oLogo;
+		
+	}
+	
+	private User getUser(String sSessionId){
+		
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			return null;
+		}
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) {
+			return null;
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return null;
+		}
+		return oUser;
+		
+	}
+	
+	private Processor getProcessor(String sProcessorId){
+	
+		if(Utils.isNullOrEmpty(sProcessorId)) {
+			return null;
+		}
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		return oProcessor;
+	}
+	
 	
     private static BufferedImage resize(BufferedImage img, int height, int width) {
         Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
