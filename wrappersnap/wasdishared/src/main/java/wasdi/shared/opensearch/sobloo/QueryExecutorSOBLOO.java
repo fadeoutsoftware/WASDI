@@ -142,7 +142,7 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		String sUrl = "";
 		try {
 			readyQueryTranslator();
-			sUrl = s_sBaseUrl + m_oQueryTranslator.translateAndEncode(sQuery);
+			sUrl = "https://sobloo.eu/api/v1/services/explore/explore/catalog/_count?" + m_oQueryTranslator.translateAndEncode(sQuery);
 		} catch (Exception oE) {
 			Utils.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
 		}
