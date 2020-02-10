@@ -126,7 +126,12 @@ public class QueryTranslationParser {
 					int iIndexmax = oFilter.optInt("indexmax", -1);
 
 					
-					if(".*".equals(sRegex) && !"".equals(sIndexvalues)) {
+					if(sIndexname.equals("swathidentifier")) {
+						//not supported by sobloo
+						Utils.log("WARNING", "QueryTranslationParser.parse: unexpected key: swathidentifier. Ignoring it");
+						continue;
+					} else if(".*".equals(sRegex) && !"".equals(sIndexvalues)) {
+						//normal key:value
 						JSONObject oValues = m_oValuesTranslation.optJSONObject(sWasdiQueryKey);
 						if(null==oValues) {
 							Utils.log("ERROR", "QueryTranslationParser.parse( " + sQuery + " ): could not translate value for key: " + sWasdiQueryKey);
@@ -136,7 +141,12 @@ public class QueryTranslationParser {
 						sProviderValue = oValues.optString(sWasdiQueryValue, null);
 						sResult += "&f=" + sProviderKey + ":eq:" + sProviderValue;
 						
-					} else if( "".equals(sIndexvalues) ){
+					} else if( "".equals(sIndexvalues) && sRegex.equals("[1-9]|[1-9][0-9]|[1-9][0-7][0-5]") ){
+						//key:number (with 1 - 3 digits)
+						sResult += "&f=" + sProviderKey + ":eq:" + sWasdiQueryValue;
+						
+						
+					} else {
 						//then it can be:
 						//a number
 						//an interval -> hint contains "TO"
