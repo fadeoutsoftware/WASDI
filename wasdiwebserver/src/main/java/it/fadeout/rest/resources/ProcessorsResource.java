@@ -1,5 +1,8 @@
 package it.fadeout.rest.resources;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -31,6 +36,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FilenameUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
@@ -57,6 +64,11 @@ import wasdi.shared.viewmodels.RunningProcessorViewModel;
 @Path("/processors")
 public class ProcessorsResource {
 	
+	final String PROCESSORS_PATH =  "C:\\temp\\wasdi\\data\\processors\\";
+	final String LOGO_PROCESSORS_PATH = "\\logo\\";
+	final String[] LOGO_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
+	final String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
+	final Integer LOGO_SIZE = 180;
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -833,8 +845,11 @@ public class ProcessorsResource {
 	@POST
 	@Path("/uploadProcessorLogo")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
-
+	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+		String sExt;
+		String sFileName;
+		
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return Response.status(401).build();
@@ -849,7 +864,7 @@ public class ProcessorsResource {
 		if(Utils.isNullOrEmpty(sProcessorId)) {
 			return Response.status(400).build();
 		}
-		
+
 		String sUserId = oUser.getUserId();
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
@@ -858,19 +873,41 @@ public class ProcessorsResource {
 			return Response.status(400).build();
 		}
 		
-		//TODO CHECK IF USER CHE MODIFY THE LOGO 
-		//TODO CHECK SIZE OF IMAGE
-		//TODO CHECK FORMAT OF IMAGE 
+		//check if the user is the owner of the processor TODO REMOVE COMMENT 
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
+		
+		//get filename and extension 
+		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
+			sFileName = fileMetaData.getFileName();
+			sExt = FilenameUtils.getExtension(sFileName);
+		} else {
+			return Response.status(400).build();
+		}
+		boolean bIsAValidExtension = false;
+		//Check if the extension is valid
+		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
+			  if(sValidExtension.equals(sExt.toLowerCase()) ){
+				  bIsAValidExtension = true;
+			  }
+		}
+		
+		if(bIsAValidExtension == false ){
+			return Response.status(400).build();
+		}
+
+		
 		
 		// Take path
-		String sPath = "C:\\temp\\wasdi\\data\\processors\\" + oProcessor.getName() + "\\logo\\";
+		String sPath = PROCESSORS_PATH + oProcessor.getName() + LOGO_PROCESSORS_PATH;
 		File oDirectory = new File(sPath);
 		//create directory
 	    if (! oDirectory.exists()){
 	    	oDirectory.mkdir();
 	    }
-	    
-	    File oOutputFilePath = new File(sPath + "logo.jpg");
+	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
+	    File oOutputFilePath = new File(sOutputFilePath);
 		// Copy the stream
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
@@ -883,16 +920,37 @@ public class ProcessorsResource {
 			oOutStream.flush();
 			oOutStream.close();
 			
+			File oFileToResizePath = new File(sOutputFilePath);
+			
+			//resize image 180px x 180px 
+	        BufferedImage oImage = ImageIO.read(oFileToResizePath);
+	        BufferedImage oResized = resize(oImage , LOGO_SIZE, LOGO_SIZE);
+	        File oOutputResizedLogo = new File(sOutputFilePath);
+	        ImageIO.write(oResized, sExt.toLowerCase(), oOutputResizedLogo);
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			return Response.status(400).build();
 		} catch (IOException e) {
 			e.printStackTrace();
+			return Response.status(400).build();
 		}
 	
 		return Response.status(200).build();
 		
 	}
 	
+    private static BufferedImage resize(BufferedImage img, int height, int width) {
+        Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        //BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        Graphics2D g2d = resized.createGraphics();
+        g2d.drawImage(tmp, 0, 0, null);
+        g2d.dispose();
+        return resized;
+    }
+    
 	public boolean UnzipProcessor(File oProcessorZipFile) {
 		try {
 						
