@@ -69,7 +69,8 @@ public class ProcessorsResource {
 	
 	final String PROCESSORS_PATH =  "C:\\temp\\wasdi\\data\\processors\\";
 	final String LOGO_PROCESSORS_PATH = "\\logo\\";
-	final String[] LOGO_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
+	final String IMAGES_PROCESSORS_PATH = "\\images\\";
+	final String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
 	final String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
 	final Integer LOGO_SIZE = 180;
 
@@ -875,15 +876,7 @@ public class ProcessorsResource {
 		}
 		
 		
-		boolean bIsAValidExtension = false;
-		//Check if the extension is valid
-		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
-			  if(sValidExtension.equals(sExt.toLowerCase()) ){
-				  bIsAValidExtension = true;
-			  }
-		}
-		
-		if(bIsAValidExtension == false ){
+		if( isValidExtension(sExt) == false ){
 			return Response.status(400).build();
 		}
 
@@ -898,11 +891,7 @@ public class ProcessorsResource {
 		    oOldLogo.delete();
 		}
 			
-		File oDirectory = new File(sPath);
-		//create directory
-	    if (! oDirectory.exists()){
-	    	oDirectory.mkdir();
-	    }
+		createDirectory(sPath);
 	    
 	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
 	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
@@ -919,6 +908,8 @@ public class ProcessorsResource {
 	    
 		return Response.status(200).build();
 	}
+
+
 	
 	@GET
 	@Path("/getlogo")
@@ -946,23 +937,65 @@ public class ProcessorsResource {
 		}
 		//prepare buffer and send the logo to the client 
 		ByteArrayInputStream abImageLogo = oLogo.getByteArrayImage();
-//		
-//		byte[] abLogo = null;
-//		try {
-//			BufferedImage oBufferedLogo = ImageIO.read(oLogo);
-//			ByteArrayOutputStream oBaos = new ByteArrayOutputStream();
-//			ImageIO.write(oBufferedLogo, sLogoExtension, oBaos);
-//			abLogo = oBaos.toByteArray();
-//			
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			return Response.status(500).build();
-//		}
 		
 	    return Response.ok(abImageLogo).build();
 
 	}
 	
+	
+
+	@POST
+	@Path("/uploadProcessorImage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+	
+		String sExt;
+		String sFileName;
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+		Processor oProcessor = getProcessor(sProcessorId);
+		
+		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		//check if the user is the owner of the processor 
+//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+//			return Response.status(401).build();
+//		}
+//		
+		//get filename and extension 
+		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
+			sFileName = fileMetaData.getFileName();
+			sExt = FilenameUtils.getExtension(sFileName);
+		} else {
+			return Response.status(400).build();
+		}
+		
+		if( isValidExtension(sExt) == false ){
+			return Response.status(400).build();
+		}
+		
+		// Take path
+		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		createDirectory(sPathFolder);
+		
+		String sPathImage = sPathFolder + "testnome." + sExt.toLowerCase();
+		ImageFile oNewImage = new ImageFile(sPathImage);
+		
+		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
+	    if(bIsSaved == false){
+	    	return Response.status(400).build();
+	    }
+	    
+		return Response.status(200).build();
+	}
 	
 	
 	//return null if there isn't any saved logo
@@ -980,7 +1013,7 @@ public class ProcessorsResource {
 	private String getExtensionOfSavedLogo (String sPathLogoFolder){
 		File oLogo = null;
 		String sExtensionReturnValue = "";
-		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
+		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
 			oLogo = new File(sPathLogoFolder + DEFAULT_LOGO_PROCESSOR_NAME + "." + sValidExtension );
 		    if (oLogo.exists()){
 		    	sExtensionReturnValue = sValidExtension;
@@ -990,6 +1023,14 @@ public class ProcessorsResource {
 		}
 		return sExtensionReturnValue;
 	}
+	
+	private void createDirectory(String sPath){
+		File oDirectory = new File(sPath);
+		//create directory
+	    if (! oDirectory.exists()){
+	    	oDirectory.mkdir();
+	    }
+	} 
 	
 	private User getUser(String sSessionId){
 		
@@ -1005,6 +1046,16 @@ public class ProcessorsResource {
 		}
 		return oUser;
 		
+	}
+	
+	private boolean isValidExtension(String sExt){
+		//Check if the extension is valid
+		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
+			  if(sValidExtension.equals(sExt.toLowerCase()) ){
+				  return true;
+			  }
+		}
+		return false;
 	}
 	
 	private Processor getProcessor(String sProcessorId){
