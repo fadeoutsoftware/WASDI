@@ -431,6 +431,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	//( beginPosition:[2018-12-10T00:00:00.000Z TO 2018-12-17T23:59:59.999Z] AND endPosition:[2018-12-10T00:00:00.000Z TO 2018-12-17T23:59:59.999Z] )
 	//ONDA format
 	//( ( beginPosition:[2018-01-01T00:00:00.000Z TO 2018-12-01T23:59:59.999Z] AND endPosition:[2018-01-01T00:00:00.000Z TO 2018-12-01T23:59:59.999Z] ) )
+	@Override
 	protected String parseTimeFrame(String sQuery) {
 		String sResult = "";
 		int iStart = 0;
@@ -471,6 +472,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	//footprint:"intersects(POLYGON((-13.535156250000002 18.97902595325528,-13.535156250000002 60.23981116999893,62.92968750000001 60.23981116999893,62.92968750000001 18.97902595325528,-13.535156250000002 18.97902595325528)))"
 	//ONDA format
 	//footprint:"Intersects(POLYGON((-13.535156250000002 18.97902595325528,-13.535156250000002 60.23981116999893,62.92968750000001 60.23981116999893,62.92968750000001 18.97902595325528,-13.535156250000002 18.97902595325528)))"
+	@Override
 	protected String  parseFootPrint(String sQuery) {
 		String sFootprint = "";
 		if(sQuery.contains("footprint")) {

@@ -6,8 +6,6 @@
  */
 package wasdi.shared.opensearch;
 
-import java.util.HashMap;
-
 import wasdi.shared.utils.Utils;
 
 /**
@@ -16,14 +14,20 @@ import wasdi.shared.utils.Utils;
  */
 public abstract class DiasQueryTranslator {
 	
-	protected HashMap<String, String> keyMapping;
-	protected HashMap<String, String> valueMapping;
 	protected String m_sParserConfigPath;
 	protected String m_sAppConfigPath;
 
 	public String translateAndEncode(String sQueryFromClient) {
 		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQueryFromClient));
+	}
+	
+	public void setParserConfigPath(String sParserConfigPath) {
+		this.m_sParserConfigPath = sParserConfigPath;
+	}
+	
+	public void setAppconfigPath(String sAppConfigPath) {
+		this.m_sAppConfigPath = sAppConfigPath;
 	}
 	
 	//translates from WASDI query (OpenSearch) to <derived class> format
@@ -56,11 +60,7 @@ public abstract class DiasQueryTranslator {
 		return sQuery;
 	}
 
-	public void setParserConfigPath(String sParserConfigPath) {
-		this.m_sParserConfigPath = sParserConfigPath;
-	}
 	
-	public void setAppconfigPath(String sAppConfigPath) {
-		this.m_sAppConfigPath = sAppConfigPath;
-	}
+	protected abstract String parseTimeFrame(String sQuery);
+	protected abstract String parseFootPrint(String sQuery);
 }

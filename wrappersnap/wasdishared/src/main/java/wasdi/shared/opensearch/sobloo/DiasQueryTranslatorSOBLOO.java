@@ -6,8 +6,6 @@
  */
 package wasdi.shared.opensearch.sobloo;
 
-import java.util.Date;
-
 import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
@@ -42,7 +40,7 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 			String sQuery = this.prepareQuery(sQueryFromClient);
 
 			sResult = "";
-			sResult += parseFootprint(sQuery);
+			sResult += parseFootPrint(sQuery);
 			//TODO parse time frame
 			sResult += parseTimeFrame(sQuery);
 
@@ -73,7 +71,8 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 		return sResult;
 	}
 
-	private String parseFootprint(String sQuery) {
+	@Override
+	protected String parseFootPrint(String sQuery) {
 		String sResult = "";
 		try {
 			if(sQuery.contains("footprint")) {
@@ -122,7 +121,8 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 		return sResult;
 	}
 	
-	private String parseTimeFrame(String sQuery) {
+	@Override
+	protected String parseTimeFrame(String sQuery) {
 		Long[] alStartEnd = {Long.MAX_VALUE, Long.MIN_VALUE};
 		
 		String sKeyword = "beginPosition";
