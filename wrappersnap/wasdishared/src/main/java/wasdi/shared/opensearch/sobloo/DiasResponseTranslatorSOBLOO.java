@@ -181,7 +181,23 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 					}
 				}
 				
-				//todo relative orbit number
+				if(oJsonItem.has("orbit")){
+					try {
+						JSONObject oOrbit = oJsonItem.optJSONObject("orbit");
+						if(null!=oOrbit) {
+							iBuffer = oOrbit.optInt("relativeNumber", -1);
+							if(iBuffer >= 0) {
+								oResult.getProperties().put("relativeorbitnumber", ""+iBuffer);
+							}
+							sBuffer = oOrbit.optString("direction", null);
+							if(!Utils.isNullOrEmpty(sBuffer)) {
+								oResult.getProperties().put("direction", sBuffer);
+							}
+						}
+					}catch (Exception oE) {
+						Utils.debugLog("DiasResponseTranslatorSOBLOO.parseData: " + oE);
+					}
+				}
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorSobloo.parseData: " + oE);
