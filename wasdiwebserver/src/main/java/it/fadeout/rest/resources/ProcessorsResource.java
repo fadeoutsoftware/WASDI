@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +45,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Counter;
+import wasdi.shared.business.ImageFile;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
@@ -497,7 +500,6 @@ public class ProcessorsResource {
 	}
 	
 	
-	
 	@POST
 	@Path("/logs/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -704,11 +706,7 @@ public class ProcessorsResource {
 			return Response.serverError().build();
 		}
 	}
-	
-	
-	
-	
-	
+			
 	
 	@POST
 	@Path("/update")
@@ -850,7 +848,6 @@ public class ProcessorsResource {
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		String sExt;
 		String sFileName;
-		
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
@@ -858,7 +855,6 @@ public class ProcessorsResource {
 		}
 		
 		String sUserId = oUser.getUserId();
-		
 		Processor oProcessor = getProcessor(sProcessorId);
 		
 		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
@@ -878,6 +874,7 @@ public class ProcessorsResource {
 			return Response.status(400).build();
 		}
 		
+		
 		boolean bIsAValidExtension = false;
 		//Check if the extension is valid
 		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
@@ -890,53 +887,43 @@ public class ProcessorsResource {
 			return Response.status(400).build();
 		}
 
-		
-		
 		// Take path
 		String sPath = PROCESSORS_PATH + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		
+		String sExtensionOfSavedLogo = getExtensionOfSavedLogo(sPath);
+		
+		//if there is a saved logo with a different extension remove it 
+		if( sExtensionOfSavedLogo.isEmpty() == false && sExtensionOfSavedLogo.equalsIgnoreCase(sExt) == false ){
+		    File oOldLogo = new File(sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExtensionOfSavedLogo);
+		    oOldLogo.delete();
+		}
+			
 		File oDirectory = new File(sPath);
 		//create directory
 	    if (! oDirectory.exists()){
 	    	oDirectory.mkdir();
 	    }
+	    
 	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
-	    File oOutputFilePath = new File(sOutputFilePath);
-		// Copy the stream
-		int iRead = 0;
-		byte[] ayBytes = new byte[1024];
-		OutputStream oOutStream;
-		try {
-			oOutStream = new FileOutputStream(oOutputFilePath);
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
-				oOutStream.write(ayBytes, 0, iRead);
-			}
-			oOutStream.flush();
-			oOutStream.close();
-			
-			File oFileToResizePath = new File(sOutputFilePath);
-			
-			//resize image 180px x 180px 
-	        BufferedImage oImage = ImageIO.read(oFileToResizePath);
-	        BufferedImage oResized = resize(oImage , LOGO_SIZE, LOGO_SIZE);
-	        File oOutputResizedLogo = new File(sOutputFilePath);
-	        ImageIO.write(oResized, sExt.toLowerCase(), oOutputResizedLogo);
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return Response.status(400).build();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return Response.status(400).build();
-		}
-	
+	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+	    
+	    boolean bIsSaved =  oOutputLogo.saveImage(fileInputStream);
+	    if(bIsSaved == false){
+	    	return Response.status(400).build();
+	    }
+	    
+	    boolean bIsResized = oOutputLogo.resizeImage(LOGO_SIZE, LOGO_SIZE);
+	    if(bIsResized == false){
+	    	return Response.status(400).build();
+	    }
+	    
 		return Response.status(200).build();
-		
 	}
 	
 	@GET
 	@Path("/getlogo")
-//	@Produces("image/png")
 	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+
 
 		Processor oProcessor = getProcessor(sProcessorId);
 		if(oProcessor == null){
@@ -950,36 +937,58 @@ public class ProcessorsResource {
 		}
 		
 		String sPathLogoFolder = PROCESSORS_PATH + oProcessor.getName() + LOGO_PROCESSORS_PATH;
-		File oLogo = getLogoInFolder(sPathLogoFolder);
-		//todo controllare nella upload se il logo c'è già e se si eliminare quello vecchio (se hanno estensioni diverse)
+		ImageFile oLogo = getLogoInFolder(sPathLogoFolder);
+		String sLogoExtension = getExtensionOfSavedLogo(sPathLogoFolder);
 		
-		return Response.status(200).build();
-//		BufferedImage image = ;
-//
-//	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//	    ImageIO.write(image, "png", baos);
-//	    byte[] imageData = baos.toByteArray();
-//
-//	    // uncomment line below to send non-streamed
-////	     return Response.ok(imageData).build();
-//
-//	    // uncomment line below to send streamed
-//	    // return Response.ok(new ByteArrayInputStream(imageData)).build();
+		//Check the logo and extension
+		if(oLogo == null || sLogoExtension.isEmpty() ){
+			return Response.status(204).build();
+		}
+		//prepare buffer and send the logo to the client 
+		ByteArrayInputStream abImageLogo = oLogo.getByteArrayImage();
+//		
+//		byte[] abLogo = null;
+//		try {
+//			BufferedImage oBufferedLogo = ImageIO.read(oLogo);
+//			ByteArrayOutputStream oBaos = new ByteArrayOutputStream();
+//			ImageIO.write(oBufferedLogo, sLogoExtension, oBaos);
+//			abLogo = oBaos.toByteArray();
+//			
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			return Response.status(500).build();
+//		}
+		
+	    return Response.ok(abImageLogo).build();
+
 	}
 	
-	private File getLogoInFolder(String sPathLogoFolder){
+	
+	
+	//return null if there isn't any saved logo
+	private ImageFile getLogoInFolder(String sPathLogoFolder){
+		ImageFile oLogo = null;
+		String sLogoExtension = getExtensionOfSavedLogo(sPathLogoFolder);
+		if(sLogoExtension.isEmpty() == false){
+			oLogo = new ImageFile(sPathLogoFolder + DEFAULT_LOGO_PROCESSOR_NAME + "." + sLogoExtension );
+		}
+		return oLogo;
+		
+	}
+	
+	//return empty string if there isn't any saved logo
+	private String getExtensionOfSavedLogo (String sPathLogoFolder){
 		File oLogo = null;
-		//Check for each extension if there is the logo (logo.jpg, logo.png, logo.svg)
+		String sExtensionReturnValue = "";
 		for (String sValidExtension : LOGO_PROCESSORS_EXTENSIONS) {
 			oLogo = new File(sPathLogoFolder + DEFAULT_LOGO_PROCESSOR_NAME + "." + sValidExtension );
-			//create directory
 		    if (oLogo.exists()){
+		    	sExtensionReturnValue = sValidExtension;
 		    	break;
 		    }
 
 		}
-		return oLogo;
-		
+		return sExtensionReturnValue;
 	}
 	
 	private User getUser(String sSessionId){
@@ -1008,17 +1017,6 @@ public class ProcessorsResource {
 		return oProcessor;
 	}
 	
-	
-    private static BufferedImage resize(BufferedImage img, int height, int width) {
-        Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        //BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-        Graphics2D g2d = resized.createGraphics();
-        g2d.drawImage(tmp, 0, 0, null);
-        g2d.dispose();
-        return resized;
-    }
     
 	public boolean UnzipProcessor(File oProcessorZipFile) {
 		try {
