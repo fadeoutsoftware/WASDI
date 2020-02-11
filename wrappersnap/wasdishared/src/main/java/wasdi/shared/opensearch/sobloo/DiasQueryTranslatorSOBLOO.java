@@ -41,7 +41,6 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 
 			sResult = "";
 			sResult += parseFootPrint(sQuery);
-			//TODO parse time frame
 			sResult += parseTimeFrame(sQuery);
 
 
@@ -107,8 +106,6 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 						}
 					}
 
-//					String sCoordinates = "" + dNorth + ',' + dWest + ',' + dSouth + ',' + dEast;
-//					String sCoordinates = "" + dWest + ',' + dNorth + ',' + dEast + ',' + dSouth;
 					String sCoordinates = "" + dWest + ',' + dSouth + ',' + dEast + ',' + dNorth; 
 					sResult = "gintersect=" + sCoordinates;
 				} catch (Exception oE) {
