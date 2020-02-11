@@ -20,6 +20,9 @@ import wasdi.shared.utils.Utils;
  *
  */
 public class QueryTranslationParser {
+	private static final String SFILTERINTRO = "&f=";
+	private static final String SEQUALITYSIMBOL = ":eq:";
+
 	private JSONObject m_oKeysTranslation = null;
 	private JSONObject m_oValuesTranslation = null;
 	
@@ -32,31 +35,12 @@ public class QueryTranslationParser {
 		setAppConf(oAppConf);
 	}
 	
-	private void setParseconf(JSONObject oParseConf) {
-		Preconditions.checkNotNull(oParseConf, "QueryTranslationParser.setParseconf: parse configuration is null");
-		Preconditions.checkNotNull(oParseConf.optJSONObject("keys"));
-		Preconditions.checkNotNull(oParseConf.optJSONObject("values"));
-		
-		m_oKeysTranslation = oParseConf.optJSONObject("keys");
-		m_oValuesTranslation = oParseConf.optJSONObject("values");
-	}
-	
-	private void setAppConf(JSONObject oAppConf) {
-		Preconditions.checkNotNull(oAppConf, "QueryTranslationParser.setAppConf: app configuration is null");
-		Preconditions.checkNotNull(oAppConf.optString("name", null));
-		Preconditions.checkNotNull(oAppConf.optString("indexname", null));
-		Preconditions.checkNotNull(oAppConf.optString("indexvalue", null));
-		Preconditions.checkNotNull(oAppConf.optJSONArray("filters"));
-		
-		this.m_oAppConf = oAppConf;
-		this.m_aoFilters = oAppConf.optJSONArray("filters");
-	}
-	
 	public String parse(String sQuery) {
 		//platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:23 AND swathidentifier:whatIsAGoodValueForASwath
 		
 		String sResult = "";
 		try {
+			String sLocalFilter = null;
 			String[] asKeysAndValues = sQuery.split(" AND ");
 			for (String sQueryItem : asKeysAndValues) {
 				
@@ -72,7 +56,7 @@ public class QueryTranslationParser {
 						throw new NullPointerException("QueryTranslationParser.parse( " + sQuery + " ): cannot map collection name, aborting");
 					} 
 					String sProviderValue = oIndexJson.optString(sIndexvalue);
-					sResult += "&f=" + sProviderKey + ":eq:" + sProviderValue;
+					sResult += QueryTranslationParser.SFILTERINTRO + sProviderKey + QueryTranslationParser.SEQUALITYSIMBOL + sProviderValue;
 					continue;
 				}
 				
@@ -92,9 +76,6 @@ public class QueryTranslationParser {
 				
 				String sProviderValue = null;
 				
-				
-				
-				
 				//translate filter
 				Iterator<Object> oIterator = m_aoFilters.iterator();
 				while( oIterator.hasNext()) {
@@ -109,7 +90,7 @@ public class QueryTranslationParser {
 						Utils.log("ERROR", "QueryTranslationParser.parse( "+ sQuery + " ): indexlabel is null, configuration does not look good");
 						continue;
 					}
-					//this one might absent
+					//this one might be absent
 					String sIndexhint = oFilter.optString("indexhint", null);
 					String sIndexvalues = oFilter.optString("indexvalues", null);
 					if(null == sIndexvalues) {
@@ -126,10 +107,15 @@ public class QueryTranslationParser {
 					int iIndexmax = oFilter.optInt("indexmax", -1);
 
 					
-					if(sIndexname.equals("swathidentifier")) {
-						//not supported by sobloo
-						Utils.log("WARNING", "QueryTranslationParser.parse: unexpected key: swathidentifier. Ignoring it");
-						continue;
+					if(sIndexname.equals("swathidentifier") && null == sIndexvalue) {
+						if( null == sProviderKey) {
+							//not supported by provider (e.g., sobloo)
+							Utils.log("WARNING", "QueryTranslationParser.parse: unexpected key: swathidentifier. Ignoring it");
+							continue;
+						} else {
+							
+						}
+						
 					} else if(".*".equals(sRegex) && !"".equals(sIndexvalues)) {
 						//normal key:value
 						JSONObject oValues = m_oValuesTranslation.optJSONObject(sWasdiQueryKey);
@@ -139,11 +125,11 @@ public class QueryTranslationParser {
 						}
 						
 						sProviderValue = oValues.optString(sWasdiQueryValue, null);
-						sResult += "&f=" + sProviderKey + ":eq:" + sProviderValue;
+						sLocalFilter += QueryTranslationParser.SFILTERINTRO + sProviderKey + QueryTranslationParser.SEQUALITYSIMBOL + sProviderValue;
 						
 					} else if( "".equals(sIndexvalues) && sRegex.equals("[1-9]|[1-9][0-9]|[1-9][0-7][0-5]") ){
 						//key:number (with 1 - 3 digits)
-						sResult += "&f=" + sProviderKey + ":eq:" + sWasdiQueryValue;
+						sLocalFilter += QueryTranslationParser.SFILTERINTRO + sProviderKey + QueryTranslationParser.SEQUALITYSIMBOL + sWasdiQueryValue;
 						
 						
 					} else {
@@ -153,6 +139,11 @@ public class QueryTranslationParser {
 						//todo check index min and max 
 						
 						//todo handle this case
+					}
+					
+					//add filter to the query
+					if (!Utils.isNullOrEmpty(sLocalFilter)) {
+						sResult += sLocalFilter;
 					}
 				}
 				
@@ -174,6 +165,40 @@ public class QueryTranslationParser {
 		
 		return sResult;
 		
+	}
+	
+	/**
+	 * @return the sequalitysimbol
+	 */
+	public static String getSequalitysimbol() {
+		return SEQUALITYSIMBOL;
+	}
+	
+	/**
+	 * @return the sfilterintro
+	 */
+	public static String getSfilterintro() {
+		return SFILTERINTRO;
+	}
+	
+	
+	private void setParseconf(JSONObject oParseConf) {
+		Preconditions.checkNotNull(oParseConf, "QueryTranslationParser.setParseconf: parse configuration is null");
+		Preconditions.checkNotNull(oParseConf.optJSONObject("keys"));
+		Preconditions.checkNotNull(oParseConf.optJSONObject("values"));
 		
+		m_oKeysTranslation = oParseConf.optJSONObject("keys");
+		m_oValuesTranslation = oParseConf.optJSONObject("values");
+	}
+	
+	private void setAppConf(JSONObject oAppConf) {
+		Preconditions.checkNotNull(oAppConf, "QueryTranslationParser.setAppConf: app configuration is null");
+		Preconditions.checkNotNull(oAppConf.optString("name", null));
+		Preconditions.checkNotNull(oAppConf.optString("indexname", null));
+		Preconditions.checkNotNull(oAppConf.optString("indexvalue", null));
+		Preconditions.checkNotNull(oAppConf.optJSONArray("filters"));
+		
+		this.m_oAppConf = oAppConf;
+		this.m_aoFilters = oAppConf.optJSONArray("filters");
 	}
 }
