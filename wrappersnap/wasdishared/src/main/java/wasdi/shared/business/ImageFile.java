@@ -45,6 +45,11 @@ public class ImageFile extends File {
 		return true;
 	}
 	
+	public String getNameWithouteExtension() {
+		String sName = this.getName();
+		return FilenameUtils.removeExtension(sName);				
+	}
+	
 	public boolean resizeImage(int iHeight, int iWidth ){
 		
 		try{

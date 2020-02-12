@@ -18,6 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -73,7 +75,8 @@ public class ProcessorsResource {
 	final String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
 	final String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
 	final Integer LOGO_SIZE = 180;
-
+	final Integer NUMB_MAX_OF_IMAGES = 5;
+	final String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -863,10 +866,10 @@ public class ProcessorsResource {
 		}
 		
 		//check if the user is the owner of the processor 
-//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-//			return Response.status(401).build();
-//		}
-		
+////		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+////			return Response.status(401).build();
+////		}
+//		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
 			sFileName = fileMetaData.getFileName();
@@ -942,16 +945,9 @@ public class ProcessorsResource {
 
 	}
 	
-	
-
-	@POST
-	@Path("/uploadProcessorImage")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
-	
-		String sExt;
-		String sFileName;
+	@DELETE
+	@Path("/deleteprocessorimage")
+	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
@@ -961,15 +957,54 @@ public class ProcessorsResource {
 		String sUserId = oUser.getUserId();
 		Processor oProcessor = getProcessor(sProcessorId);
 		
+		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		if( sImageName== null || sImageName.isEmpty() ) {
+			return Response.status(400).build();
+		}
+
+		//check if the user is the owner of the processor 
+//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+//			return Response.status(401).build();
+//		}
+		
+		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		deleteFileInFolder(sPathFolder,sImageName);
+		
+		return Response.status(200).build();
+	}
+	
+	
+	@POST
+	@Path("/uploadProcessorImage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+	
+		String sExt;
+		String sFileName;
+
+		
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+	
+		String sUserId = oUser.getUserId();
+		Processor oProcessor = getProcessor(sProcessorId);
+		
 		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			return Response.status(400).build();
 		}
 		
 		//check if the user is the owner of the processor 
-//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-//			return Response.status(401).build();
-//		}
-//		
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
+		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
 			sFileName = fileMetaData.getFileName();
@@ -981,23 +1016,82 @@ public class ProcessorsResource {
 		if( isValidExtension(sExt) == false ){
 			return Response.status(400).build();
 		}
-		
 		// Take path
 		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
 		createDirectory(sPathFolder);
+		String sAvaibleFileName = getAvaibleFileName(sPathFolder);
 		
-		String sPathImage = sPathFolder + "testnome." + sExt.toLowerCase();
+		if(sAvaibleFileName.isEmpty()){
+			//the user have reach the max number of images 
+	    	return Response.status(400).build();
+		}
+		
+		String sPathImage = sPathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
 		ImageFile oNewImage = new ImageFile(sPathImage);
-		
+
+		//TODO SCALE IMAGE ?
 		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
 	    if(bIsSaved == false){
 	    	return Response.status(400).build();
 	    }
 	    
+		double bytes = oNewImage.length();
+		double kilobytes = (bytes / 1024);
+		double megabytes = (kilobytes / 1024);
+		if( megabytes > 2 ){		
+			oNewImage.delete();
+	    	return Response.status(400).build();
+		}
+		
 		return Response.status(200).build();
 	}
 	
+	private void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
+		File oFolder = new File(sPathFolder);
+		File[] aoListOfFiles = oFolder.listFiles();
+		for (File oImage : aoListOfFiles){ 
+			String sName = oImage.getName();
+			String sFileName = FilenameUtils.removeExtension(sName);	
+			
+			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
+				oImage.delete();
+				break;
+			} 
+			
+		}
+	}
 	
+	private String getAvaibleFileName(String sPathFolder) {
+		File oFolder = new File(sPathFolder);
+		File[] aoListOfFiles = oFolder.listFiles();
+
+		String sReturnValueName = "";
+		boolean bIsAvaibleName = false; 
+		for (String sAvaibleFileName : IMAGES_NAME){
+			bIsAvaibleName = true;
+			sReturnValueName = sAvaibleFileName;
+			
+			for (File oImage : aoListOfFiles){ 
+				String sName = oImage.getName();
+				String sFileName = FilenameUtils.removeExtension(sName);	
+				
+				if(sAvaibleFileName.equalsIgnoreCase(sFileName)){
+					bIsAvaibleName = false;
+					break;
+				} 
+				
+			}
+			
+			if(bIsAvaibleName == true){
+				break;
+			}
+			sReturnValueName = "";
+		 }
+
+		return sReturnValueName;
+	}
+	
+
 	//return null if there isn't any saved logo
 	private ImageFile getLogoInFolder(String sPathLogoFolder){
 		ImageFile oLogo = null;
@@ -1031,7 +1125,7 @@ public class ProcessorsResource {
 	    	oDirectory.mkdir();
 	    }
 	} 
-	
+	//TODO REMOVE IT AND PUT IN A CLASS 
 	private User getUser(String sSessionId){
 		
 		if (Utils.isNullOrEmpty(sSessionId)) {
