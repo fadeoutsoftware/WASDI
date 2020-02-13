@@ -254,11 +254,12 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 		oResult.setSummary(sSummary);
 
 		String sLink = "https://sobloo.eu/api/v1/services/download/" + oResult.getId();
-		oResult.setLink(sLink);
+		oResult.getProperties().put("originalLink", sLink);
 
 		sSize = oResult.getProperties().get("content-length");
 		sLink += "|||fileName=" + oResult.getTitle() + "|||size=" + sSize;
 		oResult.getProperties().put("hackedLink", sLink);
+		oResult.setLink(sLink);
 
 	}
 
