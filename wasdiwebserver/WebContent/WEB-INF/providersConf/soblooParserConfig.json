@@ -46,7 +46,8 @@
 		"keys": {
 			"platformname": "&f=identification.collection:eq:",
 			"filename": "&f=acquisition.missionCode:eq:",
-			"producttype": "&f=identification.type:eq:"
+			"producttype": "&f=identification.type:eq:",
+			"cloudcoverpercentage": "&f=contentDescription.cloudCoverPercentage:range:"
 		},
 		"values":{
 			"indexvalue": {
@@ -54,7 +55,7 @@
 			},
 			"filename": {
 				"S2A_*": "S2A",
-				"|S2B_*": "S2A"
+				"S2B_*": "S2B"
 			},
 			"producttype": {
 				"S2MSI1C": "S2MSI1C",
