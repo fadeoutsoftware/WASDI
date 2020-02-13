@@ -45,6 +45,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.BaseResource;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.ImageFile;
@@ -67,7 +68,7 @@ import wasdi.shared.viewmodels.ProcessorLogViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
-public class ProcessorsResource {
+public class ProcessorsResource extends BaseResource{
 	
 	final String PROCESSORS_PATH =  "C:\\temp\\wasdi\\data\\processors\\";
 	final String LOGO_PROCESSORS_PATH = "\\logo\\";
@@ -1079,6 +1080,7 @@ public class ProcessorsResource {
 		return Response.status(200).build();
 	}
 	
+	
 	private void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
 		File oFolder = new File(sPathFolder);
 		File[] aoListOfFiles = oFolder.listFiles();
@@ -1094,6 +1096,16 @@ public class ProcessorsResource {
 		}
 	}
 	
+	private void createDirectory(String sPath){
+		File oDirectory = new File(sPath);
+		//create directory
+	    if (! oDirectory.exists()){
+	    	oDirectory.mkdir();
+	    }
+	} 
+
+	
+	// return a free name for the image (if is possible) 
 	private String getAvaibleFileName(String sPathFolder) {
 		File oFolder = new File(sPathFolder);
 		File[] aoListOfFiles = oFolder.listFiles();
@@ -1177,29 +1189,7 @@ public class ProcessorsResource {
 		return sExtensionReturnValue;
 	}
 	
-	private void createDirectory(String sPath){
-		File oDirectory = new File(sPath);
-		//create directory
-	    if (! oDirectory.exists()){
-	    	oDirectory.mkdir();
-	    }
-	} 
-	//TODO REMOVE IT AND PUT IN A CLASS 
-	private User getUser(String sSessionId){
-		
-		if (Utils.isNullOrEmpty(sSessionId)) {
-			return null;
-		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return null;
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			return null;
-		}
-		return oUser;
-		
-	}
+
 	
 	private boolean isValidExtension(String sExt){
 		//Check if the extension is valid
