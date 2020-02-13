@@ -57,9 +57,13 @@ public abstract class DiasQueryTranslator {
 
 		sQuery = sQuery.replaceAll("AND", " AND ");
 		sQuery = sQuery.trim().replaceAll(" +", " ");
+		sQuery = convertRanges(sQuery);
 		return sQuery;
 	}
 
+	protected String convertRanges(String sQuery) {
+		return sQuery;
+	}
 	
 	protected abstract String parseTimeFrame(String sQuery);
 	protected abstract String parseFootPrint(String sQuery);
