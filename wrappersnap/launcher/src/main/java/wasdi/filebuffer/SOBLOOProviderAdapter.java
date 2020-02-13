@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Base64;
-
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
