@@ -69,7 +69,7 @@ import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
 public class ProcessorsResource extends BaseResource{
-	
+	//TODO CHANGE IT
 	final String PROCESSORS_PATH =  "C:\\temp\\wasdi\\data\\processors\\";
 	final String LOGO_PROCESSORS_PATH = "\\logo\\";
 	final String IMAGES_PROCESSORS_PATH = "\\images\\";
@@ -94,9 +94,12 @@ public class ProcessorsResource extends BaseResource{
 	@POST
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public PrimitiveResult uploadProcessor(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion,
-			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample, @QueryParam("public") Integer iPublic) throws Exception {
+	public PrimitiveResult uploadProcessor( @FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
+											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
+											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
+											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
+											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, 
+											@QueryParam("link") String sLink , @QueryParam("email") String sEmail) throws Exception {
 
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -194,6 +197,12 @@ public class ProcessorsResource extends BaseResource{
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
 			oProcessor.setIsPublic(iPublic);
+			oProcessor.setLink(sLink);
+			oProcessor.setEmail(sEmail);
+			
+			if( iTimeout != null ){
+				oProcessor.setTimeoutMs(iTimeout);
+			}
 			
 			if (!Utils.isNullOrEmpty(sParamsSample)) {
 				oProcessor.setParameterSample(sParamsSample);
