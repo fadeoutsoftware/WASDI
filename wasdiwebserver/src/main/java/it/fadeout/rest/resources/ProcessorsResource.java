@@ -867,10 +867,10 @@ public class ProcessorsResource extends BaseResource{
 		}
 		
 		//check if the user is the owner of the processor 
-////		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-////			return Response.status(401).build();
-////		}
-//		
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
+		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
 			sFileName = fileMetaData.getFileName();
@@ -1000,9 +1000,9 @@ public class ProcessorsResource extends BaseResource{
 		}
 
 		//check if the user is the owner of the processor 
-//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-//			return Response.status(401).build();
-//		}
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
 		
 		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
 		deleteFileInFolder(sPathFolder,sImageName);
@@ -1035,9 +1035,9 @@ public class ProcessorsResource extends BaseResource{
 		}
 		
 		//check if the user is the owner of the processor 
-//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-//			return Response.status(401).build();
-//		}
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
 		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
