@@ -12,6 +12,7 @@ public class Processor {
 	 * Identifier of the processor
 	 */
 	private String processorId;
+
 	/**
 	 * User owner of the processor
 	 */
@@ -42,6 +43,11 @@ public class Processor {
 	 */
 	private int timeoutMs = 1000*60*60*3;
 	
+
+	private String link;
+	
+	private String email;
+	
 	/**
 	 * Flag to know if it is public or not
 	 */
@@ -63,6 +69,19 @@ public class Processor {
 	}
 	public void setParameterSample(String parameterSample) {
 		this.parameterSample = parameterSample;
+	}
+	
+	public String getLink() {
+		return link;
+	}
+	public void setLink(String link) {
+		this.link = link;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	public String getType() {
 		return type;

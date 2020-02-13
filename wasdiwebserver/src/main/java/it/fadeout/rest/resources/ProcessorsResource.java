@@ -47,6 +47,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import it.fadeout.Wasdi;
 import it.fadeout.business.BaseResource;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.ImageFile;
 import wasdi.shared.business.ProcessStatus;
@@ -55,6 +56,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
+import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
@@ -62,6 +64,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.AppCategoryViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessorLogViewModel;
@@ -78,6 +81,8 @@ public class ProcessorsResource extends BaseResource{
 	final Integer LOGO_SIZE = 180;
 	final Integer NUMB_MAX_OF_IMAGES = 5;
 	final String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
+	AppsCategoriesRepository m_oAppCategoriesRepository = new AppsCategoriesRepository();
+	
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -1089,6 +1094,37 @@ public class ProcessorsResource extends BaseResource{
 		return Response.status(200).build();
 	}
 	
+	@GET
+	@Path("/getcategories")
+	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		List<AppCategory> aoAppCategories = m_oAppCategoriesRepository.getCategories();
+		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = getCategoriesViewModel(aoAppCategories);
+		
+	    return Response.ok(aoAppCategoriesViewModel).build();
+
+	}
+	
+	private ArrayList<AppCategoryViewModel> getCategoriesViewModel(List<AppCategory> aoAppCategories ){
+		
+		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = new ArrayList<AppCategoryViewModel>();
+		
+		for(AppCategory oCategory:aoAppCategories){
+			AppCategoryViewModel oAppCategoryViewModel = new AppCategoryViewModel();
+			oAppCategoryViewModel.setId(oCategory.getId());
+			oAppCategoryViewModel.setCategory(oCategory.getCategory());
+			aoAppCategoriesViewModel.add(oAppCategoryViewModel);
+		}
+		
+		return aoAppCategoriesViewModel;
+	} 
 	
 	private void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
 		File oFolder = new File(sPathFolder);
