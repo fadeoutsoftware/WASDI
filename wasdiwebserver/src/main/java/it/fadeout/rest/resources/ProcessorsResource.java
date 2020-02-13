@@ -945,6 +945,39 @@ public class ProcessorsResource {
 
 	}
 	
+	
+	@GET
+	@Path("/getappimage")
+	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
+								@QueryParam("imageName") String sImageName) {
+
+
+		Processor oProcessor = getProcessor(sProcessorId);
+		if(oProcessor == null){
+			return Response.status(401).build();
+		}
+			
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sPathLogoFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		ImageFile oImage = getImageInFolder(sPathLogoFolder,sImageName);
+		String sLogoExtension = getExtensionOfSavedImage(sPathLogoFolder,sImageName);
+		
+		//Check the logo and extension
+		if(oImage == null || sLogoExtension.isEmpty() ){
+			return Response.status(204).build();
+		}
+		//prepare buffer and send the logo to the client 
+		ByteArrayInputStream abImage = oImage.getByteArrayImage();
+		
+	    return Response.ok(abImage).build();
+
+	}
+	
 	@DELETE
 	@Path("/deleteprocessorimage")
 	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
@@ -1001,9 +1034,9 @@ public class ProcessorsResource {
 		}
 		
 		//check if the user is the owner of the processor 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
+//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+//			return Response.status(401).build();
+//		}
 		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
@@ -1091,7 +1124,32 @@ public class ProcessorsResource {
 		return sReturnValueName;
 	}
 	
+	//return null if there isn't any saved logo
+	private ImageFile getImageInFolder(String sPathLogoFolder, String sImageName){
+		ImageFile oImage = null;
+		String sLogoExtension = getExtensionOfSavedImage(sPathLogoFolder,sImageName);
+		if(sLogoExtension.isEmpty() == false){
+			oImage = new ImageFile(sPathLogoFolder + sImageName + "." + sLogoExtension );
+		}
+		return oImage;
+		
+	}
+	
+	//return empty string if there isn't any saved logo
+	private String getExtensionOfSavedImage (String sPathLogoFolder , String sImageName){
+		File oLogo = null;
+		String sExtensionReturnValue = "";
+		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
+			oLogo = new File(sPathLogoFolder + sImageName + "." + sValidExtension );
+		    if (oLogo.exists()){
+		    	sExtensionReturnValue = sValidExtension;
+		    	break;
+		    }
 
+		}
+		return sExtensionReturnValue;
+	}
+	
 	//return null if there isn't any saved logo
 	private ImageFile getLogoInFolder(String sPathLogoFolder){
 		ImageFile oLogo = null;
@@ -1102,6 +1160,7 @@ public class ProcessorsResource {
 		return oLogo;
 		
 	}
+	
 	
 	//return empty string if there isn't any saved logo
 	private String getExtensionOfSavedLogo (String sPathLogoFolder){
