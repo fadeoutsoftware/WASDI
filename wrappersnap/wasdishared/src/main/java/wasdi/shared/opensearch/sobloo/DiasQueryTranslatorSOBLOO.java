@@ -112,8 +112,14 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 						}
 					}
 
-					String sCoordinates = "" + dWest + ',' + dSouth + ',' + dEast + ',' + dNorth; 
-					sResult = "gintersect=" + sCoordinates;
+					String sCoordinates = "" + dWest + ',' + dSouth + ',' + dEast + ',' + dNorth;
+					//todo prefix and suffic according to QueryTranlsationParser
+					String sPrefix = "gintersect=";
+					if(sQuery.contains("Sentinel-3")) {
+						sPrefix = "pwithin=";
+					}
+					String sSuffix = "";
+					sResult = sPrefix + sCoordinates;
 				} catch (Exception oE) {
 					Utils.log("ERROR", "DiasQueryTranslatorSOBLOO.parseFootprint: could not complete: " + oE);
 				}
