@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 
 import com.google.common.base.Preconditions;
@@ -13,13 +14,11 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
-	private static final String SEPARATOR = "\\|\\|\\|";
+	private static final String s_sSEPARATOR = "\\|\\|\\|";
 	private static final int s_iUrl = 0;
 	private static final int s_iName = 1;
 	private static final int s_iSize = 2;
 	private static final int s_iExpectedUrlLen = 3;
-	
-	//private static final int s_iKey = 0;
 	private static final int s_iValue = 1;
 	
 
@@ -99,7 +98,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		Preconditions.checkNotNull(sComplexUrl);
 		Preconditions.checkArgument(!sComplexUrl.isEmpty());
 		
-		String[] asTokens = sComplexUrl.split(SEPARATOR);
+		String[] asTokens = sComplexUrl.split(s_sSEPARATOR);
 		if(asTokens.length != s_iExpectedUrlLen) {
 			throw new IllegalArgumentException("SOBLOOProviderAdapter.tokenize( " + sComplexUrl + " ): tokens should be "
 					+ s_iExpectedUrlLen + " but " + asTokens.length + " were found");
@@ -116,7 +115,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			throw new IllegalArgumentException("SOBLOOProviderAdapter.extractValueFromToken( " + sToken + " ): tokens should be "
 					+ s_iExpectedUrlLen + " but " + asKeyValue.length + " were found");
 		}
-		if(Utils.isNullOrEmpty(asKeyValue[1])) {
+		if(Utils.isNullOrEmpty(asKeyValue[s_iValue])) {
 			throw new IllegalArgumentException("SOBLOOProviderAdapter.extractValueFromToken( " + sToken + " ): value is null or empty ");
 		}
 		return asKeyValue[1];
@@ -136,20 +135,11 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		m_oLogger.debug("SOBLOOProviderAdapter.fileSizeViaHttp: FileUrl = " + sFileURL);
 
 		URL oUrl = new URL(sFileURL);
-		
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-		oHttpConn.setRequestMethod("GET");
-		oHttpConn.setRequestProperty("Accept", "*/*");
-		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+		setConnectionHeaders(oHttpConn);
 
-		//DEBUG
-		// Basic HTTP Authentication "by hand"
-		String sBasicAuth = "Apikey " + m_sProviderPassword;
-
-		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
 
 		int responseCode = oHttpConn.getResponseCode();
-		int response2 = oHttpConn.getResponseCode();
 
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 
@@ -213,15 +203,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		//		sFileURL = "https://sobloo.eu/api/v1/services/search?f=acquisition.missionName:eq:Sentinel-1A";//DEBUG 
 		URL oUrl = new URL(sURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-		oHttpConn.setRequestMethod("GET");
-		oHttpConn.setRequestProperty("Accept", "*/*");
-		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
-
-		//DEBUG
-		// Basic HTTP Authentication "by hand"
-		String sBasicAuth = "Apikey " + sDownloadPassword;
-
-		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
+		setConnectionHeaders(oHttpConn);
 
 		int responseCode = oHttpConn.getResponseCode();
 
@@ -283,11 +265,24 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 		} else {
-			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
-			m_iLastError = responseCode;
+			String sError = handleConnectionError(oHttpConn);
+			//todo if code = 503 (and sError contains appropriate message handle retry 
 		}
 		oHttpConn.disconnect();
 		return sReturnFilePath;		
+	}
+
+
+	/**
+	 * @param oHttpConn
+	 * @throws ProtocolException
+	 */
+	protected void setConnectionHeaders(HttpURLConnection oHttpConn) throws ProtocolException {
+		oHttpConn.setRequestMethod("GET");
+		oHttpConn.setRequestProperty("Accept", "*/*");
+		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+		String sBasicAuth = "Apikey " + m_sProviderPassword;
+		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
 	}
 	
 	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
