@@ -2,17 +2,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.apache.commons.collections.FactoryUtils;
+import org.apache.commons.io.FileUtils;
 
 import wasdi.ConfigReader;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -20,9 +23,13 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.WorkspaceSharingRepository;
+import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 public class dbUtils {
@@ -37,6 +44,7 @@ public class dbUtils {
 	        
 	        System.out.println("\t1 - List products with broken files");
 	        System.out.println("\t2 - Delete products with broken files");
+	        System.out.println("\t3 - Clear S1 S2 published bands");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -44,61 +52,67 @@ public class dbUtils {
 	        
 	        boolean bDelete = false;
 	        
-	        if (sInputString.equals("1")) {
-	        	bDelete = false;
-	        }
-	        else if (sInputString.equals("2")) {
-	        	bDelete = true;
-	        }		        
-			
-			
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			
-			List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getList();
-			
-			System.out.println("Found " + aoDownloadedFiles.size() + " Downloaded Files");
-			
-			int iDeleted = 0;
-			
-			for (DownloadedFile oDownloadedFile : aoDownloadedFiles) {
+	        if (sInputString.equals("1") || sInputString.equals("2")) {
+	        	
+		        if (sInputString.equals("1")) {
+		        	bDelete = false;
+		        }
+		        else if (sInputString.equals("2")) {
+		        	bDelete = true;
+		        }		        
 				
-				String sPath = oDownloadedFile.getFilePath();
-				File oFile = new File(sPath);
 				
-				if (oFile.exists() == false) {
+				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+				
+				List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getList();
+				
+				System.out.println("Found " + aoDownloadedFiles.size() + " Downloaded Files");
+				
+				int iDeleted = 0;
+				
+				for (DownloadedFile oDownloadedFile : aoDownloadedFiles) {
 					
-					iDeleted ++;
+					String sPath = oDownloadedFile.getFilePath();
+					File oFile = new File(sPath);
 					
-					if (bDelete == false) {
-						System.out.println(oDownloadedFile.getFileName() + " - FILE DOES NOT EXISTS " + oDownloadedFile.getFilePath());
-					}
-					else {
+					if (oFile.exists() == false) {
 						
-						System.out.println("DELETING " + oDownloadedFile.getFileName() + " - FILE DOES NOT EXISTS " + oDownloadedFile.getFilePath());
-						oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
+						iDeleted ++;
 						
-						// Delete Product Workspace
-						ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-						oProductWorkspaceRepository.deleteByProductName(oDownloadedFile.getFilePath());
+						if (bDelete == false) {
+							System.out.println(oDownloadedFile.getFileName() + " - FILE DOES NOT EXISTS " + oDownloadedFile.getFilePath());
+						}
+						else {
+							
+							System.out.println("DELETING " + oDownloadedFile.getFileName() + " - FILE DOES NOT EXISTS " + oDownloadedFile.getFilePath());
+							oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
+							
+							// Delete Product Workspace
+							ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+							oProductWorkspaceRepository.deleteByProductName(oDownloadedFile.getFilePath());
 
-						System.out.println("DELETED " + oDownloadedFile.getFileName());
+							System.out.println("DELETED " + oDownloadedFile.getFileName());
+						}
 					}
 				}
-			}
-			
-			System.out.println("");
-			System.out.println("");
-			System.out.println("---------------------------------------------");
-			String sSummary = "";
-			if (bDelete) {
-				sSummary = "DELETED " + iDeleted + " db Entry";
-			}
-			else {
-				sSummary = "Found " + iDeleted + " db Entry to delete";
-			}
-			
-			System.out.println(sSummary);
-			
+				
+				System.out.println("");
+				System.out.println("");
+				System.out.println("---------------------------------------------");
+				String sSummary = "";
+				if (bDelete) {
+					sSummary = "DELETED " + iDeleted + " db Entry";
+				}
+				else {
+					sSummary = "Found " + iDeleted + " db Entry to delete";
+				}
+				
+				System.out.println(sSummary);
+	        }
+	        else if (sInputString.equals("3")) {
+	        	System.out.println("Clean S1 and S2 published bands");
+	        	cleanPublishedBands();
+	        }
 		}
 		catch (Exception oEx) {
 			System.out.println("downloadedProducts: exception " + oEx.toString());
@@ -387,9 +401,288 @@ public class dbUtils {
 		}
 	}
 	
+	
+	private static void users() {
+		try {
+			
+	        System.out.println("Ok, what we do with Users?");
+	        
+	        System.out.println("\t1 - Delete User");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Insert the userId to Delete:");
+	        	String sUserId = oScanner.nextLine();
+	        	
+	        	if (Utils.isNullOrEmpty(sUserId)) {
+	        		System.out.println("User Id is null or empty");
+	        		return;
+	        	}
+	        	
+	        	UserRepository oUserRepo = new UserRepository();
+	        	User oTestUser = oUserRepo.getUser(sUserId);
+	        	
+	        	if (oTestUser == null) {
+	        		System.out.println("User Id not valid");
+	        		return;	        		
+	        	}
+	        	
+	        	// Get all the workspaces
+	        	WorkspaceRepository oWorkspaceRepo = new WorkspaceRepository();
+	        	List<Workspace> aoWorkspaces = oWorkspaceRepo.getWorkspaceByUser(sUserId);
+	        	
+	        	// Delete one by one
+	        	for (Workspace oWorkspace : aoWorkspaces) {
+	        		deleteWorkspace(oWorkspace.getWorkspaceId(), oWorkspace.getUserId());
+				}
+	        	
+	        	// Clean the log/processing history
+	        	ProcessWorkspaceRepository oProcWsRepo = new ProcessWorkspaceRepository();
+	        	ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+	        	
+	        	List<ProcessWorkspace> aoProcWs = oProcWsRepo.getProcessByUser(sUserId);
+	        	
+	        	System.out.println("Deleting Process Workpsaces and Logs : " + aoProcWs.size());
+	        	
+	        	for (ProcessWorkspace oProcWorkspace : aoProcWs) {
+	        		String sProcId = oProcWorkspace.getProcessObjId();
+	        		
+	        		oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcId);
+	        		oProcWsRepo.deleteProcessWorkspaceByProcessObjId(sProcId);
+				}
+	        	
+	        	// Clean the user table
+	        	System.out.println("Deleting User Db Entry ");
+	        	
+	        	UserRepository oUserRepository = new UserRepository();
+	        	oUserRepository.deleteUser(sUserId);
+	        	
+	        	// Clean the user folder
+	        	System.out.println("Deleting User Folder ");
+	        	
+	    		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+	    		if (!sBasePath.endsWith("/")) {
+	    			sBasePath += "/";
+	    		}
+	    		sBasePath +=sUserId;
+	    		sBasePath += "/";
+	    		
+				FileUtils.deleteDirectory(new File(sBasePath));
+	        	
+	        }
+		}
+		catch (Exception oEx) {
+			System.out.println("password Exception: " + oEx);
+			oEx.printStackTrace();
+		}
+	}
+	
+	private static String getWorkspacePath(String sWorkspaceOwner,String  sWorkspaceId) throws IOException {
+		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+		if (!sBasePath.endsWith("/")) {
+			sBasePath += "/";
+		}
+		sBasePath +=sWorkspaceOwner;
+		sBasePath += "/";
+		sBasePath += sWorkspaceId;
+		sBasePath += "/";
+		
+		return sBasePath;
+	}
+	
+	private static void deleteWorkspace(String sWorkspaceId, String sWorkspaceOwner) {
+		
+		try {
+			// repositories
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			
+			// get workspace path
+			String sWorkspacePath = getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
+			
+			System.out.println("deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
+
+			// Delete Workspace Db Entry
+			if (oWorkspaceRepository.deleteWorkspace(sWorkspaceId)) {
+				
+				// Get all Products in workspace
+				List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+
+				Utils.debugLog("Deleting workspace layers");
+
+				// GeoServer Manager Object
+				GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GS_URL"), ConfigReader.getPropValue("GS_USER"), ConfigReader.getPropValue("GS_PASSWORD"));
+				
+				// For each product in the workspace
+				for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
+					
+					// Get the downloaded file
+					DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oProductWorkspace.getProductName());
+					
+					// Is the product used also in other workspaces?
+					List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getDownloadedFileListByName(oDownloadedFile.getFileName());
+					
+					if (aoDownloadedFileList.size()>1) {
+						// Yes, it is in other Ws, jump
+						Utils.debugLog("The file is also in other workspaces, leave the bands as they are");
+						continue;
+					}
+					
+					// We need the View Model product name: start from file name
+					String sProductName = oDownloadedFile.getFileName();
+					
+					// If view model is available (should be), get the name from the view model
+					if (oDownloadedFile.getProductViewModel() != null) {
+						sProductName = oDownloadedFile.getProductViewModel().getName();
+					}
+					
+					// Get the list of published bands by product name
+					List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(sProductName);
+					
+					// For each published band
+					for (PublishedBand oPublishedBand : aoPublishedBands) {
+						
+						try {
+							// Remove Geoserver layer (and file)
+							if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+								Utils.debugLog("error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+							}
+
+							try {									
+								// delete published band on database
+								oPublishRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+							} 
+							catch (Exception oEx) {
+								Utils.debugLog("error deleting published band on data base " + oEx.toString());}
+
+						} catch (Exception oEx) {
+							Utils.debugLog("error deleting layer id " + oEx.toString());
+						}
+
+					}
+				}			
+				
+				try {
+
+					Utils.debugLog("Delete workspace folder " + sWorkspacePath);
+					
+					// delete directory
+					FileUtils.deleteDirectory(new File(sWorkspacePath));
+					
+					// delete download file on database
+					for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
+						
+						try {
+							
+							Utils.debugLog("Deleting file " + oProductWorkspace.getProductName());
+							oDownloadedFilesRepository.deleteByFilePath(oProductWorkspace.getProductName());
+							
+						} 
+						catch (Exception oEx) {
+							Utils.debugLog( "Error deleting download on data base: " + oEx);
+						}
+					}
+
+				} catch (Exception oEx) {
+					Utils.debugLog("Error deleting workspace directory: " + oEx);
+				}
+				
+				// Delete Product Workspace entry 
+				oProductWorkspaceRepository.deleteByWorkspaceId(sWorkspaceId);
+				
+				// Delete also the sharings, it is deleted by the owner..
+				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+				oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+
+			} 
+			else {
+				Utils.debugLog("Error deleting workspace on data base");
+			}
+
+		} catch (Exception oEx) {
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);
+		}		
+		
+	}
+	
 	public static void sample() {
 		System.out.println("sample method running");
 	}
+	
+	private static void refreshProductsTable() {
+		DownloadedFilesRepository oDownloadedFileRepo = new DownloadedFilesRepository();
+		
+		List<DownloadedFile> aoProducts = oDownloadedFileRepo.getList();
+		
+		for (DownloadedFile oProduct : aoProducts) {
+			
+			if (oProduct.getFileName().startsWith("S1") || oProduct.getFileName().startsWith("S2")) {
+				ProductViewModel oVM = oProduct.getProductViewModel();
+				
+				List<BandViewModel> aoBands = oVM.getBandsGroups().getBands();
+				
+				if (aoBands== null) continue;
+				
+				boolean bChanged = false;
+				for (BandViewModel oBand : aoBands) {
+					if (oBand.getPublished() == true) {
+						oBand.setPublished(false);
+						bChanged = true;
+					}
+				}
+				
+				if (bChanged) {
+					oDownloadedFileRepo.updateDownloadedFile(oProduct);
+				}
+			}
+			
+		}
+	}
+
+	private static void cleanPublishedBands() throws MalformedURLException, IOException {
+		
+		try {
+			GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
+
+			PublishedBandsRepository oPublishedBandRepo = new PublishedBandsRepository();
+			
+			List<PublishedBand> aoBands = oPublishedBandRepo.getList();
+			
+			for (PublishedBand oPublishedBand : aoBands) {
+				
+				if (oPublishedBand.getProductName().startsWith("S1") || oPublishedBand.getProductName().startsWith("S2")) {
+					
+					System.out.println("DELETE " + oPublishedBand.getLayerId());
+					
+					if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+						System.out.println("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+					}
+
+					try {
+						// delete published band on data base
+						oPublishedBandRepo.deleteByProductNameLayerId(oPublishedBand.getProductName(), oPublishedBand.getLayerId());
+					} catch (Exception oEx) {
+						System.out.println( "ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
+					}				
+				}
+				else {
+					System.out.println("KEEP " + oPublishedBand.getLayerId());
+				}
+			}		
+		}
+		catch (Exception e) {
+			System.out.println( "ProductResource.DeleteProduct: error deleting published band on data base " + e);
+		}
+		
+
+		refreshProductsTable();
+	}	
 
 		
 	public static void main(String[] args) {
@@ -415,6 +708,7 @@ public class dbUtils {
 		        System.out.println("\t3 - Logs");
 		        System.out.println("\t4 - Metadata");
 		        System.out.println("\t5 - Password");
+		        System.out.println("\t6 - Users");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -435,7 +729,10 @@ public class dbUtils {
 		        }		       
 		        else if (sInputString.equals("5")) {
 		        	password();
-		        }		        
+		        }
+		        else if (sInputString.equals("6")) {
+		        	users();
+		        }
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;
 		        }		        
