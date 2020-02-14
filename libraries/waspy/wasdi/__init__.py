@@ -16,11 +16,14 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Last Update: 25/01/2020
+Last Update: 05/02/2020
 
 Tested with: Python 2.7, Python 3.7
 
 History
+
+0.2.8 [05/02/2020]
+    Solved a bug in the _waitForResume private method.
 
 0.2.7 [25/01/2020]
     Added Support to Provider selection for search and import
@@ -2114,7 +2117,7 @@ def _waitForResume():
             _log("[INFO] Waiting for the scheduler to resume this process")
             sStatus = ''
         
-            while sStatus not in {"RUNNING"}:
+            while sStatus not in {"RUNNING", "DONE", "STOPPED", "ERROR"}:
                 sStatus = getProcessStatus(getProcId())
                 time.sleep(2)
             
