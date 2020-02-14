@@ -104,7 +104,8 @@ public class ProcessorsResource extends BaseResource{
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
 											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, 
-											@QueryParam("link") String sLink , @QueryParam("email") String sEmail) throws Exception {
+											@QueryParam("link") String sLink , @QueryParam("email") String sEmail,
+											@QueryParam("categories") String[] asCategoriesId, @QueryParam("price") Integer iPrice ) throws Exception {
 
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -204,6 +205,8 @@ public class ProcessorsResource extends BaseResource{
 			oProcessor.setIsPublic(iPublic);
 			oProcessor.setLink(sLink);
 			oProcessor.setEmail(sEmail);
+			oProcessor.setPrice(iPrice);
+			oProcessor.setCategoriesId(asCategoriesId);
 			
 			if( iTimeout != null ){
 				oProcessor.setTimeoutMs(iTimeout);
