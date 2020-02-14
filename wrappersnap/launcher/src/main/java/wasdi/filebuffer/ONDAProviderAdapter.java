@@ -249,7 +249,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @param sDownloadPassword pw
 	 * @return true if available false otherwise
 	 */
-	private Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
+	@Override
+	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
 		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sFileURL + ", " + sDownloadUser + ", ************** )");
 		String sUUID = extractProductUUID(sFileURL);
 		return checkProductAvailabilityFromUUID(sUUID, sDownloadUser, sDownloadPassword);
