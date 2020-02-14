@@ -43,6 +43,9 @@ public class Processor {
 	 */
 	private int timeoutMs = 1000*60*60*3;
 	
+	private Integer price = 0; 
+
+	private String[] categoriesId; 
 
 	private String link;
 	
@@ -69,6 +72,20 @@ public class Processor {
 	}
 	public void setParameterSample(String parameterSample) {
 		this.parameterSample = parameterSample;
+	}
+	
+	
+	public Integer getPrice() {
+		return price;
+	}
+	public void setPrice(Integer price) {
+		this.price = price;
+	}
+	public String[] getCategoriesId() {
+		return categoriesId;
+	}
+	public void setCategoriesId(String[] categoriesId) {
+		this.categoriesId = categoriesId;
 	}
 	
 	public String getLink() {

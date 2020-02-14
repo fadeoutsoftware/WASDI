@@ -55,19 +55,23 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppCategoryViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
+import wasdi.shared.viewmodels.ListReviewsViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessorLogViewModel;
+import wasdi.shared.viewmodels.ReviewViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
@@ -82,6 +86,7 @@ public class ProcessorsResource extends BaseResource{
 	final Integer NUMB_MAX_OF_IMAGES = 5;
 	final String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
 	AppsCategoriesRepository m_oAppCategoriesRepository = new AppsCategoriesRepository();
+	ReviewRepository m_oReviewRepository = new ReviewRepository();
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -1113,6 +1118,54 @@ public class ProcessorsResource extends BaseResource{
 		
 	    return Response.ok(aoAppCategoriesViewModel).build();
 
+	}
+	
+	@GET
+	@Path("/getreviews")
+	public Response getReview (@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		Processor oProcessor = getProcessor(sProcessorId);
+		
+		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		//check if the user is the owner of the processor 
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
+		List<Review> aoReviewRepository = m_oReviewRepository.getReviews(sProcessorId);
+	    return Response.ok().build();
+
+	}
+	
+	private ListReviewsViewModel getListReviews(List<Review> aoReviewRepository ){
+		ListReviewsViewModel oListReviews = new ListReviewsViewModel();
+		List<ReviewViewModel> aoReview = null;
+		if(aoReviewRepository != null){
+			return null; 
+		}
+		
+		for(Review oReview: aoReviewRepository){
+			ReviewViewModel oReviewViewModel = new ReviewViewModel();
+			oReviewViewModel.setComment(oReview.getComment());
+			oReviewViewModel.setDate(oReview.getDate());
+			oReviewViewModel.setId(oReview.getId());
+			oReviewViewModel.setUserId(oReview.getUserId());
+			oReviewViewModel.setProcessorId(oReview.getUserId());
+			oReviewViewModel.setVote(oReview.getVote());
+
+			aoReview.add(oReviewViewModel);
+		}
+		
+		oListReviews.setReviews(aoReview);
+		return oListReviews;
 	}
 	
 	private ArrayList<AppCategoryViewModel> getCategoriesViewModel(List<AppCategory> aoAppCategories ){
