@@ -445,7 +445,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	}
 	
 	
-	
 	protected long getDownloadFileSizeViaHttp(String sFileURL)  throws Exception  {
 
         long lLenght = 0L;
@@ -520,13 +519,19 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param responseCode
 	 * @throws IOException
 	 */
-	protected void handleConnectionError(HttpURLConnection oHttpConn) throws IOException {
+	protected String  handleConnectionError(HttpURLConnection oHttpConn) throws IOException {
 		Preconditions.checkNotNull(oHttpConn);
 
-		int iResponseCode = oHttpConn.getResponseCode();
-		InputStream oErrorStream = oHttpConn.getErrorStream();
-		String sError = CharStreams.toString(new InputStreamReader(oErrorStream, Charsets.UTF_8));
-		m_oLogger.warn("ProviderAdapter.handleConnectionError: Server replied HTTP code: " + iResponseCode + " and message is: \n" + sError);
-		m_iLastError = iResponseCode;
+		String sError = null;
+		try{
+			m_iLastError = oHttpConn.getResponseCode();
+			InputStream oErrorStream = oHttpConn.getErrorStream();
+			CharStreams.toString(new InputStreamReader(oErrorStream, Charsets.UTF_8));
+			m_oLogger.warn("ProviderAdapter.handleConnectionError: Server replied HTTP code: " + m_iLastError + " and message is: \n" + sError);
+		} catch (Exception oE) {
+			m_oLogger.error("ProviderAdapter.handleConnectionError: " + oE);
+		}
+		
+		return sError;
 	}
 }
