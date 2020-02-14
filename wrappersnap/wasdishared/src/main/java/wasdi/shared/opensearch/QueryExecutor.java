@@ -377,10 +377,11 @@ public abstract class QueryExecutor {
 	protected String httpGetResults(String sUrl, String sQueryType) {
 		Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + ", " + sQueryType + " )");
 		String sResult = null;
+		long lStart = 0l;
+		int iResponseSize = -1;
 		try {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-	
 			// optional default is GET
 			oConnection.setRequestMethod("GET");
 			oConnection.setRequestProperty("Accept", "*/*");
@@ -390,11 +391,10 @@ public abstract class QueryExecutor {
 				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 				oConnection.setRequestProperty ("Authorization", sBasicAuth);
 			}
-	
+
 			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
-	
-			long lStart = System.nanoTime();
-			int iResponseSize = -1;
+
+			lStart = System.nanoTime();
 			try {
 				int responseCode =  oConnection.getResponseCode();
 				Utils.debugLog("QueryExecutor.httpGetResults: Response Code : " + responseCode);
@@ -434,8 +434,10 @@ public abstract class QueryExecutor {
 						iResponseSize = sMessage.length();
 					}
 				}
-			} catch (SocketTimeoutException oE) {
-				Utils.debugLog("QueryExecutor.httpGetResults: " + oE);
+			}catch (Exception oEint) {
+				Utils.debugLog("QueryExecutor.httpGetResults: " + oEint);
+			} finally {
+				oConnection.disconnect();
 			}
 			
 			long lEnd = System.nanoTime();
