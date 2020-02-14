@@ -8,7 +8,6 @@ package wasdi.shared.opensearch.sobloo;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
