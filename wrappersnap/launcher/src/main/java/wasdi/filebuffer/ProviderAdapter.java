@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
@@ -13,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.io.CharStreams;
 
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
@@ -505,4 +510,23 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
         return lLenght;
     }
+
+	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
+		return true;
+	}
+	
+	/**
+	 * @param oHttpConn
+	 * @param responseCode
+	 * @throws IOException
+	 */
+	protected void handleConnectionError(HttpURLConnection oHttpConn) throws IOException {
+		Preconditions.checkNotNull(oHttpConn);
+
+		int iResponseCode = oHttpConn.getResponseCode();
+		InputStream oErrorStream = oHttpConn.getErrorStream();
+		String sError = CharStreams.toString(new InputStreamReader(oErrorStream, Charsets.UTF_8));
+		m_oLogger.warn("ProviderAdapter.handleConnectionError: Server replied HTTP code: " + iResponseCode + " and message is: \n" + sError);
+		m_iLastError = iResponseCode;
+	}
 }
