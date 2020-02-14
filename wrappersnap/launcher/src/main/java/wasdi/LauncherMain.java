@@ -842,10 +842,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				}
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			s_oLogger.error("LauncherMain.Download: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			s_oLogger.error("LauncherMain.Download: " + oEx);
 
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			String sError = "" + oEx;
 
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
