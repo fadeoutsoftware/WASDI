@@ -85,6 +85,8 @@ public class ProcessScheduler extends Thread {
 	 */
 	protected ArrayList<String> m_asOperationTypes = new ArrayList<String>();
 	
+	protected int m_iSometimesCounter = 30;
+	
 	public boolean init(String sSchedulerKey) {
 		
 		try {
@@ -242,11 +244,11 @@ public class ProcessScheduler extends Thread {
 					}
 				}
 				else {
-					WasdiScheduler.log(m_sLogPrefix + "Running Queue full, next cycle.");
+					//if (iSometimes == m_iSometimesCounter) WasdiScheduler.log(m_sLogPrefix + "Running Queue full, next cycle.");
 				}
 				
 				// Periodic sanification tasks
-				if (iSometimes == 30) {
+				if (iSometimes == m_iSometimesCounter) {
 					
 					iSometimes = 0;
 					
@@ -288,7 +290,7 @@ public class ProcessScheduler extends Thread {
 						if (!Utils.isNullOrEmpty(sPid)) {
 							if (!Utils.isProcessStillAllive(sPid)) {
 								// PID does not exists: recheck and remove
-								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + " but the process does not exists");
+								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
 								
 								// Read Again to be sure
 								ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
@@ -308,7 +310,7 @@ public class ProcessScheduler extends Thread {
 							}
 						}
 						else {
-							WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " has null PID");
+							WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
 						}
 						
 						
@@ -382,6 +384,58 @@ public class ProcessScheduler extends Thread {
 							}
 						}
 					}
+					
+					
+					
+					// Get the updated list of waiting and ready processes
+					List<ProcessWorkspace> aoWaitingReadyList = getReadyList();
+					aoWaitingReadyList.addAll(getWaitingList());
+					
+					// For each running process check pid and timeout
+					for (ProcessWorkspace oWaitingReadyPws : aoWaitingReadyList) {
+						
+						// All processes in waiting o ready are anyway started so they can be removed from the launched list
+						if (m_aoLaunchedProcesses.containsKey(oWaitingReadyPws.getProcessObjId())) {
+							m_aoLaunchedProcesses.remove(oWaitingReadyPws.getProcessObjId());
+						}
+						
+						// Get the PID
+						String sPid = "" + oWaitingReadyPws.getPid();
+						
+						// Check if it is alive
+						if (!Utils.isNullOrEmpty(sPid)) {
+							if (!Utils.isProcessStillAllive(sPid)) {
+								// PID does not exists: recheck and remove
+								WasdiScheduler.log(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
+								
+								// Read Again to be sure
+								ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
+								
+								// Is it still running?
+								if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ||
+										oCheckProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name()) ||
+										oCheckProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
+									
+									// It cannot be in any of these states if the PID does not exists
+									
+									// Force to error
+									oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+									// Set the operation end date
+									if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
+										oCheckProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+									}
+									// Update the process
+									m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
+									WasdiScheduler.log(m_sLogPrefix + "**************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
+								}							
+							}
+						}
+						else {
+							WasdiScheduler.log(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has null PID");
+						}
+					}
+					
+					
 				}
 
 				iSometimes ++;
@@ -450,6 +504,17 @@ public class ProcessScheduler extends Thread {
 	 */
 	protected List<ProcessWorkspace> getReadyList() {
 		List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeDate");
+		aoReady = filterOperationTypes(aoReady);
+		Collections.reverse(aoReady);
+		return aoReady;
+	}	
+	
+	/**
+	 * Get the list of Waiting processes
+	 * @return list of WAITING processes
+	 */
+	protected List<ProcessWorkspace> getWaitingList() {
+		List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeDate");
 		aoReady = filterOperationTypes(aoReady);
 		Collections.reverse(aoReady);
 		return aoReady;
