@@ -195,3 +195,4 @@ wrappersnap/launcher/src/main/java/Test_BBOX.java
 wrappersnap/launcher/src/main/java/TestMain.java
 wrappersnap/launcher/src/main/java/UpdateBandViewModels.java
 wrappersnap/launcher/src/main/java/wasdi/filebuffer/ProviderAdapter.java.orig
+wrappersnap/launcher/resources/config.properties
