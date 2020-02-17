@@ -7,10 +7,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
-
-import org.joda.time.Duration;
 
 import com.google.common.base.Preconditions;
 
@@ -203,11 +202,10 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 		
 		Instant oStart = Instant.now();
-		Duration oDuration = new Duration(0l);
-		Duration oMaxDuration = Duration.ofHours(24);
+		Duration oMaxDuration = Duration.ofMinutes((long)(24 * 60 + s_iSLACKTOWAIT));
 		
 		int iAttempts = SOBLOOProviderAdapter.s_iNUMATTEMPTS;
-		while(iAttempts > 0 ) {
+		while(iAttempts > 0 && Duration.between(oStart, Instant.now()).compareTo(oMaxDuration) <= 0 ) {
 			 
 			URL oUrl = new URL(sURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
