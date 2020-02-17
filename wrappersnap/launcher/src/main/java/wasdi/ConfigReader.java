@@ -23,8 +23,13 @@ public class ConfigReader {
             Properties prop = new Properties();
             String propFileName = "config.properties";
 
+            System.out.println(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            
             //inputStream = new ConfigReader().getClass().getClassLoader().getResourceAsStream(propFileName);
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            
+            
+            
             inputStream = new FileInputStream(oCurrentFile.getParentFile().getPath() + "/" + propFileName);
 
             if (inputStream != null) {
