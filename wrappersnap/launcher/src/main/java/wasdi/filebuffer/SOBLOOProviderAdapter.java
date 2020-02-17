@@ -7,19 +7,30 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+
+import org.joda.time.Duration;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.LauncherMain;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
+	
 	private static final String s_sSEPARATOR = "\\|\\|\\|";
 	private static final int s_iUrl = 0;
 	private static final int s_iName = 1;
 	private static final int s_iSize = 2;
 	private static final int s_iExpectedUrlLen = 3;
 	private static final int s_iValue = 1;
+	//Sobloo declares they can gather images from the Long Term Archive in no more than 24 hourss
+	private static final int s_iNUMATTEMPTS = 24;
+	//Sobloo claims most images are available in 1h, so let's wait that plus some slack
+	private static final int s_iSLACKTOWAIT = 5;
 	
 
 
@@ -175,100 +186,111 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 		setProcessWorkspace(oProcessWorkspace);
 
-		//		String sReturnFilePath = CopyLocalFile(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
-		//
-		//		if (!Utils.isNullOrEmpty(sReturnFilePath)) {
-		//			m_oLogger.debug("PROBAVProviderAdapter.ExecuteDownloadFile: File found in local repo. Return");
-		//
-		//			return sReturnFilePath;
-		//		} else {
 		m_oLogger.debug( "SOBLOOProviderAdapter.ExecuteDownloadFile: File NOT found in local repo, try to donwload from provider");
 
-		return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
-		//		}
-		//		return null;
-
-	}
-
-	@Override
-	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
+//		return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
+//	}
+//
+//	@Override
+//	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
 
 		String sReturnFilePath = "";
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		String sURL = extractUrl(sFileURL);
 
-		m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
-		m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: FileUrl = " + sURL);
+		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: sDownloadUser: " + sDownloadUser);
+		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: FileUrl: " + sURL);
 
-		//		sFileURL = "https://sobloo.eu/api/v1/services/search?f=acquisition.missionName:eq:Sentinel-1A";//DEBUG 
-		URL oUrl = new URL(sURL);
-		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-		setConnectionHeaders(oHttpConn);
-
-		int responseCode = oHttpConn.getResponseCode();
-
-		// always check HTTP response code first
-		if (responseCode == HttpURLConnection.HTTP_OK) {
-
-			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: Connected");
-
-			String sFileName = "";
-			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
-			String sContentType = oHttpConn.getContentType();
-			long lContentLength = 0;
-			try {
-				lContentLength = GetDownloadFileSize(sFileURL);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-
-			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
-
-			if (sDisposition != null) {
-				// extracts file name from header field
-				int index = sDisposition.indexOf("filename=");
-				if (index > 0) {
-					sFileName = sDisposition.substring(index + 9, sDisposition.length() );
+		
+		Instant oStart = Instant.now();
+		Duration oDuration = new Duration(0l);
+		Duration oMaxDuration = Duration.ofHours(24);
+		
+		int iAttempts = SOBLOOProviderAdapter.s_iNUMATTEMPTS;
+		while(iAttempts > 0 ) {
+			 
+			URL oUrl = new URL(sURL);
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			setConnectionHeaders(oHttpConn);
+	
+			int iResponseCode = oHttpConn.getResponseCode();
+	
+			// always check HTTP response code first
+			if (iResponseCode == HttpURLConnection.HTTP_OK) {
+	
+				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Connected");
+	
+				String sFileName = "";
+				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+				String sContentType = oHttpConn.getContentType();
+				long lContentLength = 0;
+				try {
+					lContentLength = GetDownloadFileSize(sFileURL);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+	
+	
+				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: ContentLenght: " + lContentLength);
+	
+				if (sDisposition != null) {
+					// extracts file name from header field
+					int index = sDisposition.indexOf("filename=");
+					if (index > 0) {
+						sFileName = sDisposition.substring(index + 9, sDisposition.length() );
+					}
+				} else {
+					// extracts file name from URL
+					sFileName = sURL.substring(sURL.lastIndexOf("/") + 1, sURL.length());
+				}
+	
+				m_oLogger.debug("Content-Type: " + sContentType);
+				m_oLogger.debug("Content-Disposition: " + sDisposition);
+				m_oLogger.debug("Content-Length: " + lContentLength);
+				m_oLogger.debug("fileName: " + sFileName);
+	
+				// opens input stream from the HTTP connection
+				InputStream oInputStream = oHttpConn.getInputStream();
+	
+				if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
+	
+				String sSaveFilePath = sSaveDirOnServer + sFileName;
+	
+				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Create Save File Path = " + sSaveFilePath);
+	
+				File oTargetFile = new File(sSaveFilePath);
+				File oTargetDir = oTargetFile.getParentFile();
+				oTargetDir.mkdirs();
+	
+				// opens an output stream to save into file
+				FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
+	
+				//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
+				copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+	
+				sReturnFilePath = sSaveFilePath;
+	
+				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile File downloaded " + sReturnFilePath);
+				break;
 			} else {
-				// extracts file name from URL
-				sFileName = sURL.substring(sURL.lastIndexOf("/") + 1, sURL.length());
+				String sError = handleConnectionError(oHttpConn);
+				if(503 == iResponseCode) {
+					//todo if code = 503 (and sError contains appropriate message handle retry
+					try {
+						String sInfo = "Waiting for the transfer of the image from Sobloo Long Term Archive, this may take up to 24 hours from the request";
+						LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: image is in the Long Term Archive, waiting for the transfer.");
+						TimeUnit.MINUTES.sleep(60 + SOBLOOProviderAdapter.s_iSLACKTOWAIT);
+					} catch (InterruptedException oE) {
+						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Could not complete sleep: " + oE);
+					}
+					
+				}
 			}
-
-			m_oLogger.debug("Content-Type = " + sContentType);
-			m_oLogger.debug("Content-Disposition = " + sDisposition);
-			m_oLogger.debug("Content-Length = " + lContentLength);
-			m_oLogger.debug("fileName = " + sFileName);
-
-			// opens input stream from the HTTP connection
-			InputStream oInputStream = oHttpConn.getInputStream();
-
-			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
-
-			String sSaveFilePath = sSaveDirOnServer + sFileName;
-
-			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
-
-			File oTargetFile = new File(sSaveFilePath);
-			File oTargetDir = oTargetFile.getParentFile();
-			oTargetDir.mkdirs();
-
-			// opens an output stream to save into file
-			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
-
-			//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
-			copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
-
-			sReturnFilePath = sSaveFilePath;
-
-			m_oLogger.debug("SOBLOOProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
-		} else {
-			String sError = handleConnectionError(oHttpConn);
-			//todo if code = 503 (and sError contains appropriate message handle retry 
+			oHttpConn.disconnect();
+			iAttempts--;
 		}
-		oHttpConn.disconnect();
 		return sReturnFilePath;		
 	}
 
