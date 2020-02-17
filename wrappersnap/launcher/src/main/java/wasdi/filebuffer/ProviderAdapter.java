@@ -278,6 +278,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     protected void UpdateProcessProgress(int iProgress) {
     	
     	if (m_oProcessWorkspace == null) return;
+    	m_oLogger.debug("ProviderAdapter.UpdateProcessProgress: " + iProgress + "%");
     	m_oProcessWorkspace.setProgressPerc(iProgress);
     	//notify all subscribers
     	for (ProcessWorkspaceUpdateSubscriber oSubscriber : m_aoSubscribers) {
@@ -526,7 +527,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		try{
 			m_iLastError = oHttpConn.getResponseCode();
 			InputStream oErrorStream = oHttpConn.getErrorStream();
-			CharStreams.toString(new InputStreamReader(oErrorStream, Charsets.UTF_8));
+			sError = CharStreams.toString(new InputStreamReader(oErrorStream, Charsets.UTF_8));
 			m_oLogger.warn("ProviderAdapter.handleConnectionError: Server replied HTTP code: " + m_iLastError + " and message is: \n" + sError);
 		} catch (Exception oE) {
 			m_oLogger.error("ProviderAdapter.handleConnectionError: " + oE);
