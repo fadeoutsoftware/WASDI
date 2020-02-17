@@ -20,6 +20,7 @@ import wasdi.shared.utils.Utils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
+	private static final String s_sFileNamePrefix = "filename=";
 	private static final String s_sSEPARATOR = "\\|\\|\\|";
 	private static final int s_iUrl = 0;
 	private static final int s_iName = 1;
@@ -171,35 +172,23 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	@Override
 	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
-		// Domain check
-		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: sFileURL is null");
-			return "";
-		}
-		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-			m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
-			return "";
-		}
-
-		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: start");
+		
+		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " +
+				sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
+		
+		Preconditions.checkNotNull(sFileURL, "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is null");
+		Preconditions.checkArgument(sFileURL.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is empty");
+		Preconditions.checkNotNull(sDownloadPassword, "SOBLOOProviderAdapter.ExecuteDownloadFile: password is null");
+		Preconditions.checkArgument(sDownloadPassword.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: password is empty");
+		Preconditions.checkNotNull(sSaveDirOnServer, "SOBLOOProviderAdapter.ExecuteDownloadFile: save dir is null");
+		Preconditions.checkArgument(sSaveDirOnServer.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: save dir is empty");
+		Preconditions.checkNotNull(oProcessWorkspace, "SOBLOOProviderAdapter.ExecuteDownloadFile: process workspace is null");
 
 		setProcessWorkspace(oProcessWorkspace);
-
-		m_oLogger.debug( "SOBLOOProviderAdapter.ExecuteDownloadFile: File NOT found in local repo, try to donwload from provider");
-
-//		return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
-//	}
-//
-//	@Override
-//	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
 
 		String sReturnFilePath = "";
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		String sURL = extractUrl(sFileURL);
-
-		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: sDownloadUser: " + sDownloadUser);
-		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: FileUrl: " + sURL);
-
 		
 		Instant oStart = Instant.now();
 		Duration oMaxDuration = Duration.ofMinutes((long)(24 * 60 + s_iSLACKTOWAIT));
@@ -224,9 +213,8 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				long lContentLength = 0;
 				try {
 					lContentLength = GetDownloadFileSize(sFileURL);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (Exception oE) {
+					m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: " + oE);
 				}
 	
 	
@@ -234,13 +222,21 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 				if (sDisposition != null) {
 					// extracts file name from header field
-					int index = sDisposition.indexOf("filename=");
+					int index = sDisposition.indexOf(SOBLOOProviderAdapter.s_sFileNamePrefix);
 					if (index > 0) {
-						sFileName = sDisposition.substring(index + 9, sDisposition.length() );
+						int iLen = SOBLOOProviderAdapter.s_sFileNamePrefix.length();
+						sFileName = sDisposition.substring(index + iLen, sDisposition.length() );
+						sFileName = sFileName.trim();
+						while(sFileName.startsWith("\"")) {
+							sFileName = sFileName.substring(1);
+						}
+						while(sFileName.endsWith("\"")) {
+							sFileName = sFileName.substring(0, sFileName.length()-1);
+						}
 					}
 				} else {
 					// extracts file name from URL
-					sFileName = sURL.substring(sURL.lastIndexOf("/") + 1, sURL.length());
+					sFileName = GetFileName(sFileURL);
 				}
 	
 				m_oLogger.debug("Content-Type: " + sContentType);
@@ -274,11 +270,10 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			} else {
 				String sError = handleConnectionError(oHttpConn);
 				if(503 == iResponseCode) {
-					//todo if code = 503 (and sError contains appropriate message handle retry
 					try {
 						String sInfo = "Waiting for the transfer of the image from Sobloo Long Term Archive, this may take up to 24 hours from the request";
 						LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
-						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: image is in the Long Term Archive, waiting for the transfer.");
+						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: LTA status: " + sError);
 						TimeUnit.MINUTES.sleep(60 + SOBLOOProviderAdapter.s_iSLACKTOWAIT);
 					} catch (InterruptedException oE) {
 						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Could not complete sleep: " + oE);
@@ -298,16 +293,12 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	 * @throws ProtocolException
 	 */
 	protected void setConnectionHeaders(HttpURLConnection oHttpConn) throws ProtocolException {
+		Preconditions.checkNotNull(oHttpConn);
+		
 		oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");
 		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 		String sBasicAuth = "Apikey " + m_sProviderPassword;
 		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
 	}
-	
-	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
-		//todo try download and check response code and error
-		return true;
-	}
-	
 }
