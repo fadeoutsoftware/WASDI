@@ -108,10 +108,12 @@ public class ProcessorsResource extends BaseResource{
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
-											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout, 
-											@QueryParam("link") String sLink , @QueryParam("email") String sEmail,
-											@QueryParam("categories") String[] asCategoriesId, @QueryParam("price") Integer iPrice ) throws Exception {
+											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout		, 
+											@QueryParam("link") String sLink , @QueryParam("email") String sEmail, @QueryParam("price") Integer iPrice) throws Exception {
 
+//		,
+//		@QueryParam("categories") String[] asCategoriesId
+//		
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
 		
@@ -211,7 +213,7 @@ public class ProcessorsResource extends BaseResource{
 			oProcessor.setLink(sLink);
 			oProcessor.setEmail(sEmail);
 			oProcessor.setPrice(iPrice);
-			oProcessor.setCategoriesId(asCategoriesId);
+		//	oProcessor.setCategoriesId(asCategoriesId);
 			
 			if( iTimeout != null ){
 				oProcessor.setTimeoutMs(iTimeout);
@@ -1136,22 +1138,23 @@ public class ProcessorsResource extends BaseResource{
 			return Response.status(400).build();
 		}
 		
-		//check if the user is the owner of the processor 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
 		List<Review> aoReviewRepository = m_oReviewRepository.getReviews(sProcessorId);
-	    return Response.ok().build();
+		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoReviewRepository);
+
+	    return Response.ok(oListReviewsViewModel).build();
 
 	}
 	
-	private ListReviewsViewModel getListReviews(List<Review> aoReviewRepository ){
+	private ListReviewsViewModel getListReviewsViewModel(List<Review> aoReviewRepository ){
 		ListReviewsViewModel oListReviews = new ListReviewsViewModel();
-		List<ReviewViewModel> aoReview = null;
-		if(aoReviewRepository != null){
+		List<ReviewViewModel> aoReviews = new ArrayList<ReviewViewModel>();
+		if(aoReviewRepository == null){
 			return null; 
 		}
 		
+		//CHECK VALUE VOTE policy 1 - 5
+		int iSumVotes = 0;
+
 		for(Review oReview: aoReviewRepository){
 			ReviewViewModel oReviewViewModel = new ReviewViewModel();
 			oReviewViewModel.setComment(oReview.getComment());
@@ -1160,12 +1163,33 @@ public class ProcessorsResource extends BaseResource{
 			oReviewViewModel.setUserId(oReview.getUserId());
 			oReviewViewModel.setProcessorId(oReview.getUserId());
 			oReviewViewModel.setVote(oReview.getVote());
-
-			aoReview.add(oReviewViewModel);
+			iSumVotes = iSumVotes + Integer.parseInt(oReview.getVote());
+			
+			aoReviews.add(oReviewViewModel);
 		}
 		
-		oListReviews.setReviews(aoReview);
+		float avgVote = (float)iSumVotes / aoReviews.size();
+		
+		oListReviews.setReviews(aoReviews);
+		oListReviews.setAvgVote(avgVote);
+		oListReviews.setNumberOfOneStarVotes(getNumberOfVotes(aoReviews , 1));
+		oListReviews.setNumberOfTwoStarVotes(getNumberOfVotes(aoReviews , 2));
+		oListReviews.setNumberOfThreeStarVotes(getNumberOfVotes(aoReviews , 3));
+		oListReviews.setNumberOfFourStarVotes(getNumberOfVotes(aoReviews , 4));
+		oListReviews.setNumberOfFiveStarVotes(getNumberOfVotes(aoReviews , 5));
+
 		return oListReviews;
+	}
+	
+	private int getNumberOfVotes(List<ReviewViewModel> aoReviews, int iVotes ){
+		int iNumberOfVotes = 0;
+		for(ReviewViewModel oReview : aoReviews){
+			if( Integer.parseInt(oReview.getVote()) == iVotes){
+				iNumberOfVotes++;
+			}
+			
+		}
+		return iNumberOfVotes;
 	}
 	
 	private ArrayList<AppCategoryViewModel> getCategoriesViewModel(List<AppCategory> aoAppCategories ){

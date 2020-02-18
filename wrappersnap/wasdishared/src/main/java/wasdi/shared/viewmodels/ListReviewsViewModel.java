@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ListReviewsViewModel {
 	private List<ReviewViewModel> reviews;
-	long avgVote;
+	float avgVote;
 	int numberOfOneStarVotes;
 	int numberOfTwoStarVotes;
 	int numberOfThreeStarVotes;
@@ -16,10 +16,10 @@ public class ListReviewsViewModel {
 	public void setReviews(List<ReviewViewModel> reviews) {
 		this.reviews = reviews;
 	}
-	public long getAvgVote() {
+	public float getAvgVote() {
 		return avgVote;
 	}
-	public void setAvgVote(long avgVote) {
+	public void setAvgVote(float avgVote) {
 		this.avgVote = avgVote;
 	}
 	public int getNumberOfOneStarVotes() {
