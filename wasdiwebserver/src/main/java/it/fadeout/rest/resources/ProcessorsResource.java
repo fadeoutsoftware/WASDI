@@ -1122,6 +1122,29 @@ public class ProcessorsResource extends BaseResource{
 
 	}
 	
+	@POST
+	@Path("/addReview")
+//	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
+	
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+		
+		if(oReviewViewModel == null ){
+			return Response.status(400).build();
+		}
+		
+		//TODO CCHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE === 
+		//TODO CHECK THE VALUE OF THE VOTE === 1 - 5
+		Review oReview = getReviewModel(oReviewViewModel);
+		return Response.status(200).build();
+	}
+	
 	@GET
 	@Path("/getreviews")
 	public Response getReview (@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
@@ -1143,6 +1166,20 @@ public class ProcessorsResource extends BaseResource{
 
 	    return Response.ok(oListReviewsViewModel).build();
 
+	}
+	
+	private Review getReviewModel(ReviewViewModel oReviewViewModel){
+		if(oReviewViewModel != null){
+			Review oReview = new Review();
+			oReview.setComment(oReviewViewModel.getComment());
+			oReview.setDate(oReviewViewModel.getDate());
+			oReview.setId(oReviewViewModel.getId());//TODO GENERATE ID 
+			oReview.setProcessorId(oReviewViewModel.getProcessorId());
+			oReview.setUserId(oReviewViewModel.getUserId());
+			oReview.setVote(oReviewViewModel.getVote());
+			return oReview;
+		}
+		return null;
 	}
 	
 	private ListReviewsViewModel getListReviewsViewModel(List<Review> aoReviewRepository ){

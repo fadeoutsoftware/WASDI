@@ -11,6 +11,7 @@ import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.AppCategory;
+import wasdi.shared.business.Counter;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Review;
 import wasdi.shared.utils.Utils;
@@ -32,20 +33,20 @@ public class ReviewRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    private <T> void fillList(final ArrayList<T> aoReturnList, FindIterable<Document> oWSDocuments, String sRepositoryName,Class<T> oClass) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        T oAppCategory= null;
-		        try {
-		        	oAppCategory = s_oMapper.readValue(sJSON, oClass);
-		            aoReturnList.add(oAppCategory);
-		        } catch (IOException oEx) {
-		        	Utils.debugLog(sRepositoryName + ".fillList: " + oEx);
-		        }
-
-		    }
-		});
+	public String insertReview(Review oReview) {
+		String sResult = "";
+		if(oReview != null) {
+			try {
+				String sJSON = s_oMapper.writeValueAsString(oReview);
+				Document oDocument = Document.parse(sJSON);
+				getCollection("reviews").insertOne(oDocument);
+				sResult = oDocument.getObjectId("_id").toHexString();
+	
+			} catch (Exception oEx) {
+				Utils.debugLog("ReviewRepository.InsertReview: " + oEx);
+			}
+		}
+		return sResult;
 	}
     
 }

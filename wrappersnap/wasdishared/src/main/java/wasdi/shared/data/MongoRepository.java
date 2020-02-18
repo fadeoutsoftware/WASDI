@@ -2,9 +2,11 @@ package wasdi.shared.data;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -12,6 +14,8 @@ import wasdi.shared.utils.Utils;
 
 import org.bson.Document;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -103,4 +107,20 @@ public class MongoRepository {
 			}
     	}
     }
+    
+    public <T> void fillList(final ArrayList<T> aoReturnList, FindIterable<Document> oWSDocuments, String sRepositoryName,Class<T> oClass) {
+		oWSDocuments.forEach(new Block<Document>() {
+		    public void apply(Document document) {
+		        String sJSON = document.toJson();
+		        T oAppCategory= null;
+		        try {
+		        	oAppCategory = s_oMapper.readValue(sJSON, oClass);
+		            aoReturnList.add(oAppCategory);
+		        } catch (IOException oEx) {
+		        	Utils.debugLog(sRepositoryName + ".fillList: " + oEx);
+		        }
+
+		    }
+		});
+	}
 }
