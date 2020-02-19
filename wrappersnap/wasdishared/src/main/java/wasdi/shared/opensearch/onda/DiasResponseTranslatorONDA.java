@@ -23,7 +23,7 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  * @author c.nattero
  *
  */
-public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
+public class DiasResponseTranslatorONDA extends DiasResponseTranslator {
 
 	private static final String SFILENAME = "filename";
 	private static final String SCREATION_DATE = "creationDate";

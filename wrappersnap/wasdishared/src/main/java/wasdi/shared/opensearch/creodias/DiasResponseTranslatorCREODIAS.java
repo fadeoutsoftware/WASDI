@@ -22,7 +22,7 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  * @author c.nattero
  *
  */
-public class DiasResponseTranslatorCREODIAS implements DiasResponseTranslator {
+public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 
 	private static final String STITLE = "title";
 

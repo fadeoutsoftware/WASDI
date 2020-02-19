@@ -7,8 +7,10 @@
 package wasdi.shared.opensearch.sobloo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,8 +25,22 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  * @author c.nattero
  *
  */
-public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
+public class DiasResponseTranslatorSOBLOO extends DiasResponseTranslator {
 
+	private static Map<String, String> s_asKeyMap;
+	
+	static{
+		s_asKeyMap = new HashMap<>();
+		
+		s_asKeyMap.put("polarization", "polarisationmode");
+		s_asKeyMap.put("direction", "orbitdirection");
+		s_asKeyMap.put("uid", "uuid");
+		s_asKeyMap.put("type", "producttype");
+		s_asKeyMap.put("sensorId", "instrumentshortname");
+		s_asKeyMap.put("sensorMode", "sensoroperationalmode");
+		s_asKeyMap.put("missionName", "platformname");
+		
+	}
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol) {
@@ -83,7 +99,7 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 				lBuffer = oJsonItem.optLong("timestamp", -1l);
 				sBuffer = "" + lBuffer;
 				if(!Utils.isNullOrEmpty(sBuffer)) {
-					oResult.getProperties().put("timestamp", sBuffer);
+					addToProperties(oResult, getStandardKey("timestamp"), sBuffer);
 				}
 
 				oJsonBuffer = oJsonItem.optJSONObject("geometry");
@@ -137,6 +153,13 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 				oJsonItem = oJsonItem.optJSONObject("data");
 				String sBuffer = null;
 				int iBuffer = 0;
+				
+				if(oJsonItem.has("uid")) {
+					sBuffer = oJsonItem.optString("uid", null);
+					if(!Utils.isNullOrEmpty(sBuffer)){
+						addToProperties(oResult, getStandardKey("uuid"), sBuffer);
+					}
+				}
 
 				if(oJsonItem.has("identification")) {
 					JSONObject oJsonIdentification = oJsonItem.optJSONObject("identification");
@@ -147,6 +170,11 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 						} else {
 							throw new NullPointerException("DiasResponseTranslatorSOBLOO.parseData: could not find file name in the response, failing");
 						}
+						
+						sBuffer = oJsonIdentification.optString("type", null);
+						if(!Utils.isNullOrEmpty(sBuffer)) {
+							addToProperties(oResult, getStandardKey("type"), sBuffer);
+						}
 					}
 				}
 
@@ -155,8 +183,8 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 					if(null!=oJsonArchive) {
 						iBuffer = 0;
 						iBuffer = oJsonArchive.optInt("size", 0);
-						oResult.getProperties().put("size", Utils.getNormalizedSize((double)iBuffer, "MB"));
-						oResult.getProperties().put("content-length", ""+((long)iBuffer)*1024*1024);
+						addToProperties(oResult, getStandardKey("size"), Utils.getNormalizedSize((double)iBuffer, "MB"));
+						addToProperties(oResult, getStandardKey("content-length"), ""+((long)iBuffer)*1024*1024);
 					}
 				}
 
@@ -187,11 +215,11 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 						if(null!=oOrbit) {
 							iBuffer = oOrbit.optInt("relativeNumber", -1);
 							if(iBuffer >= 0) {
-								oResult.getProperties().put("relativeorbitnumber", ""+iBuffer);
+								addToProperties(oResult, getStandardKey("relativeorbitnumber"), ""+iBuffer);
 							}
 							sBuffer = oOrbit.optString("direction", null);
 							if(!Utils.isNullOrEmpty(sBuffer)) {
-								oResult.getProperties().put("direction", sBuffer);
+								addToProperties(oResult, getStandardKey("direction"), sBuffer);
 							}
 						}
 					}catch (Exception oE) {
@@ -212,9 +240,25 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 		String sBuffer = null;
 		sBuffer = oJson.optString(sKey, null);
 		if(!Utils.isNullOrEmpty(sBuffer)) {
-			oResult.getProperties().put(sKey, sBuffer);
+			addToProperties(oResult, getStandardKey(sKey), sBuffer);
 		}
 
+	}
+
+	private String getStandardKey(String sKey) {
+		Preconditions.checkNotNull(sKey, "DiasResponseTranslatorSOBLOO.getProviderKey: null key passed");
+		Preconditions.checkArgument(!sKey.isEmpty(), "DiasResponseTranslatorSOBLOO.getProviderKey: empty key passed");
+		
+		String sResult = sKey;
+		try {
+			if(s_asKeyMap.containsKey(sKey)) {
+				sResult = s_asKeyMap.get(sKey);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorSOBLOO.getProviderKey: " + oE);
+			sResult = sKey;
+		}
+		return sResult;
 	}
 
 	/**
@@ -227,39 +271,63 @@ public class DiasResponseTranslatorSOBLOO implements DiasResponseTranslator {
 		Preconditions.checkNotNull(sKey);
 		Preconditions.checkNotNull(oResult);
 
-
-		long lBuffer = -1;
-		lBuffer = oJson.optLong(sKey, -1);
-		if(0<lBuffer) {
-			oResult.getProperties().put(sKey, ""+lBuffer);
+		try {
+			long lBuffer = -1;
+			lBuffer = oJson.optLong(sKey, -1);
+			if(0<lBuffer) {
+				addToProperties(oResult, getStandardKey(sKey), ""+lBuffer);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorSOBLOO.addPositiveLongToProperties: " + oE);
 		}
 	}
 
 	private void finalizeViewModel(QueryResultViewModel oResult) {
-		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorSOBLOO: QueryResultViewModel is null");
+		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorSOBLOO.finalizeViewModel: QueryResultViewModel is null");
 
-		String sDate = oResult.getProperties().get("timestamp");
-		sDate = "" + Utils.fromTimestampToDateString(Long.parseLong(sDate));
+		String sDate = "";
+		try {
+			long lBeginViewingDate = Long.parseLong(oResult.getProperties().get("beginViewingDate"));
+			sDate = Utils.fromTimestampToDateString(lBeginViewingDate);
+			addToProperties(oResult, "ingestiondate", sDate);
+			addToProperties(oResult, "beginposition", sDate);
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorSOBLOO.finalizeViewModel: " + oE);
+		}
 		
 		String sSummary = "Date: " + sDate + ", ";
-		String sInstrument = oResult.getProperties().get("sensorId");
+		String sInstrument = oResult.getProperties().get("instrumentshortname");
+//		addToProperties(oResult, getStandardKey("sensorId"), sInstrument);
+		
 		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
-		String sMode = oResult.getProperties().get("sensorMode");
+		String sMode = oResult.getProperties().get("sensoroperationalmode");
+//		addToProperties(oResult, "sensorMode", sMode);
 		sSummary = sSummary + "Mode: " + sMode + ", ";
 
-		String sSatellite = oResult.getProperties().get("missionName");
+		String sSatellite = oResult.getProperties().get("platformname");
 		sSummary = sSummary + "Satellite: " + sSatellite + ", ";
+		
 		String sSize = oResult.getProperties().get("size");
+		addToProperties(oResult, "size", sSize);
+		
 		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
 		oResult.setSummary(sSummary);
 
 		String sLink = "https://sobloo.eu/api/v1/services/download/" + oResult.getId();
-		oResult.getProperties().put("originalLink", sLink);
+		addToProperties(oResult, "originalLink", sLink);
 
 		sSize = oResult.getProperties().get("content-length");
 		sLink += "|||fileName=" + oResult.getTitle() + "|||size=" + sSize;
-		oResult.getProperties().put("hackedLink", sLink);
+		addToProperties(oResult, "hackedLink", sLink);
 		oResult.setLink(sLink);
+		
+		addToProperties(oResult, "filename", oResult.getTitle());
+		String sMission = oResult.getProperties().get("missionName");
+		addToProperties(oResult, getStandardKey("missionName"), sMission);
+		
+		
+		
+		
 
 	}
 
