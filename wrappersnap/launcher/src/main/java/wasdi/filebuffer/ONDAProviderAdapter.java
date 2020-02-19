@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.io.Util;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import wasdi.LauncherMain;
