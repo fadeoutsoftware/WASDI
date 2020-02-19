@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -597,16 +596,21 @@ public class Utils {
 	}
 
 	///// end units conversion
+
+	
+	private static final String s_sDATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 	
 	public static String fromTimestampToDateString(long lEpochSeconds) {
-	    SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
+	    SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(Utils.s_sDATEFORMAT);
+	    oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 	    return oSimpleDateFormat.format(new Date(lEpochSeconds));
 	}
 	
 	public static long fromDateStringToTimestamp(String sDate) {
 		Long lTimestamp = null;
 		try {
-			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
+			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(Utils.s_sDATEFORMAT);
+			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 			Date oDate = oSimpleDateFormat.parse(sDate);
 			lTimestamp = oDate.getTime();
 		} catch (Exception oE) {

@@ -157,7 +157,10 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 //		sResult = "&f=acquisition.beginViewingDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
 //		sResult += "&f=acquisition.endViewingDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
 		
-		sResult = "&f=state.insertionDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+//		sResult = "&f=state.insertionDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+		
+		sResult = "&f=acquisition.beginViewingDate:gte:" + alStartEnd[0];
+		sResult += "&f=acquisition.endViewingDate:lte:" + alStartEnd[1];
 		
 		return sResult;
 	}
