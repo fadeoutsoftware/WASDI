@@ -70,11 +70,13 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 		return sResult;
 	}
 	
+	
 	@Override
 	protected String convertRanges(String sQuery) {
 		sQuery = sQuery.replaceAll("(\\[[0-9]*) TO ([0-9]*\\])", "$1<$2");
 		return sQuery;
 	}
+	
 
 	@Override
 	protected String parseFootPrint(String sQuery) {
@@ -130,6 +132,7 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 		return sResult;
 	}
 	
+	
 	@Override
 	protected String parseTimeFrame(String sQuery) {
 		Long[] alStartEnd = {Long.MAX_VALUE, Long.MIN_VALUE};
@@ -149,9 +152,14 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 			alStartEnd[1] = System.currentTimeMillis();
 		}
 		
-		sResult = "&f=timeStamp:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+		//sResult = "&f=timeStamp:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+		
+//		sResult = "&f=acquisition.beginViewingDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+//		sResult += "&f=acquisition.endViewingDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+		
+		sResult = "&f=state.insertionDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
+		
 		return sResult;
-
 	}
 
 	/**

@@ -65,6 +65,7 @@ public abstract class DiasQueryTranslator {
 		return sQuery;
 	}
 	
+	
 	protected abstract String parseTimeFrame(String sQuery);
 	protected abstract String parseFootPrint(String sQuery);
 }
