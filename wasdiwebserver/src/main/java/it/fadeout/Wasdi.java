@@ -234,10 +234,10 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
-		Utils.debugLog("------- WASDI Init done ");
+		Utils.debugLog("------- WASDI Init done\n\n");
 		Utils.debugLog("---------------------------------------------");
-		Utils.debugLog("------- 	 Welcome to space     -------");
-		Utils.debugLog("---------------------------------------------");
+		Utils.debugLog("-------- 	   Welcome to space      --------");
+		Utils.debugLog("---------------------------------------------\n\n");
 	}
 
 	/**
@@ -246,14 +246,30 @@ public class Wasdi extends ResourceConfig {
 	public static void shutDown() {
 		try {
 			Utils.debugLog("-------Shutting Down Wasdi");
-
-			s_oProcessingThread.stopThread();
-			s_oDownloadsThread.stopThread();
-			s_oIDLThread.stopThread();
-			MongoRepository.shutDownConnection();
-		} catch (Exception e) {
-			Utils.debugLog("WASDI SHUTDOWN EXCEPTION: " + e.getMessage());
-			e.printStackTrace();
+			
+			try {
+				s_oProcessingThread.stopThread();
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.shutDown: could not stop processing thread: " + oE);
+			}
+			try {
+				s_oDownloadsThread.stopThread();
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.shutDown: could not stop downloads thread: " + oE);
+			}
+			try {
+				s_oIDLThread.stopThread();
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.shutDown: could not stop IDL thread: " + oE);
+			}
+			try {
+				MongoRepository.shutDownConnection();
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.shutDown: could not shut down connection to DB: " + oE);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WASDI SHUTDOWN EXCEPTION: " + oE);
+			oE.printStackTrace();
 		}
 	}
 
