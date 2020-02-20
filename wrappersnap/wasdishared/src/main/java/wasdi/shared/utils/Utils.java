@@ -306,25 +306,26 @@ public class Utils {
 
 	public static boolean doesThisStringMeansTrue(String sString) {
 		// default value is arbitrary!
-		if (isNullOrEmpty(sString)) {
-			return true;
-		} else if (sString.equalsIgnoreCase("true")) {
-			return true;
-		} else if (sString.equalsIgnoreCase("1")) {
-			return true;
-		}
-		return false;
+		return (
+				isNullOrEmpty(sString) ||
+				sString.equalsIgnoreCase("true") ||
+				sString.equalsIgnoreCase("t") ||
+				sString.equalsIgnoreCase("1") ||
+				sString.equalsIgnoreCase("yes") ||
+				sString.equalsIgnoreCase("y")
+		);
 	}
 
 	public static void printToFile(String sFilePath, String sToBePrinted) {
-		FileWriter oFileWeriter;
-		try {
-			oFileWeriter = new FileWriter(sFilePath);
+		if(null == sFilePath || null == sToBePrinted) {
+			throw new NullPointerException("printToFile: null pointer");
+		}
+		try( FileWriter oFileWeriter = new FileWriter(sFilePath) ) {
 			oFileWeriter.write(sToBePrinted);
 			oFileWeriter.flush();
-			oFileWeriter.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+			//note: no need to close: closing resources is handled automatically by the try with resources
+		} catch (Exception oE) {
+			debugLog( "Utils.printToFile: " + oE );
 		}
 	}
 
@@ -376,20 +377,35 @@ public class Utils {
 		}
 		return false;
 	}
+	
+	
+	//////////////////////// All about log
+	
 
+	public static void debugLog(int iValue) {
+		debugLog("" + iValue);
+	}
+	
 	/**
 	 * Debug Log
 	 * 
 	 * @param sMessage
 	 */
 	public static void debugLog(String sMessage) {
-		LocalDateTime oNow = LocalDateTime.now();
-		System.out.println(oNow + ": " + sMessage);
+		log("", sMessage);
 	}
 	
-	public static void debugLog(int iValue) {
-		debugLog("" + iValue);
+	public static void log(String sLevel, String sMessage) {
+		String sPrefix = "";
+		if(!Utils.isNullOrEmpty(sLevel)) {
+			sPrefix = "[" + sLevel + "] ";
+		}
+		LocalDateTime oNow = LocalDateTime.now();
+		System.out.println( sPrefix + oNow + ": " + sMessage);
 	}
+	
+	///////// end log
+	
 	
 	
 	/**
@@ -542,5 +558,65 @@ public class Utils {
 			}
 		}
 	}
+	
+	///////// units conversion
 
+	private static String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O
+	
+	public static String getNormalizedSize(double dSize, String sInputUnit) {
+		for(int i = 0; i < sUnits.length; ++i) {
+			if((sUnits[i]).equals(sInputUnit)) {
+				return getNormalizedSize(dSize, i);
+			}
+		}
+		Utils.log("WARNING", "Utils.getNormalizedSize( " + dSize + ", " + sInputUnit + " ): could not find requested unit");
+		return "";
+	}
+	
+	public static String getNormalizedSize(Double dSize) {
+		return getNormalizedSize(dSize, 0);
+	}
+	
+	public static String getNormalizedSize(Double dSize, int iStartingIndex) {
+		String sChosenUnit = null;
+		String sSize = null;
+		 
+		int iUnitIndex = Math.max(0, iStartingIndex);
+		int iLim = sUnits.length -1;
+		while(iUnitIndex < iLim && dSize >= 900.0) {
+			dSize = dSize / 1024.0;
+			iUnitIndex++;
+
+			//now, round it to two decimal digits
+			dSize = Math.round(dSize*100.0)/100.0; 
+			sChosenUnit = sUnits[iUnitIndex];
+			sSize = String.valueOf(dSize) + " " + sChosenUnit;
+		}
+		return sSize;
+	}
+
+	///// end units conversion
+
+	
+	private static final String s_sDATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	
+	public static String fromTimestampToDateString(long lEpochSeconds) {
+	    SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(Utils.s_sDATEFORMAT);
+	    oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+	    return oSimpleDateFormat.format(new Date(lEpochSeconds));
+	}
+	
+	public static long fromDateStringToTimestamp(String sDate) {
+		Long lTimestamp = null;
+		try {
+			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(Utils.s_sDATEFORMAT);
+			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date oDate = oSimpleDateFormat.parse(sDate);
+			lTimestamp = oDate.getTime();
+		} catch (Exception oE) {
+			Utils.log("ERROR", "Utils.fromDateStringToTimestamp: " + oE);
+		}
+		return lTimestamp;
+
+	}
 }
