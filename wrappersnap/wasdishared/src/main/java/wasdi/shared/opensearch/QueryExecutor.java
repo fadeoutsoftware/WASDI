@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -46,26 +47,153 @@ public abstract class QueryExecutor {
 	protected String m_sProvider; 
 	protected String m_sUser; 
 	protected String m_sPassword;
-
+	
+	protected String m_sParserConfigPath;
+	protected String m_sAppConfigPath;
+	
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
 
 
-	void setMustCollectMetadata(boolean bGetMetadata) {
+	
+	public int executeCount(String sQuery) throws IOException {
+		try {
+			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
+			sQuery = encodeAsRequired(sQuery); 
+			String sUrl = getCountUrl(sQuery);
+			String sResponse = httpGetResults(sUrl, "count");
+			int iResult = 0;
+			try {
+				iResult = Integer.parseInt(extractNumberOfResults(sResponse));
+			} catch (NumberFormatException oNfe) {
+				Utils.debugLog("QueryExecutor.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
+				return -1;
+			}
+			return iResult;
+		} catch (Exception oE) {
+			Utils.debugLog("QueryExecutor.executeCount: " + oE);
+			return -1;
+		}
+	}
+
+	/**
+	 * @param sUrl
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	protected String encodeAsRequired(String sUrl) throws UnsupportedEncodingException {
+		String sResult = URLEncoder.encode(sUrl, "UTF-8");
+		return sResult;
+	}
+	
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
+		if(null == oQuery) {
+			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
+			return null;
+		}
+		try {
+			String sUrl = getSearchUrl(oQuery );
+
+			//create abdera client
+			Abdera oAbdera = new Abdera();
+
+			AbderaClient oClient = new AbderaClient(oAbdera);
+			oClient.setConnectionTimeout(15000);
+			oClient.setSocketTimeout(40000);
+			oClient.setConnectionManagerTimeout(20000);
+			oClient.setMaxConnectionsTotal(200);
+			oClient.setMaxConnectionsPerHost(50);
+	
+			// get default request option
+			RequestOptions oOptions = oClient.getDefaultRequestOptions();
+	
+			// set authorization
+			if (m_sUser!=null && m_sPassword!=null) {
+				String sUserCredentials = m_sUser + ":" + m_sPassword;
+				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
+				oOptions.setAuthorization(sBasicAuth);			
+			}
+
+			String sResultAsString = httpGetResults(sUrl, "search");
+			// build the parser
+			Parser oParser = oAbdera.getParser();
+			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
+			oParserOptions.setCharset("UTF-8");
+			oParserOptions.setCompressionCodecs(CompressionCodec.GZIP);
+			oParserOptions.setFilterRestrictedCharacterReplacement('_');
+			oParserOptions.setFilterRestrictedCharacters(true);
+			oParserOptions.setMustPreserveWhitespace(false);
+			oParserOptions.setParseFilter(null);
+	
+	
+			Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
+			if (oDocument == null) {
+				Utils.debugLog("OpenSearchQuery.executeAndRetrieve: Document response null");
+				return null;
+			}
+	
+			if (bFullViewModel) {
+				return buildResultViewModel(oDocument, oClient, oOptions);
+			} else {
+				return buildResultLightViewModel(oDocument, oClient, oOptions);
+			}
+		} catch (NumberFormatException oE) {
+			Utils.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
+			return null;
+		}
+	}
+
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
+		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
+		return executeAndRetrieve(oQuery,true);
+	}
+
+
+	public void setDownloadProtocol(String sDownloadProtocol) {
+		Utils.debugLog("QueryExecutor.setDownloadProtocol");
+		m_sDownloadProtocol = sDownloadProtocol;
+		if(null==m_sDownloadProtocol) {
+			m_sDownloadProtocol = "https:";
+		}
+	}
+
+	public void setCredentials(AuthenticationCredentials oCredentials) {
+		Utils.debugLog("QueryExecutor.setCredentials");
+		if(null!=oCredentials) {
+			setUser(oCredentials.getUser());
+			setPassword(oCredentials.getPassword());
+		} else {
+			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
+		}
+
+	}
+
+	public void setMustCollectMetadata(boolean bGetMetadata) {
 		m_bMustCollectMetadata = bGetMetadata;
 
 	}	
 
-	public void setUser(String m_sUser) {
-		this.m_sUser = m_sUser;
+	public void setParserConfigPath(String sParserConfigPath) {
+		m_sParserConfigPath = sParserConfigPath;
 	}
 
-	public void setPassword(String m_sPassword) {
-		this.m_sPassword = m_sPassword;
+	public void setAppconfigPath(String sAppconfigPath) {
+		this.m_sAppConfigPath = sAppconfigPath;
 	}
+	
+	
+	protected String extractNumberOfResults(String sResponse) {
+		return sResponse;
+	}
+	
+	
+	protected String getSearchListUrl(PaginatedQuery oQuery) {
+		return getSearchUrl(oQuery);
+	}
+	
 
-
-	protected String buildUrl(PaginatedQuery oQuery) {
+	protected String getSearchUrl(PaginatedQuery oQuery) {
 		//Utils.debugLog("QueryExecutor.buildUrl( " + oQuery + " )");
 		if(null==oQuery) {
 			Utils.debugLog("QueryExecutor.buildUrl: oQuery is null");
@@ -79,15 +207,9 @@ public abstract class QueryExecutor {
 		oParamsMap.put("rows", oQuery.getLimit() );
 		oParamsMap.put("orderby", oQuery.getSortedBy() + " " + oQuery.getOrder() );
 		oParamsMap.put("q", oQuery.getQuery() );
-		addUrlParams(oParamsMap);
 		return oTemplate.expand(oParamsMap);
 
 	}
-
-	//todo make this method abstract
-	protected void addUrlParams(Map<String, Object> oParamsMap) {
-	}
-
 
 	protected String getUrlSchema() {
 		return "http";
@@ -100,7 +222,7 @@ public abstract class QueryExecutor {
 
 	protected abstract String getCountUrl(String sQuery);	
 
-	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 		Utils.debugLog("QueryExecutor.buildResultViewModel(3 args)");
 		if(oDocument == null) {
 			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
@@ -123,7 +245,7 @@ public abstract class QueryExecutor {
 		//oClient.setSocketTimeout(2000);
 		oClient.setConnectionManagerTimeout(2000);
 
-		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 
 		for (Entry oEntry : oFeed.getEntries()) {
 
@@ -188,7 +310,7 @@ public abstract class QueryExecutor {
 		return aoResults;
 	}
 
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+	protected List<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 		Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args)");
 		if(oDocument == null) {
 			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
@@ -203,7 +325,7 @@ public abstract class QueryExecutor {
 			return null;
 		}
 		Feed oFeed = (Feed) oDocument.getRoot();
-		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 		for (Entry oEntry : oFeed.getEntries()) {
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
@@ -236,211 +358,12 @@ public abstract class QueryExecutor {
 		return aoResults;
 	}
 
-	public int executeCount(String sQuery) throws IOException {
-		try {
-			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
-			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
-			
-/*
-			//		if (sProvider.equals("SENTINEL"))
-			//		sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
-			//if (sProvider.equals("MATERA"))
-			//sUrl = "https://collaborative.mt.asi.it/api/stub/products/count?filter=";
-	
-			final String sUserAgent = "Mozilla/5.0";
-	
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-	
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-	
-			//add request header
-			oConnection.setRequestProperty("User-Agent", sUserAgent);
-			if (m_sUser!=null && m_sPassword!=null) {
-				String sUserCredentials = m_sUser + ":" + m_sPassword;
-				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
-				oConnection.setRequestProperty ("Authorization", sBasicAuth);
-			}
-	
-			Utils.debugLog("QueryExecutor.executeCount: Sending 'GET' request to URL : " + sUrl);
-			//int responseCode = -1;
-			//try
-			//{
-			//	responseCode = oConnection.getResponseCode();
-			//}
-			//catch(IOException oEx)
-			//{
-			//	Utils.debugLog("QueryExecutor.executeCount: Exception Get response : " + oEx.getMessage());	
-			//}
-			int responseCode =  oConnection.getResponseCode();
-			Utils.debugLog("QueryExecutor.executeCount: Response Code : " + responseCode);
-	
-			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-	
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
-			}
-			in.close();
-			String sResponse = response.toString();
-	
-			//print result
-			Utils.debugLog("QueryExecutor.executeCount: Count Done: Response " + sResponse);
-	
-			//for (Element element : oFeed.getElements()) {
-			//String sText = element.getText();
-			//	if (element.getQName().getLocalPart() 
-			//	} 
-			//String sTotalResults = oFeed.getAttributeValue("opensearch:totalResults");
-
-*/
-			String sResponse = httpGetResults(sUrl, "count");
-			int iResult = 0;
-			try {
-				iResult = Integer.parseInt(sResponse);
-			} catch (NumberFormatException oNfe) {
-				Utils.debugLog("QueryExecutor.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
-				return -1;
-			}
-			return iResult;
-		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutor.executeCount: " + oE);
-			return -1;
-		}
+	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+		return null;
 	}
-
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
-		if(null == oQuery) {
-			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
-			return null;
-		}
-		try {
-			String sUrl = buildUrl(oQuery );
-
-			//create abdera client
-			Abdera oAbdera = new Abdera();
-
-			AbderaClient oClient = new AbderaClient(oAbdera);
-			oClient.setConnectionTimeout(15000);
-			oClient.setSocketTimeout(40000);
-			oClient.setConnectionManagerTimeout(20000);
-			oClient.setMaxConnectionsTotal(200);
-			oClient.setMaxConnectionsPerHost(50);
 	
-			// get default request option
-			RequestOptions oOptions = oClient.getDefaultRequestOptions();
-	
-			// set authorization
-			if (m_sUser!=null && m_sPassword!=null) {
-				String sUserCredentials = m_sUser + ":" + m_sPassword;
-				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
-				oOptions.setAuthorization(sBasicAuth);			
-			}
-/*	
-			Utils.debugLog("QueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
-			long lStart = System.nanoTime();
-			ClientResponse response = oClient.get(sUrl, oOptions);
-			long lEnd = System.nanoTime();
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-	
-			if (response.getType() != ResponseType.SUCCESS) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: Response ERROR after " + dMillis + "ms : " + response.getType());
-				return null;
-			}
-				
-	
-			// Get The Result as a string
-			BufferedReader oBuffRead = null;
-			try {
-				oBuffRead = new BufferedReader(response.getReader());
-			} catch (IOException oe1) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe1);
-				return null;
-			}
-			String sResponseLine = null;
-			StringBuilder oResponseStringBuilder = new StringBuilder();
-			try {
-				while ((sResponseLine = oBuffRead.readLine()) != null) {
-					oResponseStringBuilder.append(sResponseLine);
-				}
-			} catch (IOException oe2) {
-				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe2);
-				return null;
-			}
-			
-	
-			String sResultAsString = oResponseStringBuilder.toString();
-			
-			//stats
-			int iResponseLength = 0;
-			iResponseLength = sResultAsString.length();
-
-			double dSpeed = 0;
-			if(iResponseLength > 0) {
-				dSpeed = ( (double) iResponseLength ) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutor.executeAndRetrieve success: ([ms,B,B/s]): "+dMillis+"," + iResponseLength + "," + dSpeed);
-			
-			//		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
-			//		Utils.printToFile(sTmpFilePath, sResultAsString);
-	
-			//		Utils.debugLog(sResultAsString);
-*/
-
-			String sResultAsString = httpGetResults(sUrl, "search");
-			// build the parser
-			Parser oParser = oAbdera.getParser();
-			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
-			oParserOptions.setCharset("UTF-8");
-			oParserOptions.setCompressionCodecs(CompressionCodec.GZIP);
-			oParserOptions.setFilterRestrictedCharacterReplacement('_');
-			oParserOptions.setFilterRestrictedCharacters(true);
-			oParserOptions.setMustPreserveWhitespace(false);
-			oParserOptions.setParseFilter(null);
-	
-	
-			Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
-			if (oDocument == null) {
-				Utils.debugLog("OpenSearchQuery.executeAndRetrieve: Document response null");
-				return null;
-			}
-	
-			if (bFullViewModel) return buildResultViewModel(oDocument, oClient, oOptions);
-			else return buildResultLightViewModel(oDocument, oClient, oOptions);
-		} catch (NumberFormatException oE) {
-			Utils.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
-			return null;
-		}
-	}
-
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
-		return executeAndRetrieve(oQuery,true);
-	}
-
-
-	public void setDownloadProtocol(String sDownloadProtocol) {
-		Utils.debugLog("QueryExecutor.setDownloadProtocol");
-		m_sDownloadProtocol = sDownloadProtocol;
-		if(null==m_sDownloadProtocol) {
-			m_sDownloadProtocol = "https:";
-		}
-	}
-
-	public void setCredentials(AuthenticationCredentials oCredentials) {
-		Utils.debugLog("QueryExecutor.setCredentials");
-		if(null!=oCredentials) {
-			setUser(oCredentials.getUser());
-			setPassword(oCredentials.getPassword());
-		} else {
-			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
-		}
-
+	protected List<QueryResultViewModel> buildResultLightViewModel(String sJson, boolean bFullViewModel){
+		return null;
 	}
 
 	protected String httpGetResults(String sUrl) {
@@ -451,14 +374,14 @@ public abstract class QueryExecutor {
 		return httpGetResults(sUrl, sQueryType);
 	}
 	
-	//todo add parameter to distinguish type of call: search or count
 	protected String httpGetResults(String sUrl, String sQueryType) {
 		Utils.debugLog("QueryExecutor.httpGetResults( " + sUrl + ", " + sQueryType + " )");
 		String sResult = null;
+		long lStart = 0l;
+		int iResponseSize = -1;
 		try {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-	
 			// optional default is GET
 			oConnection.setRequestMethod("GET");
 			oConnection.setRequestProperty("Accept", "*/*");
@@ -468,11 +391,10 @@ public abstract class QueryExecutor {
 				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 				oConnection.setRequestProperty ("Authorization", sBasicAuth);
 			}
-	
+
 			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
-	
-			long lStart = System.nanoTime();
-			int iResponseSize = -1;
+
+			lStart = System.nanoTime();
 			try {
 				int responseCode =  oConnection.getResponseCode();
 				Utils.debugLog("QueryExecutor.httpGetResults: Response Code : " + responseCode);
@@ -512,8 +434,10 @@ public abstract class QueryExecutor {
 						iResponseSize = sMessage.length();
 					}
 				}
-			} catch (SocketTimeoutException oE) {
-				Utils.debugLog("QueryExecutor.httpGetResults: " + oE);
+			}catch (Exception oEint) {
+				Utils.debugLog("QueryExecutor.httpGetResults: " + oEint);
+			} finally {
+				oConnection.disconnect();
 			}
 			
 			long lEnd = System.nanoTime();
@@ -532,12 +456,21 @@ public abstract class QueryExecutor {
 		return sResult;
 	}
 
+	protected void setUser(String m_sUser) {
+		this.m_sUser = m_sUser;
+	}
+
+	protected void setPassword(String m_sPassword) {
+		this.m_sPassword = m_sPassword;
+	}
+	
+
 	public static void main(String[] args) {
 
 		QueryExecutorFactory oFactory = new QueryExecutorFactory();
 		//change the following with your user and password (and don't commit them!)
 		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
-		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true");
+		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true", null, null);
 
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
@@ -547,4 +480,5 @@ public abstract class QueryExecutor {
 			e.printStackTrace();
 		}
 	}
+
 }

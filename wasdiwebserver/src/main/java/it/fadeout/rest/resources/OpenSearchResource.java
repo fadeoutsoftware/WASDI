@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -279,7 +280,7 @@ public class OpenSearchResource {
 					QueryExecutor oExecutor = getExecutor(sProviders);
 					try {
 						PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
-						ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
+						List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
 						if (aoTmp != null && !aoTmp.isEmpty()) {
 							aoResults.addAll(aoTmp);
 							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
@@ -442,14 +443,18 @@ public class OpenSearchResource {
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							QueryExecutor oExecutor = getExecutor(sProviders);
-							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
-							if (aoTmp != null && !aoTmp.isEmpty()) {
-								iObtainedResults += aoTmp.size();
-								aoResults.addAll(aoTmp);
-								Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
-										" results for Query#" + iQueries +" for " + sProvider);
-							} else {
-								Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+							try {
+								List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
+								if (aoTmp != null && !aoTmp.isEmpty()) {
+									iObtainedResults += aoTmp.size();
+									aoResults.addAll(aoTmp);
+									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
+											" results for Query#" + iQueries +" for " + sProvider);
+								} else {
+									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+								}
+							} catch (Exception oE4s) {
+								Utils.debugLog(s_sClassName + ".SearchList: " + oE4s);
 							}
 						}
 					}
@@ -479,11 +484,14 @@ public class OpenSearchResource {
 				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 				String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
 	
+				String sParserConfigPath = m_oServletConfig.getInitParameter(sProvider+".parserConfig");
+				String sAppConfigPath = m_oServletConfig.getInitParameter("MissionsConfigFilePath");
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
 						oCredentials,
 						//TODO change into config method
-						sDownloadProtocol, sGetMetadata);
+						sDownloadProtocol, sGetMetadata,
+						sParserConfigPath, sAppConfigPath);
 			}
 		} catch (Exception oE) {
 			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
