@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.DiasResponseTranslator;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -288,7 +289,7 @@ public class DiasResponseTranslatorSOBLOO extends DiasResponseTranslator {
 		String sDate = "";
 		try {
 			long lBeginViewingDate = Long.parseLong(oResult.getProperties().get("beginViewingDate"));
-			sDate = Utils.fromTimestampToDateString(lBeginViewingDate);
+			sDate = TimeEpochUtils.fromEpochToDateString(lBeginViewingDate);
 			addToProperties(oResult, "ingestiondate", sDate);
 			addToProperties(oResult, "beginposition", sDate);
 		} catch (Exception oE) {
