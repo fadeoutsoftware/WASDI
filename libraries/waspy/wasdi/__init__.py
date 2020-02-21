@@ -508,7 +508,7 @@ def init(sConfigFilePath=None):
             
     if m_sUser is None and m_sPassword is None:
         
-        if (sys.version_info > (3, 0)):
+        if sys.version_info > (3, 0):
             m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
         else:            
             m_sUser = raw_input('[INFO] waspy.init: Please Insert WASDI User:')
@@ -518,7 +518,7 @@ def init(sConfigFilePath=None):
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
         
-        if (sys.version_info > (3, 0)):
+        if sys.version_info > (3, 0):
             sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
         else:            
             sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
