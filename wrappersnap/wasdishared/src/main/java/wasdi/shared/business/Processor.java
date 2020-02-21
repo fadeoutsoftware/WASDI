@@ -1,5 +1,8 @@
 package wasdi.shared.business;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * Processor Entity
  * Represents a User Processor uploaded to WASDI 
@@ -45,12 +48,15 @@ public class Processor {
 	
 	private Integer price = 0; 
 
-	private String[] categoriesId; 
+	private List<String> categoriesId; 
 
 	private String link;
-	
+
 	private String email;
 	
+	private Date uploadDate;
+	
+	private Date updateDate;
 	/**
 	 * Flag to know if it is public or not
 	 */
@@ -81,11 +87,11 @@ public class Processor {
 	public void setPrice(Integer price) {
 		this.price = price;
 	}
-	public String[] getCategoriesId() {
+	public List<String> getCategoriesId() {
 		return categoriesId;
 	}
-	public void setCategoriesId(String[] categoriesId) {
-		this.categoriesId = categoriesId;
+	public void setCategoriesId(List<String> asCategoriesId) {
+		this.categoriesId = asCategoriesId;
 	}
 	
 	public String getLink() {
@@ -148,4 +154,17 @@ public class Processor {
 	public void setTimeoutMs(int timeoutMs) {
 		this.timeoutMs = timeoutMs;
 	}	
+	
+	public Date getUploadDate() {
+		return uploadDate;
+	}
+	public void setUploadDate(Date uploadDate) {
+		this.uploadDate = uploadDate;
+	}
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
 }

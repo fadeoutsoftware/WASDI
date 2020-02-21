@@ -88,7 +88,7 @@ public class ProcessorsResource extends BaseResource{
 	final String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
 	AppsCategoriesRepository m_oAppCategoriesRepository = new AppsCategoriesRepository();
 	ReviewRepository m_oReviewRepository = new ReviewRepository();
-	
+	ProcessorRepository m_oProcessorRepository = new ProcessorRepository();
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -202,6 +202,8 @@ public class ProcessorsResource extends BaseResource{
 				sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
 			}
 			
+			Date oDate = new Date();
+			
 			// Create processor entity
 			Processor oProcessor = new Processor();
 			oProcessor.setName(sName);
@@ -216,7 +218,8 @@ public class ProcessorsResource extends BaseResource{
 			oProcessor.setEmail(sEmail);
 			oProcessor.setPrice(iPrice);
 			oProcessor.setCategoriesId(asCategoriesId);
-			
+			oProcessor.setUpdateDate(oDate);
+			oProcessor.setUploadDate(oDate);
 			if( iTimeout != null ){
 				oProcessor.setTimeoutMs(iTimeout);
 			}
@@ -774,6 +777,9 @@ public class ProcessorsResource extends BaseResource{
 			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getiTimeoutMs());
 			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
+			Date oDate = new Date();
+			oProcessorToUpdate.setUpdateDate(oDate);
+			
 			oProcessorRepository.updateProcessor(oProcessorToUpdate);
 			
 			Utils.debugLog("ProcessorsResource.updateProcessor: Updated Processor " + sProcessorId);
@@ -856,6 +862,7 @@ public class ProcessorsResource extends BaseResource{
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
 			if (UnzipProcessor(oProcessorFile)) {
+				updateProcessorDate(oProcessorToUpdate);
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
 			}
 			else {
@@ -935,7 +942,7 @@ public class ProcessorsResource extends BaseResource{
 	    if(bIsResized == false){
 	    	return Response.status(400).build();
 	    }
-	    
+		updateProcessorDate(oProcessor);
 		return Response.status(200).build();
 	}
 
@@ -1059,11 +1066,11 @@ public class ProcessorsResource extends BaseResource{
 		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			return Response.status(400).build();
 		}
-		
-		//check if the user is the owner of the processor 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
+//		
+//		//check if the user is the owner of the processor 
+//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+//			return Response.status(401).build();
+//		}
 		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
@@ -1103,6 +1110,7 @@ public class ProcessorsResource extends BaseResource{
 	    	return Response.status(400).build();
 		}
 		
+		updateProcessorDate(oProcessor);
 		return Response.status(200).build();
 	}
 	
@@ -1190,6 +1198,13 @@ public class ProcessorsResource extends BaseResource{
 
 	}
 	
+	
+	public void updateProcessorDate(Processor oProcessor){
+		Date oDate = new Date();
+		oProcessor.setUpdateDate(oDate);
+		m_oProcessorRepository.updateProcessor(oProcessor);
+		
+	}
 	
 	private boolean isValidVote(String sVote){
 		boolean bIsValid = false;
