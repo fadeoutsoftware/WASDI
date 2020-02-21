@@ -16,84 +16,11 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Last Update: 05/02/2020
+Last Update: 2020-02-21
 
 Tested with: Python 2.7, Python 3.7
 
-History
-
-0.2.8 [05/02/2020]
-    Solved a bug in the _waitForResume private method.
-
-0.2.7 [25/01/2020]
-    Added Support to Provider selection for search and import
-    Added generic getPath method for both writing and reading
-    Added exception handling in getProductBBOX
-    Added limit to 10 tiles in multiSubset 
-
-0.2.3 [23/01/2020]
-    Added Support to WAITING and READY Process State
-
-0.1.34 [20/12/2019]
-    Added createWorkspace
-    Fixed asynchExecuteProcess bug
-    Reviewed comment based documentation of all methods
-
-0.1.32 [19/12/2019]
-    Fixed import bug on a not requested package
-
-0.1.31 [18/12/2019]
-    Added multiSubset support
-    Added the console input of user, pw and workspace if config is not specified
-
-0.1.30 [10/12/2019]
-    Added asynch version of the import Products Method
-    Added import Product for a list of files
-    Added get Product Bounding Box 
-    Fixed bug on Verbose Flag
-    Added first version of importAndPreprocess Version
-
-0.1.29 [05/11/2019]
-    fixed possible infinite loop in addFileToWASDI 
-
-0.1.28 [28/10/2019]
-    added support to .vrt format for mosaic 
-
-0.1.26 [24/10/2019]
-    added try and catch to importProduct
-    getFullProductPath works also for non existing files
-
-0.1.23 [23/10/2019]
-    fixed deleteProduct bug (did not get standard headers)
-
-0.1.22 [16/10/2019]
-    updated mosaic to last gdal-supported version
-
-0.1.21 [15/10/2019]
-    moved fileExistInWasdi from protected to public
-
-0.1.20 [15/10/2019]
-    added the possibility to run synch and asynch workflows without the need to use the array of input and ouput files if not needed: user can pass just strings
-
-0.1.19 [15/10/2019]
-    removed unwanted import from wasdi lib
-    
-0.1.18 [15/10/2019]
-    Splitted importEO product in two version: one with product dictionary object and one with url and bbox
-    Fixed waitProcesses syntax for python 2 compatibility
-
-0.1.17 [15/10/2019]
-    Added waitProcesses to wait for more than one asynch process
-    Fixed bug about cloud coverage in search EO Images
-    Added the getParamter version with a second optional parameter to use as default
-    
-0.1.16 [16/09/2019]
-    Fixed getFullProductPath bug to support many files on the same folder
-    Added setPayload to set the payload of the actual running processor.
-    
-0.1.15
-    Fixed Path generation for execution on shared workspaces
-
+History: see file changelog.md
 
 Created on 11 Jun 2018
 
