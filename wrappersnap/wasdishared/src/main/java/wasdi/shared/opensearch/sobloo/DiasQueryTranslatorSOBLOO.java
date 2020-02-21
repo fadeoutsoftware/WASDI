@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.opensearch.QueryTranslationParser;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 
@@ -188,9 +189,9 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 			};
 			String[] asTimeQuery= sQuery.substring(iStart, iEnd).trim().split(" TO ");
 			sStart = asTimeQuery[0];
-			alStartEnd[0] = Long.min(Utils.fromDateStringToTimestamp(sStart), alStartEnd[0] );
+			alStartEnd[0] = Long.min(TimeEpochUtils.fromDateStringToEpoch(sStart), alStartEnd[0] );
 			sEnd = asTimeQuery[1];
-			alStartEnd[1] = Long.max(Utils.fromDateStringToTimestamp(sEnd), alStartEnd[1] );
+			alStartEnd[1] = Long.max(TimeEpochUtils.fromDateStringToEpoch(sEnd), alStartEnd[1] );
 		}
 	}
 }
