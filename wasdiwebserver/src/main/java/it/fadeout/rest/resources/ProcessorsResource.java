@@ -110,7 +110,8 @@ public class ProcessorsResource extends BaseResource{
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
 											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout		, 
-											@QueryParam("link") String sLink , @QueryParam("email") String sEmail, @QueryParam("price") Integer iPrice) throws Exception {
+											@QueryParam("link") String sLink , @QueryParam("email") String sEmail, @QueryParam("price") Integer iPrice,
+											@QueryParam("categories") final List<String> asCategoriesId) throws Exception {
 
 //		,
 //		@QueryParam("categories") String[] asCategoriesId
@@ -214,7 +215,7 @@ public class ProcessorsResource extends BaseResource{
 			oProcessor.setLink(sLink);
 			oProcessor.setEmail(sEmail);
 			oProcessor.setPrice(iPrice);
-		//	oProcessor.setCategoriesId(asCategoriesId);
+			oProcessor.setCategoriesId(asCategoriesId);
 			
 			if( iTimeout != null ){
 				oProcessor.setTimeoutMs(iTimeout);
@@ -1160,7 +1161,6 @@ public class ProcessorsResource extends BaseResource{
 		Date oDate = new Date();
 		oReview.setDate(oDate);
 		
-		// REFACTORING REPOSITORY 
 		
 		m_oReviewRepository.addReview(oReview);
 		
