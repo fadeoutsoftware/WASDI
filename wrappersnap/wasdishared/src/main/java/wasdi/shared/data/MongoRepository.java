@@ -10,6 +10,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import wasdi.shared.business.Review;
 import wasdi.shared.utils.Utils;
 
 import org.bson.Document;
@@ -122,5 +123,21 @@ public class MongoRepository {
 
 		    }
 		});
+	}
+    
+	public <T> String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
+		String sResult = "";
+		if(oNewDocument != null) {
+			try {
+				String sJSON = s_oMapper.writeValueAsString(oNewDocument);
+				Document oDocument = Document.parse(sJSON);
+				getCollection(sCollection).insertOne(oDocument);
+				sResult = oDocument.getObjectId("_id").toHexString();
+	
+			} catch (Exception oEx) {
+				Utils.debugLog(sRepositoryCommand + ": " + oEx);
+			}
+		}
+		return sResult;
 	}
 }

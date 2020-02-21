@@ -85,6 +85,7 @@ public class ProcessorsResource extends BaseResource{
 	final Integer LOGO_SIZE = 180;
 	final Integer NUMB_MAX_OF_IMAGES = 5;
 	final String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
+	final String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
 	AppsCategoriesRepository m_oAppCategoriesRepository = new AppsCategoriesRepository();
 	ReviewRepository m_oReviewRepository = new ReviewRepository();
 	
@@ -1123,9 +1124,9 @@ public class ProcessorsResource extends BaseResource{
 	}
 	
 	@POST
-	@Path("/addReview")
+	@Path("/addreview")
 //	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
+	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
 	
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -1134,14 +1135,35 @@ public class ProcessorsResource extends BaseResource{
 		}
 		
 		String sUserId = oUser.getUserId();
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE === 
+		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false){
+			return Response.status(400).build();
+		}
 		
 		if(oReviewViewModel == null ){
 			return Response.status(400).build();
 		}
 		
-		//TODO CCHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE === 
-		//TODO CHECK THE VALUE OF THE VOTE === 1 - 5
+		//CHECK THE VALUE OF THE VOTE === 1 - 5
+		if( isValidVote(oReviewViewModel.getVote()) == false ){
+			return Response.status(400).build();
+		}
+		
 		Review oReview = getReviewModel(oReviewViewModel);
+		
+		//LIMIT THE NUMBER OF COMMENTS
+		if(m_oReviewRepository.alreadyVoted(oReview) == true){
+			return Response.status(400).build();
+		}
+		
+		//ADD DATE 
+		Date oDate = new Date();
+		oReview.setDate(oDate);
+		
+		// REFACTORING REPOSITORY 
+		
+		m_oReviewRepository.addReview(oReview);
+		
 		return Response.status(200).build();
 	}
 	
@@ -1163,9 +1185,21 @@ public class ProcessorsResource extends BaseResource{
 		
 		List<Review> aoReviewRepository = m_oReviewRepository.getReviews(sProcessorId);
 		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoReviewRepository);
-
+		
 	    return Response.ok(oListReviewsViewModel).build();
 
+	}
+	
+	
+	private boolean isValidVote(String sVote){
+		boolean bIsValid = false;
+		for(String sValidVote : RANGE_OF_VOTES){
+			
+			if(sValidVote.equals(sVote.toLowerCase())){
+				bIsValid = true;
+			}
+		}
+		return bIsValid;
 	}
 	
 	private Review getReviewModel(ReviewViewModel oReviewViewModel){
