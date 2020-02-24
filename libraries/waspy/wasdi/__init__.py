@@ -151,7 +151,7 @@ def printStatus():
         m_oLogger.error('printStatus: session is not valid :-(')
 
 
-def setVerbose(bVerbose: bool):
+def setVerbose(bVerbose):
     """Sets verbosity
 
     :param bVerbose: False non verbose, True verbose
@@ -175,7 +175,7 @@ def setVerbose(bVerbose: bool):
         m_oLogLevel = logging.DEBUG
 
 
-def getVerbose() -> bool:
+def getVerbose():
     """
     Get Verbose Flag
     :return: True or False
@@ -184,7 +184,7 @@ def getVerbose() -> bool:
     return m_bVerbose
 
 
-def getParametersDict() -> dict:
+def getParametersDict():
     """
     Get the full Params Dictionary
     :return: a dictionary containing the parameters
@@ -193,7 +193,7 @@ def getParametersDict() -> dict:
     return m_aoParamsDictionary
 
 
-def setParametersDict(aoParams: dict):
+def setParametersDict(aoParams):
     """
     Get the full Params Dictionary
     :param aoParams: dictionary of Parameters
@@ -203,7 +203,7 @@ def setParametersDict(aoParams: dict):
     m_aoParamsDictionary = aoParams
 
 
-def addParameter(sKey: str, oValue: object):
+def addParameter(sKey, oValue):
     """
     Adds a parameter
     :param sKey: parameter key
@@ -2541,13 +2541,8 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, True)
 
 
-def mosaic(
-        asInputFiles: list,
-        sOutputFile: str,
-        iNoDataValue: int = None,
-        iIgnoreInputValue: int = None,
-        bAsynch: bool = False
-) -> str:
+def mosaic(asInputFiles, sOutputFile, iNoDataValue=None,
+           iIgnoreInputValue=None, bAsynch=False):
     """
     Creates a mosaic out of a set of images
 
