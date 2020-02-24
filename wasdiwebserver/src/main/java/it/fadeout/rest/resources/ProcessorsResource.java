@@ -218,8 +218,8 @@ public class ProcessorsResource extends BaseResource{
 			oProcessor.setEmail(sEmail);
 			oProcessor.setPrice(iPrice);
 			oProcessor.setCategoriesId(asCategoriesId);
-			oProcessor.setUpdateDate(oDate);
-			oProcessor.setUploadDate(oDate);
+			oProcessor.setUpdateDate((double)oDate.getTime());
+			oProcessor.setUploadDate((double)oDate.getTime());
 			if( iTimeout != null ){
 				oProcessor.setTimeoutMs(iTimeout);
 			}
@@ -778,7 +778,7 @@ public class ProcessorsResource extends BaseResource{
 			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
 			Date oDate = new Date();
-			oProcessorToUpdate.setUpdateDate(oDate);
+			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
 			
 			oProcessorRepository.updateProcessor(oProcessorToUpdate);
 			
@@ -1066,11 +1066,11 @@ public class ProcessorsResource extends BaseResource{
 		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			return Response.status(400).build();
 		}
-//		
-//		//check if the user is the owner of the processor 
-//		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-//			return Response.status(401).build();
-//		}
+		
+		//check if the user is the owner of the processor 
+		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
+			return Response.status(401).build();
+		}
 		
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
@@ -1124,12 +1124,86 @@ public class ProcessorsResource extends BaseResource{
 		if(oUser == null){
 			return Response.status(401).build();
 		}
+
 		
 		List<AppCategory> aoAppCategories = m_oAppCategoriesRepository.getCategories();
 		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = getCategoriesViewModel(aoAppCategories);
 		
 	    return Response.ok(aoAppCategoriesViewModel).build();
 
+	}
+	
+	@DELETE
+	@Path("/deletereview")
+	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
+		
+		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
+		
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+
+		Processor oProcessor = getProcessor(sProcessorId);
+
+		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+
+		
+		int iDeletedCount = m_oReviewRepository.deleteReview(sProcessorId, sReviewId);
+
+		if( iDeletedCount == 0 ){
+			return Response.status(400).build();
+		}
+		
+		return Response.status(200).build();
+	}
+	
+	@POST
+	@Path("/updatereview")
+	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
+	
+		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false){
+			return Response.status(400).build();
+		}
+		
+		if(oReviewViewModel == null ){
+			return Response.status(400).build();
+		}
+		
+		//CHECK THE VALUE OF THE VOTE === 1 - 5
+		if( isValidVote(oReviewViewModel.getVote()) == false ){
+			return Response.status(400).build();
+		}
+		
+		//ADD DATE 
+		Date oDate = new Date();
+		oReviewViewModel.setDate(oDate);
+		
+		Review oReview = getReviewModel(oReviewViewModel);
+		
+		
+		boolean isUpdated = m_oReviewRepository.updateReview(oReview);
+		if(isUpdated == false){
+			return Response.status(400).build();
+		}
+		//TODO CHECK THE RESULT 
+		return Response.status(200).build();
 	}
 	
 	@POST
@@ -1158,6 +1232,10 @@ public class ProcessorsResource extends BaseResource{
 			return Response.status(400).build();
 		}
 		
+		//ADD DATE 
+		Date oDate = new Date();
+		oReviewViewModel.setDate(oDate);
+		
 		Review oReview = getReviewModel(oReviewViewModel);
 		
 		//LIMIT THE NUMBER OF COMMENTS
@@ -1165,10 +1243,8 @@ public class ProcessorsResource extends BaseResource{
 			return Response.status(400).build();
 		}
 		
-		//ADD DATE 
-		Date oDate = new Date();
-		oReview.setDate(oDate);
-		
+		// ADD ID 
+		oReview.setId(Utils.GetRandomName()); 
 		
 		m_oReviewRepository.addReview(oReview);
 		
@@ -1192,6 +1268,11 @@ public class ProcessorsResource extends BaseResource{
 		}
 		
 		List<Review> aoReviewRepository = m_oReviewRepository.getReviews(sProcessorId);
+		
+		if(aoReviewRepository == null || aoReviewRepository.size() == 0){
+			  return Response.ok(null).build();
+		}
+		
 		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoReviewRepository);
 		
 	    return Response.ok(oListReviewsViewModel).build();
@@ -1201,7 +1282,7 @@ public class ProcessorsResource extends BaseResource{
 	
 	public void updateProcessorDate(Processor oProcessor){
 		Date oDate = new Date();
-		oProcessor.setUpdateDate(oDate);
+		oProcessor.setUpdateDate( (double) oDate.getTime());
 		m_oProcessorRepository.updateProcessor(oProcessor);
 		
 	}
@@ -1221,7 +1302,7 @@ public class ProcessorsResource extends BaseResource{
 		if(oReviewViewModel != null){
 			Review oReview = new Review();
 			oReview.setComment(oReviewViewModel.getComment());
-			oReview.setDate(oReviewViewModel.getDate());
+			oReview.setDate((double)oReviewViewModel.getDate().getTime());
 			oReview.setId(oReviewViewModel.getId());//TODO GENERATE ID 
 			oReview.setProcessorId(oReviewViewModel.getProcessorId());
 			oReview.setUserId(oReviewViewModel.getUserId());
@@ -1244,7 +1325,9 @@ public class ProcessorsResource extends BaseResource{
 		for(Review oReview: aoReviewRepository){
 			ReviewViewModel oReviewViewModel = new ReviewViewModel();
 			oReviewViewModel.setComment(oReview.getComment());
-			oReviewViewModel.setDate(oReview.getDate());
+
+			oReviewViewModel.setDate( Utils.getDate(oReview.getDate()) );
+			
 			oReviewViewModel.setId(oReview.getId());
 			oReviewViewModel.setUserId(oReview.getUserId());
 			oReviewViewModel.setProcessorId(oReview.getUserId());

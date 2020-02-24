@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -9,11 +10,14 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Review;
 import wasdi.shared.utils.Utils;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -140,4 +144,40 @@ public class MongoRepository {
 		}
 		return sResult;
 	}
+	
+	
+	public int delete(BasicDBObject oCriteria, String sCollectionName ){
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection(sCollectionName).deleteOne(oCriteria);
+
+            if (oDeleteResult != null)
+            {
+                return (int) oDeleteResult.getDeletedCount();
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+	}
+	
+	public boolean update(BasicDBObject oCriteria, Object oNewDocument, String sCollectionName) {
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oNewDocument);
+            
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            UpdateResult oResult = getCollection(sCollectionName).updateOne(oCriteria, oUpdateOperationDocument);
+            
+            if (oResult.getModifiedCount()==1) return true;
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
 }

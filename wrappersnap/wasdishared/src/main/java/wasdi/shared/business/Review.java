@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Review {
 	private String processorId;
-	private Date date;
+	private Double date;
 	private String vote;
 	private String comment;
 	private String userId;
@@ -16,10 +16,10 @@ public class Review {
 	public void setProcessorId(String processorId) {
 		this.processorId = processorId;
 	}
-	public Date getDate() {
+	public Double getDate() {
 		return date;
 	}
-	public void setDate(Date date) {
+	public void setDate(Double date) {
 		this.date = date;
 	}
 	public String getVote() {

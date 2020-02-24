@@ -54,9 +54,9 @@ public class Processor {
 
 	private String email;
 	
-	private Date uploadDate;
+	private Double uploadDate;
 	
-	private Date updateDate;
+	private Double updateDate;
 	/**
 	 * Flag to know if it is public or not
 	 */
@@ -155,16 +155,16 @@ public class Processor {
 		this.timeoutMs = timeoutMs;
 	}	
 	
-	public Date getUploadDate() {
+	public Double getUploadDate() {
 		return uploadDate;
 	}
-	public void setUploadDate(Date uploadDate) {
+	public void setUploadDate(Double uploadDate) {
 		this.uploadDate = uploadDate;
 	}
-	public Date getUpdateDate() {
+	public Double getUpdateDate() {
 		return updateDate;
 	}
-	public void setUpdateDate(Date updateDate) {
+	public void setUpdateDate(Double updateDate) {
 		this.updateDate = updateDate;
 	}
 }
