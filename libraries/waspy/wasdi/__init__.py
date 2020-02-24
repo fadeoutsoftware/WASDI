@@ -1300,11 +1300,11 @@ def downloadFile(sFileName):
         sSavePath = getSavePath()
         sSavePath = os.path.join(sSavePath, sAttachmentName)
 
-        if os.path.exists(os.path.dirname(sSavePath)) == False:
+        if not os.path.exists(os.path.dirname(sSavePath)):
             try:
-                os.makedirs(os.path.dirname(sSavePath))
-            except:  # Guard against race condition
-                m_oLogger.error('downloadFile: cannot create File Path, aborting')
+                os.makedirs(os.path.dirname(sSavePath), exist_ok=True)
+            except Exception as oE:  # Guard against race condition
+                m_oLogger.error(f'downloadFile( {sFileName} ): cannot create File Path due to {oE}, aborting')
                 return
 
         m_oLogger.info(f'downloadFile: downloading local file {sSavePath}')
