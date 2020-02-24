@@ -1153,7 +1153,13 @@ public class ProcessorsResource extends BaseResource{
 			return Response.status(400).build();
 		}
 		
-
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+//		|| (m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false)
+		if( (oProcessor.getUserId().toLowerCase().equals( oUser.getUserId().toLowerCase() ) == false)  ){
+			return Response.status(401).build();
+		}
+		
+		
 		
 		int iDeletedCount = m_oReviewRepository.deleteReview(sProcessorId, sReviewId);
 
@@ -1177,15 +1183,17 @@ public class ProcessorsResource extends BaseResource{
 		}
 		
 		String sUserId = oUser.getUserId();
-		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
-		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false){
-			return Response.status(400).build();
-		}
+
 		
 		if(oReviewViewModel == null ){
 			return Response.status(400).build();
 		}
 		
+//		|| (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false)
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false  ){
+			return Response.status(400).build();
+		}
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
 			return Response.status(400).build();

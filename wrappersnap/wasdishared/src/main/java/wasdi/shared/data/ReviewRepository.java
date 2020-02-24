@@ -62,28 +62,6 @@ public class ReviewRepository extends MongoRepository {
     
     
     
-//    //TODO REFACTORING
-//    public boolean updateReview(Review oReview) {
-//        try {
-//            String sJSON = s_oMapper.writeValueAsString(oReview);
-//            
-//			BasicDBObject oCriteria = new BasicDBObject();
-//			oCriteria.append("processorId", oReview.getProcessorId());
-//			oCriteria.append("id", oReview.getId());
-////            Bson oFilter = new Document("id", oReview.getId());
-//            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
-//            
-//            UpdateResult oResult = getCollection(COLLECTION_NAME).updateOne(oCriteria, oUpdateOperationDocument);
-//
-//            
-//            if (oResult.getModifiedCount()==1) return true;
-//        }
-//        catch (Exception oEx) {
-//            oEx.printStackTrace();
-//        }
-//
-//        return  update;
-//    }
     
     //TODO REFACTORING
     public boolean updateReview(Review oReview) {
@@ -95,7 +73,28 @@ public class ReviewRepository extends MongoRepository {
         return  update(oCriteria,oReview,COLLECTION_NAME);
     }
     
-    
+    //TODO FIX THIS FUNCTION 
+//	public boolean isTheOwnerOfTheReview(String sProcessorId, String sReviewId ,String sUserId) {
+//		boolean bAlreadyVoted = false;
+//
+//			try {
+//				
+//				BasicDBObject oCriteria = new BasicDBObject();
+//				oCriteria.append("processorId", sProcessorId);
+//				oCriteria.append("id", sReviewId);
+//				oCriteria.append("userId", sUserId);
+//				Document oWSDocument = getCollection(COLLECTION_NAME).find(oCriteria).first();
+//				if(oWSDocument != null ){
+//					bAlreadyVoted = true;
+//				}
+//				
+//			} catch (Exception oEx) {
+//				Utils.debugLog("ReviewRepository.InsertReview: " + oEx);
+//			}
+//		
+//		return bAlreadyVoted;
+//	}
+//    
 	public boolean alreadyVoted(Review oReview) {
 		boolean bAlreadyVoted = false;
 		if(oReview != null) {
