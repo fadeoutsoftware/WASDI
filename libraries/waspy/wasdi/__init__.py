@@ -24,24 +24,26 @@ History: see file changelog.md
 
 Created on 11 Jun 2018
 
-@author: p.campanella
+@author: Paolo Campanella
+@author: Cristiano Nattero
 """
+
+import getpass
+import json
+import logging
+import os
+import re
+import sys
+import time
+import traceback
+import zipfile
 from time import sleep
+
+import requests
 
 from wasdi import waspyLogFormatter
 
 name = "wasdi"
-
-import json
-import os
-import re
-import time
-import traceback
-import zipfile
-import requests
-import getpass
-import sys
-import logging
 
 # Initialize "Members"
 m_sUser = None
@@ -62,7 +64,7 @@ m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
-#m_sBaseUrl = 'http://178.22.66.96/wasdiwebserver/rest'
+# m_sBaseUrl = 'http://178.22.66.96/wasdiwebserver/rest'
 m_bIsOnServer = False
 
 # log configuration
@@ -70,19 +72,13 @@ m_bIsOnServer = False
 m_bLogConfigured = False
 m_oLogLevel = logging.DEBUG
 m_asFormats = None
-m_ologger = None
+m_oLogger = None
 
 
 def _configureLog():
     # configure logger options
     global m_oLogLevel
     m_oLogLevel = logging.INFO
-
-    # todo read log level from user config
-    # try:
-    #     _oLogLevel = config.CONFIG['logLevel']
-    # except:
-    #     pass
 
     _sErrorEmphasizer = ' ***************************************************************'
 
@@ -101,8 +97,8 @@ def _configureLog():
     logging.root.addHandler(_oHandler)
     logging.root.setLevel(m_oLogLevel)
 
-    global m_ologger
-    m_ologger = logging.getLogger(__name__)
+    global m_oLogger
+    m_oLogger = logging.getLogger(__name__)
 
     m_bLogConfigured = True
 
@@ -127,49 +123,49 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
-    m_ologger.info('printStatus: begin testing log level')
-    m_ologger.debug('printStatus: testing DEBUG level')
-    m_ologger.info('printStatus: testing INFO level')
-    m_ologger.warning('printStatus: testing WARNING level')
-    m_ologger.error('printStatus: testing ERROR level (just a test, worry not ;) )')
-    m_ologger.critical('printStatus: testing CRITICAL level (just a test, worry not ;) )')
-    m_ologger.info('printStatus: done testing log level')
+    m_oLogger.info('printStatus: begin testing log level')
+    m_oLogger.debug('printStatus: testing DEBUG level')
+    m_oLogger.info('printStatus: testing INFO level')
+    m_oLogger.warning('printStatus: testing WARNING level')
+    m_oLogger.error('printStatus: testing ERROR level (just a test, worry not ;) )')
+    m_oLogger.critical('printStatus: testing CRITICAL level (just a test, worry not ;) )')
+    m_oLogger.info('printStatus: done testing log level')
 
-    m_ologger.info(f'printStatus: user: {getUser()}')
-    m_ologger.info(f'printStatus: password: *******************************')
-    m_ologger.info(f'printStatus: session id: {getSessionId()}')
-    m_ologger.info(f'printStatus: active workspace: {getActiveWorkspaceId()}')
-    m_ologger.info(f'printStatus: workspace owner: {m_sWorkspaceOwner}')
-    m_ologger.info(f'printStatus: parameters file path: {getParametersFilePath()}')
-    m_ologger.info(f'printStatus: base path: {getBasePath()}')
-    m_ologger.info(f'printStatus: download active: {getDownloadActive()}')
-    m_ologger.info(f'printStatus: upload active: {getUploadActive()}')
-    m_ologger.info(f'printStatus: verbose: {getVerbose()}')
-    m_ologger.info(f'printStatus: param dict: {getParametersDict()}')
-    m_ologger.info(f'printStatus: proc id: {getProcId()}')
-    m_ologger.info(f'printStatus: base url: {getBaseUrl()}')
-    m_ologger.info(f'printStatus: is on server: {getIsOnServer()}')
+    m_oLogger.info(f'printStatus: user: {getUser()}')
+    m_oLogger.info(f'printStatus: password: *******************************')
+    m_oLogger.info(f'printStatus: session id: {getSessionId()}')
+    m_oLogger.info(f'printStatus: active workspace: {getActiveWorkspaceId()}')
+    m_oLogger.info(f'printStatus: workspace owner: {m_sWorkspaceOwner}')
+    m_oLogger.info(f'printStatus: parameters file path: {getParametersFilePath()}')
+    m_oLogger.info(f'printStatus: base path: {getBasePath()}')
+    m_oLogger.info(f'printStatus: download active: {getDownloadActive()}')
+    m_oLogger.info(f'printStatus: upload active: {getUploadActive()}')
+    m_oLogger.info(f'printStatus: verbose: {getVerbose()}')
+    m_oLogger.info(f'printStatus: param dict: {getParametersDict()}')
+    m_oLogger.info(f'printStatus: proc id: {getProcId()}')
+    m_oLogger.info(f'printStatus: base url: {getBaseUrl()}')
+    m_oLogger.info(f'printStatus: is on server: {getIsOnServer()}')
     if m_bValidSession:
-        m_ologger.info('printStatus: session is valid :-)')
+        m_oLogger.info('printStatus: session is valid :-)')
     else:
-        m_ologger.error('printStatus: session is not valid :-(')
+        m_oLogger.error('printStatus: session is not valid :-(')
 
 
-def setVerbose(bVerbose):
+def setVerbose(bVerbose: bool):
     """Sets verbosity
 
     :param bVerbose: False non verbose, True verbose
     :return:
     """
     if bVerbose is None:
-        m_ologger.error('setVerbose: passed None, won\'t change')
+        m_oLogger.error('setVerbose: passed None, won\'t change')
         return
     if not isinstance(bVerbose, bool):
-        m_ologger.error('setVerbose: passed non boolean, trying to convert')
+        m_oLogger.warning('setVerbose: passed non boolean, trying to convert')
         try:
             bVerbose = bool(bVerbose)
         except:
-            m_ologger.error('setVerbose: cannot convert argument into boolean, won\'t change')
+            m_oLogger.error('setVerbose: cannot convert argument into boolean, won\'t change')
             return
 
     global m_bVerbose
@@ -179,7 +175,7 @@ def setVerbose(bVerbose):
         m_oLogLevel = logging.DEBUG
 
 
-def getVerbose():
+def getVerbose() -> bool:
     """
     Get Verbose Flag
     :return: True or False
@@ -188,7 +184,7 @@ def getVerbose():
     return m_bVerbose
 
 
-def getParametersDict():
+def getParametersDict() -> dict:
     """
     Get the full Params Dictionary
     :return: a dictionary containing the parameters
@@ -197,7 +193,7 @@ def getParametersDict():
     return m_aoParamsDictionary
 
 
-def setParametersDict(aoParams):
+def setParametersDict(aoParams: dict):
     """
     Get the full Params Dictionary
     :param aoParams: dictionary of Parameters
@@ -207,7 +203,7 @@ def setParametersDict(aoParams):
     m_aoParamsDictionary = aoParams
 
 
-def addParameter(sKey, oValue):
+def addParameter(sKey: str, oValue: object):
     """
     Adds a parameter
     :param sKey: parameter key
@@ -279,10 +275,10 @@ def setParametersFilePath(sParamPath):
     :param sParamPath Local Path of the parameters file
     """
     if sParamPath is None:
-        m_ologger.error('setParametersFilePath: passed None as path, won\'t change')
+        m_oLogger.error('setParametersFilePath: passed None as path, won\'t change')
         return
     if len(sParamPath) < 1:
-        m_ologger.error('setParametersFilePath: string passed has zero length, won\'t change')
+        m_oLogger.error('setParametersFilePath: string passed has zero length, won\'t change')
         return
 
     global m_sParametersFilePath
@@ -369,7 +365,7 @@ def setDownloadActive(bDownloadActive):
     """
 
     if bDownloadActive is None:
-        m_ologger.error('setDownloadActive: passed None, won\'t change')
+        m_oLogger.error('setDownloadActive: passed None, won\'t change')
         return
 
     global m_bDownloadActive
@@ -393,7 +389,7 @@ def setUploadActive(bUploadActive):
     """
 
     if bUploadActive is None:
-        m_ologger.error('setUploadActive: passed None, won\'t change')
+        m_oLogger.error('setUploadActive: passed None, won\'t change')
         return
 
     global m_bUploadActive
@@ -443,10 +439,10 @@ def _loadConfig(sConfigFilePath):
     :param sConfigFilePath: a string containing a path to the configuration file
     """
     if sConfigFilePath is None:
-        m_ologger.error('_loadConfigParams: config parameter file name is None, cannot load config')
+        m_oLogger.error('_loadConfigParams: config parameter file name is None, cannot load config')
         return
     if sConfigFilePath == '':
-        m_ologger.error('_loadConfigParams: config parameter file name is empty, cannot load config')
+        m_oLogger.error('_loadConfigParams: config parameter file name is empty, cannot load config')
         return
 
     sConfigFilePath = _normPath(sConfigFilePath)
@@ -507,13 +503,13 @@ def _loadConfig(sConfigFilePath):
                 elif sLogLevel == "CRITICAL":
                     m_oLogLevel = logging.CRITICAL
                 else:
-                    m_ologger.error(f'_loadConfigParams: unrecognized log level: {sLogLevel}')
-                m_ologger.setLevel(m_oLogLevel)
+                    m_oLogger.error(f'_loadConfigParams: unrecognized log level: {sLogLevel}')
+                m_oLogger.setLevel(m_oLogLevel)
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
     except Exception as oEx:
-        m_ologger.error('_loadConfigParams: something went wrong')
+        m_oLogger.error('_loadConfigParams: something went wrong')
         return
 
 
@@ -534,7 +530,7 @@ def _loadParams():
             pass
 
     if not bParamLoaded:
-        m_ologger.info('wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
+        m_oLogger.info('wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
 
 def refreshParameters():
@@ -583,7 +579,7 @@ def init(sConfigFilePath=None):
             sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
     if m_sUser is None:
-        m_ologger.error('init: must initialize user first, but None given')
+        m_oLogger.error('init: must initialize user first, but None given')
         return False
 
     if m_sBasePath is None:
@@ -612,23 +608,23 @@ def init(sConfigFilePath=None):
             m_bValidSession = False
     else:
         if m_sPassword is None:
-            m_ologger.error('init: must initialize password first, but None given')
+            m_oLogger.error('init: must initialize password first, but None given')
             return False
         asHeaders = {'Content-Type': 'application/json'}
         sUrl = m_sBaseUrl + '/auth/login'
         sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
         oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
         if oResponse is None:
-            m_ologger.error('init: cannot authenticate')
+            m_oLogger.error('init: cannot authenticate')
             m_bValidSession = False
         elif oResponse.ok is not True:
-            m_ologger.error(f'init: cannot authenticate, server replied: {oResponse.status_code}')
+            m_oLogger.error(f'init: cannot authenticate, server replied: {oResponse.status_code}')
             m_bValidSession = False
         else:
             oJsonResult = oResponse.json()
             try:
                 m_sSessionId = f"{oJsonResult['sessionId']}"
-                m_ologger.info(f'init: returned session is: {m_sSessionId}')
+                m_oLogger.info(f'init: returned session is: {m_sSessionId}')
                 if m_sSessionId is not None and m_sSessionId != '' and m_sSessionId != 'None':
                     m_bValidSession = True
                 else:
@@ -637,7 +633,7 @@ def init(sConfigFilePath=None):
                 m_bValidSession = False
 
     if m_bValidSession is True:
-        m_ologger.info('init: WASPY successfully initiated :-)')
+        m_oLogger.info('init: WASPY successfully initiated :-)')
         sW = getActiveWorkspaceId()
         if (sW is None) or (len(sW) < 1):
             if sWname is not None:
@@ -645,7 +641,7 @@ def init(sConfigFilePath=None):
             elif sWId is not None:
                 openWorkspaceById(sWId)
     else:
-        m_ologger.error('init: could not init WASPY :-(')
+        m_oLogger.error('init: could not init WASPY :-(')
 
     printStatus()
     return m_bValidSession
@@ -948,9 +944,9 @@ def getFullProductPath(sProductName):
                 # If the file exists on server
                 if fileExistsOnWasdi(sProductName) is True:
                     # Download The File from WASDI
-                    m_ologger.info('getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
+                    m_oLogger.info('getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
                     downloadFile(sProductName)
-                    m_ologger.info('getFullProductPath: DONWLOAD COMPLETED')
+                    m_oLogger.info('getFullProductPath: DONWLOAD COMPLETED')
 
     return sFullPath
 
@@ -1044,31 +1040,31 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
     """
 
     if sProcessId is None:
-        m_ologger.error('updateProcessStatus: cannot update status, process ID is None')
+        m_oLogger.error('updateProcessStatus: cannot update status, process ID is None')
         return ''
     elif sProcessId == '':
         return ''
 
     if sStatus is None:
-        m_ologger.error('updateProcessStatus: cannot update status, status is None')
+        m_oLogger.error('updateProcessStatus: cannot update status, status is None')
         return ''
     elif sStatus not in {'CREATED', 'RUNNING', 'STOPPED', 'DONE', 'ERROR', 'WAITING', 'READY'}:
-        m_ologger.error('updateProcessStatus: sStatus must be a string in: ' +
-                       '{CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY')
+        m_oLogger.error('updateProcessStatus: sStatus must be a string in: ' +
+                        '{CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY')
         return ''
 
     if iPerc is None:
-        m_ologger.error('updateProcessStatus: percentage is None')
+        m_oLogger.error('updateProcessStatus: percentage is None')
         return ''
 
     if iPerc < 0:
         if iPerc != -1:
-            m_ologger.error('updateProcessStatus: iPerc < 0 not valid')
+            m_oLogger.error('updateProcessStatus: iPerc < 0 not valid')
             return ''
         else:
-            m_ologger.info('updateProcessStatus: iPerc = -1 - Not considered')
+            m_oLogger.info('updateProcessStatus: iPerc = -1 - Not considered')
     elif iPerc > 100:
-        m_ologger.error('updateProcessStatus: iPerc > 100 not valid')
+        m_oLogger.error('updateProcessStatus: iPerc > 100 not valid')
         return ''
 
     global m_sBaseUrl
@@ -1103,12 +1099,12 @@ def updateStatus(sStatus, iPerc=-1):
     try:
 
         if m_bIsOnServer is False:
-            m_ologger.info("updateStatus: Running Locally, will not update status on server")
+            m_oLogger.info("updateStatus: Running Locally, will not update status on server")
             return sStatus
 
         return updateProcessStatus(getProcId(), sStatus, iPerc)
     except Exception as oEx:
-        m_ologger.error(f'updateStatus: exception {oEx}')
+        m_oLogger.error(f'updateStatus: exception {oEx}')
         return ''
 
 
@@ -1119,24 +1115,24 @@ def updateProgressPerc(iPerc):
     :return: updated status of the process or '' if there was any error
     """
     try:
-        m_ologger.info(f'updateProgressPerc( {iPerc} )')
+        m_oLogger.info(f'updateProgressPerc( {iPerc} )')
         if iPerc is None:
-            m_ologger.error('updateProgressPerc: Passed None, expected a percentage')
+            m_oLogger.error('updateProgressPerc: Passed None, expected a percentage')
             return ''
 
         if (getProcId() is None) or (len(getProcId()) < 1):
-            m_ologger.error('updateProgressPerc: Cannot update progress: process ID is not known')
+            m_oLogger.error('updateProgressPerc: Cannot update progress: process ID is not known')
             return ''
 
         if 0 > iPerc or 100 < iPerc:
-            m_ologger.warning(f'updateProgressPerc: passed {iPerc}, automatically resetting in [0, 100]')
+            m_oLogger.warning(f'updateProgressPerc: passed {iPerc}, automatically resetting in [0, 100]')
             if iPerc < 0:
                 iPerc = 0
             if iPerc > 100:
                 iPerc = 100
 
         if m_bIsOnServer is False:
-            m_ologger.info("Running locally, will not updateProgressPerc on server")
+            m_oLogger.info("Running locally, will not updateProgressPerc on server")
             return "RUNNING"
 
         sStatus = "RUNNING"
@@ -1149,10 +1145,10 @@ def updateProgressPerc(iPerc):
             if (oJson is not None) and ("status" in oJson):
                 sResult = f"{oJson['status']}"
         else:
-            m_ologger.error('updateProgressPerc: could not update progress')
+            m_oLogger.error('updateProgressPerc: could not update progress')
         return sResult
     except Exception as oEx:
-        m_ologger.error(f'updateProgressPerc: exception: {oEx}')
+        m_oLogger.error(f'updateProgressPerc: exception: {oEx}')
         return ''
 
 
@@ -1185,7 +1181,7 @@ def setProcessPayload(sProcessId, data):
 
         return sStatus
     except Exception as oEx:
-        m_ologger.error(f'setProcessPayload: exception {oEx}')
+        m_oLogger.error(f'setProcessPayload: exception {oEx}')
         return ''
 
 
@@ -1204,7 +1200,7 @@ def setPayload(data):
     if m_bIsOnServer is True:
         setProcessPayload(m_sMyProcId, data)
     else:
-        m_ologger.info(f'setPayload{data}')
+        m_oLogger.info(f'setPayload{data}')
 
 
 def saveFile(sFileName):
@@ -1241,12 +1237,12 @@ def saveFile(sFileName):
 
 def downloadFile(sFileName):
     """
-    Download a file from WASDI
+    Downloads a file from WASDI
     :param sFileName: file to download
     :return: None
     """
 
-    m_ologger.info('downloadFile( ' + sFileName + ' )')
+    m_oLogger.info('downloadFile( ' + sFileName + ' )')
 
     global m_sBaseUrl
     global m_sSessionId
@@ -1262,12 +1258,12 @@ def downloadFile(sFileName):
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
 
-    m_ologger.info('downloadfile: send request to configured url ' + sUrl)
+    m_oLogger.info('downloadfile: send request to configured url ' + sUrl)
 
     oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
 
     if (oResponse is not None) and (oResponse.status_code == 200):
-        m_ologger.info('downloadFile: got ok result, downloading')
+        m_oLogger.info('downloadFile: got ok result, downloading')
         sAttachmentName = None
         asResponseHeaders = oResponse.headers
         if asResponseHeaders is not None:
@@ -1308,16 +1304,16 @@ def downloadFile(sFileName):
             try:
                 os.makedirs(os.path.dirname(sSavePath))
             except:  # Guard against race condition
-                m_ologger.error('downloadFile: cannot create File Path, aborting')
+                m_oLogger.error('downloadFile: cannot create File Path, aborting')
                 return
 
-        m_ologger.info(f'downloadFile: downloading local file {sSavePath}')
+        m_oLogger.info(f'downloadFile: downloading local file {sSavePath}')
 
         with open(sSavePath, 'wb') as oFile:
             for oChunk in oResponse:
                 # m_logger.info('.')
                 oFile.write(oChunk)
-        m_ologger.info(f'downloadFile: download done, new file locally available {sSavePath}')
+        m_oLogger.info(f'downloadFile: download done, new file locally available {sSavePath}')
 
         if (sAttachmentName is not None) and \
                 (sAttachmentName != sFileName) and \
@@ -1326,14 +1322,14 @@ def downloadFile(sFileName):
             _unzip(sAttachmentName, sPath)
 
     else:
-        m_ologger.error(f'downloadFile: download error, server code: {oResponse.status_code}')
+        m_oLogger.error(f'downloadFile: download error, server code: {oResponse.status_code}')
 
     return
 
 
 def wasdiLog(sLogRow):
     """
-    Write one row of Log
+    Writes one row of Log
     :param sLogRow: text to log
     :return: None
     """
@@ -1348,11 +1344,11 @@ def wasdiLog(sLogRow):
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
         oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders)
         if oResult is None:
-            m_ologger.warning('wasdiLog: could not log')
+            m_oLogger.warning('wasdiLog: could not log')
         elif oResult.ok is not True:
-            m_ologger.warning(f'wasdiLog: could not log, server returned: {oResult.status_code}')
+            m_oLogger.warning(f'wasdiLog: could not log, server returned: {oResult.status_code}')
     else:
-        m_ologger.info(sForceLogRow)
+        m_oLogger.info(sForceLogRow)
 
 
 def deleteProduct(sProduct):
@@ -1366,7 +1362,7 @@ def deleteProduct(sProduct):
     global m_sActiveWorkspace
 
     if sProduct is None:
-        m_ologger.error('deleteProduct: product passed is None')
+        m_oLogger.error('deleteProduct: product passed is None')
 
     asHeaders = _getStandardHeaders()
     sUrl = m_sBaseUrl
@@ -1378,10 +1374,10 @@ def deleteProduct(sProduct):
     oResult = requests.get(sUrl, headers=asHeaders)
 
     if oResult is None:
-        m_ologger.error('deleteProduct: deletion failed')
+        m_oLogger.error('deleteProduct: deletion failed')
         return False
     elif oResult.ok is not True:
-        m_ologger.error(f'deleteProduct: deletion failed, server returned: {oResult.status_code}')
+        m_oLogger.error(f'deleteProduct: deletion failed, server returned: {oResult.status_code}')
     else:
         return oResult.ok
 
@@ -1411,44 +1407,44 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     aoReturnList = []
 
     if sPlatform is None:
-        m_ologger.error('searchEOImages: platform cannot be None')
+        m_oLogger.error('searchEOImages: platform cannot be None')
         return aoReturnList
 
     # todo support other platforms
     if (sPlatform != "S1") and (sPlatform != "S2"):
-        m_ologger.error(f'searchEOImages: platform must be S1 or S2. Received [ {sPlatform} ]')
+        m_oLogger.error(f'searchEOImages: platform must be S1 or S2. Received [ {sPlatform} ]')
         return aoReturnList
 
     if sPlatform == "S1":
         if sProductType is not None:
             if not (sProductType == "SLC" or sProductType == "GRD" or sProductType == "OCN"):
-                m_ologger.error("searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" +
+                m_oLogger.error("searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" +
                                 sProductType)
                 return aoReturnList
 
     if sPlatform == "S2":
         if sProductType is not None:
             if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
-                m_ologger.error("searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                m_oLogger.error("searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
                                 + sProductType + "]")
                 return aoReturnList
 
     if sDateFrom is None:
-        m_ologger.error("searchEOImages: sDateFrom cannot be None")
+        m_oLogger.error("searchEOImages: sDateFrom cannot be None")
         return aoReturnList
 
     # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
-        m_ologger.error("searchEOImages: sDateFrom must be in format YYYY-MM-DD")
+        m_oLogger.error("searchEOImages: sDateFrom must be in format YYYY-MM-DD")
         return aoReturnList
 
     if sDateTo is None:
-        m_ologger.error("searchEOImages: sDateTo cannot be None")
+        m_oLogger.error("searchEOImages: sDateTo cannot be None")
         return aoReturnList
 
     # if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateTo)):
-        m_ologger.error("searchEOImages: sDateTo must be in format YYYY-MM-DD")
+        m_oLogger.error("searchEOImages: sDateTo must be in format YYYY-MM-DD")
         return aoReturnList
 
     if sCloudCoverage is not None:
@@ -1471,24 +1467,24 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # If available Sensor Operational Mode
     if (sSensorOperationalMode is not None) and (sPlatform == "S1"):
-        sQuery += " AND sensoroperationalmode:{sSensorOperationalMode}"
+        sQuery += f" AND sensoroperationalmode:{sSensorOperationalMode}"
 
     # If available cloud coverage
     if (sCloudCoverage is not None) and (sPlatform == "S2"):
-        sQuery += " AND cloudcoverpercentage:{sCloudCoverage}"
+        sQuery += f" AND cloudcoverpercentage:{sCloudCoverage}"
 
     # If available add orbit number
     if iOrbitNumber is not None:
         if isinstance(iOrbitNumber, int):
-            sQuery += " AND relativeorbitnumber:{iOrbitNumber}"
+            sQuery += f" AND relativeorbitnumber:{iOrbitNumber}"
         else:
-            m_ologger.warning(f'searchEOImages: iOrbitNumber is {iOrbitNumber}, but it should be an integer')
+            m_oLogger.warning(f'searchEOImages: iOrbitNumber is {iOrbitNumber}, but it should be an integer')
             try:
                 iTmp = int(iOrbitNumber)
-                m_ologger.warning(f'searchEOImages: iOrbitNumber converted to: {iTmp}')
+                m_oLogger.warning(f'searchEOImages: iOrbitNumber converted to: {iTmp}')
                 sQuery += str(iTmp)
             except:
-                m_ologger.warning('searchEOImages: could not convert iOrbitNumber to an int, ignoring it')
+                m_oLogger.warning('searchEOImages: could not convert iOrbitNumber to an int, ignoring it')
 
             # Close the first block
     sQuery += ") "
@@ -1502,12 +1498,12 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # footprint polygon
     if (fULLat is not None) and (fULLon is not None) and (fLRLat is not None) and (fLRLon is not None):
-        sFootPrint = f"( footprint:\"intersects(POLYGON(( "
+        sFootPrint = f'( footprint:"intersects(POLYGON(( '
         sFootPrint += f"{fULLon} {fLRLat},{fULLon} {fULLat},{fLRLon} {fULLat},{fLRLon}{fLRLat},{fULLon} {fLRLat}"
-        sFootPrint += ")))\") AND "
+        sFootPrint += ')))") AND '
     sQuery = sFootPrint + sQuery
 
-    sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"
+    sQueryBody = '["' + sQuery.replace('\"' '\\\"') + '"]'
 
     if sProvider is None:
         sProvider = "ONDA"
@@ -1523,16 +1519,16 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             oJsonResponse = oResponse.json()
             aoReturnList = oJsonResponse
         except Exception as oEx:
-            m_ologger.error('searchEOImages: exception while trying to convert response into JSON object')
+            m_oLogger.error('searchEOImages: exception while trying to convert response into JSON object')
             return aoReturnList
 
-        m_ologger.info("waspy.searchEOImages: search results:\n" + repr(aoReturnList))
+        m_oLogger.info("waspy.searchEOImages: search results:\n" + repr(aoReturnList))
         return aoReturnList
     except Exception as oEx:
-        m_ologger.error('searchEOImages: an error occured')
-        m_ologger.error(f'searchEOImages: {type(oEx)}')
+        m_oLogger.error('searchEOImages: an error occured')
+        m_oLogger.error(f'searchEOImages: {type(oEx)}')
         traceback.print_exc()
-        m_ologger.error(f'searchEOImages{oEx}')
+        m_oLogger.error(f'searchEOImages{oEx}')
 
     return aoReturnList
 
@@ -1544,10 +1540,10 @@ def getFoundProductName(aoProduct):
     :return: product name or '' if there was any error
     """
     if aoProduct is None:
-        m_ologger.error('getFoundProductName: product is None, aborting')
+        m_oLogger.error('getFoundProductName: product is None, aborting')
         return ''
     elif "title" not in aoProduct:
-        m_ologger.error('getFoundProductName: title not found in product, aborting')
+        m_oLogger.error('getFoundProductName: title not found in product, aborting')
         return ''
     else:
         return aoProduct['title']
@@ -1560,10 +1556,10 @@ def fileExistsOnWasdi(sFileName):
     :return: True if the file exists, False otherwise
     """
     if sFileName is None:
-        m_ologger.error('fileExistsOnWasdi: file name must not be None')
+        m_oLogger.error('fileExistsOnWasdi: file name must not be None')
         return False
     if len(sFileName) < 1:
-        m_ologger.error('fileExistsOnWasdi: File name too short')
+        m_oLogger.error('fileExistsOnWasdi: File name too short')
         return False
 
     sBaseUrl = getBaseUrl()
@@ -1582,10 +1578,10 @@ def fileExistsOnWasdi(sFileName):
     oResult = requests.get(sUrl, headers=asHeaders)
 
     if oResult is None:
-        m_ologger.error('fileExistsOnWasdi: failed contacting the server')
+        m_oLogger.error('fileExistsOnWasdi: failed contacting the server')
         return False
     elif oResult.ok is not True:
-        m_ologger.error(f'fileExistsOnWasdi: failed, server returned: {oResult.status_code}')
+        m_oLogger.error(f'fileExistsOnWasdi: failed, server returned: {oResult.status_code}')
         return False
     else:
         return oResult.ok
@@ -1598,12 +1594,12 @@ def _unzip(sAttachmentName, sPath):
     :param sPath: both the path where the file is and where it must be unzipped
     :return: None
     """
-    m_ologger.info('_unzip( ' + sAttachmentName + ', ' + sPath + ' )')
+    m_oLogger.info('_unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
-        m_ologger.error('_unzip: path is None')
+        m_oLogger.error('_unzip: path is None')
         return
     if sAttachmentName is None:
-        m_ologger.error('_unzip: attachment to unzip is None')
+        m_oLogger.error('_unzip: attachment to unzip is None')
         return
 
     try:
@@ -1612,7 +1608,7 @@ def _unzip(sAttachmentName, sPath):
         zip_ref.extractall(sPath)
         zip_ref.close()
     except:
-        m_ologger.error('_unzip: failed unzipping')
+        m_oLogger.error('_unzip: failed unzipping')
 
     return
 
@@ -1631,9 +1627,9 @@ def getProductBBOX(sFileName):
 
     try:
         if oResponse is None:
-            m_ologger.error('getProductBBOX: cannot get bbox for product')
+            m_oLogger.error('getProductBBOX: cannot get bbox for product')
         elif oResponse.ok is not True:
-            m_ologger.error(f'getProductBBOX: cannot get bbox product, server returned: {oResponse.status_code}')
+            m_oLogger.error(f'getProductBBOX: cannot get bbox product, server returned: {oResponse.status_code}')
         else:
             oJsonResponse = oResponse.json()
             if "bbox" in oJsonResponse:
@@ -1654,12 +1650,12 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
 
-    m_ologger.info(f'importProductByFileUrl( {sFileUrl}, {sBoundingBox} )')
+    m_oLogger.info(f'importProductByFileUrl( {sFileUrl}, {sBoundingBox} )')
 
     sReturn = "ERROR"
 
     if sFileUrl is None:
-        m_ologger.error('importProductByFileUrl: cannot find a link to download the requested product')
+        m_oLogger.error('importProductByFileUrl: cannot find a link to download the requested product')
         return sReturn
 
     if sProvider is None:
@@ -1677,9 +1673,9 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
 
     oResponse = requests.get(sUrl, headers=asHeaders)
     if oResponse is None:
-        m_ologger.error('importProductByFileUrl: cannot import product')
+        m_oLogger.error('importProductByFileUrl: cannot import product')
     elif oResponse.ok is not True:
-        m_ologger.error(f'importProductByFileUrl: cannot import product, server returned: {oResponse.status_code}')
+        m_oLogger.error(f'importProductByFileUrl: cannot import product, server returned: {oResponse.status_code}')
     else:
         oJsonResponse = oResponse.json()
         if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
@@ -1699,12 +1695,12 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
 
-    m_ologger.info(f'importProductByFileUrl( {sFileUrl}), {sBoundingBox} )')
+    m_oLogger.info(f'importProductByFileUrl( {sFileUrl}), {sBoundingBox} )')
 
     sReturn = "ERROR"
 
     if sFileUrl is None:
-        m_ologger.error('importProductByFileUrl: cannot find a link to download the requested product')
+        m_oLogger.error('importProductByFileUrl: cannot find a link to download the requested product')
         return sReturn
 
     if sProvider is None:
@@ -1721,9 +1717,9 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
 
     oResponse = requests.get(sUrl, headers=asHeaders)
     if oResponse is None:
-        m_ologger.error('importProductByFileUrl: cannot import product')
+        m_oLogger.error('importProductByFileUrl: cannot import product')
     elif oResponse.ok is not True:
-        m_ologger.error(f'importProductByFileUrl: cannot import product, server returned: {oResponse.status_code}')
+        m_oLogger.error(f'importProductByFileUrl: cannot import product, server returned: {oResponse.status_code}')
     else:
         oJsonResponse = oResponse.json()
         if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
@@ -1742,10 +1738,10 @@ def importProduct(asProduct, sProvider=None):
     """
 
     if asProduct is None:
-        m_ologger.error("importProduct: input asPRoduct is none")
+        m_oLogger.error("importProduct: input asPRoduct is none")
         return "ERROR"
 
-    m_ologger.info(f'importProduct( {asProduct} )')
+    m_oLogger.info(f'importProduct( {asProduct} )')
 
     try:
         sBoundingBox = None
@@ -1755,7 +1751,7 @@ def importProduct(asProduct, sProvider=None):
 
         return importProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
     except Exception as e:
-        m_ologger.error(f"importProduct: exception {e}")
+        m_oLogger.error(f"importProduct: exception {e}")
         return "ERROR"
 
 
@@ -1768,10 +1764,10 @@ def asynchImportProduct(asProduct, sProvider=None):
     """
 
     if asProduct is None:
-        m_ologger.error("importProduct: input asPRoduct is none")
+        m_oLogger.error("importProduct: input asPRoduct is none")
         return "ERROR"
 
-    m_ologger.info(f'importProduct( {asProduct} )')
+    m_oLogger.info(f'importProduct( {asProduct} )')
 
     try:
         sBoundingBox = None
@@ -1781,7 +1777,7 @@ def asynchImportProduct(asProduct, sProvider=None):
 
         return asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
     except Exception as e:
-        m_ologger.error(f"importProduct: exception {e}")
+        m_oLogger.error(f"importProduct: exception {e}")
         return "ERROR"
 
 
@@ -1794,10 +1790,10 @@ def importProductList(aasProduct, sProvider=None):
     """
 
     if aasProduct is None:
-        m_ologger.error("importProductList: input asPRoduct is none")
+        m_oLogger.error("importProductList: input asPRoduct is none")
         return "ERROR"
 
-    m_ologger.info(f'importProductList( {aasProduct} )')
+    m_oLogger.info(f'importProductList( {aasProduct} )')
 
     asReturnList = []
 
@@ -1817,7 +1813,7 @@ def importProductList(aasProduct, sProvider=None):
             asReturnList.append(sReturn)
         except Exception as e:
             # Error!!
-            m_ologger.error(f"importProductList: exception {e}")
+            m_oLogger.error(f"importProductList: exception {e}")
             asReturnList.append("ERROR")
 
     return waitProcesses(asReturnList)
@@ -1832,10 +1828,10 @@ def asynchImportProductList(aasProduct, sProvider=None):
     """
 
     if aasProduct is None:
-        m_ologger.error("importProductList: input asPRoduct is none")
+        m_oLogger.error("importProductList: input asPRoduct is none")
         return "ERROR"
 
-    m_ologger.info(f'importProductList( {aasProduct} )')
+    m_oLogger.info(f'importProductList( {aasProduct} )')
 
     asReturnList = []
 
@@ -1854,7 +1850,7 @@ def asynchImportProductList(aasProduct, sProvider=None):
             asReturnList.append(sReturn)
         except Exception as e:
             # Error!!
-            m_ologger.error(f"importProductList: exception {e}")
+            m_oLogger.error(f"importProductList: exception {e}")
             asReturnList.append("ERROR")
 
     # In the ASYNCH MODE return the list of process Id
@@ -1918,23 +1914,25 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     :return: processor ID
     """
 
-    m_ologger.info(f'asynchExecuteProcessor( {sProcessorName}, {aoParams} )')
+    m_oLogger.info(f'asynchExecuteProcessor( {sProcessorName}, {aoParams} )')
 
     if sProcessorName is None:
-        m_ologger.error('asynchExecuteProcessor: processor name is None, aborting')
+        m_oLogger.error('asynchExecuteProcessor: processor name is None, aborting')
         return ''
     elif len(sProcessorName) <= 0:
-        m_ologger.error('asynchExecuteProcessor: processor name empty, aborting')
+        m_oLogger.error('asynchExecuteProcessor: processor name empty, aborting')
         return ''
     if isinstance(aoParams, dict) is not True:
-        m_ologger.error('asynchExecuteProcessor: parameters must be a dictionary but it is not, aborting')
+        m_oLogger.error('asynchExecuteProcessor: parameters must be a dictionary but it is not, aborting')
         return ''
 
     sEncodedParams = json.dumps(aoParams)
     asHeaders = _getStandardHeaders()
-    aoWasdiParams = {'workspace': m_sActiveWorkspace,
-                     'name': sProcessorName,
-                     'encodedJson': sEncodedParams}
+    aoWasdiParams = {
+        'workspace': m_sActiveWorkspace,
+        'name': sProcessorName,
+        'encodedJson': sEncodedParams
+    }
 
     if m_bIsOnServer:
         aoWasdiParams['parent'] = getProcId()
@@ -1943,18 +1941,18 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
 
     oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams)
     if oResponse is None:
-        m_ologger.error('asynchExecuteProcessor: something broke when contacting the server, aborting')
+        m_oLogger.error('asynchExecuteProcessor: something broke when contacting the server, aborting')
         return ''
     elif oResponse.ok is True:
-        m_ologger.info('asynchExecuteProcessor: API call OK')
+        m_oLogger.info('asynchExecuteProcessor: API call OK')
         aoJson = oResponse.json()
         if "processingIdentifier" in aoJson:
             sProcessID = aoJson['processingIdentifier']
             return sProcessID
         else:
-            m_ologger.error('asynchExecuteProcessor: cannot extract processing identifier from response, aborting')
+            m_oLogger.error('asynchExecuteProcessor: cannot extract processing identifier from response, aborting')
     else:
-        m_ologger.error(f'asynchExecuteProcessor: server returned status {oResponse.status_code}')
+        m_oLogger.error(f'asynchExecuteProcessor: server returned status {oResponse.status_code}')
 
     return ''
 
@@ -1972,9 +1970,11 @@ def executeProcessor(sProcessorName, aoProcessParams):
 
     sEncodedParams = json.dumps(aoProcessParams)
     asHeaders = _getStandardHeaders()
-    aoParams = {'workspace': m_sActiveWorkspace,
-                'name': sProcessorName,
-                'encodedJson': sEncodedParams}
+    aoParams = {
+        'workspace': m_sActiveWorkspace,
+        'name': sProcessorName,
+        'encodedJson': sEncodedParams
+    }
 
     if m_bIsOnServer:
         aoParams['parent'] = getProcId()
@@ -2003,11 +2003,11 @@ def waitProcess(sProcessId):
     :return: output status of the process
     """
     if sProcessId is None:
-        m_ologger.error('waitProcess: Passed None, expected a process ID')
+        m_oLogger.error('waitProcess: Passed None, expected a process ID')
         return "ERROR"
 
     if sProcessId == '':
-        m_ologger.error('waitProcess: Passed empty, expected a process ID')
+        m_oLogger.error('waitProcess: Passed empty, expected a process ID')
         return "ERROR"
 
     # Put this processor in WAITING
@@ -2020,7 +2020,7 @@ def waitProcess(sProcessId):
             sStatus = getProcessStatus(sProcessId)
             time.sleep(2)
     except:
-        m_ologger.error("Exception in the waitProcess")
+        m_oLogger.error("Exception in the waitProcess")
 
     # Wait to be resumed
     _waitForResume()
@@ -2035,16 +2035,16 @@ def _waitForResume():
 
         try:
             # Wait for the WASDI Scheduler to resume us
-            m_ologger.info("Waiting for the scheduler to resume this process")
+            m_oLogger.info("Waiting for the scheduler to resume this process")
             sStatus = ''
 
             while sStatus not in {"RUNNING", "DONE", "STOPPED", "ERROR"}:
                 sStatus = getProcessStatus(getProcId())
                 time.sleep(2)
 
-            m_ologger.info("Process Resumed, let's go!")
-        except:
-            _log("Exception in the _waitForResume")
+            m_oLogger.info("Process Resumed, let's go!")
+        except Exception as oE:
+            m_oLogger.error(f'_waitForResume: {oE}')
 
 
 def waitProcesses(asProcIdList):
@@ -2062,11 +2062,11 @@ def waitProcesses(asProcIdList):
 
     # Check the input
     if asProcIdList is None:
-        m_ologger.warning("waitProcesses asProcIdList is none, return empty list")
+        m_oLogger.warning("waitProcesses asProcIdList is none, return empty list")
         return asReturnStatus;
 
     if not isinstance(asProcIdList, list):
-        m_ologger.warning("waitProcesses asProcIdList is not a list, return empty list")
+        m_oLogger.warning("waitProcesses asProcIdList is not a list, return empty list")
         return asReturnStatus;
 
     # Temporary List
@@ -2103,7 +2103,7 @@ def waitProcesses(asProcIdList):
                 # Check if is done
             if sStatus == "DONE" or sStatus == "STOPPED" or sStatus == "ERROR":
                 # Ok one less
-                m_ologger.info("Process " + sProcessId + " finished with status " + sStatus)
+                m_oLogger.info("Process " + sProcessId + " finished with status " + sStatus)
             else:
                 # Not yet, we still need to wait this
                 asNewList.append(sProcessId)
@@ -2152,10 +2152,10 @@ def uploadFile(sFileName):
     :return: True if succeded, False otherwise
     """
 
-    m_ologger.info(f'upload( {sFileName} )')
+    m_oLogger.info(f'upload( {sFileName} )')
 
     if sFileName is None:
-        m_ologger.error('upload: the given file name is None, cannot upload')
+        m_oLogger.error('upload: the given file name is None, cannot upload')
         return False
     if sFileName.startswith('.'):
         sFileName = sFileName[1:]
@@ -2180,7 +2180,7 @@ def _normPath(sPath):
     """
 
     if sPath is None:
-        m_ologger.error('_normPath: passed path is None')
+        m_oLogger.error('_normPath: passed path is None')
         return None
 
     sPath = sPath.replace('/', os.path.sep)
@@ -2208,31 +2208,31 @@ def asynchAddFileToWASDI(sFileName):
 
 
 def _internalAddFileToWASDI(sFileName, bAsynch=None):
-    m_ologger.info(f'_internalAddFileToWASDI( {sFileName}, {bAsynch} )')
+    m_oLogger.info(f'_internalAddFileToWASDI( {sFileName}, {bAsynch} )')
 
     if sFileName is None:
-        m_ologger.error('_internalAddFileToWASDI: file name is None, aborting')
+        m_oLogger.error('_internalAddFileToWASDI: file name is None, aborting')
         return ''
     if not isinstance(sFileName, str):
-        m_ologger.warning('_internalAddFileToWASDI: file name is not a string, trying conversion')
+        m_oLogger.warning('_internalAddFileToWASDI: file name is not a string, trying conversion')
         try:
             sFileName = str(sFileName)
         except:
-            m_ologger.error('_internalAddFileToWASDI: cannot convert file name into string, aborting')
+            m_oLogger.error('_internalAddFileToWASDI: cannot convert file name into string, aborting')
             return ''
     if len(sFileName) < 1:
-        m_ologger.error('_internalAddFileToWASDI: file name has zero length, aborting')
+        m_oLogger.error('_internalAddFileToWASDI: file name has zero length, aborting')
         return ''
 
     if bAsynch is None:
-        m_ologger.warning('_internalAddFileToWASDI: asynch flag is None, assuming False')
+        m_oLogger.warning('_internalAddFileToWASDI: asynch flag is None, assuming False')
         bAsynch = False
     if not isinstance(bAsynch, bool):
-        m_ologger.warning('_internalAddFileToWASDI: asynch flag is not a boolean, trying casting')
+        m_oLogger.warning('_internalAddFileToWASDI: asynch flag is not a boolean, trying casting')
         try:
             bAsynch = bool(bAsynch)
         except:
-            m_ologger.error('_internalAddFileToWASDI: could not convert asynch flag into bool, aborting')
+            m_oLogger.error('_internalAddFileToWASDI: could not convert asynch flag into bool, aborting')
             return ''
 
     sResult = ''
@@ -2240,12 +2240,12 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
         if getUploadActive() is True:
             sFilePath = os.path.join(getSavePath(), sFileName)
             if fileExistsOnWasdi(sFilePath) is False:
-                m_ologger.info('_internalAddFileToWASDI: remote file is missing, uploading')
+                m_oLogger.info('_internalAddFileToWASDI: remote file is missing, uploading')
                 try:
                     uploadFile(sFileName)
-                    m_ologger.info('_internalAddFileToWASDI: file uploaded, keep on working!')
+                    m_oLogger.info('_internalAddFileToWASDI: file uploaded, keep on working!')
                 except:
-                    m_ologger.error('_internalAddFileToWASDI: could not proceed with upload')
+                    m_oLogger.error('_internalAddFileToWASDI: could not proceed with upload')
 
         sUrl = getBaseUrl() + "/catalog/upload/ingestinws?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
 
@@ -2256,9 +2256,9 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(url=sUrl, headers=asHeaders)
         if oResponse is None:
-            m_ologger.error('_internalAddFileToWASDI: cannot contact server')
+            m_oLogger.error('_internalAddFileToWASDI: cannot contact server')
         elif oResponse.ok is not True:
-            m_ologger.error(f'_internalAddFileToWASDI: failed, server replied {oResponse.status_code}')
+            m_oLogger.error(f'_internalAddFileToWASDI: failed, server replied {oResponse.status_code}')
         else:
             oJson = oResponse.json()
             if 'stringValue' in oJson:
@@ -2270,9 +2270,9 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
                     else:
                         sResult = waitProcess(sProcessId)
                 else:
-                    m_ologger.error('_internalAddFileToWASDI: impossible to ingest the file in WASDI')
+                    m_oLogger.error('_internalAddFileToWASDI: impossible to ingest the file in WASDI')
     except:
-        m_ologger.error('_internalAddFileToWASDI: something broke alongside')
+        m_oLogger.error('_internalAddFileToWASDI: something broke alongside')
 
     return sResult
 
@@ -2287,19 +2287,19 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     :param dLatS: Latitude South of the subset
     :param dLonE: Longitude Est of the subset
     """
-    m_ologger.info(f'subset( {sInputFile}, {sOutputFile}, {dLatN}, {dLonW}, {dLatS}, {dLonE} )')
+    m_oLogger.info(f'subset( {sInputFile}, {sOutputFile}, {dLatN}, {dLonW}, {dLatS}, {dLonE} )')
 
     if sInputFile is None:
-        m_ologger.error('subset: input file must not be None, aborting')
+        m_oLogger.error('subset: input file must not be None, aborting')
         return ''
     if len(sInputFile) < 1:
-        m_ologger.error('subset: input file name must not have zero length, aborting')
+        m_oLogger.error('subset: input file name must not have zero length, aborting')
         return ''
     if sOutputFile is None:
-        m_ologger.error('subset: output file must not be None, aborting')
+        m_oLogger.error('subset: output file must not be None, aborting')
         return ''
     if len(sOutputFile) < 1:
-        m_ologger.error('subset: output file name len must not have zero length, aborting')
+        m_oLogger.error('subset: output file name len must not have zero length, aborting')
         return ''
 
     sUrl = f'{m_sBaseUrl}/processing/geometric/subset?sSourceProductName={sInputFile}'
@@ -2316,10 +2316,10 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     asHeaders = _getStandardHeaders()
     oResponse = requests.get(sUrl, data=sSubsetSetting, headers=asHeaders)
     if oResponse is None:
-        m_ologger.error('subset: cannot contact server')
+        m_oLogger.error('subset: cannot contact server')
         return ''
     if oResponse.ok is not True:
-        m_ologger.error(f'subset: failed, server returned {oResponse.status_code}')
+        m_oLogger.error(f'subset: failed, server returned {oResponse.status_code}')
         return ''
     else:
         oJson = oResponse.json()
@@ -2342,23 +2342,23 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
     :param dLonE: Array of Longitude Est of the subset
     """
 
-    m_ologger.info(f'multiSubset( {sInputFile}, {asOutputFiles}, {adLatN}, {adLonW}, {adLatS}, {adLonE} )')
+    m_oLogger.info(f'multiSubset( {sInputFile}, {asOutputFiles}, {adLatN}, {adLonW}, {adLatS}, {adLonE} )')
 
     if sInputFile is None:
-        m_ologger.error('multiSubset: input file must not be None, aborting')
+        m_oLogger.error('multiSubset: input file must not be None, aborting')
         return ''
     if len(sInputFile) < 1:
-        m_ologger.error('multiSubset: input file name must not have zero length, aborting')
+        m_oLogger.error('multiSubset: input file name must not have zero length, aborting')
         return ''
     if asOutputFiles is None:
-        m_ologger.error('multiSubset: output files must not be None, aborting')
+        m_oLogger.error('multiSubset: output files must not be None, aborting')
         return ''
     if len(asOutputFiles) < 1:
-        m_ologger.error('multiSubset: output file names len must not have zero length, aborting')
+        m_oLogger.error('multiSubset: output file names len must not have zero length, aborting')
         return ''
 
     if len(asOutputFiles) > 10:
-        m_ologger.error('multiSubset: max allowed 10 tiles per call')
+        m_oLogger.error('multiSubset: max allowed 10 tiles per call')
         return ''
 
     sUrl = f'{m_sBaseUrl}/processing/geometric/multisubset?sSourceProductName={sInputFile}&sDestinationProductName={sInputFile}&sWorkspaceId={m_sActiveWorkspace}'
@@ -2381,11 +2381,11 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
     oResponse = requests.post(sUrl, headers=asHeaders, data=sSubsetSetting)
 
     if oResponse is None:
-        m_ologger.error('multiSubset: cannot contact server')
+        m_oLogger.error('multiSubset: cannot contact server')
         return ''
 
     if oResponse.ok is not True:
-        m_ologger.error(f'multiSubset: failed, server returned {oResponse.status_code}')
+        m_oLogger.error(f'multiSubset: failed, server returned {oResponse.status_code}')
         return ''
     else:
         oJson = oResponse.json()
@@ -2430,7 +2430,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     :return: processID if asynch, status of the executed process if synch, empty string in case of failure
     """
 
-    m_ologger.info(f'_internalExecuteWorkflow( {asInputFileNames}, {asOutputFileNames}, {sWorkflowName}, {bAsynch} )')
+    m_oLogger.info(f'_internalExecuteWorkflow( {asInputFileNames}, {asOutputFileNames}, {sWorkflowName}, {bAsynch} )')
 
     # if we got only a single file input, let transform it in an array
     if not isinstance(asInputFileNames, list):
@@ -2440,24 +2440,24 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         asOutputFileNames = [asOutputFileNames]
 
     if asInputFileNames is None:
-        m_ologger.error('_internalExecuteWorkflow: input file names None, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: input file names None, aborting')
         return ''
     elif len(asInputFileNames) <= 0:
-        m_ologger.error('_internalExecuteWorkflow: no input file names, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: no input file names, aborting')
         return ''
 
     if asOutputFileNames is None:
-        m_ologger.error('_internalExecuteWorkflow: output file names None, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: output file names None, aborting')
         return ''
     # elif len(asOutputFileNames) <= 0:
     #     m_logger.error('_internalExecuteWorkflow: no output file names, aborting')
     #     return ''
 
     if sWorkflowName is None:
-        m_ologger.error('_internalExecuteWorkflow: workspace name is None, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: workspace name is None, aborting')
         return ''
     elif len(sWorkflowName) <= 0:
-        m_ologger.error('_internalExecuteWorkflow: workflow name too short, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: workflow name too short, aborting')
         return ''
 
     sProcessId = ''
@@ -2475,10 +2475,10 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     aoWorkflows = getWorkflows()
     aoDictPayload = None
     if aoWorkflows is None:
-        m_ologger.error('_internalExecuteWorkflow: workflow list is None, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: workflow list is None, aborting')
         return ''
     elif len(aoWorkflows) <= 0:
-        m_ologger.error('_internalExecuteWorkflow: workflow list is empty, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: workflow list is empty, aborting')
         return ''
     else:
         for asWorkflow in aoWorkflows:
@@ -2493,24 +2493,24 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
                             aoDictPayload["workflowId"] = asWorkflow["workflowId"]
                             break
     if aoDictPayload is None:
-        m_ologger.error('_internalExecuteWorkflow: workflow name not found, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: workflow name not found, aborting')
         return ''
 
     try:
         aoDictPayload["inputFileNames"] = asInputFileNames
         aoDictPayload["outputFileNames"] = asOutputFileNames
     except:
-        m_ologger.error('_internalExecuteWorkflow: payload could not be generated, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: payload could not be generated, aborting')
         return ''
 
-    m_ologger.info(f'_internalExecuteWorkflow: about to HTTP put to {sUrl} with payload {aoDictPayload}')
+    m_oLogger.info(f'_internalExecuteWorkflow: about to HTTP put to {sUrl} with payload {aoDictPayload}')
     asHeaders = _getStandardHeaders()
     oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload))
     if oResponse is None:
-        m_ologger.error('_internalExecuteWorkflow: communication with the server failed, aborting')
+        m_oLogger.error('_internalExecuteWorkflow: communication with the server failed, aborting')
         return ''
     elif oResponse.ok is True:
-        m_ologger.info('_internalExecuteWorkflow: server replied OK')
+        m_oLogger.info('_internalExecuteWorkflow: server replied OK')
         asJson = oResponse.json()
         if "stringValue" in asJson:
             sProcessId = asJson["stringValue"]
@@ -2519,11 +2519,11 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
             else:
                 return waitProcess(sProcessId)
         else:
-            m_ologger.error('_internalExecuteWorkflow: cannot find process ID in response, aborting')
+            m_oLogger.error('_internalExecuteWorkflow: cannot find process ID in response, aborting')
             return ''
     else:
-        m_ologger.error(f'_internalExecuteWorkflow: server returned status {oResponse.status_code}')
-        m_ologger.error(str(oResponse.content))
+        m_oLogger.error(f'_internalExecuteWorkflow: server returned status {oResponse.status_code}')
+        m_oLogger.error(str(oResponse.content))
     return ''
 
 
@@ -2541,7 +2541,13 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, True)
 
 
-def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, bAsynch=False):
+def mosaic(
+        asInputFiles: list,
+        sOutputFile: str,
+        iNoDataValue: int = None,
+        iIgnoreInputValue: int = None,
+        bAsynch: bool = False
+) -> str:
     """
     Creates a mosaic out of a set of images
 
@@ -2568,23 +2574,23 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     bNativeResolution = True
     sCombine = "OR"
 
-    m_ologger.info(f'mosaic( {asInputFiles}, {sOutputFile}, {iNoDataValue}, {iIgnoreInputValue}, {bAsynch} )')
+    m_oLogger.info(f'mosaic( {asInputFiles}, {sOutputFile}, {iNoDataValue}, {iIgnoreInputValue}, {bAsynch} )')
 
     if asInputFiles is None:
-        m_ologger.error('mosaic: list of input files is None, aborting')
+        m_oLogger.error('mosaic: list of input files is None, aborting')
         return ''
     elif len(asInputFiles) <= 0:
-        m_ologger.error('mosaic: list of input files is empty, aborting')
+        m_oLogger.error('mosaic: list of input files is empty, aborting')
         return ''
 
     if sOutputFile is None:
-        m_ologger.error('mosaic: name of output file is None, aborting')
+        m_oLogger.error('mosaic: name of output file is None, aborting')
         return ''
     elif isinstance(sOutputFile, str) is False:
-        m_ologger.error(f'mosaic: output file name must be a string, but a {type(sOutputFile)} was passed, aborting')
+        m_oLogger.error(f'mosaic: output file name must be a string, but a {type(sOutputFile)} was passed, aborting')
         return ''
     elif len(sOutputFile) <= 0:
-        m_ologger.error('mosaic: output file name is empty, aborting')
+        m_oLogger.error('mosaic: output file name is empty, aborting')
         return ''
 
     sUrl = f'{getBaseUrl()}/processing/geometric/mosaic?sDestinationProductName={sOutputFile}&sWorkspaceId={getActiveWorkspaceId()}'
@@ -2601,7 +2607,6 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     if sCrs is None:
         sCrs = _getDefaultCRS()
 
-    # todo check input type is appropriate
     try:
         aoMosaicSettings = {
             'crs': sCrs,
@@ -2626,13 +2631,13 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
             'variableExpressions': []
         }
     except:
-        m_ologger.error('mosaic: cannot build DTO, please check your input. Aborting')
+        m_oLogger.error('mosaic: cannot build DTO, please check your input. Aborting')
         return ''
 
     asHeaders = _getStandardHeaders()
     oResponse = requests.post(sUrl, data=json.dumps(aoMosaicSettings), headers=asHeaders)
     if oResponse is None:
-        m_ologger.error('mosaic: cannot contact server, aborting')
+        m_oLogger.error('mosaic: cannot contact server, aborting')
         return ''
     if oResponse.ok is True:
         asJson = oResponse.json()
@@ -2643,7 +2648,7 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
             else:
                 return sProcessId
     else:
-        m_ologger.error(f'mosaic: server responded with status: {oResponse.status_code}, aborting')
+        m_oLogger.error(f'mosaic: server responded with status: {oResponse.status_code}, aborting')
         return ''
 
     return ''
@@ -2662,5 +2667,5 @@ def _getDefaultCRS():
 
 
 if __name__ == '__main__':
-    m_ologger.info('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit '
-                  'www.wasdi.net')
+    m_oLogger.info('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit '
+                   'www.wasdi.net')
