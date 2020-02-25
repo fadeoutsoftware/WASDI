@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
+import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -12,6 +13,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 import wasdi.shared.business.Review;
 import wasdi.shared.utils.Utils;
@@ -19,6 +23,7 @@ import wasdi.shared.utils.Utils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -180,4 +185,33 @@ public class MongoRepository {
 
         return  false;
     }
+	
+//	public void uploadImage (File oImageFile){
+//		
+//		GridFS gfsPhoto = new GridFS( s_oMongoClient.getDB(dbName), "userphotos");
+//
+//		String newFileName = "userimage";
+//		try {
+//			GridFSInputFile gfsFile = gfsPhoto.createFile(oImageFile);
+//			gfsFile.setFilename(newFileName);
+//			gfsFile.save();
+//
+//		} catch (IOException e) {
+//			Utils.debugLog("MongoRepository.uploadImage:" + e);
+//			e.printStackTrace();
+//		}
+//	}
+//	public void getImage (){
+//		GridFS gfsPhoto = new GridFS((DB) s_oMongoDatabase, "photo");
+//		String newFileName = "userimage";
+//		GridFSDBFile imageForOutput = gfsPhoto.findOne(newFileName);
+//		// save it into a new image file
+//		try {
+//			imageForOutput.writeTo("C:\\temp\\wasdi\\data\\alessio");
+//		} catch (IOException e) {
+//			Utils.debugLog("MongoRepository.getImage:" + e);
+//			e.printStackTrace();
+//		}
+//	}
+	
 }

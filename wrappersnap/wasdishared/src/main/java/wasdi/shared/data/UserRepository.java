@@ -12,6 +12,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.business.ImageFile;
 import wasdi.shared.business.User;
 
 /**
@@ -184,5 +185,6 @@ public class UserRepository extends  MongoRepository{
     	}
  	
     }
+
 
 }

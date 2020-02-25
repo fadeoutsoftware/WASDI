@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
@@ -67,8 +68,10 @@ public class AuthResource extends BaseResource{
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	
 	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
-	final String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
-	final String USER_IMAGE_FOLDER = "C:\\temp\\wasdi\\data\\alessio\\userImage";
+	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
+	final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
+	final String USER_IMAGE_FOLDER_NAME = "userImage";
+			
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
 	final UserRepository m_oUserRepository = new UserRepository();
 	@Context
@@ -438,18 +441,44 @@ public class AuthResource extends BaseResource{
 			return Response.status(400).build();
 		}
 		
-		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_EXTENSIONS) == false) {
+		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS) == false) {
 			return Response.status(400).build();
 		}
-		
-		oImageResourceUtils.createDirectory( USER_IMAGE_FOLDER );
-	    String sOutputFilePath = USER_IMAGE_FOLDER + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+		String sPath = USER_IMAGE_PATH_FOLDER + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		oImageResourceUtils.createDirectory(sPath);
+	    String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
 	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
 	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
 	    if(bIsSaved == false ){
 	    	return Response.status(400).build();
 	    }
 		return Response.status(200).build();
+	}
+	
+	@GET
+	@Path("/get/userimage")
+	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sPath = USER_IMAGE_PATH_FOLDER + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
+		ImageFile oUserImage = oImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		String sImageExtension = oImageResourceUtils.checkExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		
+		//Check the image and extension
+		if(oUserImage == null || sImageExtension.isEmpty() ){
+			return Response.status(204).build();
+		}
+		//prepare buffer and send the logo to the client 
+		ByteArrayInputStream abImageLogo = oUserImage.getByteArrayImage();
+		
+	    return Response.ok(abImageLogo).build();
+
 	}
 	
 	
