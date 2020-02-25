@@ -74,27 +74,30 @@ public class ReviewRepository extends MongoRepository {
     }
     
     //TODO FIX THIS FUNCTION 
-//	public boolean isTheOwnerOfTheReview(String sProcessorId, String sReviewId ,String sUserId) {
-//		boolean bAlreadyVoted = false;
-//
-//			try {
-//				
-//				BasicDBObject oCriteria = new BasicDBObject();
-//				oCriteria.append("processorId", sProcessorId);
-//				oCriteria.append("id", sReviewId);
-//				oCriteria.append("userId", sUserId);
-//				Document oWSDocument = getCollection(COLLECTION_NAME).find(oCriteria).first();
-//				if(oWSDocument != null ){
-//					bAlreadyVoted = true;
-//				}
-//				
-//			} catch (Exception oEx) {
-//				Utils.debugLog("ReviewRepository.InsertReview: " + oEx);
-//			}
-//		
-//		return bAlreadyVoted;
-//	}
-//    
+	public boolean isTheOwnerOfTheReview(String sProcessorId, String sReviewId ,String sUserId) {
+		boolean bIsTheOwner = false;
+
+        final ArrayList<Review> aoReturnList = new ArrayList<Review>();
+        try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("processorId", sProcessorId);
+    		oCriteria.append("id", sReviewId);
+    		oCriteria.append("userId", sUserId);
+
+            FindIterable<Document> oWSDocuments = getCollection(COLLECTION_NAME).find(oCriteria);
+            fillList(aoReturnList, oWSDocuments, "ReviewRepository", Review.class);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        if(aoReturnList.size() > 0){
+        	bIsTheOwner = true;
+        }
+		
+		return bIsTheOwner;
+	}
+    
 	public boolean alreadyVoted(Review oReview) {
 		boolean bAlreadyVoted = false;
 		if(oReview != null) {

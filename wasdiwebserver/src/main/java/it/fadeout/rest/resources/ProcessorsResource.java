@@ -1155,7 +1155,7 @@ public class ProcessorsResource extends BaseResource{
 		
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 //		|| (m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false)
-		if( (oProcessor.getUserId().toLowerCase().equals( oUser.getUserId().toLowerCase() ) == false)  ){
+		if( m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false ){
 			return Response.status(401).build();
 		}
 		
@@ -1174,7 +1174,7 @@ public class ProcessorsResource extends BaseResource{
 	@Path("/updatereview")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
 	
-		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
+
 
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -1191,8 +1191,8 @@ public class ProcessorsResource extends BaseResource{
 		
 //		|| (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false)
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
-		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false  ){
-			return Response.status(400).build();
+		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false || (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false) ){
+			return Response.status(401).build();
 		}
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
