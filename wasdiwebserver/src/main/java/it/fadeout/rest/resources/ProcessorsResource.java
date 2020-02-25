@@ -1468,42 +1468,16 @@ public class ProcessorsResource extends BaseResource {
 	
 	//return null if there isn't any saved logo
 	private ImageFile getLogoInFolder(String sPathLogoFolder){
-		ImageFile oLogo = null;
-		String sLogoExtension = getExtensionOfSavedLogo(sPathLogoFolder);
-		if(sLogoExtension.isEmpty() == false){
-			oLogo = new ImageFile(sPathLogoFolder + DEFAULT_LOGO_PROCESSOR_NAME + "." + sLogoExtension );
-		}
-		return oLogo;
-		
+		return oImageResourceUtils.getImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
 	}
 	
 	
 	//return empty string if there isn't any saved logo
 	private String getExtensionOfSavedLogo (String sPathLogoFolder){
-		File oLogo = null;
-		String sExtensionReturnValue = "";
-		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
-			oLogo = new File(sPathLogoFolder + DEFAULT_LOGO_PROCESSOR_NAME + "." + sValidExtension );
-		    if (oLogo.exists()){
-		    	sExtensionReturnValue = sValidExtension;
-		    	break;
-		    }
-
-		}
-		return sExtensionReturnValue;
+		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
 	}
 	
 
-	
-//	private boolean isValidExtension(String sExt){
-//		//Check if the extension is valid
-//		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
-//			  if(sValidExtension.equals(sExt.toLowerCase()) ){
-//				  return true;
-//			  }
-//		}
-//		return false;
-//	}
 	
 	private Processor getProcessor(String sProcessorId){
 	
