@@ -1040,7 +1040,7 @@ public class ProcessorsResource extends BaseResource {
 		}
 		
 		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
-		deleteFileInFolder(sPathFolder,sImageName);
+		oImageResourceUtils.deleteFileInFolder(sPathFolder,sImageName);
 		
 		return Response.status(200).build();
 	}
@@ -1385,28 +1385,20 @@ public class ProcessorsResource extends BaseResource {
 		return aoAppCategoriesViewModel;
 	} 
 	
-	private void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
-		File oFolder = new File(sPathFolder);
-		File[] aoListOfFiles = oFolder.listFiles();
-		for (File oImage : aoListOfFiles){ 
-			String sName = oImage.getName();
-			String sFileName = FilenameUtils.removeExtension(sName);	
-			
-			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
-				oImage.delete();
-				break;
-			} 
-			
-		}
-	}
-	
-//	private void createDirectory(String sPath){
-//		File oDirectory = new File(sPath);
-//		//create directory
-//	    if (! oDirectory.exists()){
-//	    	oDirectory.mkdir();
-//	    }
-//	} 
+//	private void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
+//		File oFolder = new File(sPathFolder);
+//		File[] aoListOfFiles = oFolder.listFiles();
+//		for (File oImage : aoListOfFiles){ 
+//			String sName = oImage.getName();
+//			String sFileName = FilenameUtils.removeExtension(sName);	
+//			
+//			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
+//				oImage.delete();
+//				break;
+//			} 
+//			
+//		}
+//	}
 
 	
 	// return a free name for the image (if is possible) 
