@@ -848,7 +848,7 @@ public class ProcessorsResource extends BaseResource {
 			}
 			
 			// Create file
-			File oProcessorFile = new File(sDownloadRootPath+"/processors/" + oProcessorToUpdate.getName() + "/" + sProcessorId + ".zip");
+			File oProcessorFile = new File(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName() + "/" + sProcessorId + ".zip");
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
 			
 			//save uploaded file
@@ -930,7 +930,7 @@ public class ProcessorsResource extends BaseResource {
 		    oOldLogo.delete();
 		}
 			
-		createDirectory(sPath);
+		oImageResourceUtils.createDirectory(sPath);
 	    
 	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
 	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
@@ -1087,7 +1087,7 @@ public class ProcessorsResource extends BaseResource {
 		}
 		// Take path
 		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
-		createDirectory(sPathFolder);
+		oImageResourceUtils.createDirectory(sPathFolder);
 		String sAvaibleFileName = getAvaibleFileName(sPathFolder);
 		
 		if(sAvaibleFileName.isEmpty()){
@@ -1400,13 +1400,13 @@ public class ProcessorsResource extends BaseResource {
 		}
 	}
 	
-	private void createDirectory(String sPath){
-		File oDirectory = new File(sPath);
-		//create directory
-	    if (! oDirectory.exists()){
-	    	oDirectory.mkdir();
-	    }
-	} 
+//	private void createDirectory(String sPath){
+//		File oDirectory = new File(sPath);
+//		//create directory
+//	    if (! oDirectory.exists()){
+//	    	oDirectory.mkdir();
+//	    }
+//	} 
 
 	
 	// return a free name for the image (if is possible) 

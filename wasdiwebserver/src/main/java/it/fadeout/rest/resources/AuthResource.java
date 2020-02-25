@@ -68,7 +68,9 @@ public class AuthResource extends BaseResource{
 	
 	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
 	final String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
-	
+	final String USER_IMAGE_FOLDER = "C:\\temp\\wasdi\\data\\alessio\\userImage";
+	final String DEFAULT_USER_IMAGE_NAME = "userimage";
+	final UserRepository m_oUserRepository = new UserRepository();
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -435,8 +437,18 @@ public class AuthResource extends BaseResource{
 		} else {
 			return Response.status(400).build();
 		}
-		oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_EXTENSIONS);
 		
+		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_EXTENSIONS) == false) {
+			return Response.status(400).build();
+		}
+		
+		oImageResourceUtils.createDirectory( USER_IMAGE_FOLDER );
+	    String sOutputFilePath = USER_IMAGE_FOLDER + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
+	    if(bIsSaved == false ){
+	    	return Response.status(400).build();
+	    }
 		return Response.status(200).build();
 	}
 	
