@@ -50,6 +50,11 @@ public class ImageFile extends File {
 		return FilenameUtils.removeExtension(sName);				
 	}
 	
+	public String getExtension(){
+		String sName = this.getName();
+		return FilenameUtils.getExtension(sName);	
+
+	}
 	public boolean resizeImage(int iHeight, int iWidth ){
 		
 		try{
@@ -93,5 +98,6 @@ public class ImageFile extends File {
         g2d.dispose();
         return resized;
     }
+
 
 }

@@ -46,6 +46,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.BaseResource;
+import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Counter;
@@ -75,7 +76,7 @@ import wasdi.shared.viewmodels.ReviewViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
-public class ProcessorsResource extends BaseResource{
+public class ProcessorsResource extends BaseResource {
 	//TODO CHANGE IT
 	final String PROCESSORS_PATH =  "C:\\temp\\wasdi\\data\\processors\\";
 	final String LOGO_PROCESSORS_PATH = "\\logo\\";
@@ -86,6 +87,7 @@ public class ProcessorsResource extends BaseResource{
 	final Integer NUMB_MAX_OF_IMAGES = 5;
 	final String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
 	final String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
+	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
 	AppsCategoriesRepository m_oAppCategoriesRepository = new AppsCategoriesRepository();
 	ReviewRepository m_oReviewRepository = new ReviewRepository();
 	ProcessorRepository m_oProcessorRepository = new ProcessorRepository();
@@ -913,7 +915,7 @@ public class ProcessorsResource extends BaseResource{
 		}
 		
 		
-		if( isValidExtension(sExt) == false ){
+		if(oImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
 			return Response.status(400).build();
 		}
 
@@ -1080,7 +1082,7 @@ public class ProcessorsResource extends BaseResource{
 			return Response.status(400).build();
 		}
 		
-		if( isValidExtension(sExt) == false ){
+		if( oImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
 			return Response.status(400).build();
 		}
 		// Take path
@@ -1493,15 +1495,15 @@ public class ProcessorsResource extends BaseResource{
 	
 
 	
-	private boolean isValidExtension(String sExt){
-		//Check if the extension is valid
-		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
-			  if(sValidExtension.equals(sExt.toLowerCase()) ){
-				  return true;
-			  }
-		}
-		return false;
-	}
+//	private boolean isValidExtension(String sExt){
+//		//Check if the extension is valid
+//		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
+//			  if(sValidExtension.equals(sExt.toLowerCase()) ){
+//				  return true;
+//			  }
+//		}
+//		return false;
+//	}
 	
 	private Processor getProcessor(String sProcessorId){
 	

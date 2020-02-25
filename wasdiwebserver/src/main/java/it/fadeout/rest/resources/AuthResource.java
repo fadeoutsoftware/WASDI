@@ -1,11 +1,13 @@
 package it.fadeout.rest.resources;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -14,14 +16,23 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FilenameUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import it.fadeout.Wasdi;
+import it.fadeout.business.BaseResource;
+import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
+import wasdi.shared.business.ImageFile;
 import wasdi.shared.business.PasswordAuthentication;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
@@ -43,7 +54,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 
 
 @Path("/auth")
-public class AuthResource {
+public class AuthResource extends BaseResource{
 	
 	/**
 	 * Authentication Helper
@@ -54,6 +65,9 @@ public class AuthResource {
 	 * Credential Policy
 	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
+	
+	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
+	final String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -397,7 +411,36 @@ public class AuthResource {
 
 		return Response.ok().build();
 	}
-	 
+	
+	
+	@POST
+	@Path("/upload/userimage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadUserImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId ) {
+	
+		String sExt;
+		String sFileName;
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		//get filename and extension 
+		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
+			sFileName = fileMetaData.getFileName();
+			sExt = FilenameUtils.getExtension(sFileName);
+		} else {
+			return Response.status(400).build();
+		}
+		oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_EXTENSIONS);
+		
+		return Response.status(200).build();
+	}
+	
+	
 	@POST
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
