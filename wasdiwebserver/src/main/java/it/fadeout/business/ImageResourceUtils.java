@@ -2,6 +2,8 @@ package it.fadeout.business;
 
 import java.io.File;
 
+import org.apache.commons.io.FilenameUtils;
+
 import wasdi.shared.business.ImageFile;
 
 public class ImageResourceUtils {
@@ -49,5 +51,20 @@ public class ImageResourceUtils {
 
 		}
 		return sExtensionReturnValue;
+	}
+	
+	public void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
+		File oFolder = new File(sPathFolder);
+		File[] aoListOfFiles = oFolder.listFiles();
+		for (File oImage : aoListOfFiles){ 
+			String sName = oImage.getName();
+			String sFileName = FilenameUtils.removeExtension(sName);	
+			
+			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
+				oImage.delete();
+				break;
+			} 
+			
+		}
 	}
 }

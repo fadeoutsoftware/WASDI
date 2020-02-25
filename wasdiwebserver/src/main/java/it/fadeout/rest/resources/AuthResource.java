@@ -481,6 +481,27 @@ public class AuthResource extends BaseResource{
 
 	}
 	
+	@DELETE
+	@Path("/delete/userimage")
+	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+
+//		final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
+//		final String USER_IMAGE_FOLDER_NAME = "userImage";
+//		final String DEFAULT_USER_IMAGE_NAME = "userimage";
+		
+		String sPathFolder = USER_IMAGE_PATH_FOLDER + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		oImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
+		
+		return Response.status(200).build();
+	}
+	
 	
 	@POST
 	@Path("/logingoogleuser")
