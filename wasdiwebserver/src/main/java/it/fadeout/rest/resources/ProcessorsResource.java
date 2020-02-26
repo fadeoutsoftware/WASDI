@@ -77,8 +77,11 @@ import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
 public class ProcessorsResource extends BaseResource {
-	//TODO CHANGE IT
-	final String PROCESSORS_PATH =  "C:\\temp\\wasdi\\data\\processors\\";
+	
+	@Context
+	ServletConfig m_oServletConfig;
+	
+//	String m_oServletConfig.getInitParameter("ProcessorPath")H =  m_oServletConfig.getInitParameter("ProcessorPath"); //TODO TEST IT 
 	final String LOGO_PROCESSORS_PATH = "\\logo\\";
 	final String IMAGES_PROCESSORS_PATH = "\\images\\";
 	final String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
@@ -91,8 +94,7 @@ public class ProcessorsResource extends BaseResource {
 	AppsCategoriesRepository m_oAppCategoriesRepository = new AppsCategoriesRepository();
 	ReviewRepository m_oReviewRepository = new ReviewRepository();
 	ProcessorRepository m_oProcessorRepository = new ProcessorRepository();
-	@Context
-	ServletConfig m_oServletConfig;
+
 	
 	/**
 	 * Upload a new processor in Wasdi
@@ -920,7 +922,7 @@ public class ProcessorsResource extends BaseResource {
 		}
 
 		// Take path
-		String sPath = PROCESSORS_PATH + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		String sPath = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + LOGO_PROCESSORS_PATH;
 		
 		String sExtensionOfSavedLogo = getExtensionOfSavedLogo(sPath);
 		
@@ -966,7 +968,7 @@ public class ProcessorsResource extends BaseResource {
 			return Response.status(401).build();
 		}
 		
-		String sPathLogoFolder = PROCESSORS_PATH + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		String sPathLogoFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + LOGO_PROCESSORS_PATH;
 		ImageFile oLogo = getLogoInFolder(sPathLogoFolder);
 		String sLogoExtension = getExtensionOfSavedLogo(sPathLogoFolder);
 		
@@ -999,7 +1001,7 @@ public class ProcessorsResource extends BaseResource {
 			return Response.status(401).build();
 		}
 		
-		String sPathLogoFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		String sPathLogoFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
 		ImageFile oImage = getImageInFolder(sPathLogoFolder,sImageName);
 		String sLogoExtension = getExtensionOfSavedImage(sPathLogoFolder,sImageName);
 		
@@ -1039,7 +1041,7 @@ public class ProcessorsResource extends BaseResource {
 			return Response.status(401).build();
 		}
 		
-		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		String sPathFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
 		oImageResourceUtils.deleteFileInFolder(sPathFolder,sImageName);
 		
 		return Response.status(200).build();
@@ -1086,7 +1088,7 @@ public class ProcessorsResource extends BaseResource {
 			return Response.status(400).build();
 		}
 		// Take path
-		String sPathFolder = PROCESSORS_PATH + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		String sPathFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
 		oImageResourceUtils.createDirectory(sPathFolder);
 		String sAvaibleFileName = getAvaibleFileName(sPathFolder);
 		

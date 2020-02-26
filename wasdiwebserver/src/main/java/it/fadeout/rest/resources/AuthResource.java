@@ -57,6 +57,10 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @Path("/auth")
 public class AuthResource extends BaseResource{
 	
+	
+	@Context
+	ServletConfig m_oServletConfig;
+	
 	/**
 	 * Authentication Helper
 	 */
@@ -69,15 +73,11 @@ public class AuthResource extends BaseResource{
 	
 	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
 	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
-	final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
-	final String USER_IMAGE_FOLDER_NAME = "userImage";
-			
+//	String m_oServletConfig.getInitParameter("DownloadRootPath") = m_oServletConfig.getInitParameter("DownloadRootPath"); //TODO TEST IT 
+	final String USER_IMAGE_FOLDER_NAME = "userImage";			
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
 	final UserRepository m_oUserRepository = new UserRepository();
-	
-	
-	@Context
-	ServletConfig m_oServletConfig;
+
 	
 	@POST
 	@Path("/login")
@@ -446,7 +446,7 @@ public class AuthResource extends BaseResource{
 		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS) == false) {
 			return Response.status(400).build();
 		}
-		String sPath = USER_IMAGE_PATH_FOLDER + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
 		oImageResourceUtils.createDirectory(sPath);
 	    String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
 	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
@@ -468,7 +468,7 @@ public class AuthResource extends BaseResource{
 			return Response.status(401).build();
 		}
 		
-		String sPath = USER_IMAGE_PATH_FOLDER + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
+		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
 		ImageFile oUserImage = oImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
 		String sImageExtension = oImageResourceUtils.checkExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
 		
@@ -498,7 +498,7 @@ public class AuthResource extends BaseResource{
 //		final String USER_IMAGE_FOLDER_NAME = "userImage";
 //		final String DEFAULT_USER_IMAGE_NAME = "userimage";
 		
-		String sPathFolder = USER_IMAGE_PATH_FOLDER + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		String sPathFolder = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
 		oImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
 		
 		return Response.status(200).build();
