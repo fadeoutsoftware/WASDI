@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
 
-import wasdi.shared.business.ImageFile;
+import wasdi.shared.utils.ImageFile;
 
 public class ImageResourceUtils {
 	

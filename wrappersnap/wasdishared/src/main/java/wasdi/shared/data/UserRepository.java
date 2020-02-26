@@ -12,8 +12,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.ImageFile;
 import wasdi.shared.business.User;
+import wasdi.shared.utils.ImageFile;
 
 /**
  * Created by p.campanella on 21/10/2016.

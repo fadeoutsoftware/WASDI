@@ -1,4 +1,4 @@
-package wasdi.shared.business;
+package wasdi.shared.utils;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 
-public class ImageFile extends File {
+public class ImageFile extends WrapperFile {
 
 	public ImageFile(String paramString) {
 		super(paramString);
@@ -24,37 +24,11 @@ public class ImageFile extends File {
 	}
 	
 	public boolean saveImage (InputStream oInputStream){
-		
-		int iRead = 0;
-		byte[] ayBytes = new byte[1024];
-		OutputStream oOutStream;
-		try {
-			oOutStream = new FileOutputStream(this);
-			while ((iRead = oInputStream.read(ayBytes)) != -1) {
-				oOutStream.write(ayBytes, 0, iRead);
-			}
-			oOutStream.flush();
-			oOutStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		return true;
-	}
-	
-	public String getNameWithouteExtension() {
-		String sName = this.getName();
-		return FilenameUtils.removeExtension(sName);				
-	}
-	
-	public String getExtension(){
-		String sName = this.getName();
-		return FilenameUtils.getExtension(sName);	
+		return save(oInputStream);
 
 	}
+	
+
 	public boolean resizeImage(int iHeight, int iWidth ){
 		
 		try{
