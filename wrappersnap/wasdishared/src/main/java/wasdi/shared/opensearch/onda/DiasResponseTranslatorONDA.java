@@ -4,15 +4,18 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.onda;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -20,19 +23,16 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  * @author c.nattero
  *
  */
-public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
+public class DiasResponseTranslatorONDA extends DiasResponseTranslator {
 
+	private static final String SFILENAME = "filename";
+	private static final String SCREATION_DATE = "creationDate";
+	private static final String SFOOTPRINT = "footprint";
+	private static final String SFORMAT = "format";
 	private static final Map<String,String> m_asOndaToSentinel;
 	private static final String m_sPropertyPrefix;
-	private static final String m_sLinkPrefix;
-	private static final String m_sLinkSuffix;
-
 	static {
 		m_sPropertyPrefix = "properties."; 
-		//https://catalogue.onda-dias.eu/dias-catalogue/Products(6374d3e9-8318-4bf6-aab6-1a2360b1b32f)/$value
-		m_sLinkPrefix = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
-		m_sLinkSuffix = ")/$value";
-
 		final Map<String, String> asTempMap = new HashMap<>();
 		//productinfo
 		asTempMap.put("quicklook", "preview");
@@ -50,10 +50,10 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		asTempMap.put("lastOrbitNumber", m_sPropertyPrefix + "lastorbitnumber");
 		asTempMap.put("relativeOrbitNumber", m_sPropertyPrefix + "relativeorbitnumber");
 		asTempMap.put("lastRelativeOrbitNumber", m_sPropertyPrefix + "lastrelativeorbitnumber");
-		asTempMap.put("format", m_sPropertyPrefix + "format");
+		asTempMap.put(DiasResponseTranslatorONDA.SFORMAT, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFORMAT);
 		asTempMap.put("instrumentName", m_sPropertyPrefix + "instrumentname");
-		asTempMap.put("filename", m_sPropertyPrefix + "filename");
-		asTempMap.put("footprint", m_sPropertyPrefix + "footprint");
+		asTempMap.put(DiasResponseTranslatorONDA.SFILENAME, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFILENAME);
+		asTempMap.put(DiasResponseTranslatorONDA.SFOOTPRINT, m_sPropertyPrefix + DiasResponseTranslatorONDA.SFOOTPRINT);
 		asTempMap.put("size", m_sPropertyPrefix + "size"); //note: expressed in Bytes, it must be converted
 		asTempMap.put("timeliness", m_sPropertyPrefix + "timeliness");
 		asTempMap.put("orbitDirection", m_sPropertyPrefix + "orbitdirection");
@@ -91,58 +91,99 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		//    resolutionDetail
 	}
 
-	/**
-	 * 
-	 */
-	public DiasResponseTranslatorONDA() {
-
+//	/**
+//	 * 
+//	 */
+//	public DiasResponseTranslatorONDA() {
+//
+//	}
+	
+	
+	public List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol){
+		ArrayList<QueryResultViewModel> aoResult = null;
+		if(sJson == null) {
+			throw new NullPointerException("DiasResponseTranslatorONDA.translateBatch: sJson is null");
+		}
+		
+		aoResult = new ArrayList<>();
+		try {
+			JSONObject oJsonOndaResponse = new JSONObject(sJson);
+			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
+			if(null!=aoJsonArray) {
+				if(aoJsonArray.length()<=0) {
+					Utils.debugLog("DiasResponseTranslatorONDA.buildResultViewModel: JSON string contains an empty array");
+				} else {
+					for (Object oObject : aoJsonArray) {
+						if(null!=oObject) {
+							JSONObject oOndaFullEntry = new JSONObject("{}");
+							JSONObject oOndaEntry = (JSONObject)(oObject);
+							if(!bFullViewModel) {
+								String sQuicklook = oOndaEntry.optString("quicklook");
+								if(!Utils.isNullOrEmpty(sQuicklook)) {
+									oOndaEntry.put("quicklook", (String)null);
+								}
+							}
+							String sEntryKey = "entry";
+							oOndaFullEntry.put(sEntryKey, oOndaEntry);
+							QueryResultViewModel oRes = translate(oOndaFullEntry, sDownloadProtocol);
+							aoResult.add(oRes);
+						}
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorONDA.buildResultViewModel: " + oE);
+		}
+		return aoResult;
 	}
 
 
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasResponseTranslator#translate(java.lang.Object)
-	 */
-	@Override
 	public QueryResultViewModel translate(Object oObject, String sProtocol) {
 		QueryResultViewModel oResult = null;
 		try {
 			JSONObject oJson = (JSONObject)oObject;
 			oResult = translate(oJson, sProtocol);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorONDA.translate( Object, " + sProtocol + " ): " + oE);
 		}
 		return oResult;
 	}
 
 	//TODO change the method signature to get rid of the protocol
 	public QueryResultViewModel translate(JSONObject oInJson, String sProtocol) {
+		if(null == oInJson) {
+			throw new NullPointerException("DiasResponseTranslatorONDA.translate: null json");
+		}
+		if (null == sProtocol ) {
+			//default protocol to https, trying to stay safe
+			sProtocol = "https";
+		}
 		QueryResultViewModel oResult = null;
 		try {			
-			String sInJson = oInJson.toString();
-
 			JSONObject oOndaJson = oInJson.optJSONObject("entry");
 			if(null!=oOndaJson) {
-				String sJson = oOndaJson.toString();
+				oOndaJson.toString();
 				oResult = parseBaseData(sProtocol, oOndaJson);
+				JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
+				if(null!=aoMetadata) {
+					parseMetadataArray(oResult, aoMetadata);
+				}
+				finalizeViewModel(oResult);
 			}
-			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
-			if(null!=aoMetadata) {
-				parseMetadataArray(oResult, aoMetadata);
-			}
-			finalizeViewModel(oResult);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorONDA.translate( JSONObject, " + sProtocol + " ): " + oE);
 		}
-
+		
 		return oResult;
 	}
+
 
 
 	protected QueryResultViewModel parseBaseData(String sInProtocol, JSONObject oJsonOndaResult) {
 		QueryResultViewModel oResult;
 		oResult = new QueryResultViewModel();
 		oResult.setProvider("ONDA");
-		String sFootprint = oJsonOndaResult.optString("footprint","");
+		String sFootprint = oJsonOndaResult.optString(DiasResponseTranslatorONDA.SFOOTPRINT,"");
 		oResult.setFootprint( sFootprint );
 		String sProductId = oJsonOndaResult.optString("id","");
 		String sLink = "";
@@ -173,12 +214,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 		String sProductFileFormat = oJsonOndaResult.optString("@odata.mediaContentType");
 		if(null!=sProductFileFormat) {
-			oResult.getProperties().put("format", sProductFileFormat );
+			oResult.getProperties().put(DiasResponseTranslatorONDA.SFORMAT, sProductFileFormat );
 		}
 
 		String sProductFileName = oJsonOndaResult.optString("name");
 		if(!Utils.isNullOrEmpty(sProductFileName)) {
-			oResult.getProperties().put("filename", sProductFileName);
+			oResult.getProperties().put(DiasResponseTranslatorONDA.SFILENAME, sProductFileName);
 
 			String sPath = "";
 			String sPseudopath = oJsonOndaResult.optString("pseudopath");
@@ -189,7 +230,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				//MAYBE change the Launcher so that all pseudopaths can be passed (maybe iterate through them...)
 				sPath += sIntermediate[0]; 
 				sPath += "/" + sProductFileName + "/.value";
-				
+
 				//this hack is needed because ONDA serves ENVISAT images from file system only
 				if(sProductFileName.startsWith("EN1")) {
 					oResult.getProperties().put("link", sPath);
@@ -215,9 +256,9 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		setSize(oResult, lSize);
 
 		//ONDA
-		String sCreationDate = oJsonOndaResult.optString("creationDate");
+		String sCreationDate = oJsonOndaResult.optString(DiasResponseTranslatorONDA.SCREATION_DATE);
 		if(null!= sCreationDate) {
-			oResult.getProperties().put("creationDate", sCreationDate);
+			oResult.getProperties().put(DiasResponseTranslatorONDA.SCREATION_DATE, sCreationDate);
 		}
 		String sOffline = oJsonOndaResult.optString("offline");
 		if(sOffline != null) {
@@ -234,7 +275,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	private String pruneFileExtension(String sFileName) {
 		String sResult = sFileName;
 		if(sResult.contains(".")) {
-			sResult = sFileName.substring(0, sFileName.lastIndexOf(".")); //eliminate the file extension .ZIP, .SAFE...
+			sResult = sFileName.substring(0, sFileName.lastIndexOf('.')); //eliminate the file extension .ZIP, .SAFE...
 		}
 		//now handle cases like: "*.tar.gz", "*.tar.bz" 
 		if(sResult.endsWith(".tar")) {
@@ -246,33 +287,14 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	//XXX move this method to some shared class
 	protected String getNormalizedSize(Long lSize) {
 		Double dSize = -1.0;
-		String sChosenUnit = "ZZ";
 		String sSize = null;
 		if(null != lSize) {
 			dSize = (double)lSize;
 		}
-		sSize = getNormalizedSize(dSize);
+		sSize = Utils.getNormalizedSize(dSize);
 		return sSize;
 	}
 
-	//XXX move this method to some shared class
-	protected String getNormalizedSize(Double dSize) {
-		String sChosenUnit = null;
-		String sSize = null;
-		String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
-		int iUnitIndex = 0;
-		int iLim = sUnits.length -1;
-		while(iUnitIndex < iLim && dSize >= 1024) {
-			dSize = dSize / 1024;
-			iUnitIndex++;
-
-			//now, round it to two decimal digits
-			dSize = Math.round(dSize*100)/100.0; 
-			sChosenUnit = sUnits[iUnitIndex];
-			sSize = String.valueOf(dSize) + " " + sChosenUnit;
-		}
-		return sSize;
-	}
 
 	//XXX move this method to some shared class
 	protected void setSize(QueryResultViewModel oResult, Long lSize) {
@@ -292,7 +314,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 	protected void setTitle(QueryResultViewModel oResult) {
 
-		String sTitle = oResult.getProperties().get("filename");
+		String sTitle = oResult.getProperties().get(DiasResponseTranslatorONDA.SFILENAME);
 		if(null == sTitle) {
 			sTitle = oResult.getProperties().get("name");
 		}
@@ -350,7 +372,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 							if(null!=sPrevious) {
 								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: sKey : "+sPrevious);
 								if(sTmpKey.equals("size")) {
-									sMetaValue = getNormalizedSize(Double.parseDouble(sMetaValue));
+									sMetaValue = Utils.getNormalizedSize(Double.parseDouble(sMetaValue));
 								}
 							}
 							oResult.getProperties().put(sTmpKey, sMetaValue);
@@ -372,7 +394,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 							case "link":
 								oResult.setLink(sMetaValue);
 								break;
-							case "footprint":
+							case DiasResponseTranslatorONDA.SFOOTPRINT:
 								oResult.setLink(sMetaValue);
 								break;
 							case "provider":
@@ -388,8 +410,8 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		}
 	}
 
-	private void buildSummary(QueryResultViewModel oResult) {
-		String sDate = oResult.getProperties().get("creationDate");
+	protected void buildSummary(QueryResultViewModel oResult) {
+		String sDate = oResult.getProperties().get(DiasResponseTranslatorONDA.SCREATION_DATE);
 		String sSummary = "Date: " + sDate + ", ";
 		String sInstrument = oResult.getProperties().get("instrumentshortname");
 		sSummary = sSummary + "Instrument: " + sInstrument + ", ";

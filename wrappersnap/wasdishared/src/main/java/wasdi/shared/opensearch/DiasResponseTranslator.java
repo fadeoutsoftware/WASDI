@@ -6,13 +6,31 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.List;
+
+import com.google.common.base.Preconditions;
+
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
  * @author c.nattero
  *
  */
-public interface DiasResponseTranslator {
+public abstract class DiasResponseTranslator {
 	
-	public QueryResultViewModel translate( Object oResponseViewModel, String sProtocol );
+	public abstract List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol);
+
+	
+	protected void addToProperties(QueryResultViewModel oResult, String sKey, String sValue) {
+		Preconditions.checkNotNull(oResult, "DiasResponseTranslator.addToProperties: QueryResultViewModel is null");
+		Preconditions.checkNotNull(oResult.getProperties(), "DiasResponseTranslator.addToProperties: null properties");
+		try {
+			if(!Utils.isNullOrEmpty(sKey) && null!=sValue){
+				oResult.getProperties().put(sKey, sValue);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslator.addToProperties: " + oE);
+		}
+	}
 }

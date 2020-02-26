@@ -8,8 +8,18 @@ package wasdi.shared.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.json.simple.parser.JSONParser;
+
+import com.google.common.base.Preconditions;
+import com.google.gson.JsonObject;
 
 /**
  * @author c.nattero
@@ -20,9 +30,9 @@ public class WasdiFileUtils {
 	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
 	public void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
 		try {
-//			if (oFileToZip.isHidden()) {
-//				return;
-//			}
+			//			if (oFileToZip.isHidden()) {
+			//				return;
+			//			}
 			if(oFileToZip.getName().equals(".") || oFileToZip.getName().equals("..")) {
 				return;
 			}
@@ -53,5 +63,28 @@ public class WasdiFileUtils {
 			e.printStackTrace();
 		}
 	}
+
+	public static JSONObject loadJsonFromFile(String sFileFullPath) {
+		Preconditions.checkNotNull(sFileFullPath);
+
+		JSONObject oJson = null;
+		try(
+				FileReader oReader = new FileReader(sFileFullPath);
+				){
+			
+			JSONTokener oTokener = new JSONTokener(oReader);
+			oJson = new JSONObject(oTokener);
+		} catch (FileNotFoundException oFnf) {
+			Utils.log("ERROR", "WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
+		} catch (Exception oE) {
+			Utils.log("ERROR", "WasdiFileUtils.loadJsonFromFile: " + oE);
+		}
+		return oJson;
+	}
 	
+	public static void main(String[] args) throws Exception {
+		JSONObject oJson = loadJsonFromFile("ciccia");
+		System.out.println(oJson.length());
+	}
+
 }

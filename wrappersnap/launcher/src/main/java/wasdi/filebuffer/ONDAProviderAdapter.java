@@ -14,19 +14,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.io.Util;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
-
-import com.sleepycat.je.rep.impl.TextProtocol.OK;
 
 import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
@@ -253,7 +248,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @param sDownloadPassword pw
 	 * @return true if available false otherwise
 	 */
-	private Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
+	@Override
+	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
 		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sFileURL + ", " + sDownloadUser + ", ************** )");
 		String sUUID = extractProductUUID(sFileURL);
 		return checkProductAvailabilityFromUUID(sUUID, sDownloadUser, sDownloadPassword);

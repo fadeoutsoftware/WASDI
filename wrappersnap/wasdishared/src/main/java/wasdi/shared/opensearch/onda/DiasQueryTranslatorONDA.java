@@ -4,11 +4,12 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
+package wasdi.shared.opensearch.onda;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -17,9 +18,6 @@ import wasdi.shared.utils.Utils;
  */
 public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
-	//see issue #32
-	//TODO make a JSON file with query configuration
-	//TODO write the path of the JSON file in the configuration file (web.xml, filename read and passed from the server?)
 
 	public DiasQueryTranslatorONDA() {
 		/*
@@ -60,7 +58,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	 * 
 	 */
 	@Override
-	public String translate(String sQueryFromClient) {
+	protected String translate(String sQueryFromClient) {
 		if(Utils.isNullOrEmpty(sQueryFromClient)) {
 			return new String("");
 		}
@@ -70,7 +68,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		String sResult = new String("");
 		String sTmp = "";
 
-		//TODO refactor n objects with the method parse
+		//TODO refactor using QueryTranslationParser
 
 		sTmp += parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
@@ -417,20 +415,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sSentinel1;
 	}
 
-
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasQueryTranslator#encode(java.lang.String)
-	 */
-	@Override
-	public String encode(String sDecoded) {
-		String sResult = new String(sDecoded); 
-		sResult = sResult.replaceAll(" ", "%20");
-		sResult = sResult.replaceAll("\"", "%22");
-		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
-		return sResult;
-	}
-
-	String getNextDateTime(String sSubQuery) {
+	private String getNextDateTime(String sSubQuery) {
 		String sDateTime = "";
 		String sDateTimePattern = "(\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d\\:\\d\\d:\\d\\d\\.\\d\\d\\dZ)"; 
 		Pattern oDateTimePattern = Pattern.compile(sDateTimePattern);
@@ -446,6 +431,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	//( beginPosition:[2018-12-10T00:00:00.000Z TO 2018-12-17T23:59:59.999Z] AND endPosition:[2018-12-10T00:00:00.000Z TO 2018-12-17T23:59:59.999Z] )
 	//ONDA format
 	//( ( beginPosition:[2018-01-01T00:00:00.000Z TO 2018-12-01T23:59:59.999Z] AND endPosition:[2018-01-01T00:00:00.000Z TO 2018-12-01T23:59:59.999Z] ) )
+	@Override
 	protected String parseTimeFrame(String sQuery) {
 		String sResult = "";
 		int iStart = 0;
@@ -486,6 +472,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	//footprint:"intersects(POLYGON((-13.535156250000002 18.97902595325528,-13.535156250000002 60.23981116999893,62.92968750000001 60.23981116999893,62.92968750000001 18.97902595325528,-13.535156250000002 18.97902595325528)))"
 	//ONDA format
 	//footprint:"Intersects(POLYGON((-13.535156250000002 18.97902595325528,-13.535156250000002 60.23981116999893,62.92968750000001 60.23981116999893,62.92968750000001 18.97902595325528,-13.535156250000002 18.97902595325528)))"
+	@Override
 	protected String  parseFootPrint(String sQuery) {
 		String sFootprint = "";
 		if(sQuery.contains("footprint")) {
@@ -505,25 +492,5 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		}
 		return sFootprint;
 	}
-
-	protected String prepareQuery(String sInput) {
-		String sQuery = new String(sInput);
-		//insert space before and after round brackets
-		sQuery = sQuery.replaceAll("\\(", " \\( ");
-		sQuery = sQuery.replaceAll("\\)", " \\) ");
-		//remove space before and after square brackets 
-		sQuery = sQuery.replaceAll(" \\[", "\\[");
-		sQuery = sQuery.replaceAll("\\[ ", "\\[");
-		sQuery = sQuery.replaceAll(" \\]", "\\]");
-		sQuery = sQuery.replaceAll("\\] ", "\\]");
-		sQuery = sQuery.replaceAll("POLYGON", "POLYGON ");
-		sQuery = sQuery.replaceAll("\\: ", "\\:");
-		sQuery = sQuery.replaceAll(" \\: ", "\\:");
-
-		sQuery = sQuery.replaceAll("AND", " AND ");
-		sQuery = sQuery.trim().replaceAll(" +", " ");
-		return sQuery;
-	}
-
 
 }

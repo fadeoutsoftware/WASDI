@@ -32,6 +32,9 @@ public class DownloadFileParameter extends BaseParameter{
     
     private String provider;
 
+    private String productName;
+
+
 	public String getUrl() { return url; }
 
     public void setUrl(String sUrl) {

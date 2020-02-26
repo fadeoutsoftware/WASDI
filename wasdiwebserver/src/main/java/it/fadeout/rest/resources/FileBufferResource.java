@@ -84,7 +84,12 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-			
+//			if( sProductName != null && !sProductName.isEmpty() ){
+//				oParameter.setProductName(sProductName);
+//			} else {
+//				oParameter.setProductName(null);
+//			}
+
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
 			
