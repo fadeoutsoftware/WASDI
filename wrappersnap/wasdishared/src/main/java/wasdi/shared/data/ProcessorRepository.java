@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
@@ -200,4 +201,11 @@ public class ProcessorRepository extends  MongoRepository {
         return aoReturnList;
     }
 
+	public void updateProcessorDate(Processor oProcessor){
+		Date oDate = new Date();
+		oProcessor.setUpdateDate( (double) oDate.getTime());
+		updateProcessor(oProcessor);
+		
+	}
+	
 }

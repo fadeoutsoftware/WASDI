@@ -864,7 +864,7 @@ public class ProcessorsResource extends BaseResource {
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
 			if (UnzipProcessor(oProcessorFile)) {
-				updateProcessorDate(oProcessorToUpdate);
+				m_oProcessorRepository.updateProcessorDate(oProcessorToUpdate);
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
 			}
 			else {
@@ -944,7 +944,7 @@ public class ProcessorsResource extends BaseResource {
 	    if(bIsResized == false){
 	    	return Response.status(400).build();
 	    }
-		updateProcessorDate(oProcessor);
+	    m_oProcessorRepository.updateProcessorDate(oProcessor);
 		return Response.status(200).build();
 	}
 
@@ -1112,7 +1112,7 @@ public class ProcessorsResource extends BaseResource {
 	    	return Response.status(400).build();
 		}
 		
-		updateProcessorDate(oProcessor);
+		m_oProcessorRepository.updateProcessorDate(oProcessor);
 		return Response.status(200).build();
 	}
 	
@@ -1191,7 +1191,6 @@ public class ProcessorsResource extends BaseResource {
 			return Response.status(400).build();
 		}
 		
-//		|| (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false)
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false || (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false) ){
 			return Response.status(401).build();
@@ -1290,12 +1289,6 @@ public class ProcessorsResource extends BaseResource {
 	}
 	
 	
-	public void updateProcessorDate(Processor oProcessor){
-		Date oDate = new Date();
-		oProcessor.setUpdateDate( (double) oDate.getTime());
-		m_oProcessorRepository.updateProcessor(oProcessor);
-		
-	}
 	
 	private boolean isValidVote(String sVote){
 		boolean bIsValid = false;
@@ -1419,30 +1412,14 @@ public class ProcessorsResource extends BaseResource {
 		return sReturnValueName;
 	}
 	
-	//return null if there isn't any saved logo
+//	//return null if there isn't any saved logo
 	private ImageFile getImageInFolder(String sPathLogoFolder, String sImageName){
-		ImageFile oImage = null;
-		String sLogoExtension = getExtensionOfSavedImage(sPathLogoFolder,sImageName);
-		if(sLogoExtension.isEmpty() == false){
-			oImage = new ImageFile(sPathLogoFolder + sImageName + "." + sLogoExtension );
-		}
-		return oImage;
-		
+		return oImageResourceUtils.getImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
 	}
 	
 	//return empty string if there isn't any saved logo
 	private String getExtensionOfSavedImage (String sPathLogoFolder , String sImageName){
-		File oLogo = null;
-		String sExtensionReturnValue = "";
-		for (String sValidExtension : IMAGE_PROCESSORS_EXTENSIONS) {
-			oLogo = new File(sPathLogoFolder + sImageName + "." + sValidExtension );
-		    if (oLogo.exists()){
-		    	sExtensionReturnValue = sValidExtension;
-		    	break;
-		    }
-
-		}
-		return sExtensionReturnValue;
+		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
 	}
 	
 	//return null if there isn't any saved logo
