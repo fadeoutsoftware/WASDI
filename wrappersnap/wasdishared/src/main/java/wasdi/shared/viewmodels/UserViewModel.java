@@ -8,8 +8,11 @@ public class UserViewModel {
 	private String userId;
     private String name;
     private String surname;
-    private String sessionId;
 	private String authProvider;
+	private String link;
+	private String description;
+	private String sessionId;
+	
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
 	
@@ -82,4 +85,21 @@ public class UserViewModel {
 	public void setAuthProvider(String authProvider) {
 		this.authProvider = authProvider;
 	}
+
+    public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 }

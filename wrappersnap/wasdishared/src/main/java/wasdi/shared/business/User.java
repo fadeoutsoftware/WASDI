@@ -67,6 +67,10 @@ public class User {
      */
     private static User s_oInvalid;
         
+	private String link;
+
+	private String description;
+	
     static {
     	s_oInvalid = new User();
     	s_oInvalid.id = -1;
@@ -178,5 +182,21 @@ public class User {
 	public void setConfirmationDate(String oConfirmationDate) {
 		this.m_sConfirmationDate = oConfirmationDate;
 	}
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 
 }

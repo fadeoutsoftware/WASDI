@@ -775,24 +775,26 @@ public class AuthResource extends BaseResource{
 		
 		try {
 			//note: session validity is automatically checked		
-			User oUserId = Wasdi.GetUserFromSession(sSessionId);
-			if(null == oUserId) {
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			if(null == oUser) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				Utils.debugLog("Null user from session id (does the user exist?)");
 				return UserViewModel.getInvalid();
 			}
 	
 			//update
-			oUserId.setName(oInputUserVM.getName());
-			oUserId.setSurname(oInputUserVM.getSurname());
+			oUser.setName(oInputUserVM.getName());
+			oUser.setSurname(oInputUserVM.getSurname());
+			oUser.setLink(oInputUserVM.getLink());
+			oUser.setDescription(oInputUserVM.getDescription());
 			UserRepository oUR = new UserRepository();
-			oUR.updateUser(oUserId);
+			oUR.updateUser(oUser);
 			
 			//respond
 			UserViewModel oOutputUserVM = new UserViewModel();
-			oOutputUserVM.setUserId(oUserId.getUserId());
-			oOutputUserVM.setName(oUserId.getName());
-			oOutputUserVM.setSurname(oUserId.getSurname());
+			oOutputUserVM.setUserId(oUser.getUserId());
+			oOutputUserVM.setName(oUser.getName());
+			oOutputUserVM.setSurname(oUser.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
 			return oOutputUserVM;
 			

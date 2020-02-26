@@ -1385,20 +1385,7 @@ public class ProcessorsResource extends BaseResource {
 		return aoAppCategoriesViewModel;
 	} 
 	
-//	private void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
-//		File oFolder = new File(sPathFolder);
-//		File[] aoListOfFiles = oFolder.listFiles();
-//		for (File oImage : aoListOfFiles){ 
-//			String sName = oImage.getName();
-//			String sFileName = FilenameUtils.removeExtension(sName);	
-//			
-//			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
-//				oImage.delete();
-//				break;
-//			} 
-//			
-//		}
-//	}
+
 
 	
 	// return a free name for the image (if is possible) 
