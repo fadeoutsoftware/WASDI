@@ -74,6 +74,8 @@ public class AuthResource extends BaseResource{
 			
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
 	final UserRepository m_oUserRepository = new UserRepository();
+	
+	
 	@Context
 	ServletConfig m_oServletConfig;
 	
