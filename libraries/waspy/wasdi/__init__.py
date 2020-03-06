@@ -242,10 +242,12 @@ def getParameter(sKey, oDefault=None):
     :param oDefault: Default value to return if parameter is not present
     :return: parameter value
     """
+    m_oLogger.debug(f'getParameter({sKey}, {oDefault})')
     global m_aoParamsDictionary
     try:
         return m_aoParamsDictionary[sKey]
-    except:
+    except Exception as oE:
+        m_oLogger.warning(f'getParameter( {sKey}, {oDefault} ): {oE}, defaulting')
         return oDefault
 
 
@@ -348,8 +350,13 @@ def setBaseUrl(sBaseUrl):
     Set the WASDI API URL
     :param sBaseUrl: WASDI API URL
     """
+    m_oLogger.debug(f'setBaseUrl({sBaseUrl})')
     global m_sBaseUrl
-    m_sBaseUrl = sBaseUrl
+    try:
+        sBaseUrl = str(sBaseUrl)
+        m_sBaseUrl = sBaseUrl
+    except Exception as oE:
+        m_oLogger.error(f'setBaseUrl({sBaseUrl}): {oE}, aborting')
 
 
 def getBaseUrl():
@@ -571,32 +578,28 @@ def init(sConfigFilePath=None):
     m_bValidSession = False
     if sConfigFilePath is not None:
         bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
-        if bConfigOk is True:
+        if bConfigOk:
             _loadParams()
 
-    if m_sUser is None and m_sPassword is None:
-
+    if getUser() is None:
+        sUser = ''
         if sys.version_info > (3, 0):
-            m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
+            sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
         else:
-            m_sUser = raw_input('[INFO] waspy.init: Please Insert WASDI User:')
-
-        m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
-
-        m_sUser = m_sUser.rstrip()
-        m_sPassword = m_sPassword.rstrip()
-
-        if sys.version_info > (3, 0):
-            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
-        else:
-            sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+            sUser = raw_input('[INFO] waspy.init: Please Insert WASDI User:')
+        sUser = sUser.rstrip()
+        setUser(sUser)
+    if getPassword() is None:
+        sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
+        sPassword = m_sPassword.rstrip()
+        setPassword(sPassword)
 
     if m_sUser is None:
-        m_oLogger.error('init: must initialize user first, but None given')
+        m_oLogger.error('init: must initialize user first, but None given, aborting')
         return False
 
     if m_sBasePath is None:
-        if m_bIsOnServer is True:
+        if m_bIsOnServer:
             m_sBasePath = '/data/wasdi/'
         else:
             sHome = os.path.expanduser("~")
@@ -615,23 +618,24 @@ def init(sConfigFilePath=None):
                     m_bValidSession = True
                 else:
                     m_bValidSession = False
-            except:
+            except Exception as oE:
+                m_oLogger.warning(f'init( {sConfigFilePath} ): session is not valid: {oE} (check userId)')
                 m_bValidSession = False
         else:
             m_bValidSession = False
     else:
         if m_sPassword is None:
-            m_oLogger.error('init: must initialize password first, but None given')
+            m_oLogger.error('init: must initialize password first, but None given, aborting')
             return False
         asHeaders = {'Content-Type': 'application/json'}
         sUrl = m_sBaseUrl + '/auth/login'
         sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
         oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
         if oResponse is None:
-            m_oLogger.error('init: cannot authenticate')
+            m_oLogger.error('init: cannot authenticate, aborting')
             m_bValidSession = False
-        elif oResponse.ok is not True:
-            m_oLogger.error(f'init: cannot authenticate, server replied: {oResponse.status_code}')
+        elif not oResponse.ok:
+            m_oLogger.error(f'init: cannot authenticate, server replied: {oResponse.status_code}, aborting')
             m_bValidSession = False
         else:
             oJsonResult = oResponse.json()
@@ -642,10 +646,11 @@ def init(sConfigFilePath=None):
                     m_bValidSession = True
                 else:
                     m_bValidSession = False
-            except:
+            except Exception as oE:
+                m_oLogger.warning(f'init( {sConfigFilePath} ): session not valid: {oE} (check sessionId)')
                 m_bValidSession = False
 
-    if m_bValidSession is True:
+    if m_bValidSession:
         m_oLogger.info('init: WASPY successfully initiated :-)')
         sW = getActiveWorkspaceId()
         if (sW is None) or (len(sW) < 1):
@@ -653,6 +658,12 @@ def init(sConfigFilePath=None):
                 openWorkspace(sWname)
             elif sWId is not None:
                 openWorkspaceById(sWId)
+            else:
+                if sys.version_info > (3, 0):
+                    sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to skip):')
+                else:
+                    sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to skip):')
+            openWorkspace(sWname)
     else:
         m_oLogger.error('init: could not init WASPY :-(')
 
@@ -693,7 +704,7 @@ def getWorkspaces():
 
     oResult = requests.get(sUrl, headers=asHeaders)
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and (oResult.ok):
         oJsonResult = oResult.json()
         return oJsonResult
     else:
@@ -718,7 +729,7 @@ def createWorkspace(sName=None):
 
     oResult = requests.get(sUrl, headers=asHeaders)
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
 
         openWorkspaceById(oJsonResult["stringValue"])
@@ -743,16 +754,18 @@ def getWorkspaceIdByName(sName):
 
     oResult = requests.get(sUrl, headers=asHeaders)
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
 
         for oWorkspace in oJsonResult:
             try:
                 if oWorkspace['workspaceName'] == sName:
                     return oWorkspace['workspaceId']
-            except:
+            except Exception as oE:
+                m_oLogger.error(f'getWorkspaceIdByName( {sName} ): {oE} issued at {oWorkspace}, aborting')
                 return ''
 
+    m_oLogger.error(f'getWorkspaceIdByName( {sName} ): could not find requested workspace')
     return ''
 
 
@@ -771,16 +784,18 @@ def getWorkspaceOwnerByName(sName):
 
     oResult = requests.get(sUrl, headers=asHeaders)
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
 
         for oWorkspace in oJsonResult:
             try:
                 if oWorkspace['workspaceName'] == sName:
                     return oWorkspace['ownerUserId']
-            except:
+            except Exception as oE:
+                m_oLogger.error(f'getWorkspaceOwnerByName( {sName} ): {oE} at {oWorkspace}, aborting')
                 return ''
 
+    m_oLogger.error(f'getWorkspaceOwnerByName( {sName} ): could not find workspace owner')
     return ''
 
 
@@ -799,16 +814,17 @@ def getWorkspaceOwnerByWsId(sWsId):
 
     oResult = requests.get(sUrl, headers=asHeaders)
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
 
         for oWorkspace in oJsonResult:
             try:
                 if oWorkspace['workspaceId'] == sWsId:
                     return oWorkspace['ownerUserId']
-            except:
+            except Exception as oE:
+                m_oLogger.error(f'getWorkspaceOwnerByWsId( {sWsId} ): {oE} at {oWorkspace}, aborting')
                 return ''
-
+    m_oLogger.error(f'getWorkspaceOwnerByWsId( {sWsId} ): could not find workspace')
     return ''
 
 
@@ -890,13 +906,14 @@ def getProductsByWorkspaceId(sWorkspaceId):
 
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
-    if oResult.ok is True:
+    if oResult.ok:
         oJsonResults = oResult.json()
 
         for oProduct in oJsonResults:
             try:
                 asProducts.append(oProduct['fileName'])
-            except:
+            except Exception as oE:
+                m_oLogger.warning(f'getProductsByWorkspaceId( {sWorkspaceId} ): {oE}, skipping')
                 continue
 
     return asProducts
@@ -919,8 +936,8 @@ def getPath(sFile):
     :param sFile name of the file
     :return: Local path where to read or write sFile 
     """
-
-    if fileExistsOnWasdi(sFile) is True:
+    m_oLogger.debug(f'getPath({sFile})')
+    if fileExistsOnWasdi(sFile):
         return getFullProductPath(sFile)
     else:
         return getSavePath() + sFile
@@ -933,13 +950,14 @@ def getFullProductPath(sProductName):
     :param sProductName: name of the product to get the path open (WITH the final extension)
     :return: local path of the Product File
     """
+    m_oLogger.debug(f'getFullProductPath({sProductName})')
     global m_sBasePath
     global m_sActiveWorkspace
     global m_sUser
     global m_bIsOnServer
     global m_bDownloadActive
 
-    if m_bIsOnServer is True:
+    if m_bIsOnServer:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
@@ -949,13 +967,13 @@ def getFullProductPath(sProductName):
     sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
 
     # If we are on the local PC
-    if m_bIsOnServer is False:
+    if not m_bIsOnServer:
         # If the download is active
-        if m_bDownloadActive is True:
+        if m_bDownloadActive:
             # If there is no local file
-            if os.path.isfile(sFullPath) is False:
+            if not os.path.isfile(sFullPath):
                 # If the file exists on server
-                if fileExistsOnWasdi(sProductName) is True:
+                if fileExistsOnWasdi(sProductName):
                     # Download The File from WASDI
                     m_oLogger.info('getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
                     downloadFile(sProductName)
@@ -969,11 +987,12 @@ def getSavePath():
     Get the local base save path for a product. To save use this path + fileName. Path already include '/' as last char
     :return: local path to use to save files (with '/' as last char)
     """
+    m_oLogger.debug(f'getSavePath()')
     global m_sBasePath
     global m_sActiveWorkspace
     global m_sUser
 
-    if m_bIsOnServer is True:
+    if m_bIsOnServer:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
@@ -1005,7 +1024,7 @@ def getWorkflows():
 
     oResult = requests.get(sUrl, headers=asHeaders)
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResults = oResult.json()
         return oJsonResults
     else:
@@ -1032,12 +1051,13 @@ def getProcessStatus(sProcessId):
 
     sStatus = ''
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
 
         try:
             sStatus = oJsonResult['status']
-        except:
+        except Exception as oE:
+            m_oLogger.error(f'getProcessStatus( {sProcessId} ): could not determine status due to {oE}, aborting')
             sStatus = ''
 
     return sStatus
@@ -1092,11 +1112,13 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
 
     sStatus = ''
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
         try:
             sStatus = oJsonResult['status']
-        except:
+        except Exception as oE:
+            m_oLogger.error(f'updateProcessStatus( {sProcessId}, {sStatus}, {iPerc} ):'
+                            f'could not determine status due to {oE}, aborting')
             sStatus = ''
 
     return sStatus
@@ -1109,15 +1131,15 @@ def updateStatus(sStatus, iPerc=-1):
     :param iPerc: new Percentage.-1 By default, means no change percentage. Use a value between 0 and 100 to set it.
     :return: the updated status as a String or '' if there was any problem
     """
+    m_oLogger.debug(f'updateStatus({sStatus}, {iPerc}')
     try:
-
-        if m_bIsOnServer is False:
+        if not m_bIsOnServer:
             m_oLogger.info("updateStatus: Running Locally, will not update status on server")
             return sStatus
 
         return updateProcessStatus(getProcId(), sStatus, iPerc)
     except Exception as oEx:
-        m_oLogger.error(f'updateStatus: exception {oEx}')
+        m_oLogger.error(f'updateStatus( {sStatus}, {iPerc} ): exception {oEx}')
         return ''
 
 
@@ -1153,7 +1175,7 @@ def updateProgressPerc(iPerc):
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(sUrl, headers=asHeaders)
         sResult = ''
-        if (oResponse is not None) and (oResponse.ok is True):
+        if (oResponse is not None) and oResponse.ok:
             oJson = oResponse.json()
             if (oJson is not None) and ("status" in oJson):
                 sResult = f"{oJson['status']}"
@@ -1161,7 +1183,7 @@ def updateProgressPerc(iPerc):
             m_oLogger.error('updateProgressPerc: could not update progress')
         return sResult
     except Exception as oEx:
-        m_oLogger.error(f'updateProgressPerc: exception: {oEx}')
+        m_oLogger.error(f'updateProgressPerc( {iPerc} ): exception: {oEx}')
         return ''
 
 
@@ -1185,16 +1207,18 @@ def setProcessPayload(sProcessId, data):
 
         sStatus = ''
 
-        if (oResult is not None) and (oResult.ok is True):
+        if (oResult is not None) and oResult.ok:
             oJsonResult = oResult.json()
             try:
                 sStatus = oJsonResult['status']
-            except:
+            except Exception as oE:
+                m_oLogger.error(f'setProcessPayload( {sProcessId}, {data} ): cannot determine status due to {oE},'
+                                'aborting')
                 sStatus = ''
 
         return sStatus
     except Exception as oEx:
-        m_oLogger.error(f'setProcessPayload: exception {oEx}')
+        m_oLogger.error(f'setProcessPayload( {sProcessId}, {data} ): {oEx}, aborting')
         return ''
 
 
@@ -1237,12 +1261,13 @@ def saveFile(sFileName):
 
     sProcessId = ''
 
-    if (oResult is not None) and (oResult.ok is True):
+    if (oResult is not None) and oResult.ok:
         oJsonResult = oResult.json()
         try:
-            if oJsonResult['boolValue'] is True:
+            if oJsonResult['boolValue']:
                 sProcessId = oJsonResult['stringValue']
-        except:
+        except Exception as oE:
+            m_oLogger(f'saveFile( {sFileName} ): {oE}, aborting')
             sProcessId = ''
 
     return sProcessId
@@ -1284,7 +1309,7 @@ def downloadFile(sFileName):
                 sContentDisposition = asResponseHeaders['Content-Disposition']
                 sAttachmentName = sContentDisposition.split('filename=')[1]
                 bLoop = True
-                while bLoop is True:
+                while bLoop:
                     if sAttachmentName[0] == '.':
                         sAttachmentName = sAttachmentName[1:]
                         bLoop = True
@@ -1315,8 +1340,9 @@ def downloadFile(sFileName):
 
         if not os.path.exists(os.path.dirname(sSavePath)):
             try:
+                # this is enough to guard against race condition
                 os.makedirs(os.path.dirname(sSavePath), exist_ok=True)
-            except Exception as oE:  # Guard against race condition
+            except Exception as oE:
                 m_oLogger.error(f'downloadFile( {sFileName} ): cannot create File Path due to {oE}, aborting')
                 return
 
@@ -1346,22 +1372,23 @@ def wasdiLog(sLogRow):
     :param sLogRow: text to log
     :return: None
     """
+    # here the logg
+    # m_oLogger.debug(f'wasdiLog({sLogRow})')
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
 
     sForceLogRow = str(sLogRow)
 
+    m_oLogger.info(sForceLogRow)
     if m_bIsOnServer:
         asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
         oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders)
         if oResult is None:
             m_oLogger.warning('wasdiLog: could not log')
-        elif oResult.ok is not True:
+        elif not oResult.ok:
             m_oLogger.warning(f'wasdiLog: could not log, server returned: {oResult.status_code}')
-    else:
-        m_oLogger.info(sForceLogRow)
 
 
 def deleteProduct(sProduct):
@@ -1389,7 +1416,7 @@ def deleteProduct(sProduct):
     if oResult is None:
         m_oLogger.error('deleteProduct: deletion failed')
         return False
-    elif oResult.ok is not True:
+    elif not oResult.ok:
         m_oLogger.error(f'deleteProduct: deletion failed, server returned: {oResult.status_code}')
     else:
         return oResult.ok
@@ -1497,8 +1524,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
                 iTmp = int(iOrbitNumber)
                 m_oLogger.warning(f'searchEOImages: iOrbitNumber converted to: {iTmp}')
                 sQuery += str(iTmp)
-            except:
-                m_oLogger.warning('searchEOImages: could not convert iOrbitNumber to an int, ignoring it')
+            except Exception as oE:
+                m_oLogger.warning(f'searchEOImages: could not convert iOrbitNumber to an int due to {oE}, ignoring it')
 
             # Close the first block
     sQuery += ") "
@@ -1533,13 +1560,12 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             oJsonResponse = oResponse.json()
             aoReturnList = oJsonResponse
         except Exception as oEx:
-            m_oLogger.error('searchEOImages: exception while trying to convert response into JSON object')
+            m_oLogger.error(f'searchEOImages: {oEx} while trying to convert response into JSON object')
             return aoReturnList
 
         m_oLogger.info("waspy.searchEOImages: search results:\n" + repr(aoReturnList))
         return aoReturnList
     except Exception as oEx:
-        m_oLogger.error('searchEOImages: an error occured')
         m_oLogger.error(f'searchEOImages: {type(oEx)}')
         traceback.print_exc()
         m_oLogger.error(f'searchEOImages{oEx}')
@@ -1594,7 +1620,7 @@ def fileExistsOnWasdi(sFileName):
     if oResult is None:
         m_oLogger.error('fileExistsOnWasdi: failed contacting the server')
         return False
-    elif oResult.ok is not True:
+    elif not oResult.ok:
         m_oLogger.error(f'fileExistsOnWasdi: failed, server returned: {oResult.status_code}')
         return False
     else:
@@ -1608,7 +1634,7 @@ def _unzip(sAttachmentName, sPath):
     :param sPath: both the path where the file is and where it must be unzipped
     :return: None
     """
-    m_oLogger.info('_unzip( ' + sAttachmentName + ', ' + sPath + ' )')
+    m_oLogger.debug(f'_unzip( {sAttachmentName} ,  {sPath} )')
     if sPath is None:
         m_oLogger.error('_unzip: path is None')
         return
@@ -1621,8 +1647,8 @@ def _unzip(sAttachmentName, sPath):
         zip_ref = zipfile.ZipFile(sZipFilePath, 'r')
         zip_ref.extractall(sPath)
         zip_ref.close()
-    except:
-        m_oLogger.error('_unzip: failed unzipping')
+    except Exception as oE:
+        m_oLogger.error(f'_unzip({sAttachmentName}, {sPath}): failed unzipping due to {oE}')
 
     return
 
