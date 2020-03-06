@@ -1,10 +1,30 @@
 # \_\_/== Changelog ==\\\_\_
 
-## [0.2.9] - 2020-02-21
+## [0.2.10] - 2020-03-06
+
+### Added
+
+- DEBUG log at the beginning of each method
+
+### Changed
+
+- improved 'pythonicyty' of ifs
+- improved exception handling
+- improved clarity of log messages
+
+## [0.2.9] - 2020-02-24
 
 ### Changed
 
 - Separate changelog according to [keepachangelog](https://keepachangelog.com/)
+- Introduced use of python logging instead of prints and _log
+  - Log at DEBUG level each time a method is accessed
+  - Log (at ERROR or WARNING, as appropriate), each time an exception is caught 
+
+### Fixed
+
+- minor errors in f-strings construction
+
 
 ## [0.2.8] - 2020-02-05
 
