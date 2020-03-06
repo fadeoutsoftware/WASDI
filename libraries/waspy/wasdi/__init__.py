@@ -76,6 +76,9 @@ m_oLogger = None
 
 
 def _configureLog():
+    """
+    Configure logging facilities
+    """
     # configure logger options
     global m_oLogLevel
     m_oLogLevel = logging.INFO
