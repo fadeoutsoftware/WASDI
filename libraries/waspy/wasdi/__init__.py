@@ -167,15 +167,34 @@ def setVerbose(bVerbose):
         m_oLogger.warning('setVerbose: passed non boolean, trying to convert')
         try:
             bVerbose = bool(bVerbose)
-        except:
-            m_oLogger.error('setVerbose: cannot convert argument into boolean, won\'t change')
+        except Exception as oE:
+            m_oLogger.error(f'setVerbose: cannot convert argument into boolean due to {oE}, won\'t change')
             return
 
     global m_bVerbose
     m_bVerbose = bVerbose
     if m_bVerbose:
-        global m_oLogLevel
+        setLogLevel('DEBUG')
+
+
+def setLogLevel(sLogLevel):
+    m_oLogger.debug(f'setLogLevel({sLogLevel})')
+    global m_oLogLevel
+    if sLogLevel == "DEBUG":
         m_oLogLevel = logging.DEBUG
+    elif sLogLevel == "INFO":
+        m_oLogLevel = logging.INFO
+    elif sLogLevel == "WARNING":
+        m_oLogLevel = logging.WARNING
+    elif sLogLevel == "ERROR":
+        m_oLogLevel = logging.ERROR
+    elif sLogLevel == "CRITICAL":
+        m_oLogLevel = logging.CRITICAL
+    else:
+        m_oLogger.warning(f'_loadConfigParams: unrecognized log level: {sLogLevel}, defaulting')
+        sLogLevel = m_oLogLevel
+    m_oLogger.setLevel(m_oLogLevel)
+    m_oLogger.info(f'setLogLevel: level set to {sLogLevel}')
 
 
 def getVerbose():
@@ -486,28 +505,18 @@ def _loadConfig(sConfigFilePath):
             if "UPLOADACTIVE" in oJson:
                 m_bUploadActive = bool(oJson["UPLOADACTIVE"])
             if "VERBOSE" in oJson:
-                m_bVerbose = bool(oJson["VERBOSE"])
+                setVerbose(bool(oJson["VERBOSE"]))
                 try:
                     if m_bVerbose:
                         global m_oLogLevel
                         m_oLogLevel = logging.DEBUG
-                except Exception:
-                    pass
+                except Exception as oE:
+                    m_oLogger.warning(f'_loadConfig({sConfigFilePath}): cannot set verbosity due to {oE}, skipping')
             if 'LOGLEVEL' in oJson:
                 sLogLevel = str(oJson['LOGLEVEL']).upper()
-                if sLogLevel == "DEBUG":
-                    m_oLogLevel = logging.DEBUG
-                elif sLogLevel == "INFO":
-                    m_oLogLevel = logging.INFO
-                elif sLogLevel == "WARNING":
-                    m_oLogLevel = logging.WARNING
-                elif sLogLevel == "ERROR":
-                    m_oLogLevel = logging.ERROR
-                elif sLogLevel == "CRITICAL":
-                    m_oLogLevel = logging.CRITICAL
-                else:
-                    m_oLogger.error(f'_loadConfigParams: unrecognized log level: {sLogLevel}')
-                m_oLogger.setLevel(m_oLogLevel)
+                setLogLevel(sLogLevel)
+            if 'BASEURL' in oJson:
+                setBaseUrl(oJson['BASEURL'])
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
