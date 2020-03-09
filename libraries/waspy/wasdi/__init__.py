@@ -1281,7 +1281,7 @@ def setProcessPayload(sProcessId, data):
 
 def setPayload(data):
     """
-    Set the payload of the actual running process.
+    Set the payload of the current running process.
     The payload is saved only when run on Server. In local mode is just a print.
     :param data: data to save in the payload. Suggestion is to use JSON
     return None
