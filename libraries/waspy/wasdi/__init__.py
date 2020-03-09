@@ -1200,7 +1200,7 @@ def updateStatus(sStatus, iPerc=-1):
 
 def updateProgressPerc(iPerc):
     """
-    Update the actual progress Percentage of the processor
+    Update the current progress Percentage of the processor
     :param iPerc: new Percentage. Use a value between 0 and 100 to set it.
     :return: updated status of the process or '' if there was any error
     """
