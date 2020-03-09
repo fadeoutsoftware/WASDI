@@ -70,7 +70,10 @@ m_bIsOnServer = False
 # log configuration
 
 m_bLogConfigured = False
+# this is the level used to filter log messages
 m_oLogLevel = logging.DEBUG
+# this is the level at which messages without priority are logged
+m_oDefaultLogLevel = logging.INFO
 m_asFormats = None
 m_oLogger = None
 
@@ -200,10 +203,35 @@ def setLogLevel(sLogLevel):
     elif sLogLevel == "CRITICAL":
         m_oLogLevel = logging.CRITICAL
     else:
-        m_oLogger.warning(f'_loadConfigParams: unrecognized log level: {sLogLevel}, defaulting')
+        m_oLogger.warning(f'setLogLevel: unrecognized log level: {sLogLevel}, defaulting')
         sLogLevel = m_oLogLevel
     m_oLogger.setLevel(m_oLogLevel)
     m_oLogger.info(f'setLogLevel: level set to {sLogLevel}')
+
+
+def setDefaultLogLevel(sLogLevel):
+    m_oLogger.debug(f'setLogLevel({sLogLevel})')
+    global m_oDefaultLogLevel
+    if sLogLevel == "DEBUG":
+        m_oDefaultLogLevel = logging.DEBUG
+    elif sLogLevel == "INFO":
+        m_oDefaultLogLevel = logging.INFO
+    elif sLogLevel == "WARNING":
+        m_oDefaultLogLevel = logging.WARNING
+    elif sLogLevel == "ERROR":
+        m_oDefaultLogLevel = logging.ERROR
+    elif sLogLevel == "CRITICAL":
+        m_oDefaultLogLevel = logging.CRITICAL
+    else:
+        m_oLogger.warning(f'setLogLevel: unrecognized log level: {sLogLevel}, defaulting')
+        sLogLevel = m_oLogLevel
+    m_oLogger.setLevel(m_oLogLevel)
+    m_oLogger.info(f'setLogLevel: level set to {sLogLevel}')
+
+
+def getDefaultLogLevel():
+    global m_oDefaultLogLevel
+    return m_oDefaultLogLevel
 
 
 def getVerbose():
@@ -1424,6 +1452,55 @@ def downloadFile(sFileName):
     return
 
 
+def debugLog(sLogRow):
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+
+    sForceLogRow = str(sLogRow)
+    m_oLogger.debug(sForceLogRow)
+    _internalWasdiLog(sForceLogRow)
+
+
+def infoLog(sLogRow):
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+
+    sForceLogRow = str(sLogRow)
+    m_oLogger.info(sForceLogRow)
+    _internalWasdiLog(sForceLogRow)
+
+def warningLog(sLogRow):
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+
+    sForceLogRow = str(sLogRow)
+    m_oLogger.warning(sForceLogRow)
+    _internalWasdiLog(sForceLogRow)
+
+
+def errorLog(sLogRow):
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+
+    sForceLogRow = str(sLogRow)
+    m_oLogger.error(sForceLogRow)
+    _internalWasdiLog(sForceLogRow)
+
+
+def criticalLog(sLogRow):
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+
+    sForceLogRow = str(sLogRow)
+    m_oLogger.critical(sForceLogRow)
+    _internalWasdiLog(sForceLogRow)
+
+
 def wasdiLog(sLogRow):
     """
     Writes one row of Log
@@ -1438,15 +1515,33 @@ def wasdiLog(sLogRow):
 
     sForceLogRow = str(sLogRow)
 
-    m_oLogger.info(sForceLogRow)
-    if m_bIsOnServer:
-        asHeaders = _getStandardHeaders()
-        sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
-        oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders)
-        if oResult is None:
-            m_oLogger.warning('wasdiLog: could not log')
-        elif not oResult.ok:
-            m_oLogger.warning(f'wasdiLog: could not log, server returned: {oResult.status_code}')
+    # log according to default level
+    if logging.DEBUG == getDefaultLogLevel():
+        m_oLogger.debug(sForceLogRow)
+    if logging.WARNING == getDefaultLogLevel():
+        m_oLogger.warning(sForceLogRow)
+    if logging.ERROR == getDefaultLogLevel():
+        m_oLogger.error(sForceLogRow)
+    if logging.CRITICAL == getDefaultLogLevel():
+        m_oLogger.critical(sForceLogRow)
+    else:
+        m_oLogger.info(sForceLogRow)
+
+    _internalWasdiLog(sForceLogRow)
+
+
+def _internalWasdiLog(sLogRow):
+    try:
+        sForceLogRow = str(sLogRow)
+        if m_bIsOnServer:
+            asHeaders = _getStandardHeaders()
+            sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
+            oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders)
+            if oResult is None:
+                m_oLogger.warning('wasdiLog: could not log')
+            elif not oResult.ok:
+                m_oLogger.warning(f'wasdiLog: could not log, server returned: {oResult.status_code}')
+    except Exception as oE:
 
 
 def deleteProduct(sProduct):
@@ -1668,17 +1763,21 @@ def fileExistsOnWasdi(sFileName):
         m_oLogger.error('fileExistsOnWasdi: File name too short')
         return False
 
-    sBaseUrl = getBaseUrl()
     sSessionId = getSessionId()
     sActiveWorkspace = getActiveWorkspaceId()
-
-    sUrl = m_sBaseUrl
-    sUrl += "/catalog/checkdownloadavaialibitybyname?token="
-    sUrl += sSessionId
-    sUrl += "&filename="
-    sUrl += sFileName
-    sUrl += "&workspace="
-    sUrl += sActiveWorkspace
+    try:
+        sUrl = getBaseUrl()
+        sUrl += "/catalog/checkdownloadavaialibitybyname?token="
+        sUrl += sSessionId
+        sUrl += "&filename="
+        sUrl += sFileName
+        sUrl += "&workspace="
+        sUrl += getActiveWorkspaceId()
+    except Exception as oE:
+        # abort: there must be something wrong, such as a wrong config parameter or the server not responding
+        m_oLogger.critical(f'fileExistsOnWasdi: could not complete url building due to: {oE}. I have a bad feeling about this...')
+        # todo should FAIL HORRIBLY instead
+        return False
 
     asHeaders = _getStandardHeaders()
     oResult = requests.get(sUrl, headers=asHeaders)
@@ -2263,21 +2362,43 @@ def uploadFile(sFileName):
     """
 
     m_oLogger.debug(f'upload( {sFileName} )')
-
-    if sFileName is None:
-        m_oLogger.error('upload: the given file name is None, cannot upload')
-        return False
-    if sFileName.startswith('.'):
-        sFileName = sFileName[1:]
-    if sFileName.startswith('/') or sFileName.startswith('\\'):
-        sFileName = sFileName[1:]
-
-    sFileName = _normPath(sFileName)
-
     bResult = False
+    try:
+        if sFileName is None:
+            m_oLogger.error('upload: the given file name is None, cannot upload')
+            return False
 
-    sBasePath = getBasePath()
-    sFullPath = os.path.join(sBasePath, sFileName)
+        sFileProperName = os.path.basename(sFileName)
+
+        # if sFileName.startswith('.'):
+        #     sFileName = sFileName[1:]
+        # if sFileName.startswith('/') or sFileName.startswith('\\'):
+        #     sFileName = sFileName[1:]
+        #
+        # sNormalizedFileName = _normPath(sFileName)
+        #
+        # sBasePath = getBasePath()
+        # sFullPath = os.path.join(sBasePath, sNormalizedFileName)
+
+        sFullPath = getFullProductPath(sFileName)
+
+        # sUrl = f'{getBaseUrl()}/product/uploadfile?workspace={getActiveWorkspaceId()}&name={sFileProperName}'
+        sUrl = f'http://127.0.0.1:8080/wasdiwebserver/rest/product/uploadfile?workspace={getActiveWorkspaceId()}&name={sFileProperName}'
+        asHeaders = _getStandardHeaders()
+        asHeaders['Content-Disposition'] = 'form-data'
+        asHeaders['Content-Transfer-Encoding'] = 'binary'
+
+        m_oLogger.info(f'uploadFile: uploading file to wasdi...')
+        oFiles = {'file': (sFileProperName, open(sFullPath, 'rb'))}
+        oResponse = requests.post(sUrl, files=oFiles, headers=asHeaders)
+        if oResponse.ok:
+            m_oLogger.info(f'uploadFile: upload complete :-)')
+            bResult = True
+        else:
+            m_oLogger.error(f'uploadFile: upload failed with code {oResponse.status_code}: {oResponse.text}')
+
+    except Exception as oE:
+        m_oLogger.error(f'uploadFile: {oE}')
 
     return bResult
 
