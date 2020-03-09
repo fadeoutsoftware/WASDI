@@ -19,7 +19,6 @@ def run():
         sValue = wasdi.getParameter(sKey, oDefault='escape')
         wasdi.wasdiLog(f'{sKey} {sValue}')
 
-
     wasdi.wasdiLog("Welcome to your first WASPY processor :-)")
     sNome = wasdi.getParameter("name")
     wasdi.wasdiLog("Hello " + str(sNome))
