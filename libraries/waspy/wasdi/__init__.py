@@ -1726,7 +1726,7 @@ def getProductBBOX(sFileName):
     :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
     """
     m_oLogger.debug(f'getProductBBOX({sFileName})')
-    sUrl = f'{getBaseUrl()}/product/byname?sProductName={sFileName}"&workspace="{getActiveWorkspaceId()}'
+    sUrl = f'{getBaseUrl()}/product/byname?sProductName={sFileName}&workspace={getActiveWorkspaceId()}'
     asHeaders = _getStandardHeaders()
 
     oResponse = requests.get(sUrl, headers=asHeaders)
