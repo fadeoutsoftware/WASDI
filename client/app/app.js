@@ -51,6 +51,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.DropdownMenuDirective',
     'wasdi.ToDoListDirective',
     'wasdi.InputTextDirective',
+    'wasdi.Map2DDirective',
 
     //FILTERS
     'wasdi.stringUtils',
