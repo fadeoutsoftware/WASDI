@@ -2,6 +2,28 @@
 <!--    <inputtextdirective input-text="m_oController.test" ></inputtextdirective>-->
 <!--    <dropdownmenudirective></dropdownmenudirective>-->
 <!--</div>-->
-<div ng-repeat="view in m_oController.m_aoViewElements">
-    {{view.type}}
+<div class="editor-view">
+
+    <div class="row-v4 justify-content-end toolbar">
+        <div class="col-v4-auto ml-auto">
+
+        </div>
+    </div>
+
+    <div class="row-v4">
+        <div class="col-v4-auto">
+            <div ng-repeat="view in m_oController.m_aoViewElements">
+                <inputtextdirective input-text="view.sTextBox" ng-if="view.type === 'textbox'"></inputtextdirective>
+                {{view.sLabel}}
+                <dropdownmenudirective list-of-values="view.asListValues"
+                                       selected-value="view.sSelectedValues"
+                                       enable-search-filter="view.bEnableSearchFilter"
+                                       dropdown-name="view.sDropdownName"
+                                       on-click-function="view.oOnClickFunction"
+                                       ng-if="view.type === 'dropdown'"></dropdownmenudirective>
+            </div>
+        </div>
+    </div>
+
+
 </div>

@@ -1,6 +1,7 @@
 function ViewElementFactory() {
     this.CreateViewElement = function (type) {
         var oViewElement;
+
         if (type === "textbox") {
             oViewElement = new TextBox();
         }
@@ -8,6 +9,7 @@ function ViewElementFactory() {
             oViewElement = new DropDown();
         }
         oViewElement.type = type;
+        oViewElement.sLabel = "";
 
         return oViewElement;
     }
