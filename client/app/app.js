@@ -50,6 +50,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ImageEditorDirective',
     'wasdi.DropdownMenuDirective',
     'wasdi.ToDoListDirective',
+    'wasdi.InputTextDirective',
 
     //FILTERS
     'wasdi.stringUtils',
@@ -167,6 +168,14 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
             'maincontent' : { templateUrl : 'partials/catalog.html', controller  : 'CatalogController'}
         }
     });
+    //APP STORE
+    $stateProvider.state('root.appstore',{
+        url: '/appstore',// /{workSpace}
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/appstore.html', controller  : 'AppStoreController'}
+        }
+    });
 
 
 }]);
@@ -178,6 +187,7 @@ wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
 wasdiApp.controller("SearchOrbitController",SearchOrbitController);
 wasdiApp.controller("ValidateUserController",ValidateUserController);
+wasdiApp.controller("AppStoreController",AppStoreController);
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);

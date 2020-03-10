@@ -109,6 +109,14 @@
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
+                        <!-- APPSTORE BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.appstore')}"  >
+                            <a ng-click="m_oController.openAppStore();" href=""   >
+                                <!--i class="fa fa-cogs fa-lg" aria-hidden="true"></i>-->
+                                <i class="fa fa-archive" aria-hidden="true"></i>
+                                App Store
+                            </a>
+                        </li>
                         <!-- CATALOGUE BUTTON-->
                         <!--<li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >-->
                             <!--<a ng-click="m_oController.openCatalogPage()" href=""  >-->
