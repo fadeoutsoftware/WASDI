@@ -10,8 +10,8 @@ angular.module('wasdi.InputTextDirective', [])
             // * Two-way binding ('=' or '=?') *
             // * Function binding ('&' or '&?') *
             bindToController: {
-                hero: '=',
-                deleted: '&'
+                inputText: '=',
+                // deleted: '&'
             },
     //         template: `
     //   <h2>{{$ctrl.hero.name}} details!</h2>
@@ -19,12 +19,11 @@ angular.module('wasdi.InputTextDirective', [])
     //   <button ng-click="$ctrl.onDelete()">Delete</button>
     // `,
             template: `
-            <input type="text" class="form-control"  ng-model="$ctrl.hero">
+            <input type="text" class="form-control"  ng-model="$ctrl.inputText">
+
          `,
             controller: function() {
-                this.onDelete = () => {
-                    this.deleted({hero: this.hero});
-                };
+
             },
             controllerAs: '$ctrl'
         };
