@@ -8,6 +8,9 @@ function ViewElementFactory() {
         if (type === "dropdown") {
             oViewElement = new DropDown();
         }
+        if (type === "selectarea") {
+            oViewElement = new SelectArea();
+        }
         oViewElement.type = type;
         oViewElement.sLabel = "";
 
@@ -16,6 +19,8 @@ function ViewElementFactory() {
 }
 
 
+var SelectArea = function () {
+};
 
 var TextBox = function () {
     this.sTextBox = "";

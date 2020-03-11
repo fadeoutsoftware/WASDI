@@ -18,8 +18,10 @@ var AppStoreController = (function() {
         let oFactory = new ViewElementFactory();
         let tst1 = oFactory.CreateViewElement("textbox");
         let tst2 = oFactory.CreateViewElement("dropdown");
+        let tst3 = oFactory.CreateViewElement("selectarea");
         oViewElements.push(tst1);
         oViewElements.push(tst2);
+        oViewElements.push(tst3);
         return oViewElements;
     };
 

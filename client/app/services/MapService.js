@@ -139,6 +139,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     };
 
+
+
+
     /**
      * Get the Map object
      * @returns {null|*}

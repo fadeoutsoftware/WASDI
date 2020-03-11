@@ -13,14 +13,17 @@
     <div class="row-v4">
         <div class="col-v4-auto">
             <div ng-repeat="view in m_oController.m_aoViewElements">
+
                 <inputtextdirective input-text="view.sTextBox" ng-if="view.type === 'textbox'"></inputtextdirective>
-                {{view.sLabel}}
+
                 <dropdownmenudirective list-of-values="view.asListValues"
                                        selected-value="view.sSelectedValues"
                                        enable-search-filter="view.bEnableSearchFilter"
                                        dropdown-name="view.sDropdownName"
                                        on-click-function="view.oOnClickFunction"
                                        ng-if="view.type === 'dropdown'"></dropdownmenudirective>
+
+                <map2ddirective  ng-if="view.type === 'selectarea'" height-map="'200'" width-map="'500'"></map2ddirective>
             </div>
         </div>
     </div>
