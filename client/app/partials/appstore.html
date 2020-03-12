@@ -10,22 +10,25 @@
 <!--        </div>-->
     </div>
 
-    <div class="row" ng-repeat="view in m_oController.m_aoViewElements">
+    <div class="row" ng-repeat="viewElement in m_oController.m_aoViewElements">
 
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-            {{view.sLabel}}
+            {{viewElement.sLabel}}
         </div>
         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-            <inputtextdirective input-text="view.sTextBox" ng-if="view.type === 'textbox'"></inputtextdirective>
+            <inputtextdirective input-text="viewElement.sTextBox" ng-if="viewElement.type === 'textbox'"></inputtextdirective>
 
-            <dropdownmenudirective list-of-values="view.asListValues"
-                                   selected-value="view.sSelectedValues"
-                                   enable-search-filter="view.bEnableSearchFilter"
-                                   dropdown-name="view.sDropdownName"
-                                   on-click-function="view.oOnClickFunction"
-                                   ng-if="view.type === 'dropdown'"></dropdownmenudirective>
+            <dropdownmenudirective list-of-values="viewElement.asListValues"
+                                   selected-value="viewElement.sSelectedValues"
+                                   enable-search-filter="viewElement.bEnableSearchFilter"
+                                   dropdown-name="viewElement.sDropdownName"
+                                   on-click-function="viewElement.oOnClickFunction"
+                                   ng-if="viewElement.type === 'dropdown'"
+                                    ></dropdownmenudirective>
 
-            <map2ddirective  ng-if="view.type === 'selectarea'" bounding-box="view.oBoundingBox" height-map="'200'" width-map="'500'"></map2ddirective>
+            <map2ddirective  ng-if="viewElement.type === 'selectarea'" bounding-box="viewElement.oBoundingBox" height-map="'200'" width-map="'500'"></map2ddirective>
+
+            <datedirective ng-if="viewElement.type === 'date'" date-time="viewElement.oDate"></datedirective>
         </div>
 
     </div>
