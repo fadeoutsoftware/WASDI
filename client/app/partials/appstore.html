@@ -4,28 +4,30 @@
 <!--</div>-->
 <div class="editor-view">
 
-    <div class="row-v4 justify-content-end toolbar">
-        <div class="col-v4-auto ml-auto">
+    <div class="row justify-content-end toolbar">
+<!--        <div class="col-v4-auto ml-auto">-->
 
-        </div>
+<!--        </div>-->
     </div>
 
-    <div class="row-v4">
-        <div class="col-v4-auto">
-            <div ng-repeat="view in m_oController.m_aoViewElements">
+    <div class="row" ng-repeat="view in m_oController.m_aoViewElements">
 
-                <inputtextdirective input-text="view.sTextBox" ng-if="view.type === 'textbox'"></inputtextdirective>
-
-                <dropdownmenudirective list-of-values="view.asListValues"
-                                       selected-value="view.sSelectedValues"
-                                       enable-search-filter="view.bEnableSearchFilter"
-                                       dropdown-name="view.sDropdownName"
-                                       on-click-function="view.oOnClickFunction"
-                                       ng-if="view.type === 'dropdown'"></dropdownmenudirective>
-
-                <map2ddirective  ng-if="view.type === 'selectarea'" height-map="'200'" width-map="'500'"></map2ddirective>
-            </div>
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+            {{view.sLabel}}
         </div>
+        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+            <inputtextdirective input-text="view.sTextBox" ng-if="view.type === 'textbox'"></inputtextdirective>
+
+            <dropdownmenudirective list-of-values="view.asListValues"
+                                   selected-value="view.sSelectedValues"
+                                   enable-search-filter="view.bEnableSearchFilter"
+                                   dropdown-name="view.sDropdownName"
+                                   on-click-function="view.oOnClickFunction"
+                                   ng-if="view.type === 'dropdown'"></dropdownmenudirective>
+
+            <map2ddirective  ng-if="view.type === 'selectarea'" bounding-box="view.oBoundingBox" height-map="'200'" width-map="'500'"></map2ddirective>
+        </div>
+
     </div>
 
 

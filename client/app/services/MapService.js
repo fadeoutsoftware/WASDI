@@ -140,6 +140,70 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     };
 
 
+    this.initMapSingleton = function(sMapDiv) {
+        var oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
+        });
+
+        var oMap = L.map(sMapDiv, {
+            zoomControl: false,
+            //layers: [this.m_oOSMBasic, this.m_oOpenTopoMap, this.m_oEsriWorldStreetMap, this.m_oEsriWorldImagery, this.m_oNASAGIBSViirsEarthAtNight2012],
+            layers: [oOSMBasic],
+            keyboard: false
+            //maxZoom: 22
+        });
+
+        // coordinates in map find this plugin in lib folder
+        L.control.mousePosition().addTo(oMap);
+
+        //scale control
+        L.control.scale({
+            position: "bottomright",
+            imperial: false
+        }).addTo(oMap);
+
+        //layers control
+        var oLayersControl = L.control.layers(
+            {
+                "Standard": this.m_oOSMBasic,
+                "OpenTopoMap":this.m_oOpenTopoMap,
+                "EsriWorldStreetMap":this.m_oEsriWorldStreetMap,
+                "EsriWorldImagery":this.m_oEsriWorldImagery,
+                "NASAGIBSViirsEarthAtNight2012":this.m_oNASAGIBSViirsEarthAtNight2012
+            },
+            {},
+            {
+                'position' : 'bottomright'
+            }
+        );
+        oLayersControl.addTo(oMap);
+
+        // center map
+        var southWest = L.latLng(0, 0),
+            northEast = L.latLng(0, 0),
+            oBoundaries = L.latLngBounds(southWest, northEast);
+
+        oMap.fitBounds(oBoundaries);
+        oMap.setZoom(3);
+
+        var oActiveBaseLayer = oOSMBasic;
+
+        //add event on base change
+        oMap.on('baselayerchange', function(e){
+            // console.log(e);
+            //e.layer.bringToBack();
+            oActiveBaseLayer = e;
+        });
+
+        return oMap;
+
+    };
 
 
     /**

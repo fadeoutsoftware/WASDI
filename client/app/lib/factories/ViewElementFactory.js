@@ -20,6 +20,10 @@ function ViewElementFactory() {
 
 
 var SelectArea = function () {
+    this.oBoundingBox = {
+        northEast : "",
+        southWest : ""
+    };
 };
 
 var TextBox = function () {

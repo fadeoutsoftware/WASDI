@@ -11,7 +11,8 @@ angular.module('wasdi.Map2DDirective', [])
             // * Function binding ('&' or '&?') *
             bindToController: {
                 heightMap: '=',
-                widthMap: '='
+                widthMap: '=',
+                boundingBox: '='
                 // idMap: '=',
                 // deleted: '&'
             },
@@ -30,10 +31,10 @@ angular.module('wasdi.Map2DDirective', [])
                 // generated a new id map number and converted as string
                 this.mapId = "" + Date.now() + Math.random();
                 this.oMap = null;
-                this.m_oBoundingBox = {
-                    northEast: "",
-                    southWest: ""
-                };
+                // this.m_oBoundingBox = {
+                //     northEast: "",
+                //     southWest: ""
+                // };
                 this.m_oDrawnItems = {};
 
                 //CHECK IF ID MAP IS NULL OR UNDEFINED or height
@@ -82,8 +83,11 @@ angular.module('wasdi.Map2DDirective', [])
                     oMap.on(L.Draw.Event.CREATED, function (event)
                     {
                         var layer = event.layer;
-                        oController.m_oBoundingBox.northEast = layer._bounds._northEast;
-                        oController.m_oBoundingBox.southWest = layer._bounds._southWest;
+                        oController.boundingBox.northEast = layer._bounds._northEast;
+                        oController.boundingBox.southWest = layer._bounds._southWest;
+                        // oController.m_oBoundingBox.northEast = layer._bounds._northEast;
+                        // oController.m_oBoundingBox.southWest = layer._bounds._southWest;
+
                         //remove old shape
                         if(oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length!==0){
                             oController.m_oDrawnItems.clearLayers();
@@ -101,16 +105,11 @@ angular.module('wasdi.Map2DDirective', [])
                 let oController = this;
                 //init the map after the directive is loaded
                 setTimeout(function() {
-                    oController.oMap = $MapService.initMap(oController.mapId);
+                    oController.oMap = $MapService.initMapSingleton(oController.mapId);
 
                     //is it an option?
                     oController.oMap = oController.addBoundigBoxDrawerOnMap(oController.oMap);
                 }, 500);
-
-
-
-
-
 
             },
             controllerAs: '$ctrl'
