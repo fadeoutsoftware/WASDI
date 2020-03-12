@@ -20,16 +20,21 @@ var AppStoreController = (function() {
         tst1.sLabel = "Sono una texbox";
         let tst2 = oFactory.CreateViewElement("dropdown");
         tst2.sLabel = "Sono una dropdown";
+
         let tst3 = oFactory.CreateViewElement("selectarea");
         tst3.sLabel = "Sono una selectarea";
 
         let tst4 = oFactory.CreateViewElement("selectarea");
         tst4.sLabel = "Sono una selectarea";
 
+        let tst5 = oFactory.CreateViewElement("date");
+        tst5.sLabel = "Sono una data";
+
         oViewElements.push(tst1);
         oViewElements.push(tst2);
         oViewElements.push(tst3);
         oViewElements.push(tst4);
+        oViewElements.push(tst5);
         return oViewElements;
     };
 

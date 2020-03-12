@@ -11,6 +11,9 @@ function ViewElementFactory() {
         if (type === "selectarea") {
             oViewElement = new SelectArea();
         }
+        if(type === "date"){
+            oViewElement = new DateBox();
+        }
         oViewElement.type = type;
         oViewElement.sLabel = "";
 
@@ -18,6 +21,9 @@ function ViewElementFactory() {
     }
 }
 
+var DateBox = function(){
+    this.oDate = null;
+}
 
 var SelectArea = function () {
     this.oBoundingBox = {
