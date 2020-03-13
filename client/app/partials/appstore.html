@@ -31,6 +31,8 @@
             <datedirective ng-if="viewElement.type === 'date'" date-time="viewElement.oDate"></datedirective>
 
             <tableofproductsdirective  ng-if="viewElement.type === 'tableofproducts'" products-list="viewElement.aoProducts"></tableofproductsdirective>
+
+            <lightsearchproductdirective  ng-if="viewElement.type === 'lighserachproduct'" light-search-object="viewElement"></lightsearchproductdirective>
         </div>
 
     </div>

@@ -16,6 +16,7 @@ var AppStoreController = (function() {
     AppStoreController.prototype.LoadViewElements = function(){
         let oViewElements = [];
         let oFactory = new ViewElementFactory();
+
         let tst1 = oFactory.CreateViewElement("textbox");
         tst1.sLabel = "Sono una texbox";
         let tst2 = oFactory.CreateViewElement("dropdown");
@@ -33,13 +34,17 @@ var AppStoreController = (function() {
         let tst6 = oFactory.CreateViewElement("tableofproducts");
         tst6.sLabel = "Sono una table";
 
-
-        oViewElements.push(tst1);
-        oViewElements.push(tst2);
-        oViewElements.push(tst3);
-        oViewElements.push(tst4);
-        oViewElements.push(tst5);
-        oViewElements.push(tst6);
+        let tst7 = oFactory.CreateViewElement("lighserachproduct");
+        tst7.sLabel = "Sono una light search";
+        tst7.oSelectArea.iHeight = 200;
+        tst7.oSelectArea.iWidth = 500;
+        // oViewElements.push(tst1);
+        // oViewElements.push(tst2);
+        // oViewElements.push(tst3);
+        // oViewElements.push(tst4);
+        // oViewElements.push(tst5);
+        // oViewElements.push(tst6);
+        oViewElements.push(tst7);
         return oViewElements;
     };
 

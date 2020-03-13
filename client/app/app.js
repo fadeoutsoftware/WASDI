@@ -34,6 +34,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ProcessorService',
     'wasdi.AuthServiceGoogle',
     'wasdi.TreeService',
+    'wasdi.LightSearchService',
 
     //DIRECTIVE
     'wasdi.SnakeDirective',
@@ -54,7 +55,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.Map2DDirective',
     'wasdi.DateDirective',
     'wasdi.TableOfProductsDirective',
-
+    'wasdi.LightSearchProductDirective',
     //FILTERS
     'wasdi.stringUtils',
 

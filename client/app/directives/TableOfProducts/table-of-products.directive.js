@@ -71,8 +71,6 @@ angular.module('wasdi.TableOfProductsDirective', [])
             </table>
         </div>
 
-
-
          `,
             controller: function() {
 
