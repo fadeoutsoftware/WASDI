@@ -14,11 +14,19 @@ function ViewElementFactory() {
         if(type === "date"){
             oViewElement = new DateBox();
         }
+        if(type === "tableofproducts"){
+            oViewElement = new TableOfProducts();
+        }
         oViewElement.type = type;
         oViewElement.sLabel = "";
 
         return oViewElement;
     }
+}
+
+
+var TableOfProducts = function(){
+    this.aoProducts = [];
 }
 
 var DateBox = function(){

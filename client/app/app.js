@@ -53,6 +53,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.InputTextDirective',
     'wasdi.Map2DDirective',
     'wasdi.DateDirective',
+    'wasdi.TableOfProductsDirective',
 
     //FILTERS
     'wasdi.stringUtils',

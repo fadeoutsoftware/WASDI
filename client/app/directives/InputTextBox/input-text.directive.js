@@ -13,11 +13,7 @@ angular.module('wasdi.InputTextDirective', [])
                 inputText: '=',
                 // deleted: '&'
             },
-    //         template: `
-    //   <h2>{{$ctrl.hero.name}} details!</h2>
-    //   <div><label>id: </label>{{$ctrl.hero.id}}</div>
-    //   <button ng-click="$ctrl.onDelete()">Delete</button>
-    // `,
+
             template: `
             <input type="text" class="form-control"  ng-model="$ctrl.inputText">
 

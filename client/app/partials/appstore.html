@@ -29,6 +29,8 @@
             <map2ddirective  ng-if="viewElement.type === 'selectarea'" bounding-box="viewElement.oBoundingBox" height-map="'200'" width-map="'500'"></map2ddirective>
 
             <datedirective ng-if="viewElement.type === 'date'" date-time="viewElement.oDate"></datedirective>
+
+            <tableofproductsdirective  ng-if="viewElement.type === 'tableofproducts'" products-list="viewElement.aoProducts"></tableofproductsdirective>
         </div>
 
     </div>

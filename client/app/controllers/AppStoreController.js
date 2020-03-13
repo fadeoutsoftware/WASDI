@@ -30,11 +30,16 @@ var AppStoreController = (function() {
         let tst5 = oFactory.CreateViewElement("date");
         tst5.sLabel = "Sono una data";
 
+        let tst6 = oFactory.CreateViewElement("tableofproducts");
+        tst6.sLabel = "Sono una table";
+
+
         oViewElements.push(tst1);
         oViewElements.push(tst2);
         oViewElements.push(tst3);
         oViewElements.push(tst4);
         oViewElements.push(tst5);
+        oViewElements.push(tst6);
         return oViewElements;
     };
 

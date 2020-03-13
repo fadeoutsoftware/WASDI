@@ -20,21 +20,24 @@ angular.module('wasdi.DateDirective', [])
             //   <button ng-click="$ctrl.onDelete()">Delete</button>
             // `,
             template: `
-            <div class=" time-picker-container ">
-                <div    class="input-group"
+            <div class="date-directive">
+                <div class=" time-picker-container ">
+                    <div    class="input-group"
                         moment-picker="$ctrl.dateTime"
                         format="YYYY-MM-DD HH"
                         today="true">
 
-                    <input  class="form-control"
+                        <input  class="form-control"
                             placeholder="Select time"
                             ng-model="$ctrl.dateTime"
                             ng-model-options="{ updateOn: 'blur' }">
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar"></i>
-                        </span>
+                            <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                    </div>
                 </div>
             </div>
+
 
          `,
             controller: function() {
