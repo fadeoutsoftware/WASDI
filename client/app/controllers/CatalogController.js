@@ -307,7 +307,15 @@ var CatalogController = (function() {
         this.m_bIsDownloadingProduct = true;
         var oController = this;
         this.m_sProductNameInDownloadingStatus = oEntry.fileName;
-        this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
+
+        var sUrl = null;
+
+        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+
+        this.m_oCatalogService.downloadEntry(oJson, sUrl).success(function (data, status, headers, config) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 //var FileSaver = require('file-saver');

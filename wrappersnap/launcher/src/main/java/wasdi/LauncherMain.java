@@ -201,7 +201,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Create Launcher Instance
 			LauncherMain.s_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
 			LauncherMain oLauncher = new LauncherMain();
-
+			
+			// Deserialize the parameter referring the base class
 			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
@@ -213,9 +214,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Set the process object id
 			s_oLogger.setPrefix("[" + oProcessWorkspace.getProcessObjId() + "]");
-
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
-
+			
+			// Snap Log
 			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "0");
 
 			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
@@ -1292,11 +1293,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + oLauncherOperation);
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
-		s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == "
-				+ oProcessWorkspace.getProcessObjId());
+		s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == " + oProcessWorkspace.getProcessObjId());
 
 		try {
 			if (oProcessWorkspace != null) {

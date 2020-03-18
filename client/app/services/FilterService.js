@@ -11,15 +11,7 @@ service('FilterService', ['$http',  'ConstantsService', function ($http, oConsta
     {
         return this.m_oHttp.get(this.APIURL + "/processing/standardfilters");
     };
-    // this.applyFilter = function(oFilter)
-    // {
-    //     return this.m_oHttp.post(this.APIURL + "/processing/applyfilter",oFilter);
-    // };
-/*
-    this.getProductBand = function(oBody,sWorkspaceId){
-        return this.m_oHttp.post(this.APIURL + '/processing/bandimage?workspace=' + sWorkspaceId, oBody,{responseType: 'arraybuffer'});
-    };
-*/
+
     this.getProductBand = function(oBody,sWorkspaceId, sUrl){
 
         var sAPIUrl = this.APIURL;

@@ -17,11 +17,23 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
          // return this.m_oHttp.get(this.APIURL + "/catalog/entries");
     };
 
-    this.downloadEntry = function(oEntry)
+    this.downloadEntry = function(oEntry, sUrl)
     {
-          return this.m_oHttp.post(this.APIURL + "/catalog/downloadentry",oEntry,{responseType: 'arraybuffer'});
+        var sAPIUrl = this.APIURL;
+
+        if(typeof sUrl !== "undefined") {
+            if ( sUrl !== null) {
+                if (sUrl !== "") {
+                    sAPIUrl = sUrl;
+                }
+            }
+        }
+
+        return this.m_oHttp.post(sAPIUrl + "/catalog/downloadentry",oEntry,{responseType: 'arraybuffer'});
     };
-    this.downloadByName = function(sFileName, sWorkspace)
+
+
+    this.downloadByName = function(sFileName, sWorkspace, sUrl)
     {
         var urlParams = "?" + "token=" + oConstantsService.getSessionId();
         urlParams = urlParams + "&" + "filename=" + sFileName + "&workspace=" + sWorkspace;
@@ -32,21 +44,18 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
             timeout : 1000 * 120
         }
 
+        var sAPIUrl = this.APIURL;
 
-        window.location.href = this.APIURL + "/catalog/downloadbyname" + urlParams;
-        /*
-        return this.m_oHttp.get(this.APIURL + "/catalog/checkdownloadavaialibitybyname" + urlParams, config)
-            .then(function(data){
-                if(data.data.boolValue == true)
-                {
-                    //window.open(_this.APIURL + "/catalog/downloadbyname" + urlParams);
-                    window.location.href = _this.APIURL + "/catalog/downloadbyname" + urlParams;
+        if(typeof sUrl !== "undefined") {
+            if ( sUrl !== null) {
+                if (sUrl !== "") {
+                    sAPIUrl = sUrl;
                 }
-            })
-            .catch(function(reason){
-                throw "File not found";
-            })
-*/
+            }
+        }
+
+        window.location.href = sAPIUrl + "/catalog/downloadbyname" + urlParams;
+
 
     };
 
