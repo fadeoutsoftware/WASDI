@@ -1026,9 +1026,9 @@ def getPath(sFile):
 
 def getFullProductPath(sProductName):
     """
-    Get the full local path of a product given the product name. If auto download is true and the code is running locally, WASDI will download the image and keep the file on the local PC
-    Use the output of this API to get the full path to open a file
-    :param sProductName: name of the product to get the path open (WITH the final extension)
+    Get the full local path of a product given the product name. If auto download is true and the code is running
+    locally, WASDI will download the image and keep the file on the local PC Use the output of this API to get the
+    full path to open a file :param sProductName: name of the product to get the path open (WITH the final extension)
     :return: local path of the Product File
     """
     m_oLogger.debug(f'getFullProductPath({sProductName})')
@@ -1215,7 +1215,7 @@ def updateStatus(sStatus, iPerc=-1):
     :param iPerc: new Percentage.-1 By default, means no change percentage. Use a value between 0 and 100 to set it.
     :return: the updated status as a String or '' if there was any problem
     """
-    m_oLogger.debug(f'updateStatus({sStatus}, {iPerc}')
+    m_oLogger.debug(f'updateStatus({sStatus}, {iPerc})')
     try:
         if not m_bIsOnServer:
             m_oLogger.info("updateStatus: Running Locally, will not update status on server")
@@ -1543,6 +1543,7 @@ def _internalWasdiLog(sLogRow):
             elif not oResult.ok:
                 m_oLogger.warning(f'wasdiLog: could not log, server returned: {oResult.status_code}')
     except Exception as oE:
+        errorLog(f'_internalWasdiLog: could not log {sLogRow} due to {oE}. Aborting log.')
 
 
 def deleteProduct(sProduct):
@@ -2839,7 +2840,9 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None,
         m_oLogger.error('mosaic: output file name is empty, aborting')
         return ''
 
-    sUrl = f'{getBaseUrl()}/processing/geometric/mosaic?sDestinationProductName={sOutputFile}&sWorkspaceId={getActiveWorkspaceId()}'
+    sUrl = getBaseUrl()
+    sUrl += f'/processing/geometric/mosaic?'
+    sUrl += f'sDestinationProductName={sOutputFile}&sWorkspaceId={getActiveWorkspaceId()}'
 
     if m_bIsOnServer:
         sUrl += f"&parent={getProcId()}"
