@@ -46,6 +46,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
@@ -70,6 +71,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.bc.ceres.binding.PropertyContainer;
 
 import it.fadeout.Wasdi;
+import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.SnapOperatorFactory;
 import wasdi.shared.business.SnapWorkflow;
@@ -105,6 +107,7 @@ import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
@@ -320,14 +323,16 @@ public class ProcessingResources {
 			if (!sDownloadRootPath.endsWith("/"))
 				sDownloadRootPath = sDownloadRootPath + "/";
 
-			File oUserWorkflowPath = new File(sDownloadRootPath + sUserId + "/workflows/");
+			//File oUserWorkflowPath = new File(sDownloadRootPath + sUserId + "/workflows/");
+			File oUserWorkflowPath = new File(sDownloadRootPath + "workflows/");
 
 			if (!oUserWorkflowPath.exists()) {
 				oUserWorkflowPath.mkdirs();
 			}
 
 			String sWorkflowId = UUID.randomUUID().toString();
-			File oWorkflowXmlFile = new File(sDownloadRootPath + sUserId + "/workflows/" + sWorkflowId + ".xml");
+			File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
+			//File oWorkflowXmlFile = new File(sDownloadRootPath + sUserId + "/workflows/" + sWorkflowId + ".xml");
 
 			Utils.debugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
 
@@ -438,23 +443,18 @@ public class ProcessingResources {
 	 */
 	@GET
 	@Path("/deletegraph")
-	public Response deleteWorkflow(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workflowId") String sWorkflowId) {
+	public Response deleteGraph(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
 		Utils.debugLog("ProcessingResources.deleteWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + " )");
 
-		if (Utils.isNullOrEmpty(sSessionId))
-			return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		if (oUser == null)
-			return Response.status(Status.UNAUTHORIZED).build();
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return Response.status(Status.UNAUTHORIZED).build();
+		if (oUser == null) return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 		String sUserId = oUser.getUserId();
 
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-
 		SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
 		if (oWorkflow == null)
@@ -467,8 +467,7 @@ public class ProcessingResources {
 			File oWorkflowFile = new File(oWorkflow.getFilePath());
 			if (oWorkflowFile.exists()) {
 				if (!oWorkflowFile.delete()) {
-					Utils.debugLog("ProcessingResource.deleteWorkflow: Error deleting the workflow file "
-							+ oWorkflow.getFilePath());
+					Utils.debugLog("ProcessingResource.deleteWorkflow: Error deleting the workflow file " + oWorkflow.getFilePath());
 				}
 			}
 		} else {
@@ -508,6 +507,7 @@ public class ProcessingResources {
 			oResult.setIntValue(401);
 			return oResult;
 		}
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -612,6 +612,69 @@ public class ProcessingResources {
 
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
 	}
+	
+	
+	@GET
+	@Path("downloadgraph")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadGraphByName(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("token") String sTokenSessionId,
+			@QueryParam("workflowId") String sWorkflowId,
+			@QueryParam("workspace") String sWorkspace)
+	{			
+
+		Utils.debugLog("ProcessingResource.downloadGraphByName( Session: " + sSessionId + ", WorkflowId: " + sWorkflowId + ", workspace: " + sWorkspace);
+		
+		try {
+			
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
+			
+			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+
+			if (oUser == null) {
+				Utils.debugLog("ProcessingResource.downloadGraphByName: user not authorized");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// Take path
+			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath += "/";
+			String sWorkflowXmlPath = sDownloadRootPath + "workflows/" + sWorkflowId + ".xml";
+			
+			File oFile = new File(sWorkflowXmlPath);
+			
+			ResponseBuilder oResponseBuilder = null;
+			
+			if(oFile.exists()==false) {
+				Utils.debugLog("ProcessingResource.downloadGraphByName: file does not exists " + oFile.getPath());
+				oResponseBuilder = Response.serverError();	
+			} 
+			else {
+				
+				Utils.debugLog("ProcessingResource.downloadGraphByName: returning file " + oFile.getPath());
+				
+				FileStreamingOutput oStream;
+				oStream = new FileStreamingOutput(oFile);
+				
+				oResponseBuilder = Response.ok(oStream);
+				oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
+				oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
+			}
+			
+			return oResponseBuilder.build();
+			
+		} 
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessingResource.downloadGraphByName: " + oEx);
+		}
+		
+		return null;
+	}
+	
+	
+	
 
 	@GET
 	@Path("/standardfilters")
@@ -751,11 +814,6 @@ public class ProcessingResources {
 			IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
 		}
 
-		// Get Download File Path
-		// String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		// File oProductFile = new File(new File(new File(sDownloadPath, sUserId),
-		// sWorkspace), oBandImageViewModel.getProductFileName());
-
 		String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 		File oProductFile = new File(sProductPath + oBandImageViewModel.getProductFileName());
 
@@ -779,15 +837,15 @@ public class ProcessingResources {
 
 		if (oBandImageViewModel.getFilterVM() != null) {
 			Filter oFilter = oBandImageViewModel.getFilterVM().getFilter();
-			FilterBand oFilteredBand = oBandImageManager.getFilterBand(oBandImageViewModel.getBandName(), oFilter,
-					oBandImageViewModel.getFilterIterationCount());
+			FilterBand oFilteredBand = oBandImageManager.getFilterBand(oBandImageViewModel.getBandName(), oFilter, oBandImageViewModel.getFilterIterationCount());
+			
 			if (oFilteredBand == null) {
-				Utils.debugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND "
-						+ oBandImageViewModel.getBandName());
+				Utils.debugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + oBandImageViewModel.getBandName());
 				return Response.status(500).build();
 			}
 			oRasterDataNode = oFilteredBand;
-		} else {
+		} 
+		else {
 			oRasterDataNode = oSNAPProduct.getBand(oBandImageViewModel.getBandName());
 		}
 
@@ -798,12 +856,12 @@ public class ProcessingResources {
 			+ oBandImageViewModel.getVp_h() + " OUTW = " + oBandImageViewModel.getImg_w() + " OUTH = "
 			+ oBandImageViewModel.getImg_h());
 			return Response.status(500).build();
-		} else {
+		} 
+		else {
 			Utils.debugLog("ProcessingResources.getBandImage: parameters OK");
 		}
 
-		Rectangle oRectangleViewPort = new Rectangle(oBandImageViewModel.getVp_x(), oBandImageViewModel.getVp_y(),
-				oBandImageViewModel.getVp_w(), oBandImageViewModel.getVp_h());
+		Rectangle oRectangleViewPort = new Rectangle(oBandImageViewModel.getVp_x(), oBandImageViewModel.getVp_y(), oBandImageViewModel.getVp_w(), oBandImageViewModel.getVp_h());
 		Dimension oImgSize = new Dimension(oBandImageViewModel.getImg_w(), oBandImageViewModel.getImg_h());
 
 		// apply product masks
@@ -812,8 +870,7 @@ public class ProcessingResources {
 			for (ProductMaskViewModel oMaskModel : aoProductMasksModels) {
 				Mask oMask = oSNAPProduct.getMaskGroup().get(oMaskModel.getName());
 				if (oMask == null) {
-					Utils.debugLog(
-							"ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
+					Utils.debugLog("ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
 				} else {
 					// set the user specified color
 					oMask.setImageColor(
@@ -898,282 +955,6 @@ public class ProcessingResources {
 		return mask;
 	}
 
-	@POST
-	@Path("/assimilation")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public String assimilation(@FormDataParam("humidity") InputStream humidityFile,
-			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
-			@HeaderParam("x-session-token") String sSessionId, @QueryParam("midapath") String sMidaPath) {
-
-		Utils.debugLog("ProcessingResource.Assimilation( InputStream, FormDataContentDisposition, " + sSessionId + ", "
-				+ sMidaPath + " )");
-
-		User user = Wasdi.GetUserFromSession(sSessionId);
-		try {
-
-			// check authentication
-			if (user == null || Utils.isNullOrEmpty(user.getUserId())) {
-				return null;
-			}
-
-			// build and check paths
-			File assimilationWD = new File(m_oServletConfig.getInitParameter("AssimilationWDPath"));
-			if (!assimilationWD.isDirectory()) {
-				Utils.debugLog("ProcessingResource.Assimilation: ERROR: Invalid directory: "
-						+ assimilationWD.getAbsolutePath());
-				throw new InternalServerErrorException("invalid directory in assimilation settings");
-			}
-			File midaTifFile = new File(sMidaPath);
-			if (!midaTifFile.canRead()) {
-				Utils.debugLog(
-						"ProcessingResource.Assimilation: ERROR: Invalid mida path: " + midaTifFile.getAbsolutePath());
-				throw new InternalServerErrorException("invalid path in assimilation settings");
-			}
-			File humidityTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
-			File resultDir = new File(m_oServletConfig.getInitParameter("AssimilationResultPath"));
-			File resultTifFile = new File(resultDir, UUID.randomUUID().toString() + ".tif");
-
-			// save uploaded file
-			int read = 0;
-			byte[] bytes = new byte[1024];
-			OutputStream out = new FileOutputStream(humidityTifFile);
-			while ((read = humidityFile.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
-			}
-			out.flush();
-			out.close();
-
-			// execute assimilation
-			if (launchAssimilation(midaTifFile, humidityTifFile, resultTifFile)) {
-				String url = "wasdidownloads/" + resultTifFile.getName();
-				return url;
-			}
-
-		} catch (Exception e) {
-			Utils.debugLog("ProcessingResource.Assimilation: " + e);
-			throw new InternalServerErrorException("Error launching assimilation: " + e);
-		}
-		throw new InternalServerErrorException("unable to execute assimilation");
-	}
-
-	@GET
-	@Path("/saba")
-	@Produces({ "application/json" })
-	public PrimitiveResult saba(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFileName,
-			@QueryParam("workspaceId") String sWorkspaceId) {
-
-		Utils.debugLog("ProcessingResource.Saba( " + sSessionId + ", " + sFileName + ", " + sWorkspaceId + " )");
-		PrimitiveResult oResult = new PrimitiveResult();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		try {
-
-			// check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				oResult.setBoolValue(false);
-				oResult.setIntValue(404);
-				return oResult;
-			}
-
-			Utils.debugLog("ProcessingResource.Saba: INPUT FILE " + sFileName);
-
-			Utils.debugLog("ProcessingResource.Saba: launching ENVI SABA Processor");
-
-			// execute assimilation
-			if (launchSaba(sFileName, sWorkspaceId)) {
-				Utils.debugLog("ProcessingResource.Saba: ok return");
-				String sOutputFile = "";
-
-				if (sFileName.startsWith("CSK")) {
-					sOutputFile = "Mappa_" + sFileName.substring(0, 41) + ".tif";
-				} else if (sFileName.startsWith("S1A")) {
-					sOutputFile = "Mappa_" + sFileName.substring(0, 32) + ".tif";
-				}
-
-				oResult.setStringValue(sOutputFile);
-
-				oResult.setBoolValue(true);
-				oResult.setIntValue(200);
-			} else {
-				Utils.debugLog("ProcessingResource.Saba: error, return");
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-			}
-		} catch (Exception e) {
-			Utils.debugLog("ProcessingResource.Saba: " + e);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-
-		return oResult;
-	}
-
-	@GET
-	@Path("/ddspublishsaba")
-	@Produces({ "application/json" })
-	public PrimitiveResult DDSPublishSaba(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("file") String sFileName, @QueryParam("workspaceId") String sWorkspaceId) {
-
-		Utils.debugLog(
-				"ProcessingResource.DDSPublishSaba( " + sSessionId + ", " + sFileName + ", " + sWorkspaceId + " )");
-		PrimitiveResult oResult = new PrimitiveResult();
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		try {
-
-			// check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				oResult.setBoolValue(false);
-				oResult.setIntValue(404);
-				return null;
-			}
-
-			Utils.debugLog("ProcessingResource.DDSPublishSaba: INPUT FILE " + sFileName);
-
-			String sAccount = oUser.getUserId();
-
-			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!sDownloadRootPath.endsWith("/"))
-				sDownloadRootPath = sDownloadRootPath + "/";
-			File oUserBaseDir = new File(sDownloadRootPath + sAccount + "/" + sWorkspaceId + "/");
-			File oFilePath = new File(oUserBaseDir, sFileName);
-
-			Utils.debugLog("ProcessingResource.DDSPublishSaba: Full Path " + oFilePath.getPath());
-
-			String sDestinationFile = m_oServletConfig.getInitParameter("DDSPath");
-			String[] asFileNameSplitted = sFileName.split("_");
-
-			if (asFileNameSplitted == null) {
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				oResult.setStringValue("Impossible split file _");
-				return oResult;
-			}
-
-			if (asFileNameSplitted.length < 1) {
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				oResult.setStringValue("Impossible split file _");
-				return oResult;
-			}
-
-			String sDate = asFileNameSplitted[asFileNameSplitted.length - 1];
-
-			String sDDSFileFolder = sDestinationFile + sDate.substring(0, 4) + "/" + sDate.substring(4, 6) + "/"
-					+ sDate.substring(6, 8) + "/";
-
-			Utils.debugLog("ProcessingResource.DDSPublishSaba: Output File Path " + sDDSFileFolder);
-
-			File oOutputFile = new File(sDDSFileFolder);
-
-			oOutputFile.mkdirs();
-
-			String sOutputFileOnlyName = "FLOOD_" + sDate.replace("T", "") + "f";
-
-			Utils.debugLog("ProcessingResource.DDSPublishSaba: Output File Name " + sOutputFileOnlyName);
-
-			oOutputFile = new File(sDDSFileFolder + sOutputFileOnlyName);
-
-			FileUtils.copyFile(oFilePath, oOutputFile);
-
-			Utils.debugLog("ProcessingResource.DDSPublishSaba: Copy Done");
-
-			oResult.setStringValue(sDDSFileFolder);
-			oResult.setBoolValue(true);
-			oResult.setIntValue(200);
-
-		} catch (Exception e) {
-			Utils.debugLog("ProcessingResource.DDSPublishSaba: " + e);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-
-		return oResult;
-	}
-
-	@POST
-	@Path("/upload")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadModel(@FormDataParam("file") InputStream fileInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileMetaData,
-			@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId)
-					throws Exception {
-		Utils.debugLog("ProcessingResource.UploadModel( InputStream, FormDataContentDisposition, " + sSessionId + ", "
-				+ sWorkspaceId + " )");
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null)
-			return Response.status(Status.UNAUTHORIZED).build();
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return Response.status(Status.UNAUTHORIZED).build();
-
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/"))
-			sDownloadRootPath += "/";
-
-		String sDownloadPath = sDownloadRootPath + oUser.getUserId() + "/" + sWorkspaceId + "/" + "CONTINUUM";
-
-		if (!Files.exists(Paths.get(sDownloadPath))) {
-			if (Files.createDirectories(Paths.get(sDownloadPath)) == null) {
-				Utils.debugLog("ProcessingResource.uploadMapFile: Directory " + sDownloadPath + " not created");
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
-
-		}
-
-		try {
-			int read = 0;
-			byte[] bytes = new byte[1024];
-
-			OutputStream out = new FileOutputStream(new File(sDownloadPath + "/" + fileMetaData.getFileName()));
-			while ((read = fileInputStream.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
-			}
-			out.flush();
-			out.close();
-
-			/*
-			 * TODO: Abilitare questa parte se si vuole far partire l'assimilazione dopo
-			 * l'upload del file (E' ancora da testare)
-			 * 
-			 * 
-			 * String sAssimilationContinuumPath =
-			 * m_oServletConfig.getInitParameter("AssimilationContinuumPath"); String
-			 * sMulesmeEstimatePath = m_oServletConfig.getInitParameter("MulesmeStimePath");
-			 * if (!sAssimilationContinuumPath.endsWith("/")) sAssimilationContinuumPath +=
-			 * "/"; if (!sMulesmeEstimatePath.endsWith("/")) sMulesmeEstimatePath += "/";
-			 * 
-			 * 
-			 * //Continuum format SoilMoistureItaly_20160801230000 //Get continuum date
-			 * SimpleDateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd"); String
-			 * sFileName = fileMetaData.getFileName(); String sDate =
-			 * sFileName.split("_")[1].substring(0, 7); Calendar oContinuumDate =
-			 * Calendar.getInstance(); Calendar oMulesmeDate = Calendar.getInstance();
-			 * oContinuumDate.setTime(oDateFormat.parse(sDate));
-			 * oMulesmeDate.setTime(oDateFormat.parse(sDate));
-			 * oMulesmeDate.add(Calendar.DATE, 1); // number of days to add String
-			 * sMulesmeDate = oDateFormat.format(oMulesmeDate);
-			 * 
-			 * //Search in catalog soil moisture map with date = continuum date + 1 day
-			 * CatalogRepository oRepo = new CatalogRepository(); Catalog oCatalog =
-			 * oRepo.GetCatalogsByDate(sMulesmeDate); if (oCatalog != null) { //Copy file
-			 * into Mulesme Stime path Files.move(Paths.get(oCatalog.getFilePath()),
-			 * Paths.get(sMulesmeEstimatePath)); //Copy file from CONTINUUM to assimilation
-			 * path Files.move(Paths.get(sDownloadPath + "/" + fileMetaData.getFileName()),
-			 * Paths.get(sAssimilationContinuumPath)); //launch assimilation
-			 * LaunchAssimilation(); }
-			 */
-
-		} catch (IOException e) {
-			throw new WebApplicationException(
-					"CatalogResources.uploadModel: Error while uploading file. Please try again !!");
-		}
-
-		return Response.ok().build();
-	}
-
 	@GET
 	@Path("/WPSlist")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -1195,83 +976,6 @@ public class ProcessingResources {
 			return aoResult;
 		}
 		return null;
-	}
-
-	private boolean launchAssimilation(File midaTifFile, File humidityTifFile, File resultTifFile) {
-		Utils.debugLog("ProcessingResource.launchAssimilation( File, File, File )");
-		try {
-
-			String cmd[] = new String[] { m_oServletConfig.getInitParameter("AssimilationScript"),
-					midaTifFile.getAbsolutePath(), humidityTifFile.getAbsolutePath(), resultTifFile.getAbsolutePath() };
-
-			Utils.debugLog("ProcessingResource.LaunchAssimilation: shell exec " + Arrays.toString(cmd));
-
-			Process proc = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line;
-			while ((line = input.readLine()) != null) {
-				Utils.debugLog("ProcessingResource.LaunchAssimilation: Assimilation stdout: " + line);
-			}
-			if (proc.waitFor() != 0)
-				return false;
-		} catch (Exception oEx) {
-			Utils.debugLog("ProcessingResource.LaunchAssimilation: " + oEx);
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Launch Saba ENVI process
-	 * 
-	 * @param sInputFile
-	 * @param sWorkspaceId
-	 * @return
-	 */
-	private boolean launchSaba(String sInputFile, String sWorkspaceId) {
-		Utils.debugLog("ProcessingResources.launchSaba( " + sInputFile + ", " + sWorkspaceId + " )");
-		try {
-
-			String cmd[] = new String[] { m_oServletConfig.getInitParameter("SabaScript") };
-
-			String sParamFile = m_oServletConfig.getInitParameter("SabaParam");
-
-			Utils.debugLog("ProcessingResource.launchSaba ParamFile " + sParamFile);
-
-			Utils.debugLog("ProcessingResource.launchSaba: shell exec " + Arrays.toString(cmd));
-			File oFile = new File(sParamFile);
-
-			if (!oFile.exists()) {
-				oFile.mkdirs();
-			}
-
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
-			oWriter.write("USER," + m_oServletConfig.getInitParameter("SabaUser"));
-			oWriter.newLine();
-			oWriter.write("PASSWORD," + m_oServletConfig.getInitParameter("SabaPassword"));
-			oWriter.newLine();
-			oWriter.write("FILE," + sInputFile);
-			oWriter.newLine();
-			oWriter.write("WORKSPACE," + sWorkspaceId);
-			oWriter.newLine();
-			oWriter.flush();
-			oWriter.close();
-
-			Process proc = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line;
-			while ((line = input.readLine()) != null) {
-				Utils.debugLog("ProcessingResource.launchSaba: envi stdout: " + line);
-			}
-			if (proc.waitFor() != 0)
-				return false;
-		} catch (Exception oEx) {
-			Utils.debugLog("ProcessingResource.launchSaba: " + oEx);
-			return false;
-		}
-
-		return true;
 	}
 
 	private String acceptedUserAndSession(String sSessionId) {
@@ -1353,8 +1057,7 @@ public class ProcessingResources {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			// Do we have settings?
-			if (oSetting != null)
-				oParameter.setSettings(oSetting);
+			if (oSetting != null) oParameter.setSettings(oSetting);
 
 			// Serialization Path
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
@@ -1464,461 +1167,6 @@ public class ProcessingResources {
 		default:
 			return null;
 
-		}
-	}
-
-	/**
-	 * Runs a the IDL script implementation of the LIST flood algorithm on specified
-	 * files
-	 * 
-	 * @param sSessionId a valid session identifier
-	 * @param sFileName  input file
-	 * @param a          workspase identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK
-	 *         after execution of the script
-	 */
-	@POST
-	@Path("/asynchjrctest")
-	@Produces({ "application/json" })
-	public PrimitiveResult asynchJRCTest(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspaceId") String sWorkspaceId, JRCTestViewModel oJRCViewModel) {
-
-		Utils.debugLog("ProcessingResource.asynchJRCTest( " + sSessionId + ", " + sWorkspaceId + ", ... )");
-
-		if (null == sSessionId) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(400);
-			return oResult;
-		}
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-		try {
-			// check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setIntValue(401);
-				return oResult;
-			}
-
-			Utils.debugLog("ProcessingResource.asynchJRCTest: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Utils.debugLog("ProcessingResource.asynchJRCTest: OUTPUT FILE " + oJRCViewModel.getOutputFileName());
-			Utils.debugLog("ProcessingResource.asynchJRCTest: EPSG " + oJRCViewModel.getEpsg());
-
-			Utils.debugLog("ProcessingResource.asynchJRCTest: launching MATLAB JRC Processor");
-
-			return asynchLaunchJRC(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
-
-		} catch (Exception e) {
-			Utils.debugLog("ProcessingResource.asynchJRCTest: " + e);
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-	}
-
-	/**
-	 * Launch LIST ENVI process
-	 * 
-	 * @param sReferenceFile
-	 * @param sWorkspaceId
-	 * @return
-	 */
-	private PrimitiveResult asynchLaunchJRC(String sSessionId, JRCTestViewModel oJRCViewModel, User oUser,
-			String sWorkspaceId) {
-		Utils.debugLog("ProcessingResources.asynchLaunchJRC( " + sSessionId + ", JRCTestViewModel, User, "
-				+ sWorkspaceId + " )");
-		PrimitiveResult oResult = new PrimitiveResult();
-		String sProcessObjId = Utils.GetRandomName();
-		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
-
-		oResult.setBoolValue(false);
-		oResult.setIntValue(500);
-
-		try {
-			String sParamFile = "param.txt";
-
-			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath")
-					+ "/processors/wasdi_matlab_test_01/" + sParamFile;
-			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath")
-					+ "/processors/wasdi_matlab_test_01/config.properties";
-
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
-
-			File oFile = new File(sParamFullPath);
-			File oConfigFile = new File(sConfigFullPath);
-
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
-
-			if (null != oWriter) {
-				Utils.debugLog("ProcessingResource.asynchLaunchJRC: Creating config.properties file");
-
-				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
-				oWriter.newLine();
-				oWriter.write("USER=" + oUser.getUserId());
-				oWriter.newLine();
-				oWriter.write("WORKSPACE=" + oWorkspace.getName());
-				oWriter.newLine();
-				oWriter.write("SESSIONID=" + sSessionId);
-				oWriter.newLine();
-				oWriter.write("ISONSERVER=1");
-				oWriter.newLine();
-				oWriter.write("DOWNLOADACTIVE=0");
-				oWriter.newLine();
-				oWriter.write("MYPROCID=" + sProcessObjId);
-				oWriter.newLine();
-				oWriter.write("PARAMETERSFILEPATH=" + sParamFullPath);
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-
-			oWriter = new BufferedWriter(new FileWriter(oFile));
-			if (null != oWriter) {
-				Utils.debugLog("ProcessingResource.asynchLaunchJRC: Creating parameters file");
-
-				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
-				oWriter.newLine();
-				oWriter.write("EPSG=" + oJRCViewModel.getEpsg());
-				oWriter.newLine();
-				oWriter.write("OUTPUT=" + oJRCViewModel.getOutputFileName());
-				oWriter.newLine();
-				oWriter.write("PREPROCESS=" + oJRCViewModel.getPreprocess());
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-
-			// Update process list
-
-			MATLABProcParameters oParameter = new MATLABProcParameters();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setConfigFilePath(sConfigFullPath);
-			oParameter.setParamFilePath(sParamFullPath);
-			oParameter.setProcessorName("wasdi_matlab_test_01");
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.RUNMATLAB.toString(), oJRCViewModel.getInputFileName(), sPath, oParameter);
-
-		} catch (Exception oEx) {
-			Utils.debugLog("ProcessingResource.launchList: " + oEx);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-	}
-
-	/**
-	 * Runs a the IDL script implementation of the LIST flood algorithm on specified
-	 * files
-	 * 
-	 * @param sSessionId a valid session identifier
-	 * @param sFileName  input file
-	 * @param a          workspase identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK
-	 *         after execution of the script
-	 */
-	@POST
-	@Path("/asynchjrctest2")
-	@Produces({ "application/json" })
-	public PrimitiveResult asynchJRCTest2(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspaceId") String sWorkspaceId, JRCTestViewModel2 oJRCViewModel) {
-
-		Utils.debugLog(
-				"ProcessingResource.asynchJRCTest2( " + sSessionId + ", " + sWorkspaceId + ", JRCTestViewModel2 )");
-
-		if (null == sSessionId) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(400);
-			return oResult;
-		}
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-		try {
-			// check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setIntValue(401);
-				return oResult;
-			}
-
-			Utils.debugLog("ProcessingResource.asynchJRCTest2: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Utils.debugLog("ProcessingResource.asynchJRCTest2: GLC " + oJRCViewModel.getGlc());
-			Utils.debugLog("ProcessingResource.asynchJRCTest2: LANDSATGHSL " + oJRCViewModel.getLandsatghsl());
-			Utils.debugLog("ProcessingResource.asynchJRCTest2: PREPROCESS " + oJRCViewModel.getPreprocess());
-
-			Utils.debugLog("ProcessingResource.asynchJRCTest2: launching MATLAB JRC 2 Processor");
-
-			return asynchLaunchJRC2(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
-
-		} catch (Exception e) {
-			Utils.debugLog("ProcessingResource.asynchJRCTest2: " + e);
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-	}
-
-	/**
-	 * Launch LIST ENVI process
-	 * 
-	 * @param sReferenceFile
-	 * @param sWorkspaceId
-	 * @return
-	 */
-	private PrimitiveResult asynchLaunchJRC2(String sSessionId, JRCTestViewModel2 oJRCViewModel, User oUser,
-			String sWorkspaceId) {
-
-		Utils.debugLog("ProcessingResources.asynchLaunchJRC2( " + sSessionId + ", JRCTestViewModel2, oUser, "
-				+ sWorkspaceId + " )");
-		PrimitiveResult oResult = new PrimitiveResult();
-		String sProcessObjId = Utils.GetRandomName();
-		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
-
-		oResult.setBoolValue(false);
-		oResult.setIntValue(500);
-
-		try {
-			String sParamFile = "param.txt";
-
-			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath")
-					+ "/processors/wasdi_matlab_test_02/" + sParamFile;
-			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath")
-					+ "/processors/wasdi_matlab_test_02/config.properties";
-
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
-
-			File oFile = new File(sParamFullPath);
-			File oConfigFile = new File(sConfigFullPath);
-
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
-
-			if (null != oWriter) {
-				Utils.debugLog("ProcessingResource.asynchLaunchJRC2: Creating config.properties file");
-
-				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
-				oWriter.newLine();
-				oWriter.write("USER=" + oUser.getUserId());
-				oWriter.newLine();
-				oWriter.write("WORKSPACE=" + oWorkspace.getName());
-				oWriter.newLine();
-				oWriter.write("SESSIONID=" + sSessionId);
-				oWriter.newLine();
-				oWriter.write("ISONSERVER=1");
-				oWriter.newLine();
-				oWriter.write("DOWNLOADACTIVE=0");
-				oWriter.newLine();
-				oWriter.write("MYPROCID=" + sProcessObjId);
-				oWriter.newLine();
-				oWriter.write("PARAMETERSFILEPATH=" + sParamFullPath);
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-
-			oWriter = new BufferedWriter(new FileWriter(oFile));
-			if (null != oWriter) {
-				Utils.debugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
-
-				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
-				oWriter.newLine();
-				oWriter.write("GLC=" + oJRCViewModel.getGlc());
-				oWriter.newLine();
-				oWriter.write("LANDSATGHSL=" + oJRCViewModel.getLandsatghsl());
-				oWriter.newLine();
-				oWriter.write("PREPROCESS=" + oJRCViewModel.getPreprocess());
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-
-			// Update process list
-
-			MATLABProcParameters oParameter = new MATLABProcParameters();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setConfigFilePath(sConfigFullPath);
-			oParameter.setParamFilePath(sParamFullPath);
-			oParameter.setProcessorName("wasdi_matlab_test_02");
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			sPath = sPath + sProcessObjId;
-			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.RUNMATLAB.toString(), oJRCViewModel.getInputFileName(), sPath, oParameter);
-
-		} catch (Exception oEx) {
-			Utils.debugLog("ProcessingResource.launchList2: " + oEx);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-	}
-
-	/**
-	 * Runs the JRC Matlab Processor v3
-	 * 
-	 * @param sSessionId a valid session identifier
-	 * @param sFileName  input file
-	 * @param a workspace identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK
-	 *         after execution of the script
-	 */
-	@POST
-	@Path("/asynchjrctest3")
-	@Produces({ "application/json" })
-	public PrimitiveResult asynchJRCTest3(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspaceId") String sWorkspaceId, JRCTestViewModel3 oJRCViewModel) {
-
-		Utils.debugLog(
-				"ProcessingResource.asynchJRCTest3( " + sSessionId + ", " + sWorkspaceId + ", JRCTestViewModel3 )");
-
-		if (null == sSessionId) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(400);
-			return oResult;
-		}
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-		try {
-			// check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setIntValue(401);
-				return oResult;
-			}
-
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: LRN_SET " + oJRCViewModel.getLrnSet());
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: LRN_SET_POSITIVE " + oJRCViewModel.getLrnSetPositive());
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: LRN_SET_NODATA " + oJRCViewModel.getLrnSetNoData());
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: CLOUD_THRESH " + oJRCViewModel.getCloudThresh());
-
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: launching MATLAB JRC 3 Processor");
-
-			return asynchLaunchJRC3(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
-
-		} catch (Exception e) {
-			Utils.debugLog("ProcessingResource.asynchJRCTest3: " + e);
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-	}
-
-	/**
-	 * Launch LIST ENVI process
-	 * 
-	 * @param sReferenceFile
-	 * @param sWorkspaceId
-	 * @return
-	 */
-	private PrimitiveResult asynchLaunchJRC3(String sSessionId, JRCTestViewModel3 oJRCViewModel, User oUser,
-			String sWorkspaceId) {
-
-		Utils.debugLog("ProcessingResources.asynchLaunchJRC3( " + sSessionId + ", oJRCViewModel, User, " + sWorkspaceId
-				+ " )");
-		PrimitiveResult oResult = new PrimitiveResult();
-		String sProcessObjId = Utils.GetRandomName();
-		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
-
-		oResult.setBoolValue(false);
-		oResult.setIntValue(500);
-
-		try {
-			String sParamFile = "param.txt";
-
-			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath")
-					+ "/processors/wasdi_matlab_test_03/" + sParamFile;
-			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath")
-					+ "/processors/wasdi_matlab_test_03/config.properties";
-
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
-
-			File oFile = new File(sParamFullPath);
-			File oConfigFile = new File(sConfigFullPath);
-
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
-
-			if (null != oWriter) {
-				Utils.debugLog("ProcessingResource.asynchLaunchJRC3: Creating config.properties file");
-
-				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
-				oWriter.newLine();
-				oWriter.write("USER=" + oUser.getUserId());
-				oWriter.newLine();
-				oWriter.write("WORKSPACE=" + oWorkspace.getName());
-				oWriter.newLine();
-				oWriter.write("SESSIONID=" + sSessionId);
-				oWriter.newLine();
-				oWriter.write("ISONSERVER=1");
-				oWriter.newLine();
-				oWriter.write("DOWNLOADACTIVE=0");
-				oWriter.newLine();
-				oWriter.write("MYPROCID=" + sProcessObjId);
-				oWriter.newLine();
-				oWriter.write("PARAMETERSFILEPATH=" + sParamFullPath);
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-
-			oWriter = new BufferedWriter(new FileWriter(oFile));
-			if (null != oWriter) {
-				Utils.debugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
-
-				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
-				oWriter.newLine();
-				oWriter.write("LRN_SET=" + oJRCViewModel.getLrnSet());
-				oWriter.newLine();
-				oWriter.write("LRN_SET_POSITIVE=" + oJRCViewModel.getLrnSetPositive());
-				oWriter.newLine();
-				oWriter.write("LRN_SET_NODATA=" + oJRCViewModel.getLrnSetNoData());
-				oWriter.newLine();
-				oWriter.write("CLOUD_THRESH=" + oJRCViewModel.getCloudThresh());
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-
-			// Update process list
-
-			MATLABProcParameters oParameter = new MATLABProcParameters();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setConfigFilePath(sConfigFullPath);
-			oParameter.setParamFilePath(sParamFullPath);
-			oParameter.setProcessorName("wasdi_matlab_test_03");
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.RUNMATLAB.toString(), oJRCViewModel.getInputFileName(), sPath, oParameter);
-			
-		} catch (Exception oEx) {
-			Utils.debugLog("ProcessingResource.launchList2: " + oEx);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
 		}
 	}
 }

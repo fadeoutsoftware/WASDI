@@ -29,9 +29,6 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import it.fadeout.business.DownloadsThread;
-import it.fadeout.business.IDLThread;
-import it.fadeout.business.ProcessingThread;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
@@ -51,6 +48,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 public class Wasdi extends ResourceConfig {
+	
 	@Context
 	ServletConfig m_oServletConfig;
 
@@ -61,21 +59,6 @@ public class Wasdi extends ResourceConfig {
 	 * Flag for Debug Log: if true Authentication is disabled
 	 */
 	private static boolean s_bDebug = false;
-
-	/**
-	 * Process queue scheduler
-	 */
-	private static ProcessingThread s_oProcessingThread = null;
-
-	/**
-	 * Downloads queue scheduler
-	 */
-	private static DownloadsThread s_oDownloadsThread = null;
-
-	/**
-	 * IDL Processors queue scheduler
-	 */
-	private static IDLThread s_oIDLThread = null;
 
 	/**
 	 * User for debug mode auto login
@@ -91,7 +74,10 @@ public class Wasdi extends ResourceConfig {
 	 * Code of the actual node
 	 */
 	public static String s_sMyNodeCode = "wasdi";
-
+	
+	/**
+	 * Credential Policy Utility class
+	 */
 	private static CredentialPolicy m_oCredentialPolicy;
 
 	static {
@@ -106,14 +92,7 @@ public class Wasdi extends ResourceConfig {
 	@PostConstruct
 	public void initWasdi() {
 
-		Utils.debugLog("-----------welcome to WASDI - Web Advanced Space Developer Interface");
-
-		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
-			s_bDebug = true;
-			Utils.debugLog("-------Debug Version on");
-			s_sDebugUser = getInitParameter("DebugUser", "user");
-			s_sDebugPassword = getInitParameter("DebugPassword", "password");
-		}
+		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 
 		try {
 			Utils.m_iSessionValidityMinutes = Integer
@@ -168,41 +147,6 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 
-		if (s_oProcessingThread == null) {
-			try {
-
-				Utils.debugLog("-------Starting Processing and Download Schedulers...");
-
-				if (getInitParameter("EnableProcessingScheduler", "true").toLowerCase().equals("true")) {
-					s_oProcessingThread = new ProcessingThread(m_oServletConfig);
-					s_oProcessingThread.start();
-					Utils.debugLog("-------processing thread STARTED");
-				} else {
-					Utils.debugLog("-------processing thread DISABLED");
-				}
-
-				if (getInitParameter("EnableDownloadScheduler", "true").toLowerCase().equals("true")) {
-					s_oDownloadsThread = new DownloadsThread(m_oServletConfig);
-					s_oDownloadsThread.start();
-					Utils.debugLog("-------downloads thread STARTED");
-				} else {
-					Utils.debugLog("-------downloads thread DISABLED");
-				}
-
-				if (getInitParameter("EnableIDLScheduler", "true").toLowerCase().equals("true")) {
-					s_oIDLThread = new IDLThread(m_oServletConfig);
-					s_oIDLThread.start();
-					Utils.debugLog("-------IDL thread STARTED");
-				} else {
-					Utils.debugLog("-------IDL thread DISABLED");
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-				Utils.debugLog("-------ERROR: CANNOT START PROCESSING THREAD!!!");
-			}
-		}
-
 		Utils.debugLog("-------initializing snap...");
 
 		try {
@@ -247,21 +191,6 @@ public class Wasdi extends ResourceConfig {
 		try {
 			Utils.debugLog("-------Shutting Down Wasdi");
 			
-			try {
-				s_oProcessingThread.stopThread();
-			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.shutDown: could not stop processing thread: " + oE);
-			}
-			try {
-				s_oDownloadsThread.stopThread();
-			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.shutDown: could not stop downloads thread: " + oE);
-			}
-			try {
-				s_oIDLThread.stopThread();
-			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.shutDown: could not stop IDL thread: " + oE);
-			}
 			try {
 				MongoRepository.shutDownConnection();
 			} catch (Exception oE) {
@@ -324,39 +253,28 @@ public class Wasdi extends ResourceConfig {
 		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 			return null;
 		}
+		
+		// Create Session Repository
+		SessionRepository oSessionRepo = new SessionRepository();
+		// Get The User Session
+		UserSession oSession = oSessionRepo.getSession(sSessionId);
 
-		if (s_bDebug) {
-			User oUser = new User();
-			oUser.setId(1);
-			oUser.setUserId(s_sDebugUser);
-			oUser.setName("Name");
-			oUser.setSurname("Surname");
-			oUser.setPassword(s_sDebugPassword);
+		if (Utils.isValidSession(oSession)) {
+			// Create User Repo
+			UserRepository oUserRepo = new UserRepository();
+			// Get the user from the session
+			User oUser = oUserRepo.getUser(oSession.getUserId());
+
+			oSessionRepo.touchSession(oSession);
+
 			return oUser;
-		} else {
-			// Create Session Repository
-			SessionRepository oSessionRepo = new SessionRepository();
-			// Get The User Session
-			UserSession oSession = oSessionRepo.getSession(sSessionId);
-
-			if (Utils.isValidSession(oSession)) {
-				// Create User Repo
-				UserRepository oUserRepo = new UserRepository();
-				// Get the user from the session
-				User oUser = oUserRepo.getUser(oSession.getUserId());
-
-				oSessionRepo.touchSession(oSession);
-
-				return oUser;
-			}
-
-			// Session not valid
-			oSessionRepo.deleteSession(oSession);
-
-			// No Session, No User
-			return null;
-
 		}
+
+		// Session not valid
+		oSessionRepo.deleteSession(oSession);
+
+		// No Session, No User
+		return null;
 	}
 
 	/**

@@ -253,46 +253,11 @@ var EditorController = (function () {
                         icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name: "",//mida
-                        caption_i18n: "EDITOR_OPERATION_TITLE_MIDA",
-                        subMenu: [],
-                        onClick: this.openMergeDialogInNavBar,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//OPERA
-                        caption_i18n: "EDITOR_OPERATION_TITLE_OPERA",
-                        subMenu: [],
-                        onClick: this.openWappDialog,
-                        icon: "fa fa-lg fa-tint"
-                    },
-                    {
                         name: "",//RASOR
                         caption_i18n: "EDITOR_OPERATION_TITLE_RASOR",
                         subMenu: [],
                         onClick: this.openRasorDialog,
                         icon: "fa fa-lg fa-users"
-                    },
-                    {
-                        name: "",//JRC Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_JRC_WORKFLOW",
-                        subMenu: [],
-                        onClick: this.openJRCWorkflowDialog,
-                        icon: "fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name: "",//JRC Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_JRC_CLASSIFICATION",
-                        subMenu: [],
-                        onClick: this.openJRCClassificationDialog,
-                        icon: "fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name: "",//JRC Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_JRCS2_TEST_PROCESSOR",
-                        subMenu: [],
-                        onClick: this.openJRCS2TestProcessor,
-                        icon: "fa fa-lg fa-file-code-o"
                     },
                     // --- WPS ---
                     {
@@ -2564,53 +2529,6 @@ var EditorController = (function () {
         });
     };
 
-    EditorController.prototype.openJRCClassificationDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRC_classification/JRCClassificationView.html",
-            controller: "JRCClassificationController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-    EditorController.prototype.openJRCS2TestProcessor = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRCS2/JRCS2.html",
-            controller: "JRCS2Controller",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-
     EditorController.prototype.openEDriftCheckImagesAvailability = function (oWindow) {
         var oController;
         if (utilsIsObjectNullOrUndefined(oWindow) === true) {
@@ -2647,33 +2565,6 @@ var EditorController = (function () {
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/eDrift_flood_automatic_chain/EDriftFloodAutomaticChainView.html",
             controller: "EDriftFloodAutomaticChainController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openJRCWorkflowDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRC_workflow/JRCWorkflowView.html",
-            controller: "JRCWorkflowController",
             inputs: {
                 extras: {
                     products: oController.m_aoProducts,
@@ -2798,42 +2689,6 @@ var EditorController = (function () {
         return true;
     };
 
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openWappDialog = function (oWindow) {
-
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/opera/OperaWappDialog.html",
-            controller: "OperaWappController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-
-                return true;
-            });
-        });
-
-        return true;
-    };
 
     /**
      *
@@ -4263,18 +4118,21 @@ var EditorController = (function () {
         var sFileName = oEntry.fileName;
         // this.m_bIsDownloadingProduct = true;
         var oController = this;
-        // this.m_sProductNameInDownloadingStatus = oEntry.fileName;
-        this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
+
+        var sUrl = null;
+
+        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+
+        this.m_oCatalogService.downloadEntry(oJson, sUrl).success(function (data, status, headers, config) {
             if (utilsIsObjectNullOrUndefined(data) == false) {
                 var blob = new Blob([data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
             }
-            // oController.m_bIsDownloadingProduct = false;
-            // oController.m_sProductNameInDownloadingStatus = "";
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
-            // oController.m_bIsDownloadingProduct = false;
-            // oController.m_sProductNameInDownloadingStatus = "";
         });
 
         return true;
@@ -4284,7 +4142,13 @@ var EditorController = (function () {
             return false;
         }
 
-        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId);
+        var sUrl = null;
+        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+
+        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl);
 
         return true;
     };
