@@ -524,9 +524,10 @@ def _getStandardHeaders():
     m_oLogger.debug(f'_getStandardHeaders()')
     global m_sSessionId
     asHeaders = {
-        # no need to specify content type, requests generate it automatically
-        # 'Content-Type': 'application/json',
-        'x-session-token': m_sSessionId
+        'x-session-token': m_sSessionId,
+        # note: it should be possible to remove the following, as requests handle it automatically
+        'Content-Type': 'application/json'
+
     }
     return asHeaders
 
@@ -2385,22 +2386,32 @@ def uploadFile(sFileName):
         #     sFileName = sFileName[1:]
         # if sFileName.startswith('/') or sFileName.startswith('\\'):
         #     sFileName = sFileName[1:]
-        #
-        # sNormalizedFileName = _normPath(sFileName)
-        #
-        # sBasePath = getBasePath()
-        # sFullPath = os.path.join(sBasePath, sNormalizedFileName)
 
         sFullPath = getFullProductPath(sFileName)
 
-        # sUrl = f'{getBaseUrl()}/product/uploadfile?workspace={getActiveWorkspaceId()}&name={sFileProperName}'
-        sUrl = f'http://127.0.0.1:8080/wasdiwebserver/rest/product/uploadfile?workspace={getActiveWorkspaceId()}&name={sFileProperName}'
+        sUrl = f'{getBaseUrl()}/product/uploadfile?workspace={getActiveWorkspaceId()}&name={sFileProperName}'
         asHeaders = _getStandardHeaders()
-        asHeaders['Content-Disposition'] = 'form-data'
-        asHeaders['Content-Transfer-Encoding'] = 'binary'
+        if 'Content-Type' in asHeaders:
+            del(asHeaders['Content-Type'])
+
+        oFiles = {'file': (sFileProperName, open(sFullPath, 'rb'))}
 
         m_oLogger.info(f'uploadFile: uploading file to wasdi...')
-        oFiles = {'file': (sFileProperName, open(sFullPath, 'rb'))}
+
+        try:
+            import http.client as http_client
+        except ImportError:
+            # Python 2
+            import httplib as http_client
+        http_client.HTTPConnection.debuglevel = 1
+
+        # You must initialize logging, otherwise you'll not see debug output.
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.DEBUG)
+        requests_log = logging.getLogger("requests.packages.urllib3")
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True
+
         oResponse = requests.post(sUrl, files=oFiles, headers=asHeaders)
         if oResponse.ok:
             m_oLogger.info(f'uploadFile: upload complete :-)')
@@ -2410,7 +2421,8 @@ def uploadFile(sFileName):
 
     except Exception as oE:
         m_oLogger.error(f'uploadFile: {oE}')
-
+    finally:
+        os.chdir(getScriptPath())
     return bResult
 
 
