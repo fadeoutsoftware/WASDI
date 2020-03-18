@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
@@ -12,7 +13,9 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.utils.Utils;
 
 public class SnapWorkflowRepository extends  MongoRepository {
 	
@@ -78,6 +81,53 @@ public class SnapWorkflowRepository extends  MongoRepository {
 
         return aoReturnList;
     }
+    
+    public List<SnapWorkflow> getList() {
+
+        final ArrayList<SnapWorkflow> aoReturnList = new ArrayList<SnapWorkflow>();
+        
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("snapworkflows").find();
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    SnapWorkflow oWorkflow = null;
+                    try {
+                        oWorkflow = s_oMapper.readValue(sJSON,SnapWorkflow.class);
+                        aoReturnList.add(oWorkflow);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    public boolean updateSnapWorkflow(SnapWorkflow oSnapWorkflow) {
+
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oSnapWorkflow);
+            Document filter = new Document("workflowId", oSnapWorkflow.getWorkflowId());
+			Document update = new Document("$set", new Document(Document.parse(sJSON)));
+			getCollection("snapworkflows").updateOne(filter, update);
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+    
 
     public boolean deleteSnapWorkflow(String sWorkflowId) {
 
