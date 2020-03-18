@@ -523,7 +523,11 @@ def _getStandardHeaders():
     """
     m_oLogger.debug(f'_getStandardHeaders()')
     global m_sSessionId
-    asHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
+    asHeaders = {
+        # no need to specify content type, requests generate it automatically
+        # 'Content-Type': 'application/json',
+        'x-session-token': m_sSessionId
+    }
     return asHeaders
 
 
