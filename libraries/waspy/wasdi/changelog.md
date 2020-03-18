@@ -1,14 +1,30 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.2.12] - 2020-03-18
+
+### Added
+
+- (Automatic) upload (& ingestion) of files in wasdi
+
+## [0.2.11] - 2020-03-11
+
+### Added
+
+- users can now log at different levels: DEBUG, INFO, WARNING, ERROR and CRITICAL, using respectively: debugLog, infoLog, warningLog, errorLog and criticalLog
+
+### Fixed
+
+- solved error in getProductBBOX internal url construction (it was introduced in last update)
+
 ## [0.2.10] - 2020-03-06
 
 ### Added
 
-- DEBUG log at the beginning of each method
+- DEBUG log at the beginning of each method (except those that would log anyway)
 
 ### Changed
 
-- improved 'pythonicyty' of ifs
+- improved 'pythonicyty' of IFs
 - improved exception handling
 - improved clarity of log messages
 

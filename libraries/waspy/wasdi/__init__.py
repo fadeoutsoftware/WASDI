@@ -1442,7 +1442,7 @@ def downloadFile(sFileName):
 
         with open(sSavePath, 'wb') as oFile:
             for oChunk in oResponse:
-                # m_logger.info('.')
+                # infoLog('.')
                 oFile.write(oChunk)
         m_oLogger.info(f'downloadFile: download done, new file locally available {sSavePath}')
 
@@ -2716,7 +2716,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         m_oLogger.error(
             f'_internalExecuteWorkflow( {asInputFileNames}, {asOutputFileNames}, {sWorkflowName}, {bAsynch} ): output file names None, aborting')
         return ''
-    # elif len(asOutputFileNames) <= 0: m_logger.error(f'_internalExecuteWorkflow( {asInputFileNames},
+    # elif len(asOutputFileNames) <= 0: errorLog(f'_internalExecuteWorkflow( {asInputFileNames},
     # {asOutputFileNames}, {sWorkflowName}, {bAsynch} ): no output file names, aborting') return ''
 
     if sWorkflowName is None:
