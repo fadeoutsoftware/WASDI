@@ -1,0 +1,193 @@
+# \_\_/== Changelog ==\\\_\_
+
+## [0.2.12] - 2020-03-18
+
+### Added
+
+- (Automatic) upload (& ingestion) of files in wasdi
+
+## [0.2.11] - 2020-03-11
+
+### Added
+
+- users can now log at different levels: DEBUG, INFO, WARNING, ERROR and CRITICAL, using respectively: debugLog, infoLog, warningLog, errorLog and criticalLog
+
+### Fixed
+
+- solved error in getProductBBOX internal url construction (it was introduced in last update)
+
+## [0.2.10] - 2020-03-06
+
+### Added
+
+- DEBUG log at the beginning of each method (except those that would log anyway)
+
+### Changed
+
+- improved 'pythonicyty' of IFs
+- improved exception handling
+- improved clarity of log messages
+
+## [0.2.9] - 2020-02-24
+
+### Changed
+
+- Separate changelog according to [keepachangelog](https://keepachangelog.com/)
+- Introduced use of python logging instead of prints and _log
+  - Log at DEBUG level each time a method is accessed
+  - Log (at ERROR or WARNING, as appropriate), each time an exception is caught 
+
+### Fixed
+
+- minor errors in f-strings construction
+
+
+## [0.2.8] - 2020-02-05
+
+### Fixed
+
+- Solved a bug in the _waitForResume private method.
+
+## [0.2.7] - 2020-01-25
+
+## Added
+
+- Support to Provider selection for search and import
+- Generic getPath method for both writing and reading
+- Exception handling in getProductBBOX
+- Limit to 10 tiles in multiSubset 
+
+## [0.2.3] - 2020-01-23
+
+### Added
+
+- Support to WAITING and READY Process State
+
+## [0.1.34] - 2019-12/20
+
+### Added
+
+- createWorkspace
+
+### Fixed
+
+- asynchExecuteProcess bug
+
+### Changed
+
+- Reviewed comment based documentation of all methods
+
+## [0.1.32] - 2019-12-19
+
+### Fixed
+
+- import bug on a not requested package
+
+## [0.1.31] - 2019-12-18
+
+### Added
+
+- multiSubset support
+- console input of user, pw and workspace if config is not specified
+
+## [0.1.30] - 2019-12-10
+
+### Added
+
+- asynch version of the import Products Method
+- import Product for a list of files
+- get Product Bounding Box
+- first version of importAndPreprocess Version
+
+### Fixed
+
+- bug on Verbose Flag
+
+## [0.1.29] - 2019-11-05
+
+### Fixed
+
+- possible infinite loop in addFileToWASDI 
+
+## [0.1.28] - 2019-10-28
+
+### Added
+
+  - support to .vrt format for mosaic 
+
+## [0.1.26] - 2019-10-24
+
+### Added
+
+- try and catch to importProduct
+
+### Changed
+
+- getFullProductPath works also for non existing files
+
+## [0.1.23] - 2019-10-23
+
+### Fixed
+
+- deleteProduct bug (did not get standard headers)
+
+## [0.1.22] - 2019-10-16
+
+### Changed
+
+- updated mosaic to last gdal-supported version
+
+## [0.1.21] - 2019-10-15
+
+### Changed
+
+- moved fileExistInWasdi from protected to public
+
+## [0.1.20] - 2019-10-15
+
+### Added
+
+- possibility to run synch and asynch workflows without the need to use the array of input and ouput files if not needed: user can pass just strings
+
+## [0.1.19] - 15/10/2019
+
+### Removed
+
+- unwanted import from wasdi lib
+    
+## [0.1.18] - 2019-10-15
+
+### Changed
+
+- Splitted importEO product in two version: one with product dictionary object and one with url and bbox
+
+### Fixed
+
+- waitProcesses syntax for python 2 compatibility
+
+## [0.1.17]- 2019-10-15
+
+### Added
+
+- waitProcesses to wait for more than one asynch process
+- getParamter version with a second optional parameter to use as default
+
+### Fixed
+
+- bug about cloud coverage in search EO Images
+
+## [0.1.16] - 2019-09-16
+
+### Added
+
+- setPayload to set the payload of the actual running processor.
+
+### Fixed
+
+- getFullProductPath bug to support many files on the same folder
+     
+## [0.1.15]
+
+### Fixed
+
+- Path generation for execution on shared workspaces
