@@ -56,6 +56,7 @@ m_sParametersFilePath = None
 m_sSessionId = ''
 m_bValidSession = False
 m_sBasePath = None
+m_sScriptPath = os.getcwd()
 
 m_bDownloadActive = True
 m_bUploadActive = True
@@ -2352,6 +2353,11 @@ def waitProcesses(asProcIdList):
 
     # Return the list of status
     return asReturnStatus
+
+
+def getScriptPath():
+    global m_sScriptPath
+    return m_sScriptPath
 
 
 def uploadFile(sFileName):
