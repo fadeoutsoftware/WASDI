@@ -944,8 +944,14 @@ public class ProcessorsResource {
 			}
 			
 			String sRelativePath = sAbsolutePath.substring(iBaseLen);
-			Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
-			aoFileEntries.put(sRelativePath,oFile);
+			
+			if (!Utils.isNullOrEmpty(sRelativePath)) {
+				Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
+				aoFileEntries.put(sRelativePath,oFile);				
+			}
+			else {
+				Utils.debugLog("ProcessorsResource.zipProcessor: jumping empty file");
+			}
 		}
 		
 		Utils.debugLog("ProcessorsResource.zipProcessor: done preparing map, added " + aoFileEntries.size() + " files");

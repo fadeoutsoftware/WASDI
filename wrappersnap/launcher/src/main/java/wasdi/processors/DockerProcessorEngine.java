@@ -43,9 +43,18 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Deploy a new Processor in WASDI
 	 * @param oParameter
 	 */
+	@Override
 	public boolean deploy(ProcessorParameter oParameter) {
+		return deploy(oParameter, true);
+	}
+	
+	/**
+	 * Deploy a new Processor in WASDI
+	 * @param oParameter
+	 */
+	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 		
-		LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: start");
+		LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: start");
 		
 		if (oParameter == null) return false;
 		
@@ -57,7 +66,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
 			// First Check if processor exists
 			String sProcessorName = oParameter.getName();
@@ -75,23 +84,23 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Check it
 			if (oProcessorZipFile.exists()==false) {
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
+				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return false;
 			}
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
-			LauncherMain.s_oLogger.error("WasdiProcessorEngine.DeployProcessor: unzip processor");
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor: unzip processor");
 			
 			// Unzip the processor (and check for entry point myProcessor.py)
 			if (!UnzipProcessor(sProcessorFolder, sProcessorId + ".zip")) {
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
+				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return false;
 			}
 		    
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: copy container image template");
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: copy container image template");
 			
 			// Copy Docker template files in the processor folder
 			File oDockerTemplateFolder = new File(m_sDockerTemplatePath);
@@ -99,10 +108,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
 			// Generate the image
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: building image");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: building image");
 			
 			handleUnzippedProcessor(sProcessorFolder);
 			
@@ -112,19 +121,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
 			ArrayList<String> asArgs = new ArrayList<>();
+			
 			String sCommand = "docker";
-			/*
-			asArgs.add("build");
-			//asArgs.add("--no-cache");
-			asArgs.add("-t"+sDockerName);
-			asArgs.add(sProcessorFolder);
-			
-			handleBuildCommand(sCommand, asArgs);
-			
-			shellExec(sCommand,asArgs);
-			*/
-			
-			
 			String sRunFile = sProcessorFolder+"deploywasdidocker.sh";
 			
 			File oRunFile = new File(sRunFile);
@@ -136,22 +134,29 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 				oRunWriter.write("#!/bin/bash");
 				oRunWriter.newLine();
-				//oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 >/dev/null 2>1");
+				oRunWriter.write("echo Deploy Docker Started > /usr/lib/wasdi/launcher/logs/echo.txt");
+				oRunWriter.newLine();
 				oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 > /usr/lib/wasdi/launcher/logs/deploy.txt 2>1");
 				oRunWriter.newLine();
+				oRunWriter.write("echo Deploy Docker Done");
 				oRunWriter.flush();
 				oRunWriter.close();
 			}			
 			
-			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
-
+			Runtime.getRuntime().exec("chmod u+x "+sRunFile);
+			
 			shellExec(sRunFile, asArgs);
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: created image " + sDockerName);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: created image " + sDockerName);
 			
 			// Run the container
 			int iProcessorPort = oProcessorRepository.getNextProcessorPort();
+			
+			if (!bFirstDeploy) {
+				iProcessorPort = oProcessor.getPort();
+			}
+			
 			//docker run -it -p 8888:5000 fadeout/wasdi:0.6
 			asArgs.clear();
 			asArgs.add("run");
@@ -166,25 +171,26 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			handleRunCommand(sCommand, asArgs);
 			
 			shellExec(sCommand, asArgs, false);
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 			
 			// Save Processor Port in the Repo
-			oProcessor.setPort(iProcessorPort);
-			oProcessorRepository.updateProcessor(oProcessor);
+			if (bFirstDeploy) {
+				oProcessor.setPort(iProcessorPort);
+				oProcessorRepository.updateProcessor(oProcessor);
+			}
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: container " + sDockerName + " is running");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: container " + sDockerName + " is running");
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
 		}
 		catch (Exception oEx) {
-			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
-			LauncherMain.s_oLogger.error("WasdiProcessorEngine.DeployProcessor Exception", oEx);
+			
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
 			try {
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			} catch (JsonProcessingException e) {
-				LauncherMain.s_oLogger.error("WasdiProcessorEngine.DeployProcessor Exception", e);
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", e);
 			}
 			return false;
 		}
@@ -197,7 +203,13 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	protected abstract void handleBuildCommand(String sCommand, ArrayList<String> asArgs);
 
 	protected abstract void handleUnzippedProcessor(String sProcessorFolder);
-
+	
+	/**
+	 * Unzip the processor
+	 * @param sProcessorFolder
+	 * @param sZipFileName
+	 * @return
+	 */
 	public boolean UnzipProcessor(String sProcessorFolder, String sZipFileName) {
 		try {
 			// Create the file
@@ -238,7 +250,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		    oZipInputStream.close();
 		    
 		    if (!bMyProcessorExists) {
-		    	LauncherMain.s_oLogger.error("WasdiProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
+		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
 		    	return false;
 		    }
 		    
@@ -249,7 +261,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		    catch (Exception e) {
 				//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
 				//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
-				LauncherMain.s_oLogger.error("WasdiProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
 				//return false;
 			}
 		    
@@ -257,7 +269,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		catch (Exception oEx) {
 			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
-			LauncherMain.s_oLogger.error("WasdiProcessorEngine.DeployProcessor Exception", oEx);
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
 			return false;
 		}
 		
@@ -290,7 +302,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				//String sLine;
 				//while ((sLine = oReader.readLine()) != null)
 					//LauncherMain.s_oLogger.debug("[docker]: " + sLine);
-				oProcess.waitFor();				
+				int iProcOuptut = oProcess.waitFor();
+				
+				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 		}
 		catch (Exception e) {
@@ -303,7 +317,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	 */
 	public boolean run(ProcessorParameter oParameter) {
 		
-		LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: start");
+		LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: start");
 		
 		if (oParameter == null) return false;
 		
@@ -328,14 +342,32 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Check processor
 			if (oProcessor == null) {
 				// Catch block will handle 
-				throw new Exception("Impossible to find processor " + sProcessorId);
+				throw new Exception("DockerProcessorEngine.run: Impossible to find processor " + sProcessorId);
+			}
+			
+			// Check if the processor is available on the node
+			if (!isProcessorOnNode(oParameter)) {
+				LauncherMain.s_oLogger.info("DockerProcessorEngine.run: processor not available on node download it");
+				
+				String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
+				
+				LauncherMain.s_oLogger.info("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
+				
+				if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
+					deploy(oParameter, false);
+				}
+				else {
+					LauncherMain.s_oLogger.error("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+					return false;
+				}
 			}
 			
 			// Decode JSON
 			String sEncodedJson = oParameter.getJson();
 			String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
 
 			// Json sanity check
 			if (Utils.isNullOrEmpty(sJson)) {
@@ -347,7 +379,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				sJson = "{}";
 			}
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Decoded JSON Parameter " + sJson);
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Decoded JSON Parameter " + sJson);
 			
 			// Call localhost:port
 			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/"+oParameter.getProcessObjId();
@@ -356,12 +388,12 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			sUrl += "&sessionid=" + oParameter.getSessionID();
 			sUrl += "&workspaceid=" + oParameter.getWorkspace();
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling URL = " + sUrl);
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: calling URL = " + sUrl);
 			
 			// Create connection
 			URL oProcessorUrl = new URL(sUrl);
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: call open connection");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: call open connection");
 			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
 			oConnection.setDoOutput(true);
 			oConnection.setRequestMethod("POST");
@@ -380,7 +412,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				}
 			}
 			catch (Exception e) {
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: connection failed: try to start container again");
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to start container again");
 				
 				// Try to start Again the docker
 				
@@ -413,11 +445,11 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				
 				shellExec(sCommand, asArgs, false);
 				
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: wait 5 sec to let docker start");
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: wait 5 sec to let docker start");
 				Thread.sleep(5000);
 				
 				// Try again the connection
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: connection failed: try to connect again");
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to connect again");
 				oProcessorUrl = new URL(sUrl);
 				oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
 				oConnection.setDoOutput(true);
@@ -433,7 +465,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 					throw new RuntimeException("Failed Again: HTTP error code : " + oConnection.getResponseCode());
 				}
 				
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: ok container recovered");
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: ok container recovered");
 			}
 				
 			// Get Result from server
@@ -442,12 +474,12 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sJsonOutput="";
 			String sOutputResult;
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Output from Server .... \n");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Output from Server .... \n");
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: " + sOutputResult);
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: " + sOutputResult);
 				sJsonOutput += sOutputResult;
 			}
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: out from the read Line loop");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: out from the read Line loop");
 			
 			oConnection.disconnect();
 			
@@ -461,9 +493,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			String sStatus = oProcessWorkspace.getStatus();
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: process Status: " + sStatus);
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: process Status: " + sStatus);
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: process output: " + sJsonOutput);
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: process output: " + sJsonOutput);
 			
 			Map<String, String> oOutputJsonMap = null;
 			
@@ -472,7 +504,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				oOutputJsonMap = oMapper.readValue(sJsonOutput, Map.class);				
 			}
 			catch (Exception oEx) {
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: exception converting proc output in Json " + oEx.toString());
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: exception converting proc output in Json " + oEx.toString());
 			}
 			
 			// Check if is a processor > 1.0: 
@@ -495,7 +527,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 						e.printStackTrace();
 					}
 					
-					LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine version " + dVersion);
+					LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: processor engine version " + dVersion);
 										
 					// New, Asynch, Processor?
 					if (dVersion > 1.0) {
@@ -503,7 +535,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 						boolean bForcedError = false;
 						
 						// Yes
-						LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine version > 1.0: wait for the processor to finish");
+						LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: processor engine version > 1.0: wait for the processor to finish");
 						
 						// Check the processId
 						String sProcId = oOutputJsonMap.get("processId");
@@ -531,7 +563,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 							if (oProcessor.getTimeoutMs()>0) {
 								if (iTimeSpentMs > oProcessor.getTimeoutMs()) {
 									// Timeout
-									LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
+									LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
 									
 									// Update process and rabbit users
 									LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -549,24 +581,24 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 						}
 						
 						
-						LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor done");
+						LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: processor done");
 						
 					}
 					else {
 						// Old processor engine: force safe status
-						LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine v1.0 - force process as done");
+						LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: processor engine v1.0 - force process as done");
 						LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);						
 					}
 				}
 				else {
 					// Old processor engine: force safe status
-					LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine v1.0 - force process as done");
+					LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: processor engine v1.0 - force process as done");
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 				}
 			}
 			else {
 				// Old processor engine: force safe status
-				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: impossible to read processor outptu in a json. Force closed");
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: impossible to read processor outptu in a json. Force closed");
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			}
 			
@@ -645,7 +677,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
 			
 			if(null!= oRunWriter) {
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.deleteProcessor: Creating "+sRunFile+" file");
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.deleteProcessor: Creating "+sRunFile+" file");
 
 				oRunWriter.write("#!/bin/bash");
 				oRunWriter.newLine();
