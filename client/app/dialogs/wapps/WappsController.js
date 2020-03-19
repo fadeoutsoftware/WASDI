@@ -144,6 +144,16 @@ var WappsController = (function() {
 
     };
 
+    WappsController.prototype.downloadClick = function(oProcessor) {
+        if(utilsIsObjectNullOrUndefined(oProcessor) === true)
+        {
+            return false;
+        }
+
+        this.m_oProcessorService.downloadProcessor(oProcessor.processorId);
+
+    };
+
     WappsController.prototype.deleteClick= function(oProcessor) {
         if(utilsIsObjectNullOrUndefined(oProcessor) === true)
         {

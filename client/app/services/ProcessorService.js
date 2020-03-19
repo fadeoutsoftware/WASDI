@@ -85,4 +85,21 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.readGDACS = function () {
         return this.m_oHttp.get("https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP?eventtypes=FL");
     };
+
+    this.downloadProcessor = function (sProcessorId, sUrl=null) {
+        var urlParams = "?" + "token=" + this.m_oConstantsService.getSessionId();
+        urlParams = urlParams + "&" + "processorId=" + sProcessorId;
+
+        var sAPIUrl = this.APIURL;
+
+        if(typeof sUrl !== "undefined") {
+            if ( sUrl !== null) {
+                if (sUrl !== "") {
+                    sAPIUrl = sUrl;
+                }
+            }
+        }
+
+        window.location.href = sAPIUrl + "/processors/downloadprocessor" + urlParams;
+    };
 }]);

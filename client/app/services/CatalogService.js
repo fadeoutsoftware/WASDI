@@ -38,12 +38,6 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
         var urlParams = "?" + "token=" + oConstantsService.getSessionId();
         urlParams = urlParams + "&" + "filename=" + sFileName + "&workspace=" + sWorkspace;
 
-        var _this = this;
-
-        var config = {
-            timeout : 1000 * 120
-        }
-
         var sAPIUrl = this.APIURL;
 
         if(typeof sUrl !== "undefined") {
@@ -55,8 +49,6 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
         }
 
         window.location.href = sAPIUrl + "/catalog/downloadbyname" + urlParams;
-
-
     };
 
     this.ingestFile = function(sSelectedFile,sWorkspace){

@@ -2068,7 +2068,7 @@ public class WasdiLib {
 	 * Delete a Product in the active Workspace
 	 * @param sProduct
 	 */
-	public void deleteProduct(String sProduct) {
+	public String deleteProduct(String sProduct) {
 		try {
 			
 			// Build API URL
@@ -2077,12 +2077,11 @@ public class WasdiLib {
 		    // Call API
 		    String sResponse = httpGet(sUrl, getStandardHeaders());
 
-		    return ;
-
+		    return sResponse;
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
-			return;
+			return "ERROR";
 		}		
 	}
 	

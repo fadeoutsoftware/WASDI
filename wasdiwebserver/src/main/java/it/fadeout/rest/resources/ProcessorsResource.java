@@ -11,7 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -27,13 +30,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
+import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
+import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Counter;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
@@ -45,7 +52,6 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -120,10 +126,7 @@ public class ProcessorsResource {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!sDownloadRootPath.endsWith("/")) {
-				sDownloadRootPath = sDownloadRootPath + "/";
-			}
+			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 			
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
 			
@@ -171,6 +174,14 @@ public class ProcessorsResource {
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
 			oProcessor.setIsPublic(iPublic);
+			
+			// Add info about the deploy node
+			Node oNode = Wasdi.getActualNode();
+			
+			if (oNode != null) {
+				oProcessor.setNodeCode(oNode.getNodeCode());
+				oProcessor.setNodeUrl(oNode.getNodeBaseAddress());
+			}
 			
 			if (!Utils.isNullOrEmpty(sParamsSample)) {
 				oProcessor.setParameterSample(sParamsSample);
@@ -690,11 +701,6 @@ public class ProcessorsResource {
 		}
 	}
 	
-	
-	
-	
-	
-	
 	@POST
 	@Path("/update")
 	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
@@ -783,10 +789,7 @@ public class ProcessorsResource {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!sDownloadRootPath.endsWith("/")) {
-				sDownloadRootPath = sDownloadRootPath + "/";
-			}
+			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + oProcessorToUpdate.getName());
 			
 			// Create folders
@@ -811,7 +814,7 @@ public class ProcessorsResource {
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
-			if (UnzipProcessor(oProcessorFile)) {
+			if (unzipProcessor(oProcessorFile)) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
 			}
 			else {
@@ -825,9 +828,151 @@ public class ProcessorsResource {
 			return Response.serverError().build();
 		}
 		return Response.ok().build();
+	}
+	
+	@GET
+	@Path("downloadprocessor")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadProcessor(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("token") String sTokenSessionId,
+			@QueryParam("processorId") String sProcessorId)
+	{			
+
+		Utils.debugLog("ProcessorsResource.downloadProcessor( Session: " + sSessionId + ", processorId: " + sProcessorId);
+		
+		try {
+			
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
+			
+			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+
+			if (oUser == null) {
+				Utils.debugLog("ProcessorsResource.downloadProcessor: user not authorized");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				Utils.debugLog("ProcessorsResource.downloadProcessor: processor does not exists");
+				return Response.status(Status.NO_CONTENT).build();				
+			}
+			
+			String sProcessorName = oProcessor.getName();
+			
+			// Take path
+			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
+			
+			File oFile = new File(sProcessorZipPath);
+			
+			return zipProcessor(oFile, oProcessor);			
+		} 
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.downloadProcessor: " + oEx);
+		}
+		
+		return null;
 	}	
 	
-	public boolean UnzipProcessor(File oProcessorZipFile) {
+	/**
+	 * Zip a full processor
+	 * @param oInitialFile
+	 * @return
+	 */
+	private Response zipProcessor(File oInitialFile, Processor oProcessor) {
+		
+		// Create a stack of files
+		Stack<File> aoFileStack = new Stack<File>();
+		String sBasePath = oInitialFile.getParent();
+		
+		Utils.debugLog("ProcessorsResource.zipProcessor: sDir = " + sBasePath);
+		
+		// Get the processor folder
+		File oFile = new File(sBasePath);
+		aoFileStack.push(oFile);
+				
+		if(!sBasePath.endsWith("/") && !sBasePath.endsWith("\\")) {
+			sBasePath = sBasePath + "/";
+		}
+		
+		int iBaseLen = sBasePath.length();
+		
+		String sProcTemplatePath = Wasdi.getDownloadPath(m_oServletConfig);
+		sProcTemplatePath += "dockertemplate/";
+		sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
+		
+		ArrayList<String> asTemplateFiles = new ArrayList<String>();
+		File oProcTemplateFolder = new File(sProcTemplatePath);
+		
+		Utils.debugLog("ProcessorsResource.zipProcessor: Proc Template Path " + sProcTemplatePath);
+		
+		File[] aoTemplateChildren = oProcTemplateFolder.listFiles();
+		for (File oChild : aoTemplateChildren) {
+			asTemplateFiles.add(oChild.getName());
+		}
+		
+		
+		// Create a map of the files to zip
+		Map<String, File> aoFileEntries = new HashMap<>();
+		
+		while(aoFileStack.size()>=1) {
+			
+			oFile = aoFileStack.pop();
+			String sAbsolutePath = oFile.getAbsolutePath();
+			
+			Utils.debugLog("ProcessorsResource.zipProcessor: sAbsolute Path " + sAbsolutePath);
+
+			if(oFile.isDirectory()) {
+				if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
+					sAbsolutePath = sAbsolutePath + "/";
+				}
+				File[] aoChildren = oFile.listFiles();
+				for (File oChild : aoChildren) {
+					
+					if (!asTemplateFiles.contains(oChild.getName())) {
+						aoFileStack.push(oChild);
+					}
+					else {
+						Utils.debugLog("ProcessorsResource.zipProcessor: jumping template file " + oChild.getName());
+					}
+					
+				}
+			}
+			
+			String sRelativePath = sAbsolutePath.substring(iBaseLen);
+			Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
+			aoFileEntries.put(sRelativePath,oFile);
+		}
+		
+		Utils.debugLog("ProcessorsResource.zipProcessor: done preparing map, added " + aoFileEntries.size() + " files");
+					
+		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+
+		// Set response headers and return 
+		ResponseBuilder oResponseBuilder = Response.ok(oStream);
+		String sFileName = oInitialFile.getName();
+				
+		Utils.debugLog("ProcessorsResource.zipProcessor: sFileName " + sFileName);
+		
+		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+		Long lLength = 0L;
+		for (String sFile : aoFileEntries.keySet()) {
+			File oTempFile = aoFileEntries.get(sFile);
+			if(!oTempFile.isDirectory()) {
+				//NOTE: this way we are cheating, it is an upper bound, not the real size!
+				lLength += oTempFile.length();
+			}
+		}
+		oResponseBuilder.header("Content-Length", lLength);
+		Utils.debugLog("ProcessorsResource.zipProcessor: done");
+		return oResponseBuilder.build();
+	}
+	
+	public boolean unzipProcessor(File oProcessorZipFile) {
 		try {
 						
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists

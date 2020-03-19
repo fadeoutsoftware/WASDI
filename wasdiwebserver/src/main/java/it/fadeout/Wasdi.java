@@ -1,7 +1,10 @@
 package it.fadeout;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -13,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.FileHandler;
@@ -24,11 +28,13 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.apache.commons.net.io.Util;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
@@ -74,6 +80,11 @@ public class Wasdi extends ResourceConfig {
 	 * Code of the actual node
 	 */
 	public static String s_sMyNodeCode = "wasdi";
+	
+	/**
+	 * Actual node Object
+	 */
+	public static Node s_oMyNode = null;
 	
 	/**
 	 * Credential Policy Utility class
@@ -317,6 +328,21 @@ public class Wasdi extends ResourceConfig {
 		return sPath;
 	}
 
+
+	public static String getDownloadPath(ServletConfig oServletConfig) {
+		// Take path
+		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
+
+		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
+			sDownloadRootPath = "/data/wasdi/";
+		}
+
+		if (!sDownloadRootPath.endsWith("/")) {
+			sDownloadRootPath = sDownloadRootPath + "/";
+		}
+
+		return sDownloadRootPath;
+	}
 	/**
 	 * Get The owner of a workspace starting from the workspace id
 	 * 
@@ -528,7 +554,128 @@ public class Wasdi extends ResourceConfig {
 			oEx.printStackTrace();
 			return "";
 		}
+	}
+	
+	/**
+	 * Download a file on the local PC
+	 * @param sWorkflowId File Name
+	 * @return Full Path
+	 */
+	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId, ServletConfig oServletConfig) {
+		try {
+			
+			if (sWorkflowId == null) {
+				System.out.println("sFileName must not be null");
+			}
+
+			if (sWorkflowId.equals("")) {
+				System.out.println("sFileName must not be empty");
+			}
+			
+			String sBaseUrl = sNodeUrl;
+			
+			if (Utils.isNullOrEmpty(sNodeUrl)) sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest";
+
+		    String sUrl = sBaseUrl + "/processing/downloadgraph?workflowId="+sWorkflowId;
+		    
+		    String sOutputFilePath = "";
+		    
+		    HashMap<String, String> asHeaders = getStandardHeaders(sSessionId);
+			
+			try {
+				URL oURL = new URL(sUrl);
+				HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+				// optional default is GET
+				oConnection.setRequestMethod("GET");
+				
+				if (asHeaders != null) {
+					for (String sKey : asHeaders.keySet()) {
+						oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+					}
+				}
+				
+				int responseCode =  oConnection.getResponseCode();
+
+ 				if(responseCode == 200) {
+							
+					Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
+					List<String> asContents = null;
+					if(null!=aoHeaders) {
+						asContents = aoHeaders.get("Content-Disposition");
+					}
+					String sAttachmentName = null;
+					if(null!=asContents) {
+						String sHeader = asContents.get(0);
+						sAttachmentName = sHeader.split("filename=")[1];
+						if(sAttachmentName.startsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(1);
+						}
+						if(sAttachmentName.endsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
+						}
+						System.out.println(sAttachmentName);
+						
+					}
+					
+					String sSavePath = getDownloadPath(oServletConfig) + "workflows/";
+					sOutputFilePath = sSavePath + sWorkflowId+".xml";
+					
+					File oTargetFile = new File(sOutputFilePath);
+					File oTargetDir = oTargetFile.getParentFile();
+					oTargetDir.mkdirs();
+
+					// opens an output stream to save into file
+					FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+
+					InputStream oInputStream = oConnection.getInputStream();
+
+					Util.copyStream(oInputStream, oOutputStream);
+
+					if(null!=oOutputStream) {
+						oOutputStream.close();
+					}
+					if(null!=oInputStream) {
+						oInputStream.close();
+					}
+					
+					return sOutputFilePath;
+				} else {
+					String sMessage = oConnection.getResponseMessage();
+					System.out.println(sMessage);
+					return "";
+				}
+
+			} catch (Exception oEx) {
+				oEx.printStackTrace();
+				return "";
+			}
+			
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}		
 	}	
 	
+	/**
+	 * Get the Node Object representing the node where the server is running.
+	 * @return Actual Node Object
+	 */
+	public static Node getActualNode() {
+		try {
+			if (s_oMyNode == null) {
+				NodeRepository oNodeRepository = new NodeRepository();
+				s_oMyNode = oNodeRepository.getNodeByCode(s_sMyNodeCode);
+			}
+			
+			return s_oMyNode;
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("Wasdi.getActualNode: " + oEx.toString());
+		}
+		
+		return null;
+	}
 		
 }

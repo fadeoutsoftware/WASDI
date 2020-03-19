@@ -121,7 +121,6 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 					if(sQuery.contains("Sentinel-3")) {
 						sPrefix = "pwithin=";
 					}
-					String sSuffix = "";
 					sResult = sPrefix + sCoordinates;
 				} catch (Exception oE) {
 					Utils.log("ERROR", "DiasQueryTranslatorSOBLOO.parseFootprint: could not complete: " + oE);
