@@ -1,11 +1,21 @@
 package wasdi.processors;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.net.io.Util;
 
 import wasdi.LauncherMain;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
@@ -47,14 +57,35 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public abstract boolean deploy(ProcessorParameter oParameter);
 	
+	/**
+	 * Run a processor
+	 * @param oParameter
+	 * @return
+	 */
 	public abstract boolean run(ProcessorParameter oParameter);
 	
+	/**
+	 * Deletes a processor
+	 * @param oParameter
+	 * @return
+	 */
 	public abstract boolean delete(ProcessorParameter oParameter);
 	
+	/**
+	 * Execute a system task
+	 * @param sCommand
+	 * @param asArgs
+	 */
 	public void shellExec(String sCommand, List<String> asArgs) {
 		shellExec(sCommand,asArgs,true);
 	}
 	
+	/**
+	 * Execute a system task
+	 * @param sCommand
+	 * @param asArgs
+	 * @param bWait
+	 */
 	public void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
@@ -73,6 +104,147 @@ public abstract class WasdiProcessorEngine {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Check if a processor exists on actual node
+	 * @param oProcessorParameter
+	 * @return True if the processor exists
+	 */
+	protected boolean isProcessorOnNode(ProcessorParameter oProcessorParameter) {
+		
+		if (oProcessorParameter == null) return false;
+		
+		// First Check if processor exists
+		String sProcessorName = oProcessorParameter.getName();
+		
+		// Set the processor path
+		String sDownloadRootPath = m_sWorkingRootPath;
+		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+		
+		String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;
+		
+		File oProcessorFolderFile = new File(sProcessorFolder);
+		
+		return oProcessorFolderFile.exists();		
+	}
+	
+	/**
+	 * Get the standard headers for a WASDI call
+	 * @return
+	 */
+	public static HashMap<String, String> getStandardHeaders(String sSessionId) {
+		HashMap<String, String> aoHeaders = new HashMap<String, String>();
+		aoHeaders.put("x-session-token", sSessionId);
+		aoHeaders.put("Content-Type", "application/json");
+		
+		return aoHeaders;
+	}
+
+	
+	/**
+	 * Download Workflow on the local PC
+	 * @param sWorkflowId File Name
+	 * @return Full Path
+	 */
+	protected String downloadProcessor(Processor oProcessor, String sSessionId) {
+		try {
+			
+			String sProcessorId = oProcessor.getProcessorId();
+			
+			if (sProcessorId == null) {
+				System.out.println("sFileName must not be null");
+			}
+
+			if (sProcessorId.equals("")) {
+				System.out.println("sFileName must not be empty");
+			}
+			
+			
+			String sBaseUrl = oProcessor.getNodeUrl();
+			
+			if (Utils.isNullOrEmpty(sBaseUrl)) sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest";
+
+		    String sUrl = sBaseUrl + "/processors/downloadprocessor?processorId="+sProcessorId;
+		    
+		    String sOutputFilePath = "";
+		    
+		    HashMap<String, String> asHeaders = getStandardHeaders(sSessionId);
+			
+			try {
+				URL oURL = new URL(sUrl);
+				HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+				// optional default is GET
+				oConnection.setRequestMethod("GET");
+				
+				if (asHeaders != null) {
+					for (String sKey : asHeaders.keySet()) {
+						oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+					}
+				}
+				
+				int responseCode =  oConnection.getResponseCode();
+
+ 				if(responseCode == 200) {
+							
+					Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
+					List<String> asContents = null;
+					if(null!=aoHeaders) {
+						asContents = aoHeaders.get("Content-Disposition");
+					}
+					String sAttachmentName = null;
+					if(null!=asContents) {
+						String sHeader = asContents.get(0);
+						sAttachmentName = sHeader.split("filename=")[1];
+						if(sAttachmentName.startsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(1);
+						}
+						if(sAttachmentName.endsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
+						}
+						System.out.println(sAttachmentName);
+						
+					}
+					
+					String sSavePath = m_sWorkingRootPath + "/processors/" + oProcessor.getName()+ "/";
+					sOutputFilePath = sSavePath + sProcessorId+".zip";
+					
+					File oTargetFile = new File(sOutputFilePath);
+					File oTargetDir = oTargetFile.getParentFile();
+					oTargetDir.mkdirs();
+
+					// opens an output stream to save into file
+					FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+
+					InputStream oInputStream = oConnection.getInputStream();
+
+					Util.copyStream(oInputStream, oOutputStream);
+
+					if(null!=oOutputStream) {
+						oOutputStream.close();
+					}
+					if(null!=oInputStream) {
+						oInputStream.close();
+					}
+					
+					return sOutputFilePath;
+				} else {
+					String sMessage = oConnection.getResponseMessage();
+					System.out.println(sMessage);
+					return "";
+				}
+
+			} catch (Exception oEx) {
+				oEx.printStackTrace();
+				return "";
+			}
+			
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}		
 	}
 	
 }

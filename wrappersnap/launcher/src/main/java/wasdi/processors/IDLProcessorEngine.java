@@ -56,7 +56,11 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 	}
 
 	@Override
-	public boolean deploy(ProcessorParameter oParameter) {		
+	public boolean deploy(ProcessorParameter oParameter) {
+		return deploy(oParameter,true);
+	}
+
+	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 		LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: start");
 		
 		if (oParameter == null) return false;
@@ -69,7 +73,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
 			// First Check if processor exists
 			String sProcessorName = oParameter.getName();
@@ -88,21 +92,21 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			// Check it
 			if (oProcessorZipFile.exists()==false) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return false;
 			}
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor: unzip processor");
 			
-			// Unzip the processor (and check for entry point myProcessor.py)
+			// Unzip the processor (and check for entry point)
 			if (!UnzipProcessor(sProcessorFolder, sProcessorName, sProcessorId + ".zip")) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return false;
 			}
 		    
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 40);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 40);
 			LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: copy container image template");
 			
 			// Copy Docker template files in the processor folder
@@ -111,7 +115,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
 			// Generate the image
 			LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating script files");
@@ -120,7 +124,6 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			String sCallIdlFile = sProcessorFolder + "call_idl.pro";
 			String sWasdiWrapperFile = sProcessorFolder + "wasdi_wrapper.pro";
 			String sRunFile = sProcessorFolder + "run_"+sProcessorName+".sh";
-			
 			
 			// GENERATE Call IDL File
 			File oCallIdlFile = new File (sCallIdlFile);
@@ -187,7 +190,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				
 			}			
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
 			
 			File oRunFile = new File(sRunFile);
 			
@@ -214,7 +217,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			Runtime.getRuntime().exec("chmod u+x "+sRunFile);
 			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
 			LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: processor " + sProcessorName + " deployed");
 			
@@ -224,7 +227,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor Exception", oEx);
 			try {
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			} catch (JsonProcessingException e) {
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor Exception", e);
 			}
@@ -287,16 +290,12 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			    oProcessorZipFile.delete();		    	
 		    }
 		    catch (Exception e) {
-				//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-				//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
 				//return false;
 			}
 		    
 		}
 		catch (Exception oEx) {
-			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor Exception", oEx);
 			return false;
 		}
@@ -321,6 +320,24 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+						
+			// Check if the processor is avaialbe on the node
+			if (!isProcessorOnNode(oParameter)) {
+				
+				ProcessorRepository oProcessorRepository = new ProcessorRepository();
+				
+				Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+				String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
+				
+				if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
+					deploy(oParameter, false);
+				}
+				else {
+					LauncherMain.s_oLogger.error("IDLProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+					return false;
+				}
+			}
 
 			// First Check if processor exists
 			String sProcessorName = oParameter.getName();
@@ -422,7 +439,6 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				oConfigWriter.close();
 			}			
 			
-			
 			BufferedWriter oParamWriter = new BufferedWriter(new FileWriter(oParameterFile));
 			
 			if(oParamWriter != null) {
@@ -465,17 +481,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: shell exec " + Arrays.toString(asCmd));
 			ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
 			Process oProc = oProcBuilder.start();
-			
-			
-			// P.Campanella 2019/04/16: to read the output looks to much instable
-			// The log can be read redirecting the output to a file
-//			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
-//			
-//            String sLine;
-//            while((sLine=oInput.readLine()) != null) {
-//            	LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: envi stdout: " + sLine);
-//            }
-            
+			            
             LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: waiting for the process to exit");
             
             int iExitStatus = oProc.waitFor(); 
