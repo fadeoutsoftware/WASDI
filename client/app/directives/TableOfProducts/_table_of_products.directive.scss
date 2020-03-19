@@ -1,0 +1,95 @@
+@import "../../css/main_theme";
+
+.table-of-products-directive{
+    overflow-y: auto; //ATTENTION CARE TO DELETE IT (USED FOR ANIMATION SCROLL)
+    //height: 62vh;
+
+    thead {
+        background-color: $wasdi-import-table-head-background-color;
+        color: $wasdi-import-table-head-color;
+    }
+
+    th {
+        text-align: center;
+        vertical-align: middle;
+    }
+    tbody {
+        border-top: 1px solid #ddd; //FIX TABLE
+        //background-color: blue;
+
+    }
+
+
+
+    .cell-centered{
+        text-align: center;
+    }
+
+    .operation-button {
+        cursor: pointer;
+
+    }
+    .operation-button:hover {
+        background-color: $wasdi-import-cell-background-color-over-button;
+
+        i {
+
+            color: $wasdi-import-cell-color-over-button;
+        }
+
+    }
+
+    .info-layer {
+        //font-family:$wasdi-font-web-small-dimension !important;
+        //font-size:12px;
+        //line-height: 1.42857;
+        //font-weight: 500;
+        .button-cell {
+            vertical-align: middle;
+            .btn-group-vertical {
+                .btn-primary {
+                    background-color: $wasdi-blue-logo;
+                    border-color: $wasdi-white;
+                    //border-color: $wasdi-green-logo;
+                }
+                .btn:hover {
+                    background-color: $wasdi-green-logo;
+                    color: $wasdi-white;
+                }
+            }
+        }
+
+        .image-cell {
+            vertical-align: middle;
+            text-align: center;
+            .label {
+                padding: .1em .3em .1em;
+                font-size: 12px;
+                //font-size:90%;
+            }
+            //OVERRIDE BOOTSTRAP METHOD
+            .label-success {
+                background-color: $wasdi-green-logo;
+            }
+            //PREVIEW IMAGE
+            .preview-layer-image {
+                margin-top: 2px;
+                margin-bottom: 2px;
+                //margin-right: 0;
+                //max-height:$wasdi-import-preview-layer-on-table-dimension;
+                //max-width:$wasdi-import-preview-layer-on-table-dimension;
+                img {
+                    height: $wasdi-import-preview-layer-on-table-dimension;
+                    width: $wasdi-import-preview-layer-on-table-dimension;
+                }
+            }
+        }
+
+        //DROPDOWN MENU
+        .operations-table-layers {
+            display: inline;
+        }
+    }
+
+}
+

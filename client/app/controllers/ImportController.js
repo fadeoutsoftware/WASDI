@@ -520,6 +520,7 @@ var ImportController = (function() {
     };
 
     ImportController.prototype.setFilter = function() {
+
         this.m_oAdvancedFilterService.setAdvancedFilter(this.m_aoMissions);
         this.m_oModel.missionFilter = this.m_oAdvancedFilterService.getAdvancedFilter();
         this.m_oSearchService.setMissionFilter(this.m_oModel.missionFilter);
@@ -542,6 +543,7 @@ var ImportController = (function() {
         {
             if(this.m_aListOfProvider[iIndexProvider].selected === true)
             {
+
                 this.searchAndCount(this.m_aListOfProvider[iIndexProvider]);
             }
         }

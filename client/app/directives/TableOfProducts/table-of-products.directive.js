@@ -11,11 +11,20 @@ angular.module('wasdi.TableOfProductsDirective', [])
             // * Function binding ('&' or '&?') *
             bindToController: {
                 productsList: '=',
+                heightTable: '=',
+                parentController: '=',
+                loadingData: '='
                 // deleted: '&'
             },
 
             template: `
-        <div class="table-of-products-directive">
+        <div class="table-of-products-directive"  ng-style="$ctrl.oTableStyle">
+
+<!--            &lt;!&ndash; TODO HIDE BUTTON IF PARENT CONTROLLER IS NULL&ndash;&gt;-->
+<!--            <button class="btn btn-primary btn-wasdi search-button"  ng-click="$ctrl.parentController.loadMore()">-->
+<!--                Load more-->
+<!--            </button>-->
+
             <table class="table table-hover layers "  >
                 <tbody ng-repeat="layer in $ctrl.productsList ">
                     <!------------------------------- SUMMARY ------------------------------->
@@ -67,12 +76,31 @@ angular.module('wasdi.TableOfProductsDirective', [])
                         </td>
 
                     </tr>
+
                 </tbody>
+                    <tr>
+                        <td colspan="2">
+                            <div ng-show = "true" class="loadIcon" ng-show = "$ctrl.loadingData">
+                                <invader></invader>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="cell-centered">
+                            <!--TODO END IT -->
+                            <button class="btn btn-default btn-wasdi" ng-click="$ctrl.parentController.loadMore()">
+                                <i class="fa fa-refresh mr-2" aria-hidden="true"></i>Load more...
+                            </button>
+
+                        </td>
+
+                    </tr>
             </table>
         </div>
 
          `,
             controller: function() {
+                this.oTableStyle = { height: this.heightTable + 'px' };
 
             },
             controllerAs: '$ctrl'
