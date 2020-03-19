@@ -177,11 +177,11 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
 		
 		Preconditions.checkNotNull(sFileURL, "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is null");
-		Preconditions.checkArgument(sFileURL.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is empty");
+		Preconditions.checkArgument(!sFileURL.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is empty");
 		Preconditions.checkNotNull(sDownloadPassword, "SOBLOOProviderAdapter.ExecuteDownloadFile: password is null");
-		Preconditions.checkArgument(sDownloadPassword.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: password is empty");
+		Preconditions.checkArgument(!sDownloadPassword.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: password is empty");
 		Preconditions.checkNotNull(sSaveDirOnServer, "SOBLOOProviderAdapter.ExecuteDownloadFile: save dir is null");
-		Preconditions.checkArgument(sSaveDirOnServer.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: save dir is empty");
+		Preconditions.checkArgument(!sSaveDirOnServer.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: save dir is empty");
 		Preconditions.checkNotNull(oProcessWorkspace, "SOBLOOProviderAdapter.ExecuteDownloadFile: process workspace is null");
 
 		setProcessWorkspace(oProcessWorkspace);
