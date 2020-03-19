@@ -3,7 +3,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -16,6 +18,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -24,6 +27,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
@@ -401,6 +405,72 @@ public class dbUtils {
 		}
 	}
 	
+	private static void workflows () {
+		try {
+			
+	        System.out.println("Ok, what we do with workflows?");
+	        
+	        System.out.println("\t1 - Copy workflows from user folder to generic folder");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Getting workflows");
+	        	
+	        	SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+	        	List<SnapWorkflow> aoWorkflows = oSnapWorkflowRepository.getList();
+	        	
+	    		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+	    		if (!sBasePath.endsWith("/")) {
+	    			sBasePath += "/";
+	    		}
+	    		sBasePath += "workflows/";
+	    		
+	    		File oDestinationPath = new File(sBasePath);
+	    		
+	    		if (!oDestinationPath.exists()) {
+	    			oDestinationPath.mkdirs();
+	    		}
+	        	
+	        	// Search one by one
+	        	for (SnapWorkflow oWorkflow : aoWorkflows) {
+	        		
+	        		String sWorkflowPath = sBasePath + oWorkflow.getWorkflowId() + ".xml";
+	        		
+	        		File oOriginalFile = new File(sWorkflowPath);
+	        		File oDestinationFile = new File(oDestinationPath, oOriginalFile.getName());
+	        		
+	        		if (!oDestinationFile.exists()) {
+	        			System.out.println("File does not exists, make a copy [" + oDestinationFile.getPath() + "]");
+	        			
+	        			try {
+		        			FileUtils.copyFileToDirectory(oOriginalFile, oDestinationPath);
+		        			
+		        			oWorkflow.setFilePath(oDestinationFile.getPath());
+		        			oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);	        				
+	        			}
+	        			catch (Exception oEx) {
+	        				System.out.println("File Copy Exception: " + oEx);
+	        				oEx.printStackTrace();
+						}
+	        		}
+	        		else {
+	        			System.out.println("File already exists, jump");
+	        		}
+				}
+	        	
+	        	System.out.println("All workflows copied");
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Workflows Exception: " + oEx);
+			oEx.printStackTrace();
+		}		
+	}
 	
 	private static void users() {
 		try {
@@ -476,7 +546,7 @@ public class dbUtils {
 	        }
 		}
 		catch (Exception oEx) {
-			System.out.println("password Exception: " + oEx);
+			System.out.println("USERS Exception: " + oEx);
 			oEx.printStackTrace();
 		}
 	}
@@ -709,6 +779,7 @@ public class dbUtils {
 		        System.out.println("\t4 - Metadata");
 		        System.out.println("\t5 - Password");
 		        System.out.println("\t6 - Users");
+		        System.out.println("\t7 - Workflows");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -733,6 +804,9 @@ public class dbUtils {
 		        else if (sInputString.equals("6")) {
 		        	users();
 		        }
+		        else if (sInputString.equals("7")) {
+		        	workflows();
+		        }		        
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;
 		        }		        
