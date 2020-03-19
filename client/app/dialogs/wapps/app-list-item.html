@@ -3,6 +3,7 @@
         <div class="pt-1 pb-3 px-3 h-100 app-item" ng-click="m_oController.selectProcessor(processor)" ng-class="{'selected' : m_oController._selectedProcessor == processor}">
             <div class="row-v4">
                 <div class="col-v4-12">
+                    <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher" class="wapps-button " ng-click="m_oController.downloadClick(processor)"><i class="fa fa-download"></i></button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher" class="wapps-button " ng-click="m_oController.editClick(processor)"><i class="fa fa-pencil"></i></button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher" class="wapps-button" ng-click="m_oController.deleteClick(processor)"><i class="fa fa-times"></i></button>
                     <i ng-show="m_oController.m_oConstantsService.getUserId()!==processor.publisher" class="fa fa-times" style="color:transparent"></i>

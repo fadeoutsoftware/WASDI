@@ -9,16 +9,12 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
     this.m_oController = this;
+    this.m_oConstantService = oConstantsService;
+
     /************************************ RADAR OPERATIONS ************************************/
     this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
         return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
     };
-    // this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-    //     // return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
-    //     var sUrl = this.APIURL + '/processing/radar/applyOrbit?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
-    //     var oConfig = {header:""};
-    //     return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
-    // };
 
     this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
@@ -71,6 +67,24 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.getWorkflowsByUser = function()
     {
         return this.m_oHttp.get(this.APIURL + '/processing/getgraphsbyusr');
+    };
+
+    this.downloadWorkflow = function(sWorkflowId, sUrl = null)
+    {
+        var urlParams = "?" + "token=" + this.m_oConstantService.getSessionId();
+        urlParams = urlParams + "&" + "workflowId=" + sWorkflowId;
+
+        var sAPIUrl = this.APIURL;
+
+        if(typeof sUrl !== "undefined") {
+            if ( sUrl !== null) {
+                if (sUrl !== "") {
+                    sAPIUrl = sUrl;
+                }
+            }
+        }
+
+        window.location.href = sAPIUrl + "/processing/downloadgraph" + urlParams;
     };
     /************************************ Masks ************************************/
     this.getListOfProductMask = function(sFile,sBand, sWorkspaceId)

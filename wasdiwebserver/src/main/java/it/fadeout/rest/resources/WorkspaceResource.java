@@ -54,18 +54,19 @@ public class WorkspaceResource {
 	@GET
 	@Path("/workspacelistbyproductname")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public ArrayList<WorkspaceListInfoViewModel> getWorkspaceListByProductName(
-			@HeaderParam("x-session-token") String sSessionId, @QueryParam("productname") String sProductName) {
+	public ArrayList<WorkspaceListInfoViewModel> getWorkspaceListByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("productname") String sProductName) {
 		Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( Session: " + sSessionId + ", Product: " + sProductName + " )");
 
 		// input validation
 		if (null == sSessionId || null == sProductName) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: invalid input");
 			return null;
-		} else if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
+		} 
+		else if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sSessionId");
 			return null;
-		} else if (!m_oWorkspacePolicy.validProductName(sProductName)) {
+		} 
+		else if (!m_oWorkspacePolicy.validProductName(sProductName)) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sProductName");
 			return null;
 		}
@@ -78,9 +79,10 @@ public class WorkspaceResource {
 			return null;
 		}
 
-		// get list of workspaces ID by productname
+		// get list of workspaces ID by product name
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 		List<String> asWorkspaces = oProductWorkspaceRepository.getWorkspaces(sProductName);
+		
 		if (asWorkspaces == null) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: Workspaces list is null");
 			return null;
@@ -91,7 +93,9 @@ public class WorkspaceResource {
 
 		// get workspace info for each workspace ID
 		for (String sWorkspaceID : asWorkspaces) {
+			
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceID);
+			
 			if (null != oWorkspace) {
 				WorkspaceListInfoViewModel oTemp = new WorkspaceListInfoViewModel();
 				oTemp.setWorkspaceId(oWorkspace.getWorkspaceId());

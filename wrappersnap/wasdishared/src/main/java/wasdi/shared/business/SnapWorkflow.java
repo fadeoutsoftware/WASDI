@@ -45,6 +45,28 @@ public class SnapWorkflow {
 	 */
 	private boolean isPublic;
 	
+	/**
+	 * Code of the WASDI node where the workflow has been uploaded
+	 */
+	private String nodeCode;
+	
+	/**
+	 * Url  of the WASDI node where the workflow has been uploaded
+	 */
+	private String nodeUrl;
+	
+	public String getNodeCode() {
+		return nodeCode;
+	}
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+	public String getNodeUrl() {
+		return nodeUrl;
+	}
+	public void setNodeUrl(String nodeUrl) {
+		this.nodeUrl = nodeUrl;
+	}
 	public String getName() {
 		return name;
 	}

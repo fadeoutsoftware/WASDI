@@ -8,13 +8,21 @@ public class SnapWorkflowViewModel {
 	private String description;
 	private boolean isPublic;
 	private String userId;
+	private String nodeUrl;
 
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
 	private ArrayList<String> inputFileNames = new ArrayList<>();
 	
 	private ArrayList<String> outputNodeNames = new ArrayList<>();
 	private ArrayList<String> outputFileNames = new ArrayList<>();
+
 	
+	public String getNodeUrl() {
+		return nodeUrl;
+	}
+	public void setNodeUrl(String nodeUrl) {
+		this.nodeUrl = nodeUrl;
+	}
 	public String getDescription() {
 		return description;
 	}

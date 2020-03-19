@@ -496,9 +496,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 					}
 					
 					LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: processor engine version " + dVersion);
-					
-					
-					
+										
 					// New, Asynch, Processor?
 					if (dVersion > 1.0) {
 						
@@ -530,15 +528,17 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 							// Increase the time
 							iTimeSpentMs += iThreadSleepMs;
 							
-							if (iTimeSpentMs > oProcessor.getTimeoutMs()) {
-								// Timeout
-								LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
-								
-								// Update process and rabbit users
-								LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-								bForcedError = true;
-								// Force cycle to exit
-								sStatus = ProcessStatus.ERROR.name();
+							if (oProcessor.getTimeoutMs()>0) {
+								if (iTimeSpentMs > oProcessor.getTimeoutMs()) {
+									// Timeout
+									LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
+									
+									// Update process and rabbit users
+									LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+									bForcedError = true;
+									// Force cycle to exit
+									sStatus = ProcessStatus.ERROR.name();
+								}								
 							}
 						}
 						

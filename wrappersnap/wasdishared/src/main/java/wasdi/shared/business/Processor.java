@@ -36,6 +36,14 @@ public class Processor {
 	 * Processor type
 	 */
 	private String type;
+	/**
+	 * Processor first deploy nodeCode
+	 */
+	private String nodeCode;	
+	/**
+	 * Processor first deploy nodeUrl
+	 */
+	private String nodeUrl;
 
 	/**
 	 * timeoutMs: 3 hours by default
@@ -47,12 +55,6 @@ public class Processor {
 	 */
 	private int isPublic = 1;
 		
-	public int getIsPublic() {
-		return isPublic;
-	}
-	public void setIsPublic(int isPublic) {
-		this.isPublic = isPublic;
-	}
 	/**
 	 * Sample JSON Parameter
 	 */
@@ -112,4 +114,24 @@ public class Processor {
 	public void setTimeoutMs(int timeoutMs) {
 		this.timeoutMs = timeoutMs;
 	}	
+	
+	public int getIsPublic() {
+		return isPublic;
+	}
+	public void setIsPublic(int isPublic) {
+		this.isPublic = isPublic;
+	}
+
+	public String getNodeCode() {
+		return nodeCode;
+	}
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+	public String getNodeUrl() {
+		return nodeUrl;
+	}
+	public void setNodeUrl(String nodeUrl) {
+		this.nodeUrl = nodeUrl;
+	}
 }
