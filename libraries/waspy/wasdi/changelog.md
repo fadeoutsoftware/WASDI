@@ -1,5 +1,11 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.3.0] - 2020-03-20
+
+### Added
+
+- Support to distributed WASDI nodes
+
 ## [0.2.12] - 2020-03-18
 
 ### Added
