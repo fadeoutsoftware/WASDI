@@ -137,17 +137,23 @@ angular.module('wasdi.LightSearchProductDirective', [])
                             }
                         }
                         oController.m_bLoadingData = false;
+                        debugger;
                     };
+
                     this.search(oCallback);
                 };
 
                 this.search = function(oCallback){
                     //set geoselection
                     //TODO CHECK IF AN AREA IS SELECTED
+
                     //TODO SET DEFAULT VALUE OF PERIOD OF TIME(LAST 24H?)
                     var sOpenSearchGeoselection = $LightSearchService.getOpenSearchGeoselection(this.lightSearchObject.oSelectArea.oBoundingBox);
+                    var bIsSubstring = sOpenSearchGeoselection.includes('undefined');
+                    //TODO CHECK IF IS SUBSTRING WORKS
                     var oOpenSearchDates = this.getOpenSearchDate();
                     var oProvider = this.m_oSelectedProvider; //ONDA?
+                    debugger;
                     var oCallbackError = function(){
                         utilsVexDialogAlertTop("It was impossible loading product");
                     };

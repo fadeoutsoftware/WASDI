@@ -134,8 +134,6 @@ service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService
         $SearchService.setOffset(iOffset);//default 0 (index page)
         $SearchService.setLimit(oProvider.productsPerPageSelected);
         //todo  set default filters ?  this.m_oAdvancedFilterService.setAdvancedFilter + this.m_oSearchService.setMissionFilter
-        //todo ADD LOAD
-        //todo laod more
 
         // let oController = this;
         $SearchService.search().then(function(result){

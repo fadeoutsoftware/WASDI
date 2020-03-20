@@ -80,15 +80,17 @@ angular.module('wasdi.TableOfProductsDirective', [])
                 </tbody>
                     <tr>
                         <td colspan="2">
-                            <div ng-show = "true" class="loadIcon" ng-show = "$ctrl.loadingData">
+                            <div class="td-load-icon" ng-show = "$ctrl.loadingData"><!--ng-show = "$ctrl.loadingData"-->
                                 <invader></invader>
                             </div>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="cell-centered">
-                            <!--TODO END IT -->
-                            <button class="btn btn-default btn-wasdi" ng-click="$ctrl.parentController.loadMore()">
+                        <td colspan="2" class="cell-centered ">
+
+                            <button class="btn btn-default btn-wasdi"
+                                    ng-click="$ctrl.parentController.loadMore()"
+                                    ng-hide="$ctrl.loadingData">
                                 <i class="fa fa-refresh mr-2" aria-hidden="true"></i>Load more...
                             </button>
 
