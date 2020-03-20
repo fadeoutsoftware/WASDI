@@ -54,6 +54,12 @@ public class WasdiLib {
 	 * Wasdi Active Workspace
 	 */
 	private String m_sActiveWorkspace = "";
+	
+	/*
+	 * Url associated with the workspace
+	 */
+	private String m_sWorkspaceBaseUrl = "";
+	
 	/**
 	 * Wasdi Workspace Owner
 	 */
@@ -1255,7 +1261,7 @@ public class WasdiLib {
 				}
 			}
 						
-			String sUrl = m_sBaseUrl + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
+			String sUrl = getWorkspaceBaseUrl() + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -2560,6 +2566,14 @@ public class WasdiLib {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public String getWorkspaceBaseUrl() {
+		return m_sWorkspaceBaseUrl;
+	}
+
+	public void setWorkspaceBaseUrl(String m_sWorkspaceBaseUrl) {
+		this.m_sWorkspaceBaseUrl = m_sWorkspaceBaseUrl;
 	}
 	
 }
