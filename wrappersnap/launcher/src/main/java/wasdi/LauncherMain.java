@@ -2931,18 +2931,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// update the process
 			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace))
-				s_oLogger.debug("LauncherMain.DownloadFile: Error during process update with process Perc");
+				s_oLogger.error("LauncherMain.DownloadFile: Error during process update with process Perc");
 
 			// send update process message
 			if (LauncherMain.s_oSendToRabbit != null) {
 				if (!LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-					s_oLogger.debug("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
+					s_oLogger.error("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
 				}
 			}
 		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.DownloadFile: Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			oEx.printStackTrace();
+			s_oLogger.error("LauncherMain.DownloadFile: Exception: " + oEx);
+			s_oLogger.debug("LauncherMain.DownloadFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 

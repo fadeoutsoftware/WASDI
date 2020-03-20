@@ -57,6 +57,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			if(bEstimate) {
 				try {
 					lLenght = extractSize(sFileURL);
+					m_oLogger.warn("SOBLOOProviderAdapter.GetDownloadSize: sobloo did not provide 'Content-Length' header, estimating content length from query result as " + lLenght + " B");
 				} catch (Exception oEin) {
 					m_oLogger.error("SOBLOOProviderAdapter.GetDownloadFileSize: " + oEin);
 				}
@@ -262,6 +263,13 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 				//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
 				copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+				
+				try {
+					File oFile = new File(sSaveFilePath);
+					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: file size: expected/actual: " + lContentLength + "/" + oFile.length());
+				} catch (Exception oE) {
+					
+				}
 	
 				sReturnFilePath = sSaveFilePath;
 	
