@@ -276,13 +276,19 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @param iProgress
      */
     protected void UpdateProcessProgress(int iProgress) {
-    	
-    	if (m_oProcessWorkspace == null) return;
-    	m_oLogger.debug("ProviderAdapter.UpdateProcessProgress: " + iProgress + "%");
-    	m_oProcessWorkspace.setProgressPerc(iProgress);
-    	//notify all subscribers
-    	for (ProcessWorkspaceUpdateSubscriber oSubscriber : m_aoSubscribers) {
-			oSubscriber.notify(m_oProcessWorkspace);
+    	try {
+	    	if (m_oProcessWorkspace == null) return;
+//	    	if(0 == iProgress % 10) {
+//	    		//log updates only on tens%    		
+//	    		m_oLogger.debug("ProviderAdapter.UpdateProcessProgress: " + iProgress + "%");
+//	    	}
+	    	m_oProcessWorkspace.setProgressPerc(iProgress);
+	    	//notify all subscribers
+	    	for (ProcessWorkspaceUpdateSubscriber oSubscriber : m_aoSubscribers) {
+				oSubscriber.notify(m_oProcessWorkspace);
+			}
+    	} catch (Exception oE) {
+			m_oLogger.error("ProviderAdapter.UpdateProcessProgress: " + oE);
 		}
     }
 	
@@ -399,10 +405,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		int iBytesRead = -1;
 		byte[] abBuffer = new byte[BUFFER_SIZE];
 		int iZeroes = MAX_NUM_ZEORES_DURING_READ;
+		long lTotalLen = 0l;
 		
 		try {
 			while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
 
+				lTotalLen += (long)iBytesRead;
 				if (iBytesRead <= 0) {
 					m_oLogger.debug("ProviderAdapter.copyStream: Read 0 bytes from stream. Counter: " + iZeroes);
 					iZeroes--;
@@ -411,7 +419,13 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					iZeroes = MAX_NUM_ZEORES_DURING_READ;
 				}
 				
-				if (iZeroes <= 0) break;
+				if (iZeroes <= 0) {
+					//do not break here: sobloo does not send the Content-Length header, so the forecasted length might be wrong
+					//instead, let the copy reach the end of the stream
+					m_oLogger.debug("ProviderAdapter.copyStream: o bytes have been read for " + MAX_NUM_ZEORES_DURING_READ + "times, which is too many times: aborting copy");
+					break;
+					
+				}
 
 				oOutputStream.write(abBuffer, 0, iBytesRead);
 
@@ -423,25 +437,32 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					
 					// Increase the file
 					iFilePercent += 1;
-					if (iFilePercent > 100) iFilePercent = 100;
+					if (iFilePercent > 100) {
+						iFilePercent = 100;
+					}
 					
 					// Reset the count
 					iTotalBytes = 0;
 					
 					// Update the progress
-					if (iZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(iFilePercent);
+					if (iZeroes == MAX_NUM_ZEORES_DURING_READ) {
+						UpdateProcessProgress(iFilePercent);
+					}
 				}
 			}
-
+			m_oLogger.debug("ProviderAdapter.copyStream: setting 100%");
+			UpdateProcessProgress(100);
+			m_oLogger.debug("ProviderAdapter.copyStream: closing streams");
 			oOutputStream.close();
 			oInputStream.close();			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("ProviderAdapter.copyStream: Exception: " + oEx.toString());
+			m_oLogger.debug("ProviderAdapter.copyStream: after reading " + lTotalLen + "/" + lContentLength + " an exception was caught: " + oEx);
 			return false;
 		}
 
-		m_oLogger.debug("ProviderAdapter.copyStream: copy done");
+		m_oLogger.debug("ProviderAdapter.copyStream: read " + lTotalLen + "/" + lContentLength + ", copy done");
+		
 		return true;
 	}
 	
