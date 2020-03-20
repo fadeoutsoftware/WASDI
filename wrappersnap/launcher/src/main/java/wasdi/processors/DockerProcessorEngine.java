@@ -224,26 +224,31 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
 		    while(oZipEntry != null){
 		    	
-		    	String sZippedFileName = oZipEntry.getName();
-		    	
-		    	if (sZippedFileName.equals("myProcessor.py")) bMyProcessorExists = true;
-		    	
-		    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-		    	
-		    	if (oZipEntry.isDirectory()) {
-		    		File oUnzippedDir = new File(sUnzipFilePath);
-	                oUnzippedDir.mkdir();
-		    	}
-		    	else {
+		    	try {
+			    	String sZippedFileName = oZipEntry.getName();
 			    	
-			        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-			        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
-			        int iLen;
-			        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-			        	oOutputStream.write(ayBuffer, 0, iLen);
-			        }
-			        oOutputStream.close();		    		
+			    	if (sZippedFileName.equals("myProcessor.py")) bMyProcessorExists = true;
+			    	
+			    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+			    	
+			    	if (oZipEntry.isDirectory()) {
+			    		File oUnzippedDir = new File(sUnzipFilePath);
+		                oUnzippedDir.mkdir();
+			    	}
+			    	else {
+				        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
+				        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
+				        int iLen;
+				        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
+				        	oOutputStream.write(ayBuffer, 0, iLen);
+				        }
+				        oOutputStream.close();		    		
+			    	}		    		
 		    	}
+		    	catch (Exception oInnerEx) {
+		    		LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception unzipping Zip entry", oInnerEx);
+				}
+
 		        oZipEntry = oZipInputStream.getNextEntry();
 	        }
 		    oZipInputStream.closeEntry();

@@ -731,8 +731,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
 
 					if (oAlreadyDownloaded == null) {
-						s_oLogger.debug(
-								"LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
+						s_oLogger.debug( "LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
 						// Check if it is already downloaded, in any workpsace
 						oAlreadyDownloaded = oDownloadedRepo.getDownloadedFile(sFileNameWithoutPath);
 					} else {
