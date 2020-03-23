@@ -36,6 +36,8 @@ var AppStoreController = (function() {
 
         let tst7 = oFactory.CreateViewElement("lighserachproduct");
         tst7.sLabel = "Sono una light search";
+        tst7.oStartDate.oDate =  moment().subtract(1, 'days').startOf('day');
+        tst7.oEndDate.oDate = moment();
         tst7.oSelectArea.iHeight = 200;
         tst7.oSelectArea.iWidth = 500;
         // oViewElements.push(tst1);

@@ -25,7 +25,9 @@ angular.module('wasdi.LightSearchProductDirective', [])
                 <datedirective date-time="$ctrl.lightSearchObject.oStartDate.oDate"></datedirective>
 
                 <datedirective date-time="$ctrl.lightSearchObject.oEndDate.oDate"></datedirective>
-                <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()">
+
+                <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()"
+                                                                        ng-disabled = "$ctrl.isAreaSelected() === false">
                     Search
                 </button>
             </div>
@@ -51,7 +53,7 @@ angular.module('wasdi.LightSearchProductDirective', [])
 
             `,
             controller: function() {
-                //todo check the main object
+                //todo check the main object ?
                 this.m_aListOfProvider = [];
                 this.m_oSelectedProvider = {};
                 this.m_bAreVisibleProducts = false;
@@ -143,17 +145,19 @@ angular.module('wasdi.LightSearchProductDirective', [])
                     this.search(oCallback);
                 };
 
-                this.search = function(oCallback){
-                    //set geoselection
-                    //TODO CHECK IF AN AREA IS SELECTED
-
-                    //TODO SET DEFAULT VALUE OF PERIOD OF TIME(LAST 24H?)
+                this.isAreaSelected = function(){
                     var sOpenSearchGeoselection = $LightSearchService.getOpenSearchGeoselection(this.lightSearchObject.oSelectArea.oBoundingBox);
                     var bIsSubstring = sOpenSearchGeoselection.includes('undefined');
-                    //TODO CHECK IF IS SUBSTRING WORKS
+                    return !bIsSubstring;
+                };
+
+                this.search = function(oCallback){
+                    //set geoselection
+
+                    var sOpenSearchGeoselection = $LightSearchService.getOpenSearchGeoselection(this.lightSearchObject.oSelectArea.oBoundingBox);
+
                     var oOpenSearchDates = this.getOpenSearchDate();
                     var oProvider = this.m_oSelectedProvider; //ONDA?
-                    debugger;
                     var oCallbackError = function(){
                         utilsVexDialogAlertTop("It was impossible loading product");
                     };
