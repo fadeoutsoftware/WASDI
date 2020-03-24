@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -677,15 +678,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		String sFileName = "";
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 
-			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory()
-					.supplyProviderAdapter(oParameter.getProvider());
+			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
 
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
@@ -700,10 +699,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				long lFileSizeByte = oProviderAdapter.GetDownloadFileSize(oParameter.getUrl());
 				// set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
-
-				// get process pid
-				// oProcessWorkspace.setPid(getProcessId());
-
+				
 			} else {
 				s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
 			}
@@ -733,11 +729,30 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					if (oAlreadyDownloaded == null) {
 						s_oLogger.debug( "LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
 						// Check if it is already downloaded, in any workpsace
-						oAlreadyDownloaded = oDownloadedRepo.getDownloadedFile(sFileNameWithoutPath);
+						List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
+						
+						// Check if any of this is in this node
+						for (DownloadedFile oDownloadedCandidate : aoExistingList) {
+							
+							if (new File(oDownloadedCandidate.getFilePath()).exists()) {
+								oAlreadyDownloaded = oDownloadedCandidate;
+								s_oLogger.debug( "LauncherMain.Download: found already existing copy on this computing node");
+								break;
+							}
+						}
+						
 					} else {
-						s_oLogger.debug("LauncherMain.Download: Product already found in the workspace");
+						
+						File oAlreadyDownloadedFileCheck = new File(oAlreadyDownloaded.getFilePath());
+						
+						if (oAlreadyDownloadedFileCheck.exists() == false) {
+							s_oLogger.debug("LauncherMain.Download: Product already found in the database but the file does not exists in the node");
+							oAlreadyDownloaded = null;
+						}
+						else {
+							s_oLogger.debug("LauncherMain.Download: Product already found in the node");
+						}
 					}
-
 				}
 
 				if (oAlreadyDownloaded == null) {
@@ -754,6 +769,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 							s_oLogger.debug(
 									"LauncherMain.Download: Error sending rabbitmq message to update process list");
 						}
+					}
+					else {
+						s_oLogger.error("LauncherMain.Download: sFileNameWithoutPath is null or empty!!");
 					}
 
 					// No: it isn't: download it
@@ -2632,23 +2650,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Try to insert
 				if (oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
 
-					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" + sProductFullPath + "] in WS: ["
-							+ sWorkspaceId + "]");
+					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
 					return true;
 				} else {
 
-					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding [" + sProductFullPath
-							+ "] in WS: [" + sWorkspaceId + "]");
+					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
 					return false;
 				}
 			} else {
-				s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" + sProductFullPath
-						+ "] Already exists in WS: [" + sWorkspaceId + "]");
+				s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" + sProductFullPath + "] Already exists in WS: [" + sWorkspaceId + "]");
 				return true;
 			}
 		} catch (Exception e) {
-			s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+			s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 		}
 
 		return false;
@@ -2960,5 +2974,32 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		default:
 			return "GTiff";
 		}
+	}
+	
+	
+	/**
+	 * Wait for a process to be resumed in a state like RUNNING, ERROR or DONE
+	 * @param oProcessWorkspace Process Workspace to wait that should be in READY
+	 * @return output status of the process
+	 */
+	public static String waitForProcessResume(ProcessWorkspace oProcessWorkspace) {
+		try {
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
+			while (true)  {
+				if (oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.ERROR.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.STOPPED.name())) {
+					return oProcessWorkspace.getStatus();
+				}
+				
+				Thread.sleep(5000);
+				oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+			}
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.waitForProcessResume: " + oEx.toString());
+		}
+		
+		return "ERROR";
 	}
 }

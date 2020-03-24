@@ -26,7 +26,9 @@ import org.json.JSONObject;
 import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -173,15 +175,37 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product should be available, try to download");
 					
+					// If we were in waiting, move in ready and wait the scheduler to resume us
+					if (oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process Waiting, set it ready and wait for resume");
+						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.READY, oProcessWorkspace.getProgressPerc());
+						LauncherMain.waitForProcessResume(oProcessWorkspace);
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process resumed let's go!");
+					}
+					
 					sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 					
-					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished");
-					
-					if (!Utils.isNullOrEmpty(sResult)) break;
+					if (!Utils.isNullOrEmpty(sResult)) {
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result: " + sResult);
+						// Break the retry attemp cycle
+						break;
+					}
+					else {
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result null, try again");
+					}
 				} 
 				else {
 					
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product not available, place order");
+					
+					if (!oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: set the process in WAITING STATE");
+						// Set the process in WAITING
+						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.WAITING, oProcessWorkspace.getProgressPerc());						
+					}
+					else {
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: process already in WAITING STATE");
+					}
 					
 					String sDate = placeOrder(sFileURL, sDownloadUser, sDownloadPassword);
 					
@@ -228,7 +252,9 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: attemps finished. Break cycle");
 					break;
 				}
-
+				
+				// Sleep a bit before next attempt
+				TimeUnit.SECONDS.sleep(2);
 			}
 			
 			String sResLog = sResult;
