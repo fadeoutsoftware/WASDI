@@ -54,6 +54,12 @@ public class WasdiLib {
 	 * Wasdi Active Workspace
 	 */
 	private String m_sActiveWorkspace = "";
+	
+	/*
+	 * Url associated with the workspace
+	 */
+	private String m_sWorkspaceBaseUrl = "";
+	
 	/**
 	 * Wasdi Workspace Owner
 	 */
@@ -827,7 +833,7 @@ public class WasdiLib {
 		}
 		int iResult = 200;
 		try{
-			String sUrl = m_sBaseUrl + "/catalog/checkdownloadavaialibitybyname?token=";
+			String sUrl = getWorkspaceBaseUrl() + "/catalog/checkdownloadavaialibitybyname?token=";
 			sUrl += m_sSessionId;
 			sUrl += "&filename=";
 			sUrl += sFileName;
@@ -1255,7 +1261,7 @@ public class WasdiLib {
 				}
 			}
 						
-			String sUrl = m_sBaseUrl + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
+			String sUrl = getWorkspaceBaseUrl() + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -2072,7 +2078,7 @@ public class WasdiLib {
 		try {
 			
 			// Build API URL
-		    String sUrl = m_sBaseUrl + "/product/delete?sProductName="+sProduct+"&bDeleteFile=true&sWorkspaceId="+m_sActiveWorkspace+"&bDeleteLayer=true";
+		    String sUrl = getWorkspaceBaseUrl() + "/product/delete?sProductName="+sProduct+"&bDeleteFile=true&sWorkspaceId="+m_sActiveWorkspace+"&bDeleteLayer=true";
 		    
 		    // Call API
 		    String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2304,7 +2310,7 @@ public class WasdiLib {
 				System.out.println("sFileName must not be empty");
 			}
 
-		    String sUrl = m_sBaseUrl + "/catalog/downloadbyname?filename="+sFileName+"&workspace="+m_sActiveWorkspace;
+		    String sUrl = getWorkspaceBaseUrl() + "/catalog/downloadbyname?filename="+sFileName+"&workspace="+m_sActiveWorkspace;
 		    
 		    String sOutputFilePath = "";
 		    
@@ -2499,7 +2505,7 @@ public class WasdiLib {
 			InputStream oInputStream = new FileInputStream(oFile);
 			
 		    //request
-			String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+			String sUrl = getWorkspaceBaseUrl() + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			oConnection.setDoOutput(true);
@@ -2560,6 +2566,14 @@ public class WasdiLib {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public String getWorkspaceBaseUrl() {
+		return m_sWorkspaceBaseUrl;
+	}
+
+	public void setWorkspaceBaseUrl(String m_sWorkspaceBaseUrl) {
+		this.m_sWorkspaceBaseUrl = m_sWorkspaceBaseUrl;
 	}
 	
 }
