@@ -183,6 +183,7 @@ public class Wasdi extends ResourceConfig {
 				SystemUtils.LOG.setLevel(Level.ALL);
 				SystemUtils.LOG.addHandler(oFileHandler);
 			}
+			
 			Engine.start(false);
 
 		} catch (Throwable e) {
@@ -193,6 +194,18 @@ public class Wasdi extends ResourceConfig {
 		Utils.debugLog("---------------------------------------------");
 		Utils.debugLog("-------- 	   Welcome to space      --------");
 		Utils.debugLog("---------------------------------------------\n\n");
+		
+		try {
+			
+			Utils.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
+			
+			for (String string : enviorntmentVars.keySet()) { Utils.debugLog(string + ": " + enviorntmentVars.get(string)); }
+			 			
+		}
+		catch (Exception e) {
+			Utils.debugLog(e.toString());
+			e.printStackTrace();
+		}
 	}
 
 	/**
