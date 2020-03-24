@@ -249,32 +249,48 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			byte[] ayBuffer = new byte[1024];
 		    ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile));
 		    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
+		    
 		    while(oZipEntry != null){
 		    	
-		    	String sZippedFileName = oZipEntry.getName();
-		    	
-		    	if (sZippedFileName.startsWith(sProcessorName)) {
-		    		bMyProcessorExists = true;
-		    		// Force extension case
-		    		sZippedFileName = sProcessorName + ".pro";
-		    	}
-		    	
-		    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-		    	
-		    	if (oZipEntry.isDirectory()) {
-		    		File oUnzippedDir = new File(sUnzipFilePath);
-	                oUnzippedDir.mkdir();
-		    	}
-		    	else {
+		    	try  {
+			    	String sZippedFileName = oZipEntry.getName();
 			    	
-			        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-			        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
-			        int iLen;
-			        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-			        	oOutputStream.write(ayBuffer, 0, iLen);
-			        }
-			        oOutputStream.close();		    		
+			    	if (sZippedFileName.startsWith(sProcessorName)) {
+			    		bMyProcessorExists = true;
+			    		// Force extension case
+			    		sZippedFileName = sProcessorName + ".pro";
+			    	}
+			    	
+			    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+			    	
+			    	if (oZipEntry.isDirectory()) {
+			    		File oUnzippedDir = new File(sUnzipFilePath);
+		                oUnzippedDir.mkdirs();
+			    	}
+			    	else {
+				    	
+				        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
+				        
+				        if (oUnzippedFile.getParentFile().isDirectory()) {
+				        	if (!oUnzippedFile.getParentFile().exists()) {
+				        		oUnzippedFile.getParentFile().mkdirs();
+				        	}
+				        }
+				        
+				        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
+				        int iLen;
+				        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
+				        	oOutputStream.write(ayBuffer, 0, iLen);
+				        }
+				        oOutputStream.close();		    		
+			    	}	    		
 		    	}
+		    	catch (Exception e) {
+		    		LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor exception in zip entry " + e.getMessage());
+				}
+		    	
+		    	
+
 		        oZipEntry = oZipInputStream.getNextEntry();
 	        }
 		    oZipInputStream.closeEntry();
