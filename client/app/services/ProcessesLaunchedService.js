@@ -79,8 +79,12 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
     {
         if(utilsIsObjectNullOrUndefined(sPidInput)===true) return false;
 
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
         var oService = this;
-        this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
+        this.m_oHttp.get(sUrl + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
             {
                 if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
                 {
