@@ -1,7 +1,9 @@
 angular.module('wasdi.LightSearchProductDirective', [])
-    .directive('lightsearchproductdirective', ['SearchService','LightSearchService','OpenSearchService',function ($SearchService,
+    .directive('lightsearchproductdirective', ['SearchService','LightSearchService','OpenSearchService','ConfigurationService',
+                                                                                                        function ($SearchService,
                                                                                                                   $LightSearchService,
-                                                                                                                  oOpenSearchService) {
+                                                                                                                  oOpenSearchService,
+                                                                                                                  oConfigurationService) {
         "use strict";
         return {
             restrict: 'E',
@@ -58,33 +60,11 @@ angular.module('wasdi.LightSearchProductDirective', [])
                 this.m_oSelectedProvider = {};
                 this.m_bAreVisibleProducts = false;
                 this.m_bLoadingData = false;
+                this.m_oConfiguration = {};
+                this.m_aoMissions = [];
                 let oController = this;
 
-                oOpenSearchService.getListOfProvider().success(function (data) {
-                    if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
-                    {
-                        var iLengthData = data.length;
-                        for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
-                        {
-                            oController.m_aListOfProvider[iIndexProvider] = {
-                                "name": data[iIndexProvider].code,
-                                "totalOfProducts":0,
-                                "totalPages":1,
-                                "currentPage":1,
-                                "productsPerPageSelected":10,
-                                "selected":true,
-                                "isLoaded":false,
-                                "description": data[iIndexProvider].description,
-                                "link": data[iIndexProvider].link
-                            };
-                        }
-                        oController.m_oSelectedProvider = oController.m_aListOfProvider[0];//TODO REMOVE LEGACY CODE
-                    }
-
-                }).error(function (data) {
-
-                });
-
+                /*************************** METHODS ***************************/
                 this.backToLightSearch = function() {
                     this.m_bAreVisibleProducts = false;
                     // clean table
@@ -139,7 +119,6 @@ angular.module('wasdi.LightSearchProductDirective', [])
                             }
                         }
                         oController.m_bLoadingData = false;
-                        debugger;
                     };
 
                     this.search(oCallback);
@@ -157,19 +136,82 @@ angular.module('wasdi.LightSearchProductDirective', [])
                     var sOpenSearchGeoselection = $LightSearchService.getOpenSearchGeoselection(this.lightSearchObject.oSelectArea.oBoundingBox);
 
                     var oOpenSearchDates = this.getOpenSearchDate();
-                    var oProvider = this.m_oSelectedProvider; //ONDA?
+                    this.initSelectedProvider();
+                    var oProvider = this.m_oSelectedProvider;
                     var oCallbackError = function(){
                         utilsVexDialogAlertTop("It was impossible loading product");
                     };
+
+                    this.m_aoMissions[1].selected = true;//TODO REMOVE LEGACY CODE
+                    var aoOpenSearchMissions = $LightSearchService.getOpenSearchMissions(this.m_aoMissions);
+
                     this.m_bLoadingData = true;
 
-                    $LightSearchService.lightSearch(sOpenSearchGeoselection,oOpenSearchDates,oProvider,oCallback, oCallbackError);
-
-                    // //todo  set default filters ?  this.m_oAdvancedFilterService.setAdvancedFilter + this.m_oSearchService.setMissionFilter
-
+                    $LightSearchService.lightSearch(sOpenSearchGeoselection,oOpenSearchDates,oProvider, aoOpenSearchMissions,
+                                                    oCallback, oCallbackError);
 
 
-                }
+
+
+                };
+
+                this.loadConfiguration = function(){
+                    var oController = this;
+                    oConfigurationService.getConfiguration().then(function(configuration){
+
+                        oController.m_oConfiguration = configuration;
+
+                        oController.m_aoMissions = oController.m_oConfiguration.missions;
+                        debugger;
+                    });
+                };
+
+                this.initSelectedProvider = function(){
+                    if(this.m_aListOfProvider === null || this.m_aListOfProvider === undefined){
+                        return null;
+                    }
+                    let iNumberOfProviders = this.m_aListOfProvider.length;
+
+                    for(let iIndexProviders = 0 ; iIndexProviders < iNumberOfProviders;iIndexProviders++){
+                        let  iNumberOfInputSelectedProviders = this.lightSearchObject.aoProviders.length;
+                        for(let iIndexInputSelectedProvider = 0; iIndexInputSelectedProvider < iNumberOfInputSelectedProviders;iIndexInputSelectedProvider++){
+                            if( this.m_aListOfProvider[iIndexProviders].name.toLowerCase() === this.lightSearchObject.aoProviders[iIndexInputSelectedProvider]){
+                                oController.m_oSelectedProvider = this.m_aListOfProvider[iIndexProviders];
+                                break;
+                            }
+                        }
+
+                    }
+                };
+                /**************************** BEGIN ****************************/
+                oOpenSearchService.getListOfProvider().success(function (data) {
+                    if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
+                    {
+                        var iLengthData = data.length;
+                        for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
+                        {
+                            oController.m_aListOfProvider[iIndexProvider] = {
+                                "name": data[iIndexProvider].code,
+                                "totalOfProducts":0,
+                                "totalPages":1,
+                                "currentPage":1,
+                                "productsPerPageSelected":10,
+                                "selected":true,
+                                "isLoaded":false,
+                                "description": data[iIndexProvider].description,
+                                "link": data[iIndexProvider].link
+                            };
+                        }
+                        debugger;
+                    }
+
+                }).error(function (data) {
+
+                });
+
+                this.loadConfiguration();
+
+                /**************************** END ****************************/
 
             },
             controllerAs: '$ctrl'

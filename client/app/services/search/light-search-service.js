@@ -2,11 +2,15 @@
 
 'use strict';
 angular.module('wasdi.LightSearchService', []).
-service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService','SearchService', function ($http,
+service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService','SearchService','AdvancedFilterService',
+                                                                                            function (
+                                                                                             $http,
                                                                                              oConstantsService,
                                                                                              oAdvancedSearchService,
-                                                                                             $SearchService) {
+                                                                                             $SearchService,
+                                                                                             oAdvancedFilterService) {
     this.m_oAdvancedSearchService = oAdvancedSearchService;
+    this.m_oAdvancedFilterService = oAdvancedFilterService;
     this.m_sDefaultProductImage = "assets/icons/ImageNotFound.svg";
     this.getOpenSearchGeoselection = function(oBoundingBox){
         var sFilter = '( footprint:"intersects(POLYGON((';
@@ -45,7 +49,7 @@ service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService
         }
 
         return sFilter ;
-    }
+    };
 
     this.utcDateConverter = function(date){
         var result = date;
@@ -58,7 +62,7 @@ service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService
         }
 
         return result;
-    }
+    };
 
     this.getOpenSearchDate = function(searchFilter){
 
@@ -113,7 +117,7 @@ service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService
 
         }
 
-    }
+    };
 
 
     this.calcOffset = function(oProvider){
@@ -124,7 +128,26 @@ service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService
         return(oProvider.currentPage-1) * oProvider.productsPerPageSelected;
     };
 
-    this.lightSearch = function(sOpenSearchGeoselection,oOpenSearchDates,oProvider,oCallback,oCallbackError ){
+    this.getOpenSearchMissions = function(aoMissions){
+        this.m_oAdvancedFilterService.setAdvancedFilter(aoMissions);
+        return  this.m_oAdvancedFilterService.getAdvancedFilter();
+    }
+
+    this.lightSearch = function(sOpenSearchGeoselection,oOpenSearchDates,oProvider,
+                                aoOpenSearchMissions, oCallback,oCallbackError ){
+
+        this.setSearchParameters(sOpenSearchGeoselection,oOpenSearchDates,oProvider,
+            aoOpenSearchMissions);
+
+        $SearchService.search().then(function(result){
+            oCallback(result);
+        }, function errorCallback(response) {
+            oCallbackError();
+        });
+    };
+
+    this.setSearchParameters = function(sOpenSearchGeoselection,oOpenSearchDates,oProvider,
+                                        aoOpenSearchMissions){
         $SearchService.setGeoselection(sOpenSearchGeoselection);
         $SearchService.setAdvancedFilter(oOpenSearchDates);
         var aoProviders = [];
@@ -133,13 +156,6 @@ service('LightSearchService', ['$http','ConstantsService','AdvancedSearchService
         var iOffset = this.calcOffset(oProvider);
         $SearchService.setOffset(iOffset);//default 0 (index page)
         $SearchService.setLimit(oProvider.productsPerPageSelected);
-        //todo  set default filters ?  this.m_oAdvancedFilterService.setAdvancedFilter + this.m_oSearchService.setMissionFilter
-
-        // let oController = this;
-        $SearchService.search().then(function(result){
-            oCallback(result);
-        }, function errorCallback(response) {
-            oCallbackError();
-        });
+        $SearchService.setMissionFilter(aoOpenSearchMissions);
     }
 }]);

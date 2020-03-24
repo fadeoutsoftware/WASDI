@@ -40,6 +40,8 @@ var AppStoreController = (function() {
         tst7.oEndDate.oDate = moment();
         tst7.oSelectArea.iHeight = 200;
         tst7.oSelectArea.iWidth = 500;
+        tst7.aoProviders.push(providers.ONDA);
+        tst7.aoMissionsFilters.push({name:"sentinel-1" });
         // oViewElements.push(tst1);
         // oViewElements.push(tst2);
         // oViewElements.push(tst3);

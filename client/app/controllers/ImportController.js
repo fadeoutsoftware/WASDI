@@ -1,4 +1,4 @@
-/**
+3/**
  * Created by a.corrado on 30/11/2016.
  */
 
@@ -157,10 +157,7 @@ var ImportController = (function() {
                 this.openWorkspace(this.m_oState.params.workSpace);
                 this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
-            // else
-            // {
-            //
-            // }
+
         }
         else
         {

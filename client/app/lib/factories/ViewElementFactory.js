@@ -32,6 +32,8 @@ var LightSearchProduct = function() {
     this.oStartDate = new DateBox();
     this.oEndDate = new DateBox();
     this.oSelectArea = new SelectArea();
+    this.aoProviders = [];
+    this.aoMissionsFilters = [];
 };
 
 var TableOfProducts = function(){
