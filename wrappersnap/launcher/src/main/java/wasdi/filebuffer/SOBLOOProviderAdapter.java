@@ -15,7 +15,9 @@ import com.google.common.base.Preconditions;
 
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
@@ -205,6 +207,11 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 			// always check HTTP response code first
 			if (iResponseCode == HttpURLConnection.HTTP_OK) {
+				
+				if (oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+					LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.READY, oProcessWorkspace.getProgressPerc());
+					LauncherMain.waitForProcessResume(oProcessWorkspace);
+				}
 	
 				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Connected");
 	
@@ -276,6 +283,10 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile File downloaded " + sReturnFilePath);
 				break;
 			} else {
+				
+				// Set this task in waiting state
+				LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.WAITING, oProcessWorkspace.getProgressPerc());
+				
 				String sError = handleConnectionError(oHttpConn);
 				if(503 == iResponseCode) {
 					try {
@@ -292,6 +303,11 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			oHttpConn.disconnect();
 			iAttempts--;
 		}
+		
+		if (oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+			LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.ERROR, -1);
+		}
+		
 		return sReturnFilePath;		
 	}
 

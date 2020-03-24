@@ -296,6 +296,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * Download a file via Http using Basic HTTP authentication is sDownloadUser is not null
 	 */
 	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
+		
+		// Return file path
 		String sReturnFilePath = "";
 
 		// Basic HTTP Authentication
@@ -368,15 +370,17 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			// opens an output stream to save into file
 			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
 
-			//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
-			copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+			//Retry should be handled by the specific provider ExecuteDownloadingFile Method
+			if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
+				sReturnFilePath = sSaveFilePath;
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+			}
+			else {
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
+			}
 
-			sReturnFilePath = sSaveFilePath;
-
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 		} else {
-			m_oLogger.debug(
-					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
 			m_iLastError = iResponseCode;
 		}
 		oHttpConn.disconnect();
