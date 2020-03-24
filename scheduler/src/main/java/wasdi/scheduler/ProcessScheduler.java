@@ -214,7 +214,7 @@ public class ProcessScheduler extends Thread {
 						
 						// Move in the running list
 						aoReadyList.remove(0);
-						aoRunningList.add(oReadyProcess);						
+						aoRunningList.add(oReadyProcess);
 					}
 										
 					// For each created process
@@ -297,6 +297,7 @@ public class ProcessScheduler extends Thread {
 								
 								// Is it still running?
 								if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())) {
+									
 									// Force to error
 									oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 									// Set the operation end date
@@ -313,9 +314,8 @@ public class ProcessScheduler extends Thread {
 							WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
 						}
 						
-						
 						// Is there a timeout?
-						if (m_lTimeOutMs != -1) {					
+						if (m_lTimeOutMs != -1) {				
 							// Check the last state change
 							if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeDate())) {
 								
@@ -385,8 +385,6 @@ public class ProcessScheduler extends Thread {
 						}
 					}
 					
-					
-					
 					// Get the updated list of waiting and ready processes
 					List<ProcessWorkspace> aoWaitingReadyList = getReadyList();
 					aoWaitingReadyList.addAll(getWaitingList());
@@ -424,6 +422,7 @@ public class ProcessScheduler extends Thread {
 									if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
 										oCheckProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
 									}
+									
 									// Update the process
 									m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
 									WasdiScheduler.log(m_sLogPrefix + "**************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
