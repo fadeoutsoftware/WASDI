@@ -278,10 +278,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     protected void UpdateProcessProgress(int iProgress) {
     	try {
 	    	if (m_oProcessWorkspace == null) return;
-//	    	if(0 == iProgress % 10) {
-//	    		//log updates only on tens%    		
-//	    		m_oLogger.debug("ProviderAdapter.UpdateProcessProgress: " + iProgress + "%");
-//	    	}
+	    	
 	    	m_oProcessWorkspace.setProgressPerc(iProgress);
 	    	//notify all subscribers
 	    	for (ProcessWorkspaceUpdateSubscriber oSubscriber : m_aoSubscribers) {

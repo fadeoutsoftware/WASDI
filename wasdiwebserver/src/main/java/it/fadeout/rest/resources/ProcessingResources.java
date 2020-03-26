@@ -925,10 +925,11 @@ public class ProcessingResources {
 		// creating the image
 		BufferedImage oBufferedImg;
 		try {
-			oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort,
-					oColorManiputalionViewModel == null);
+			oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort, oColorManiputalionViewModel == null);
 		} catch (Exception e) {
-			Utils.debugLog("ProcessingResources.getBandImage: " + e);
+			Utils.debugLog("ProcessingResources.getBandImage: Exception: " + e.toString());
+			Utils.debugLog("ProcessingResources.getBandImage: ExMessage: " + e.getMessage());
+			e.printStackTrace();
 			return Response.status(500).build();
 		}
 

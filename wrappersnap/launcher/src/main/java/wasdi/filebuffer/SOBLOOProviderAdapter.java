@@ -173,11 +173,9 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
-			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
 		
-		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " +
-				sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
+		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
 		
 		Preconditions.checkNotNull(sFileURL, "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is null");
 		Preconditions.checkArgument(!sFileURL.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is empty");
@@ -197,6 +195,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		Duration oMaxDuration = Duration.ofMinutes((long)(24 * 60 + s_iSLACKTOWAIT));
 		
 		int iAttempts = SOBLOOProviderAdapter.s_iNUMATTEMPTS;
+		
 		while(iAttempts > 0 && Duration.between(oStart, Instant.now()).compareTo(oMaxDuration) <= 0 ) {
 			 
 			URL oUrl = new URL(sURL);
@@ -208,9 +207,22 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			// always check HTTP response code first
 			if (iResponseCode == HttpURLConnection.HTTP_OK) {
 				
-				if (oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
-					LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.READY, oProcessWorkspace.getProgressPerc());
-					LauncherMain.waitForProcessResume(oProcessWorkspace);
+				if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+					
+					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: set process in READY State");
+					
+					LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.READY, m_oProcessWorkspace.getProgressPerc());
+					
+					String sResumedStatus = LauncherMain.waitForProcessResume(m_oProcessWorkspace);
+					m_oProcessWorkspace.setStatus(sResumedStatus);
+					
+					if (sResumedStatus.equals(ProcessStatus.ERROR.name()) || sResumedStatus.equals(ProcessStatus.STOPPED.name()) ) {
+						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Process resumed with status ERROR or STOPPED: exit");
+						break;
+					}
+					
+					
+					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Process Resumed, let's go!");
 				}
 	
 				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Connected");
@@ -282,16 +294,19 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile File downloaded " + sReturnFilePath);
 				break;
-			} else {
-				
-				// Set this task in waiting state
-				LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.WAITING, oProcessWorkspace.getProgressPerc());
+			} 
+			else {
 				
 				String sError = handleConnectionError(oHttpConn);
 				if(503 == iResponseCode) {
 					try {
+						
+						m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Product in LTA, put this process in WAITING");
+						// Set this task in waiting state
+						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.WAITING, m_oProcessWorkspace.getProgressPerc());
+						
 						String sInfo = "Waiting for the transfer of the image from Sobloo Long Term Archive, this may take up to 24 hours from the request";
-						LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+						LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),m_oProcessWorkspace.getWorkspaceId(), sInfo,m_oProcessWorkspace.getWorkspaceId());
 						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: LTA status: " + sError);
 						TimeUnit.MINUTES.sleep(60 + SOBLOOProviderAdapter.s_iSLACKTOWAIT);
 					} catch (InterruptedException oE) {
@@ -304,8 +319,9 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 			iAttempts--;
 		}
 		
-		if (oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
-			LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.ERROR, -1);
+		if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+			m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: process is still in waiting, attemps finished, set ERROR state ");
+			LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.ERROR, m_oProcessWorkspace.getProgressPerc());
 		}
 		
 		return sReturnFilePath;		

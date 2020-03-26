@@ -1,5 +1,12 @@
 # \_\_/== Changelog ==\\\_\_
 
+
+## [0.3.1] - 2020-03-26
+
+### Added
+
+- Private API to set the subprocess id
+
 ## [0.3.0] - 2020-03-20
 
 ### Added

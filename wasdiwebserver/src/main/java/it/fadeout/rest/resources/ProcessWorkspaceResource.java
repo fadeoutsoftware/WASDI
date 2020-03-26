@@ -641,6 +641,55 @@ public class ProcessWorkspaceResource {
 		return oProcess;
 	}
 	
+	
+	@GET
+	@Path("/setsubpid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceViewModel setSubProcessPid(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("subpid") int iSubPid) {
+		
+		Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId +", Payload: " + iSubPid + " )" );
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return oProcess;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return oProcess;
+			}
+
+			Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid: process id " + sProcessWorkspaceId);
+			Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid: SubPid " + iSubPid);
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessWorkspaceId);
+			
+			if (oProcessWorkspace == null) {
+				return oProcess;
+			}
+			
+			oProcessWorkspace.setSubprocessPid(iSubPid);
+
+			oRepository.updateProcess(oProcessWorkspace);
+			
+			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid: " + oEx);
+			oEx.printStackTrace();
+		}
+
+		return oProcess;
+	}
+	
 	@GET
 	@Path("/cleanqueue")
 	@Produces({"application/xml", "application/json", "text/xml"})

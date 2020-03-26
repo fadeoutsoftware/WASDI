@@ -16,8 +16,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.3.0
-Last Update: 20/03/2020
+Version 0.3.1
+Last Update: 26/03/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -1137,12 +1137,7 @@ def updateProgressPerc(iPerc):
             _log('[ERROR] waspy.updateProgressPerc: Passed None, expected a percentage' +
                  '  ******************************************************************************')
             return ''
-
-        if (getProcId() is None) or (len(getProcId()) < 1):
-            _log('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
-                 '  ******************************************************************************')
-            return ''
-
+        
         if 0 > iPerc or 100 < iPerc:
             _log('[WARNING] waspy.updateProgressPerc: passed' + str(iPerc) + ', automatically resetting in [0, 100]')
             if iPerc < 0:
@@ -1153,7 +1148,12 @@ def updateProgressPerc(iPerc):
         if m_bIsOnServer is False:
             _log("[INFO] Running locally, will not updateProgressPerc on server")
             return "RUNNING"
-
+        
+        if (getProcId() is None) or (len(getProcId()) < 1):
+            _log('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
+                 '  ******************************************************************************')
+            return ''
+        
         sStatus = "RUNNING"
         sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(
             iPerc) + "&sendrabbit=1"
@@ -1205,6 +1205,40 @@ def setProcessPayload(sProcessId, data):
         print("[ERROR] waspy.setProcessPayload: exception " + str(oEx))
         return ''
 
+
+
+
+def setSubPid(sProcessId, iSubPid):
+    """
+    Saves the Payload of a process
+    :param sProcessId: Id of the process
+    :param data: data to write in the payload. Suggestion to use a JSON
+    :return: the updated status as a String or '' if there was any problem
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+
+    try:
+        asHeaders = _getStandardHeaders()
+        payload = {'sProcessId': sProcessId, 'subpid': iSubPid}
+
+        sUrl = m_sBaseUrl + '/process/setsubpid'
+
+        oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+
+        sStatus = ''
+
+        if (oResult is not None) and (oResult.ok is True):
+            oJsonResult = oResult.json()
+            try:
+                sStatus = oJsonResult['status']
+            except:
+                sStatus = ''
+
+        return sStatus
+    except Exception as oEx:
+        print("[ERROR] waspy.setSubPid: exception " + str(oEx))
+        return ''
 
 def setPayload(data):
     """
@@ -1954,7 +1988,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
     for oImage in aoImages:
 
         # Get the file name
-        sFile = oImage["properties"]["filename"]
+        sFile = oImage["title"] + ".zip"
         wasdiLog("Importing Image " + sFile)
 
         # Import in WASDI
@@ -1984,6 +2018,84 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
     wasdiLog("All image imported, waiting for all workflows to finish")
     waitProcesses(asRunningProcList)
 
+
+
+def importAndPreprocess2(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvider=None):
+    """
+    Imports in WASDI and apply a SNAP Workflow to an array of EO Images as returned by searchEOImages
+    :param aoImages: array of images to import as returned by searchEOImages
+    :param sWorkflow: name of the workflow to apply to each imported images
+    :param sProvider: WASDI Data Provider. Use None for default
+    :param sPreProcSuffix: suffix to use for the name of the output of the workflows
+    :return: 
+    """
+    asOriginalFiles = []
+    asPreProcessedFiles = []
+    asRunningProcList = []
+    
+    asRunningDownloadList = []
+
+    # For each image found
+    for oImage in aoImages:
+
+        # Get the file name
+        sFile = oImage["title"] + ".zip"
+        wasdiLog("Importing Image " + sFile)
+
+        # Import in WASDI
+        sImportProcId = asynchImportProduct(oImage, sProvider)
+        
+        if sImportProcId != "ERROR":
+            asRunningDownloadList.append(sImportProcId)
+            asOriginalFiles.append(sFile)
+    
+    #Flag to know if we are waiting for a donwload
+    bWaitingDonwload = True;
+    
+    # While there are download to wait for
+    while bWaitingDonwload:
+        
+        # Suppose they are done
+        bWaitingDonwload = False
+        
+        # For each running process
+        for iImports in range(len(asRunningDownloadList)):
+            
+            # Get the status
+            sImportProcId = asRunningDownloadList[iImports]
+            
+            if sImportProcId == "DONE" or sImportProcId == "ERROR" or sImportProcId == "WAITING":
+                continue
+             
+            sImportStatus = getProcessStatus(sImportProcId)
+            
+            if  sImportStatus == "DONE":
+                # No, start the workflow
+                sFile = asOriginalFiles[iImports]            
+                # Generate the output name
+                sOutputFile = sFile.replace(".zip", sPreProcSuffix)            
+                sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
+                # Add the pre processed file to the list
+                asPreProcessedFiles.append(sOutputFile)
+    
+                wasdiLog(sFile + " imported, starting workflow to get " + sOutputFile)
+    
+                # Is already there for any reason?
+                if not fileExistsOnWasdi(sOutputFile):
+                    # No, start the workflow
+                    sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
+                    asRunningProcList.append(sProcId)
+                
+                asRunningDownloadList[iImports] = "DONE"
+            elif sImportStatus == "ERROR" or sImportStatus == "STOPPED":
+                asRunningDownloadList[iImports] = sImportStatus
+                pass
+            else:
+                bWaitingDonwload = True           
+
+    # Checkpoint: wait for all asynch workflows to finish
+    wasdiLog("All image imported, waiting for all workflows to finish")
+    waitProcesses(asRunningProcList)
 
 def asynchExecuteProcessor(sProcessorName, aoParams={}):
     """

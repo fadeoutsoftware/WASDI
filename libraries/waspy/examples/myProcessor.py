@@ -4,10 +4,12 @@ import wasdi
 def run():
     wasdi.setVerbose(True)
     bVerbosity = wasdi.getVerbose()
-    wasdi.wasdiLog(f'Verbosity is: {bVerbosity}')
+    
     wasdi.hello()
 
     wasdi.wasdiLog(wasdi.getUser())
+    
+    wasdi.setSubPid("3e3253fc-52e7-47f6-ad6f-a5d9439691ff", 11)
 
     # params
     aoParams = wasdi.getParametersDict()
@@ -17,7 +19,6 @@ def run():
     asKeys = ['hello', 'no']
     for sKey in asKeys:
         sValue = wasdi.getParameter(sKey, oDefault='escape')
-        wasdi.wasdiLog(f'{sKey} {sValue}')
 
     wasdi.wasdiLog("Welcome to your first WASPY processor :-)")
     sNome = wasdi.getParameter("name")
@@ -44,6 +45,6 @@ def run():
 
 
 if __name__ == '__main__':
-    wasdi.init("./config.json")
+    #wasdi.init("./config.json")
     wasdi.init()
     run()
