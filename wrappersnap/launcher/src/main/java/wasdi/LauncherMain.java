@@ -675,6 +675,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @return
 	 */
 	public String download(DownloadFileParameter oParameter, String sDownloadPath) {
+		
 		String sFileName = "";
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -766,8 +767,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 						// send update process message
 						if (s_oSendToRabbit != null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-							s_oLogger.debug(
-									"LauncherMain.Download: Error sending rabbitmq message to update process list");
+							s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
 						}
 					}
 					else {
@@ -775,8 +775,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 					// No: it isn't: download it
-					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(),
-							oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
 
 					if (Utils.isNullOrEmpty(sFileName)) {
 						int iLastError = oProviderAdapter.getLastServerError();
@@ -785,18 +784,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 							sError += ": query obtained HTTP Error Code " + iLastError;
 						throw new Exception(sError);
 					}
+					
 					oProviderAdapter.unsubscribe(this);
 
 					// Control Check for the file Name
 					sFileName = sFileName.replaceAll("//", "/");
 
 					if (sFileNameWithoutPath.startsWith("S3") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
-						s_oLogger.debug("File is a Sentinel 3 image, start unzip");
+						s_oLogger.debug("LauncherMain.download: File is a Sentinel 3 image, start unzip");
 						Utils.unzip(sFileNameWithoutPath, sDownloadPath);
 						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", ".SEN3");
-						s_oLogger.debug("Unzip done, folder name: " + sFolderName);
+						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
 						sFileName = sFolderName + "/" + "xfdumanifest.xml";
-						s_oLogger.debug("File Name changed in: " + sFileName);
+						s_oLogger.debug("LauncherMain.download: File Name changed in: " + sFileName);
 					}
 
 					// Get The product view Model
@@ -806,6 +806,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 					// Save Metadata
 					oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
+					
+					if (Utils.isNullOrEmpty(sFileNameWithoutPath)) {
+						sFileNameWithoutPath = oProductFile.getName();
+						s_oLogger.debug("LauncherMain.download: sFileNameWithoutPath still null, forced to: " + sFileNameWithoutPath);
+					}
 
 					// Save it in the register
 					oAlreadyDownloaded = new DownloadedFile();
@@ -820,7 +825,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
-					oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+					
+					if (oProduct.getStartTime()!=null) {
+						oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+					}
+					
 					oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());
 					oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
 				} else {
@@ -850,11 +859,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				}
 			} else {
-				s_oLogger.debug(
-						"LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
+				s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
 
 				sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
-
+				WasdiProductReader oReadProduct = new WasdiProductReader();
+				Product oProduct = oReadProduct.readSnapProduct(new File(sFileName), null);
+				s_oLogger.debug("Test reading product");
 			}
 
 			if (Utils.isNullOrEmpty(sFileName)) {
@@ -2936,8 +2946,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 	@Override
 	public void notify(ProcessWorkspace oProcessWorkspace) {
-		if (oProcessWorkspace == null)
-			return;
+		
+		if (oProcessWorkspace == null) return;
 
 		try {
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

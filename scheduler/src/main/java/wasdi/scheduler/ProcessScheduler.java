@@ -219,12 +219,13 @@ public class ProcessScheduler extends Thread {
 										
 					// For each created process
 					while (aoCreatedList.size()> 0) {
-																		
+																								
+						// If we fished free slots, stop the cycle
+						if (aoRunningList.size()>=m_iNumberOfConcurrentProcess) break;
+						
 						// Get the Created process
 						ProcessWorkspace oCreatedProcess = aoCreatedList.get(0);
-						
-						// If we fished free slots, stop the cycle
-						if (aoRunningList.size()>=m_iNumberOfConcurrentProcess) break;						
+
 						
 						// Check if we did not launch this before
 						if (!m_aoLaunchedProcesses.containsKey(oCreatedProcess.getProcessObjId())) {

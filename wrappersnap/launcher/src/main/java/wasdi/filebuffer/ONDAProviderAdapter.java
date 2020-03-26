@@ -142,7 +142,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				
 				//TODO change method signature and check result: if it fails try https or retry if timeout
 				//MAYBE pass the entire pseudopath so that if one does not work, another one can be tried
-				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
+				copyStream(m_oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
 
 			} catch (Exception e) {
 				m_oLogger.info("ONDAProviderAdapter.ExecuteDownloadFile: " + e);
@@ -175,12 +175,31 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product should be available, try to download");
 					
+					if (Utils.isNullOrEmpty(m_oProcessWorkspace.getProductName())) {
+						
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product name is still null, try to get it now");
+						
+						String sFileNameWithoutPath = this.GetFileName(sFileURL);
+						
+						if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
+							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: got product name " + sFileNameWithoutPath);
+							m_oProcessWorkspace.setProductName(sFileNameWithoutPath);
+						}
+					}
+					
 					// If we were in waiting, move in ready and wait the scheduler to resume us
-					if (oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+					if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process Waiting, set it ready and wait for resume");
-						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.READY, oProcessWorkspace.getProgressPerc());
-						LauncherMain.waitForProcessResume(oProcessWorkspace);
-						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process resumed let's go!");
+						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.READY, m_oProcessWorkspace.getProgressPerc());
+						String sResumedStatus = LauncherMain.waitForProcessResume(m_oProcessWorkspace);
+						m_oProcessWorkspace.setStatus(sResumedStatus);
+						
+						if (sResumedStatus.equals(ProcessStatus.ERROR.name()) || sResumedStatus.equals(ProcessStatus.STOPPED.name()) ) {
+							m_oLogger.error("ONDAProviderAdapter.ExecuteDownloadFile: Process resumed with status ERROR or STOPPED: exit");
+							break;
+						}
+						
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process resumed let's go! Status: " + sResumedStatus);
 					}
 					
 					sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
@@ -198,10 +217,10 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product not available, place order");
 					
-					if (!oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+					if (!m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: set the process in WAITING STATE");
 						// Set the process in WAITING
-						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), oProcessWorkspace, ProcessStatus.WAITING, oProcessWorkspace.getProgressPerc());						
+						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.WAITING, m_oProcessWorkspace.getProgressPerc());						
 					}
 					else {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: process already in WAITING STATE");
@@ -226,7 +245,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 							
 							if (LauncherMain.s_oSendToRabbit != null) {
 								String sInfo = "Download Operation<br>File in long term archive<br>Retrive scheduled for " + sDate;
-								LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+								LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),m_oProcessWorkspace.getWorkspaceId(), sInfo,m_oProcessWorkspace.getWorkspaceId());
 							}
 						}
 						catch (Exception e) {

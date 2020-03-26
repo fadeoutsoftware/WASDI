@@ -7,6 +7,7 @@ import wasdi
 import json
 import urllib.parse
 import subprocess
+import traceback
 from distutils.dir_util import copy_tree
 from os.path import sys
 
@@ -33,6 +34,8 @@ def run(processId):
 	if processId == '--help':
 		
 		print("wasdiProcessorServer Help Request: calling processor Help")
+		
+		sHelp = ""
 		
 		#Try to get help from the processor
 		try:
@@ -66,8 +69,7 @@ def run(processId):
 				sHelpFileName = "help.TXT"
 			elif os.path.isfile("HELP.TXT"):
 				sHelpFileName = "HELP.TXT"
-			
-			sHelp = ""
+						
 			if not sHelpFileName == "":
 				with open(sHelpFileName, 'r') as oHelpFile:
 					sHelp = oHelpFile.read()
@@ -79,6 +81,24 @@ def run(processId):
 		print("wasdiProcessorServer return received help " + sHelp)
 		# Return the available help			
 		return jsonify({'help': sHelp})
+	
+	# Check if this is a lib update request
+	if processId == '--wasdiupdate':
+		#Try to update the lib
+		try:
+			
+			print("Calling pip upgrade")
+			oProcess = subprocess.Popen(["pip", "install", "--upgrade", "wasdi"])
+			print("pip upgrade done")
+		except Exception as oEx:
+			print("wasdi.executeProcessor EXCEPTION")
+			print(repr(oEx))
+			print(traceback.format_exc())
+		except:
+			print("wasdi.executeProcessor generic EXCEPTION")			
+		
+		# Return the result of the update
+		return jsonify({'update': '1'})	
 	
 	print("wasdiProcessorServer run request")
 	
@@ -188,6 +208,8 @@ def run(processId):
 		oProcess = subprocess.Popen(["python", "wasdiProcessorExecutor.py", sEncodeParameters, processId])
 		
 		wasdi.wasdiLog("wasdiProcessorServer Process Started with local pid "  + str(oProcess.pid))
+		#Update the server with the subprocess pid
+		wasdi.setSubPid(processId, int(oProcess.pid))
 		
 	except Exception as oEx:
 		wasdi.wasdiLog("wasdiProcessorServer EXCEPTION")
