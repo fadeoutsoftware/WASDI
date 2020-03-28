@@ -8,6 +8,7 @@ import java.util.TimeZone;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -515,6 +516,41 @@ public class ProcessWorkspaceResource {
 		}
 
 		return oProcess;
+	}
+	
+	
+	@POST
+	@Path("/statusbyid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<String> getStatusProcessesById(@HeaderParam("x-session-token") String sSessionId, ArrayList<String> asProcessesWorkspaceId) {
+		
+		Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById( Session: " + sSessionId + " )");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		ArrayList<String> asReturnStatusList = new ArrayList<String>();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return asReturnStatusList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return asReturnStatusList;
+			}
+			
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			asReturnStatusList = oRepository.getProcessesStatusByProcessObjId(asProcessesWorkspaceId);
+			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById: " + oEx);
+		}
+
+		return asReturnStatusList;
 	}
 
 	
