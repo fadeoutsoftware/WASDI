@@ -124,9 +124,16 @@ public class WasdiScheduler
 					}
 				}
 				
-				// Start the scheduler
-				s_oLogger.debug("INFO: Starting Scheduler: " + sScheduler);
-				oProcessScheduler.start();				
+				String sSchedulerEnabled = ConfigReader.getPropValue(sScheduler.toUpperCase()+"_ENABLED", "1");
+				
+				if (sSchedulerEnabled.equals("1")) {
+					// Start the scheduler
+					s_oLogger.debug("INFO: Starting Scheduler: " + sScheduler);
+					oProcessScheduler.start();					
+				}
+				else {
+					s_oLogger.debug("INFO: Scheduler: " + sScheduler + " not enabled, will not start");
+				}
 			}
 			
 			// Do we have other types?
