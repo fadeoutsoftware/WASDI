@@ -819,12 +819,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded.setProductViewModel(oVM);
 
 					String sBoundingBox = oParameter.getBoundingBox();
-
-					if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
-						sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+					
+					if (!Utils.isNullOrEmpty(sBoundingBox)) {
+						if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
+							sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+						}
+						
+						oAlreadyDownloaded.setBoundingBox(sBoundingBox);
 					}
-
-					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
+					else {
+						s_oLogger.info("LauncherMain.download: bounding box not available in the parameter");
+					}
 					
 					if (oProduct.getStartTime()!=null) {
 						oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
@@ -871,15 +876,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
 
 				String sError = "The name of the file to download result null";
-				if (s_oSendToRabbit != null)
-					s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(),
-							oParameter.getWorkspace(), sError, oParameter.getExchange());
-				if (oProcessWorkspace != null)
-					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			} else {
+				if (s_oSendToRabbit != null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(), sError, oParameter.getExchange());
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			} 
+			else {
 
-				addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(),
-						oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
+				addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
 
 				s_oLogger.debug("LauncherMain.Download: Add Product to Db and Send to Rabbit Done");
 
@@ -2781,8 +2783,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 */
 	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName,
 			String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception {
-		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox,
-				true);
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox,true);
 	}
 
 	/**
@@ -2803,8 +2804,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName,
 			String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata)
 			throws Exception {
-		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox,
-				bAsynchMetadata, true);
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, bAsynchMetadata, true);
 	}
 
 	/**
