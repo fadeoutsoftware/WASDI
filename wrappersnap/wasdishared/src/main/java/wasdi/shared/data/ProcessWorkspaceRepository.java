@@ -9,6 +9,7 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
@@ -797,6 +798,31 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return oProcessWorkspace;
     }
 
+    public ArrayList<String> getProcessesStatusByProcessObjId(ArrayList<String> asProcessesObjId) {
+    	
+    	ArrayList<String> asReturnStatus = new ArrayList<>();
+    	
+    	final ArrayList<ProcessWorkspace> aoProcessesList = new ArrayList<ProcessWorkspace>();
+        try {
+        	
+        	BasicDBObject oInQuery = new BasicDBObject();
+        	
+            oInQuery.put("processObjId", new BasicDBObject("$in", asProcessesObjId));
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oInQuery);
+            fillList(aoProcessesList, oWSDocuments);
+            
+            for (int i=0; i<aoProcessesList.size(); i++) {
+            	asReturnStatus.add(aoProcessesList.get(i).getStatus());
+            }
+        } 
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return asReturnStatus;
+    }
+    
     /**
      * Update a process Workspace. If there is a state change, the system will update also update lastStateChangeDate 
      * @param oProcessWorkspace Process Workpsace to update
