@@ -2,22 +2,37 @@
 FADEOUT SOFTWARE 
 
 **Disclaimer ** 
-Please consider this is a preliminary version of the lib. It is undergoing many tests but also many changes,
-so please be patient and do not trust anyone's life with the library (not yet)
+The library is provided "as-is" without warranty
+
+Neither FadeOut Software (IT) Srl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential 
+damages (including, but not limited to, breach of expressed or implied contract; procurement of substitute goods or services; loss of use, data or profits; 
+business interruption; or damage to any equipment, software and/or data files) however caused and on any legal theory of liability, whether for contract, 
+tort, strict liability, or a combination thereof (including negligence or otherwise) arising in any way out of the direct or indirect use of software, 
+even if advised of the possibility of such risk and potential damage.
+
+FadeOut Software (IT) Srl uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed, 
+and that all products are free from any known software virus. For your own protection, you should scan all files for viruses prior to installation.
+
 
 # WASDI
 
 This is WASPY, the WASDI Python lib.
 
-The methods in the module allow to interact with WASDI seamlessly.
+WASDI is an ESA GSTP Project sponsored by ASI in 2016. The system is a fully scalable and distributed Cloud based EO analytical platform. The system is cross-cloud and cross DIAS. 
+WASDI is an operating platform that offers services to develop and deploy DIAS based EO on-line applications, designed 
+to extract value-added information, made and distributed by EO-Experts without any specific IT/Cloud skills.  
+WASDI offers as well to End-Users the opportunity to run EO applications both from a dedicated user-friendly interface 
+and from an API based software interface, fulfilling the real-world business needs. 
+EO-Developers can work using the WASDI Libraries in their usual programming languages and add to the platform these new blocks 
+in the simplest possible way.
 
 Note:
 the philosophy of safe programming is adopted as widely as possible, the lib will try to workaround issues such as
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.3.1
-Last Update: 26/03/2020
+Version 0.3.2
+Last Update: 02/04/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -1148,15 +1163,14 @@ def updateProgressPerc(iPerc):
         if m_bIsOnServer is False:
             _log("[INFO] Running locally, will not updateProgressPerc on server")
             return "RUNNING"
-        
-        if (getProcId() is None) or (len(getProcId()) < 1):
-            _log('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
-                 '  ******************************************************************************')
-            return ''
+        else:            
+            if (getProcId() is None) or (len(getProcId()) < 1):
+                _log('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
+                     '  ******************************************************************************')
+                return ''
         
         sStatus = "RUNNING"
-        sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(
-            iPerc) + "&sendrabbit=1"
+        sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(sUrl, headers=asHeaders)
         sResult = ""
@@ -1970,57 +1984,7 @@ def asynchImportProductList(aasProduct, sProvider=None):
     # In the ASYNCH MODE return the list of process Id
     return asReturnList
 
-
 def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvider=None):
-    """
-    Imports in WASDI and apply a SNAP Workflow to an array of EO Images as returned by searchEOImages
-    :param aoImages: array of images to import as returned by searchEOImages
-    :param sWorkflow: name of the workflow to apply to each imported images
-    :param sProvider: WASDI Data Provider. Use None for default
-    :param sPreProcSuffix: suffix to use for the name of the output of the workflows
-    :return: 
-    """
-    asOriginalFiles = []
-    asPreProcessedFiles = []
-    asRunningProcList = []
-
-    # For each image found
-    for oImage in aoImages:
-
-        # Get the file name
-        sFile = oImage["title"] + ".zip"
-        wasdiLog("Importing Image " + sFile)
-
-        # Import in WASDI
-        sStatus = importProduct(oImage, sProvider)
-
-        # Import done?
-        if sStatus == "DONE":
-            # Add the file to the list of original files
-            asOriginalFiles.append(sFile)
-            # Generate the output name
-            sOutputFile = sFile.replace(".zip", sPreProcSuffix)
-
-            # Add the pre processed file to the list
-            asPreProcessedFiles.append(sOutputFile)
-
-            wasdiLog(sFile + " imported, starting workflow to get " + sOutputFile)
-
-            # Is already there for any reason?
-            if not fileExistsOnWasdi(sOutputFile):
-                # No, start the workflow
-                sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
-                asRunningProcList.append(sProcId)
-        else:
-            wasdiLog("File " + sFile + " not imported in wasdi. Jump to the next")
-
-    # Checkpoint: wait for all asynch workflows to finish
-    wasdiLog("All image imported, waiting for all workflows to finish")
-    waitProcesses(asRunningProcList)
-
-
-
-def importAndPreprocess2(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvider=None):
     """
     Imports in WASDI and apply a SNAP Workflow to an array of EO Images as returned by searchEOImages
     :param aoImages: array of images to import as returned by searchEOImages
@@ -2070,14 +2034,11 @@ def importAndPreprocess2(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvi
             sImportStatus = getProcessStatus(sImportProcId)
             
             if  sImportStatus == "DONE":
-                # No, start the workflow
+                # Yes, start the workflow
                 sFile = asOriginalFiles[iImports]            
                 # Generate the output name
                 sOutputFile = sFile.replace(".zip", sPreProcSuffix)            
-                sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
-                # Add the pre processed file to the list
-                asPreProcessedFiles.append(sOutputFile)
-    
+
                 wasdiLog(sFile + " imported, starting workflow to get " + sOutputFile)
     
                 # Is already there for any reason?
@@ -2085,13 +2046,17 @@ def importAndPreprocess2(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvi
                     # No, start the workflow
                     sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
                     asRunningProcList.append(sProcId)
+                    asPreProcessedFiles.append(sOutputFile)
                 
                 asRunningDownloadList[iImports] = "DONE"
             elif sImportStatus == "ERROR" or sImportStatus == "STOPPED":
                 asRunningDownloadList[iImports] = sImportStatus
                 pass
             else:
-                bWaitingDonwload = True           
+                bWaitingDonwload = True
+                
+        if bWaitingDonwload:
+            time.sleep(5)                
 
     # Checkpoint: wait for all asynch workflows to finish
     wasdiLog("All image imported, waiting for all workflows to finish")
@@ -2241,7 +2206,6 @@ def _waitForResume():
         except:
             _log("Exception in the _waitForResume")
 
-
 def waitProcesses(asProcIdList):
     """
     Wait for a list of processes to wait.
@@ -2251,10 +2215,16 @@ def waitProcesses(asProcIdList):
     
     :return list of strings with the same number of elements in input, with the exit status of the processes
     """
+    
+    global m_sBaseUrl
+    global m_sSessionId
 
-    # Initialize the return list
+    asHeaders = _getStandardHeaders()
+
+    sUrl = m_sBaseUrl + '/process/statusbyid'
+    
     asReturnStatus = []
-
+    
     # Check the input
     if asProcIdList is None:
         _log("[WARNING] waitProcesses asProcIdList is none, return empty list")
@@ -2264,81 +2234,39 @@ def waitProcesses(asProcIdList):
         _log("[WARNING] waitProcesses asProcIdList is not a list, return empty list")
         return asReturnStatus;
 
-    # Temporary List
-    asProcessesToCheck = asProcIdList.copy();
-
-    # Get the number of processes
-    iProcessCount = len(asProcessesToCheck)
-
     iTotalTime = 0
-    asNewList = []
 
     # Put this process in WAITING
     updateStatus("WAITING")
-
-    # While there are processes to wait for
-    while (iProcessCount > 0):
-
-        # For all the processes
-        iProcessIndex = 0
-
-        for iProcessIndex in range(0, iProcessCount):
-
-            # Get the id
-            sProcessId = asProcessesToCheck[iProcessIndex]
-
-            if sProcessId == "ERROR":
-                sStatus = "ERROR"
-            elif sProcessId == "":
-                sStatus = "ERROR"
-            else:
-                # Get the status
-                sStatus = getProcessStatus(sProcessId)
-
-                # Check if is done
-            if sStatus == "DONE" or sStatus == "STOPPED" or sStatus == "ERROR":
-                # Ok one less
-                _log("[INFO] Process " + sProcessId + " finished with status " + sStatus)
-            else:
-                # Not yet, we still need to wait this
-                asNewList.append(sProcessId)
-
-        # Update the list 
-        asProcessesToCheck = asNewList.copy()
-        # Clean the temp one
-        asNewList = []
-        # Get the new total of proc to wait
-        iProcessCount = len(asProcessesToCheck)
-        # Sleep a little bit
-        sleep(2)
-        # Trace the time needed
-        iTotalTime = iTotalTime + 2
-
-    # We are done. Get again all the result to ensure the coordinations of the IN/OUT arrays 
-    iProcessCount = len(asProcIdList)
-    iProcessIndex = 0
-
-    for iProcessIndex in range(0, iProcessCount):
-        # Get Proc id
-        sProcessId = asProcIdList[iProcessIndex]
-
-        if sProcessId == "ERROR":
-            sStatus = "ERROR"
-        elif sProcessId == "":
-            sStatus = "ERROR"
-        else:
-            # Get the status
-            sStatus = getProcessStatus(sProcessId)
-
-            # Save status in the output list
-        asReturnStatus.append(sStatus)
-
+    
+    bAllDone = False
+    
+    while not bAllDone:
+        
+        oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders)
+    
+        if (oResult is not None) and (oResult.ok is True):
+            asResultStatus = oResult.json()
+            asReturnStatus = asResultStatus
+            
+            bAllDone = True
+            
+            for sProcStatus in asResultStatus:
+                if not (sProcStatus == "DONE" or sProcStatus == "ERROR" or sProcStatus == "STOPPED"):
+                    bAllDone = False
+                    break   
+        
+        if not bAllDone:
+            # Sleep a little bit
+            sleep(5)
+            # Trace the time needed
+            iTotalTime = iTotalTime + 2
+    
     # Wait to be resumed
     _waitForResume()
 
     # Return the list of status
     return asReturnStatus
-
 
 def uploadFile(sFileName):
     """
@@ -2920,3 +2848,153 @@ if __name__ == '__main__':
     _log(
         'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net'
     )
+
+
+def _waitProcessesV1(asProcIdList):
+    """
+    LEGACY: this version query each process with a REST API. The new version use the Massive API to make only one request per cycle
+    Wait for a list of processes to wait.
+    The list of processes is an array of strings, each with a proc id to wait
+    
+    :param asProcIdList: list of strings, procId, to wait
+    
+    :return list of strings with the same number of elements in input, with the exit status of the processes
+    """
+
+    # Initialize the return list
+    asReturnStatus = []
+
+    # Check the input
+    if asProcIdList is None:
+        _log("[WARNING] waitProcesses asProcIdList is none, return empty list")
+        return asReturnStatus;
+
+    if not isinstance(asProcIdList, list):
+        _log("[WARNING] waitProcesses asProcIdList is not a list, return empty list")
+        return asReturnStatus;
+
+    # Temporary List
+    asProcessesToCheck = asProcIdList.copy();
+
+    # Get the number of processes
+    iProcessCount = len(asProcessesToCheck)
+
+    iTotalTime = 0
+    asNewList = []
+
+    # Put this process in WAITING
+    updateStatus("WAITING")
+
+    # While there are processes to wait for
+    while (iProcessCount > 0):
+
+        # For all the processes
+        iProcessIndex = 0
+
+        for iProcessIndex in range(0, iProcessCount):
+
+            # Get the id
+            sProcessId = asProcessesToCheck[iProcessIndex]
+
+            if sProcessId == "ERROR":
+                sStatus = "ERROR"
+            elif sProcessId == "":
+                sStatus = "ERROR"
+            else:
+                # Get the status
+                sStatus = getProcessStatus(sProcessId)
+
+                # Check if is done
+            if sStatus == "DONE" or sStatus == "STOPPED" or sStatus == "ERROR":
+                # Ok one less
+                _log("[INFO] Process " + sProcessId + " finished with status " + sStatus)
+            else:
+                # Not yet, we still need to wait this
+                asNewList.append(sProcessId)
+
+        # Update the list 
+        asProcessesToCheck = asNewList.copy()
+        # Clean the temp one
+        asNewList = []
+        # Get the new total of proc to wait
+        iProcessCount = len(asProcessesToCheck)
+        # Sleep a little bit
+        sleep(2)
+        # Trace the time needed
+        iTotalTime = iTotalTime + 2
+
+    # We are done. Get again all the result to ensure the coordinations of the IN/OUT arrays 
+    iProcessCount = len(asProcIdList)
+    iProcessIndex = 0
+
+    for iProcessIndex in range(0, iProcessCount):
+        # Get Proc id
+        sProcessId = asProcIdList[iProcessIndex]
+
+        if sProcessId == "ERROR":
+            sStatus = "ERROR"
+        elif sProcessId == "":
+            sStatus = "ERROR"
+        else:
+            # Get the status
+            sStatus = getProcessStatus(sProcessId)
+
+            # Save status in the output list
+        asReturnStatus.append(sStatus)
+
+    # Wait to be resumed
+    _waitForResume()
+
+    # Return the list of status
+    return asReturnStatus
+
+
+def _importAndPreprocessV1(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvider=None):
+    """
+    Legacy: first version of import and preprocess. This version has a synch download and then starts the workflow
+    The new version triggers all the download in asynch and then starts the workflow for each download once done
+    
+    Imports in WASDI and apply a SNAP Workflow to an array of EO Images as returned by searchEOImages
+    :param aoImages: array of images to import as returned by searchEOImages
+    :param sWorkflow: name of the workflow to apply to each imported images
+    :param sProvider: WASDI Data Provider. Use None for default
+    :param sPreProcSuffix: suffix to use for the name of the output of the workflows
+    :return: 
+    """
+    asOriginalFiles = []
+    asPreProcessedFiles = []
+    asRunningProcList = []
+
+    # For each image found
+    for oImage in aoImages:
+
+        # Get the file name
+        sFile = oImage["title"] + ".zip"
+        wasdiLog("Importing Image " + sFile)
+
+        # Import in WASDI
+        sStatus = importProduct(oImage, sProvider)
+
+        # Import done?
+        if sStatus == "DONE":
+            # Add the file to the list of original files
+            asOriginalFiles.append(sFile)
+            # Generate the output name
+            sOutputFile = sFile.replace(".zip", sPreProcSuffix)
+
+            # Add the pre processed file to the list
+            asPreProcessedFiles.append(sOutputFile)
+
+            wasdiLog(sFile + " imported, starting workflow to get " + sOutputFile)
+
+            # Is already there for any reason?
+            if not fileExistsOnWasdi(sOutputFile):
+                # No, start the workflow
+                sProcId = asynchExecuteWorkflow(sFile, sOutputFile, sWorkflow)
+                asRunningProcList.append(sProcId)
+        else:
+            wasdiLog("File " + sFile + " not imported in wasdi. Jump to the next")
+
+    # Checkpoint: wait for all asynch workflows to finish
+    wasdiLog("All image imported, waiting for all workflows to finish")
+    waitProcesses(asRunningProcList)
