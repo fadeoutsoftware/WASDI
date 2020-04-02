@@ -37,6 +37,53 @@ import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 public class dbUtils {
+	
+	public static boolean isProductOnThisNode(DownloadedFile oDownloadedFile, WorkspaceRepository oWorkspaceRepository) {
+		try {
+			String sPath = oDownloadedFile.getFilePath();
+			
+			String [] asSplittedPath = sPath.split("/");
+			
+			if (asSplittedPath == null) {
+				System.out.println(oDownloadedFile.getFileName() + " - CANNOT SPLIT PATH");
+				return false;
+			}
+			
+			if (asSplittedPath.length<2) {
+				System.out.println(oDownloadedFile.getFileName() + " - SPLITTED PATH HAS ONLY ONE ELEMENT");
+				return false;
+			}
+			
+			String sWorkspaceId = asSplittedPath[asSplittedPath.length-2];
+			
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			if (oWorkspace == null) {
+				System.out.println(oDownloadedFile.getFileName() + " - IMPOSSIBILE TO FIND WORKSPACE " + sWorkspaceId);
+				return false;
+				
+			}
+			
+			String sNode = oWorkspace.getNodeCode();
+			
+			if (Utils.isNullOrEmpty(sNode)) {
+				sNode = "wasdi";
+			}
+			
+			if (sNode.equals(s_sMyNodeCode) == false) {
+				System.out.println(oDownloadedFile.getFileName() + " - IS ON ANOTHER NODE  [" + sNode + "]");
+				return false;
+			}
+			
+		}
+		catch (Exception oEx) {
+			System.out.println(" DOWNLOADED FILE EX " + oEx.toString());
+			oEx.printStackTrace();
+			return false;
+		}
+		
+		return true;
+	}
 
 	/**
 	 * Tools to fix the downloaded products table
@@ -65,6 +112,7 @@ public class dbUtils {
 		        	bDelete = true;
 		        }		        
 				
+		        WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 				
 				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 				
@@ -80,6 +128,8 @@ public class dbUtils {
 					File oFile = new File(sPath);
 					
 					if (oFile.exists() == false) {
+						
+						if (!isProductOnThisNode(oDownloadedFile, oWorkspaceRepository)) continue;
 						
 						iDeleted ++;
 						
@@ -130,10 +180,10 @@ public class dbUtils {
 	public static void productWorkspace() {
 		try {
 			
-	        System.out.println("Ok, what we do with downloaded products?");
+	        System.out.println("Ok, what we do with product Workspaces?");
 	        
-	        System.out.println("\t1 - Clean by Workspace");
-	        System.out.println("\t2 - Clean by Product Name");
+	        System.out.println("\t1 - Clean by not existing Workspace");
+	        System.out.println("\t2 - Clean by not existing Product Name");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -297,6 +347,7 @@ public class dbUtils {
 	        	
 	        	File oMetadataPath = new File("/data/wasdi/metadata");
 	        	
+	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	        	// Get all the downloaded files
 	        	DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 	        	List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getList();
@@ -305,6 +356,11 @@ public class dbUtils {
 	        	
 	        	// Generate the list of valid metadata file reference
 	        	for (DownloadedFile oDownloadedFile : aoDownloadedFileList) {
+	        		
+	        		if (!isProductOnThisNode(oDownloadedFile, oWorkspaceRepository)) {
+	        			System.out.println("Product " + oDownloadedFile.getFileName() + " NOT IN THIS NODE JUMP");
+	        			continue;
+	        		}
 	        		
 	        		// Get the view model
 	        		ProductViewModel oVM = oDownloadedFile.getProductViewModel();
@@ -573,6 +629,13 @@ public class dbUtils {
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			if (oWorkspace.getNodeCode().equals(s_sMyNodeCode) == false) {
+				System.out.println("Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner + " IS IN NODE " + oWorkspace.getNodeCode());
+				return;
+			}
+			
 			// get workspace path
 			String sWorkspacePath = getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 			
@@ -752,7 +815,9 @@ public class dbUtils {
 		
 
 		refreshProductsTable();
-	}	
+	}
+	
+	public static String s_sMyNodeCode = "wasdi";
 
 		
 	public static void main(String[] args) {
@@ -764,6 +829,11 @@ public class dbUtils {
 	        MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
 	        MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 	        MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+	        
+	        String sNode = ConfigReader.getPropValue("NODECODE");
+	        if (!Utils.isNullOrEmpty(sNode)) {
+	        	s_sMyNodeCode = sNode;
+	        }
 	        
 	        boolean bExit = false;
 	        
