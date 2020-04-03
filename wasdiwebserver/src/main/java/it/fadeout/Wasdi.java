@@ -1,7 +1,10 @@
 package it.fadeout;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -566,6 +570,92 @@ public class Wasdi extends ResourceConfig {
 		catch (Exception oEx) {
 			oEx.printStackTrace();
 			return "";
+		}
+	}
+	
+	public static void httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) 
+	{
+		if(sFileName==null || sFileName.isEmpty()){
+			throw new NullPointerException("Wasdi.httpPostFile: file name is null");
+		}
+		try {
+			//local file
+			File oFile = new File(sFileName);
+			
+			if(!oFile.exists()) {
+				throw new IOException("Wasdi.httpPostFile: file not found");
+			}
+			
+			InputStream oInputStream = new FileInputStream(oFile);
+			
+		    //request
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setDoInput(true);
+			oConnection.setUseCaches(false);
+			int iBufferSize = 8192;//8*1024*1024;
+			oConnection.setChunkedStreamingMode(iBufferSize);
+			Long lLen = oFile.length();
+			Utils.debugLog("Wasdi.httpPostFile: file length is: "+Long.toString(lLen));
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+
+			String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
+			oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+			oConnection.setRequestProperty("Connection", "Keep-Alive");
+			oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
+
+
+			oConnection.connect();
+			DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
+
+			oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
+			oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
+			oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
+			oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
+			oOutputStream.writeBytes("\r\n");
+
+			Util.copyStream(oInputStream, oOutputStream);
+
+			oOutputStream.flush();
+			oInputStream.close();
+			oOutputStream.writeBytes("\r\n");
+			oOutputStream.flush();
+			oOutputStream.writeBytes("\r\n");
+			oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
+			oOutputStream.close();
+
+			// response
+			int iResponse = oConnection.getResponseCode();
+			Utils.debugLog("Wasdi.httpPostFile: server returned " + iResponse);
+			
+			InputStream oResponseInputStream = null;
+			
+			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+			
+			if( 200 <= iResponse && 299 >= iResponse ) {
+				oResponseInputStream = oConnection.getInputStream();
+			} else {
+				oResponseInputStream = oConnection.getErrorStream();
+			}
+			if(null!=oResponseInputStream) {
+				Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+				String sMessage = oByteArrayOutputStream.toString();
+				System.out.println(sMessage);
+			} else {
+				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+			}
+
+			oOutputStream.close();
+			oConnection.disconnect();
+
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	

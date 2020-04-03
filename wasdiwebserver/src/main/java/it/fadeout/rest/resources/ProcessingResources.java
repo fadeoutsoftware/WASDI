@@ -876,8 +876,7 @@ public class ProcessingResources {
 					Utils.debugLog("ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
 				} else {
 					// set the user specified color
-					oMask.setImageColor(
-							new Color(oMaskModel.getColorRed(), oMaskModel.getColorGreen(), oMaskModel.getColorBlue()));
+					oMask.setImageColor(new Color(oMaskModel.getColorRed(), oMaskModel.getColorGreen(), oMaskModel.getColorBlue()));
 					oMask.setImageTransparency(oMaskModel.getTransparency());
 					oRasterDataNode.getOverlayMaskGroup().add(oMask);
 				}

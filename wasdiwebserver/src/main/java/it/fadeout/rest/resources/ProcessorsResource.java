@@ -38,6 +38,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
+import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.Node;
@@ -48,6 +49,7 @@ import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.CounterRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -814,8 +816,42 @@ public class ProcessorsResource {
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
-			if (unzipProcessor(oProcessorFile)) {
+			if (unzipProcessor(oProcessorFile, false)) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
+				
+				if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+					
+					try {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
+						
+						//This is the main node: forward the request to other nodes
+						UpdateProcessorFilesWorker oUpdateWorker = new UpdateProcessorFilesWorker();
+						
+						NodeRepository oNodeRepo = new NodeRepository();
+						List<Node> aoNodes = oNodeRepo.getNodesList();
+						
+						oUpdateWorker.init(aoNodes, oProcessorFile.getPath(), sSessionId, sWorkspaceId, sProcessorId);
+						oUpdateWorker.start();
+						
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Worker started");						
+					}
+					catch (Exception oEx) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error starting UpdateWorker " + oEx.toString());
+					}
+					
+				}
+				else {
+					
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
+					
+					// Computational Node: delete the file
+					try {
+						oProcessorFile.delete();
+					}
+					catch (Exception oEx) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
+					}
+				}
 			}
 			else {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: error in unzip");
@@ -978,7 +1014,7 @@ public class ProcessorsResource {
 		return oResponseBuilder.build();
 	}
 	
-	public boolean unzipProcessor(File oProcessorZipFile) {
+	public boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
 		try {
 						
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists
@@ -1025,7 +1061,7 @@ public class ProcessorsResource {
 		    
 		    try {
 			    // Remove the zip?
-			    oProcessorZipFile.delete();		    	
+			    if (bDeleteFile) oProcessorZipFile.delete();		    	
 		    }
 		    catch (Exception e) {
 				Utils.debugLog("ProcessorsResource.UnzipProcessor Exception Deleting Zip File " + e.toString());
