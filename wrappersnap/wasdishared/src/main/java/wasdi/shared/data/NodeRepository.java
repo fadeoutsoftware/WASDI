@@ -1,7 +1,14 @@
 package wasdi.shared.data;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.Utils;
@@ -55,4 +62,33 @@ public class NodeRepository extends MongoRepository {
 
 	        return  null;
 	    }
+	    
+	    public List<Node> getNodesList() {
+
+	        final ArrayList<Node> aoReturnList = new ArrayList<Node>();
+	        try {
+
+	            FindIterable<Document> oWSDocuments = getCollection("node").find();
+
+	            oWSDocuments.forEach(new Block<Document>() {
+	                public void apply(Document document) {
+	                    String sJSON = document.toJson();
+	                    Node oNode = null;
+	                    try {
+	                        oNode = s_oMapper.readValue(sJSON,Node.class);
+	                        aoReturnList.add(oNode);
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+
+	                }
+	            });
+
+	        } catch (Exception oEx) {
+	            oEx.printStackTrace();
+	        }
+
+	        return aoReturnList;
+	    }
+	    
 }
