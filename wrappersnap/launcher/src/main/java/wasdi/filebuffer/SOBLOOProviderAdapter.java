@@ -79,6 +79,13 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		String[] asTokens = tokenize(sComplexUrl);
 		String sName = extractValueFromToken(asTokens[s_iName]);
+		
+		// P.Campanella 2020-04-02: the launcher download method needs the file name with extension
+		// This is maybe a trick, is there a more secure way to have the complete file name?
+		if (!sName.contains(".")) {
+			sName += ".zip";
+		}
+		
 		return sName;
 	}
 	
@@ -239,7 +246,11 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 	
 				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: ContentLenght: " + lContentLength);
-	
+				
+				/*
+				
+				// P.Campanella 2020-04-02: Content disposition return a name different from the one obtained from the URL.
+				// This create a misalignement between fileName and FilePath. Use the same method is safer
 				if (sDisposition != null) {
 					// extracts file name from header field
 					int index = sDisposition.indexOf(SOBLOOProviderAdapter.s_sFileNamePrefix);
@@ -257,7 +268,9 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				} else {
 					// extracts file name from URL
 					sFileName = GetFileName(sFileURL);
-				}
+				}*/
+				
+				sFileName = GetFileName(sFileURL);
 	
 				m_oLogger.debug("Content-Type: " + sContentType);
 				m_oLogger.debug("Content-Disposition: " + sDisposition);
