@@ -38,6 +38,9 @@ var LightSearchProduct = function() {
 
 var TableOfProducts = function(){
     this.aoProducts = [];
+    this.isAvailableSelection = false;
+    this.isSingleSelection = true;
+    this.oSingleSelectionLayer = {};
 };
 
 var DateBox = function(){

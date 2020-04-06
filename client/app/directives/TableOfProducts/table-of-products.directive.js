@@ -13,7 +13,10 @@ angular.module('wasdi.TableOfProductsDirective', [])
                 productsList: '=',
                 heightTable: '=',
                 parentController: '=',
-                loadingData: '='
+                loadingData: '=',
+                isAvailableSelection: '=',
+                isSingleSelection : '=',
+                singleSelectionLayer: '='
                 // deleted: '&'
             },
 
@@ -26,10 +29,16 @@ angular.module('wasdi.TableOfProductsDirective', [])
 <!--            </button>-->
 
             <table class="table table-hover layers "  >
+
                 <tbody ng-repeat="layer in $ctrl.productsList ">
                     <!------------------------------- SUMMARY ------------------------------->
                     <tr class="info-layer" >
-
+                        <td ng-show="$ctrl.isAvailableSelection">
+                            <!--RADIO BUTTON-->
+                            <input type="radio"  ng-model="$ctrl.singleSelectionLayer" ng-value="layer" ng-show="$ctrl.isSingleSelection"/>
+                            <!--CHECKBOX -->
+                            <input type="checkbox"  ng-model="layer.isSelected" ng-value="layer" ng-hide="$ctrl.isSingleSelection"/>
+                        </td>
                         <!-- IMAGE CELL -->
                         <td class="image-cell">
                             <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
@@ -78,19 +87,18 @@ angular.module('wasdi.TableOfProductsDirective', [])
                     </tr>
 
                 </tbody>
-                    <tr>
+                    <tr ng-show = "$ctrl.loadingData">
                         <td colspan="2">
-                            <div class="td-load-icon" ng-show = "$ctrl.loadingData"><!--ng-show = "$ctrl.loadingData"-->
+                            <div class="td-load-icon" ><!--ng-show = "$ctrl.loadingData"-->
                                 <invader></invader>
                             </div>
                         </td>
                     </tr>
-                    <tr>
+                    <tr ng-hide="$ctrl.loadingData">
                         <td colspan="2" class="cell-centered ">
 
                             <button class="btn btn-default btn-wasdi"
-                                    ng-click="$ctrl.parentController.loadMore()"
-                                    ng-hide="$ctrl.loadingData">
+                                    ng-click="$ctrl.parentController.loadMore()" >
                                 <i class="fa fa-refresh mr-2" aria-hidden="true"></i>Load more...
                             </button>
 

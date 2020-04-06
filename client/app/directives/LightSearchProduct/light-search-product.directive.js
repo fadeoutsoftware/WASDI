@@ -46,10 +46,18 @@ angular.module('wasdi.LightSearchProductDirective', [])
 
                 <tableofproductsdirective height-table = "'400'"
                                           parent-controller = "$ctrl"
-                                          products-list="$ctrl.lightSearchObject.oTableOfProducts.aoProducts"
-                                          loading-data = "$ctrl.m_bLoadingData">
+                                          products-list= "$ctrl.lightSearchObject.oTableOfProducts.aoProducts"
+                                          loading-data = "$ctrl.m_bLoadingData"
+                                          is-available-selection = "$ctrl.lightSearchObject.oTableOfProducts.isAvailableSelection"
+                                          is-single-selection = "$ctrl.lightSearchObject.oTableOfProducts.isSingleSelection"
+                                          single-selection-layer ="$ctrl.lightSearchObject.oTableOfProducts.oSingleSelectionLayer" >
 
                 </tableofproductsdirective>
+
+                <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.selectedProducts()">
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                    save selection
+                </button>
             </div>
 
 
@@ -62,13 +70,13 @@ angular.module('wasdi.LightSearchProductDirective', [])
                 this.m_bLoadingData = false;
                 this.m_oConfiguration = {};
                 this.m_aoMissions = [];
+                this.m_oSingleSelectionLayer = {};
                 let oController = this;
 
                 /*************************** METHODS ***************************/
                 this.backToLightSearch = function() {
                     this.m_bAreVisibleProducts = false;
-                    // clean table
-                    this.lightSearchObject.oTableOfProducts.aoProducts = [];
+
                 };
 
                 this.getOpenSearchDate = function(){
@@ -107,6 +115,9 @@ angular.module('wasdi.LightSearchProductDirective', [])
                 this.lightSearch = function(){
                     this.m_bAreVisibleProducts = true;
                     let oController = this;
+                    // clean table
+                    this.lightSearchObject.oTableOfProducts.aoProducts = [];
+
                     let oCallback = function(result){
                         var sResults = result;
                         if(!utilsIsObjectNullOrUndefined(sResults))
@@ -141,8 +152,8 @@ angular.module('wasdi.LightSearchProductDirective', [])
                     var oCallbackError = function(){
                         utilsVexDialogAlertTop("It was impossible loading product");
                     };
-
-                    this.m_aoMissions[1].selected = true;//TODO REMOVE LEGACY CODE
+                    this.initMissionsFilters();
+                    // this.m_aoMissions[1].selected = true;//TODO REMOVE LEGACY CODE
                     var aoOpenSearchMissions = $LightSearchService.getOpenSearchMissions(this.m_aoMissions);
 
                     this.m_bLoadingData = true;
@@ -162,20 +173,21 @@ angular.module('wasdi.LightSearchProductDirective', [])
                         oController.m_oConfiguration = configuration;
 
                         oController.m_aoMissions = oController.m_oConfiguration.missions;
-                        debugger;
+
                     });
                 };
-
+                // initSelectedProvider It's a kid of adapter
                 this.initSelectedProvider = function(){
                     if(this.m_aListOfProvider === null || this.m_aListOfProvider === undefined){
-                        return null;
+                        return null;//TODO THROW EXCEPTION?
                     }
                     let iNumberOfProviders = this.m_aListOfProvider.length;
 
                     for(let iIndexProviders = 0 ; iIndexProviders < iNumberOfProviders;iIndexProviders++){
                         let  iNumberOfInputSelectedProviders = this.lightSearchObject.aoProviders.length;
                         for(let iIndexInputSelectedProvider = 0; iIndexInputSelectedProvider < iNumberOfInputSelectedProviders;iIndexInputSelectedProvider++){
-                            if( this.m_aListOfProvider[iIndexProviders].name.toLowerCase() === this.lightSearchObject.aoProviders[iIndexInputSelectedProvider]){
+                            if( this.m_aListOfProvider[iIndexProviders].name.toLowerCase() ===
+                                this.lightSearchObject.aoProviders[iIndexInputSelectedProvider].toLowerCase()){
                                 oController.m_oSelectedProvider = this.m_aListOfProvider[iIndexProviders];
                                 break;
                             }
@@ -183,6 +195,31 @@ angular.module('wasdi.LightSearchProductDirective', [])
 
                     }
                 };
+
+                // initMissionsFilters It's a kid of adapter
+                this.initMissionsFilters = function(){
+                    if(this.m_aoMissions === null || this.m_aoMissions === undefined ) {
+                        return null;//TODO THROW EXCEPTION?
+                    }
+                    let iNumberOfMissions = this.m_aoMissions.length;
+
+                    for(let iIndexMission = 0; iIndexMission < iNumberOfMissions; iIndexMission++){
+                        let iNumberOfInputSelectedMissions = this.lightSearchObject.aoMissionsFilters.length;
+                        for(let iIndexInputMission = 0 ; iIndexInputMission < iNumberOfInputSelectedMissions; iIndexInputMission ++){
+                            if( this.m_aoMissions[iIndexMission].indexvalue.toLowerCase() ===
+                                this.lightSearchObject.aoMissionsFilters[iIndexInputMission].name.toLowerCase()){
+                                this.m_aoMissions[iIndexMission].selected = true;
+                            }
+                        }
+                    }
+                };
+
+                this.selectedProducts = function(){
+                    this.lightSearchObject.oTableOfProducts.oSingleSelectionLayer;
+                    this.lightSearchObject.oTableOfProducts.aoProducts;
+                    this.backToLightSearch();
+
+                }
                 /**************************** BEGIN ****************************/
                 oOpenSearchService.getListOfProvider().success(function (data) {
                     if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
@@ -202,7 +239,7 @@ angular.module('wasdi.LightSearchProductDirective', [])
                                 "link": data[iIndexProvider].link
                             };
                         }
-                        debugger;
+
                     }
 
                 }).error(function (data) {

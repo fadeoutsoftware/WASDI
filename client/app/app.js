@@ -56,6 +56,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.DateDirective',
     'wasdi.TableOfProductsDirective',
     'wasdi.LightSearchProductDirective',
+    'wasdi.ChipsListDirective',
+    
     //FILTERS
     'wasdi.stringUtils',
 

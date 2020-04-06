@@ -11,7 +11,6 @@
     </div>
 
     <div class="row" ng-repeat="viewElement in m_oController.m_aoViewElements">
-
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
             {{viewElement.sLabel}}
         </div>
@@ -33,6 +32,9 @@
             <tableofproductsdirective  ng-if="viewElement.type === 'tableofproducts'" products-list="viewElement.aoProducts"></tableofproductsdirective>
 
             <lightsearchproductdirective  ng-if="viewElement.type === 'lighserachproduct'" light-search-object="viewElement"></lightsearchproductdirective>
+
+            <chipslistdirective></chipslistdirective>
+
         </div>
 
     </div>
