@@ -163,6 +163,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// P.Campanella 11/06/2018: mounted volume
 			// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 			asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
+			
+			//asArgs.add("--user=tomcat8");
+			
+			
 			asArgs.add("--mount");
 			asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");
 			asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
@@ -436,6 +440,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				//docker run -it -p 8888:5000 fadeout/wasdi:0.6
 				asArgs.clear();
 				asArgs.add("run");
+				
+				//asArgs.add("--user=tomcat8");
+				
 				// P.Campanella 11/06/2018: mounted volume
 				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
