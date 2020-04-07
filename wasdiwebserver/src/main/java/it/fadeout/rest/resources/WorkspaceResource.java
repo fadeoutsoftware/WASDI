@@ -495,7 +495,18 @@ public class WorkspaceResource {
 						Utils.debugLog("WorkspaceResource.DeleteWorkspace: Delete workspace folder " + sWorkspacePath);
 						
 						// delete directory
-						FileUtils.deleteDirectory(new File(sWorkspacePath));
+						try {
+							File oDir = new File(sWorkspacePath);
+							if(!oDir.exists()) {
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: trying to delete non existing directory " + sWorkspacePath); 
+							}
+							//try anyway for two reasons:
+							//1. non existing directories are handled anyway
+							//2. try avoiding race conditions
+							FileUtils.deleteDirectory(oDir);
+						} catch (Exception oE) {
+							Utils.debugLog("WorkspaceResource.DeleteWorkspace: error while trying to delete directory " + sWorkspacePath + ": " + oE );  
+						}
 						
 						// delete download file on database
 						for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
