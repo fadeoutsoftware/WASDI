@@ -4188,18 +4188,32 @@ var EditorController = (function () {
         }
         return false;
     };
+
     EditorController.prototype.isActiveEditorMode = function () {
         return this.m_bIsActiveGeoraphicalMode === false;
-    }
+    };
+
     EditorController.prototype.filterTree = function (sTextQuery) {
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
             sTextQuery = "";
         }
-
+        // let test = function(search,node){
+        //     alert("sono una prova");
+        // };
+        // let oggetoTest={
+        //     "search": {
+        //         "search_callback": function(search,node){
+        //             alert("sono una prova");
+        //         },
+        //     }
+        //
+        // };
+        // $('#jstree').jstree(oggetoTest);
         $('#jstree').jstree(true).search(sTextQuery);//,false,true
 
         return true;
-    }
+    };
+
     EditorController.$inject = [
         '$scope',
         '$location',

@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 
 import it.fadeout.Wasdi;
+import jersey.repackaged.com.google.common.base.Preconditions;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -286,21 +287,33 @@ public class WorkspaceResource {
 	@GET
 	@Path("create")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
+	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("node") String sNodeCode) {
 
-		Utils.debugLog("WorkspaceResource.CreateWorkspace( Session: " + sSessionId + " )");
+		Utils.debugLog("WorkspaceResource.CreateWorkspace( Session: " + sSessionId + ", " + sName + ", " + sNodeCode + " )");
 
+		if(Utils.isNullOrEmpty(sSessionId)) {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: session is null or empty, aborting");
+			return null;
+		}
+
+		// sName and sNodeCode can be null, and will be defaulted
+		
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null)
+		if (oUser == null) {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: cannot get a valid user from session " + sSessionId + ", aborting" );
 			return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: userId from session " + sSessionId + " is null or empty, aborting" );
 			return null;
+		}
 
 		// Create New Workspace
 		Workspace oWorkspace = new Workspace();
 		
 		if (Utils.isNullOrEmpty(sName)) {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: name is null or empty, defaulting");
 			sName = "Untitled Workspace";
 		}
 
@@ -310,6 +323,11 @@ public class WorkspaceResource {
 		oWorkspace.setName(sName);
 		oWorkspace.setUserId(oUser.getUserId());
 		oWorkspace.setWorkspaceId(Utils.GetRandomName());
+		if(Utils.isNullOrEmpty(sNodeCode)) {
+			//default node code
+			sNodeCode = "wasdi";
+		}
+		oWorkspace.setNodeCode(sNodeCode);
 
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 		if (oWorkspaceRepository.insertWorkspace(oWorkspace)) {
@@ -319,6 +337,7 @@ public class WorkspaceResource {
 
 			return oResult;
 		} else {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace( Session: " + sSessionId + ", " + sName + ", " + sNodeCode + " ): insertion FAILED");
 			return null;
 		}
 
