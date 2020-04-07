@@ -36,6 +36,8 @@ var HomeController = (function() {
         this.m_bBrowserIsIE = utilsUserUseIEBrowser();
         this.m_bVisualizeLink = false;
 
+        this.m_bRegistering = false;
+
         if(this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.workspaces");// go workspaces
         if(this.m_bBrowserIsIE === true)
@@ -191,7 +193,6 @@ var HomeController = (function() {
      */
     HomeController.prototype.signingUser = function(myForm)
     {
-
         var oUser = {};
         var oController = this;
 
@@ -199,6 +200,8 @@ var HomeController = (function() {
         {
             return false;
         }
+
+        oController.m_bRegistering = true;
 
         oUser.userId = oController.m_oRegistrationUser.userId;
         oUser.password = oController.m_oRegistrationUser.password;
@@ -234,8 +237,11 @@ var HomeController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 }
+
+                oController.m_bRegistering = false;
             }).error(function (data,status) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+                oController.m_bRegistering = false;
         });
 
         return true;

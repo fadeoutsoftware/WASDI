@@ -162,7 +162,7 @@
                         </h6>
                     </div>
 
-                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: signinForm.$invalid === true }"
+                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: signinForm.$invalid === true || m_oController.m_bRegistering }"
                             type="submit">
                         {{"SIGN_IN_BUTTON"|translate}}
                     </button>
