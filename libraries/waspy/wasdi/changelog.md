@@ -1,5 +1,10 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.3.3] - 2020-04-07
+
+### Added
+
+- big tiff support to multiSubset 
 
 ## [0.3.2] - 2020-04-02
 
