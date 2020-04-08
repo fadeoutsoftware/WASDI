@@ -249,10 +249,57 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
      */
     this.addRectangleOnGlobeParamArray = function (aArray)
     {
+        // Safe Programming check
         if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
         if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
 
         try {
+
+            // Create the new Polygon
+            var oNewPolygon = {
+                hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
+                    outline : true,
+                    outlineColor : Cesium.Color.RED.withAlpha(1),
+                    outlineWidth : 10,
+                    material : Cesium.Color.RED.withAlpha(0.2)
+            }
+
+            // Get the Globe Entities
+            var aoEntities = this.m_oWasdiGlobe.entities.values;
+
+            // Search if the same BBOX has already been added
+            for (var i=0; i<aoEntities.length; i++) {
+
+                // Get the entity
+                var oEntity = aoEntities[i];
+
+                // Check if it is a valid one (can be a satellite sprite also)
+                if (utilsIsObjectNullOrUndefined(oEntity.polygon)) continue;
+
+                // Assume is equal: we will set this = false if a point of the poly is different
+                var bIsEqual = true;
+
+                // For all the points of the poly already added to the globe
+                for (var j=0; j<oEntity.polygon.hierarchy.getValue().positions.length; j++) {
+
+                    // Safe programming: index < of size
+                    if (j<oNewPolygon.hierarchy.positions.length) {
+                        // The position is the same?
+                        if (!oEntity.polygon.hierarchy.getValue().positions[j].equalsEpsilon(oNewPolygon.hierarchy.positions[j], 0.1)) {
+                            // No! One point different => different poly. Try next one.
+                            bIsEqual = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (bIsEqual) {
+                    //If we found an equal bbox we can return this as Rectangle
+                    return oEntity;
+                }
+            }
+
+            // If we exit from the above cycle, there are no entities with the same poly, so add it.
             var oRectangle = this.m_oWasdiGlobe.entities.add({
                 polygon : {
                     hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
