@@ -3830,6 +3830,7 @@ var EditorController = (function () {
                                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
                                                     oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
+
                                                         var iLengthLayer = oController.m_aoVisibleBands.length;
                                                         var iLengthChildren_d = that.temp.children_d.length;
 
@@ -4203,7 +4204,7 @@ var EditorController = (function () {
             this.m_bIsFilteredTree = true;
         }
 
-        //TODO i need to show the loading icon in html 
+        //TODO i need to show the loading icon in html
 
         // let test = function(search,node){
         //     alert("sono una prova");
