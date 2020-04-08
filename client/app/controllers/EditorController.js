@@ -34,6 +34,7 @@ var EditorController = (function () {
 
         //filter query text in tree
         this.m_sTextQueryFilterInTree = "";
+        this.m_bIsFilteredTree = false;
 
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
@@ -4194,9 +4195,16 @@ var EditorController = (function () {
     };
 
     EditorController.prototype.filterTree = function (sTextQuery) {
+
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
             sTextQuery = "";
+            this.m_bIsFilteredTree = false;
+        } else {
+            this.m_bIsFilteredTree = true;
         }
+
+        //TODO i need to show the loading icon in html 
+
         // let test = function(search,node){
         //     alert("sono una prova");
         // };
@@ -4214,6 +4222,10 @@ var EditorController = (function () {
         return true;
     };
 
+    EditorController.prototype.cleanFilterTree = function () {
+        this.m_sTextQueryFilterInTree = '';
+        this.filterTree(null);
+    };
     EditorController.$inject = [
         '$scope',
         '$location',

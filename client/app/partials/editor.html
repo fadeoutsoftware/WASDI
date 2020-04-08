@@ -17,9 +17,11 @@
                     </button>
 
                     <button class="btn btn-wasdi fa"
-                            title="Load all"
-                            ng-click="m_oController.filterTree(''); m_oController.m_sTextQueryFilterInTree = ''">
-                        <i class="fa fa-list" aria-hidden="true"></i>
+                            title="Clean filters"
+                            ng-click="m_oController.cleanFilterTree(); "
+                            ng-disabled="m_oController.m_bIsFilteredTree === false">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+
                     </button>
 
                 </div>
