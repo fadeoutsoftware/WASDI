@@ -427,14 +427,20 @@ var WorkspaceController = (function() {
                 if (value.geoserver == 'on')
                     bDeleteLayer = true;
 
-                oController.m_oWorkspaceService.DeleteWorkspace(sWorkspaceId, bDeleteFile, bDeleteLayer)
-                    .success(function (data, status) {
-                        oController.deselectWorskpace();
-                        oController.fetchWorkspaceInfoList();
-                    })
-                    .error(function (data, status) {
+                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
 
-                    });
+                    oController.m_oWorkspaceService.DeleteWorkspace(data, bDeleteFile, bDeleteLayer)
+                        .success(function (data, status) {
+                            oController.deselectWorskpace();
+                            oController.fetchWorkspaceInfoList();
+                        })
+                        .error(function (data, status) {
+
+                        });
+                }).error(function (data, status) {
+
+                });
+
             }
         });
     };

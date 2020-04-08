@@ -24,8 +24,13 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return this.m_oHttp.post(this.APIURL + '/ws/update', oWorkspace);
     };
 
-    this.DeleteWorkspace = function (sWorkspaceId, bDeleteFile, bDeleteLayer) {
-        return this.m_oHttp.delete(this.APIURL + '/ws/delete?sWorkspaceId=' + sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
+    this.DeleteWorkspace = function (oWorkspace, bDeleteFile, bDeleteLayer) {
+
+        var sUrl = this.APIURL;
+
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        return this.m_oHttp.delete(sUrl + '/ws/delete?sWorkspaceId=' + oWorkspace.workspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     };
 
     this.getWorkspaceListByProductName = function(sProductName){
