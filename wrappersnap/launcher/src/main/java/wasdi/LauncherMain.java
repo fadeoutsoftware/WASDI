@@ -530,9 +530,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case MULTISUBSET: {
 				// Execute Multi Subset Operation
-				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
-				// executeMultiSubset(oParameter);
+				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeGDALMultiSubset(oParameter);
 			}
 				break;
@@ -981,8 +979,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
 
-		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(),
-				oParam.getPassword());
+		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
 
 		if (!oFtpClient.open()) {
 			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
@@ -2067,201 +2064,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * 
 	 * @param oParameter
 	 */
-	public void executeMultiSubset(MultiSubsetParameter oParameter) {
-
-		s_oLogger.debug("LauncherMain.executeMultiSubset: Start");
-
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		Product oInputProduct = null;
-
-		try {
-
-			if (oProcessWorkspace != null) {
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			}
-
-			String sSourceProduct = oParameter.getSourceProductName();
-			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
-
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-			File oProductFile = new File(getWorspacePath(oParameter) + sSourceProduct);
-			oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
-
-			if (oInputProduct == null) {
-				s_oLogger.error("LauncherMain.executeMultiSubset: product is not a SNAP product ");
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-				return;
-			}
-
-			// Take the Geo Coding
-			final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
-
-			if (oProcessWorkspace != null) {
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
-			}
-
-			int iTileCount = oSettings.getOutputNames().size();
-
-			int iStepPerTile = 80;
-
-			if (iTileCount > 0) {
-				iStepPerTile = 80 / iTileCount;
-				;
-			}
-
-			int iProgress = 20;
-
-			for (int iTiles = 0; iTiles < oSettings.getOutputNames().size(); iTiles++) {
-
-				String sOutputProduct = oSettings.getOutputNames().get(iTiles);
-
-				if (oSettings.getLatNList().size() <= iTiles) {
-					s_oLogger.debug("Lat N List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLatSList().size() <= iTiles) {
-					s_oLogger.debug("Lat S List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLonEList().size() <= iTiles) {
-					s_oLogger.debug("Lon E List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLonWList().size() <= iTiles) {
-					s_oLogger.debug("Lon W List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				s_oLogger.debug("Computing tile " + sOutputProduct);
-
-				// Create 2 GeoPos points
-				GeoPos oGeoPosNW = new GeoPos(oSettings.getLatNList().get(iTiles), oSettings.getLonWList().get(iTiles));
-				GeoPos oGeoPosSE = new GeoPos(oSettings.getLatSList().get(iTiles), oSettings.getLonEList().get(iTiles));
-
-				// Convert to Pixel Position
-				PixelPos oPixelPosNW = oGeoCoding.getPixelPos(oGeoPosNW, null);
-				if (!oPixelPosNW.isValid()) {
-					oPixelPosNW.setLocation(0, 0);
-				}
-
-				PixelPos oPixelPosSW = oGeoCoding.getPixelPos(oGeoPosSE, null);
-				if (!oPixelPosSW.isValid()) {
-					oPixelPosSW.setLocation(oInputProduct.getSceneRasterWidth(), oInputProduct.getSceneRasterHeight());
-				}
-
-				// Create the final region
-				Rectangle.Float oRegion = new Rectangle.Float();
-				oRegion.setFrameFromDiagonal(oPixelPosNW.x, oPixelPosNW.y, oPixelPosSW.x, oPixelPosSW.y);
-
-				// Create the product bound rectangle
-				Rectangle.Float oProductBounds = new Rectangle.Float(0, 0, oInputProduct.getSceneRasterWidth(),
-						oInputProduct.getSceneRasterHeight());
-
-				// Intersect
-				Rectangle2D oSubsetRegion = oProductBounds.createIntersection(oRegion);
-
-				ProductSubsetDef oSubsetDef = new ProductSubsetDef();
-				oSubsetDef.setRegion(oSubsetRegion.getBounds());
-				oSubsetDef.setIgnoreMetadata(false);
-				oSubsetDef.setSubSampling(1, 1);
-				oSubsetDef.setSubsetName("subset");
-				oSubsetDef.setTreatVirtualBandsAsRealBands(false);
-
-				if (oSettings.getBands().size() == 0) {
-					oSubsetDef.setNodeNames(oInputProduct.getBandNames());
-					oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
-				} else {
-					oSubsetDef.setNodeNames(oSettings.getBands().toArray(new String[oSettings.getBands().size()]));
-				}
-
-				Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct,
-						oInputProduct.getDescription());
-
-				if (oSubsetProduct != null) {
-					String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
-
-					ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset done for index " + iTiles);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
-
-					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(),
-							oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");
-				} else {
-					s_oLogger.debug("LauncherMain.executeMultiSubset Subset null for index " + iTiles);
-				}
-
-				oSubsetProduct.dispose();
-
-				if (oProcessWorkspace != null) {
-					iProgress = iProgress + iStepPerTile;
-					if (iProgress > 100)
-						iProgress = 100;
-					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING,
-							iProgress);
-				}
-
-			}
-
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.executeMultiSubset: exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(),
-						oParameter.getWorkspace(), sError, oParameter.getExchange());
-
-		} finally {
-
-			if (oInputProduct != null) {
-				try {
-					oInputProduct.closeProductReader();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				oInputProduct.dispose();
-			}
-
-			String sProcWSId = "";
-			if (oProcessWorkspace != null)
-				sProcWSId = oProcessWorkspace.getProcessObjId();
-
-			s_oLogger.debug("LauncherMain.executeMultiSubset: calling close Process Workspace");
-
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-
-			s_oLogger.debug("LauncherMain.executeMultiSubset: End [" + sProcWSId + "]");
-		}
-
-	}
-
-	/**
-	 * Computes and save a list subset all from an Input image (a tile or clip)
-	 * 
-	 * @param oParameter
-	 */
 	public void executeGDALMultiSubset(MultiSubsetParameter oParameter) {
 
 		s_oLogger.debug("LauncherMain.executeGDALMultiSubset: Start");
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 
@@ -2336,6 +2144,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				asArgs.add(oSettings.getLatNList().get(iTiles).toString());
 				asArgs.add(oSettings.getLonEList().get(iTiles).toString());
 				asArgs.add(oSettings.getLatSList().get(iTiles).toString());
+				
+				if (oSettings.getBigTiff()) {
+					asArgs.add("-co");
+					asArgs.add("BIGTIFF=YES");
+				}
 
 				asArgs.add(getWorspacePath(oParameter) + sSourceProduct);
 				asArgs.add(getWorspacePath(oParameter) + sOutputProduct);
@@ -2580,8 +2393,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("LauncherMain.executeMosaic: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");

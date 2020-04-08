@@ -31,7 +31,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.3.2
+Version 0.3.3
 Last Update: 02/04/2020
 
 Tested with: Python 2.7, Python 3.7
@@ -2483,7 +2483,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     return ''
 
 
-def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
+def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff=False):
     """
     Creates a Many Subsets from an image. MAX 10 TILES PER CALL
     :param sInputFile: Input file 
@@ -2533,7 +2533,10 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
     aoBody["lonWList"] = adLonW;
     aoBody["latSList"] = adLatS;
     aoBody["lonEList"] = adLonE;
-
+    
+    if bBigTiff:
+        aoBody["bigTiff"] = True 
+    
     sSubsetSetting = json.dumps(aoBody)
     asHeaders = _getStandardHeaders()
 
