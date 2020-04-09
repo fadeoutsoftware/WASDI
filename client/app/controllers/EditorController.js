@@ -34,6 +34,7 @@ var EditorController = (function () {
 
         //filter query text in tree
         this.m_sTextQueryFilterInTree = "";
+        this.m_bIsFilteredTree = false;
 
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
@@ -3829,6 +3830,7 @@ var EditorController = (function () {
                                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
                                                     oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
+
                                                         var iLengthLayer = oController.m_aoVisibleBands.length;
                                                         var iLengthChildren_d = that.temp.children_d.length;
 
@@ -4194,9 +4196,16 @@ var EditorController = (function () {
     };
 
     EditorController.prototype.filterTree = function (sTextQuery) {
+
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
             sTextQuery = "";
+            this.m_bIsFilteredTree = false;
+        } else {
+            this.m_bIsFilteredTree = true;
         }
+
+        //TODO i need to show the loading icon in html
+
         // let test = function(search,node){
         //     alert("sono una prova");
         // };
@@ -4214,6 +4223,10 @@ var EditorController = (function () {
         return true;
     };
 
+    EditorController.prototype.cleanFilterTree = function () {
+        this.m_sTextQueryFilterInTree = '';
+        this.filterTree(null);
+    };
     EditorController.$inject = [
         '$scope',
         '$location',
