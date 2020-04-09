@@ -1,5 +1,5 @@
 <div>
-    <input class = "wasdi-input" ng-model="SearchTextApp" placeholder="Search..."></label>
+    <input class = "wasdi-input" ng-model="SearchTextApp" placeholder="Filter App Name..." style="margin-bottom: 15px;"></label>
 </div>
 <div class="row-v4 apps-list">
     <div class="col-v4-4 mb-4" ng-repeat="processor in m_oController.m_aoProcessorList  | filter: {processorName:SearchTextApp}">

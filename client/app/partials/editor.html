@@ -5,22 +5,23 @@
 
         <div class="col-v4-auto mr-auto filter-search-wrapper"><!--mr-auto-->
             <div class="row-v4">
-                <div class="col-v4-auto">
+                <div class="col-v4-auto" style="padding-right: 0px">
                     <input type="text" name="name" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"
-                           required="required"  placeholder="Tree filter"> <!--ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)"-->
+                           required="required"  placeholder="Products Filter..."> <!--ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)"-->
                 </div>
-                <div class="col-v4-auto">
-                    <button class="btn btn-wasdi fa"
-                            title="Search product"
+                <div class="col-v4-auto" style="padding-left: 3px">
+                    <button class="btn btn-wasdi fa btn-outline-primary"
+                            title="Apply Filter"
+                            ng-disabled="m_oController.m_sTextQueryFilterInTree.length  === 0"
                             ng-click="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)">
-                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <i class="fa fa-search" aria-hidden="true" style="margin-right: 0px;"></i>
                     </button>
 
-                    <button class="btn btn-wasdi fa"
-                            title="Clean filters"
+                    <button class="btn btn-wasdi fa btn-outline-primary"
+                            title="Clean Filter"
                             ng-click="m_oController.cleanFilterTree(); "
                             ng-disabled="m_oController.m_bIsFilteredTree === false">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
+                        <i class="fa fa-trash" aria-hidden="true" style="margin-right: 0px;"></i>
 
                     </button>
 
