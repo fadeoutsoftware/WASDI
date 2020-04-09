@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -107,9 +108,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }    
 
+    //todo remove if unused
     /**
      * Get List of Process Workspaces in a Workspace
      * @param sWorkspaceId
+     * @param eStatus
      * @return
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId) {
@@ -128,6 +131,34 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
     
     /**
+     * Get List of Process Workspaces in a Workspace
+     * @param sWorkspaceId
+     * @param eStatus
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+        	Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
+        	if(null!=eStatus) {
+        		Bson oStatus = Filters.eq("status", eStatus.name());
+        		oFilter = Filters.and(oFilter, oStatus);
+        	}
+        	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oFilter)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    //todo remove if unused
+    /**
      * Get paginated list of process workspace in a workspace
      * @param sWorkspaceId
      * @param iStartIndex
@@ -141,6 +172,38 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
             FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1)).skip(iStartIndex).limit(iEndIndex-iStartIndex);
             fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    /**
+     * Get paginated list of process workspace in a workspace
+     * @param sWorkspaceId
+     * @param eStatus
+     * @param iStartIndex
+     * @param iEndIndex
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, int iStartIndex, int iEndIndex) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+        	Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
+        	if(null!=eStatus) {
+        		Bson oStatus = Filters.eq("status", eStatus.name());
+        		oFilter = Filters.and(oFilter, oStatus);
+        	}
+        	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oFilter)
+            		.sort(new Document("operationDate", -1))
+            		.skip(iStartIndex)
+            		.limit(iEndIndex-iStartIndex);
+            fillList(aoReturnList, oWSDocuments);
+        	
 
         } catch (Exception oEx) {
             oEx.printStackTrace();

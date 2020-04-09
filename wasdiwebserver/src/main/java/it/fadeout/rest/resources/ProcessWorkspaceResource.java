@@ -3,8 +3,6 @@ package it.fadeout.rest.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -36,9 +34,9 @@ public class ProcessWorkspaceResource {
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("status") String sStatus, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Start: " + iStartIndex + ", End: " + iEndIndex);
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", status: " + sStatus + ", Start: " + iStartIndex + ", End: " + iEndIndex);
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -62,11 +60,16 @@ public class ProcessWorkspaceResource {
 			// Get Process List
 			List<ProcessWorkspace> aoProcess = null;
 			
+			ProcessStatus eStatus = null;
+			if(!Utils.isNullOrEmpty(sStatus)) {
+				eStatus = ProcessStatus.valueOf(sStatus);
+			}
+			
 			if (iStartIndex != null && iEndIndex != null) {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, iStartIndex, iEndIndex);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, iStartIndex, iEndIndex);
 			}
 			else {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus);
 			}
 
 			// For each
