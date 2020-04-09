@@ -61,6 +61,11 @@ public class User {
      * User last login date
      */
     private String m_sLastLogin = null;
+    
+    /*
+     * User default node
+     */
+    private String m_sDefaultNode = "wasdi";
 
     /**
      * Singleton invalid User
@@ -77,6 +82,7 @@ public class User {
     	s_oInvalid.validAfterFirstAccess = null;
     	s_oInvalid.firstAccessUUID = null;
     	s_oInvalid.authServiceProvider = null;
+    	s_oInvalid.m_sDefaultNode = null;
     }
 
     public static User getInvalid() {
@@ -177,6 +183,20 @@ public class User {
 
 	public void setConfirmationDate(String oConfirmationDate) {
 		this.m_sConfirmationDate = oConfirmationDate;
+	}
+
+	/**
+	 * @return the defaultNode
+	 */
+	public String getDefaultNode() {
+		return m_sDefaultNode;
+	}
+
+	/**
+	 * @param defaultNode the defaultNode to set
+	 */
+	public void setDefaultNode(String defaultNode) {
+		this.m_sDefaultNode = defaultNode;
 	}
 
 }

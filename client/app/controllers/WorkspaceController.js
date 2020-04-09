@@ -435,10 +435,10 @@ var WorkspaceController = (function() {
                             oController.fetchWorkspaceInfoList();
                         })
                         .error(function (data, status) {
-
+                            console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
                         });
                 }).error(function (data, status) {
-
+                    console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
                 });
 
             }
