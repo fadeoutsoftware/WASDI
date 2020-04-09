@@ -2748,9 +2748,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			getProcessIdMethod.setAccessible(true);
 			iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
 
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		} catch (Throwable oEx) {
+			try {
+				s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));				
+			}
+			finally {
+				s_oLogger.error("LauncherMain.GetProcessId: finally here");
+			}
 		}
 
 		return iPid;
