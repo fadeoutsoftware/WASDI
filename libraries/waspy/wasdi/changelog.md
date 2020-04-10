@@ -1,10 +1,11 @@
 # \_\_/== Changelog ==\\\_\_
 
-## [0.3.3] - 2020-04-07
+## [0.3.3] - 2020-04-10
 
 ### Added
 
-- big tiff support to multiSubset 
+- Added big tiff support to multiSubset (added flag, False by default)
+- Added wasdi.copyFileToSftp to copy a file from a workpsace to the user wasdi sftp folder 
 
 ## [0.3.2] - 2020-04-02
 
