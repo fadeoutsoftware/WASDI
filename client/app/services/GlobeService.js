@@ -294,6 +294,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 }
 
                 if (bIsEqual) {
+
                     //If we found an equal bbox we can return this as Rectangle
                     return oEntity;
                 }
