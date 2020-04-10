@@ -699,6 +699,97 @@ public class CatalogResources {
 		return oResult;
 	}
 
+	/**
+	 * Copy a file from a workspace to the user sftp folder 
+	 * @param sSessionId User Session token
+	 * @param sFile Name of the file to copy
+	 * @param sWorkspace Id of the workspace 
+	 * @return Primitive Result with boolValue true or false and Http Code in intValue
+	 */
+	@GET
+	@Path("/copytosfpt")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId) {
+		
+		// Create the result object
+		PrimitiveResult oResult = new PrimitiveResult();
+
+		Utils.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspace);
+
+		// Check the user session
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;		
+		}
+		
+		// Get the user account
+		String sUserId = oUser.getUserId();
+		
+		// Get the file path		
+		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+		
+		Utils.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
+		
+		File oFilePath = new File(sFilePath);
+		
+		// Check if the file exists 
+		if (!oFilePath.canRead()) {
+			Utils.debugLog("CatalogResource.copyFileToSftp: file not found. Check if it is an extension problem");
+
+			String [] asSplittedFileName = sFile.split("\\.");
+
+			if (asSplittedFileName.length == 1) {
+
+				Utils.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
+
+				sFile = sFile + ".dim";
+				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+				oFilePath = new File(sFilePath);
+
+				if (!oFilePath.canRead()) {
+					Utils.debugLog("CatalogResource.copyFileToSftp: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;							
+				}
+			}
+			else {
+				Utils.debugLog("CatalogResource.copyFileToSftp: file with exension but not available");
+				Utils.debugLog("CatalogResource.copyFileToSftp: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;											
+			}
+
+		}
+		
+		try {
+			
+			// Crete the ingest parameter
+			String sProcessObjId = Utils.GetRandomName();
+
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspace);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
+
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+
+		} catch (Exception e) {
+			Utils.debugLog("CatalogueResource.copyFileToSftp: " + e);
+		}
+
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		return oResult;
+	}
+	
 	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})

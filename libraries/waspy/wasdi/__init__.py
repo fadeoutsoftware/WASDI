@@ -2835,6 +2835,94 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     return ''
 
 
+
+def copyFileToSftp(sFileName, bAsynch=None):
+    """
+    Copy a file from a workspace to the WASDI user's SFTP Folder
+    
+    :param sFileName: FIle name (with extension, without path) to copy in the SFTP folder
+    :param bAsynch: True to return after the triggering, False to wait the process to finish
+    :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure    
+    """
+    
+    _log('[INFO] waspy.copyFileToSftp( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
+
+    if sFileName is None:
+        print('[ERROR] waspy.copyFileToSftp: file name is None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if not isinstance(sFileName, str):
+        print('[WARNING] waspy.copyFileToSftp: file name is not a string, trying conversion' +
+              '  ******************************************************************************')
+        try:
+            sFileName = str(sFileName)
+        except:
+            print('[ERROR] waspy.copyFileToSftp: cannot convert file name into string, aborting' +
+                  '  ******************************************************************************')
+            return ''
+    if len(sFileName) < 1:
+        print('[ERROR] waspy.copyFileToSftp: file name has zero length, aborting' +
+              '  ******************************************************************************')
+        return ''
+
+    if bAsynch is None:
+        print('[WARNING] waspy.copyFileToSftp: asynch flag is None, assuming False')
+        bAsynch = False
+    if not isinstance(bAsynch, bool):
+        print('[WARNING] waspy.copyFileToSftp: asynch flag is not a boolean, trying casting')
+        try:
+            bAsynch = bool(bAsynch)
+        except:
+            print('[ERROR] waspy.copyFileToSftp: could not convert asynch flag into bool, aborting' +
+                  '  ******************************************************************************')
+            return ''
+
+    sResult = ''
+    try:
+        if getUploadActive() is True:
+            sFilePath = os.path.join(getSavePath(), sFileName)
+            if fileExistsOnWasdi(sFilePath) is False:
+                _log('[INFO] waspy.copyFileToSftp: remote file is missing, uploading')
+                try:
+                    uploadFile(sFileName)
+                    _log('[INFO] waspy.moveFileToSftp: file uploaded, keep on working!')
+                except:
+                    print('[ERROR] waspy.copyFileToSftp: could not proceed with upload' +
+                          '  ******************************************************************************')
+
+        sUrl = getWorkspaceBaseUrl() + "/catalog/copytosfpt?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
+
+        if m_bIsOnServer:
+            sUrl += "&parent="
+            sUrl += getProcId()
+
+        asHeaders = _getStandardHeaders()
+        oResponse = requests.get(url=sUrl, headers=asHeaders)
+        if oResponse is None:
+            print('[ERROR] waspy.copyFileToSftp: cannot contact server' +
+                  '  ******************************************************************************')
+        elif oResponse.ok is not True:
+            print('[ERROR] waspy.copyFileToSftp: failed, server replied ' + str(oResponse.status_code) +
+                  '  ******************************************************************************')
+        else:
+            oJson = oResponse.json()
+            if 'stringValue' in oJson:
+                bOk = bool(oJson['boolValue'])
+                if bOk:
+                    sProcessId = str(oJson['stringValue'])
+                    if bAsynch is True:
+                        sResult = sProcessId
+                    else:
+                        sResult = waitProcess(sProcessId)
+                else:
+                    print('[ERROR] waspy.copyFileToSftp: impossible to move file in the user WASDI sftp folder')
+    except:
+        print('[ERROR] waspy.copyFileToSftp: something broke alongside' +
+              '  ******************************************************************************')
+
+    return sResult
+
+
 def _getDefaultCRS():
     return (
             "GEOGCS[\"WGS84(DD)\", \r\n" +

@@ -399,57 +399,49 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			switch (oLauncherOperation) {
 			case INGEST: {
 				// Deserialize Parameters
-				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 				break;
 			case DOWNLOAD: {
 				// Deserialize Parameters
-				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 				break;
 			case FTPUPLOAD: {
 				// FTP Upload
-				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				ftpTransfer(oFtpTransferParameters);
 			}
 				break;
 			case PUBLISHBAND: {
 				// Deserialize Parameters
-				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				publishBandImage(oPublishBandParameter);
 			}
 				break;
 			case APPLYORBIT: {
 				// Deserialize Parameters
-				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
 			}
 				break;
 			case CALIBRATE: {
 				// Deserialize Parameters
-				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
 			}
 				break;
 			case MULTILOOKING: {
 				// Deserialize Parameters
-				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
 			}
 				break;
 			case TERRAIN: {
 				// Deserialize Parameters
-				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
 			}
 				break;
@@ -467,8 +459,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case RASTERGEOMETRICRESAMPLE: {
 				// Deserialize Parameters
-				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				rasterGeometricResample(oParameter);
 			}
 				break;
@@ -480,8 +471,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case DEPLOYPROCESSOR: {
 				// Deploy new user processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -491,8 +481,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			case RUNIDL:
 			case RUNPROCESSOR: {
 				// Execute User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -501,8 +490,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case DELETEPROCESSOR: {
 				// Delete User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -518,6 +506,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case MOSAIC: {
 				// Execute Mosaic Operation
+			
 				MosaicParameter oParameter = (MosaicParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMosaic(oParameter);
 			}
@@ -544,6 +533,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeGDALRegrid(oParameter);
 			}
 				break;
+			case COPYTOSFTP: {
+				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				copyToSfpt(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("SFTP_ROOT_PATH", "/data/sftpuser"));
+			}
+				break;			
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -557,6 +551,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
 	}
+
 
 	/**
 	 * Execute a SNAP Workflow
@@ -1271,8 +1266,122 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		return "";
-
 	}
+	
+	/**
+	 * Copy a file from a workspace to the user sftp folder
+	 * @param oParameter IngestFileParameter with the reference of the file to move
+	 * @param sRootPath
+	 * @param sSftpPath
+	 * @return
+	 * @throws Exception
+	 */
+	public String copyToSfpt(IngestFileParameter oParameter, String sRootPath, String sSftpPath) throws Exception {
+		s_oLogger.debug("LauncherMain.copyToSfpt");
+
+		if (null == oParameter) {
+			String sMsg = "LauncherMain.copyToSfpt: null parameter";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+
+		if (null == sRootPath) {
+			String sMsg = "LauncherMain.copyToSfpt: null download path";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+
+		File oFileToMovePath = new File(oParameter.getFilePath());
+
+		if (!oFileToMovePath.canRead()) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: unable to access file to Move " + oFileToMovePath.getAbsolutePath();
+			s_oLogger.error(sMsg);
+			throw new IOException(sMsg);
+		}
+
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+
+		try {
+			if (oProcessWorkspace != null) {
+				// get file size
+				long lFileSizeByte = oFileToMovePath.length();
+
+				// set file size
+				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
+
+				// get process pid
+				// oProcessWorkspace.setPid(getProcessId());
+
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 5);
+			} else {
+				s_oLogger.error("LauncherMain.copyToSfpt: process workspace not found: " + oParameter.getProcessObjId());
+			}
+
+			String sDestinationPath = sSftpPath;
+			if (!sDestinationPath.endsWith("/")) sDestinationPath+="/";
+			sDestinationPath += oParameter.getUserId();
+			sDestinationPath += "/uploads/";
+
+			File oDstDir = new File(sDestinationPath);
+
+			if (!oDstDir.exists()) {
+				oDstDir.mkdirs();
+			}
+
+			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
+				s_oLogger.error("LauncherMain.copyToSfpt: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
+				throw new IOException("Unable to access destination directory for the Workspace");
+			}
+			
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+
+			// copy file to workspace directory
+			if (!oFileToMovePath.getParent().equals(oDstDir.getAbsolutePath())) {
+				s_oLogger.debug("LauncherMain.copyToSfpt: File in another folder make a copy");
+				FileUtils.copyFileToDirectory(oFileToMovePath, oDstDir);
+			} 
+			else {
+				s_oLogger.debug("LauncherMain.copyToSfpt: File already in place");
+			}
+
+			File oDstFile = new File(oDstDir, oFileToMovePath.getName());
+			
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+
+			return oDstFile.getAbsolutePath();
+
+		} catch (Exception e) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: Exception in copy file to sftp";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+
+		} 
+		catch (Throwable e) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: Throwable occurrend during file ingestion";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+		} finally {
+			// update process status and send rabbit updateProcess message
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+
+		return "";		
+	}	
 
 	public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
 			ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc)
@@ -2748,9 +2857,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			getProcessIdMethod.setAccessible(true);
 			iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
 
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		} catch (Throwable oEx) {
+			try {
+				s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));				
+			}
+			finally {
+				s_oLogger.error("LauncherMain.GetProcessId: finally here");
+			}
 		}
 
 		return iPid;
