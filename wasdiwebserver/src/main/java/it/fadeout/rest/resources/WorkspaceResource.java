@@ -21,7 +21,6 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 
 import it.fadeout.Wasdi;
-import jersey.repackaged.com.google.common.base.Preconditions;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -262,7 +261,9 @@ public class WorkspaceResource {
 			if (oWorkspace.getNodeCode().equals(Wasdi.s_sMyNodeCode) == false) {
 				// Get the Node
 				wasdi.shared.data.NodeRepository oNodeRepository = new wasdi.shared.data.NodeRepository();
-				wasdi.shared.business.Node oWorkspaceNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+				//FIXME: NullPointerException after this
+				String sNodeCode = oWorkspace.getNodeCode();
+				wasdi.shared.business.Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
 			}
 
