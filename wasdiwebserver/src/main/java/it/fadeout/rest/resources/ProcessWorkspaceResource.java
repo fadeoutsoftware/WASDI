@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
@@ -29,12 +31,15 @@ public class ProcessWorkspaceResource {
 	
 	@Context
 	ServletConfig m_oServletConfig;	
-	
+
 	@GET
 	@Path("/byws")
-	@Produces({"application/xml", "application/json", "text/xml"})
+	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("status") String sStatus, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("status") String sStatus,
+			@QueryParam("operationType") String sOperationType,
+			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo,
+			@QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", status: " + sStatus + ", Start: " + iStartIndex + ", End: " + iEndIndex);
 
@@ -62,14 +67,45 @@ public class ProcessWorkspaceResource {
 			
 			ProcessStatus eStatus = null;
 			if(!Utils.isNullOrEmpty(sStatus)) {
-				eStatus = ProcessStatus.valueOf(sStatus);
+				try {
+					eStatus = ProcessStatus.valueOf(sStatus);
+				}catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sStatus + " to a valid process status, ignoring it");
+				}
+			}
+			
+			LauncherOperations eLauncherOperation = null;
+			if(!Utils.isNullOrEmpty(sOperationType)) {
+				try {
+					eLauncherOperation = LauncherOperations.valueOf(sOperationType);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
+				}
+			}
+			
+			Instant oDateFrom = null;
+			if(!Utils.isNullOrEmpty(sDateFrom)) {
+				try {
+					oDateFrom = Instant.parse(sDateFrom);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert start date " + sDateFrom + " to a valid date, ignoring it");
+				}
+			}
+			
+			Instant oDateTo = null;
+			if(!Utils.isNullOrEmpty(sDateTo)){
+				try {
+					oDateTo = Instant.parse(sDateTo);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert end date " + sDateFrom + " to a valid date, ignoring it");
+				}
 			}
 			
 			if (iStartIndex != null && iEndIndex != null) {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, iStartIndex, iEndIndex);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, oDateFrom, oDateTo, iStartIndex, iEndIndex);
 			}
 			else {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, oDateFrom, oDateTo);
 			}
 
 			// For each

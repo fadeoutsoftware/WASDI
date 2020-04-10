@@ -1,6 +1,7 @@
 package wasdi.shared.data;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -108,44 +109,32 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }    
 
-    //todo remove if unused
     /**
      * Get List of Process Workspaces in a Workspace
-     * @param sWorkspaceId
-     * @param eStatus
-     * @return
+     * @param sWorkspaceId unique id of the workspace
+     * @param eStatus the status of the process
+     * @param eOperation the type of Launcher Operation
+     * @param oDateFRom starting date (included)
+     * @param oDateTo ending date (included)
+     * @return list of results
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId) {
 
-        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1));
-            fillList(aoReturnList, oWSDocuments);
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        return aoReturnList;
+        return getProcessByWorkspace(sWorkspaceId, null, null, null, null);
     }
     
     /**
      * Get List of Process Workspaces in a Workspace
      * @param sWorkspaceId
      * @param eStatus
-     * @return
+     * @return list of results
      */
-    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus) {
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, Instant oDateFRom, Instant oDateTo) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-        	Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
-        	if(null!=eStatus) {
-        		Bson oStatus = Filters.eq("status", eStatus.name());
-        		oFilter = Filters.and(oFilter, oStatus);
-        	}
+        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, oDateFRom, oDateTo);
         	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oFilter)
             		.sort(new Document("operationDate", -1));
             fillList(aoReturnList, oWSDocuments);
@@ -157,51 +146,41 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    //todo remove if unused
     /**
      * Get paginated list of process workspace in a workspace
-     * @param sWorkspaceId
-     * @param iStartIndex
-     * @param iEndIndex
-     * @return
+     * @param sWorkspaceId unique id of the workspace
+     * @param iStartIndex start index for pagination
+     * @param iEndIndex end index for pagination
+     * @return list of results
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, int iStartIndex, int iEndIndex) {
 
-        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1)).skip(iStartIndex).limit(iEndIndex-iStartIndex);
-            fillList(aoReturnList, oWSDocuments);
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        return aoReturnList;
+        return getProcessByWorkspace(sWorkspaceId, null, null, null, null, iStartIndex, iEndIndex);
     }
     
     /**
      * Get paginated list of process workspace in a workspace
-     * @param sWorkspaceId
-     * @param eStatus
-     * @param iStartIndex
-     * @param iEndIndex
-     * @return
+     * @param sWorkspaceId unique id of the workspace
+     * @param eStatus the status of the process
+     * @param eOperation the type of Launcher Operation
+     * @param oDateFRom starting date (included)
+     * @param oDateTo ending date (included)
+     * @param iStartIndex start index for pagination
+     * @param iEndIndex end index for pagination
+     * @return list of results
      */
-    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, int iStartIndex, int iEndIndex) {
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, Instant oDateFRom, Instant oDateTo, int iStartIndex, int iEndIndex) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-        	Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
-        	if(null!=eStatus) {
-        		Bson oStatus = Filters.eq("status", eStatus.name());
-        		oFilter = Filters.and(oFilter, oStatus);
-        	}
+        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, oDateFRom, oDateTo);
+        	
         	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oFilter)
             		.sort(new Document("operationDate", -1))
             		.skip(iStartIndex)
             		.limit(iEndIndex-iStartIndex);
+        	
             fillList(aoReturnList, oWSDocuments);
         	
 
@@ -211,6 +190,36 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+
+	/**
+	 * @param sWorkspaceId
+	 * @param eStatus
+	 * @param eOperation
+	 * @param oDateFRom
+	 * @param oDateTo
+	 * @return
+	 */
+	protected Bson buildFilter(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation,
+			Instant oDateFRom, Instant oDateTo) {
+		Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
+		if(null!=eStatus) {
+			Bson oCond = Filters.eq("status", eStatus.name());
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=eOperation) {
+			Bson oCond = Filters.eq("operationType", eOperation.name());
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=oDateFRom) {
+			Bson oCond = Filters.gte("operationDate", oDateFRom);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=oDateTo) {
+			Bson oCond = Filters.lte("operationDate", oDateFRom);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		return oFilter;
+	}
     
     /**
      * Get the total count of pw in a workspace
