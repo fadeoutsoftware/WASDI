@@ -25,6 +25,11 @@ import wasdi.shared.utils.Utils;
 /**
  * Created by s.adamo on 31/01/2017.
  */
+/**
+ * @author s.adamo
+ * @author c.nattero
+ *
+ */
 public class ProcessWorkspaceRepository extends MongoRepository {
 
 	/**
@@ -233,6 +238,24 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		return oFilter;
 	}
     
+	
+	
+	/**
+	 * @param sProcessId the process id
+	 * @return process status as a string, null if the process is not found
+	 */
+	public String getProcessStatusFromId(String sProcessId) {
+		Document oDocument = getCollection("processworkpsace").find(Filters.eq("processObjId", sProcessId)).first();
+		String sJson = oDocument.toJson();
+		try {
+			ProcessWorkspace oProcessWorkspace = s_oMapper.readValue(sJson, ProcessWorkspace.class);
+			return oProcessWorkspace.getStatus();
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): " + oE );
+		}
+		return null;
+	}
+	
     /**
      * Get the total count of pw in a workspace
      * @param sWorkspaceId
