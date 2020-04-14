@@ -6,6 +6,7 @@
  */
 package wasdi.shared.utils;
 
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 
@@ -25,18 +26,42 @@ public class PermissionsUtils {
 			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
 				return false;
 			}
-			
+
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			if(oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
 				return true;
 			}
-			
+
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			if(oWorkspaceSharingRepository.isSharedWithUser(sUserId, sWorkspaceId)) {
-				return true;
-			}
+			return oWorkspaceSharingRepository.isSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+		}
+		return false;
+	}
+
+
+
+	/**
+	 * @param sUserId a valid user id
+	 * @param sProcessObjId a valid process obj id
+	 * @return true if the user can access the process, false otherwise
+	 */
+	public static boolean canUserAccessProcess(String sUserId, String sProcessObjId) {
+		try {
+			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessObjId)) {
+				return false;
+			}
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			if(oProcessWorkspaceRepository.isProcessOwnedByUser(sUserId, sProcessObjId)) {
+				return true;
+			}
+			String sWorkspaceId = oProcessWorkspaceRepository.getWorkspaceByProcessObjId(sProcessObjId);
+			if(!Utils.isNullOrEmpty(sWorkspaceId)) {
+				return canUserAccessWorkspace(sUserId, sWorkspaceId);
+			}
+		}catch (Exception oE) {
+			Utils.debugLog("PermissionsUtils.canUserAccessProcess( " + sUserId + ", " + sProcessObjId + " ): " + oE);
 		}
 		return false;
 	}
