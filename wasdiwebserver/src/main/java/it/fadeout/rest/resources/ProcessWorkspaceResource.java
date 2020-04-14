@@ -20,7 +20,10 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
@@ -38,27 +41,39 @@ public class ProcessWorkspaceResource {
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("status") String sStatus,
 			@QueryParam("operationType") String sOperationType,
+			@QueryParam("namePattern") String sNamePattern,
 			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo,
 			@QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", status: " + sStatus + ", Start: " + iStartIndex + ", End: " + iEndIndex);
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId +
+				", status: " + sStatus + ", name pattern: " + sNamePattern +
+				", Start: " + iStartIndex + ", End: " + iEndIndex);
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 
 		try {
 			// Domain Check
+			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: workspace id is null, aborting");
+				return aoProcessList;
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user from session is null, aborting");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user id from session is null, aborting");
 				return aoProcessList;
 			}
-			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+			
+			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user " + oUser.getUserId() + " is not allowed to access workspace " + sWorkspaceId +", aborting" );
 				return aoProcessList;
 			}
-
+			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
@@ -102,10 +117,10 @@ public class ProcessWorkspaceResource {
 			}
 			
 			if (iStartIndex != null && iEndIndex != null) {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, oDateFrom, oDateTo, iStartIndex, iEndIndex);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, sNamePattern, oDateFrom, oDateTo, iStartIndex, iEndIndex);
 			}
 			else {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, oDateFrom, oDateTo);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, sNamePattern, oDateFrom, oDateTo);
 			}
 
 			// For each
