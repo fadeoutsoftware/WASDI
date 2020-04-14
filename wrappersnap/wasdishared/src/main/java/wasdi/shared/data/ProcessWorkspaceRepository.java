@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -120,7 +121,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId) {
 
-        return getProcessByWorkspace(sWorkspaceId, null, null, null, null);
+        return getProcessByWorkspace(sWorkspaceId, null, null, null, null, null);
     }
     
     /**
@@ -129,12 +130,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param eStatus
      * @return list of results
      */
-    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, Instant oDateFRom, Instant oDateTo) {
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, String sProductNameSubstring, Instant oDateFRom, Instant oDateTo) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, oDateFRom, oDateTo);
+        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFRom, oDateTo);
         	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oFilter)
             		.sort(new Document("operationDate", -1));
             fillList(aoReturnList, oWSDocuments);
@@ -155,7 +156,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, int iStartIndex, int iEndIndex) {
 
-        return getProcessByWorkspace(sWorkspaceId, null, null, null, null, iStartIndex, iEndIndex);
+        return getProcessByWorkspace(sWorkspaceId, null, null, null, null, null, iStartIndex, iEndIndex);
     }
     
     /**
@@ -169,12 +170,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param iEndIndex end index for pagination
      * @return list of results
      */
-    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, Instant oDateFRom, Instant oDateTo, int iStartIndex, int iEndIndex) {
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, String sProductNameSubstring, Instant oDateFRom, Instant oDateTo, int iStartIndex, int iEndIndex) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, oDateFRom, oDateTo);
+        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFRom, oDateTo);
         	
         	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(oFilter)
             		.sort(new Document("operationDate", -1))
@@ -200,6 +201,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	 * @return
 	 */
 	protected Bson buildFilter(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation,
+			String sProductNameSubstring,
 			Instant oDateFRom, Instant oDateTo) {
 		Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
 		if(null!=eStatus) {
@@ -208,6 +210,15 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		}
 		if(null!=eOperation) {
 			Bson oCond = Filters.eq("operationType", eOperation.name());
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(!Utils.isNullOrEmpty(sProductNameSubstring)) {
+			//Bson oCond = Filters.regex("productName", Pattern.quote(sProductNameSubstring));
+			//Bson oCond = Filters.regex("productName", sProductNameSubstring);
+			//Bson oCond = Filters.eq("productName", sProductNameSubstring);
+
+			Pattern regex = Pattern.compile(sProductNameSubstring);
+			Bson oCond = Filters.eq("productName", regex);
 			oFilter = Filters.and(oFilter, oCond);
 		}
 		if(null!=oDateFRom) {
