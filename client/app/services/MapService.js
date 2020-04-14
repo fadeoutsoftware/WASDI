@@ -379,7 +379,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
 
         try {
-            console.log("sono qui")
+
             for (var iProduct = 0; iProduct<aoProducts.length; iProduct++) {
 
                 if(this.isAlreadyDrawRectangle(aoProducts[iProduct].bbox) === false){
