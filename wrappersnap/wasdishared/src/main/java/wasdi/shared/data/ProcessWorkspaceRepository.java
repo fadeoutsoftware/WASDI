@@ -191,6 +191,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+    
 
 	/**
 	 * @param sWorkspaceId
@@ -200,7 +201,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	 * @param oDateTo
 	 * @return
 	 */
-	protected Bson buildFilter(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation,
+	private Bson buildFilter(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation,
 			String sProductNameSubstring,
 			Instant oDateFRom, Instant oDateTo) {
 		Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
