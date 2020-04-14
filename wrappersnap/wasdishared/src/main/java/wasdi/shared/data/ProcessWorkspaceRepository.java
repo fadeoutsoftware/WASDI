@@ -1062,7 +1062,6 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
-
             FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find();
             fillList(aoReturnList, oWSDocuments);
 
@@ -1072,4 +1071,43 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+
+	/**
+	 * @param sUserId a valid user id
+	 * @param sProcessObjId a valid process obj id
+	 * @return true if the user launched the process, false otherwise
+	 */
+	public boolean isProcessOwnedByUser(String sUserId, String sProcessObjId) {
+		try {
+			Document oDoc = getCollection("processworkpsace").find(Filters.and(
+					Filters.eq("userId", sUserId),
+					Filters.eq("processObjId", sProcessObjId)
+					)).first();
+			if(null!=oDoc) {
+				return true;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+		}
+		return false;
+	}
+	
+	/**
+	 * @param sProcessObjId a valid process obj id
+	 * @return the corresponding workspace id, if found, null otherwise
+	 */
+	public String getWorkspaceByProcessObjId(String sProcessObjId) {
+		try {
+			Document oDoc = getCollection("processworkpsace").find(
+					Filters.eq("processObjId", sProcessObjId)
+					).first();
+			if(oDoc.containsKey("workspaceId")) {
+				String sWorkspaceId = oDoc.getString("workspaceId");
+				return sWorkspaceId;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
+		}
+		return null;
+	}
 }
