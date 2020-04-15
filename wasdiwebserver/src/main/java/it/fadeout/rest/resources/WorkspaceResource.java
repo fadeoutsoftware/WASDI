@@ -645,11 +645,9 @@ public class WorkspaceResource {
 	@GET
 	@Path("enableusersworkspace")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<WorkspaceSharing> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public List<WorkspaceSharing> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog(
-				"WorkspaceResource.getUsersSharedWorksace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
 		// Validate Session
 		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);

@@ -11,6 +11,7 @@ public class DeployedProcessorViewModel {
 	private int isPublic = 0;
 	private int iTimeoutMs = 1000*60*60*3;
 	private String type = "";
+	private Boolean sharedWithMe = false;
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -71,6 +72,12 @@ public class DeployedProcessorViewModel {
 	}
 	public void setiTimeoutMs(int iTimeoutMs) {
 		this.iTimeoutMs = iTimeoutMs;
+	}
+	public Boolean getSharedWithMe() {
+		return sharedWithMe;
+	}
+	public void setSharedWithMe(Boolean sharedWithMe) {
+		this.sharedWithMe = sharedWithMe;
 	}
 	
 }
