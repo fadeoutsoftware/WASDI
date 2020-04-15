@@ -1,10 +1,9 @@
 package it.fadeout.rest.resources;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -16,11 +15,15 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
@@ -31,42 +34,93 @@ public class ProcessWorkspaceResource {
 	
 	@Context
 	ServletConfig m_oServletConfig;	
-	
+
 	@GET
 	@Path("/byws")
-	@Produces({"application/xml", "application/json", "text/xml"})
+	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("status") String sStatus,
+			@QueryParam("operationType") String sOperationType,
+			@QueryParam("namePattern") String sNamePattern,
+			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo,
+			@QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Start: " + iStartIndex + ", End: " + iEndIndex);
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId +
+				", status: " + sStatus + ", name pattern: " + sNamePattern +
+				", Start: " + iStartIndex + ", End: " + iEndIndex);
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 
 		try {
 			// Domain Check
+			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: workspace id is null, aborting");
+				return aoProcessList;
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user from session is null, aborting");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user id from session is null, aborting");
 				return aoProcessList;
 			}
-			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+			
+			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user " + oUser.getUserId() + " is not allowed to access workspace " + sWorkspaceId +", aborting" );
 				return aoProcessList;
 			}
-
+			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
 			List<ProcessWorkspace> aoProcess = null;
 			
+			ProcessStatus eStatus = null;
+			if(!Utils.isNullOrEmpty(sStatus)) {
+				try {
+					eStatus = ProcessStatus.valueOf(sStatus);
+				}catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sStatus + " to a valid process status, ignoring it");
+				}
+			}
+			
+			LauncherOperations eLauncherOperation = null;
+			if(!Utils.isNullOrEmpty(sOperationType)) {
+				try {
+					eLauncherOperation = LauncherOperations.valueOf(sOperationType);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
+				}
+			}
+			
+			Instant oDateFrom = null;
+			if(!Utils.isNullOrEmpty(sDateFrom)) {
+				try {
+					oDateFrom = Instant.parse(sDateFrom);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert start date " + sDateFrom + " to a valid date, ignoring it");
+				}
+			}
+			
+			Instant oDateTo = null;
+			if(!Utils.isNullOrEmpty(sDateTo)){
+				try {
+					oDateTo = Instant.parse(sDateTo);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert end date " + sDateFrom + " to a valid date, ignoring it");
+				}
+			}
+			
 			if (iStartIndex != null && iEndIndex != null) {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, iStartIndex, iEndIndex);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, sNamePattern, oDateFrom, oDateTo, iStartIndex, iEndIndex);
 			}
 			else {
-				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId);
+				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, sNamePattern, oDateFrom, oDateTo);
 			}
 
 			// For each
@@ -552,7 +606,23 @@ public class ProcessWorkspaceResource {
 
 		return asReturnStatusList;
 	}
-
+	
+	@GET
+	@Path("/getstatusbyid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public String getProcessStatusById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processObjId") String sProcessObjId) {
+		Utils.debugLog("ProcessWorrkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " )" );
+		try {
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorrkspaceResource.getProcessStatusById: " + oE );
+		}
+		return null;
+	}
 	
 	@GET
 	@Path("/updatebyid")
@@ -759,4 +829,28 @@ public class ProcessWorkspaceResource {
 		return oResult;
 	}
 
+	@GET
+	@Path("/payload")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public String getPayload(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processObjId") String sProcessObjId) {
+		Utils.debugLog("ProcessWorkspaceResource.getPayload( " + sSessionId + ", " + sProcessObjId + " )" );
+		try {
+			if(Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("ProcessWorkspaceResource.getPayload: session is null or empty, aborting");
+				return null;
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				return oProcessWorkspaceRepository.getPayload(sProcessObjId);
+			} else {
+				Utils.debugLog("ProcessWorkspaceResource.getPayload: user " + oUser.getUserId() + " cannot access process obj id " + sProcessObjId );
+			}
+		}catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceResource.getPayload: " + oE );
+		}
+		
+		
+		return "not yet...";
+	}
 }

@@ -187,6 +187,11 @@ var ProcessesLogsController = (function() {
        return true;
     };
 
+    ProcessesLogsController.prototype.deleteProcess = function(oProcessInput)
+    {
+        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
+        return true;
+    };
 
 
     ProcessesLogsController.$inject = [

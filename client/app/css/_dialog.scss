@@ -91,7 +91,8 @@ $color_alto_approx: #ddd;
     }
     .vex-dialog-message,
     .dialog-message {
-
+        //overflow-y: auto;
+        //height: 300px;
       // background: $white;
       // border: 1px solid $color_alto_approx;
       padding: 0.1em 0.2em;
