@@ -555,25 +555,26 @@ var RootController = (function() {
         });
 
         return true;
-    }
+    };
 
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
-        var oController = this;
-        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
-            controller: "DeleteProcessController"
-        }).then(function(modal) {
-            modal.element.modal();
-            modal.close.then(function(result) {
-                oController.m_oScope.Result = result ;
 
-                if(result === 'delete')
-                    oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
-            });
-        });
-
+        // var oController = this;
+        // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        // this.m_oModalService.showModal({
+        //     templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
+        //     controller: "DeleteProcessController"
+        // }).then(function(modal) {
+        //     modal.element.modal();
+        //     modal.close.then(function(result) {
+        //         oController.m_oScope.Result = result ;
+        //
+        //         if(result === 'delete')
+        //             oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
+        //     });
+        // });
+        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
         return true;
     };
 

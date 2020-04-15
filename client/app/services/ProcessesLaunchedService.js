@@ -4,7 +4,10 @@
 
 'use strict';
 angular.module('wasdi.ProcessesLaunchedService', ['wasdi.ProcessesLaunchedService']).
-service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', function (oConstantsService,$rootScope,$http) {
+service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'ModalService', function (oConstantsService,
+                                                                                        $rootScope,
+                                                                                        $http,
+                                                                                        oModalService) {
     this.m_aoProcessesRunning = [];
     this.m_aoProcessesStopped = [];
 
@@ -14,6 +17,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
     * */
     this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
     this.m_oConstantsService = oConstantsService;
+    this.m_oModalService = oModalService;
     this.APIURL =  this.m_oConstantsService.getAPIURL();
     this.m_oHttp = $http;
 
@@ -228,4 +232,22 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         return this.m_oHttp.get(this.APIURL + '/process/summary');
     };
 
+    this.deleteProcess = function(oProcessInput)
+    {
+        debugger;
+        var oController = this;
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
+            controller: "DeleteProcessController"
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                if(result === 'delete')
+                    oController.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
+            });
+        });
+
+        return true;
+    };
 }]);
