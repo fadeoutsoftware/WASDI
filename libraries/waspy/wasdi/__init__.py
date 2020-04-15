@@ -1,3 +1,4 @@
+
 """
 FADEOUT SOFTWARE 
 
@@ -1036,20 +1037,19 @@ def getProcessStatus(sProcessId):
     global m_sSessionId
 
     asHeaders = _getStandardHeaders()
-    payload = {'sProcessId': sProcessId}
+    payload = {'processObjId': sProcessId}
 
-    sUrl = m_sBaseUrl + '/process/byid'
+    sUrl = m_sBaseUrl + '/process/getstatusbyid'
 
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
     sStatus = ''
 
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResult = oResult.json()
-
+    if (oResult is not None) and oResult.ok:
         try:
-            sStatus = oJsonResult['status']
-        except:
+            sStatus = oResult.text
+        except Exception as oE:
+            print('[ERROR] waspy.getProcessStatus: ' + str(oE))
             sStatus = ''
 
     return sStatus
