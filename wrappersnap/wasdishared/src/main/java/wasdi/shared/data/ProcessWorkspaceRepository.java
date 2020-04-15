@@ -1101,12 +1101,40 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			Document oDoc = getCollection("processworkpsace").find(
 					Filters.eq("processObjId", sProcessObjId)
 					).first();
+			if(null==oDoc) {
+				Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId: " + sProcessObjId + " is not a valid process obj id, aborting");
+				return null;
+			}
 			if(oDoc.containsKey("workspaceId")) {
 				String sWorkspaceId = oDoc.getString("workspaceId");
 				return sWorkspaceId;
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
+		}
+		return null;
+	}
+
+	
+	/**
+	 * @param sProcessObjId a valid process obj id
+	 * @return the corresponding payload
+	 */
+	public String getPayload(String sProcessObjId) {
+		try {
+			Document oDoc = getCollection("processworkpsace").find(
+					Filters.eq("processObjId", sProcessObjId)
+					).first();
+			if(null==oDoc) {
+				Utils.debugLog("ProcessWorkspaceRepository.getPayload: " + sProcessObjId + " is not a valid process obj id, aborting");
+				return null;
+			}
+			if(oDoc.containsKey("payload")) {
+				String sPayload = oDoc.getString("payload");
+				return sPayload;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): " + oE);
 		}
 		return null;
 	}

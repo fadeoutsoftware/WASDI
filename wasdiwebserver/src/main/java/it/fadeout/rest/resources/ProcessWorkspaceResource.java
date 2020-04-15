@@ -829,4 +829,28 @@ public class ProcessWorkspaceResource {
 		return oResult;
 	}
 
+	@GET
+	@Path("/payload")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public String getPayload(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processObjId") String sProcessObjId) {
+		Utils.debugLog("ProcessWorkspaceResource.getPayload( " + sSessionId + ", " + sProcessObjId + " )" );
+		try {
+			if(Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("ProcessWorkspaceResource.getPayload: session is null or empty, aborting");
+				return null;
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				return oProcessWorkspaceRepository.getPayload(sProcessObjId);
+			} else {
+				Utils.debugLog("ProcessWorkspaceResource.getPayload: user " + oUser.getUserId() + " cannot access process obj id " + sProcessObjId );
+			}
+		}catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceResource.getPayload: " + oE );
+		}
+		
+		
+		return "not yet...";
+	}
 }
