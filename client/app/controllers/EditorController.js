@@ -1339,8 +1339,16 @@ var EditorController = (function () {
                 oController.m_oTree = oController.generateTree();
                 oController.m_bIsLoadingTree = false;
 
-                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                if( oController.m_b2DMapModeOn === false){
+                    oController.m_oMapService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                    oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+
+                } else {
+                    oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                    oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                }
+
+
             }
         }).error(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
@@ -3832,24 +3840,7 @@ var EditorController = (function () {
 
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
 
-                                                        // var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                        // var iLengthChildren_d = that.temp.children_d.length;
-                                                        //
-                                                        // for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-                                                        //     oController.removeAllRedSquareBoundingBox();
-                                                        //     oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                        //     for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
-                                                        //         if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
-                                                        //             oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                        //             break;
-                                                        //         }
-                                                        //
-                                                        //     }
-                                                        //
-                                                        // }
-                                                        //
-                                                        // //reload product list
-                                                        // oController.getProductListByWorkspace();
+
 
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
@@ -4009,24 +4000,7 @@ var EditorController = (function () {
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
-                                                        // var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                        // var iLengthChildren_d = that.temp.children_d.length;
-                                                        //
-                                                        // for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-                                                        //     oController.removeAllRedSquareBoundingBox();
-                                                        //     oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                        //     for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
-                                                        //         if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
-                                                        //             oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                        //             break;
-                                                        //         }
-                                                        //
-                                                        //     }
-                                                        //
-                                                        // }
-                                                        //
-                                                        // //reload product list
-                                                        // oController.getProductListByWorkspace();
+
 
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
@@ -4231,7 +4205,7 @@ var EditorController = (function () {
     EditorController.prototype.deleteProductInNavigation = function(aoVisibleBands,oChildrenNode){
         // // In georeferenced mode or not?
         // if (this.m_bIsActiveGeoraphicalMode == true) {
-        // debugger;
+
         if( this.m_b2DMapModeOn === false){
 
             this.deleteProductInMap();
@@ -4242,26 +4216,7 @@ var EditorController = (function () {
 
     EditorController.prototype.deleteProductInMap = function(){
         this.m_oMapService.clearMap();
-        this.m_oMapService.initMapEditor('wasdiMap');
-        // this.m_oMapService.removeLayersFromMap();
-
-        // var iLengthLayer = aoVisibleBands.length;
-        // var iLengthChildren_d = oChildrenNode.length;//that.temp.children_d
-        //
-        // for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-        //
-        //     this.removeAllRedSquareBoundingBox();// it's in wrong place ?
-        //
-        //     this.m_oGlobeService.addAllWorkspaceRectanglesOnMap(this.m_aoProducts);
-        //     for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
-        //         if (oChildrenNode[iIndexChildren] === aoVisibleBands[iIndexLayer].layerId) {
-        //             this.removeBandImage(aoVisibleBands[iIndexChildren]);
-        //             break;
-        //         }
-        //
-        //     }
-        //
-        // }
+        this.m_oMapService.initWasdiMap('wasdiMap2');
 
         //reload product list
         this.getProductListByWorkspace();
