@@ -6,13 +6,11 @@ import java.util.List;
 
 import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
-import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.utils.Utils;
 
