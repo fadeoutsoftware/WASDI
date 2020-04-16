@@ -1238,7 +1238,7 @@ public class ProcessorsResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult deleteUserSharingProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId) {
 
-		Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", WS: " + sProcessorId + ", User:" + sUserId + " )");
+		Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session

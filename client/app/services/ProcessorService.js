@@ -86,6 +86,18 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         return this.m_oHttp.get("https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP?eventtypes=FL");
     };
 
+    this.putShareProcessor = function(sProcessorId,sUserId){
+        return this.m_oHttp.put(this.APIURL + '/processors/share/add?processorId=' + sProcessorId + "&userId=" + sUserId);
+    };
+
+    this.getUsersBySharedProcessor = function(sProcessorId){
+        return this.m_oHttp.get(this.APIURL + '/processors/share/byprocessor?processorId=' + sProcessorId );
+    };
+
+    this.deleteUserSharedProcessor = function(sProcessorId,sUserId){
+        return this.m_oHttp.delete(this.APIURL + '/processors/share/delete?processorId=' + sProcessorId + "&userId=" + sUserId );
+    };
+
     this.downloadProcessor = function (sProcessorId, sUrl=null) {
         var urlParams = "?" + "token=" + this.m_oConstantsService.getSessionId();
         urlParams = urlParams + "&" + "processorId=" + sProcessorId;

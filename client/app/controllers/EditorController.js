@@ -1099,17 +1099,18 @@ var EditorController = (function () {
 
             this.m_aoVisibleBands.push(oBand);
 
-            //if there isn't Bounding Box is impossible to zoom
-            if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
-                this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
-            } else {
-                this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+            if (this.m_aoVisibleBands.length == 1) {
+                //if there isn't Bounding Box is impossible to zoom
+                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
+                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
+                } else {
+                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+                }
             }
-
         }
 
     };
