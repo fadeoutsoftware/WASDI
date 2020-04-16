@@ -1,5 +1,15 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.3.4] - 2020-04-16
+
+### Added
+
+- get payload given process id
+
+### Changed
+
+- use of optimized API to get process status 
+
 ## [0.3.3] - 2020-04-10
 
 ### Added
