@@ -848,7 +848,6 @@ public class ProcessWorkspaceResource {
 			Utils.debugLog("ProcessWorkspaceResource.getPayload: " + oE );
 		}
 		
-		
-		return "not yet...";
+		return null;
 	}
 }
