@@ -486,6 +486,8 @@ def _loadConfig(sConfigFilePath):
                 m_bUploadActive = bool(oJson["UPLOADACTIVE"])
             if "VERBOSE" in oJson:
                 m_bVerbose = bool(oJson["VERBOSE"])
+            if 'BASEURL' in oJson:
+                setBaseUrl(oJson['BASEURL'])
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
