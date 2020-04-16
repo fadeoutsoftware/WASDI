@@ -3091,3 +3091,43 @@ def _importAndPreprocessV1(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sPro
     # Checkpoint: wait for all asynch workflows to finish
     wasdiLog("All image imported, waiting for all workflows to finish")
     waitProcesses(asRunningProcList)
+
+
+def getProcessorPayload(sProcessObjId, bAsJson=False):
+    """
+    Retrieves the payload
+    :param sProcessObjId: a valid processor obj id
+    :param bAsJson: flag to indicate whether the payload is a json object: if True, then a dictionary is returned
+    :return: the processor payload if present, None otherwise
+    """
+    try:
+        if sProcessObjId is None:
+            wasdiLog('[WARNING] waspy.getProcessorPayload: process obj id is None, aborting')
+            return None
+        sUrl = getBaseUrl() + '/process/payload'
+        asParams = {'processObjId': sProcessObjId}
+        asHeaders = _getStandardHeaders()
+        oResponse = requests.get(url=sUrl, headers=asHeaders, params=asParams)
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.getProcessorPayload: response is None, failing')
+            return None
+        if oResponse.ok:
+            if bAsJson:
+                return oResponse.json()
+            else:
+                return oResponse.text
+        else:
+            wasdiLog('[ERROR] waspy.getProcessorPayload: response status not ok: ' + oResponse.status_code +
+                     ': ' + oResponse.text)
+    except Exception as oE:
+        wasdiLog('[ERROR] waspy.getProcessorPayload: ' + str(oE))
+    return None
+
+
+def getProcessorPayloadAsJson(sProcessorPayload):
+    """
+    Retrieves the payload in json format using getProcessorPayload
+    :param sProcessObjId: a valid processor obj id
+    :return: the processor payload if present as a dictionary, None otherwise
+    """
+    return getProcessorPayload(sProcessorPayload, True)
