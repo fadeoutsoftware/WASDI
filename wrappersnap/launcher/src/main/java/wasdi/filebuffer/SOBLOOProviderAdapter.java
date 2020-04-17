@@ -180,7 +180,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
 		
@@ -203,7 +203,9 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		
 		int iAttempts = SOBLOOProviderAdapter.s_iNUMATTEMPTS;
 		
-		while(iAttempts > 0 && Duration.between(oStart, Instant.now()).compareTo(oMaxDuration) <= 0 ) {
+		int iDownloadAttemp = 0;
+		
+		while(iAttempts > 0 && Duration.between(oStart, Instant.now()).compareTo(oMaxDuration) <= 0 && iDownloadAttemp < iMaxRetry ) {
 			 
 			URL oUrl = new URL(sURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
@@ -292,15 +294,24 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 				// opens an output stream to save into file
 				FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
-	
-				//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
-				copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+
+				iDownloadAttemp ++;
+				
+				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Download Attemp # " + iDownloadAttemp);
+				
+				boolean bCopyStreamResult = copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+				
+				if (!bCopyStreamResult) {
+					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: error in the copy stream, try again if we have more attemps");
+					continue;
+				}
 				
 				try {
 					File oFile = new File(sSaveFilePath);
 					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: file size: expected/actual: " + lContentLength + "/" + oFile.length());
 				} catch (Exception oE) {
-					
+					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: exception reading downloaded file " + oE.toString());
+					continue;
 				}
 	
 				sReturnFilePath = sSaveFilePath;

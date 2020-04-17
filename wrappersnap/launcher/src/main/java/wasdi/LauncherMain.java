@@ -721,6 +721,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
 
 					if (oAlreadyDownloaded == null) {
+						
 						s_oLogger.debug( "LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
 						// Check if it is already downloaded, in any workpsace
 						List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
@@ -768,11 +769,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 					// No: it isn't: download it
-					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
 					if (Utils.isNullOrEmpty(sFileName)) {
+						
 						int iLastError = oProviderAdapter.getLastServerError();
 						String sError = "There was an error contacting the provider";
+						
 						if (iLastError > 0)
 							sError += ": query obtained HTTP Error Code " + iLastError;
 						throw new Exception(sError);

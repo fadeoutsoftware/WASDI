@@ -90,7 +90,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	
 
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.debug("PROBAVProviderAdapter.ExecuteDownloadFile: sFileURL is null");

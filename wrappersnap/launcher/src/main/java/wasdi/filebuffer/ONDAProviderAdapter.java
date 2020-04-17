@@ -89,7 +89,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#ExecuteDownloadFile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, wasdi.shared.business.ProcessWorkspace)
 	 */
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -157,13 +157,15 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			Boolean bAvailable = false;
 			String sResult = null;
 			
-			//TODO parameter
-			int iAttempts = 3;
+			int iAttempts = iMaxRetry;
 
 			long lDeltaT = 10;
 
 			while(iAttempts > 0) {
 				
+				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Attempt # " + (iMaxRetry-iAttempts+1));
+				
+				// Check Product Availability				
 				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start checkProductAvailability");
 				
 				bAvailable = checkProductAvailability(sFileURL, sDownloadUser, sDownloadPassword);
@@ -173,6 +175,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				} 
 				else if(bAvailable) {
 					
+					// Product Available
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product should be available, try to download");
 					
 					if (Utils.isNullOrEmpty(m_oProcessWorkspace.getProductName())) {
@@ -189,6 +192,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					
 					// If we were in waiting, move in ready and wait the scheduler to resume us
 					if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+						
+						// Put processor in READY State
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process Waiting, set it ready and wait for resume");
 						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.READY, m_oProcessWorkspace.getProgressPerc());
 						String sResumedStatus = LauncherMain.waitForProcessResume(m_oProcessWorkspace);
