@@ -10,19 +10,131 @@
                     <h4 class="m-4">No workspace selected, cannot loading data. If you refreshed the page please go to Workspace section and select one.</h4>
                 </div>
                 <div ng-hide="m_oController.hasError == true">
-                    <!--<div class="row" ng-hide="m_oController.m_bAreProcessesLoaded">-->
-                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">-->
-                            <!--<invader></invader>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <div class="row" ><!--ng-show="m_oController.m_bAreProcessesLoaded"-->
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 my-input-text">
-                            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                <input type="text" class="" ng-model="m_oController.filterTable" placeholder="Search...">
-                            </div>
-                            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                <a ng-href="{{m_oController.m_sHrefLogFile}}" download ="download">Download Logs</a>
-                            </div>
+                    <div class="row" >
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" >
+
+                            <table class="table table-responsive table-striped " id="tableProcesses" >
+                                <thead>
+                                <tr>
+                                    <th>
+                                        <!--label>Status:</label-->
+                                        <div class="dropdown">
+                                            <button class="btn btn-default dropdown-toggle ng-binding" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="false">
+                                                {{m_oController.m_oFilter.m_sStatus}}
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="0" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("None")'>
+                                                        None
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="0" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("CREATED")'>
+                                                        CREATED
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="1" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("RUNNING")'>
+                                                        RUNNING
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="2" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("WAITING")'>
+                                                        WAITING
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="3" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("READY")'>
+                                                        READY
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="4" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("DONE")'>
+                                                        DONE
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="5" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("ERROR")'>
+                                                        ERROR
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboStatusClick("STOPPED")'>
+                                                        STOPPED
+                                                    </a>
+                                                </li>
+                                            </ul>
+
+                                        </div>
+                                    </th>
+                                    <th><!--label>Date:</label--> <input type="text" class="" ng-model="m_oController.m_oFilter.m_sDate" placeholder="Date..."></th>
+                                    <th>
+                                        <!--label>Type:</label-->
+                                        <div class="dropdown">
+                                            <button class="btn btn-default dropdown-toggle ng-binding" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="false">
+                                                {{m_oController.m_oFilter.m_sType}}
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="0" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("None")'>
+                                                        None
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="0" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("RUNPROCESSOR")'>
+                                                        RUNPROCESSOR
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="1" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("RUNIDL")'>
+                                                        RUNIDL
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="2" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("RUNMATLAB")'>
+                                                        RUNMATLAB
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="3" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("INGEST")'>
+                                                        INGEST
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="4" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("DOWNLOAD")'>
+                                                        DOWNLOAD
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="5" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("PUBLISHBAND")'>
+                                                        PUBLISHBAND
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("GRAPH")'>
+                                                        GRAPH
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("DEPLOYPROCESSOR")'>
+                                                        DEPLOYPROCESSOR
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </th>
+                                    <th><!--label>Name:</label--> <input type="text" class="" ng-model="m_oController.m_oFilter.m_sName" placeholder="Name..."> </th>
+                                    <th><a ng-click="m_oController.applyFilters()" style="cursor:pointer"><span><i class="custom-icon fa fa-filter"></i>&nbsp;Apply Filters</span></a></th>
+                                    <th><a ng-click="m_oController.resetFilters()" style="cursor:pointer"><span><i class="custom-icon fa fa-remove"></i>&nbsp;Reset Filters</span></a></th>
+                                    <th></th>
+                                    <th><a ng-href="{{m_oController.m_sHrefLogFile}}" download ="download"  style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download Logs</span></a></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
 

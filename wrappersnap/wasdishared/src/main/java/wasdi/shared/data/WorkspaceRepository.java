@@ -143,7 +143,7 @@ public class WorkspaceRepository extends  MongoRepository{
     
     public boolean isOwnedByUser(String sUserId, String sWorkspaceId) {
     	try {
-	    	Document oWSDocument = getCollection("workspace").find(
+	    	Document oWSDocument = getCollection("workspaces").find(
 	        		Filters.and(
 	        				Filters.eq("userId", sUserId),
 	        				Filters.eq("workspaceId", sWorkspaceId)

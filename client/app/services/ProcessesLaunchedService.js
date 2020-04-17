@@ -79,6 +79,26 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         return this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex);
     };
 
+    this.getFilteredProcessesFromServer = function(sWorkSpaceId,iStartIndex,iEndIndex, sStatus, sType, sDate, sName)
+    {
+        var sUrl = this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex;
+
+        if (!utilsIsStrNullOrEmpty(sStatus)) {
+            if (sStatus !== "Status...") sUrl += "&status=" +sStatus;
+        }
+        if (!utilsIsStrNullOrEmpty(sType)) {
+            if (sType !== "Type...") sUrl += "&operationType=" +sType;
+        }
+        if (!utilsIsStrNullOrEmpty(sDate)) {
+            sUrl += "&dateFrom=" +sDate + "&dateTo="+sDate;
+        }
+        if (!utilsIsStrNullOrEmpty(sName)) {
+            sUrl += "&namePattern=" +sName;
+        }
+
+        return this.m_oHttp.get(sUrl);
+    };
+
     this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
     {
         if(utilsIsObjectNullOrUndefined(sPidInput)===true) return false;
@@ -234,7 +254,6 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
 
     this.deleteProcess = function(oProcessInput)
     {
-        debugger;
         var oController = this;
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
