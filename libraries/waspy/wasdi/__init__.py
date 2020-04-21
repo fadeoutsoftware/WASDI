@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.3.3
-Last Update: 02/04/2020
+Version 0.3.5
+Last Update: 21/04/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -1031,12 +1031,22 @@ def getProcessStatus(sProcessId):
     """
     get the status of a Process
     :param sProcessId: Id of the process to query
-    :return: the status or '' if there was any error
+    :return: the status or 'ERROR' if there was any error
 
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
     """
     global m_sBaseUrl
     global m_sSessionId
+    
+    if sProcessId is None:
+        _log('[ERROR] waspy.getProcessStatus: Passed None, expected a process ID' +
+             '  ******************************************************************************')
+        return "ERROR"
+
+    if sProcessId == '':
+        _log('[ERROR] waspy.getProcessStatus: Passed empty, expected a process ID' +
+             '  ******************************************************************************')
+        return "ERROR"    
 
     asHeaders = _getStandardHeaders()
     payload = {'processObjId': sProcessId}
@@ -1052,7 +1062,7 @@ def getProcessStatus(sProcessId):
             sStatus = oResult.text
         except Exception as oE:
             print('[ERROR] waspy.getProcessStatus: ' + str(oE))
-            sStatus = ''
+            sStatus = 'ERROR'
 
     return sStatus
 
@@ -2071,6 +2081,8 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     :param aoParams: a dictionary of parameters for the processor
     :return: processor ID
     """
+    
+    global m_sActiveWorkspace
 
     _log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
 
@@ -2099,6 +2111,7 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     sUrl = getBaseUrl() + "/processors/run"
 
     oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams)
+    
     if oResponse is None:
         print('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting' +
               '  ******************************************************************************')
@@ -2121,15 +2134,27 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
 
 def executeProcessor(sProcessorName, aoProcessParams):
     """
-    Executes a WASDI Processor
+    Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
     :param sProcessorName: WASDI processor name
     :param aoParams: a dictionary of parameters for the processor    
     :return: the Process Id if every thing is ok, '' if there was any problem
     """
-    global m_sBaseUrl
-    global m_sSessionId
     global m_sActiveWorkspace
-
+    
+    if sProcessorName is None:
+        print('[ERROR] waspy.executeProcessor: processor name is None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    elif len(sProcessorName) <= 0:
+        print('[ERROR] waspy.executeProcessor: processor name empty, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if isinstance(aoProcessParams, dict) is not True:
+        print('[ERROR] waspy.executeProcessor: parameters must be a dictionary but it is not, aborting' +
+              '  ******************************************************************************')
+        return ''    
+    
+    # Prepare API headers and params
     sEncodedParams = json.dumps(aoProcessParams)
     asHeaders = _getStandardHeaders()
     aoParams = {'workspace': m_sActiveWorkspace,
@@ -2139,21 +2164,37 @@ def executeProcessor(sProcessorName, aoProcessParams):
     if m_bIsOnServer:
         aoParams['parent'] = getProcId()
 
-    sUrl = m_sBaseUrl + '/processors/run'
-
-    oResult = requests.get(sUrl, headers=asHeaders, params=aoParams)
-
-    sProcessId = ''
-
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResults = oResult.json()
-
-        try:
-            sProcessId = oJsonResults['processingIdentifier']
-        except:
-            return sProcessId
-
-    return sProcessId
+    sUrl = getBaseUrl() + '/processors/run'
+    
+    # Try up to three time
+    iMaxRetry = 3
+    
+    for iAttempt in range(iMaxRetry):
+        
+        wasdiLog("[INFO]: execute Processor Attempt # " + str(iAttempt+1))
+    
+        oResult = requests.get(sUrl, headers=asHeaders, params=aoParams)
+        
+        if oResult is None:
+            wasdiLog('[ERROR] waspy.executeProcessor: something broke when contacting the server')
+        elif oResult.ok is True:
+            _log('[INFO] waspy.executeProcessor: API call OK')
+            aoJson = oResult.json()
+            if "processingIdentifier" in aoJson:
+                sProcessID = aoJson['processingIdentifier']
+                return sProcessID
+            else:
+                wasdiLog('[ERROR] waspy.executeProcessor: cannot extract processing identifier from response, aborting')
+        else:
+            wasdiLog('[ERROR] waspy.executeProcessor: server returned status ' + str(oResult.status_code))
+        
+        wasdiLog("[ERROR]: Error triggering the new process.")
+        time.sleep(5)
+    
+    wasdiLog("[ERROR]: process not triggered, too many errors")
+    
+    # If we exit from the cycle, we do not have any result for our client...
+    return ''
 
 
 def waitProcess(sProcessId):
