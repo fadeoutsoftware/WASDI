@@ -1,6 +1,6 @@
 # \_\_/== Changelog ==\\\_\_
 
-## [0.3.4] - 2020-04-16
+## [0.3.5] - 2020-04-21
 
 ### Added
 
@@ -8,6 +8,8 @@
 
 ### Changed
 
+- added retry and logs to the executeProcess
+- added check to the getProcess Status to return ERROR if processId is null or empty
 - use of optimized API to get process status 
 
 ## [0.3.3] - 2020-04-10
