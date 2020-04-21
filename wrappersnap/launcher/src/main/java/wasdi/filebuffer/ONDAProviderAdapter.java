@@ -21,10 +21,12 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.io.Util;
+import org.esa.snap.core.datamodel.Product;
 import org.json.JSONObject;
 
 import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
+import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -210,9 +212,35 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 					
 					if (!Utils.isNullOrEmpty(sResult)) {
-						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result: " + sResult);
-						// Break the retry attemp cycle
-						break;
+						
+						// Get The product view Model
+						File oProductFile = new File(sResult);
+						String sNameOnly = oProductFile.getName();
+						
+						if (sNameOnly.startsWith("S1") || sNameOnly.startsWith("S2")) {
+							
+							try {
+								WasdiProductReader oReadProduct = new WasdiProductReader();
+								Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
+								if (oProduct != null)  {
+									m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result: " + sResult);
+									// Break the retry attempt cycle
+									break;							
+								}
+								else {
+									m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: file not readable: " + sResult + " try again");
+								}								
+							}
+							catch (Exception oReadEx) {
+								m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: exception reading file: " + oReadEx.toString() + " try again");
+							}
+						}
+						else {
+							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result: " + sResult);
+							// Break the retry attempt cycle
+							break;							
+						}
+						
 					}
 					else {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result null, try again");
