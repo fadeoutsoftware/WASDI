@@ -1,5 +1,15 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.3.6] - 2020-04-22
+
+## Added
+
+- check for availability of params file
+
+## Fixed
+
+- bug in getProcessorPayload due to string concatenation with non string
+
 ## [0.3.5] - 2020-04-21
 
 ### Added
