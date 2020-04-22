@@ -1274,7 +1274,7 @@ def setPayload(data):
     if m_bIsOnServer is True:
         setProcessPayload(m_sMyProcId, data)
     else:
-        _log(str(data))
+        _log('wasdi.setPayload( ' + str(data))
 
 
 def saveFile(sFileName):
@@ -3120,8 +3120,8 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
             else:
                 return oResponse.text
         else:
-            wasdiLog('[ERROR] waspy.getProcessorPayload: response status not ok: ' + oResponse.status_code +
-                     ': ' + oResponse.text)
+            wasdiLog('[ERROR] waspy.getProcessorPayload: response status not ok: ' + str(oResponse.status_code) +
+                     ': ' + str(oResponse.text))
     except Exception as oE:
         wasdiLog('[ERROR] waspy.getProcessorPayload: ' + str(oE))
     return None
