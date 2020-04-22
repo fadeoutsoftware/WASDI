@@ -54,6 +54,7 @@ import zipfile
 import requests
 import getpass
 import sys
+import os.path
 
 # Initialize "Members"
 m_sUser = None
@@ -507,14 +508,16 @@ def _loadParams():
     bParamLoaded = False
     if (m_sParametersFilePath is not None) and (m_sParametersFilePath != ''):
         try:
+            if not os.path.isfile(m_sParametersFilePath):
+                wasdiLog('[WARNING] _loadParams: parameters file not found')
             with open(m_sParametersFilePath) as oJsonFile:
                 m_aoParamsDictionary = json.load(oJsonFile)
                 bParamLoaded = True
-        except:
-            pass
+        except Exception as oE:
+            wasdiLog('[WARNING] _loadParams: could not open file due to: ' + str(oE))
 
     if not bParamLoaded:
-        _log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
+        _log('[INFO] _loadParams: wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
 
 def refreshParameters():
