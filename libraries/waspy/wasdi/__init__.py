@@ -1688,8 +1688,8 @@ def fileExistsOnWasdi(sFileName):
         print('[ERROR] waspy.fileExistsOnWasdi: failed contacting the server' +
               '  ******************************************************************************')
         return False
-    elif oResult.ok is not True:
-        print('[ERROR] waspy.fileExistsOnWasdi: failed, server returned: ' + str(oResult.status_code) +
+    elif not oResult.ok and not 500 == oResult.status_code:
+        print('[ERROR] waspy.fileExistsOnWasdi: unexpected failure, server returned: ' + str(oResult.status_code) +
               '  ******************************************************************************')
         return False
     else:
