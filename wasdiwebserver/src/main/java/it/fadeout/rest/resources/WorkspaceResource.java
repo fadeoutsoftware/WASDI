@@ -621,12 +621,21 @@ public class WorkspaceResource {
 		try {
 			WorkspaceSharing oWorkspaceSharing = new WorkspaceSharing();
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-			oWorkspaceSharing.setOwnerId(oOwnerUser.getUserId());
-			oWorkspaceSharing.setUserId(sUserId);
-			oWorkspaceSharing.setWorkspaceId(sWorkspaceId);
-			oWorkspaceSharing.setShareDate((double) oTimestamp.getTime());
-			oWorkspaceSharingRepository.insertWorkspaceSharing(oWorkspaceSharing);
+			
+			if (!oWorkspaceSharingRepository.isSharedWithUser(sUserId, sWorkspaceId)) {
+				Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
+				oWorkspaceSharing.setOwnerId(oOwnerUser.getUserId());
+				oWorkspaceSharing.setUserId(sUserId);
+				oWorkspaceSharing.setWorkspaceId(sWorkspaceId);
+				oWorkspaceSharing.setShareDate((double) oTimestamp.getTime());
+				oWorkspaceSharingRepository.insertWorkspaceSharing(oWorkspaceSharing);				
+			}
+			else {
+				oResult.setStringValue("Already Shared.");
+				oResult.setBoolValue(true);
+				return oResult;
+			}
+			
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: " + oEx);
 
