@@ -1,5 +1,40 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.4.1] - 2020-04-22
+
+## Added
+
+- added log in searchEOImages
+
+## [0.4.0] - 2020-04-22
+
+## Added
+
+- check for availability of params file
+- executeProcessor supporting POST other than GET
+
+## Fixed
+
+- bug in getProcessorPayload due to string concatenation with non string
+
+## [0.3.5] - 2020-04-21
+
+### Added
+
+- get payload given process id
+
+### Changed
+
+- added retry and logs to the executeProcess
+- added check to the getProcess Status to return ERROR if processId is null or empty
+- use of optimized API to get process status 
+
+## [0.3.3] - 2020-04-10
+
+### Added
+
+- Added big tiff support to multiSubset (added flag, False by default)
+- Added wasdi.copyFileToSftp to copy a file from a workpsace to the user wasdi sftp folder 
 
 ## [0.3.2] - 2020-04-02
 

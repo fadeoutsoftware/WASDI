@@ -27,13 +27,31 @@ public class DownloadFileParameter extends BaseParameter{
      * SessionId
      */
     private String queue;
-
+    
+    /**
+     * Product Bounding Box
+     */
     private String boundingBox;
     
+    /**
+     * Selected download provider
+     */
     private String provider;
+    
+    
+    /**
+     * Number of Retry
+     */
+    private int maxRetry = 5;
 
-    private String productName;
 
+	public int getMaxRetry() {
+		return maxRetry;
+	}
+
+	public void setMaxRetry(int maxRetry) {
+		this.maxRetry = maxRetry;
+	}
 
 	public String getUrl() { return url; }
 

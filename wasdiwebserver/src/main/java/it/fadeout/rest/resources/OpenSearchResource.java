@@ -231,6 +231,9 @@ public class OpenSearchResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return null;
 			}
+
+			// TODO use the ProviderCatalog and map the business objects to the expected view models
+
 			ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
 			String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
 			if (sProviders != null && sProviders.length() > 0) {

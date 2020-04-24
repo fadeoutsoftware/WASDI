@@ -20,11 +20,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.Util;
+import org.esa.snap.core.datamodel.Product;
 import org.json.JSONObject;
 
 import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
+import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -89,7 +92,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#ExecuteDownloadFile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, wasdi.shared.business.ProcessWorkspace)
 	 */
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -153,19 +156,19 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		} 
 		else if(sFileURL.startsWith("https://")) {
 			//  https://catalogue.onda-dias.eu/dias-catalogue/Products(357ae76d-f1c4-4f25-b535-e278c3f937af)/$value
-			
+						
 			Boolean bAvailable = false;
 			String sResult = null;
 			
-			//TODO parameter
-			int iAttempts = 3;
-
+			int iAttempts = iMaxRetry;
+			
 			long lDeltaT = 10;
 
 			while(iAttempts > 0) {
 				
-				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start checkProductAvailability");
+				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Attempt # " + (iMaxRetry-iAttempts+1));
 				
+				// Check Product Availability				
 				bAvailable = checkProductAvailability(sFileURL, sDownloadUser, sDownloadPassword);
 				
 				if(null == bAvailable) {
@@ -173,7 +176,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				} 
 				else if(bAvailable) {
 					
-					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product should be available, try to download");
+					// Product Available
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product available, try to download");
 					
 					if (Utils.isNullOrEmpty(m_oProcessWorkspace.getProductName())) {
 						
@@ -189,6 +193,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					
 					// If we were in waiting, move in ready and wait the scheduler to resume us
 					if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
+						
+						// Put processor in READY State
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process Waiting, set it ready and wait for resume");
 						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.READY, m_oProcessWorkspace.getProgressPerc());
 						String sResumedStatus = LauncherMain.waitForProcessResume(m_oProcessWorkspace);
@@ -199,15 +205,61 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 							break;
 						}
 						
-						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process resumed let's go! Status: " + sResumedStatus);
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Process resumed let's go!");
 					}
 					
 					sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 					
 					if (!Utils.isNullOrEmpty(sResult)) {
-						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result: " + sResult);
-						// Break the retry attemp cycle
-						break;
+						
+						// Get The product view Model
+						File oProductFile = new File(sResult);
+						
+						String sNameOnly = oProductFile.getName();
+						
+						if (sNameOnly.startsWith("S1") || sNameOnly.startsWith("S2")) {
+							
+							try {
+								// Product Reader will be used to test if the image has been downloaded with success.
+								WasdiProductReader oReadProduct = new WasdiProductReader();
+								
+								Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
+								if (oProduct != null)  {
+									m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result [attemp#" + (iMaxRetry-iAttempts+1) + "]: " + sResult);
+									// Break the retry attempt cycle
+									break;							
+								}
+								else {
+									m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: file not readable: " + sResult + " try again");
+									try {
+										String sDestination = oProductFile.getPath();
+										sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
+										FileUtils.copyFile(oProductFile, new File(sDestination));										
+									}
+									catch (Exception oEx) {
+										m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: Exception making copy of attempt file " + oEx.toString());
+									}
+								}								
+							}
+							catch (Exception oReadEx) {
+								m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: exception reading file: " + oReadEx.toString() + " try again");
+							}
+							
+							
+							try {
+								m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: delete corrupted file");
+								oProductFile.delete();
+							}
+							catch (Exception oDeleteEx) {
+								m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: exception deleting not valid file ");
+							}
+						}
+						else {
+							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result: " + sResult);
+							// Break the retry attempt cycle
+							break;							
+						}
+						
 					}
 					else {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result null, try again");

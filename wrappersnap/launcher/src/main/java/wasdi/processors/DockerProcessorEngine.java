@@ -59,8 +59,13 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		if (oParameter == null) return false;
 		
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		ProcessWorkspace oProcessWorkspace = null;		
 		
+		
+		String sProcessorName = oParameter.getName();
+		String sProcessorId = oParameter.getProcessorID();
+
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -69,8 +74,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
 			// First Check if processor exists
-			String sProcessorName = oParameter.getName();
-			String sProcessorId = oParameter.getProcessorID();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);	
 			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
@@ -85,7 +89,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Check it
 			if (oProcessorZipFile.exists()==false) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
-				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) {
+					oProcessorRepository.deleteProcessor(sProcessorId);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
 				return false;
 			}
 			
@@ -95,7 +102,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Unzip the processor (and check for entry point myProcessor.py)
 			if (!UnzipProcessor(sProcessorFolder, sProcessorId + ".zip")) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
-				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) {
+					oProcessorRepository.deleteProcessor(sProcessorId);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
 				return false;
 			}
 		    
@@ -114,10 +124,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: building image");
 			
 			handleUnzippedProcessor(sProcessorFolder);
-			
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-			
+						
 			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
 			ArrayList<String> asArgs = new ArrayList<>();
@@ -164,8 +171,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 			asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
 			
-			//asArgs.add("--user=tomcat8");
-			
+			//asArgs.add("-u 111");
 			
 			asArgs.add("--mount");
 			asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");
@@ -192,7 +198,16 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
 			try {
-				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) {
+					try {
+						oProcessorRepository.deleteProcessor(sProcessorId);
+					}
+					catch (Exception oInnerEx) {
+						LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oInnerEx);
+					}
+					
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
 			} catch (JsonProcessingException e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", e);
 			}
@@ -441,7 +456,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				asArgs.clear();
 				asArgs.add("run");
 				
-				//asArgs.add("--user=tomcat8");
+				//asArgs.add("-u 111");
 				
 				// P.Campanella 11/06/2018: mounted volume
 				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!

@@ -381,13 +381,55 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         try {
 
             for (var iProduct = 0; iProduct<aoProducts.length; iProduct++) {
-                this.addRectangleOnMap(aoProducts[iProduct].bbox, sColor, aoProducts[iProduct].fileName);
+
+                if(this.isAlreadyDrawRectangle(aoProducts[iProduct].bbox) === false){
+                    this.addRectangleOnMap(aoProducts[iProduct].bbox, sColor, aoProducts[iProduct].fileName);
+                }
+
             }
         }
         catch (e) {
             console.log(e);
         }
 
+    };
+
+    this.isAlreadyDrawRectangle = function(aoProductBbox) {
+        try{
+            var aoBounds = this.convertBboxInBoundariesArray(aoProductBbox);
+            // var aoLatLngsProduct = [];
+            var oRectangle = L.polygon(aoBounds);
+            var aoLatLngsProduct = oRectangle.getLatLngs();
+            // aoLatLngsProduct.concat(aoLatLngsRectangle);
+
+            // for(var iIndexBound = 0 ; iIndexBound < aoBounds.length; iIndexBound++ ){
+            //     var oLatLng = L.latLng(aoBounds[iIndexBound]);
+            //     aoLatLngArrayProduct.push(oLatLng);
+            // }
+
+            var oMap = this.getMap();
+            var oController = this;
+            var isAlreadyDraw = false;
+            oMap.eachLayer( function(layer) {
+                if(layer instanceof L.Polygon) {
+                    var aoLayerLatLng = layer._latlngs;
+                    var iLatLngsProductLength = aoLatLngsProduct[0].length;
+
+                    for(let iIndexLatLngProduct = 0 ; iIndexLatLngProduct < iLatLngsProductLength; iIndexLatLngProduct++){
+
+                        var bAreEquals = aoLatLngsProduct[0][iIndexLatLngProduct].equals(aoLayerLatLng[0][iIndexLatLngProduct] , 0.1);
+                        if(bAreEquals){
+                            isAlreadyDraw = true;
+                        }
+                    }
+                }
+            });
+        }
+        catch(e){
+            return false;
+        }
+
+        return isAlreadyDraw;
     };
 
     /**
@@ -443,44 +485,51 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
      */
     this.addRectangleOnMap = function (sBbox,sColor,sReferenceName)
     {
-        if(utilsIsObjectNullOrUndefined(sBbox)) return null;
+        try{
+            if(utilsIsObjectNullOrUndefined(sBbox)) return null;
 
-        var aoBounds = this.convertBboxInBoundariesArray(sBbox);
+            var aoBounds = this.convertBboxInBoundariesArray(sBbox);
 
-        for(var iIndex = 0; iIndex < aoBounds.length; iIndex++ )
-        {
-            if(utilsIsObjectNullOrUndefined(aoBounds[iIndex])) return null;
-        }
+            for(var iIndex = 0; iIndex < aoBounds.length; iIndex++ )
+            {
+                if(utilsIsObjectNullOrUndefined(aoBounds[iIndex])) return null;
+            }
 
-        //default color
-        if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
+            //default color
+            if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
 
-        // create an colored rectangle
-        // weight = line thickness
-        var oRectangle = L.polygon(aoBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
+            // create an colored rectangle
+            // weight = line thickness
+            var oRectangle = L.polygon(aoBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
 
-        //event on click
-        if(!utilsIsObjectNullOrUndefined(sReferenceName)) {
-            oRectangle.on("click",function (event) {
-                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});
+            //event on click
+            if(!utilsIsObjectNullOrUndefined(sReferenceName)) {
+                oRectangle.on("click",function (event) {
+                    $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});
+                });
+            }
+
+            //mouse over event change rectangle style
+            oRectangle.on("mouseover", function (event) {
+                oRectangle.setStyle({weight:3,fillOpacity:0.7});
+                $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
+                var temp = oRectangle.getBounds()
             });
+
+            //mouse out event set default value of style
+            oRectangle.on("mouseout", function (event) {
+                oRectangle.setStyle({weight:1,fillOpacity:0.2});
+                $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});
+            });
+
+        }catch(e){
+            return null;
         }
 
-        //mouse over event change rectangle style
-        oRectangle.on("mouseover", function (event) {
-            oRectangle.setStyle({weight:3,fillOpacity:0.7});
-            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
-            var temp = oRectangle.getBounds()
-        });
-
-        //mouse out event set default value of style
-        oRectangle.on("mouseout", function (event) {
-            oRectangle.setStyle({weight:1,fillOpacity:0.2});
-            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});
-        });
 
         return oRectangle;
     };
+
 
 
     /********************************************ZOOM AND NAVIGATION FUNCTIONS**********************************************/

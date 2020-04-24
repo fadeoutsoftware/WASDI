@@ -14,7 +14,12 @@ var ProcessesLogsController = (function() {
         this.m_aoProcessesLogs = [];
         this.filterTable = "";
         this.m_bAreProcessesLoaded = false;
+        this.m_oFilter = {};
 
+        this.m_oFilter.m_sStatus = "Status...";
+        this.m_oFilter.m_sType = "Type...";
+        this.m_oFilter.m_sDate = "";
+        this.m_oFilter.m_sName = "";
 
         this.m_iNumberOfProcessForRequest = 40;
         this.m_iFirstProcess = 0;
@@ -38,10 +43,38 @@ var ProcessesLogsController = (function() {
         else{
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
-        }
+        };
 
+    }
 
-;    }
+    ProcessesLogsController.prototype.comboStatusClick = function (sStatus) {
+
+        if (sStatus == "None") sStatus = "Status..."
+        this.m_oFilter.m_sStatus = sStatus;
+    }
+
+    ProcessesLogsController.prototype.comboTypeClick = function (sStatus) {
+
+        if (sStatus == "None") sStatus = "Type..."
+        this.m_oFilter.m_sType = sStatus;
+    }
+
+    ProcessesLogsController.prototype.applyFilters = function () {
+        this.resetCounters();
+        this.m_aoProcessesLogs = [];
+        this.getAllProcessesLogs();
+    }
+
+    ProcessesLogsController.prototype.resetFilters = function () {
+        this.resetCounters();
+        this.m_aoProcessesLogs = [];
+        this.m_oFilter.m_sType = "Type...";
+        this.m_oFilter.m_sStatus = "Status..."
+        this.m_oFilter.m_sName = ""
+        this.m_oFilter.m_sDate = ""
+
+        this.getAllProcessesLogs()
+    }
 
     /**
      * getAllProcessesLogs
@@ -56,7 +89,9 @@ var ProcessesLogsController = (function() {
         }
 
         this.m_bAreProcessesLoaded = false;
-        this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
+
+        //this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
+        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName ).success(function (data, status)
         {
             if(!utilsIsObjectNullOrUndefined(data))
             {
@@ -91,6 +126,11 @@ var ProcessesLogsController = (function() {
         this.m_iFirstProcess = this.m_iFirstProcess + this.m_iNumberOfProcessForRequest;
         this.m_iLastProcess = this.m_iLastProcess + this.m_iNumberOfProcessForRequest;
     };
+
+    ProcessesLogsController.prototype.resetCounters = function() {
+        this.m_iNumberOfProcessForRequest = 40;
+        this.m_iFirstProcess = 0;
+    }
 
     ProcessesLogsController.prototype.getProcessDuration = function (oProcess) {
         //time by server
@@ -187,6 +227,11 @@ var ProcessesLogsController = (function() {
        return true;
     };
 
+    ProcessesLogsController.prototype.deleteProcess = function(oProcessInput)
+    {
+        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
+        return true;
+    };
 
 
     ProcessesLogsController.$inject = [

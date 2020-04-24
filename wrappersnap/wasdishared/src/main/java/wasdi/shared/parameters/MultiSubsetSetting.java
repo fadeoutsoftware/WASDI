@@ -10,8 +10,14 @@ public class MultiSubsetSetting implements ISetting {
 	ArrayList<Double> latSList = new ArrayList<>();
 	ArrayList<Double> lonEList = new ArrayList<>();
 	ArrayList<String> bands = new ArrayList<>();
+	boolean bigTiff = false;
 	
-	
+	public boolean getBigTiff() {
+		return bigTiff;
+	}
+	public void setBigTiff(boolean bigTiff) {
+		this.bigTiff = bigTiff;
+	}
 	public ArrayList<String> getOutputNames() {
 		return outputNames;
 	}

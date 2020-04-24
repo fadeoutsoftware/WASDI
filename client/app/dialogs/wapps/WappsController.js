@@ -23,6 +23,8 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         this.m_oModalService = oModalService;
         this.m_oConstantsService = oConstantsService;
+        // this.m_sSearchTextApp = "";
+
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
@@ -253,6 +255,9 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         utilsCollapseBootstrapPanels();
     };
+
+
+
     WappsController.$inject = [
         '$scope',
         'close',

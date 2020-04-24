@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.esa.snap.core.datamodel.Product;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -24,6 +25,7 @@ import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
+import wasdi.io.WasdiProductReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
@@ -77,7 +79,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param oProcessWorkspace Process Workspace to update the user
 	 * @return
 	 */
-    public abstract String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception;
+    public abstract String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception;
     
     /**
      * Abstract method to get the name of the file from the url
@@ -296,91 +298,96 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		
 		// Return file path
 		String sReturnFilePath = "";
-
-		// Basic HTTP Authentication
-		m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
 		
-		if (sDownloadUser != null) {
-			Authenticator.setDefault(new Authenticator() {
-				protected PasswordAuthentication getPasswordAuthentication() {
-					try {
-						return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
-					} catch (Exception oEx) {
-						m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth "
-								+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		try {
+			// Basic HTTP Authentication
+			//m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+			
+			if (sDownloadUser != null) {
+				Authenticator.setDefault(new Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						try {
+							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
+						} catch (Exception oEx) {
+							m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+						}
+						return null;
 					}
-					return null;
+				});
+			}
+
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+
+			URL oUrl = new URL(sFileURL);
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			oHttpConn.setRequestMethod("GET");
+			oHttpConn.setRequestProperty("Accept", "*/*");
+			oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+			int iResponseCode = oHttpConn.getResponseCode();
+
+			// always check HTTP response code first
+			if (iResponseCode == HttpURLConnection.HTTP_OK) {
+
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
+
+				String sFileName = "";
+				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+				String sContentType = oHttpConn.getContentType();
+				long lContentLength = oHttpConn.getContentLengthLong();
+
+				if (sDisposition != null) {
+					// extracts file name from header field
+					int index = sDisposition.indexOf("filename=");
+					if (index > 0) {
+						sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
+					}
+				} else {
+					// extracts file name from URL
+					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
 				}
-			});
-		}
 
-		m_oLogger.debug("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+				m_oLogger.debug("Content-Type = " + sContentType);
+				m_oLogger.debug("Content-Disposition = " + sDisposition);
+				m_oLogger.debug("Content-Length = " + lContentLength);
+				m_oLogger.debug("fileName = " + sFileName);
 
-		URL oUrl = new URL(sFileURL);
-		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-		oHttpConn.setRequestMethod("GET");
-		oHttpConn.setRequestProperty("Accept", "*/*");
-		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
-		int iResponseCode = oHttpConn.getResponseCode();
+				// opens input stream from the HTTP connection
+				InputStream oInputStream = oHttpConn.getInputStream();
+				
+				if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
+				
+				String sSaveFilePath = sSaveDirOnServer + sFileName;
 
-		// always check HTTP response code first
-		if (iResponseCode == HttpURLConnection.HTTP_OK) {
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
 
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
+				File oTargetFile = new File(sSaveFilePath);
+				File oTargetDir = oTargetFile.getParentFile();
+				oTargetDir.mkdirs();
 
-			String sFileName = "";
-			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
-			String sContentType = oHttpConn.getContentType();
-			long lContentLength = oHttpConn.getContentLengthLong();
+				// opens an output stream to save into file
+				FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
 
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
-
-			if (sDisposition != null) {
-				// extracts file name from header field
-				int index = sDisposition.indexOf("filename=");
-				if (index > 0) {
-					sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
+				//Retry should be handled by the specific provider ExecuteDownloadingFile Method
+				if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
+					sReturnFilePath = sSaveFilePath;
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 				}
+				else {
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
+				}
+
 			} else {
-				// extracts file name from URL
-				sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+				m_iLastError = iResponseCode;
 			}
-
-			m_oLogger.debug("Content-Type = " + sContentType);
-			m_oLogger.debug("Content-Disposition = " + sDisposition);
-			m_oLogger.debug("Content-Length = " + lContentLength);
-			m_oLogger.debug("fileName = " + sFileName);
-
-			// opens input stream from the HTTP connection
-			InputStream oInputStream = oHttpConn.getInputStream();
-			
-			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
-			
-			String sSaveFilePath = sSaveDirOnServer + sFileName;
-
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
-
-			File oTargetFile = new File(sSaveFilePath);
-			File oTargetDir = oTargetFile.getParentFile();
-			oTargetDir.mkdirs();
-
-			// opens an output stream to save into file
-			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
-
-			//Retry should be handled by the specific provider ExecuteDownloadingFile Method
-			if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
-				sReturnFilePath = sSaveFilePath;
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
-			}
-			else {
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
-			}
-
-		} else {
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
-			m_iLastError = iResponseCode;
+			oHttpConn.disconnect();			
 		}
-		oHttpConn.disconnect();
+		catch (Exception oEx) {
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Exception " + oEx.toString());
+			return "";
+		}
+
+
 		return sReturnFilePath;
 	}
 
@@ -447,13 +454,14 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					
 					// Update the progress
 					if (iZeroes == MAX_NUM_ZEORES_DURING_READ) {
-						UpdateProcessProgress(iFilePercent);
+						//UpdateProcessProgress(iFilePercent);
 					}
 				}
 			}
-			m_oLogger.debug("ProviderAdapter.copyStream: setting 100%");
+			
+			m_oLogger.debug("ProviderAdapter.copyStream: EOF received, set process to 100% [was " + iFilePercent + "%]");
 			UpdateProcessProgress(100);
-			m_oLogger.debug("ProviderAdapter.copyStream: closing streams");
+			
 			oOutputStream.close();
 			oInputStream.close();			
 		}

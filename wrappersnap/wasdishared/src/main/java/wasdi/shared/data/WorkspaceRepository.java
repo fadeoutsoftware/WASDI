@@ -2,9 +2,16 @@ package wasdi.shared.data;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
+
+import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.utils.Utils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,5 +140,38 @@ public class WorkspaceRepository extends  MongoRepository{
 
         return 0;
     }
+    
+    public boolean isOwnedByUser(String sUserId, String sWorkspaceId) {
+    	try {
+	    	Document oWSDocument = getCollection("workspaces").find(
+	        		Filters.and(
+	        				Filters.eq("userId", sUserId),
+	        				Filters.eq("workspaceId", sWorkspaceId)
+	        				)
+	        		).first();
+	    	if(null!=oWSDocument) {
+	    		return true;
+	    	}
+    	}catch (Exception oE) {
+			Utils.debugLog("WorkspaceRepository.belongsToUser( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+		}
+    	return false;
+    }
+
+	private void fillList(final ArrayList<Workspace> aoReturnList, FindIterable<Document> oWSDocuments) {
+		oWSDocuments.forEach(new Block<Document>() {
+		    public void apply(Document document) {
+		        String sJSON = document.toJson();
+		        Workspace oWorkspace = null;
+		        try {
+		            oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+		            aoReturnList.add(oWorkspace);
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+
+		    }
+		});
+	}
     
 }

@@ -399,57 +399,49 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			switch (oLauncherOperation) {
 			case INGEST: {
 				// Deserialize Parameters
-				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 				break;
 			case DOWNLOAD: {
 				// Deserialize Parameters
-				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 				break;
 			case FTPUPLOAD: {
 				// FTP Upload
-				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				ftpTransfer(oFtpTransferParameters);
 			}
 				break;
 			case PUBLISHBAND: {
 				// Deserialize Parameters
-				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				publishBandImage(oPublishBandParameter);
 			}
 				break;
 			case APPLYORBIT: {
 				// Deserialize Parameters
-				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
 			}
 				break;
 			case CALIBRATE: {
 				// Deserialize Parameters
-				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
 			}
 				break;
 			case MULTILOOKING: {
 				// Deserialize Parameters
-				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
 			}
 				break;
 			case TERRAIN: {
 				// Deserialize Parameters
-				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
 			}
 				break;
@@ -467,8 +459,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case RASTERGEOMETRICRESAMPLE: {
 				// Deserialize Parameters
-				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				rasterGeometricResample(oParameter);
 			}
 				break;
@@ -480,8 +471,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case DEPLOYPROCESSOR: {
 				// Deploy new user processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -491,8 +481,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			case RUNIDL:
 			case RUNPROCESSOR: {
 				// Execute User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -501,8 +490,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case DELETEPROCESSOR: {
 				// Delete User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -518,6 +506,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case MOSAIC: {
 				// Execute Mosaic Operation
+			
 				MosaicParameter oParameter = (MosaicParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMosaic(oParameter);
 			}
@@ -530,9 +519,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case MULTISUBSET: {
 				// Execute Multi Subset Operation
-				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
-				// executeMultiSubset(oParameter);
+				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeGDALMultiSubset(oParameter);
 			}
 				break;
@@ -546,6 +533,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeGDALRegrid(oParameter);
 			}
 				break;
+			case COPYTOSFTP: {
+				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				copyToSfpt(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("SFTP_ROOT_PATH", "/data/sftpuser"));
+			}
+				break;			
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -559,6 +551,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
 	}
+
 
 	/**
 	 * Execute a SNAP Workflow
@@ -728,6 +721,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
 
 					if (oAlreadyDownloaded == null) {
+						
 						s_oLogger.debug( "LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
 						// Check if it is already downloaded, in any workpsace
 						List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
@@ -775,11 +769,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 					// No: it isn't: download it
-					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
 					if (Utils.isNullOrEmpty(sFileName)) {
+						
 						int iLastError = oProviderAdapter.getLastServerError();
 						String sError = "There was an error contacting the provider";
+						
 						if (iLastError > 0)
 							sError += ": query obtained HTTP Error Code " + iLastError;
 						throw new Exception(sError);
@@ -981,8 +977,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
 
-		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(),
-				oParam.getPassword());
+		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
 
 		if (!oFtpClient.open()) {
 			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
@@ -1274,8 +1269,122 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		return "";
-
 	}
+	
+	/**
+	 * Copy a file from a workspace to the user sftp folder
+	 * @param oParameter IngestFileParameter with the reference of the file to move
+	 * @param sRootPath
+	 * @param sSftpPath
+	 * @return
+	 * @throws Exception
+	 */
+	public String copyToSfpt(IngestFileParameter oParameter, String sRootPath, String sSftpPath) throws Exception {
+		s_oLogger.debug("LauncherMain.copyToSfpt");
+
+		if (null == oParameter) {
+			String sMsg = "LauncherMain.copyToSfpt: null parameter";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+
+		if (null == sRootPath) {
+			String sMsg = "LauncherMain.copyToSfpt: null download path";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+
+		File oFileToMovePath = new File(oParameter.getFilePath());
+
+		if (!oFileToMovePath.canRead()) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: unable to access file to Move " + oFileToMovePath.getAbsolutePath();
+			s_oLogger.error(sMsg);
+			throw new IOException(sMsg);
+		}
+
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+
+		try {
+			if (oProcessWorkspace != null) {
+				// get file size
+				long lFileSizeByte = oFileToMovePath.length();
+
+				// set file size
+				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
+
+				// get process pid
+				// oProcessWorkspace.setPid(getProcessId());
+
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 5);
+			} else {
+				s_oLogger.error("LauncherMain.copyToSfpt: process workspace not found: " + oParameter.getProcessObjId());
+			}
+
+			String sDestinationPath = sSftpPath;
+			if (!sDestinationPath.endsWith("/")) sDestinationPath+="/";
+			sDestinationPath += oParameter.getUserId();
+			sDestinationPath += "/uploads/";
+
+			File oDstDir = new File(sDestinationPath);
+
+			if (!oDstDir.exists()) {
+				oDstDir.mkdirs();
+			}
+
+			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
+				s_oLogger.error("LauncherMain.copyToSfpt: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
+				throw new IOException("Unable to access destination directory for the Workspace");
+			}
+			
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+
+			// copy file to workspace directory
+			if (!oFileToMovePath.getParent().equals(oDstDir.getAbsolutePath())) {
+				s_oLogger.debug("LauncherMain.copyToSfpt: File in another folder make a copy");
+				FileUtils.copyFileToDirectory(oFileToMovePath, oDstDir);
+			} 
+			else {
+				s_oLogger.debug("LauncherMain.copyToSfpt: File already in place");
+			}
+
+			File oDstFile = new File(oDstDir, oFileToMovePath.getName());
+			
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+
+			return oDstFile.getAbsolutePath();
+
+		} catch (Exception e) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: Exception in copy file to sftp";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+
+		} 
+		catch (Throwable e) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: Throwable occurrend during file ingestion";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+		} finally {
+			// update process status and send rabbit updateProcess message
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+
+		return "";		
+	}	
 
 	public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
 			ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc)
@@ -2067,201 +2176,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * 
 	 * @param oParameter
 	 */
-	public void executeMultiSubset(MultiSubsetParameter oParameter) {
-
-		s_oLogger.debug("LauncherMain.executeMultiSubset: Start");
-
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		Product oInputProduct = null;
-
-		try {
-
-			if (oProcessWorkspace != null) {
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			}
-
-			String sSourceProduct = oParameter.getSourceProductName();
-			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
-
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-			File oProductFile = new File(getWorspacePath(oParameter) + sSourceProduct);
-			oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
-
-			if (oInputProduct == null) {
-				s_oLogger.error("LauncherMain.executeMultiSubset: product is not a SNAP product ");
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-				return;
-			}
-
-			// Take the Geo Coding
-			final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
-
-			if (oProcessWorkspace != null) {
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
-			}
-
-			int iTileCount = oSettings.getOutputNames().size();
-
-			int iStepPerTile = 80;
-
-			if (iTileCount > 0) {
-				iStepPerTile = 80 / iTileCount;
-				;
-			}
-
-			int iProgress = 20;
-
-			for (int iTiles = 0; iTiles < oSettings.getOutputNames().size(); iTiles++) {
-
-				String sOutputProduct = oSettings.getOutputNames().get(iTiles);
-
-				if (oSettings.getLatNList().size() <= iTiles) {
-					s_oLogger.debug("Lat N List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLatSList().size() <= iTiles) {
-					s_oLogger.debug("Lat S List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLonEList().size() <= iTiles) {
-					s_oLogger.debug("Lon E List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLonWList().size() <= iTiles) {
-					s_oLogger.debug("Lon W List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				s_oLogger.debug("Computing tile " + sOutputProduct);
-
-				// Create 2 GeoPos points
-				GeoPos oGeoPosNW = new GeoPos(oSettings.getLatNList().get(iTiles), oSettings.getLonWList().get(iTiles));
-				GeoPos oGeoPosSE = new GeoPos(oSettings.getLatSList().get(iTiles), oSettings.getLonEList().get(iTiles));
-
-				// Convert to Pixel Position
-				PixelPos oPixelPosNW = oGeoCoding.getPixelPos(oGeoPosNW, null);
-				if (!oPixelPosNW.isValid()) {
-					oPixelPosNW.setLocation(0, 0);
-				}
-
-				PixelPos oPixelPosSW = oGeoCoding.getPixelPos(oGeoPosSE, null);
-				if (!oPixelPosSW.isValid()) {
-					oPixelPosSW.setLocation(oInputProduct.getSceneRasterWidth(), oInputProduct.getSceneRasterHeight());
-				}
-
-				// Create the final region
-				Rectangle.Float oRegion = new Rectangle.Float();
-				oRegion.setFrameFromDiagonal(oPixelPosNW.x, oPixelPosNW.y, oPixelPosSW.x, oPixelPosSW.y);
-
-				// Create the product bound rectangle
-				Rectangle.Float oProductBounds = new Rectangle.Float(0, 0, oInputProduct.getSceneRasterWidth(),
-						oInputProduct.getSceneRasterHeight());
-
-				// Intersect
-				Rectangle2D oSubsetRegion = oProductBounds.createIntersection(oRegion);
-
-				ProductSubsetDef oSubsetDef = new ProductSubsetDef();
-				oSubsetDef.setRegion(oSubsetRegion.getBounds());
-				oSubsetDef.setIgnoreMetadata(false);
-				oSubsetDef.setSubSampling(1, 1);
-				oSubsetDef.setSubsetName("subset");
-				oSubsetDef.setTreatVirtualBandsAsRealBands(false);
-
-				if (oSettings.getBands().size() == 0) {
-					oSubsetDef.setNodeNames(oInputProduct.getBandNames());
-					oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
-				} else {
-					oSubsetDef.setNodeNames(oSettings.getBands().toArray(new String[oSettings.getBands().size()]));
-				}
-
-				Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct,
-						oInputProduct.getDescription());
-
-				if (oSubsetProduct != null) {
-					String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
-
-					ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset done for index " + iTiles);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
-
-					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(),
-							oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");
-				} else {
-					s_oLogger.debug("LauncherMain.executeMultiSubset Subset null for index " + iTiles);
-				}
-
-				oSubsetProduct.dispose();
-
-				if (oProcessWorkspace != null) {
-					iProgress = iProgress + iStepPerTile;
-					if (iProgress > 100)
-						iProgress = 100;
-					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING,
-							iProgress);
-				}
-
-			}
-
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.executeMultiSubset: exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(),
-						oParameter.getWorkspace(), sError, oParameter.getExchange());
-
-		} finally {
-
-			if (oInputProduct != null) {
-				try {
-					oInputProduct.closeProductReader();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				oInputProduct.dispose();
-			}
-
-			String sProcWSId = "";
-			if (oProcessWorkspace != null)
-				sProcWSId = oProcessWorkspace.getProcessObjId();
-
-			s_oLogger.debug("LauncherMain.executeMultiSubset: calling close Process Workspace");
-
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-
-			s_oLogger.debug("LauncherMain.executeMultiSubset: End [" + sProcWSId + "]");
-		}
-
-	}
-
-	/**
-	 * Computes and save a list subset all from an Input image (a tile or clip)
-	 * 
-	 * @param oParameter
-	 */
 	public void executeGDALMultiSubset(MultiSubsetParameter oParameter) {
 
 		s_oLogger.debug("LauncherMain.executeGDALMultiSubset: Start");
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 
@@ -2336,6 +2256,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				asArgs.add(oSettings.getLatNList().get(iTiles).toString());
 				asArgs.add(oSettings.getLonEList().get(iTiles).toString());
 				asArgs.add(oSettings.getLatSList().get(iTiles).toString());
+				
+				if (oSettings.getBigTiff()) {
+					asArgs.add("-co");
+					asArgs.add("BIGTIFF=YES");
+				}
 
 				asArgs.add(getWorspacePath(oParameter) + sSourceProduct);
 				asArgs.add(getWorspacePath(oParameter) + sOutputProduct);
@@ -2580,8 +2505,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("LauncherMain.executeMosaic: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
@@ -2936,9 +2860,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			getProcessIdMethod.setAccessible(true);
 			iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
 
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		} catch (Throwable oEx) {
+			try {
+				s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));				
+			}
+			finally {
+				s_oLogger.error("LauncherMain.GetProcessId: finally here");
+			}
 		}
 
 		return iPid;

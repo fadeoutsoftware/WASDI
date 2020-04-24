@@ -34,6 +34,7 @@ var EditorController = (function () {
 
         //filter query text in tree
         this.m_sTextQueryFilterInTree = "";
+        this.m_bIsFilteredTree = false;
 
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
@@ -1098,17 +1099,18 @@ var EditorController = (function () {
 
             this.m_aoVisibleBands.push(oBand);
 
-            //if there isn't Bounding Box is impossible to zoom
-            if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
-                this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
-            } else {
-                this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+            if (this.m_aoVisibleBands.length == 1) {
+                //if there isn't Bounding Box is impossible to zoom
+                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
+                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
+                } else {
+                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+                }
             }
-
         }
 
     };
@@ -1338,14 +1340,21 @@ var EditorController = (function () {
                 oController.m_oTree = oController.generateTree();
                 oController.m_bIsLoadingTree = false;
 
-                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                if( oController.m_b2DMapModeOn === false){
+                    oController.m_oMapService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                    oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+
+                } else {
+                    oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                    oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                }
+
+
             }
         }).error(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         });
     };
-
 
     /**
      * Open a Workspace and relod it whe the page is reloaded
@@ -3829,26 +3838,10 @@ var EditorController = (function () {
                                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
                                                     oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
-                                                        var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                        var iLengthChildren_d = that.temp.children_d.length;
 
-                                                        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-                                                            oController.removeAllRedSquareBoundingBox();
-                                                            oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
+                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
 
 
-                                                                if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
-                                                                    oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                                    break;
-                                                                }
-
-                                                            }
-
-                                                        }
-
-                                                        //reload product list
-                                                        oController.getProductListByWorkspace();
 
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
@@ -4007,24 +4000,8 @@ var EditorController = (function () {
                                                     this.temp = $node;
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
-                                                        var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                        var iLengthChildren_d = that.temp.children_d.length;
+                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
 
-                                                        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-                                                            oController.removeAllRedSquareBoundingBox();
-                                                            oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
-                                                                if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
-                                                                    oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                                    break;
-                                                                }
-
-                                                            }
-
-                                                        }
-
-                                                        //reload product list
-                                                        oController.getProductListByWorkspace();
 
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
@@ -4188,18 +4165,86 @@ var EditorController = (function () {
         }
         return false;
     };
+
     EditorController.prototype.isActiveEditorMode = function () {
         return this.m_bIsActiveGeoraphicalMode === false;
-    }
+    };
+
     EditorController.prototype.filterTree = function (sTextQuery) {
+
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
             sTextQuery = "";
+            this.m_bIsFilteredTree = false;
+        } else {
+            this.m_bIsFilteredTree = true;
         }
 
+        //TODO i need to show the loading icon in html
+
+        // let test = function(search,node){
+        //     alert("sono una prova");
+        // };
+        // let oggetoTest={
+        //     "search": {
+        //         "search_callback": function(search,node){
+        //             alert("sono una prova");
+        //         },
+        //     }
+        //
+        // };
+        // $('#jstree').jstree(oggetoTest);
         $('#jstree').jstree(true).search(sTextQuery);//,false,true
 
         return true;
-    }
+    };
+
+    EditorController.prototype.cleanFilterTree = function () {
+        this.m_sTextQueryFilterInTree = '';
+        this.filterTree(null);
+    };
+
+    EditorController.prototype.deleteProductInNavigation = function(aoVisibleBands,oChildrenNode){
+        // // In georeferenced mode or not?
+        // if (this.m_bIsActiveGeoraphicalMode == true) {
+
+        if( this.m_b2DMapModeOn === false){
+
+            this.deleteProductInMap();
+        } else {
+            this.deleteProductInGlobe(aoVisibleBands,oChildrenNode);
+        }
+    };
+
+    EditorController.prototype.deleteProductInMap = function(){
+        this.m_oMapService.clearMap();
+        this.m_oMapService.initWasdiMap('wasdiMap2');
+
+        //reload product list
+        this.getProductListByWorkspace();
+    };
+
+    EditorController.prototype.deleteProductInGlobe = function(aoVisibleBands,oChildrenNode){
+        var iLengthLayer = aoVisibleBands.length;
+        var iLengthChildren_d = oChildrenNode.length;//that.temp.children_d
+
+        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
+
+            this.removeAllRedSquareBoundingBox();// it's in wrong place ?
+
+            this.m_oGlobeService.addAllWorkspaceRectanglesOnMap(this.m_aoProducts);
+            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
+                if (oChildrenNode[iIndexChildren] === aoVisibleBands[iIndexLayer].layerId) {
+                    this.removeBandImage(aoVisibleBands[iIndexChildren]);
+                    break;
+                }
+
+            }
+
+        }
+
+        //reload product list
+        this.getProductListByWorkspace();
+    };
     EditorController.$inject = [
         '$scope',
         '$location',

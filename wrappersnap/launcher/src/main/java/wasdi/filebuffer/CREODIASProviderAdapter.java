@@ -70,7 +70,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 */
 	@Override
 	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
-			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// TODO fail instead
 		if(Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty");

@@ -1,3 +1,4 @@
+
 """
 FADEOUT SOFTWARE 
 
@@ -31,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.3.2
-Last Update: 02/04/2020
+Version 0.4.1
+Last Update: 22/04/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -53,6 +54,7 @@ import zipfile
 import requests
 import getpass
 import sys
+import os.path
 
 # Initialize "Members"
 m_sUser = None
@@ -485,6 +487,8 @@ def _loadConfig(sConfigFilePath):
                 m_bUploadActive = bool(oJson["UPLOADACTIVE"])
             if "VERBOSE" in oJson:
                 m_bVerbose = bool(oJson["VERBOSE"])
+            if 'BASEURL' in oJson:
+                setBaseUrl(oJson['BASEURL'])
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -504,14 +508,16 @@ def _loadParams():
     bParamLoaded = False
     if (m_sParametersFilePath is not None) and (m_sParametersFilePath != ''):
         try:
+            if not os.path.isfile(m_sParametersFilePath):
+                wasdiLog('[WARNING] _loadParams: parameters file not found')
             with open(m_sParametersFilePath) as oJsonFile:
                 m_aoParamsDictionary = json.load(oJsonFile)
                 bParamLoaded = True
-        except:
-            pass
+        except Exception as oE:
+            wasdiLog('[WARNING] _loadParams: could not open file due to: ' + str(oE))
 
     if not bParamLoaded:
-        _log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
+        _log('[INFO] _loadParams: wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
 
 def refreshParameters():
@@ -1028,29 +1034,38 @@ def getProcessStatus(sProcessId):
     """
     get the status of a Process
     :param sProcessId: Id of the process to query
-    :return: the status or '' if there was any error
+    :return: the status or 'ERROR' if there was any error
 
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
     """
     global m_sBaseUrl
     global m_sSessionId
+    
+    if sProcessId is None:
+        _log('[ERROR] waspy.getProcessStatus: Passed None, expected a process ID' +
+             '  ******************************************************************************')
+        return "ERROR"
+
+    if sProcessId == '':
+        _log('[ERROR] waspy.getProcessStatus: Passed empty, expected a process ID' +
+             '  ******************************************************************************')
+        return "ERROR"    
 
     asHeaders = _getStandardHeaders()
-    payload = {'sProcessId': sProcessId}
+    payload = {'processObjId': sProcessId}
 
-    sUrl = m_sBaseUrl + '/process/byid'
+    sUrl = m_sBaseUrl + '/process/getstatusbyid'
 
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
     sStatus = ''
 
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResult = oResult.json()
-
+    if (oResult is not None) and oResult.ok:
         try:
-            sStatus = oJsonResult['status']
-        except:
-            sStatus = ''
+            sStatus = oResult.text
+        except Exception as oE:
+            print('[ERROR] waspy.getProcessStatus: ' + str(oE))
+            sStatus = 'ERROR'
 
     return sStatus
 
@@ -1269,7 +1284,7 @@ def setPayload(data):
     if m_bIsOnServer is True:
         setProcessPayload(m_sMyProcId, data)
     else:
-        _log(str(data))
+        _log('wasdi.setPayload( ' + str(data))
 
 
 def saveFile(sFileName):
@@ -1598,11 +1613,14 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
+        wasdiLog("searchEOImages: Start Provider Query")
         asHeaders = _getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
+        wasdiLog("searchEOImages: Query Done, starting conversion")
         try:
             # populate list from response
             oJsonResponse = oResponse.json()
+            wasdiLog("searchEOImages: Conversion done")
             aoReturnList = oJsonResponse
         except Exception as oEx:
             print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object' +
@@ -1673,8 +1691,8 @@ def fileExistsOnWasdi(sFileName):
         print('[ERROR] waspy.fileExistsOnWasdi: failed contacting the server' +
               '  ******************************************************************************')
         return False
-    elif oResult.ok is not True:
-        print('[ERROR] waspy.fileExistsOnWasdi: failed, server returned: ' + str(oResult.status_code) +
+    elif not oResult.ok and not 500 == oResult.status_code:
+        print('[ERROR] waspy.fileExistsOnWasdi: unexpected failure, server returned: ' + str(oResult.status_code) +
               '  ******************************************************************************')
         return False
     else:
@@ -2069,6 +2087,8 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     :param aoParams: a dictionary of parameters for the processor
     :return: processor ID
     """
+    
+    global m_sActiveWorkspace
 
     _log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
 
@@ -2097,6 +2117,7 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     sUrl = getBaseUrl() + "/processors/run"
 
     oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams)
+    
     if oResponse is None:
         print('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting' +
               '  ******************************************************************************')
@@ -2117,17 +2138,92 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     return ''
 
 
+
 def executeProcessor(sProcessorName, aoProcessParams):
     """
-    Executes a WASDI Processor
+    Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
     :param sProcessorName: WASDI processor name
     :param aoParams: a dictionary of parameters for the processor    
     :return: the Process Id if every thing is ok, '' if there was any problem
     """
-    global m_sBaseUrl
-    global m_sSessionId
     global m_sActiveWorkspace
+    
+    if sProcessorName is None:
+        print('[ERROR] waspy.executeProcessor: processor name is None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    elif len(sProcessorName) <= 0:
+        print('[ERROR] waspy.executeProcessor: processor name empty, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if isinstance(aoProcessParams, dict) is not True:
+        print('[ERROR] waspy.executeProcessor: parameters must be a dictionary but it is not, aborting' +
+              '  ******************************************************************************')
+        return ''    
+    
+    # Prepare API headers and params
+    sEncodedParams = json.dumps(aoProcessParams)
+    
+    asHeaders = _getStandardHeaders()
+    
+    sUrl = getBaseUrl() + '/processors/run?workspace=' + m_sActiveWorkspace + '&name='+sProcessorName
+    
+    if m_bIsOnServer:
+        sUrl = sUrl + '&parent=' + getProcId()
+  
+    # Try up to three time
+    iMaxRetry = 3
+    
+    for iAttempt in range(iMaxRetry):
+        
+        wasdiLog("[INFO]: execute Processor Attempt # " + str(iAttempt+1))
+        
+        oResult = requests.post(sUrl, data=sEncodedParams, headers=asHeaders)
+        
+        if oResult is None:
+            wasdiLog('[ERROR] waspy.executeProcessor: something broke when contacting the server')
+        elif oResult.ok is True:
+            _log('[INFO] waspy.executeProcessor: API call OK')
+            aoJson = oResult.json()
+            if "processingIdentifier" in aoJson:
+                sProcessID = aoJson['processingIdentifier']
+                return sProcessID
+            else:
+                wasdiLog('[ERROR] waspy.executeProcessor: cannot extract processing identifier from response, aborting')
+        else:
+            wasdiLog('[ERROR] waspy.executeProcessor: server returned status ' + str(oResult.status_code))
+        
+        wasdiLog("[ERROR]: Error triggering the new process.")
+        time.sleep(5)
+    
+    wasdiLog("[ERROR]: process not triggered, too many errors")
+    
+    # If we exit from the cycle, we do not have any result for our client...
+    return ''
 
+def _executeProcessorV1(sProcessorName, aoProcessParams):
+    """
+    Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
+    :param sProcessorName: WASDI processor name
+    :param aoParams: a dictionary of parameters for the processor    
+    :return: the Process Id if every thing is ok, '' if there was any problem
+    """
+    global m_sActiveWorkspace
+    
+    if sProcessorName is None:
+        print('[ERROR] waspy.executeProcessor: processor name is None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    elif len(sProcessorName) <= 0:
+        print('[ERROR] waspy.executeProcessor: processor name empty, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if isinstance(aoProcessParams, dict) is not True:
+        print('[ERROR] waspy.executeProcessor: parameters must be a dictionary but it is not, aborting' +
+              '  ******************************************************************************')
+        return ''    
+    
+    # Prepare API headers and params
     sEncodedParams = json.dumps(aoProcessParams)
     asHeaders = _getStandardHeaders()
     aoParams = {'workspace': m_sActiveWorkspace,
@@ -2137,21 +2233,37 @@ def executeProcessor(sProcessorName, aoProcessParams):
     if m_bIsOnServer:
         aoParams['parent'] = getProcId()
 
-    sUrl = m_sBaseUrl + '/processors/run'
-
-    oResult = requests.get(sUrl, headers=asHeaders, params=aoParams)
-
-    sProcessId = ''
-
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResults = oResult.json()
-
-        try:
-            sProcessId = oJsonResults['processingIdentifier']
-        except:
-            return sProcessId
-
-    return sProcessId
+    sUrl = getBaseUrl() + '/processors/run'
+    
+    # Try up to three time
+    iMaxRetry = 3
+    
+    for iAttempt in range(iMaxRetry):
+        
+        wasdiLog("[INFO]: execute Processor Attempt # " + str(iAttempt+1))
+    
+        oResult = requests.get(sUrl, headers=asHeaders, params=aoParams)
+        
+        if oResult is None:
+            wasdiLog('[ERROR] waspy.executeProcessor: something broke when contacting the server')
+        elif oResult.ok is True:
+            _log('[INFO] waspy.executeProcessor: API call OK')
+            aoJson = oResult.json()
+            if "processingIdentifier" in aoJson:
+                sProcessID = aoJson['processingIdentifier']
+                return sProcessID
+            else:
+                wasdiLog('[ERROR] waspy.executeProcessor: cannot extract processing identifier from response, aborting')
+        else:
+            wasdiLog('[ERROR] waspy.executeProcessor: server returned status ' + str(oResult.status_code))
+        
+        wasdiLog("[ERROR]: Error triggering the new process.")
+        time.sleep(5)
+    
+    wasdiLog("[ERROR]: process not triggered, too many errors")
+    
+    # If we exit from the cycle, we do not have any result for our client...
+    return ''
 
 
 def waitProcess(sProcessId):
@@ -2483,7 +2595,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     return ''
 
 
-def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
+def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff=False):
     """
     Creates a Many Subsets from an image. MAX 10 TILES PER CALL
     :param sInputFile: Input file 
@@ -2533,7 +2645,10 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE):
     aoBody["lonWList"] = adLonW;
     aoBody["latSList"] = adLatS;
     aoBody["lonEList"] = adLonE;
-
+    
+    if bBigTiff:
+        aoBody["bigTiff"] = True 
+    
     sSubsetSetting = json.dumps(aoBody)
     asHeaders = _getStandardHeaders()
 
@@ -2832,6 +2947,94 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     return ''
 
 
+
+def copyFileToSftp(sFileName, bAsynch=None):
+    """
+    Copy a file from a workspace to the WASDI user's SFTP Folder
+    
+    :param sFileName: FIle name (with extension, without path) to copy in the SFTP folder
+    :param bAsynch: True to return after the triggering, False to wait the process to finish
+    :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure    
+    """
+    
+    _log('[INFO] waspy.copyFileToSftp( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
+
+    if sFileName is None:
+        print('[ERROR] waspy.copyFileToSftp: file name is None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if not isinstance(sFileName, str):
+        print('[WARNING] waspy.copyFileToSftp: file name is not a string, trying conversion' +
+              '  ******************************************************************************')
+        try:
+            sFileName = str(sFileName)
+        except:
+            print('[ERROR] waspy.copyFileToSftp: cannot convert file name into string, aborting' +
+                  '  ******************************************************************************')
+            return ''
+    if len(sFileName) < 1:
+        print('[ERROR] waspy.copyFileToSftp: file name has zero length, aborting' +
+              '  ******************************************************************************')
+        return ''
+
+    if bAsynch is None:
+        print('[WARNING] waspy.copyFileToSftp: asynch flag is None, assuming False')
+        bAsynch = False
+    if not isinstance(bAsynch, bool):
+        print('[WARNING] waspy.copyFileToSftp: asynch flag is not a boolean, trying casting')
+        try:
+            bAsynch = bool(bAsynch)
+        except:
+            print('[ERROR] waspy.copyFileToSftp: could not convert asynch flag into bool, aborting' +
+                  '  ******************************************************************************')
+            return ''
+
+    sResult = ''
+    try:
+        if getUploadActive() is True:
+            sFilePath = os.path.join(getSavePath(), sFileName)
+            if fileExistsOnWasdi(sFilePath) is False:
+                _log('[INFO] waspy.copyFileToSftp: remote file is missing, uploading')
+                try:
+                    uploadFile(sFileName)
+                    _log('[INFO] waspy.moveFileToSftp: file uploaded, keep on working!')
+                except:
+                    print('[ERROR] waspy.copyFileToSftp: could not proceed with upload' +
+                          '  ******************************************************************************')
+
+        sUrl = getWorkspaceBaseUrl() + "/catalog/copytosfpt?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
+
+        if m_bIsOnServer:
+            sUrl += "&parent="
+            sUrl += getProcId()
+
+        asHeaders = _getStandardHeaders()
+        oResponse = requests.get(url=sUrl, headers=asHeaders)
+        if oResponse is None:
+            print('[ERROR] waspy.copyFileToSftp: cannot contact server' +
+                  '  ******************************************************************************')
+        elif oResponse.ok is not True:
+            print('[ERROR] waspy.copyFileToSftp: failed, server replied ' + str(oResponse.status_code) +
+                  '  ******************************************************************************')
+        else:
+            oJson = oResponse.json()
+            if 'stringValue' in oJson:
+                bOk = bool(oJson['boolValue'])
+                if bOk:
+                    sProcessId = str(oJson['stringValue'])
+                    if bAsynch is True:
+                        sResult = sProcessId
+                    else:
+                        sResult = waitProcess(sProcessId)
+                else:
+                    print('[ERROR] waspy.copyFileToSftp: impossible to move file in the user WASDI sftp folder')
+    except:
+        print('[ERROR] waspy.copyFileToSftp: something broke alongside' +
+              '  ******************************************************************************')
+
+    return sResult
+
+
 def _getDefaultCRS():
     return (
             "GEOGCS[\"WGS84(DD)\", \r\n" +
@@ -2998,3 +3201,43 @@ def _importAndPreprocessV1(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sPro
     # Checkpoint: wait for all asynch workflows to finish
     wasdiLog("All image imported, waiting for all workflows to finish")
     waitProcesses(asRunningProcList)
+
+
+def getProcessorPayload(sProcessObjId, bAsJson=False):
+    """
+    Retrieves the payload
+    :param sProcessObjId: a valid processor obj id
+    :param bAsJson: flag to indicate whether the payload is a json object: if True, then a dictionary is returned
+    :return: the processor payload if present, None otherwise
+    """
+    try:
+        if sProcessObjId is None:
+            wasdiLog('[WARNING] waspy.getProcessorPayload: process obj id is None, aborting')
+            return None
+        sUrl = getBaseUrl() + '/process/payload'
+        asParams = {'processObjId': sProcessObjId}
+        asHeaders = _getStandardHeaders()
+        oResponse = requests.get(url=sUrl, headers=asHeaders, params=asParams)
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.getProcessorPayload: response is None, failing')
+            return None
+        if oResponse.ok:
+            if bAsJson:
+                return oResponse.json()
+            else:
+                return oResponse.text
+        else:
+            wasdiLog('[ERROR] waspy.getProcessorPayload: response status not ok: ' + str(oResponse.status_code) +
+                     ': ' + str(oResponse.text))
+    except Exception as oE:
+        wasdiLog('[ERROR] waspy.getProcessorPayload: ' + str(oE))
+    return None
+
+
+def getProcessorPayloadAsJson(sProcessorPayload):
+    """
+    Retrieves the payload in json format using getProcessorPayload
+    :param sProcessObjId: a valid processor obj id
+    :return: the processor payload if present as a dictionary, None otherwise
+    """
+    return getProcessorPayload(sProcessorPayload, True)

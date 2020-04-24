@@ -66,7 +66,12 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		if (oParameter == null) return false;
 		
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		ProcessWorkspace oProcessWorkspace = null;		
+		
+		// First Check if processor exists
+		String sProcessorName = oParameter.getName();
+		String sProcessorId = oParameter.getProcessorID();
 		
 		try {
 			
@@ -75,9 +80,6 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
-			// First Check if processor exists
-			String sProcessorName = oParameter.getName();
-			String sProcessorId = oParameter.getProcessorID();
 			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
@@ -92,7 +94,11 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			// Check it
 			if (oProcessorZipFile.exists()==false) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
-				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: delete processor db entry");
+					oProcessorRepository.deleteProcessor(sProcessorId);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
 				return false;
 			}
 			
@@ -102,7 +108,11 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			// Unzip the processor (and check for entry point)
 			if (!UnzipProcessor(sProcessorFolder, sProcessorName, sProcessorId + ".zip")) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
-				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: delete processor db entry");
+					oProcessorRepository.deleteProcessor(sProcessorId);
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
 				return false;
 			}
 		    
@@ -132,18 +142,6 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			if(null!= oCallIdlWriter) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating call_idl.pro file");
-
-				/*oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write("STARTWASDI, '"+sProcessorFolder+"config.properties'");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write(".r "+sProcessorFolder + sProcessorName + ".pro");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write(sProcessorName);
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write("exit");
-				oCallIdlWriter.flush();
-				oCallIdlWriter.close();*/
 				
 				oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
 				oCallIdlWriter.newLine();
@@ -223,11 +221,19 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 		}
 		catch (Exception oEx) {
-			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor Exception", oEx);
 			try {
-				if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (bFirstDeploy) {
+					
+					try {
+						oProcessorRepository.deleteProcessor(sProcessorId);
+					}
+					catch (Exception oInnerEx) {
+						LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oInnerEx);
+					}					
+					
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
 			} catch (JsonProcessingException e) {
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor Exception", e);
 			}

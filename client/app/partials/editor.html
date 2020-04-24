@@ -4,8 +4,31 @@
     <div class="row-v4 justify-content-end toolbar">
 
         <div class="col-v4-auto mr-auto filter-search-wrapper"><!--mr-auto-->
-            <input type="text" name="name" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"
-                   required="required" ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)" placeholder="Tree filter">
+            <div class="row-v4">
+                <div class="col-v4-auto" style="padding-right: 0px">
+                    <input type="text" name="name" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"
+                           required="required"  placeholder="Products Filter..."> <!--ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)"-->
+                </div>
+                <div class="col-v4-auto" style="padding-left: 3px">
+                    <button class="btn btn-wasdi fa btn-outline-primary"
+                            title="Apply Filter"
+                            ng-disabled="m_oController.m_sTextQueryFilterInTree.length  === 0"
+                            ng-click="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)">
+                        <i class="fa fa-search" aria-hidden="true" style="margin-right: 0px;"></i>
+                    </button>
+
+                    <button class="btn btn-wasdi fa btn-outline-primary"
+                            title="Clean Filter"
+                            ng-click="m_oController.cleanFilterTree(); "
+                            ng-disabled="m_oController.m_bIsFilteredTree === false">
+                        <i class="fa fa-trash" aria-hidden="true" style="margin-right: 0px;"></i>
+
+                    </button>
+
+                </div>
+            </div>
+
+
         </div>
 
         <div class="col-v4-auto button-menu-with-icons pl-1"
@@ -50,6 +73,8 @@
             <div class="card flex-grow-1 mb-4">
                 <div class="card-header">
                     {{"EDITOR_TITLE_PANEL_PRODUCTS"|translate}}
+                    <span class="badge">{{m_oController.m_aoProducts.length}}</span>
+
                     <div ng-click="m_oController.openPublishedBandsInTree()" class="my-button" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_OPEN_BAND'|translate}}">
                         <i class="fa fa-folder-open-o" aria-hidden="true"></i>
                     </div>
