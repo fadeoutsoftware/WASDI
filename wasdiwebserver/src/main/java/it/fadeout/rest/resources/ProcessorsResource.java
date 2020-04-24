@@ -289,13 +289,33 @@ public class ProcessorsResource {
 	}
 	
 	
+	@POST
+	@Path("/run")
+	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("parent") String sParentProcessWorkspaceId, String sEncodedJson) throws Exception {
+		Utils.debugLog("ProcessorsResource.run( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
+		
+		Utils.debugLog("ProcessorsResource.internalRun: run@POST");
+		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
+	}
+	
+	
 	@GET
 	@Path("/run")
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId) throws Exception {
-		Utils.debugLog("ProcessorsResource.run( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
+		
+		
+		Utils.debugLog("ProcessorsResource.internalRun: run@GET");
+		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
+	}
+	
+	
+	public RunningProcessorViewModel internalRun(String sSessionId, String sName, String sEncodedJson, String sWorkspaceId, String sParentProcessWorkspaceId) throws Exception {
+		Utils.debugLog("ProcessorsResource.internalRun( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
 		
@@ -309,12 +329,12 @@ public class ProcessorsResource {
 			
 			String sUserId = oUser.getUserId();
 		
-			Utils.debugLog("ProcessorsResource.run: get Processor");	
+			Utils.debugLog("ProcessorsResource.internalRun: get Processor");
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 			
 			if (oProcessorToRun == null) { 
-				Utils.debugLog("ProcessorsResource.run: unable to find processor " + sName);
+				Utils.debugLog("ProcessorsResource.internalRun: unable to find processor " + sName);
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;
 			}
@@ -344,7 +364,7 @@ public class ProcessorsResource {
 			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, sPath, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
-				Utils.debugLog("ProcessorsResource.run: create task");
+				Utils.debugLog("ProcessorsResource.internalRun: create task");
 				
 				if (oResult.getBoolValue()==false) {
 					throw new Exception();
@@ -355,16 +375,16 @@ public class ProcessorsResource {
 				oRunningProcessorViewModel.setProcessingIdentifier(oResult.getStringValue());
 				oRunningProcessorViewModel.setProcessorId(oProcessorToRun.getProcessorId());
 				oRunningProcessorViewModel.setStatus("CREATED");
-				Utils.debugLog("ProcessorsResource.run: done"); 
+				Utils.debugLog("ProcessorsResource.internalRun: done"); 
 			}
 			catch(Exception oEx){
-				Utils.debugLog("ProcessorsResource.run: Error scheduling the run process " + oEx);
+				Utils.debugLog("ProcessorsResource.internalRun: Error scheduling the run process " + oEx);
 				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 				return oRunningProcessorViewModel;
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessorsResource.run: " + oEx );
+			Utils.debugLog("ProcessorsResource.internalRun: " + oEx );
 			oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 			return oRunningProcessorViewModel;
 		}
