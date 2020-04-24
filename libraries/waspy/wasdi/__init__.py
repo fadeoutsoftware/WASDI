@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.3.5
-Last Update: 21/04/2020
+Version 0.4.1
+Last Update: 22/04/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -1613,11 +1613,14 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
+        wasdiLog("searchEOImages: Start Provider Query")
         asHeaders = _getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
+        wasdiLog("searchEOImages: Query Done, starting conversion")
         try:
             # populate list from response
             oJsonResponse = oResponse.json()
+            wasdiLog("searchEOImages: Conversion done")
             aoReturnList = oJsonResponse
         except Exception as oEx:
             print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object' +
@@ -2135,7 +2138,70 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     return ''
 
 
+
 def executeProcessor(sProcessorName, aoProcessParams):
+    """
+    Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
+    :param sProcessorName: WASDI processor name
+    :param aoParams: a dictionary of parameters for the processor    
+    :return: the Process Id if every thing is ok, '' if there was any problem
+    """
+    global m_sActiveWorkspace
+    
+    if sProcessorName is None:
+        print('[ERROR] waspy.executeProcessor: processor name is None, aborting' +
+              '  ******************************************************************************')
+        return ''
+    elif len(sProcessorName) <= 0:
+        print('[ERROR] waspy.executeProcessor: processor name empty, aborting' +
+              '  ******************************************************************************')
+        return ''
+    if isinstance(aoProcessParams, dict) is not True:
+        print('[ERROR] waspy.executeProcessor: parameters must be a dictionary but it is not, aborting' +
+              '  ******************************************************************************')
+        return ''    
+    
+    # Prepare API headers and params
+    sEncodedParams = json.dumps(aoProcessParams)
+    
+    asHeaders = _getStandardHeaders()
+    
+    sUrl = getBaseUrl() + '/processors/run?workspace=' + m_sActiveWorkspace + '&name='+sProcessorName
+    
+    if m_bIsOnServer:
+        sUrl = sUrl + '&parent=' + getProcId()
+  
+    # Try up to three time
+    iMaxRetry = 3
+    
+    for iAttempt in range(iMaxRetry):
+        
+        wasdiLog("[INFO]: execute Processor Attempt # " + str(iAttempt+1))
+        
+        oResult = requests.post(sUrl, data=sEncodedParams, headers=asHeaders)
+        
+        if oResult is None:
+            wasdiLog('[ERROR] waspy.executeProcessor: something broke when contacting the server')
+        elif oResult.ok is True:
+            _log('[INFO] waspy.executeProcessor: API call OK')
+            aoJson = oResult.json()
+            if "processingIdentifier" in aoJson:
+                sProcessID = aoJson['processingIdentifier']
+                return sProcessID
+            else:
+                wasdiLog('[ERROR] waspy.executeProcessor: cannot extract processing identifier from response, aborting')
+        else:
+            wasdiLog('[ERROR] waspy.executeProcessor: server returned status ' + str(oResult.status_code))
+        
+        wasdiLog("[ERROR]: Error triggering the new process.")
+        time.sleep(5)
+    
+    wasdiLog("[ERROR]: process not triggered, too many errors")
+    
+    # If we exit from the cycle, we do not have any result for our client...
+    return ''
+
+def _executeProcessorV1(sProcessorName, aoProcessParams):
     """
     Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
     :param sProcessorName: WASDI processor name

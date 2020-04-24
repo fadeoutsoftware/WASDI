@@ -1,10 +1,17 @@
 # \_\_/== Changelog ==\\\_\_
 
-## [0.3.6] - 2020-04-22
+## [0.4.1] - 2020-04-22
+
+## Added
+
+- added log in searchEOImages
+
+## [0.4.0] - 2020-04-22
 
 ## Added
 
 - check for availability of params file
+- executeProcessor supporting POST other than GET
 
 ## Fixed
 
