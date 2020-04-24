@@ -42,7 +42,7 @@ public class DownloadFileParameter extends BaseParameter{
     /**
      * Number of Retry
      */
-    private int maxRetry = 3;
+    private int maxRetry = 5;
 
 
 	public int getMaxRetry() {

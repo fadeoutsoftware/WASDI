@@ -301,7 +301,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		
 		try {
 			// Basic HTTP Authentication
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+			//m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
 			
 			if (sDownloadUser != null) {
 				Authenticator.setDefault(new Authenticator() {
@@ -309,8 +309,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						try {
 							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
 						} catch (Exception oEx) {
-							m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth "
-									+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+							m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 						}
 						return null;
 					}
@@ -335,8 +334,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 				String sContentType = oHttpConn.getContentType();
 				long lContentLength = oHttpConn.getContentLengthLong();
-
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
 				if (sDisposition != null) {
 					// extracts file name from header field
@@ -373,7 +370,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				//Retry should be handled by the specific provider ExecuteDownloadingFile Method
 				if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
 					sReturnFilePath = sSaveFilePath;
-					
 					m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 				}
 				else {
@@ -458,13 +454,14 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					
 					// Update the progress
 					if (iZeroes == MAX_NUM_ZEORES_DURING_READ) {
-						UpdateProcessProgress(iFilePercent);
+						//UpdateProcessProgress(iFilePercent);
 					}
 				}
 			}
-			m_oLogger.debug("ProviderAdapter.copyStream: setting 100%");
+			
+			m_oLogger.debug("ProviderAdapter.copyStream: EOF received, set process to 100% [was " + iFilePercent + "%]");
 			UpdateProcessProgress(100);
-			m_oLogger.debug("ProviderAdapter.copyStream: closing streams");
+			
 			oOutputStream.close();
 			oInputStream.close();			
 		}
