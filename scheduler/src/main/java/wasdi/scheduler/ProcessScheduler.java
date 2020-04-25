@@ -108,7 +108,10 @@ public class ProcessScheduler extends Thread {
 			// Read Max Size of Concurrent Processes of this scheduler 
 			try {
 				int iMaxConcurrents = Integer.parseInt(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_MAX_QUEUE"));
-				if (iMaxConcurrents>0) m_iNumberOfConcurrentProcess = iMaxConcurrents;
+				if (iMaxConcurrents>0) {
+					m_iNumberOfConcurrentProcess = iMaxConcurrents;
+					WasdiScheduler.log(m_sLogPrefix + " Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -116,7 +119,10 @@ public class ProcessScheduler extends Thread {
 			// Read Timeout of this scheduler 
 			try {
 				long lTimeout = Long.parseLong(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_TIMEOUT_MS"));
-				if (lTimeout>0) m_lSleepingTimeMS = lTimeout;
+				if (lTimeout>0) {
+					m_lTimeOutMs = lTimeout;
+					WasdiScheduler.log(m_sLogPrefix + " TimeOut Ms: " + m_lTimeOutMs);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -143,14 +149,20 @@ public class ProcessScheduler extends Thread {
 			
 			try {
 				long iThreadSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadSleepingTimeMS", "2000"));
-				if (iThreadSleep>0) m_lSleepingTimeMS = iThreadSleep;
+				if (iThreadSleep>0) {
+					m_lSleepingTimeMS = iThreadSleep;
+					WasdiScheduler.log(m_sLogPrefix + " CatNap Ms: " + m_lSleepingTimeMS);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
 			try {
 				long iStartWaitSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadWaitStartMS", "2000"));
-				if (iStartWaitSleep>0) m_lWaitProcessStartMS = iStartWaitSleep;
+				if (iStartWaitSleep>0) {
+					m_lWaitProcessStartMS = iStartWaitSleep;
+					WasdiScheduler.log(m_sLogPrefix + " Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -316,7 +328,7 @@ public class ProcessScheduler extends Thread {
 						}
 						
 						// Is there a timeout?
-						if (m_lTimeOutMs != -1) {				
+						if (m_lTimeOutMs != -1) {
 							// Check the last state change
 							if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeDate())) {
 								
