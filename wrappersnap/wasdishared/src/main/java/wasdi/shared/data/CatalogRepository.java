@@ -16,6 +16,10 @@ import wasdi.shared.business.Catalog;
  * Created by s.adamo on 02/03/2017.
  */
 public class CatalogRepository extends MongoRepository{
+	
+	public CatalogRepository() {
+		m_sThisCollection = "catalog";
+	}
 
 	/**
 	 * Insert new Catalog
@@ -25,7 +29,7 @@ public class CatalogRepository extends MongoRepository{
     public boolean insertCatalogEntry(Catalog oCatalog) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oCatalog);
-            getCollection("catalog").insertOne(Document.parse(sJSON));
+            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
 
             return true;
 
@@ -45,7 +49,7 @@ public class CatalogRepository extends MongoRepository{
         final ArrayList<Catalog> aoReturnList = new ArrayList<Catalog>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("catalog").find();
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -78,7 +82,7 @@ public class CatalogRepository extends MongoRepository{
         Catalog oCatalog = null;
         try {
 
-            Document oWSDocument = getCollection("catalog").find(new Document("date", sDate)).first();
+            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("date", sDate)).first();
             String sJSON = oWSDocument.toJson();
             try {
                 oCatalog = s_oMapper.readValue(sJSON, Catalog.class);

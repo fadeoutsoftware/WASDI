@@ -10,11 +10,10 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
     {
         return this.m_oHttp.get(this.APIURL + "/catalog/categories");
     };
+
     this.getEntries = function(sFrom,sTo,sFreeText,sCategory)
     {
           return this.m_oHttp.get(this.APIURL + "/catalog/entries?from=" + sFrom + "&to=" + sTo + "&freetext=" + sFreeText + "&category=" + sCategory);
-         // return this.m_oHttp.get(this.APIURL + "/catalog/entries?from=" + sFrom + "&to=" + sTo + "&category=" + sCategory);
-         // return this.m_oHttp.get(this.APIURL + "/catalog/entries");
     };
 
     this.downloadEntry = function(oEntry, sUrl)

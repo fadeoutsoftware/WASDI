@@ -328,7 +328,7 @@ public class ProcessWorkspaceResource {
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			
 			// Get all CREATED
-			List<ProcessWorkspace> aoWaitingList = oRepository.getWaitingSummary();
+			List<ProcessWorkspace> aoWaitingList = oRepository.getCreatedSummary();
 			oSummaryViewModel.setAllProcessWaiting(aoWaitingList.size());
 			
 			int iUserWaiting = 0 ;

@@ -9,6 +9,10 @@ import wasdi.shared.business.Schedule;
 
 public class ScheduleRepository extends MongoRepository {
 	
+	public ScheduleRepository() {
+		m_sThisCollection = "schedule";
+	}
+	
 	/**
 	 * Insert a schedule in the db
 	 * @param oSchedule Schedule Entity to insert
@@ -21,7 +25,7 @@ public class ScheduleRepository extends MongoRepository {
             String sJSON = s_oMapper.writeValueAsString(oSchedule);
             Document oDocument = Document.parse(sJSON);
             
-            getCollection("schedule").insertOne(oDocument);
+            getCollection(m_sThisCollection).insertOne(oDocument);
             return oSchedule.getScheduleId();
 
         } catch (Exception oEx) {
@@ -39,7 +43,7 @@ public class ScheduleRepository extends MongoRepository {
     public boolean deleteScheduleById(String sScheduleId) {
 
         try {
-            getCollection("schedule").deleteOne(new Document("scheduleId", new ObjectId(sScheduleId)));
+            getCollection(m_sThisCollection).deleteOne(new Document("scheduleId", new ObjectId(sScheduleId)));
 
             return true;
 
@@ -57,7 +61,7 @@ public class ScheduleRepository extends MongoRepository {
      */
     public Schedule getSchedule(String sScheduleId) {
         try {
-            Document oSessionDocument = getCollection("schedule").find(new Document("scheduleId", sScheduleId)).first();
+            Document oSessionDocument = getCollection(m_sThisCollection).find(new Document("scheduleId", sScheduleId)).first();
 
             if (oSessionDocument==null) return  null;
 

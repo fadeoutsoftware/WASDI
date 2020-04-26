@@ -4,18 +4,15 @@
 
 'use strict';
 angular.module('wasdi.ProcessesLaunchedService', ['wasdi.ProcessesLaunchedService']).
-service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'ModalService', function (oConstantsService,
-                                                                                        $rootScope,
-                                                                                        $http,
-                                                                                        oModalService) {
+service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'ModalService',
+    function (oConstantsService, $rootScope, $http, oModalService) {
+
+    // this.m_aoProcessesRunning  is a list of objects {processName: "", nodeId: "", typeOfProcess: ""}
     this.m_aoProcessesRunning = [];
     this.m_aoProcessesStopped = [];
 
-    /*
-    * this.m_aoProcessesRunning  is a list of object
-    * {processName: , nodeId:,typeOfProcess: }
-    * */
-    this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
+    // Days
+    this.COOKIE_EXPIRE_TIME_DAYS = 1;
     this.m_oConstantsService = oConstantsService;
     this.m_oModalService = oModalService;
     this.APIURL =  this.m_oConstantsService.getAPIURL();
@@ -24,249 +21,234 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
     /* ATTENTION!!! THE ORDER OF TYPE PROCESS IS IMPORTANT !! */
     this.TYPE_OF_PROCESS=["DOWNLOAD","PUBLISHBAND","PUBLISH","UPDATEPROCESSES"];
 
-    this.loadProcessesFromServer = function(sWorkSpaceId)
-    {
-        var oService = this;
-        console.log("Last loadProcessesFromServer():"+utilsGetTimeStamp());
-        this.m_oHttp.get(this.APIURL + '/process/lastbyws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
-            {
-                if(!utilsIsObjectNullOrUndefined(data))
-                {
-                    /*
-                    // Full Process Log for extreme debug
-                    console.log("ProcessLaunchedService.loadProcessesFromServer PROCESSES LOG:")
-                    data.forEach(function (i) {
-                        console.log(i.operationType + ": " + i.status + " " + i.progressPerc + "%")
-                    });
-                    */
 
-                    oService.m_aoProcessesRunning = data;
-                    oService.updateProcessesBar();
-                }
-            }).error(function (data,status)
-            {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
-            });
-    };
-
-    this.loadAllProcessesFromServer = function(sWorkSpaceId)
-    {
-        var oService = this;
-        console.log("Last loadProcessesFromServer():"+utilsGetTimeStamp());
-        this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
-            {
-                if(!utilsIsObjectNullOrUndefined(data))
-                {
-                    /*
-                    // Full Process Log for extreme debug
-                    console.log("ProcessLaunchedService.loadProcessesFromServer PROCESSES LOG:")
-                    data.forEach(function (i) {
-                        console.log(i.operationType + ": " + i.status + " " + i.progressPerc + "%")
-                    });
-                    */
-
-                    oService.m_aoProcessesRunning = data;
-                    oService.updateProcessesBar();
-                }
-            }).error(function (data,status)
-            {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
-            });
-    };
-
-    this.getAllProcessesFromServer = function(sWorkSpaceId,iStartIndex,iEndIndex)
-    {
-        return this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex);
-    };
-
-    this.getFilteredProcessesFromServer = function(sWorkSpaceId,iStartIndex,iEndIndex, sStatus, sType, sDate, sName)
-    {
-        var sUrl = this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex;
-
-        if (!utilsIsStrNullOrEmpty(sStatus)) {
-            if (sStatus !== "Status...") sUrl += "&status=" +sStatus;
-        }
-        if (!utilsIsStrNullOrEmpty(sType)) {
-            if (sType !== "Type...") sUrl += "&operationType=" +sType;
-        }
-        if (!utilsIsStrNullOrEmpty(sDate)) {
-            sUrl += "&dateFrom=" +sDate + "&dateTo="+sDate;
-        }
-        if (!utilsIsStrNullOrEmpty(sName)) {
-            sUrl += "&namePattern=" +sName;
-        }
-
-        return this.m_oHttp.get(sUrl);
-    };
-
-    this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
-    {
-        if(utilsIsObjectNullOrUndefined(sPidInput)===true) return false;
-
-        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        var sUrl = this.APIURL;
-        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
-
-        var oService = this;
-        this.m_oHttp.get(sUrl + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
-            {
-                if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
-                {
-                    oProcess.status = "stopped";
-                    oService.m_aoProcessesStopped.push(oProcess);
-                    oService.loadProcessesFromServer(sWorkSpaceId);
-                }
-            }).error(function (data,status)
-            {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR WHILE KILLING THE PROCESS");
-            });
-        return true;
-    };
-
-    this.getProcesses = function()
-    {
-        return this.m_aoProcessesRunning;
-    };
-
-
-    this.updateProcessesBar = function()
-    {
-        //send a message to RootController for update the bar of processes
-        $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
-    };
-
-
-    this.thereAreSomePublishBandProcess = function()
-    {
-        if(! (utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning) || this.m_aoProcessesRunning.length == 0))
+        /**
+         * Load the last 5 processes of a workspace
+         * @param sWorkSpaceId
+         */
+        this.loadProcessesFromServer = function(sWorkSpaceId)
         {
-            for(var iIndex = 0; iIndex < this.m_aoProcessesRunning.length; iIndex++)
-            {
-                if(this.m_aoProcessesRunning[iIndex].operationType == this.getTypeOfProcessPublishingBand())
-                    return true;
-            }
-            return false;
-        }
-        return false;
-    };
+            var oService = this;
 
-    this.thereIsPublishBandProcessOfTheProduct = function(sProductId)
-    {
-        if(utilsIsString(sProductId) == false) return false;
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sUrl = this.APIURL;
+            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
 
-        if(utilsIsStrNullOrEmpty(sProductId) == true) return false;
-
-        if(! (utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning) || this.m_aoProcessesRunning.length == 0))
-        {
-            for(var iIndex = 0; iIndex < this.m_aoProcessesRunning.length; iIndex++)
-            {
-                if(this.m_aoProcessesRunning[iIndex].operationType != this.TYPE_OF_PROCESS[1] )//publish band
+            this.m_oHttp.get(sUrl + '/process/lastbyws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
                 {
-                    var asProductNameSplit = this.m_aoProcessesRunning[iIndex].productName.split(".");// remove .zip .rar ....
-                    if(utilsIsObjectNullOrUndefined (asProductNameSplit) == false && asProductNameSplit.length != 0 )
+                    if(!utilsIsObjectNullOrUndefined(data))
                     {
-                        var sProductName = asProductNameSplit[0];
-                        var oId = sProductName;
-
-                        if(utilsIsSubstring(sProductId,oId) == true) return true;
+                        oService.m_aoProcessesRunning = data;
+                        oService.updateProcessesBar();
                     }
+                }).error(function (data,status)
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
+                });
+        };
+
+        /**
+         * Get the paginated list of processes of a workspace
+         * @param sWorkSpaceId
+         * @param iStartIndex
+         * @param iEndIndex
+         * @returns {*}
+         */
+        this.getAllProcessesFromServer = function(sWorkSpaceId,iStartIndex,iEndIndex)
+        {
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sUrl = this.APIURL;
+            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            return this.m_oHttp.get(sUrl + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex);
+        };
+
+        /**
+         * Get the filtered and paginated list of processes of a workspace
+         * @param sWorkSpaceId
+         * @param iStartIndex
+         * @param iEndIndex
+         * @param sStatus
+         * @param sType
+         * @param sDate
+         * @param sName
+         * @returns {*}
+         */
+        this.getFilteredProcessesFromServer = function(sWorkSpaceId,iStartIndex,iEndIndex, sStatus, sType, sDate, sName)
+        {
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sUrl = this.APIURL;
+            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            sUrl = sUrl + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex;
+
+            if (!utilsIsStrNullOrEmpty(sStatus)) {
+                if (sStatus !== "Status...") sUrl += "&status=" +sStatus;
+            }
+            if (!utilsIsStrNullOrEmpty(sType)) {
+                if (sType !== "Type...") sUrl += "&operationType=" +sType;
+            }
+            if (!utilsIsStrNullOrEmpty(sDate)) {
+                sUrl += "&dateFrom=" +sDate + "&dateTo="+sDate;
+            }
+            if (!utilsIsStrNullOrEmpty(sName)) {
+                sUrl += "&namePattern=" +sName;
+            }
+
+            return this.m_oHttp.get(sUrl);
+        };
+
+        /**
+         * Kill (Stop) a running process
+         * @param sPidInput
+         * @param sWorkSpaceId
+         * @param oProcess
+         * @returns {boolean}
+         */
+        this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
+        {
+            if(utilsIsObjectNullOrUndefined(sPidInput)===true) return false;
+
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sUrl = this.APIURL;
+            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            var oService = this;
+            this.m_oHttp.get(sUrl + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
+                {
+                    if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
+                    {
+                        oProcess.status = "stopped";
+                        oService.m_aoProcessesStopped.push(oProcess);
+                        oService.loadProcessesFromServer(sWorkSpaceId);
+                    }
+                }).error(function (data,status)
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR WHILE KILLING THE PROCESS");
+                });
+            return true;
+        };
+
+        /**
+         * Get the list of running processes
+         * @returns {[]}
+         */
+        this.getProcesses = function()
+        {
+            return this.m_aoProcessesRunning;
+        };
+
+        /**
+         * Triggers the update of the WASDI process bar
+         */
+        this.updateProcessesBar = function()
+        {
+            //send a message to RootController for update the bar of processes
+            $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
+        };
+
+        /**
+         * Check if a file is under download in this moment
+         * @param oLayer
+         * @param sTypeOfProcess
+         * @returns {boolean}
+         */
+        this.checkIfFileIsDownloading = function(oLayer,sTypeOfProcess)
+        {
+            if(utilsIsObjectNullOrUndefined(oLayer)=== true) return false;
+            var sProcessName = oLayer.title;
+            var sLink = oLayer.link;
+            if(utilsIsStrNullOrEmpty(sProcessName)) return false;
+            if(utilsIsStrNullOrEmpty(sTypeOfProcess)) return false;
+
+            var sProcess = {"productName":sProcessName,"operationType":sTypeOfProcess, "link":sLink};
+
+            if(utilsIsObjectNullOrUndefined(sProcess)) return false;
+
+            var aoProcesses = this.getProcesses();
+            if(utilsIsObjectNullOrUndefined(aoProcesses)) return false;
+
+            var iNumberOfProcesses = aoProcesses.length;
+
+            for(var iIndex = 0; iIndex < iNumberOfProcesses; iIndex++ )
+            {
+                /*check if the processes are equals*/
+                //aoProcesses[iIndex].productName == sProcess.productName
+                if( (utilsIsSubstring(aoProcesses[iIndex].productName, sProcess.productName)===true || utilsIsSubstring(aoProcesses[iIndex].productName, sProcess.link)===true)
+                    && aoProcesses[iIndex].operationType == sProcess.operationType && aoProcesses[iIndex].status=== "RUNNING")
+                {
+                    return true;
                 }
             }
             return false;
-        }
-        return false;
-    };
 
-    this.checkIfFileIsDownloading = function(oLayer,sTypeOfProcess)
-    {
-        if(utilsIsObjectNullOrUndefined(oLayer)=== true) return false;
-        var sProcessName = oLayer.title;
-        var sLink = oLayer.link;
-        if(utilsIsStrNullOrEmpty(sProcessName)) return false;
-        if(utilsIsStrNullOrEmpty(sTypeOfProcess)) return false;
+        };
 
-        var sProcess = {"productName":sProcessName,"operationType":sTypeOfProcess, "link":sLink};
-
-        if(utilsIsObjectNullOrUndefined(sProcess)) return false;
-
-        var aoProcesses = this.getProcesses();
-        if(utilsIsObjectNullOrUndefined(aoProcesses)) return false;
-
-        var iNumberOfProcesses = aoProcesses.length;
-
-        for(var iIndex = 0; iIndex < iNumberOfProcesses; iIndex++ )
+        /**
+         * Return the downlod Proc Type
+         * @returns {string}
+         */
+        this.getTypeOfProcessProductDownload = function()
         {
-            /*check if the processes are equals*/
-            //aoProcesses[iIndex].productName == sProcess.productName
-            if( (utilsIsSubstring(aoProcesses[iIndex].productName, sProcess.productName)===true || utilsIsSubstring(aoProcesses[iIndex].productName, sProcess.link)===true)
-                && aoProcesses[iIndex].operationType == sProcess.operationType && aoProcesses[iIndex].status=== "RUNNING")
-            {
-                return true;
-            }
-        }
-        return false;
+            return this.TYPE_OF_PROCESS[0];
+        };
 
-    };
-
-    this.getTypeOfProcessProductDownload = function()
-    {
-        return this.TYPE_OF_PROCESS[0];
-    };
-
-    this.getTypeOfProcessPublishingBand = function()
-    {
-        return this.TYPE_OF_PROCESS[1];
-    };
-
-    this.checkIfProcessWasStopped = function(oProcessInput)
-    {
-        if(!this.m_aoProcessesStopped)
-            return false;
-        var iLengthProcessesStopped = this.m_aoProcessesStopped.length;
-        for(var iIndexProcess = 0; iIndexProcess < iLengthProcessesStopped;  iIndexProcess++)
+        /**
+         * Return the Publish Band Proc Type
+         * @returns {string}
+         */
+        this.getTypeOfProcessPublishingBand = function()
         {
-            if( (this.m_aoProcessesStopped[iIndexProcess].processObjId === oProcessInput.processObjId) && (this.m_aoProcessesStopped[iIndexProcess].operationType === oProcessInput.operationType)
-                &&(this.m_aoProcessesStopped[iIndexProcess].operationDate === oProcessInput.operationDate) && (this.m_aoProcessesStopped[iIndexProcess].pid === oProcessInput.pid)
-                &&(this.m_aoProcessesStopped[iIndexProcess].product_name === oProcessInput.product_name) )
-            {
-                return true;
-            }
+            return this.TYPE_OF_PROCESS[1];
+        };
 
-        }
-        return false;
-    };
+        /**
+         * Get a single process workspace object
+         * @param sProcessId
+         * @returns {*}
+         */
+        this.getProcessWorkspaceById = function(sProcessId)
+        {
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sUrl = this.APIURL;
+            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
 
-    /**
-     * Get a single process workspace object
-     * @param sProcessId
-     * @returns {*}
-     */
-    this.getProcessWorkspaceById = function(sProcessId)
-    {
-        var oService = this;
-        return this.m_oHttp.get(this.APIURL + '/process/byid?sProcessId=' + sProcessId);
-    };
+            return this.m_oHttp.get(sUrl + '/process/byid?sProcessId=' + sProcessId);
+        };
 
-    this.getSummary  =function()
-    {
-        return this.m_oHttp.get(this.APIURL + '/process/summary');
-    };
+        /**
+         * Get the summary of created and running processes
+         * @returns {*}
+         */
+        this.getSummary  =function()
+        {
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sUrl = this.APIURL;
+            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
 
-    this.deleteProcess = function(oProcessInput)
-    {
-        var oController = this;
-        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
-            controller: "DeleteProcessController"
-        }).then(function(modal) {
-            modal.element.modal();
-            modal.close.then(function(result) {
-                if(result === 'delete')
-                    oController.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
+            return this.m_oHttp.get(sUrl + '/process/summary');
+        };
+
+        /**
+         * Delete a process
+         * @param oProcessInput
+         * @returns {boolean}
+         */
+        this.deleteProcess = function(oProcessInput)
+        {
+            var oController = this;
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            this.m_oModalService.showModal({
+                templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
+                controller: "DeleteProcessController"
+            }).then(function(modal) {
+                modal.element.modal();
+                modal.close.then(function(result) {
+                    if(result === 'delete')
+                        oController.removeProcessInServer(oProcessInput.processObjId, oWorkspace.workspaceId, oProcessInput)
+                });
             });
-        });
 
-        return true;
-    };
+            return true;
+        };
 }]);

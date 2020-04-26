@@ -147,6 +147,20 @@ public class Wasdi extends ResourceConfig {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		try {
+			// If this is not the main node
+			if (!s_sMyNodeCode.equals("wasdi")) {
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
+				
+				Utils.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
+			}			
+		}
+		catch (Throwable e) {
+			e.printStackTrace();
+		}
+
 
 
 		try {

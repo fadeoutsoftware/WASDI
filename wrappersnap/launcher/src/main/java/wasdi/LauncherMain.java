@@ -126,18 +126,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	/**
 	 * Static Logger that references the "MyApp" logger
 	 */
-	// public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
 	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(LauncherMain.class));
 
 	/**
 	 * Static reference to Send To Rabbit utility class
 	 */
 	public static Send s_oSendToRabbit = null;
+	
+	/**
+	 * Actual node, main by default
+	 */
+	public static String m_sNodeCode = "wasdi";
 
 	/**
 	 * WASDI Launcher Main Entry Point
 	 * 
-	 * @param args -operation <operation> -elaboratefile <file>
+	 * @param args -o <operation> -p <parameterfile>
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
@@ -344,6 +348,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
+			// Read this node code
+			LauncherMain.m_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			
+			// If this is not the main node
+			if (!LauncherMain.m_sNodeCode.equals("wasdi")) {
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
+			}
+
 			System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
 
 			Path oPropFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
@@ -364,8 +377,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Engine.start(false);
 
 		} catch (Throwable e) {
-			s_oLogger.error("Launcher Main Constructor Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 		}
 	}
 
