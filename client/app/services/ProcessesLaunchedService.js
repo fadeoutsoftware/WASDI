@@ -32,7 +32,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
 
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
 
             this.m_oHttp.get(sUrl + '/process/lastbyws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
                 {
@@ -58,7 +61,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         {
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
 
             return this.m_oHttp.get(sUrl + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex);
         };
@@ -78,7 +84,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         {
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
 
             sUrl = sUrl + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex;
 
@@ -111,7 +120,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
 
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
 
             var oService = this;
             this.m_oHttp.get(sUrl + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
@@ -211,7 +223,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         {
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
 
             return this.m_oHttp.get(sUrl + '/process/byid?sProcessId=' + sProcessId);
         };
@@ -224,7 +239,11 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         {
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
+
 
             return this.m_oHttp.get(sUrl + '/process/summary');
         };
@@ -238,6 +257,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         {
             var oController = this;
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
             this.m_oModalService.showModal({
                 templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
                 controller: "DeleteProcessController"

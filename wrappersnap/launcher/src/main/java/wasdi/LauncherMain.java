@@ -136,7 +136,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	/**
 	 * Actual node, main by default
 	 */
-	public static String m_sNodeCode = "wasdi";
+	public static String s_sNodeCode = "wasdi";
 
 	/**
 	 * WASDI Launcher Main Entry Point
@@ -349,10 +349,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
 			// Read this node code
-			LauncherMain.m_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			LauncherMain.s_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			
+			s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
 			
 			// If this is not the main node
-			if (!LauncherMain.m_sNodeCode.equals("wasdi")) {
+			if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
+				s_oLogger.debug("Adding local mongo config");
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
 			}

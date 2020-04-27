@@ -85,7 +85,7 @@ public class MongoRepository {
     			
     			// Create the connection config
     			oMongoConnection = new MongoConnection();
-            	MongoCredential oCredential = MongoCredential.createCredential(sUser, sPassword, sPassword.toCharArray());
+            	MongoCredential oCredential = MongoCredential.createCredential(sUser, sDbName, sPassword.toCharArray());
             	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(sAddress, iServerPort), Arrays.asList(oCredential));
             	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(sDbName);
             	
