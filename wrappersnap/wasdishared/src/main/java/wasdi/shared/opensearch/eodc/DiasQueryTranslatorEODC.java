@@ -16,26 +16,101 @@ import wasdi.shared.utils.Utils;
  *
  */
 public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
+	private static String s_sQueryPrefix ="<csw:GetRecords xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" service=\"CSW\" version=\"2.0.2\" resultType=\"results\" startPosition=\"1\" maxRecords=\"10\" outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
+	private static String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>";
+	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
+	private static final String s_sPRODUCTTYPE = "producttype:";
+	private static final String s_sRELATIVEORBITNUMBER = "relativeorbitnumber:";
 
-	static String s_sQueryPrefix ="<csw:GetRecords xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" service=\"CSW\" version=\"2.0.2\" resultType=\"results\" startPosition=\"1\" maxRecords=\"10\" outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
-	static String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>";
-	
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
 	 */
 	@Override
 	protected String translate(String sQueryFromClient) {
-		String sQuery = prepareQuery(sQueryFromClient);
 		String sTranslatedQuery = "";
-		
-		if(!Utils.isNullOrEmpty(sQuery)) {
-			sTranslatedQuery += s_sQueryPrefix;
-			sTranslatedQuery += parseFootPrint(sQuery);
-			sTranslatedQuery += parseTimeFrame(sQuery);
-			//todo translate
-			sTranslatedQuery += s_sQuerySuffix;
+		try {
+			String sQuery = prepareQuery(sQueryFromClient);
+
+			if(!Utils.isNullOrEmpty(sQuery)) {
+				sTranslatedQuery += s_sQueryPrefix;
+				sTranslatedQuery += parseFootPrint(sQuery);
+				sTranslatedQuery += parseTimeFrame(sQuery);
+				sTranslatedQuery += parseSentinel_1(sQuery);
+				//todo translate
+				sTranslatedQuery += s_sQuerySuffix;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslatorEODC.translate( " + sQueryFromClient + " ): " + oE);
 		}
 		return sTranslatedQuery;
+	}
+
+	private String parseSentinel_1(String sQuery) {
+		String sSentinel1Query = "";
+		try {
+			if(sQuery.contains(DiasQueryTranslatorEODC.s_sPLATFORMNAME_SENTINEL_1)) {
+				sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-1</ogc:Literal></ogc:PropertyIsEqualTo>";
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_1);
+				if(iStart < 0) {
+					throw new IllegalArgumentException("Could not find the initial index");
+				}
+				iStart += s_sPLATFORMNAME_SENTINEL_1.length();
+				int iEnd = sQuery.indexOf(')', iStart);
+				if(iEnd < 0) {
+					sQuery = sQuery.substring(iStart);
+				} else {
+					sQuery = sQuery.substring(iStart, iEnd);
+				}
+				
+				//check for product type
+				try {
+					if(sQuery.contains(DiasQueryTranslatorEODC.s_sPRODUCTTYPE)) {
+						iStart = sQuery.indexOf(s_sPRODUCTTYPE, s_sPRODUCTTYPE.length());
+						iEnd = sQuery.indexOf(" AND ", iStart);
+						if(iEnd < 0) {
+							iEnd = sQuery.indexOf(')');
+						}
+						if(iEnd < 0) {
+							//the types can be OCN, GRD, SLC, all of three letters
+							iEnd = iStart + 3;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:product_type</ogc:PropertyName><ogc:Literal>";
+						sSentinel1Query += sType;
+						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsEqualTo>";
+					}
+				} catch (Exception oE) {
+					Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): error while parsing product type: " + oE);
+				}
+
+				//check for relative orbit
+				if(sQuery.contains(DiasQueryTranslatorEODC.s_sRELATIVEORBITNUMBER)) {
+					try {
+						iStart = sQuery.indexOf(s_sRELATIVEORBITNUMBER) + s_sRELATIVEORBITNUMBER.length();
+						iEnd = sQuery.indexOf(' ', iStart);
+						if(iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if(iEnd < 0) {
+							iEnd = iStart;
+							while(Character.isDigit(sQuery.charAt(iEnd))) {
+								++iEnd;
+							}
+						}
+						String sOrbit = sQuery.substring(iStart, iEnd);
+						int iOrbit = Integer.parseInt(sOrbit); 
+						sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:rel_orbit_number</ogc:PropertyName><ogc:Literal>";
+						sSentinel1Query += iOrbit;
+						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsEqualTo>";
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_1(" + sQuery + " ): error while parsing relative orbit: " + oE );
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): " + oE);
+		}
+		return sSentinel1Query;
 	}
 
 	/* (non-Javadoc)
@@ -43,15 +118,15 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	 */
 	@Override
 	protected String parseTimeFrame(String sQuery) {
-		
+
 		String[] asInterval = {null, null};
-		
+
 		//beginPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
 		String sKeyword = "beginPosition";
 		parseInterval(sQuery, sKeyword, asInterval);
 		String sStart = asInterval[0];
 		String sEnd = asInterval[1];
-		
+
 		//endPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
 		sKeyword = "endPosition";
 		parseInterval(sQuery, sKeyword, asInterval);
@@ -75,7 +150,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 		}
 
 		//todo add interval
-		
+
 		return sTranslatedTimeFrame;
 	}
 
@@ -90,7 +165,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 		Preconditions.checkNotNull(asInterval, "DiasQueryTranslatorEODC.parseInterval: String array is null");
 		Preconditions.checkElementIndex(0, asInterval.length, "DiasQueryTranslatorEODC.parseInterval: 0 is not a valid element index");
 		Preconditions.checkElementIndex(1, asInterval.length, "DiasQueryTranslatorEODC.parseInterval: 1 is not a valid element index");
-		
+
 		if( sQuery.contains(sKeyword)) {
 			int iStart = Math.max(0, sQuery.indexOf(sKeyword));
 			iStart = Math.max(iStart, sQuery.indexOf('[', iStart) + 1);
@@ -148,14 +223,14 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 							-90 <= dSouth && 90 >= dSouth &&
 							-180 <= dEast && 180 >= dEast &&
 							-180 <= dWest && 180 >= dWest
-					) {
+							) {
 						sResult += "<ogc:BBOX><ogc:PropertyName>ows:BoundingBox</ogc:PropertyName><gml:Envelope><gml:lowerCorner>";
 						sResult += dSouth + " " + dWest;
 						sResult += "</gml:lowerCorner><gml:upperCorner>";
 						sResult += dNorth + " " + dEast;
 						sResult += "</gml:upperCorner></gml:Envelope></ogc:BBOX>";
 					}
-						
+
 				} catch (Exception oE) {
 					Utils.log("ERROR", "DiasQueryTranslatorEODC.parseFootprint: could not complete: " + oE);
 				}
@@ -172,5 +247,5 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 		String sResult = oEODC.translate(sQuery);
 		System.out.println(sResult);
 	}
-	
+
 }
