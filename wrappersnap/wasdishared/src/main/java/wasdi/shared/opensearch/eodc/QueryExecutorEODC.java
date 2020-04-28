@@ -78,13 +78,14 @@ public class QueryExecutorEODC extends QueryExecutor {
 	public int executeCount(String sQuery) throws IOException {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
-			sQuery = encodeAsRequired(sQuery); 
+			//sQuery = encodeAsRequired(sQuery); 
 			String sUrl = getCountUrl(sQuery);
 			
 			
 			// ( footprint:"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:33)&providers=ONDA
 			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
-			String sTranslatedQuery = oEODC.translateAndEncode(sQuery);
+			//String sTranslatedQuery = oEODC.translateAndEncode(sQuery);
+			String sTranslatedQuery = oEODC.translate(sQuery);
 			sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
 			
 			String sResponse = httpPostResults(sUrl, "count", sTranslatedQuery);
