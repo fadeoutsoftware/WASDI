@@ -4001,8 +4001,6 @@ var EditorController = (function () {
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
-
-
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                     });
@@ -4179,21 +4177,7 @@ var EditorController = (function () {
             this.m_bIsFilteredTree = true;
         }
 
-        //TODO i need to show the loading icon in html
-
-        // let test = function(search,node){
-        //     alert("sono una prova");
-        // };
-        // let oggetoTest={
-        //     "search": {
-        //         "search_callback": function(search,node){
-        //             alert("sono una prova");
-        //         },
-        //     }
-        //
-        // };
-        // $('#jstree').jstree(oggetoTest);
-        $('#jstree').jstree(true).search(sTextQuery);//,false,true
+        $('#jstree').jstree(true).search(sTextQuery);
 
         return true;
     };
@@ -4207,8 +4191,8 @@ var EditorController = (function () {
         // // In georeferenced mode or not?
         // if (this.m_bIsActiveGeoraphicalMode == true) {
 
-        if( this.m_b2DMapModeOn === false){
 
+        if( this.m_b2DMapModeOn === false){
             this.deleteProductInMap();
         } else {
             this.deleteProductInGlobe(aoVisibleBands,oChildrenNode);
@@ -4229,9 +4213,6 @@ var EditorController = (function () {
 
         for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
 
-            this.removeAllRedSquareBoundingBox();// it's in wrong place ?
-
-            this.m_oGlobeService.addAllWorkspaceRectanglesOnMap(this.m_aoProducts);
             for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
                 if (oChildrenNode[iIndexChildren] === aoVisibleBands[iIndexLayer].layerId) {
                     this.removeBandImage(aoVisibleBands[iIndexChildren]);
