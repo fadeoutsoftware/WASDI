@@ -502,6 +502,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sOutputResult;
 			
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Output from Server .... \n");
+			
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: " + sOutputResult);
 				sJsonOutput += sOutputResult;
@@ -515,7 +516,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Here we can wait for the process to finish with the status check
 			// we can also handle a timeout, that is property (with default) of the processor
-			int iTimeSpentMs = 0;
+			long lTimeSpentMs = 0;
 			int iThreadSleepMs = 2000;
 			
 			String sStatus = oProcessWorkspace.getStatus();
@@ -585,12 +586,12 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 							}
 							
 							// Increase the time
-							iTimeSpentMs += iThreadSleepMs;
+							lTimeSpentMs += iThreadSleepMs;
 							
 							if (oProcessor.getTimeoutMs()>0) {
-								if (iTimeSpentMs > oProcessor.getTimeoutMs()) {
+								if (lTimeSpentMs > oProcessor.getTimeoutMs()) {
 									// Timeout
-									LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
+									LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + lTimeSpentMs );
 									
 									// Update process and rabbit users
 									LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);

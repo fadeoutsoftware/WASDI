@@ -48,7 +48,7 @@ public class Processor {
 	/**
 	 * timeoutMs: 3 hours by default
 	 */
-	private int timeoutMs = 1000*60*60*3;
+	private long timeoutMs = 1000*60*60*3;
 	
 	/**
 	 * Flag to know if it is public or not
@@ -108,10 +108,10 @@ public class Processor {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public int getTimeoutMs() {
+	public long getTimeoutMs() {
 		return timeoutMs;
 	}
-	public void setTimeoutMs(int timeoutMs) {
+	public void setTimeoutMs(long timeoutMs) {
 		this.timeoutMs = timeoutMs;
 	}	
 	

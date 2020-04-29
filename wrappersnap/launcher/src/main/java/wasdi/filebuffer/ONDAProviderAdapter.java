@@ -325,7 +325,13 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				}
 				
 				// Sleep a bit before next attempt
-				TimeUnit.SECONDS.sleep(2);
+				if (bAvailable != null) {
+					TimeUnit.SECONDS.sleep(2);
+				}
+				else {
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: since it was impossible to check availability, sleep for 5 min before retry");
+					TimeUnit.SECONDS.sleep(5*60);
+				}
 			}
 			
 			String sResLog = sResult;
