@@ -21,8 +21,8 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	private static final String s_sCLOUDCOVERPERCENTAGE = "cloudcoverpercentage:[";
 	private static final String s_sPLATFORMNAME_SENTINEL_2 = "platformname:Sentinel-2";
 	private static final String s_sQueryPrefix ="<csw:GetRecords xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" service=\"CSW\" version=\"2.0.2\" resultType=\"results\" startPosition=\"";
-	private static final String s_sMaxRecords = "\" maxRecords=\"";
-	private static final String s_sRemainingPrefix = "\" outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
+	private static final String s_sMaxRecords = "maxRecords=\"";
+	private static final String s_sRemainingPrefix = "outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
 	private static final String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>";
 	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
 	private static final String s_sPRODUCTTYPE = "producttype:";
@@ -69,14 +69,21 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 			
 			try {
 				iOffset = readInt(sQuery, DiasQueryTranslatorEODC.s_sOFFSET);
+				if(iOffset <= 0) {
+					iOffset = 1;
+				}
 			} catch (Exception oE) {
 				Utils.debugLog("DiasQueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse offset: " + oE);
 			}
 			
 			sTranslatedQuery = s_sQueryPrefix;
 			sTranslatedQuery += iOffset;
-			sTranslatedQuery += s_sMaxRecords;
-			sTranslatedQuery += iLimit;
+			sTranslatedQuery += "\" ";
+			if(iLimit > 0) {
+				sTranslatedQuery += s_sMaxRecords;
+				sTranslatedQuery += iLimit;
+				sTranslatedQuery += "\" ";
+			}
 			sTranslatedQuery += s_sRemainingPrefix;
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorEODC.parseCommon( " + sQuery + " ): " + oE);
@@ -176,6 +183,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 				} else {
 					sQuery = sQuery.substring(iStart, iEnd);
 				}
+				sQuery = sQuery.trim();
 				sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-1</ogc:Literal></ogc:PropertyIsEqualTo>";
 				
 				//check for product type
@@ -188,16 +196,17 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 						iStart += s_sPRODUCTTYPE.length();
 						iEnd = sQuery.indexOf(" AND ", iStart);
 						if(iEnd < 0) {
-							iEnd = sQuery.indexOf(')');
+							iEnd = sQuery.indexOf(')', iStart);
 						}
 						if(iEnd < 0) {
-							iEnd = sQuery.indexOf(' ');
+							iEnd = sQuery.indexOf(' ', iStart);
 						}
 						if(iEnd < 0) {
 							//the types can be OCN, GRD, SLC, all of three letters
 							iEnd = iStart + 3;
 						}
 						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
 						sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:product_type</ogc:PropertyName><ogc:Literal>";
 						sSentinel1Query += sType;
 						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsEqualTo>";

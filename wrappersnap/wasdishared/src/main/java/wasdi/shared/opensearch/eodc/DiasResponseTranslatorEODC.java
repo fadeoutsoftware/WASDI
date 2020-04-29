@@ -46,8 +46,26 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 			// Access the SearchResults child
 			Map<String, Object> aoSearchResults = (Map<String, Object>) aoChilds.get("csw:SearchResults");
 			
-			// Access the list of records
-			ArrayList<Map<String, Object>> aoRecords = (ArrayList<Map<String, Object>>) aoSearchResults.get("csw:Record");
+			int iResultCount = 0;
+			try {
+				iResultCount = Integer.parseInt((String)aoSearchResults.get("@numberOfRecordsReturned"));
+			} catch (Exception oE) {
+				Utils.debugLog("DiasResponseTranslatorEODC.translateBatch: cast to int failed: " + oE);
+			}
+			
+			ArrayList<Map<String, Object>> aoRecords = new ArrayList<Map<String, Object>>();
+			
+			try {
+				if(iResultCount > 1) {
+				// Access the list of records
+					aoRecords = (ArrayList<Map<String, Object>>) aoSearchResults.get("csw:Record");
+				} else {
+					aoRecords.add((Map<String, Object>)aoSearchResults.get("csw:Record"));
+				}
+			}
+			catch (Exception oE) {
+				Utils.debugLog("DiasResponseTranslatorEODC.translateBatch: aoRecords creation failed: " + oE);
+			}
 			
 			// For each record
 			for (Map<String, Object> oRecord : aoRecords) {
@@ -62,6 +80,7 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 						String sScheme = (String) oReference.get("@scheme");
 						if (sScheme.equals("offlineAccess")) {
 							sLink = (String) oReference.get("#text");
+							break;
 						}
 					}
 					

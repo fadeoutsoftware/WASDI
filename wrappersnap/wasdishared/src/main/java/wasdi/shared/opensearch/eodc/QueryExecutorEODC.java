@@ -7,12 +7,18 @@
 package wasdi.shared.opensearch.eodc;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
 import org.json.JSONObject;
 
+import com.google.common.base.Preconditions;
+
+import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
+import wasdi.shared.opensearch.creodias.DiasQueryTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
  * @author c.nattero
@@ -86,7 +92,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
 			//String sTranslatedQuery = oEODC.translateAndEncode(sQuery);
 			String sTranslatedQuery = oEODC.translate(sQuery);
-			sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
+			sTranslatedQuery = sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
 			
 			String sResponse = httpPostResults(sUrl, "count", sTranslatedQuery);
 			int iResult = 0;
@@ -101,6 +107,55 @@ public class QueryExecutorEODC extends QueryExecutor {
 			Utils.debugLog("QueryExecutor.executeCount: " + oE);
 			return -1;
 		}
+	}
+	
+	
+	@Override
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+//		Preconditions.checkNotNull(this.m_sAppConfigPath, "QueryExecutorEODC.executeAndRetrieve: app config path is null");
+//		Preconditions.checkNotNull(this.m_sParserConfigPath, "QueryExecutorEODC.executeAndRetrieve: parser config path is null");
+		
+//		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
+//		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
+		
+		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
+		String sResult = null;
+		String sUrl = null;
+		try {
+			sUrl = "https://csw.eodc.eu/";
+			String sPayload = "";
+//			if(bFullViewModel) {
+//				sPayload = getSearchUrl(oQuery);
+//			} else {
+//				sUrl = getSearchListUrl(oQuery);
+//			}
+			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
+			sPayload = oEODC.translate(oQuery.getQuery());
+//			this.m_sUser = null;
+//			this.m_sPassword = null;
+			sResult = httpPostResults(sUrl, "search", sPayload);		
+			List<QueryResultViewModel> aoResult = null;
+			if(!Utils.isNullOrEmpty(sResult)) {
+				//todo build result view model
+				aoResult = buildResultViewModel(sResult, bFullViewModel);
+				if(null==aoResult) {
+					throw new NullPointerException(s_sClassName + ".executeAndRetrieve: aoResult is null"); 
+				}
+			} else {
+				Utils.debugLog(s_sClassName + ".executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
+			}
+			return aoResult;
+		} catch (Exception oE) {
+			Utils.debugLog(s_sClassName + ".executeAndRetrieve(2 args, with sUrl=" + sUrl + "): " + oE);
+		}
+		return null;
+	}
+	
+	
+	@Override
+	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
+		DiasResponseTranslatorEODC oEODC = new DiasResponseTranslatorEODC();
+		return oEODC.translateBatch(sJson, bFullViewModel, "file");
 	}
 	
 	
