@@ -276,7 +276,7 @@ public class ProcessorsResource {
 				oVM.setParamsSample(oProcessor.getParameterSample());
 				oVM.setIsPublic(oProcessor.getIsPublic());
 				oVM.setType(oProcessor.getType());
-				oVM.setiTimeoutMs(oProcessor.getTimeoutMs());
+				oVM.setTimeoutMs(oProcessor.getTimeoutMs());
 				
 				aoRet.add(oVM);
 			}
@@ -779,7 +779,7 @@ public class ProcessorsResource {
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
-			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getiTimeoutMs());
+			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getTimeoutMs());
 			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
 			oProcessorRepository.updateProcessor(oProcessorToUpdate);
