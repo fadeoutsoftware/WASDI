@@ -141,7 +141,6 @@ var WappsController = (function() {
             })
             .error(function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
-                oController.cleanAllExecuteWorkflowFields();
             });
 
     };
