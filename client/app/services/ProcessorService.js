@@ -22,7 +22,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         else {
             sWorkspaceId = "-";
         }
-        return this.m_oHttp.get(this.APIURL + '/processors/run?name='+sProcessorName+'&encodedJson='+ sEncodedJSON+'&workspace='+sWorkspaceId);
+        return this.m_oHttp.post(this.APIURL + '/processors/run?name='+sProcessorName+'&workspace='+sWorkspaceId, sEncodedJSON);
     };
 
     this.deleteProcessor = function (sProcessorId) {
