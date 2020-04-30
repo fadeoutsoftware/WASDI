@@ -52,32 +52,59 @@ public class QueryExecutorEODC extends QueryExecutor {
 		String sUrl = "https://csw.eodc.eu/";
 		return sUrl;
 	}
-	
-	
+
+
 	@Override
 	protected String extractNumberOfResults(String sResponse) {
 		//todo parse response json and extract number
-		String sCount = "";
-		if(!Utils.isNullOrEmpty(sResponse)) {
-			JSONObject oJson = new JSONObject(sResponse);
-			if(null!=oJson) {
-				if(oJson.has("csw:GetRecordsResponse")) {
-					JSONObject oCswGetRecordsResponse = oJson.optJSONObject("csw:GetRecordsResponse");
-					if(null!=oCswGetRecordsResponse) {
-						if(oCswGetRecordsResponse.has("csw:SearchResults")) {
-							JSONObject oSearchResults = oCswGetRecordsResponse.optJSONObject("csw:SearchResults");
-							if(null!=oSearchResults) {
-								if(oSearchResults.has("@numberOfRecordsMatched")) {
-									int iResults = oSearchResults.optInt("@numberOfRecordsMatched", -1);
-									sCount = "" + iResults;
-								}
-							}
-						}
-					}
-				}
-			}
+
+		if(Utils.isNullOrEmpty(sResponse)) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: response is null, aborting");
+			return "";
 		}
-		
+
+		JSONObject oJson = null;
+		try {
+			oJson = new JSONObject(sResponse);
+		}
+		catch (Exception oE) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: could not create JSONObject (syntax error or duplicate key), aborting");
+			return "";
+		}
+
+		if(!oJson.has("csw:GetRecordsResponse")) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: \"csw:GetRecordsResponse\" not found in JSON, aborting");
+			return "";
+		}
+
+		JSONObject oCswGetRecordsResponse = oJson.optJSONObject("csw:GetRecordsResponse");
+		if(null==oCswGetRecordsResponse) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: could not access JSONObject at \"csw:GetRecordsResponse\", aborting");
+			return "";
+		}
+
+		if(!oCswGetRecordsResponse.has("csw:SearchResults")) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: \"csw:SearchResults\" not found in \"csw:GetRecordsResponse\", aborting");
+			return "";
+		}
+
+		JSONObject oSearchResults = oCswGetRecordsResponse.optJSONObject("csw:SearchResults");
+		if(null==oSearchResults) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: could not access JSONObject at \"csw:SearchResults\", aborting");
+			return "";
+		}
+
+		if(!oSearchResults.has("@numberOfRecordsMatched")) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: \"@numberOfRecordsMatched\" not found int \"csw:SearchResults\", aborting");
+			return "";
+		}
+
+		int iResults = oSearchResults.optInt("@numberOfRecordsMatched", -1);
+		if(iResults < 0) {
+			Utils.debugLog("QueryExecutorEODC.extractNumberOfResults: could not access \"@numberOfRecordsMatched\", aborting");
+			return "";
+		}
+		String sCount = "" + iResults;
 		return sCount;
 	}
 
@@ -86,14 +113,21 @@ public class QueryExecutorEODC extends QueryExecutor {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
 			//sQuery = encodeAsRequired(sQuery); 
 			String sUrl = getCountUrl(sQuery);
+
 			
-			
-			// ( footprint:"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:33)&providers=ONDA
+			if(sQuery.contains("offset=")) {
+				sQuery = sQuery.replace("offset=", "OFFSETAUTOMATICALLYREMOVED=");
+			}
+			if(sQuery.contains("limit=")) {
+				sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
+			}
+			//we do not need results now, just the count
+			sQuery += "&limit=0";
+
 			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
-			//String sTranslatedQuery = oEODC.translateAndEncode(sQuery);
 			String sTranslatedQuery = oEODC.translate(sQuery);
 			sTranslatedQuery = sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
-			
+
 			String sResponse = httpPostResults(sUrl, "count", sTranslatedQuery);
 			int iResult = 0;
 			try {
@@ -108,31 +142,65 @@ public class QueryExecutorEODC extends QueryExecutor {
 			return -1;
 		}
 	}
-	
-	
+
+
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-//		Preconditions.checkNotNull(this.m_sAppConfigPath, "QueryExecutorEODC.executeAndRetrieve: app config path is null");
-//		Preconditions.checkNotNull(this.m_sParserConfigPath, "QueryExecutorEODC.executeAndRetrieve: parser config path is null");
-		
-//		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
-//		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
-		
+
 		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
 		String sResult = null;
 		String sUrl = null;
 		try {
 			sUrl = "https://csw.eodc.eu/";
 			String sPayload = "";
-//			if(bFullViewModel) {
-//				sPayload = getSearchUrl(oQuery);
-//			} else {
-//				sUrl = getSearchListUrl(oQuery);
-//			}
+
+			String sQuery = oQuery.getQuery();
+			String sLimit = oQuery.getLimit();
+			String sOffset = oQuery.getOffset();
+			
+			if(bFullViewModel) {
+				//offset
+				int iOffset = 1;
+				if(!Utils.isNullOrEmpty(sOffset)) {
+					try {
+						iOffset = Integer.parseInt(sOffset);
+						//in EODC offset starts at 1
+						iOffset += 1;
+					}catch (Exception oE) {
+						Utils.debugLog(s_sClassName + ".executeAndRetrieve: could not parse offset, defaulting");
+					}
+				}
+				if(!sQuery.contains("offset=")) {
+					sQuery += "&offset="+iOffset;
+				} else {
+					Utils.debugLog(s_sClassName + ".executeAndRetrieve: offset already specified: " + sQuery);
+				}
+				
+				//limit
+				int iLimit = 10;
+				if(!Utils.isNullOrEmpty(sLimit)) {
+					try {
+						iLimit = Integer.parseInt(sLimit);
+					}catch (Exception oE) {
+						Utils.debugLog(s_sClassName + ".executeAndRetrieve: could not parse limit, defaulting");
+					}
+				}
+				if(!sQuery.contains("limit=")) {
+					sQuery += "&limit="+iLimit;
+				} else {
+					Utils.debugLog(s_sClassName + ".executeAndRetrieve: limit already specified: " + sQuery);
+				}
+				
+			} else {
+				if(sQuery.contains("limit=")) {
+					sQuery = sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
+				}
+				if(sQuery.contains("offset=")) {
+					sQuery = sQuery.replace("offset=", "OFFSETAUTOMATICALLYREMOVED=");
+				}
+			}
 			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
-			sPayload = oEODC.translate(oQuery.getQuery());
-//			this.m_sUser = null;
-//			this.m_sPassword = null;
+			sPayload = oEODC.translate(sQuery);
 			sResult = httpPostResults(sUrl, "search", sPayload);		
 			List<QueryResultViewModel> aoResult = null;
 			if(!Utils.isNullOrEmpty(sResult)) {
@@ -150,15 +218,15 @@ public class QueryExecutorEODC extends QueryExecutor {
 		}
 		return null;
 	}
-	
-	
+
+
 	@Override
 	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		DiasResponseTranslatorEODC oEODC = new DiasResponseTranslatorEODC();
 		return oEODC.translateBatch(sJson, bFullViewModel, "file");
 	}
-	
-	
+
+
 	public static void main(String[] args) {
 		QueryExecutorEODC oEODC = new QueryExecutorEODC();
 		int iResults = -2;
@@ -169,7 +237,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 			e.printStackTrace();
 		}
 		System.out.println(iResults);
-		
+
 	}
 }
 

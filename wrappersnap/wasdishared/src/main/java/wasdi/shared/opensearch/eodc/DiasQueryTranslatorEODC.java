@@ -20,9 +20,10 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	private static final String s_sLIMIT = "limit=";
 	private static final String s_sCLOUDCOVERPERCENTAGE = "cloudcoverpercentage:[";
 	private static final String s_sPLATFORMNAME_SENTINEL_2 = "platformname:Sentinel-2";
-	private static final String s_sQueryPrefix ="<csw:GetRecords xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" service=\"CSW\" version=\"2.0.2\" resultType=\"results\" startPosition=\"";
+	private static final String s_sQueryPrefix ="<csw:GetRecords xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" service=\"CSW\" version=\"2.0.2\" resultType=\"results\" ";
+	private static final String s_siOffset = "startPosition=\"";
 	private static final String s_sMaxRecords = "maxRecords=\"";
-	private static final String s_sRemainingPrefix = "outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
+	private static final String s_sRemainingPartOfPrefix = "outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
 	private static final String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>";
 	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
 	private static final String s_sPRODUCTTYPE = "producttype:";
@@ -59,32 +60,33 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	protected String parseCommon(String sQuery) {
 		String sTranslatedQuery = "";
 		try {
+			sTranslatedQuery = s_sQueryPrefix;
+			
+			int iOffset = -1;
+			try {
+				iOffset = readInt(sQuery, DiasQueryTranslatorEODC.s_sOFFSET);
+			} catch (Exception oE) {
+				Utils.debugLog("DiasQueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse offset: " + oE);
+			}
+			if(iOffset > 0) {
+				sTranslatedQuery += s_siOffset;
+				sTranslatedQuery += iOffset;
+				sTranslatedQuery += "\" ";
+			}
+			
 			int iLimit = 10;
-			int iOffset = 0;
 			try {
 				iLimit = readInt(sQuery, DiasQueryTranslatorEODC.s_sLIMIT);
 			} catch (Exception oE) {
 				Utils.debugLog("DiasQueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse limit: " + oE);
 			}
-			
-			try {
-				iOffset = readInt(sQuery, DiasQueryTranslatorEODC.s_sOFFSET);
-				if(iOffset <= 0) {
-					iOffset = 1;
-				}
-			} catch (Exception oE) {
-				Utils.debugLog("DiasQueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse offset: " + oE);
-			}
-			
-			sTranslatedQuery = s_sQueryPrefix;
-			sTranslatedQuery += iOffset;
-			sTranslatedQuery += "\" ";
-			if(iLimit > 0) {
+			if(iLimit >= 0) {
 				sTranslatedQuery += s_sMaxRecords;
 				sTranslatedQuery += iLimit;
 				sTranslatedQuery += "\" ";
 			}
-			sTranslatedQuery += s_sRemainingPrefix;
+			
+			sTranslatedQuery += s_sRemainingPartOfPrefix;
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorEODC.parseCommon( " + sQuery + " ): " + oE);
 		}
@@ -133,7 +135,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 					sQuery = sQuery.substring(iStart, iEnd);
 				}
 				sSentinel2Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-2</ogc:Literal></ogc:PropertyIsEqualTo>";
-				
+
 				//check for cloud coverage
 				try {
 					if(sQuery.contains(DiasQueryTranslatorEODC.s_sCLOUDCOVERPERCENTAGE)) {
@@ -145,13 +147,13 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 						iStart += s_sCLOUDCOVERPERCENTAGE.length() + 1;
 						iEnd = sQuery.indexOf(']', iStart);
 						String sSubQuery = sQuery.substring(iStart, iEnd);
-						
+
 						String[] asCloudLimits = sSubQuery.split(" TO ");
-						
+
 						//these variables could be omitted, but in this way we check we are reading numbers
 						double dLo = Double.parseDouble(asCloudLimits[0]);
 						double dUp = Double.parseDouble(asCloudLimits[1]);
-						
+
 						sSentinel2Query += "<ogc:PropertyIsGreaterThanOrEqualTo><ogc:PropertyName>eodc:cloud_coverage</ogc:PropertyName><ogc:Literal>";
 						sSentinel2Query += dLo;
 						sSentinel2Query += "</ogc:Literal></ogc:PropertyIsGreaterThanOrEqualTo><ogc:PropertyIsLessThanOrEqualTo><ogc:PropertyName>eodc:cloud_coverage</ogc:PropertyName><ogc:Literal>";
@@ -185,7 +187,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 				}
 				sQuery = sQuery.trim();
 				sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-1</ogc:Literal></ogc:PropertyIsEqualTo>";
-				
+
 				//check for product type
 				try {
 					if(sQuery.contains(DiasQueryTranslatorEODC.s_sPRODUCTTYPE)) {
@@ -383,17 +385,17 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 
 	public static void main(String[] args) {
 		DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
-		
+
 		//S1
 		String sQuery = "( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:33)&offset=21&limit=8";
 		String sResult = oEODC.translate(sQuery);
 		System.out.println(sResult);
-		
+
 		//S2
 		sQuery = "( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND cloudcoverpercentage:[10 TO 40])&offset=11&limit=5";
 		sResult = oEODC.translate(sQuery);
 		System.out.println(sResult);
-		
+
 	}
 
 }
