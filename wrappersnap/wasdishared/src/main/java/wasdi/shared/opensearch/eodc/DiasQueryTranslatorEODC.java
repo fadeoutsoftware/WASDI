@@ -279,12 +279,12 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 
 		String sTranslatedTimeFrame = "";
 		if(!Utils.isNullOrEmpty(sStart)) {
-			sTranslatedTimeFrame += "<ogc:PropertyIsGreaterThanOrEqualTo><ogc:PropertyName>dc:date</ogc:PropertyName><ogc:Literal>";
+			sTranslatedTimeFrame += "<ogc:PropertyIsGreaterThanOrEqualTo><ogc:PropertyName>apiso:TempExtent_begin</ogc:PropertyName><ogc:Literal>";
 			sTranslatedTimeFrame += sStart;
 			sTranslatedTimeFrame += "</ogc:Literal></ogc:PropertyIsGreaterThanOrEqualTo>";
 		}
 		if(!Utils.isNullOrEmpty(sEnd)) {
-			sTranslatedTimeFrame += "<ogc:PropertyIsLessThanOrEqualTo><ogc:PropertyName>dc:date</ogc:PropertyName><ogc:Literal>";
+			sTranslatedTimeFrame += "<ogc:PropertyIsLessThanOrEqualTo><ogc:PropertyName>apiso:TempExtent_end</ogc:PropertyName><ogc:Literal>";
 			sTranslatedTimeFrame += sEnd;
 			sTranslatedTimeFrame += "</ogc:Literal></ogc:PropertyIsLessThanOrEqualTo>";
 		}
