@@ -22,7 +22,8 @@
             "MINIMALBLOBREMOVAL": "150",
             "PREPROCESS": true,
             "DAYSBACK": "15",
-            "DAYSFORWARD": "15"
+            "DAYSFORWARD": "15",
+            "PROVIDER": ""
         };
 
         this.m_oBoundingBox = {
@@ -311,6 +312,10 @@
 
          if (oParams.SIMULATE == true) {
              asParams.push('"SIMULATE":"1"')
+         }
+
+         if (!utilsIsStrNullOrEmpty(oParams.PROVIDER)) {
+             asParams.push('"PROVIDER":"'+ oParams.PROVIDER + '"')
          }
 
          sJSON = '{ "BBOX": "'+sBbox+'", "EVENT_DATE":"' + sDate + '", "BASENAME":"'+ sBaseName + '"';
