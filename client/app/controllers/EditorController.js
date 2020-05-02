@@ -38,7 +38,7 @@ var EditorController = (function () {
 
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
-        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
+        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
         //Flag to know if the Preview Band Image is loaded or not (2D - Editor Mode)
         this.m_bIsLoadedPreviewBandImage = true;
@@ -166,7 +166,9 @@ var EditorController = (function () {
 
         //set default navbar menu
         this.generateDefaultNavBarMenu();
-        // this.navbarMenuTranslation();
+
+        // Go in geographic mode
+        this.switchEditorGeoReferencedMode();
 
         // Launch image editor modal to debug it
         //this.openImageEditorDialog();
