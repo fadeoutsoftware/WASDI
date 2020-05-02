@@ -97,13 +97,61 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 					// Create WASDI View Model
 					QueryResultViewModel oResViewModel = new QueryResultViewModel();
 					
-					oResViewModel.setTitle( (String) oRecord.get("dc:title"));
+					String sTitle =  (String) oRecord.get("dc:identifier");
+					
+					oResViewModel.setTitle(sTitle);
 					oResViewModel.setProvider("EODC");
 					oResViewModel.setSummary("");
 					oResViewModel.setLink("file://" + sLink);
 					oResViewModel.setFootprint(sFootPrint);
 					oResViewModel.getProperties().put("format", (String) oRecord.get("dc:format"));
-					oResViewModel.getProperties().put("creationDate", (String) oRecord.get("dc:date"));					
+					oResViewModel.getProperties().put("creationDate", (String) oRecord.get("dc:date"));
+					
+					// If this is a S1, try to get the relative Orbit (that is not in the data obtained from the provider)
+					
+					if (sTitle.startsWith("S1")) {
+						
+						// Split the title
+						String [] asTitleParts = sTitle.split("_");
+						
+						// Safe check
+						if (asTitleParts != null) {
+							
+							if (asTitleParts.length >= 9) {
+								
+								// Get the absolute orbit
+								String sAbsoluteOrbit = asTitleParts[6];
+								
+								// Cast to int
+								int iAbsoluteOrbit = -1;
+								try {
+									iAbsoluteOrbit = Integer.parseInt(sAbsoluteOrbit);
+								}
+								catch (Exception oEx) {
+									Utils.debugLog("Exception converting EODC Result Relative Orbit: "  + oEx.toString()) ;
+								}
+								
+								if (iAbsoluteOrbit != -1) {
+									
+									// Init the relative orbit
+									int iRelativeOrbit = -1;
+									
+									// S1A or S1B?
+									if (sTitle.startsWith("S1A")) {
+										iRelativeOrbit = (iAbsoluteOrbit-73)%175;
+										iRelativeOrbit ++;
+									}
+									else if (sTitle.startsWith("S1B")) {
+										iRelativeOrbit = (iAbsoluteOrbit-27)%175;
+										iRelativeOrbit ++;										
+									}
+									
+									// Set the relative orbit to the WASDI View Model
+									oResViewModel.getProperties().put("relativeorbitnumber", ""+iRelativeOrbit);
+								}
+							}
+						}
+					}
 					
 					aoResults.add(oResViewModel);
 				}

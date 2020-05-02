@@ -127,6 +127,8 @@ public class OpenSearchResource {
 		
 		Utils.debugLog(s_sClassName + ".search( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " +
 				sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
+		
+		// Domain Check
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
 			return null;
@@ -143,7 +145,9 @@ public class OpenSearchResource {
 				sSortedBy = "ingestiondate";
 			if (sOrder == null)
 				sOrder = "asc";
+			
 			Map<String, Integer> aiCounterMap = null;
+			
 			try {
 				Utils.debugLog(s_sClassName + ".Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
@@ -170,6 +174,8 @@ public class OpenSearchResource {
 				return null;
 			}
 			int iSkipped = 0;
+			
+			
 			for (Entry<String, Integer> oEntry : aiCounterMap.entrySet()) {
 				String sProvider = oEntry.getKey();
 				int iCount = oEntry.getValue();
@@ -184,8 +190,8 @@ public class OpenSearchResource {
 				String sCurrentLimit = "" + iCurrentLimit;
 				int iCurrentOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
 				String sCurrentOffset = "" + iCurrentOffset;
-				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +
-						sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
+				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
+				
 				try {
 					QueryExecutor oExecutor = getExecutor(sProviders);
 					try {
