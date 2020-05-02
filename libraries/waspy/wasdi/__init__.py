@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.4.1
-Last Update: 22/04/2020
+Version 0.4.2
+Last Update: 30/04/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -710,6 +710,39 @@ def createWorkspace(sName=None):
     else:
         return None
 
+
+
+def deleteWorkspace(sWorkspaceId):
+    """
+    Delete a workspace
+    :param workspaceId: Id of the workspace to delete
+    :return: Workspace Id as a String if it is a success, None otherwise
+    """
+    asHeaders = _getStandardHeaders()
+    
+    if sWorkspaceId is None:
+        print('[ERROR] waspy.deleteWorkspace: sWorkspaceId passed is None' +
+              '  ******************************************************************************')
+        return False
+
+    bDeleteLayer = True
+    bDeleteFile = True
+    
+    sActualWorkspaceId = getActiveWorkspaceId()
+    
+    openWorkspaceById(sWorkspaceId)
+    
+    try:
+        sUrl = getWorkspaceBaseUrl() + '/ws/delete?sWorkspaceId='+sWorkspaceId+'&bDeleteLayer='+str(bDeleteLayer) + "&bDeleteFile=" + str(bDeleteFile)
+        
+        oResult = requests.delete(sUrl, headers=asHeaders)
+    
+        if (oResult is not None) and (oResult.ok is True):
+            return True
+        else:
+            return False
+    finally:
+        openWorkspaceById(sActualWorkspaceId)
 
 def getWorkspaceIdByName(sName):
     """
@@ -1451,6 +1484,7 @@ def deleteProduct(sProduct):
     if sProduct is None:
         print('[ERROR] waspy.deleteProduct: product passed is None' +
               '  ******************************************************************************')
+        return False
 
     asHeaders = _getStandardHeaders()
     sUrl = getWorkspaceBaseUrl()
