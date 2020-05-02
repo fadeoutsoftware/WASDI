@@ -574,7 +574,7 @@ public class WorkspaceResource {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);
 		}
 
-		return null;
+		return Response.serverError().build();
 	}
 
 	@PUT
