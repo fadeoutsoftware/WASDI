@@ -157,10 +157,6 @@ var ImportController = (function() {
                 this.openWorkspace(this.m_oState.params.workSpace);
                 this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
-            // else
-            // {
-            //
-            // }
         }
         else
         {
@@ -326,14 +322,6 @@ var ImportController = (function() {
 
             }
         });
-
-        /*
-        // P.Campanella 11/02/2018: tentativo NON finito di mostrare solo i footprint del provider selezionato
-        $scope.$watch('m_oController.m_iActiveProvidersTab', function (newVal) {
-            oController.updateLayerListForActiveTab(newVal);
-        });
-        */
-
 
         // Set search default values:
         this.m_aListOfProvider = this.m_oPageService.getProviders();
@@ -647,25 +635,6 @@ var ImportController = (function() {
         oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
         oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
         oProvider.isLoaded = false;
-        // oProvider.totalOfProducts = 0;
-
-        // oController.m_oSearchService.getProductsCount().then(
-        //         function(result)
-        //         {
-        //             if(result)
-        //             {
-        //                 if(utilsIsObjectNullOrUndefined(result.data) === false )
-        //                 {
-        //                     oProvider.totalOfProducts = result.data;
-        //                     //calc number of pages
-        //                     var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
-        //                     oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
-        //                     if(remainder !== 0) oProvider.totalPages += 1;
-        //                 }
-        //             }
-        //         }, function errorCallback(response) {
-        //             console.log("Impossible get products number");
-        //         });
 
         oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
