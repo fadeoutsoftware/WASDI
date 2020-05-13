@@ -32,8 +32,6 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 
 public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
-	
-	//protected String m_sDockerTemplatePath = "";
 
 	public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
 		super(sWorkingRootPath, sDockerTemplatePath);
@@ -122,74 +120,27 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 			// Generate the image
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: building image");
-			
 			handleUnzippedProcessor(sProcessorFolder);
-						
-			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
-			ArrayList<String> asArgs = new ArrayList<>();
-			
-			String sCommand = "docker";
-			String sRunFile = sProcessorFolder+"deploywasdidocker.sh";
-			
-			File oRunFile = new File(sRunFile);
-			
-			BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
-			
-			if(null!= oRunWriter) {
-				LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating "+sRunFile+" file");
-
-				oRunWriter.write("#!/bin/bash");
-				oRunWriter.newLine();
-				oRunWriter.write("echo Deploy Docker Started > /usr/lib/wasdi/launcher/logs/echo.txt");
-				oRunWriter.newLine();
-				oRunWriter.write("docker build -t" + sDockerName + " " + sProcessorFolder + " $1 > /usr/lib/wasdi/launcher/logs/deploy.txt 2>1");
-				oRunWriter.newLine();
-				oRunWriter.write("echo Deploy Docker Done");
-				oRunWriter.flush();
-				oRunWriter.close();
-			}			
-			
-			Runtime.getRuntime().exec("chmod u+x "+sRunFile);
-			
-			shellExec(sRunFile, asArgs);
+			// Create Docker Util and deploy the docker 
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath);
+			oDockerUtils.deploy();
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
-			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: created image " + sDockerName);
 			
-			// Run the container
+			// Run the container: find the port
 			int iProcessorPort = oProcessorRepository.getNextProcessorPort();
-			
 			if (!bFirstDeploy) {
 				iProcessorPort = oProcessor.getPort();
 			}
 			
-			//docker run -it -p 8888:5000 fadeout/wasdi:0.6
-			asArgs.clear();
-			asArgs.add("run");
-			// P.Campanella 11/06/2018: mounted volume
-			// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
-			asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
+			oDockerUtils.run(iProcessorPort);
 			
-			//asArgs.add("-u 111");
-			
-			asArgs.add("--mount");
-			asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");
-			asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
-			asArgs.add(sDockerName);
-			
-			handleRunCommand(sCommand, asArgs);
-			
-			shellExec(sCommand, asArgs, false);
-			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
-			
-			// Save Processor Port in the Repo
 			if (bFirstDeploy) {
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 				oProcessor.setPort(iProcessorPort);
 				oProcessorRepository.updateProcessor(oProcessor);
 			}
-			
-			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: container " + sDockerName + " is running");
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
@@ -283,16 +234,12 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			    oProcessorZipFile.delete();		    	
 		    }
 		    catch (Exception e) {
-				//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-				//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
 				//return false;
 			}
 		    
 		}
 		catch (Exception oEx) {
-			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
 			return false;
 		}
@@ -300,42 +247,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		return true;
 	}
 	
-	
-	public void shellExec(String sCommand, List<String> asArgs) {
-		shellExec(sCommand,asArgs,true);
-	}
-	
-	public void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		try {
-			if (asArgs==null) asArgs = new ArrayList<String>();
-			asArgs.add(0, sCommand);
-			
-			String sCommandLine = "";
-			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}
-			
-			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
-			
-			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-			//oProcessBuilder.redirectErrorStream(true);
-			Process oProcess = oProcessBuilder.start();
-			if (bWait) {
-				//BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-				//String sLine;
-				//while ((sLine = oReader.readLine()) != null)
-					//LauncherMain.s_oLogger.debug("[docker]: " + sLine);
-				int iProcOuptut = oProcess.waitFor();
-				
-				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
+
 	/**
 	 * Run a Docker Processor
 	 */
@@ -443,34 +355,11 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				// Set the processor path
 				String sDownloadRootPath = m_sWorkingRootPath;
 				if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+				String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;
 				
-				String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;				
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
 				
-				// Set the docker Name
-				String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
-				
-				ArrayList<String> asArgs = new ArrayList<>();
-				// Run the container
-				int iProcessorPort = oProcessor.getPort();
-				//docker run -it -p 8888:5000 fadeout/wasdi:0.6
-				asArgs.clear();
-				asArgs.add("run");
-				
-				//asArgs.add("-u 111");
-				
-				// P.Campanella 11/06/2018: mounted volume
-				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
-				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
-				asArgs.add("--mount");
-				asArgs.add("type=bind,src="+sProcessorFolder+",dst=/wasdi");				
-				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
-				asArgs.add(sDockerName);
-				
-				String sCommand = "docker";
-				
-				handleRunCommand(sCommand, asArgs);
-				
-				shellExec(sCommand, asArgs, false);
+				oDockerUtils.run();
 				
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: wait 5 sec to let docker start");
 				Thread.sleep(5000);
@@ -507,6 +396,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: " + sOutputResult);
 				sJsonOutput += sOutputResult;
 			}
+			
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: out from the read Line loop");
 			
 			oConnection.disconnect();
@@ -608,7 +498,6 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 							LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
 						}
 						
-						
 						LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: processor done");
 						
 					}
@@ -692,47 +581,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			File oProcessorFolder = new File(sProcessorFolder);
 
 			
-			// docker ps -a | awk '{ print $1,$2 }' | grep <imagename> | awk '{print $1 }' | xargs -I {} docker rm -f {}
-			// docker rmi -f <imagename>
-			
-			
-			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
-			
-			String sRunFile = sProcessorFolder+"cleanwasdidocker.sh";
-			
-			File oRunFile = new File(sRunFile);
-			
-			BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
-			
-			if(null!= oRunWriter) {
-				LauncherMain.s_oLogger.debug("DockerProcessorEngine.deleteProcessor: Creating "+sRunFile+" file");
-
-				oRunWriter.write("#!/bin/bash");
-				oRunWriter.newLine();
-				oRunWriter.write("docker ps -a | awk '{ print $1,$2 }' | grep " + sDockerName + " | awk '{print $1 }' | xargs -I {} docker rm -f {}");
-				oRunWriter.newLine();
-				oRunWriter.flush();
-				oRunWriter.close();
-			}			
-			
-			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
-
-			Runtime.getRuntime().exec(sRunFile);
-
-			// Wait for docker to finish
-			Thread.sleep(10000);
-			
-			// Delete this image
-			ArrayList<String> asArgs = new ArrayList<>();
-			// Remove the container image
-			asArgs.add("rmi");
-			asArgs.add("-f");
-			asArgs.add(sDockerName);
-			
-			String sCommand = "docker";
-			
-			
-			shellExec(sCommand, asArgs, false);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
+			oDockerUtils.delete();
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
 						
@@ -769,4 +619,87 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			return false;
 		}
 	}
+	
+	/**
+	 * Deploy
+	 * @param oParameter
+	 * @return
+	 */
+	public boolean redeploy(ProcessorParameter oParameter) {
+		
+		if (oParameter == null) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.redeploy: oParameter is null");
+			return false;
+		}
+		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;		
+		
+		try {
+			
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+
+			// First Check if processor exists
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			// Check processor
+			if (oProcessor == null) { 
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.redeploy: oProcessor is null [" + sProcessorId +"]");
+				return false;
+			}
+			
+			// Set the processor path
+			String sDownloadRootPath = m_sWorkingRootPath;
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			
+			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
+			
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: update docker for " + sProcessorName);
+			
+			// Create utils
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
+			
+			// Delete the image
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: delete the container");
+			oDockerUtils.delete();
+			
+			// Create again
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: deploy the image");
+			oDockerUtils.deploy();
+			
+			// Run
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: run the container");
+			oDockerUtils.run();
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: docker " + sProcessorName + " updated");
+			return true;
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.redeploy Exception", oEx);
+			try {
+				// Check and set the operation end-date
+				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				}			
+				
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+			} catch (Exception e) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.redeploy Exception", e);
+			}
+			
+			return false;
+		}
+	}
 }
+

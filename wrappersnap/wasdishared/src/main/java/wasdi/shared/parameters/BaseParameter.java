@@ -147,6 +147,12 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.WPS.name())) {
 			oParam = new WpsParameters();
 		}
+		else if (sOperationType.equals(LauncherOperations.REDEPLOYPROCESSOR.name())) {
+			oParam = new ProcessorParameter();
+		}
+		else if (sOperationType.equals(LauncherOperations.COPYTOSFTP.name())) {
+			oParam = new IngestFileParameter();
+		}
 		
 		return oParam;
 	}

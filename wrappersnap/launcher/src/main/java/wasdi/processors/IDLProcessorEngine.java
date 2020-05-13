@@ -612,4 +612,10 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		return false;
 	}
 	
+	@Override
+	public boolean redeploy(ProcessorParameter oParameter) {
+		// TODO: Maybe update the WASDI Lib?
+		
+		return true;
+	}
 }

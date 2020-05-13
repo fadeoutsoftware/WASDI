@@ -735,6 +735,70 @@ public class ProcessorsResource {
 		}
 	}
 	
+	
+	@GET
+	@Path("/redeploy")
+	public Response redeployProcessor(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Utils.debugLog("ProcessorResources.redeployProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+		
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.redeployProcessor: get Processor");	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToReDeploy = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToReDeploy == null) {
+				Utils.debugLog("ProcessorsResource.redeployProcessor: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToReDeploy.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.redeployProcessor: processor not of user " + oProcessorToReDeploy.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			// Schedule the process to run the processor
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(oProcessorToReDeploy.getName());
+			oProcessorParameter.setProcessorID(oProcessorToReDeploy.getProcessorId());
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setJson("{}");
+			oProcessorParameter.setProcessorType(oProcessorToReDeploy.getType());
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(), sPath,oProcessorParameter);			
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.redeployProcessor: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
 	@POST
 	@Path("/update")
 	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
