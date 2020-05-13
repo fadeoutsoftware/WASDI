@@ -1704,7 +1704,13 @@ var EditorController = (function () {
 
                 //remove layer in 2D map
                 oMap2D.eachLayer(function (layer) {
-                    if (utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId) {
+                    var sMapLayer = layer.options.layers;
+                    var sMapLayer2 = "wasdi:" + layer.options.layers;
+
+                    if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer == sLayerId) {
+                        oMap2D.removeLayer(layer);
+                    }
+                    else if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer2 == sLayerId) {
                         oMap2D.removeLayer(layer);
                     }
                 });
@@ -1801,6 +1807,18 @@ var EditorController = (function () {
                 // oLayer = oGlobe.remove(oLayer);
                 //break;
                 iIndexLayer = 0;
+            }
+            else {
+
+                if (!utilsIsObjectNullOrUndefined(oLayer.imageryProvider.layers)) {
+                    var sMapLayer = "wasdi:" + oLayer.imageryProvider.layers;
+                    if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sMapLayer == sLayerId) {
+                        oLayer = aoGlobeLayers.remove(oLayer);
+                        // oLayer = oGlobe.remove(oLayer);
+                        //break;
+                        iIndexLayer = 0;
+                    }
+                }
             }
 
         }
