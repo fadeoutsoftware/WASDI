@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.4.1
-Last Update: 22/04/2020
+Version 0.4.2
+Last Update: 30/04/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -619,6 +619,68 @@ def getWorkspaces():
         return oJsonResult
     else:
         return None
+
+
+def createWorkspace(sName=None):
+    """
+    Create a new workspaces and set it as ACTIVE Workspace
+    :param sName: Name of the workspace to create. Null by default
+    :return: Workspace Id as a String if it is a success, None otherwise
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+
+    asHeaders = _getStandardHeaders()
+
+    sUrl = m_sBaseUrl + '/ws/create'
+
+    if sName is not None:
+        sUrl = sUrl + "?name=" + sName
+
+    oResult = requests.get(sUrl, headers=asHeaders)
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResult = oResult.json()
+
+        openWorkspaceById(oJsonResult["stringValue"])
+
+        return oJsonResult["stringValue"]
+    else:
+        return None
+
+
+
+def deleteWorkspace(sWorkspaceId):
+    """
+    Delete a workspace
+    :param workspaceId: Id of the workspace to delete
+    :return: Workspace Id as a String if it is a success, None otherwise
+    """
+    asHeaders = _getStandardHeaders()
+    
+    if sWorkspaceId is None:
+        print('[ERROR] waspy.deleteWorkspace: sWorkspaceId passed is None' +
+              '  ******************************************************************************')
+        return False
+
+    bDeleteLayer = True
+    bDeleteFile = True
+    
+    sActualWorkspaceId = getActiveWorkspaceId()
+    
+    openWorkspaceById(sWorkspaceId)
+    
+    try:
+        sUrl = getWorkspaceBaseUrl() + '/ws/delete?sWorkspaceId='+sWorkspaceId+'&bDeleteLayer='+str(bDeleteLayer) + "&bDeleteFile=" + str(bDeleteFile)
+        
+        oResult = requests.delete(sUrl, headers=asHeaders)
+    
+        if (oResult is not None) and (oResult.ok is True):
+            return True
+        else:
+            return False
+    finally:
+        openWorkspaceById(sActualWorkspaceId)
 
 def getWorkspaceIdByName(sName):
     """
@@ -1443,8 +1505,9 @@ def deleteProduct(sProduct):
     global m_sActiveWorkspace
 
     if sProduct is None:
-        wasdiLog('[ERROR] waspy.deleteProduct: product passed is None' +
+        print('[ERROR] waspy.deleteProduct: product passed is None' +
               '  ******************************************************************************')
+        return False
 
     asHeaders = _getStandardHeaders()
     sUrl = getWorkspaceBaseUrl()

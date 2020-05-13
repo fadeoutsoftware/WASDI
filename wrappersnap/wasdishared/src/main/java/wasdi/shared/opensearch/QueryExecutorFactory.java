@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import wasdi.shared.opensearch.eodc.QueryExecutorEODC;
 import wasdi.shared.opensearch.onda.QueryExecutorONDA;
 import wasdi.shared.opensearch.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.utils.AuthenticationCredentials;
@@ -34,6 +35,7 @@ public class QueryExecutorFactory {
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
 		aoMap.put("FEDEO", QueryExecutorFEDEO::new);
 		aoMap.put("SOBLOO", QueryExecutorSOBLOO::new);
+		aoMap.put("EODC", QueryExecutorEODC::new);
 		//todo complete CREODIAS and uncomment
 //		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);

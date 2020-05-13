@@ -151,7 +151,7 @@ public class WorkspaceSharingRepository extends  MongoRepository{
 
         try {
 
-            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(new Document("wokspaceId", sWorkspaceId));
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(new Document("workspaceId", sWorkspaceId));
 
             if (oDeleteResult != null)
             {

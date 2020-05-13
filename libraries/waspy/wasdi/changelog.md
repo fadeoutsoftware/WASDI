@@ -1,5 +1,11 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.4.2] - 2020-04-30
+
+## Added
+
+- added deleteWorkspace method
+
 ## [0.4.1] - 2020-04-22
 
 ## Added

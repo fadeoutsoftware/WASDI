@@ -430,8 +430,7 @@ public class WorkspaceResource {
 
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
-				Utils.debugLog("User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner
-						+ "]: delete the sharing, not the ws");
+				Utils.debugLog("User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
@@ -440,15 +439,13 @@ public class WorkspaceResource {
 			// get workspace path
 			String sWorkspacePath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
 
-			Utils.debugLog("ProductResource.DeleteProduct: deleting Workspace " + sWorkspaceId + " of user "
-					+ sWorkspaceOwner);
+			Utils.debugLog("ProductResource.DeleteProduct: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
 			// Delete Workspace Db Entry
 			if (oWorkspaceRepository.deleteWorkspace(sWorkspaceId)) {
 
 				// Get all Products in workspace
-				List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository
-						.getProductsByWorkspace(sWorkspaceId);
+				List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
 				// Do we need to delete layers?
 				if (bDeleteLayer) {
@@ -461,21 +458,18 @@ public class WorkspaceResource {
 								m_oServletConfig.getInitParameter("GS_USER"),
 								m_oServletConfig.getInitParameter("GS_PASSWORD"));
 
-						// For each product in the workspace
+						// For each product in the workspace, if is unique, delete published bands and metadata file ref
 						for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
 
 							// Get the downloaded file
-							DownloadedFile oDownloadedFile = oDownloadedFilesRepository
-									.getDownloadedFileByPath(oProductWorkspace.getProductName());
+							DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oProductWorkspace.getProductName());
 
 							// Is the product used also in other workspaces?
-							List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository
-									.getDownloadedFileListByName(oDownloadedFile.getFileName());
+							List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getDownloadedFileListByName(oDownloadedFile.getFileName());
 
 							if (aoDownloadedFileList.size() > 1) {
 								// Yes, it is in other Ws, jump
-								Utils.debugLog(
-										"ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
+								Utils.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
 								continue;
 							}
 
@@ -488,8 +482,7 @@ public class WorkspaceResource {
 							}
 
 							// Get the list of published bands by product name
-							List<PublishedBand> aoPublishedBands = oPublishRepository
-									.getPublishedBandsByProductName(sProductName);
+							List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(sProductName);
 
 							// For each published band
 							for (PublishedBand oPublishedBand : aoPublishedBands) {
@@ -497,25 +490,31 @@ public class WorkspaceResource {
 								try {
 									// Remove Geoserver layer (and file)
 									if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-										Utils.debugLog("ProductResource.DeleteProduct: error deleting layer "
-												+ oPublishedBand.getLayerId() + " from geoserver");
+										Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
 									}
 
 									try {
 										// delete published band on database
-										oPublishRepository.deleteByProductNameLayerId(
-												oDownloadedFile.getProductViewModel().getName(),
-												oPublishedBand.getLayerId());
+										oPublishRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 									} catch (Exception oEx) {
-										Utils.debugLog(
-												"WorkspaceResource.DeleteWorkspace: error deleting published band on data base "
-														+ oEx.toString());
+										Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting published band on data base " + oEx.toString());
 									}
 								} catch (Exception oEx) {
-									Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting layer id "
-											+ oEx.toString());
+									Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting layer id " + oEx.toString());
 								}
 							}
+							
+							// If view model is available (should be), get the metadata file reference
+							if (oDownloadedFile.getProductViewModel() != null) {
+								
+								String sMetadataFileRef = oDownloadedFile.getProductViewModel().getMetadataFileReference();
+								
+								if (!Utils.isNullOrEmpty(sMetadataFileRef)) {
+									Utils.debugLog("WorkspaceResource.DeleteWorkspace: deleting metadata file " + sMetadataFileRef);
+									FileUtils.deleteQuietly(new File(sMetadataFileRef));
+								}
+							}
+							
 						}
 					} catch (Exception oE) {
 						Utils.debugLog("WorkspaceResource.DeleteWorkspace: error while trying to delete layers: " + oE);
@@ -532,17 +531,14 @@ public class WorkspaceResource {
 						try {
 							File oDir = new File(sWorkspacePath);
 							if (!oDir.exists()) {
-								Utils.debugLog(
-										"WorkspaceResource.DeleteWorkspace: trying to delete non existing directory "
-												+ sWorkspacePath);
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: trying to delete non existing directory " + sWorkspacePath);
 							}
 							// try anyway for two reasons:
 							// 1. non existing directories are handled anyway
 							// 2. try avoiding race conditions
 							FileUtils.deleteDirectory(oDir);
 						} catch (Exception oE) {
-							Utils.debugLog("WorkspaceResource.DeleteWorkspace: error while trying to delete directory "
-									+ sWorkspacePath + ": " + oE);
+							Utils.debugLog("WorkspaceResource.DeleteWorkspace: error while trying to delete directory " + sWorkspacePath + ": " + oE);
 						}
 
 						// delete download file on database
@@ -550,14 +546,11 @@ public class WorkspaceResource {
 
 							try {
 
-								Utils.debugLog("WorkspaceResource.DeleteWorkspace: Deleting file "
-										+ oProductWorkspace.getProductName());
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: Deleting file " + oProductWorkspace.getProductName());
 								oDownloadedFilesRepository.deleteByFilePath(oProductWorkspace.getProductName());
 
 							} catch (Exception oEx) {
-								Utils.debugLog(
-										"WorkspaceResource.DeleteWorkspace: Error deleting download on data base: "
-												+ oEx);
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting download on data base: " + oEx);
 							}
 						}
 
@@ -581,7 +574,7 @@ public class WorkspaceResource {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);
 		}
 
-		return null;
+		return Response.serverError().build();
 	}
 
 	@PUT
