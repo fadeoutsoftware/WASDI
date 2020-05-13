@@ -564,35 +564,6 @@ def hello():
     oResult = requests.get(sUrl)
     return oResult.text
 
-
-def createWorkspace(sName=None):
-    """
-    Create a new workspaces and set it as ACTIVE Workspace
-    :param sName: Name of the workspace to create. Null by default
-    :return: Workspace Id as a String if it is a success, None otherwise
-    """
-    global m_sBaseUrl
-    global m_sSessionId
-
-    asHeaders = _getStandardHeaders()
-
-    sUrl = m_sBaseUrl + '/ws/create'
-
-    if sName is not None:
-        sUrl = sUrl + "?name=" + sName
-
-    oResult = requests.get(sUrl, headers=asHeaders)
-
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResult = oResult.json()
-
-        openWorkspaceById(oJsonResult["stringValue"])
-
-        return oJsonResult["stringValue"]
-    else:
-        return None
-
-
 def getWorkspaces():
     """
     Get List of user workspaces
@@ -619,7 +590,6 @@ def getWorkspaces():
         return oJsonResult
     else:
         return None
-
 
 def createWorkspace(sName=None):
     """
