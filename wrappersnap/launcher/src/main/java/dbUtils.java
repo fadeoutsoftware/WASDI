@@ -11,11 +11,9 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
-import au.com.objectix.jgridshift.Util;
 import wasdi.ConfigReader;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
-import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
