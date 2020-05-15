@@ -511,6 +511,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.delete(oParameter);
 			}
+				break;
 			case REDEPLOYPROCESSOR: {
 				// Delete User Processor
 				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -559,6 +560,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeWPS(oParameter);
 			}
+				break;
 			case REGRID: {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
