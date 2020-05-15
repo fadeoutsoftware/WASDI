@@ -663,6 +663,12 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: update docker for " + sProcessorName);
 			
+			// Copy Docker template files in the processor folder
+			File oDockerTemplateFolder = new File(m_sDockerTemplatePath);
+			File oProcessorFolder = new File(sProcessorFolder);
+			
+			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);			
+			
 			// Create utils
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
 			
