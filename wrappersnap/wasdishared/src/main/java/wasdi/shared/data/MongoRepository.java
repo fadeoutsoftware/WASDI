@@ -52,7 +52,7 @@ public class MongoRepository {
     }
     
     /**
-     * 
+     * Static Connections Dictionary
      */
     private static HashMap<String, MongoConnection> s_aoDbConnections = new HashMap<>();
     
@@ -66,7 +66,7 @@ public class MongoRepository {
      */
     protected String m_sRepoDb = "wasdi";
     
-    /**
+	/**
      * Add a new Mongo Connection
      * @param sDbCode Code of the connection
      * @param sUser User 
@@ -176,4 +176,21 @@ public class MongoRepository {
 			e.printStackTrace();
 		}    	
     }
+    
+    /**
+     * Get the repo db of this Repository
+     * @return
+     */
+    public String getRepoDb() {
+		return m_sRepoDb;
+	}
+
+    /**
+     * Set the repo db of this Repository
+     * @param sRepoDb
+     */
+	public void setRepoDb(String sRepoDb) {
+		this.m_sRepoDb = sRepoDb;
+	}
+    
 }

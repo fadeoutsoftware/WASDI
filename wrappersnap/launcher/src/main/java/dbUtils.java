@@ -12,8 +12,10 @@ import java.util.Scanner;
 import org.apache.commons.io.FileUtils;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
@@ -892,6 +894,31 @@ public class dbUtils {
 	        	s_sMyNodeCode = sNode;
 	        }
 	        
+			// If this is not the main node
+			if (!s_sMyNodeCode.equals("wasdi")) {
+				System.out.println("Adding local mongo config");
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
+			}
+			
+			
+			// TODO TOGLILI DA QUI SONO LO SPUNTO
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspaceRepository.setRepoDb("wasdi");
+			
+			//una cosa simile ma tutti quelli del nodo
+			oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.DONE.name(), s_sMyNodeCode);
+			
+			// Un ciclo per tutti (tratta anche i logs)
+			// Quando devi scriverlo invece in locale:
+			oProcessWorkspaceRepository.setRepoDb("local");
+			oProcessWorkspaceRepository.insertProcessWorkspace( new ProcessWorkspace());
+			
+			
+			
+			
+
+			
 	        boolean bExit = false;
 	        
 	        Scanner oScanner = new Scanner( System.in);
