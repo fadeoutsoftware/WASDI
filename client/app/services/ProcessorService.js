@@ -191,6 +191,21 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     };
 
     /**
+     * Force processor Refresh
+     * @param sProcessorId
+     * @param sUserId
+     * @returns {*}
+     */
+    this.redeployProcessor = function(sProcessorId){
+
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        return this.m_oHttp.get(this.APIURL + '/processors/redeploy?processorId=' + sProcessorId + "&workspaceId=" + oWorkspace.workspaceId);
+    };
+
+    /**
      * Download a processor
      * @param sProcessorId
      * @param sUrl
