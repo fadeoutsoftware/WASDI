@@ -81,11 +81,11 @@ public class DockerUtils {
 
 				oBuildScriptWriter.write("#!/bin/bash");
 				oBuildScriptWriter.newLine();
-				oBuildScriptWriter.write("echo Deploy Docker Started > " + m_sDockerLogFile);
+				oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
 				oBuildScriptWriter.newLine();
-				oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " $1 > " + m_sDockerLogFile + " 2>1");
+				oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " $1 >> " + m_sDockerLogFile + " 2>&1");
 				oBuildScriptWriter.newLine();
-				oBuildScriptWriter.write("echo Deploy Docker Done > " + m_sDockerLogFile);
+				oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
 				oBuildScriptWriter.flush();
 				oBuildScriptWriter.close();
 			}			
@@ -173,11 +173,11 @@ public class DockerUtils {
 
 					oRunWriter.write("#!/bin/bash");
 					oRunWriter.newLine();
-					oRunWriter.write("echo Run Docker Started > " + m_sDockerLogFile);
+					oRunWriter.write("echo Run Docker Started >> " + m_sDockerLogFile);
 					oRunWriter.newLine();
-					oRunWriter.write(sCommandLine + " $1 > " + m_sDockerLogFile + " 2>1");
+					oRunWriter.write(sCommandLine + " $1 >> " + m_sDockerLogFile + " 2>&1");
 					oRunWriter.newLine();
-					oRunWriter.write("echo Run Docker Done > " + m_sDockerLogFile);
+					oRunWriter.write("echo Run Docker Done >> " + m_sDockerLogFile);
 					oRunWriter.flush();
 					oRunWriter.close();
 				}			
