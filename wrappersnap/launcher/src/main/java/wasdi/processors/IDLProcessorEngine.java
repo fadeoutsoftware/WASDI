@@ -618,4 +618,47 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		
 		return true;
 	}
+	
+	@Override
+	public boolean libraryUpdate(ProcessorParameter oParameter) {
+		
+		try {
+			String sIDLWasdiLibFile = m_sDockerTemplatePath;
+			
+			if (!sIDLWasdiLibFile.endsWith("/")) sIDLWasdiLibFile += "/";
+			
+			sIDLWasdiLibFile += "idlwasdilib.pro";
+			
+			// Copy Docker template files in the processor folder
+			File oIDLLibFile = new File(sIDLWasdiLibFile);
+			
+			if (!oIDLLibFile.exists()) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: impossibile to find the lib file " + oIDLLibFile.getPath());
+				return false;
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+			
+			// Check processor
+			if (oProcessor == null) { 
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: oProcessor is null [" + oParameter.getProcessorID() +"]");
+				return false;
+			}
+			
+			// Set the processor path
+			String sDownloadRootPath = m_sWorkingRootPath;
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			
+			String sProcessorFolder = sDownloadRootPath+ "/processors/" + oParameter.getName() + "/" ;
+			
+			FileUtils.copyFileToDirectory(oIDLLibFile, new File(sProcessorFolder));			
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: exception " + oEx.toString());
+		}
+		
+		return false;
+	}
+	
 }

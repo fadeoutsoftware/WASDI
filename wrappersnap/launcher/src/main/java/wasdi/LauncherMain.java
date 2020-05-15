@@ -520,6 +520,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oEngine.redeploy(oParameter);
 			}			
 				break;
+			case LIBRARYUPDATE: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
+						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.redeploy(oParameter);
+			}			
+				break;				
 			case RUNMATLAB: {
 				// Run Matlab Processor
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils

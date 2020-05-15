@@ -313,7 +313,16 @@ public class ProcessorsResource {
 		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
 	}
 	
-	
+	/**
+	 * Internal method to create run operation
+	 * @param sSessionId 
+	 * @param sName
+	 * @param sEncodedJson
+	 * @param sWorkspaceId
+	 * @param sParentProcessWorkspaceId
+	 * @return
+	 * @throws Exception
+	 */
 	public RunningProcessorViewModel internalRun(String sSessionId, String sName, String sEncodedJson, String sWorkspaceId, String sParentProcessWorkspaceId) throws Exception {
 		Utils.debugLog("ProcessorsResource.internalRun( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
 
@@ -785,6 +794,70 @@ public class ProcessorsResource {
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(), sPath,oProcessorParameter);			
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.redeployProcessor: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	
+	@GET
+	@Path("/libupdate")
+	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+		
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.libraryUpdate: get Processor");	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToForceUpdate = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToForceUpdate == null) {
+				Utils.debugLog("ProcessorsResource.libraryUpdate: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.libraryUpdate: processor not of user " + oProcessorToForceUpdate.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			// Schedule the process to run the processor
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
+			oProcessorParameter.setProcessorID(oProcessorToForceUpdate.getProcessorId());
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setJson("{}");
+			oProcessorParameter.setProcessorType(oProcessorToForceUpdate.getType());
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();

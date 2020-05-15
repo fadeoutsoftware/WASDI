@@ -197,6 +197,39 @@ public class WorkspaceRepository extends  MongoRepository {
     }
     
     /**
+     * Get all the workspaces of a user
+     * @param sUserId
+     * @return
+     */
+    public List<Workspace> getWorkspacesList() {
+
+        final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    Workspace oWorkspace = null;
+                    try {
+                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+                        aoReturnList.add(oWorkspace);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }    
+    
+    /**
      * Fill a list of Workpaces Entites
      * @param aoReturnList
      * @param oWSDocuments

@@ -55,6 +55,9 @@ RUN export C_INCLUDE_PATH=/usr/include/gdal
 
 RUN /usr/bin/python3.7 -m pip install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
 
+#TODO DA PROVARE
+RUN apt-get update && apt install -y python-gdal
+
 # Install Rasterio
 #RUN pip install rasterio
 

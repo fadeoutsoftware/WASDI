@@ -143,6 +143,39 @@ public class WorkspaceSharingRepository extends  MongoRepository{
     }
     
     /**
+     * Get all the sharings 
+     * @param sWorkspaceId
+     * @return
+     */
+    public List<WorkspaceSharing> getWorkspaceSharings() {
+
+        final ArrayList<WorkspaceSharing> aoReturnList = new ArrayList<WorkspaceSharing>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    WorkspaceSharing oWorkspaceSharing = null;
+                    try {
+                        oWorkspaceSharing = s_oMapper.readValue(sJSON,WorkspaceSharing.class);
+                        aoReturnList.add(oWorkspaceSharing);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }    
+    
+    /**
      * Delete all the sharings of a specific Workspace
      * @param sWorkspaceId
      * @return

@@ -21,6 +21,7 @@ import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -35,6 +36,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 
 public class dbUtils {
 	
@@ -534,6 +536,7 @@ public class dbUtils {
 	        System.out.println("Ok, what we do with Users?");
 	        
 	        System.out.println("\t1 - Delete User");
+	        System.out.println("\t2 - Print User Mails");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -599,6 +602,14 @@ public class dbUtils {
 	    		
 				FileUtils.deleteDirectory(new File(sBasePath));
 	        	
+	        }
+	        else if (sInputString.equals("2")) {
+	        	UserRepository oUserRepo = new  UserRepository();
+	        	ArrayList<User> aoUsers = oUserRepo.getAllUsers();
+	        	
+	        	for (User oUser : aoUsers) {
+					System.out.println(oUser.getUserId());
+				}
 	        }
 		}
 		catch (Exception oEx) {
@@ -775,6 +786,7 @@ public class dbUtils {
 				}
 			}
 			
+			
 		}
 	}
 
@@ -817,6 +829,51 @@ public class dbUtils {
 		refreshProductsTable();
 	}
 	
+	private static void workspaces() {
+		try {
+			
+	        System.out.println("Ok, what we do with workspaces?");
+	        
+	        System.out.println("\t1 - Clean shared ws errors");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Getting workspace sharings");
+	        	
+	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	        	WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+	        	
+	        	List<WorkspaceSharing> aoWorkspacesSharings = oWorkspaceSharingRepository.getWorkspaceSharings();
+	        	
+	        	
+	        	
+	        	for (WorkspaceSharing oWorkspaceSharing : aoWorkspacesSharings) {
+	        		
+					Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oWorkspaceSharing.getWorkspaceId());
+
+					if (oWorkspace == null) {
+						Utils.debugLog("WorkspaceSharings: DELETE WS Shared not available " + oWorkspaceSharing.getWorkspaceId());
+						
+						oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oWorkspaceSharing.getUserId(), oWorkspaceSharing.getWorkspaceId());
+						continue;
+					}	        		
+				}
+
+	        	
+	        	System.out.println("All sharings done");
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Workflows Exception: " + oEx);
+			oEx.printStackTrace();
+		}				
+	}
+	
 	public static String s_sMyNodeCode = "wasdi";
 
 		
@@ -850,6 +907,7 @@ public class dbUtils {
 		        System.out.println("\t5 - Password");
 		        System.out.println("\t6 - Users");
 		        System.out.println("\t7 - Workflows");
+		        System.out.println("\t8 - Workspaces");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -876,6 +934,9 @@ public class dbUtils {
 		        }
 		        else if (sInputString.equals("7")) {
 		        	workflows();
+		        }
+		        else if (sInputString.equals("8")) {
+		        	workspaces();
 		        }		        
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;

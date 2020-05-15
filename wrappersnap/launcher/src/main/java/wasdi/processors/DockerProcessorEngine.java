@@ -701,5 +701,92 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			return false;
 		}
 	}
+	
+	@Override
+	public boolean libraryUpdate(ProcessorParameter oParameter) {
+	
+		if (oParameter == null) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate: oParameter is null");
+			return false;
+		}
+		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;		
+		
+		try {
+			
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+
+			// First Check if processor exists
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			// Check processor
+			if (oProcessor == null) { 
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate: oProcessor is null [" + sProcessorId +"]");
+				return false;
+			}
+			
+			// Set the processor path
+			String sDownloadRootPath = m_sWorkingRootPath;
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			
+			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
+			
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
+			
+			// Call localhost:port
+			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/--wasdiupdate";
+			
+			// CREI CONNESSIONE AL
+			URL oProcessorUrl = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/json");
+			OutputStream oOutputStream = oConnection.getOutputStream();
+			oOutputStream.write("{}".getBytes());
+			oOutputStream.flush();
+			
+			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			}
+			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+			String sOutputResult;
+			String sOutputCumulativeResult = "";
+			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
+			while ((sOutputResult = oBufferedReader.readLine()) != null) {
+				Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
+				
+				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
+			}
+			oConnection.disconnect();			
+			
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: lib updated");
+			
+			return true;
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", oEx);
+			try {
+				// Check and set the operation end-date
+				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				}			
+				
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+			} catch (Exception e) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", e);
+			}
+			
+			return false;
+		}
+	}
 }
 

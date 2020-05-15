@@ -30,5 +30,6 @@ public enum LauncherOperations {
     DELETEPROCESSOR,
     INFO,
     COPYTOSFTP,
-    REDEPLOYPROCESSOR
+    REDEPLOYPROCESSOR,
+    LIBRARYUPDATE
 }

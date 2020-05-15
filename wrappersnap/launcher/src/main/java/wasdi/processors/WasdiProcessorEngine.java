@@ -78,6 +78,9 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public abstract boolean redeploy(ProcessorParameter oParameter);
 	
+	
+	public abstract boolean libraryUpdate(ProcessorParameter oParameter);
+	
 	/**
 	 * Execute a system task
 	 * @param sCommand

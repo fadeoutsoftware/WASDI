@@ -153,6 +153,9 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.COPYTOSFTP.name())) {
 			oParam = new IngestFileParameter();
 		}
+		else if (sOperationType.equals(LauncherOperations.LIBRARYUPDATE.name())) {
+			oParam = new ProcessorParameter();
+		}		
 		
 		return oParam;
 	}
