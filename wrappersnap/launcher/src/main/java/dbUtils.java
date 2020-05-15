@@ -888,9 +888,6 @@ public class dbUtils {
 		//get processWorkspaces on local node from main DB 
 		String sNodeCode = s_sMyNodeCode;
 		
-		//todo remove after testing!
-		sNodeCode = "WASDI-ONDA-1";	
-		
 		List<ProcessWorkspace> aoProcessesToBePorted = oProcessWorkspaceRepository.getByNode(sNodeCode);
 		
 		//construct set of workspaces
