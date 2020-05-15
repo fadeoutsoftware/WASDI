@@ -771,8 +771,18 @@ public class ProcessorsResource {
 			}
 			
 			if (!oProcessorToReDeploy.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.redeployProcessor: processor not of user " + oProcessorToReDeploy.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();
+				
+				ProcessorSharingRepository oSharingRepo = new ProcessorSharingRepository();
+				
+				ProcessorSharing oSharing = oSharingRepo.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.redeployProcessor: processor not of user " + oProcessorToReDeploy.getUserId());
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.redeployProcessor: processor shared with user " + oUser.getUserId());
+				}
 			}
 
 			// Schedule the process to run the processor
