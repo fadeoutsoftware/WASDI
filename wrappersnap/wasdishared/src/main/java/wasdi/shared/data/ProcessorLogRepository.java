@@ -56,6 +56,33 @@ public class ProcessorLogRepository extends MongoRepository {
         return "";
     }
     
+	/**
+	 * Insert a new log row
+	 * @param aoProcessLogs a list of rows to add
+	 */
+    public void insertProcessLogList(List<ProcessorLog> aoProcessLogs) {
+        try {
+        	if(null == aoProcessLogs) {
+        		Utils.debugLog("ProcessorLogRepository.InsertProcessLogList: aoProcessorLog is null");
+        		return;
+        	}
+        	
+        	List<Document> aoDocs = new ArrayList<>();
+        	for (ProcessorLog oProcessorLog: aoProcessLogs) {
+        		if(null!=oProcessorLog) {
+        			String sJSON = s_oMapper.writeValueAsString(oProcessorLog);
+                    Document oDocument = Document.parse(sJSON);
+                    aoDocs.add(oDocument);
+        		}
+			}
+        	getCollection(m_sThisCollection).insertMany(aoDocs);
+
+        } catch (Exception oEx) {
+            Utils.debugLog("ProcessorLogRepository.InsertProcessLog: "+oEx);
+        }
+        return;
+    }
+    
     /**
      * Delete a Log row by Mongo Id
      * @param sId Mongo Obj Id

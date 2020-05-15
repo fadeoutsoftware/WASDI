@@ -3,16 +3,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
+import au.com.objectix.jgridshift.Util;
 import wasdi.ConfigReader;
-import wasdi.LauncherMain;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessStatus;
@@ -38,7 +38,6 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
-import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 
 public class dbUtils {
 	
@@ -876,8 +875,62 @@ public class dbUtils {
 		}				
 	}
 	
-	public static String s_sMyNodeCode = "wasdi";
+	/*
+	 *
+	 */
+	public static void migrateToLocal() {
+		Utils.debugLog("dbUtild.migrateToLocal");
+		
+		
+		
+		//connect to main DB
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		oProcessWorkspaceRepository.setRepoDb("wasdi");
+		
+		//get processWorkspaces on local node from main DB 
+		String sNodeCode = s_sMyNodeCode;
+		
+		//todo remove after testing!
+		sNodeCode = "WASDI-ONDA-1";	
+		
+		List<ProcessWorkspace> aoProcessesToBePorted = oProcessWorkspaceRepository.getByNode(sNodeCode);
+		
+		//construct set of workspaces
+		Set<String> asUniqueWorkspaces = new HashSet<>(); 
+		for (ProcessWorkspace oProcessWS : aoProcessesToBePorted) {
+			if(!asUniqueWorkspaces.contains(oProcessWS.getWorkspaceId())) {
+				asUniqueWorkspaces.add(oProcessWS.getWorkspaceId());
+			}
+		}
+		
+		// Find and save corresponding logs 
+		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+		List<ProcessorLog> aoLogsToBePorted = new ArrayList<>();
+		for (String sWs : asUniqueWorkspaces) {
+			List<ProcessorLog> aoLoglist = oProcessorLogRepository.getLogsByProcessWorkspaceId(sWs);
+			if(aoLoglist!=null && aoLoglist.size()>0) {
+				aoLogsToBePorted.addAll(aoLoglist);
+			}
+		}
 
+		// Switch to local db
+		oProcessWorkspaceRepository.setRepoDb("local");
+		
+		//insert processes
+		oProcessWorkspaceRepository.insertProcessListWorkspace(aoProcessesToBePorted);
+//		for (ProcessWorkspace oProcessWorkspace : aoProcessesToBePorted) {
+//			if(null!=oProcessWorkspace) {
+//				oProcessWorkspaceRepository.insertProcessWorkspace(oProcessWorkspace);
+//			}
+//		}
+		
+		//insert logs
+		oProcessorLogRepository.insertProcessLogList(aoLogsToBePorted);
+	}
+	
+	
+	public static String s_sMyNodeCode = "wasdi";
+	
 		
 	public static void main(String[] args) {
 		
@@ -901,24 +954,6 @@ public class dbUtils {
 				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
 			}
 			
-			
-			// TODO TOGLILI DA QUI SONO LO SPUNTO
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspaceRepository.setRepoDb("wasdi");
-			
-			//una cosa simile ma tutti quelli del nodo
-			oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.DONE.name(), s_sMyNodeCode);
-			
-			// Un ciclo per tutti (tratta anche i logs)
-			// Quando devi scriverlo invece in locale:
-			oProcessWorkspaceRepository.setRepoDb("local");
-			oProcessWorkspaceRepository.insertProcessWorkspace( new ProcessWorkspace());
-			
-			
-			
-			
-
-			
 	        boolean bExit = false;
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -935,6 +970,7 @@ public class dbUtils {
 		        System.out.println("\t6 - Users");
 		        System.out.println("\t7 - Workflows");
 		        System.out.println("\t8 - Workspaces");
+		        System.out.println("\t9 - Migrate DB to local");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -965,6 +1001,9 @@ public class dbUtils {
 		        else if (sInputString.equals("8")) {
 		        	workspaces();
 		        }		        
+		        else if(sInputString.equals("9")) {
+		        	migrateToLocal();
+		        }
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;
 		        }		        

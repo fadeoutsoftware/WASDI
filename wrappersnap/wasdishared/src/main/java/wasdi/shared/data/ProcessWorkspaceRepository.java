@@ -61,6 +61,29 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return "";
     }
+    
+	/**
+	 * Insert a new Process Workspace 
+	 * @param oProcessWorkspace Process Workpsace list to insert
+	 */
+    public void insertProcessListWorkspace(List<ProcessWorkspace> aoProcessWorkspace) {
+
+        try {
+        	
+        	List<Document> aoDocs = new ArrayList<>();
+        	for (ProcessWorkspace oProcessWorkspace : aoProcessWorkspace) {
+        		// Initialize the Last State Change Date
+        		oProcessWorkspace.setLastStateChangeDate(Utils.GetFormatDate(new Date()));
+        		String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
+                Document oDocument = Document.parse(sJSON);
+                aoDocs.add(oDocument);
+			}
+        	getCollection(m_sThisCollection).insertMany(aoDocs);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+    }
 
     /**
      * Delete an Entity by Mongo Id
@@ -1188,4 +1211,29 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		}
 		return null;
 	}
+
+	
+	/**
+	 * Get the list of processes in a specific node. WARNING: use this method for
+	 * maintenance, since if you need to further filter the results it can be pretty
+	 * inefficient, so prefer other more specific queries
+	 * 
+	 * @param sComputingNodeCode computing node
+	 * @return
+	 */
+	public List<ProcessWorkspace> getByNode(String sComputingNodeCode) {
+		final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+					Filters.eq("nodeCode", sComputingNodeCode))
+					.sort(new Document("operationDate", -1));
+			fillList(aoReturnList, oWSDocuments);
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
 }
