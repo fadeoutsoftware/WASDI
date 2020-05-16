@@ -614,15 +614,21 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 	
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
-		// TODO: Maybe update the WASDI Lib?
-		
-		return true;
+		return libraryUpdate(oParameter);
 	}
 	
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
 		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;				
+		
 		try {
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			
 			String sIDLWasdiLibFile = m_sDockerTemplatePath;
 			
 			if (!sIDLWasdiLibFile.endsWith("/")) sIDLWasdiLibFile += "/";
@@ -637,6 +643,8 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				return false;
 			}
 			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 			
@@ -646,13 +654,17 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				return false;
 			}
 			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
+			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
 			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 			
 			String sProcessorFolder = sDownloadRootPath+ "/processors/" + oParameter.getName() + "/" ;
 			
-			FileUtils.copyFileToDirectory(oIDLLibFile, new File(sProcessorFolder));			
+			FileUtils.copyFileToDirectory(oIDLLibFile, new File(sProcessorFolder));
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: exception " + oEx.toString());

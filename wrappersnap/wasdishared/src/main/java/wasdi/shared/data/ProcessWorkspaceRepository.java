@@ -63,7 +63,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
     
 	/**
-	 * Insert a new Process Workspace 
+	 * Insert a list of Process Workspace Objects 
 	 * @param oProcessWorkspace Process Workpsace list to insert
 	 */
     public void insertProcessListWorkspace(List<ProcessWorkspace> aoProcessWorkspace) {
@@ -72,8 +72,6 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	
         	List<Document> aoDocs = new ArrayList<>();
         	for (ProcessWorkspace oProcessWorkspace : aoProcessWorkspace) {
-        		// Initialize the Last State Change Date
-        		oProcessWorkspace.setLastStateChangeDate(Utils.GetFormatDate(new Date()));
         		String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
                 Document oDocument = Document.parse(sJSON);
                 aoDocs.add(oDocument);

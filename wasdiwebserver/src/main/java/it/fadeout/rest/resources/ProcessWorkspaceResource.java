@@ -609,7 +609,7 @@ public class ProcessWorkspaceResource {
 	@Path("/getstatusbyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public String getProcessStatusById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processObjId") String sProcessObjId) {
-		Utils.debugLog("ProcessWorrkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " )" );
+		Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " )" );
 		try {
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
@@ -617,7 +617,7 @@ public class ProcessWorkspaceResource {
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorrkspaceResource.getProcessStatusById: " + oE );
+			Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById: " + oE );
 		}
 		return null;
 	}

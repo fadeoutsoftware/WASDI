@@ -102,6 +102,8 @@ public class MongoRepository {
     	}    	
     }
     
+    private static boolean s_bDbSwitchLogged = false;
+    
     /**
      * Get The database Object
      * @return
@@ -125,7 +127,12 @@ public class MongoRepository {
                 	s_aoDbConnections.put("wasdi", oMongoConnection);
     			}
     			else {
-    				Utils.debugLog("MongoRepository.getMongoDatabase: Db Code " + sDbCode + " NOT FOUND. try to recover with default db");
+    				
+    				if (!s_bDbSwitchLogged) {
+    					Utils.debugLog("MongoRepository.getMongoDatabase: Db Code " + sDbCode + " NOT FOUND. try to recover with default db");
+    					s_bDbSwitchLogged = true;
+    				}
+    				
     				
     				// If is not the default one, but does not exists, recover with the defualt
     				return getMongoDatabase("wasdi");

@@ -124,6 +124,35 @@ public class WorkspaceRepository extends  MongoRepository {
         return aoReturnList;
     }
     
+    public Workspace getByNameAndNode(String sName, String sNode) {
+    	try {
+    		Document oWSDocument = getCollection(m_sThisCollection).find(
+    				Filters.and(
+    						Filters.eq("name", sName),
+    						Filters.eq("nodeCode", sNode)
+    						)
+    		).first();
+    		
+    		if(null!=oWSDocument) {
+    			String sJSON = oWSDocument.toJson();
+    			
+                Workspace oWorkspace = null;
+                try {
+                    oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                
+                return oWorkspace;
+    		}
+    		
+    	} catch (Exception oE) {
+			Utils.debugLog("WorkspaceRepository.getByNameAndNode( " + sName + ", " + sNode + "): error: " + oE);
+		}
+    	
+    	return null;
+    }
+    
     /**
      * Delete a workspace by Id
      * @param sWorkspaceId

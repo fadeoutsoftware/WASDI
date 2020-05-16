@@ -51,6 +51,7 @@ import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -58,6 +59,7 @@ import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
@@ -1008,9 +1010,12 @@ public class ProcessorsResource {
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
 			if (unzipProcessor(oProcessorFile, false)) {
+				
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
 				
 				if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+					
+					// In the main node: start a thread to update all the computing nodes
 					
 					try {
 						Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
@@ -1035,7 +1040,8 @@ public class ProcessorsResource {
 					
 					Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
 					
-					// Computational Node: delete the file
+					// Computational Node: delete the zip file after update
+					
 					try {
 						oProcessorFile.delete();
 					}
@@ -1043,6 +1049,61 @@ public class ProcessorsResource {
 						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
 					}
 				}
+				
+				
+				// Trigger the library update on this specific node
+				
+				// Node specific workspace for internal operation
+				String sLocalWorkspaceName = "wasdi_specific_node_ws_code";
+				
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Forcing Update Lib");
+				
+				// Check if it exists
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+				
+				if (oWorkspace == null) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Workspace " + sLocalWorkspaceName + " does not exist create it");
+					
+					oWorkspace = new Workspace();
+					
+					// Create the working Workspace in this node
+
+					// Default values
+					oWorkspace.setCreationDate((double) new Date().getTime());
+					oWorkspace.setLastEditDate((double) new Date().getTime());
+					oWorkspace.setName(sLocalWorkspaceName);
+					// Leave this at "no user"
+					//oWorkspace.setUserId(oUser.getUserId());
+					oWorkspace.setWorkspaceId(Utils.GetRandomName());
+					oWorkspace.setNodeCode(Wasdi.s_sMyNodeCode);
+					
+					// Insert in the db
+					oWorkspaceRepository.insertWorkspace(oWorkspace);
+					
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Workspace " + sLocalWorkspaceName + " created");
+				}
+				
+				// If we have our special workspace
+				if (oWorkspace != null) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Create updatelib operation in Workspace " + sLocalWorkspaceName);
+					
+					// Create the processor Parameter
+					ProcessorParameter oProcessorParameter = new ProcessorParameter();
+					oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
+					oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+					oProcessorParameter.setName(oProcessorToUpdate.getName());
+					oProcessorParameter.setProcessObjId(Utils.GetRandomName());
+					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
+					
+					String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+					
+					// Trigger the library update in this node
+					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), sPath, oProcessorParameter);
+					
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: LIBRARYUPDATE process scheduled");
+				}
+
 			}
 			else {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: error in unzip");

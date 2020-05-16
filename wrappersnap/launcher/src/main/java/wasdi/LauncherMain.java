@@ -527,19 +527,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
-				oEngine.redeploy(oParameter);
+				oEngine.libraryUpdate(oParameter);
 			}			
 				break;				
 			case RUNMATLAB: {
 				// Run Matlab Processor
-				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMATLABProcessor(oParameter);
 			}
 				break;
 			case MOSAIC: {
 				// Execute Mosaic Operation
-			
 				MosaicParameter oParameter = (MosaicParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMosaic(oParameter);
 			}

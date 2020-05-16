@@ -266,6 +266,22 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
+			
+			// Check workspace folder
+			String sWorkspacePath = LauncherMain.getWorspacePath(oParameter);
+			
+			File oWorkspacePath = new File(sWorkspacePath);
+			
+			if (!oWorkspacePath.exists()) {
+				try {
+					LauncherMain.s_oLogger.info("DockerProcessorEngine.run: creating ws folder");
+					oWorkspacePath.mkdirs();
+				}
+				catch (Exception oWorkspaceFolderExcetpion) {
+					LauncherMain.s_oLogger.error("DockerProcessorEngine.run: exception creating ws");
+				}
+			}
+			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
 			// First Check if processor exists
@@ -639,7 +655,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
-			
+						
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
 			// First Check if processor exists
@@ -775,6 +791,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			oConnection.disconnect();			
 			
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: lib updated");
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
 			return true;
 		}

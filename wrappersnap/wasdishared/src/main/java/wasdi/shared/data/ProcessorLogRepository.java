@@ -123,6 +123,40 @@ public class ProcessorLogRepository extends MongoRepository {
     }
     
     /**
+     * Get all the logs of an array of ProcessWorkspaceId
+     * @param asProcessWorkspaceId
+     * @return
+     */
+    public List<ProcessorLog> getLogsByArrayProcessWorkspaceId(List<String> asProcessWorkspaceId) {
+    	
+    	/*
+        ObjectId[] aoObjarray = new ObjectId[asProcessWorkspaceId.size()];
+
+        for(int i=0;i<asProcessWorkspaceId.size();i++)
+        {
+            aoObjarray[i] = new ObjectId(asProcessWorkspaceId.get(i));
+        }
+        */
+
+        BasicDBObject oInQuery = new BasicDBObject("$in", asProcessWorkspaceId);
+        BasicDBObject oQuery = new BasicDBObject("processWorkspaceId", oInQuery);
+
+        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
+        
+        try {
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oQuery);
+            if(oWSDocuments!=null) {
+            	fillList(aoReturnList, oWSDocuments);
+            }
+        } catch (Exception oEx) {
+        	Utils.debugLog("ProcessorLogRepository.getLogsByArrayProcessWorkspaceId" +oEx);
+        }
+        return aoReturnList;
+    }
+    
+
+    
+    /**
      * Delete all the logs of a Process Workspace
      * @param sProcessWorkspaceId Id of the process
      * @return True or False in case of error

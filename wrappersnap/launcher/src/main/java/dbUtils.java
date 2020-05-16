@@ -10,11 +10,15 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
+import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -26,6 +30,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
@@ -33,6 +38,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -263,25 +269,28 @@ public class dbUtils {
 	}
 
 	
-	public static void logs() {
+	public static void processors() {
 		
 		try {
 			
-	        System.out.println("Ok, what we do with logs?");
+	        System.out.println("Ok, what we do with processors?");
 	        
 	        System.out.println("\t1 - Extract Log");
 	        System.out.println("\t2 - Clear Log");
+	        System.out.println("\t3 - Redeploy");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
-	        System.out.println("Please input ProcessWorkspaceId");
-	        String sProcessWorkspaceId = oScanner.nextLine();
 	        
 	        ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 
 	        if (sInputString.equals("1")) {
+	        	
+		        System.out.println("Please input ProcessWorkspaceId");
+		        String sProcessWorkspaceId = oScanner.nextLine();
+	        	
 	        	
 	        	String sOuptutFile = "./" + sProcessWorkspaceId + ".txt";
 	        	
@@ -317,13 +326,44 @@ public class dbUtils {
 				System.out.println("Log Extraction done");	        	
 	        }
 	        else if (sInputString.equals("2")) {
+	        	
+		        System.out.println("Please input ProcessWorkspaceId");
+		        String sProcessWorkspaceId = oScanner.nextLine();
+	        	
 	        	System.out.println("Deleting logs of " + sProcessWorkspaceId);
 	        	oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcessWorkspaceId);
 	        	System.out.println(sProcessWorkspaceId + " logs DELETED");
 	        }
+	        else if (sInputString.equals("3")) {
+		        System.out.println("Please input Processor Name");
+		        String sProcessorName = oScanner.nextLine();
+		        
+		        ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		        Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+		        
+		        if (oProcessor == null) {
+		        	System.out.println(sProcessorName + " does NOT exists");
+		        	return;
+		        }
+		        
+		        String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+		        String sDockerTemplatePath = ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH");
+		        
+		        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath);
+		        
+		        ProcessorParameter oParameter = new ProcessorParameter();
+		        
+		        oParameter.setName(oProcessor.getName());
+		        oParameter.setProcessorID(oProcessor.getProcessorId());
+		        
+		        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
+		        
+		        oEngine.redeploy(oParameter);
+		        
+	        }
 		}
 		catch (Exception oEx) {
-			System.out.println("logs Exception: " + oEx);
+			System.out.println("processors Exception: " + oEx);
 			oEx.printStackTrace();
 		}
 	}
@@ -848,8 +888,6 @@ public class dbUtils {
 	        	
 	        	List<WorkspaceSharing> aoWorkspacesSharings = oWorkspaceSharingRepository.getWorkspaceSharings();
 	        	
-	        	
-	        	
 	        	for (WorkspaceSharing oWorkspaceSharing : aoWorkspacesSharings) {
 	        		
 					Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oWorkspaceSharing.getWorkspaceId());
@@ -862,13 +900,12 @@ public class dbUtils {
 					}	        		
 				}
 
-	        	
-	        	System.out.println("All sharings done");
+	        	System.out.println("All workspace sharings cleaned");
 	        }
 
 		}
 		catch (Exception oEx) {
-			System.out.println("Workflows Exception: " + oEx);
+			System.out.println("Workspace Sharing Exception: " + oEx);
 			oEx.printStackTrace();
 		}				
 	}
@@ -877,52 +914,65 @@ public class dbUtils {
 	 *
 	 */
 	public static void migrateToLocal() {
-		Utils.debugLog("dbUtild.migrateToLocal");
-		
-		
-		
-		//connect to main DB
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		oProcessWorkspaceRepository.setRepoDb("wasdi");
-		
-		//get processWorkspaces on local node from main DB 
-		String sNodeCode = s_sMyNodeCode;
-		
-		List<ProcessWorkspace> aoProcessesToBePorted = oProcessWorkspaceRepository.getByNode(sNodeCode);
-		
-		//construct set of workspaces
-		Set<String> asUniqueWorkspaces = new HashSet<>(); 
-		for (ProcessWorkspace oProcessWS : aoProcessesToBePorted) {
-			if(!asUniqueWorkspaces.contains(oProcessWS.getWorkspaceId())) {
-				asUniqueWorkspaces.add(oProcessWS.getWorkspaceId());
-			}
-		}
-		
-		// Find and save corresponding logs 
-		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-		List<ProcessorLog> aoLogsToBePorted = new ArrayList<>();
-		for (String sWs : asUniqueWorkspaces) {
-			List<ProcessorLog> aoLoglist = oProcessorLogRepository.getLogsByProcessWorkspaceId(sWs);
-			if(aoLoglist!=null && aoLoglist.size()>0) {
-				aoLogsToBePorted.addAll(aoLoglist);
-			}
-		}
 
-		// Switch to local db
-		oProcessWorkspaceRepository.setRepoDb("local");
+		try {
+			
+	        System.out.println("Ok, what do we migrate?");
+	        
+	        System.out.println("\t1 - Copy Process Workspace of this Node in the local Database");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        if (sInputString.equals("1")) {
+	        	
+	    		//connect to main DB
+	    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+	    		oProcessWorkspaceRepository.setRepoDb("wasdi");
+	    		
+	    		//get processWorkspaces on local node from main DB 
+	    		String sNodeCode = s_sMyNodeCode;
+	    		
+	    		List<ProcessWorkspace> aoProcessesToBePorted = oProcessWorkspaceRepository.getByNode(sNodeCode);
+	    		
+	    		System.out.println("Got " + aoProcessesToBePorted.size() + " processes to migrate");
+	    		
+	    		ArrayList<String> asIds = new ArrayList<String>();
+	    		
+	    		for (ProcessWorkspace oProcessWS : aoProcessesToBePorted) {
+	    			asIds.add(oProcessWS.getProcessObjId());
+	    		}	    		
+	    		
+	    		System.out.println("Start logs search ");
+	    		
+	    		// Find and save corresponding logs 
+	    		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+	    		oProcessorLogRepository.setRepoDb("wasdi");
+	    		
+	    		List<ProcessorLog> aoLogsToBePorted = new ArrayList<>();
+	    		
+	    		aoLogsToBePorted = oProcessorLogRepository.getLogsByArrayProcessWorkspaceId(asIds);
+	    		
+	    		// Switch to local db
+	    		oProcessWorkspaceRepository.setRepoDb("local");
+	    		oProcessorLogRepository.setRepoDb("local");
+	    		
+	    		//insert processes
+	    		oProcessWorkspaceRepository.insertProcessListWorkspace(aoProcessesToBePorted);
+	    		
+	    		//insert logs
+	    		oProcessorLogRepository.insertProcessLogList(aoLogsToBePorted);
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Migrate Exception: " + oEx);
+			oEx.printStackTrace();
+		}			
 		
-		//insert processes
-		oProcessWorkspaceRepository.insertProcessListWorkspace(aoProcessesToBePorted);
-//		for (ProcessWorkspace oProcessWorkspace : aoProcessesToBePorted) {
-//			if(null!=oProcessWorkspace) {
-//				oProcessWorkspaceRepository.insertProcessWorkspace(oProcessWorkspace);
-//			}
-//		}
-		
-		//insert logs
-		oProcessorLogRepository.insertProcessLogList(aoLogsToBePorted);
+
 	}
-	
 	
 	public static String s_sMyNodeCode = "wasdi";
 	
@@ -942,6 +992,20 @@ public class dbUtils {
 	        	s_sMyNodeCode = sNode;
 	        }
 	        
+			try {
+				// get jar directory
+				File oCurrentFile = new File(
+						dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+				// configure log
+				String sThisFilePath = oCurrentFile.getParentFile().getPath();
+				DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
+
+			} catch (Exception exp) {
+				// no log4j configuration
+				System.err.println("DbUtils - Error loading log configuration.  Reason: "
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+			}
+	        
 			// If this is not the main node
 			if (!s_sMyNodeCode.equals("wasdi")) {
 				System.out.println("Adding local mongo config");
@@ -959,7 +1023,7 @@ public class dbUtils {
 		        
 		        System.out.println("\t1 - Downloaded Products");
 		        System.out.println("\t2 - Product Workspace");
-		        System.out.println("\t3 - Logs");
+		        System.out.println("\t3 - Processors");
 		        System.out.println("\t4 - Metadata");
 		        System.out.println("\t5 - Password");
 		        System.out.println("\t6 - Users");
@@ -979,7 +1043,7 @@ public class dbUtils {
 		        	productWorkspace();
 		        }		        
 		        else if (sInputString.equals("3")) {
-		        	logs();
+		        	processors();
 		        }		        
 		        else if (sInputString.equals("4")) {
 		        	metadata();
