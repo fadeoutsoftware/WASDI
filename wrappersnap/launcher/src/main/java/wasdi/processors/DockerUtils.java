@@ -187,6 +187,15 @@ public class DockerUtils {
 				asArgs.clear();
 			}
 			
+			try {
+				if (!oRunFile.canExecute()) {
+					Runtime.getRuntime().exec("chmod u+x "+sRunFile);
+				}				
+			}
+			catch (Exception oInnerEx) {
+				Runtime.getRuntime().exec("chmod u+x "+sRunFile);
+			}
+			
 			// Execute the command to start the docker
 			WasdiProcessorEngine.shellExec(sRunFile, asArgs, false);		
 						

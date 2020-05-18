@@ -1233,5 +1233,32 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
+	
+	/**
+     *  Get List of Process Workspaces in a Workspace
+     * @param sWorkspaceId Workspace
+     * @param eStatus State
+     * @param eOperation Op type
+     * @param sProductNameSubstring Product Name
+     * @param oDateFRom Start Date
+     * @param oDateTo End Date
+     * @return Found processworkspaces with applied filters
+     */
+    public List<ProcessWorkspace> getProcessByParentId(String sParentId) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+					Filters.eq("parentId", sParentId))
+					.sort(new Document("operationDate", -1));
+			fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }	
 
 }
