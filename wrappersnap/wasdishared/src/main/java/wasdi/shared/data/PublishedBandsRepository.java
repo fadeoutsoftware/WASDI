@@ -18,11 +18,20 @@ import wasdi.shared.business.PublishedBand;
  * Created by p.campanella on 17/11/2016.
  */
 public class PublishedBandsRepository extends MongoRepository {
-
+	
+	public PublishedBandsRepository() {
+		m_sThisCollection = "publishedbands";
+	}
+	
+	/**
+	 * Insert a published band
+	 * @param oFile
+	 * @return
+	 */
     public boolean insertPublishedBand(PublishedBand oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
-            getCollection("publishedbands").insertOne(Document.parse(sJSON));
+            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
 
             return true;
 
@@ -33,6 +42,12 @@ public class PublishedBandsRepository extends MongoRepository {
         return false;
     }
 
+    /**
+     * Get a published band by product and band name
+     * @param sProductName
+     * @param sBandName
+     * @return
+     */
     public PublishedBand getPublishedBand(String sProductName, String sBandName) {
         try {
             BasicDBObject oQuery = new BasicDBObject();
@@ -41,7 +56,7 @@ public class PublishedBandsRepository extends MongoRepository {
             aoAndList.add(new BasicDBObject("bandName", sBandName));
             oQuery.put("$and", aoAndList);
 
-            Document oSessionDocument = getCollection("publishedbands").find(oQuery).first();
+            Document oSessionDocument = getCollection(m_sThisCollection).find(oQuery).first();
 
             if (oSessionDocument==null) return  null;
 
@@ -56,13 +71,18 @@ public class PublishedBandsRepository extends MongoRepository {
 
         return  null;
     }
-
+    
+    /**
+     * Get all the published bands of a product
+     * @param sProductName
+     * @return
+     */
     public List<PublishedBand> getPublishedBandsByProductName(String sProductName) {
 
         final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("publishedbands").find(Filters.eq("productName", sProductName));
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.eq("productName", sProductName));
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -85,13 +105,16 @@ public class PublishedBandsRepository extends MongoRepository {
         return  aoReturnList;
     }
     
-
+    /**
+     * Get all the published bands
+     * @return
+     */
     public List<PublishedBand> getList() {
 
         final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("publishedbands").find();
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -114,12 +137,16 @@ public class PublishedBandsRepository extends MongoRepository {
         return  aoReturnList;
     }
 
-
+    /**
+     * Delete all the Published Bands of a Product
+     * @param sProductName
+     * @return
+     */
     public int deleteByProductName(String sProductName) {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("publishedbands").deleteMany(Filters.eq("productName", sProductName));
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.eq("productName", sProductName));
 
             if (oDeleteResult != null)
             {
@@ -132,12 +159,18 @@ public class PublishedBandsRepository extends MongoRepository {
 
         return 0;
     }
-
+    
+    /**
+     * Delete a specific Published band
+     * @param sProductName
+     * @param sLayerId
+     * @return
+     */
     public int deleteByProductNameLayerId(String sProductName, String sLayerId) {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("publishedbands").deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("layerId", sLayerId)));
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("layerId", sLayerId)));
 
             if (oDeleteResult != null)
             {

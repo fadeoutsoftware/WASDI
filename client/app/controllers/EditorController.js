@@ -38,7 +38,7 @@ var EditorController = (function () {
 
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
-        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
+        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
         //Flag to know if the Preview Band Image is loaded or not (2D - Editor Mode)
         this.m_bIsLoadedPreviewBandImage = true;
@@ -166,7 +166,9 @@ var EditorController = (function () {
 
         //set default navbar menu
         this.generateDefaultNavBarMenu();
-        // this.navbarMenuTranslation();
+
+        // Go in geographic mode
+        this.switchEditorGeoReferencedMode();
 
         // Launch image editor modal to debug it
         //this.openImageEditorDialog();
@@ -1702,7 +1704,13 @@ var EditorController = (function () {
 
                 //remove layer in 2D map
                 oMap2D.eachLayer(function (layer) {
-                    if (utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId) {
+                    var sMapLayer = layer.options.layers;
+                    var sMapLayer2 = "wasdi:" + layer.options.layers;
+
+                    if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer == sLayerId) {
+                        oMap2D.removeLayer(layer);
+                    }
+                    else if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer2 == sLayerId) {
                         oMap2D.removeLayer(layer);
                     }
                 });
@@ -1799,6 +1807,18 @@ var EditorController = (function () {
                 // oLayer = oGlobe.remove(oLayer);
                 //break;
                 iIndexLayer = 0;
+            }
+            else {
+
+                if (!utilsIsObjectNullOrUndefined(oLayer.imageryProvider.layers)) {
+                    var sMapLayer = "wasdi:" + oLayer.imageryProvider.layers;
+                    if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sMapLayer == sLayerId) {
+                        oLayer = aoGlobeLayers.remove(oLayer);
+                        // oLayer = oGlobe.remove(oLayer);
+                        //break;
+                        iIndexLayer = 0;
+                    }
+                }
             }
 
         }
@@ -4001,8 +4021,6 @@ var EditorController = (function () {
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
-
-
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                     });
@@ -4179,21 +4197,7 @@ var EditorController = (function () {
             this.m_bIsFilteredTree = true;
         }
 
-        //TODO i need to show the loading icon in html
-
-        // let test = function(search,node){
-        //     alert("sono una prova");
-        // };
-        // let oggetoTest={
-        //     "search": {
-        //         "search_callback": function(search,node){
-        //             alert("sono una prova");
-        //         },
-        //     }
-        //
-        // };
-        // $('#jstree').jstree(oggetoTest);
-        $('#jstree').jstree(true).search(sTextQuery);//,false,true
+        $('#jstree').jstree(true).search(sTextQuery);
 
         return true;
     };
@@ -4207,8 +4211,8 @@ var EditorController = (function () {
         // // In georeferenced mode or not?
         // if (this.m_bIsActiveGeoraphicalMode == true) {
 
-        if( this.m_b2DMapModeOn === false){
 
+        if( this.m_b2DMapModeOn === false){
             this.deleteProductInMap();
         } else {
             this.deleteProductInGlobe(aoVisibleBands,oChildrenNode);
@@ -4229,9 +4233,6 @@ var EditorController = (function () {
 
         for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
 
-            this.removeAllRedSquareBoundingBox();// it's in wrong place ?
-
-            this.m_oGlobeService.addAllWorkspaceRectanglesOnMap(this.m_aoProducts);
             for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
                 if (oChildrenNode[iIndexChildren] === aoVisibleBands[iIndexLayer].layerId) {
                     this.removeBandImage(aoVisibleBands[iIndexChildren]);

@@ -285,6 +285,28 @@ var ProcessorController = (function() {
      };
 
 
+
+
+     ProcessorController.prototype.forceProcessorRefresh = function(sProcessorId) {
+
+         if (utilsIsObjectNullOrUndefined(sProcessorId) === true)
+         {
+             return false;
+         }
+
+         // TODO: ADD CONFIRMATION DIALOG
+         this.m_oProcessorService.redeployProcessor(sProcessorId)
+             .success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>REFRESH SCHEDULED");
+                 utilsVexCloseDialogAfter(5000,oDialog);
+             }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR REFRESHING PROCESSOR");
+         });
+
+         return true;
+     };
+
+
     ProcessorController.$inject = [
         '$scope',
         'close',

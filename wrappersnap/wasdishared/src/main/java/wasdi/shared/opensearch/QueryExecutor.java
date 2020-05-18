@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -456,6 +457,101 @@ public abstract class QueryExecutor {
 		return sResult;
 	}
 
+	
+	
+	protected String httpPostResults(String sUrl, String sQueryType, String sPayload) {
+		Utils.debugLog("QueryExecutor.httpPostResults( " + sUrl + ", " + sQueryType + " )");
+		String sResult = null;
+		long lStart = 0l;
+		int iResponseSize = -1;
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			// optional default is GET
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Accept", "*/*");
+			
+			if (m_sUser!=null && m_sPassword!=null) {
+				String sUserCredentials = m_sUser + ":" + m_sPassword;
+				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
+				oConnection.setRequestProperty ("Authorization", sBasicAuth);
+			}
+			
+			oConnection.setDoOutput(true);
+			byte[] ayBytes = sPayload.getBytes();
+			oConnection.setFixedLengthStreamingMode(ayBytes.length);
+			oConnection.setRequestProperty("Content-Type", "application/xml");
+			oConnection.connect();
+			try(OutputStream os = oConnection.getOutputStream()) {
+			    os.write(ayBytes);
+			}
+			
+
+			Utils.debugLog("QueryExecutor.httpPostResults: Sending 'POST' request to URL : " + sUrl);
+
+			lStart = System.nanoTime();
+			try {
+				int responseCode =  oConnection.getResponseCode();
+				Utils.debugLog("QueryExecutor.httpGetResults: Response Code : " + responseCode);
+				String sResponseExtract = null;
+				if(200 == responseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					if(null!=oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+					}
+					
+					if(!Utils.isNullOrEmpty(sResult)) {
+						if(sResult.length() > 200 ) {
+							sResponseExtract = sResult.substring(0, 200) + "...";
+						} else {
+							sResponseExtract = new String(sResult);
+						}
+						Utils.debugLog("QueryExecutor.httpPostResults: Response extract: " + sResponseExtract);
+						iResponseSize = sResult.length();
+					} else {
+						Utils.debugLog("QueryExecutor.httpPostResults: reponse is empty");
+					}
+				} else {
+					Utils.debugLog("QueryExecutor.httpPostResults: provider did not return 200 but "+responseCode+
+							" (1/2) and the following message:\n" + oConnection.getResponseMessage());
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+					String sMessage = oBytearrayOutputStream.toString();
+					if(null!=sMessage) {
+						sResponseExtract = sMessage.substring(0,  200) + "...";
+					}
+					Utils.debugLog("QueryExecutor.httpPostResults: provider did not return 200 but "+responseCode+
+							" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
+					if(iResponseSize <= 0) {
+						iResponseSize = sMessage.length();
+					}
+				}
+			}catch (Exception oEint) {
+				Utils.debugLog("QueryExecutor.httpPostResults: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+			
+			long lEnd = System.nanoTime();
+			long lTimeElapsed = lEnd - lStart;
+			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
+			double dSpeed = 0;
+			if(iResponseSize > 0) {
+				dSpeed = ( (double) iResponseSize ) / dMillis;
+				dSpeed *= 1000.0;
+			}
+			Utils.debugLog("QueryExecutor.httpPostResults( " + sUrl + ", " + sQueryType + " ) performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
+		}
+		catch (Exception oE) {
+			Utils.debugLog("QueryExecutor.httpPostResults: " + oE);
+		}
+		return sResult;
+	}
+	
+	
 	protected void setUser(String m_sUser) {
 		this.m_sUser = m_sUser;
 	}

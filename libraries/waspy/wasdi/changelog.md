@@ -1,5 +1,17 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.5.0] - 2020-05-15
+
+## Added
+
+- support to the optmized Distributed Architecture
+
+## [0.4.2] - 2020-04-30
+
+## Added
+
+- added deleteWorkspace method
+
 ## [0.4.1] - 2020-04-22
 
 ## Added

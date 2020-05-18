@@ -13,82 +13,110 @@ import com.mongodb.client.FindIterable;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Repository of the WASDI Nodes entities
+ * @author p.campanella
+ *
+ */
 public class NodeRepository extends MongoRepository {
+
+	public NodeRepository () {
+		m_sThisCollection = "node";
+	}
+
+	/**
+	 * Create a new node
+	 * @param oNode Entity
+	 * @return Obj Id
+	 */
+	public String insertNode(Node oNode) {
+		try {
+			if(null == oNode) {
+				Utils.debugLog("NodeRepository.InsertNode: oNode is null");
+				return null;
+			}	        	
+			String sJSON = s_oMapper.writeValueAsString(oNode);
+			Document oDocument = Document.parse(sJSON);
+
+			getCollection(m_sThisCollection).insertOne(oDocument);
+			return oDocument.getObjectId("_id").toHexString();
+
+		} catch (Exception oEx) {
+			Utils.debugLog("NodeRepository.InsertNode: "+oEx);
+		}
+		return "";
+	}
 	
-	   public String insertNode(Node oNode) {
-	        try {
-	        	if(null == oNode) {
-	        		Utils.debugLog("NodeRepository.InsertNode: oNode is null");
-	        		return null;
-	        	}	        	
-	            String sJSON = s_oMapper.writeValueAsString(oNode);
-	            Document oDocument = Document.parse(sJSON);
-	            
-	            getCollection("node").insertOne(oDocument);
-	            return oDocument.getObjectId("_id").toHexString();
+	/**
+	 * Delete a node by the mongo Id
+	 * @param sId Id of the mongo object
+	 * @return true or false
+	 */
+	public boolean deleteNode(String sId) {
+		try {
+			getCollection(m_sThisCollection).deleteOne(new Document("_id", new ObjectId(sId)));
 
-	        } catch (Exception oEx) {
-	            Utils.debugLog("NodeRepository.InsertNode: "+oEx);
-	        }
-	        return "";
-	    }
+			return true;
 
-	    public boolean deleteNode(String sId) {
-	        try {
-	            getCollection("node").deleteOne(new Document("_id", new ObjectId(sId)));
+		} catch (Exception oEx) {
+			Utils.debugLog("NodeRepository.InsertNode( "+sId+" )" +oEx);
+		}
 
-	            return true;
+		return false;
+	}
+	
+	/**
+	 * Get a node from the WASDI code
+	 * @param sCode Code of the Node
+	 * @return Entity or null
+	 */
+	public Node getNodeByCode(String sCode) {
 
-	        } catch (Exception oEx) {
-	        	Utils.debugLog("NodeRepository.InsertNode( "+sId+" )" +oEx);
-	        }
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("nodeCode", sCode)).first();
 
-	        return false;
-	    }
+			String sJSON = oWSDocument.toJson();
 
-	    public Node getNodeByCode(String sCode) {
+			Node oNode = s_oMapper.readValue(sJSON,Node.class);
 
-	        try {
-	            Document oWSDocument = getCollection("node").find(new Document("nodeCode", sCode)).first();
+			return oNode;
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
 
-	            String sJSON = oWSDocument.toJson();
+		return  null;
+	}
+	
+	/**
+	 * Get the fill nodes list
+	 * @return List of all the nodes
+	 */
+	public List<Node> getNodesList() {
 
-	            Node oNode = s_oMapper.readValue(sJSON,Node.class);
+		final ArrayList<Node> aoReturnList = new ArrayList<Node>();
+		try {
 
-	            return oNode;
-	        } catch (Exception oEx) {
-	            oEx.printStackTrace();
-	        }
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
 
-	        return  null;
-	    }
-	    
-	    public List<Node> getNodesList() {
+			oWSDocuments.forEach(new Block<Document>() {
+				public void apply(Document document) {
+					String sJSON = document.toJson();
+					Node oNode = null;
+					try {
+						oNode = s_oMapper.readValue(sJSON,Node.class);
+						aoReturnList.add(oNode);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 
-	        final ArrayList<Node> aoReturnList = new ArrayList<Node>();
-	        try {
+				}
+			});
 
-	            FindIterable<Document> oWSDocuments = getCollection("node").find();
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
 
-	            oWSDocuments.forEach(new Block<Document>() {
-	                public void apply(Document document) {
-	                    String sJSON = document.toJson();
-	                    Node oNode = null;
-	                    try {
-	                        oNode = s_oMapper.readValue(sJSON,Node.class);
-	                        aoReturnList.add(oNode);
-	                    } catch (IOException e) {
-	                        e.printStackTrace();
-	                    }
+		return aoReturnList;
+	}
 
-	                }
-	            });
-
-	        } catch (Exception oEx) {
-	            oEx.printStackTrace();
-	        }
-
-	        return aoReturnList;
-	    }
-	    
 }

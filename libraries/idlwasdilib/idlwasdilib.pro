@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 3.0.0
-; Last Update: 
+; IDL WASDI Lib Version 3.1.0
+; Last Update: 2020-05-15
 ;
 ; History
+; 3.1.0 - 2020-05-15
+;   Added support to vertical partitioning
+;
 ; 3.0.0 - 2020-03-23
 ;   Added support to distributed nodes
 ;
@@ -275,6 +278,10 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 	IF (sHostName EQ !NULL) THEN BEGIN
 		sHostName = '217.182.93.57'
 	END	
+	
+	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END		
 
 	sessioncookie = token
 
@@ -518,13 +525,13 @@ END
 ; Get the status of a WASDI Process
 FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 
 	; API URL
 	UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
 
 	; Call get status
-	wasdiResult = WASDIHTTPGET(UrlPath,!NULL)
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 	; read response JSON.
 	sStatus = GETVALUEBYKEY(wasdiResult, 'status')
@@ -839,7 +846,7 @@ pro WASDIOPENWORKSPACE,workspacename
   activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
   workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
   workspaceurl = WASDIGETWORKSPACEURLBYWSID(activeworkspace)
-  ;print, workspaceurl
+  print, workspaceurl
   
   
 END
@@ -1546,7 +1553,7 @@ END
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 	sMyProcId = myprocid
 
 	sPerc = STRING(iPerc)
@@ -1556,7 +1563,7 @@ PRO WASDIUPDATEPROGRESS, iPerc
 	END ELSE BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
-		wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 		; Read updated status
 		sStatus = GETVALUEBYKEY(wasdiResult, 'status')
@@ -1567,25 +1574,25 @@ END
 ; Update the progress of this own process
 PRO WASDILOG, sLog
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 	
 	sTimestamp = SYSTIME()
 	print, '[', myprocid, '] - ', sTimestamp,': ', sLog
 	IF (isonserver EQ '1') THEN BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/processors/logs/add?processworkspace='+myprocid
-		wasdiResult = WASDIHTTPPOST(UrlPath, sLog, !NULL)
+		wasdiResult = WASDIHTTPPOST(UrlPath, sLog, workspaceurl)
 	END  
 END
 
 ; Update the status of a WASDI Process
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 
   ; API URL
   UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+iPerc
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+  wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
   
   ; get the output status
   sUpdatedStatus = GETVALUEBYKEY(wasdiResult, 'status')

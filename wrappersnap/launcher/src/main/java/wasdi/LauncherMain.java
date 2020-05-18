@@ -126,18 +126,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	/**
 	 * Static Logger that references the "MyApp" logger
 	 */
-	// public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
 	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(LauncherMain.class));
 
 	/**
 	 * Static reference to Send To Rabbit utility class
 	 */
 	public static Send s_oSendToRabbit = null;
+	
+	/**
+	 * Actual node, main by default
+	 */
+	public static String s_sNodeCode = "wasdi";
 
 	/**
 	 * WASDI Launcher Main Entry Point
 	 * 
-	 * @param args -operation <operation> -elaboratefile <file>
+	 * @param args -o <operation> -p <parameterfile>
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
@@ -344,6 +348,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
+			// Read this node code
+			LauncherMain.s_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			
+			s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
+			
+			// If this is not the main node
+			if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
+				s_oLogger.debug("Adding local mongo config");
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
+			}
+
 			System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
 
 			Path oPropFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
@@ -364,8 +380,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Engine.start(false);
 
 		} catch (Throwable e) {
-			s_oLogger.error("Launcher Main Constructor Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 		}
 	}
 
@@ -497,16 +512,32 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oEngine.delete(oParameter);
 			}
 				break;
+			case REDEPLOYPROCESSOR: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
+						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.redeploy(oParameter);
+			}			
+				break;
+			case LIBRARYUPDATE: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
+						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.libraryUpdate(oParameter);
+			}			
+				break;				
 			case RUNMATLAB: {
 				// Run Matlab Processor
-				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMATLABProcessor(oParameter);
 			}
 				break;
 			case MOSAIC: {
 				// Execute Mosaic Operation
-			
 				MosaicParameter oParameter = (MosaicParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMosaic(oParameter);
 			}
@@ -527,6 +558,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeWPS(oParameter);
 			}
+				break;
 			case REGRID: {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);

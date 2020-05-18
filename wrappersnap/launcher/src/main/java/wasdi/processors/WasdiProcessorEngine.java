@@ -72,11 +72,21 @@ public abstract class WasdiProcessorEngine {
 	public abstract boolean delete(ProcessorParameter oParameter);
 	
 	/**
+	 * Deploy again a processor to update it
+	 * @param oParameter
+	 * @return
+	 */
+	public abstract boolean redeploy(ProcessorParameter oParameter);
+	
+	
+	public abstract boolean libraryUpdate(ProcessorParameter oParameter);
+	
+	/**
 	 * Execute a system task
 	 * @param sCommand
 	 * @param asArgs
 	 */
-	public void shellExec(String sCommand, List<String> asArgs) {
+	public static void shellExec(String sCommand, List<String> asArgs) {
 		shellExec(sCommand,asArgs,true);
 	}
 	
@@ -85,27 +95,59 @@ public abstract class WasdiProcessorEngine {
 	 * @param sCommand
 	 * @param asArgs
 	 * @param bWait
-	 */
-	public void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
+	 */	
+	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
-			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
-			pb.redirectErrorStream(true);
-			Process process = pb.start();
+			
+			String sCommandLine = "";
+			
+			for (String sArg : asArgs) {
+				sCommandLine += sArg + " ";
+			}
+			
+			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
+			
+			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+			Process oProcess = oProcessBuilder.start();
+			
 			if (bWait) {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				String line;
-				while ((line = reader.readLine()) != null)
-					LauncherMain.s_oLogger.debug("[docker]: " + line);
-				process.waitFor();				
+				int iProcOuptut = oProcess.waitFor();				
+				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+//		
+//	/**
+//	 * Execute a system task
+//	 * @param sCommand
+//	 * @param asArgs
+//	 * @param bWait
+//	 */
+//	public void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
+//		try {
+//			if (asArgs==null) asArgs = new ArrayList<String>();
+//			asArgs.add(0, sCommand);
+//			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
+//			pb.redirectErrorStream(true);
+//			Process process = pb.start();
+//			if (bWait) {
+//				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//				String line;
+//				while ((line = reader.readLine()) != null)
+//					LauncherMain.s_oLogger.debug("[docker]: " + line);
+//				process.waitFor();				
+//			}
+//		}
+//		catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
 	/**
 	 * Check if a processor exists on actual node
 	 * @param oProcessorParameter

@@ -8,49 +8,6 @@ service('ConstantsService', [function () {
 
     this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
 
-    // WASDI SERVER
-    /**/
-        // this.URL = 'http://178.22.66.96/wasdiwebserver/';
-        // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
-        // this.WMSURL = "http://178.22.66.96/geoserver/ows?";
-        // //this.WASDIGEOSERVERWPS = "http://178.22.66.96/geoserver/wps";
-        //  this.WASDIGEOSERVERWPS = "http://www.wasdi.net/geoserver/wps";
-    //
-
-    /**/
-        // PROBAV
-        // this.URL = 'http://wasdi.vgt.vito.be/wasdiwebserver/';
-        // this.WEBSTOMPURL = 'http://wasdi.vgt.vito.be/rabbit/stomp';
-        // this.WMSURL = "http://wasdi.vgt.vito.be/geoserver/ows?";
-        // this.WASDIGEOSERVERWPS = "http://wasdi.vgt.vito.be/geoserver/wps";
-
-
-
-        // SERCO
-        // this.URL = 'http://217.182.93.57//wasdiwebserver/';
-        // this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp';
-        // this.WMSURL = "http://217.182.93.57//geoserver/ows?";
-        // this.WASDIGEOSERVERWPS = "http://217.182.93.57//geoserver/wps";
-
-
-    // PAOLO
-    // this.URL= 'http://10.0.0.11:8080/wasdiwebserver/';//PAOLO SERVER
-    // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
-    // this.WMSURL = "http://10.0.0.7:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
-
-    //CRISTIANO (potrei cambiarlo con quello di Alessio)
-    // this.URL= 'http://10.0.0.15:8080/wasdiwebserver/';//
-    // this.WEBSTOMPURL = 'http://10.0.0.15/rabbit/stomp';
-    // this.WMSURL = "http://10.0.0.15:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
-
-    // LOCALHOST
-    // this.URL= 'http://127.0.0.1:8080/wasdiwebserver/';//
-    // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
-    // this.WMSURL = "http://127.0.0.1:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
-    //
-    //
-    // this.WPSPROXY =  'https://cors-anywhere.herokuapp.com/';
-
     this.URL = environment.url;
     this.WEBSTOMPURL = environment.webstompUrl;
     this.WMSURL = environment.wmsUrl;
@@ -141,12 +98,14 @@ service('ConstantsService', [function () {
     {
         return Secrets.GOOGLE_ID;
     }
+
     //-------------------- SET USER---------------------
     this.setUser = function (oUser) {
         this.m_oUser = oUser;
         //set coockie
         this.setCookie("oUser",this.m_oUser,this.COOKIE_EXPIRE_TIME_DAYS);
     }
+
     //-------------------- GET USER ---------------------
     this.getUser = function () {
         // check if there is the user
@@ -171,6 +130,7 @@ service('ConstantsService', [function () {
 
         return this.m_oUser.userId;
     }
+
     this.isUserLogged = function () {
 
         if (angular.isUndefined(this.m_oUser) || this.m_oUser == null) return false;
@@ -290,47 +250,7 @@ service('ConstantsService', [function () {
         });
     };
 
-    // //LOG-OUT
-    // this.logOut= function()
-    // {
-    //
-    //     /*
-    //     if(!gapi.auth2){
-    //         gapi.load('auth2', function() {
-    //             gapi.auth2.init();
-    //             gapi.auth2.signOut();
-    //         });
-    //     } else {
-    //         //signout not performed so far
-    //         //FIXME gapi.auth2.signOut is not a function
-    //         //gapi.auth2.signOut();
-    //
-    //         var auth2 = gapi.auth2.getAuthInstance();
-    //         //FIXME TypeError: Cannot read property 'signOut' of null
-    //         auth2.signOut().then(function () {
-    //             console.log('User signed out.');
-    //         });
-    //     }
-    //     */
-    //     gapi.load('auth2', function() {
-    //         gapi.auth2.init();
-    //         gapi.auth2.signOut();
-    //     });
-    //     console.log("logout");
-    //
-    //
-    //
-    //     this.deleteCookie("oUser");
-    //     this.m_oUser = null;
-    // }
 
-    // this.logOutGoogle = function ()
-    // {
-    //     var auth2 = gapi.auth2.getAuthInstance();
-    //     auth2.signOut().then(function () {
-    //         console.log('User log out google.');
-    //     });
-    // }
     //GET GEOSERVER
     this.getWmsUrlGeoserver = function()
     {

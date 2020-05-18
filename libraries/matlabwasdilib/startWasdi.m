@@ -13,10 +13,10 @@ end
 % add internal path 
 addpath(genpath(sPath))
 % add WASDI Library Jar
-javaaddpath(fullfile(sPath, 'jwasdilib-0.9.1.jar'))
+javaaddpath(fullfile(sPath, 'jwasdilib-0.9.3.jar'))
 
 % Log
-disp('WASDI MATLAB LIB INITIALIZED (v.0.09.01)')
+disp('WASDI MATLAB LIB INITIALIZED (v.0.09.03)')
 
 % Create the Wasdi Object
 Wasdi = javaObject ("wasdi.jwasdilib.WasdiLib");

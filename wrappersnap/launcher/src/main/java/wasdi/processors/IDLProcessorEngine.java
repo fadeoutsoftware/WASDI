@@ -612,4 +612,65 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		return false;
 	}
 	
+	@Override
+	public boolean redeploy(ProcessorParameter oParameter) {
+		return libraryUpdate(oParameter);
+	}
+	
+	@Override
+	public boolean libraryUpdate(ProcessorParameter oParameter) {
+		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;				
+		
+		try {
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			
+			String sIDLWasdiLibFile = m_sDockerTemplatePath;
+			
+			if (!sIDLWasdiLibFile.endsWith("/")) sIDLWasdiLibFile += "/";
+			
+			sIDLWasdiLibFile += "idlwasdilib.pro";
+			
+			// Copy Docker template files in the processor folder
+			File oIDLLibFile = new File(sIDLWasdiLibFile);
+			
+			if (!oIDLLibFile.exists()) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: impossibile to find the lib file " + oIDLLibFile.getPath());
+				return false;
+			}
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+			
+			// Check processor
+			if (oProcessor == null) { 
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: oProcessor is null [" + oParameter.getProcessorID() +"]");
+				return false;
+			}
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
+			
+			// Set the processor path
+			String sDownloadRootPath = m_sWorkingRootPath;
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			
+			String sProcessorFolder = sDownloadRootPath+ "/processors/" + oParameter.getName() + "/" ;
+			
+			FileUtils.copyFileToDirectory(oIDLLibFile, new File(sProcessorFolder));
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: exception " + oEx.toString());
+		}
+		
+		return false;
+	}
+	
 }

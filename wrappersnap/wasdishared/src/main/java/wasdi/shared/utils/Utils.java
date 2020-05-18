@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.UserSession;
 
 /**
@@ -163,6 +165,30 @@ public class Utils {
 
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
+	
+	public static Date getWasdiDate(String sWasdiDate) {
+
+		try {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(sWasdiDate);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	
+	public static long getProcessWorkspaceSecondsDuration(ProcessWorkspace oProcessWorkspace) {
+		try {
+			Date oStart = Utils.getWasdiDate(oProcessWorkspace.getOperationStartDate());
+			Date oEnd = Utils.getWasdiDate(oProcessWorkspace.getOperationEndDate());
+			
+			long lDiff = oEnd.getTime() - oStart.getTime();
+			lDiff /= 1000;
+			return lDiff;
+		}
+		catch (Exception e) {
+			return 0;
+		}
+	}
+	
 	
 	/**
 	 * Gets the local time offset from UTC

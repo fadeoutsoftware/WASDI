@@ -29,6 +29,14 @@
                                                                                                dropdown-name="'Select Your Programming Language'"></dropdownmenudirective></div>
                             <input id="typeread" ng-readonly="m_oController.m_bEditMode" ng-show="m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sTypeNameOnly">
                         </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <button class="btn btn-primary btn-wasdi"
+                                    ng-click="m_oController.forceProcessorRefresh(m_oController.m_sProcessorId)">
+                                <i class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></i>
+                                <span class="ng-binding">Force Refresh</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="row">
                         <br/>

@@ -151,7 +151,7 @@ public class CatalogResources {
 
 		if (oDownloadedFile == null) 
 		{
-			Utils.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found");
+			Utils.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
 			return null;
 		}
 		

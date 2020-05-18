@@ -18,12 +18,21 @@ import wasdi.shared.business.User;
  * Created by p.campanella on 21/10/2016.
  */
 public class UserRepository extends  MongoRepository{
-
+	
+	public UserRepository() {
+		m_sThisCollection = "users";
+	}
+	
+	/**
+	 * Insert a new User
+	 * @param oUser
+	 * @return
+	 */
     public boolean insertUser(User oUser) {
 
         try {
             String sJSON = s_oMapper.writeValueAsString(oUser);
-            getCollection("users").insertOne(Document.parse(sJSON));
+            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
 
             return true;
 
@@ -34,11 +43,15 @@ public class UserRepository extends  MongoRepository{
         return false;
     }
 
-
+    /**
+     * Get a user
+     * @param sUserId
+     * @return
+     */
     public User getUser(String sUserId) {
 
         try {
-            Document oUserDocument = getCollection("users").find(new Document("userId", sUserId)).first();
+            Document oUserDocument = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).first();
             if(oUserDocument == null)
             {
             	return null;
@@ -55,7 +68,12 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
-    
+    /**
+     * Check login credentials
+     * @param sUserId
+     * @param sPassword
+     * @return
+     */
     public User login(String sUserId, String sPassword) {
         try {
             User oUser = getUser(sUserId);
@@ -79,15 +97,19 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
-    //TODO check: can we get rid of sEmail? @sergin13 @kr1zz
+    /**
+     * Verify login of a google user
+     * @param sGoogleIdToken
+     * @param sEmail
+     * @param sAuthProvider
+     * @return
+     */
     public User googleLogin(String sGoogleIdToken, String sEmail, String sAuthProvider) {
         try {
             User oUser = getUser(sEmail);
 
             if (oUser != null){
-            	if ( oUser.getUserId() != null &&
-            			oUser.getAuthServiceProvider() != null &&
-            			null != oUser.getGoogleIdToken() ) {
+            	if ( oUser.getUserId() != null && oUser.getAuthServiceProvider() != null && null != oUser.getGoogleIdToken() ) {
             		if(oUser.getGoogleIdToken().equals(sGoogleIdToken)) {
             			if ( oUser.getAuthServiceProvider().equals(sAuthProvider)   ) {
             				return oUser;
@@ -103,11 +125,16 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
+    /**
+     * Delete a user
+     * @param sUserId
+     * @return
+     */
     public boolean deleteUser(String sUserId) {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("users").deleteOne(new Document("userId", sUserId));
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("userId", sUserId));
 
             if (oDeleteResult != null)
             {
@@ -123,7 +150,12 @@ public class UserRepository extends  MongoRepository{
 
         return  false;
     }
-   
+    
+    /**
+     * Update a user
+     * @param oUser
+     * @return
+     */
     public boolean updateUser(User oUser)
     {
     	String sJSON;
@@ -132,7 +164,7 @@ public class UserRepository extends  MongoRepository{
 			sJSON = s_oMapper.writeValueAsString(oUser);
 			Bson oFilter = new Document("userId", oUser.getUserId());
 		    Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
-            UpdateResult oResult = getCollection("users").updateOne(oFilter, oUpdateOperationDocument);
+            UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
             if (oResult.getModifiedCount()==1) return  true;
 
 		} 
@@ -143,10 +175,13 @@ public class UserRepository extends  MongoRepository{
 		 return  false;
     }
     
-    
+    /**
+     * Get the list of all users
+     * @return
+     */
     public ArrayList<User> getAllUsers ()
     {
-    	FindIterable<Document> oDocuments = getCollection("users").find();
+    	FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find();
         final ArrayList<User> aoReturnList = new ArrayList<User>();
 
     	oDocuments.forEach(new Block<Document>() 
@@ -168,6 +203,10 @@ public class UserRepository extends  MongoRepository{
     	return aoReturnList;
     }
     
+    /**
+     * Update a list of users
+     * @param aoUsers
+     */
     public void updateAllUsers(ArrayList<User> aoUsers)
     {
     	try

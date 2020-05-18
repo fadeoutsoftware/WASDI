@@ -29,5 +29,7 @@ public enum LauncherOperations {
     REGRID,
     DELETEPROCESSOR,
     INFO,
-    COPYTOSFTP
+    COPYTOSFTP,
+    REDEPLOYPROCESSOR,
+    LIBRARYUPDATE
 }

@@ -25,6 +25,10 @@ import wasdi.shared.business.DownloadedFile;
  * Created by p.campanella on 11/11/2016.
  */
 public class DownloadedFilesRepository extends MongoRepository {
+	
+	public DownloadedFilesRepository() {
+		m_sThisCollection = "downloadedfiles";
+	}
 
 	/**
 	 * Insert new Downloaded File
@@ -34,7 +38,7 @@ public class DownloadedFilesRepository extends MongoRepository {
     public boolean insertDownloadedFile(DownloadedFile oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
-            getCollection("downloadedfiles").insertOne(Document.parse(sJSON));
+            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
 
             return true;
 
@@ -57,8 +61,8 @@ public class DownloadedFilesRepository extends MongoRepository {
             Bson oFilter = new Document("fileName", oFile.getFileName());
             Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
             
-            //UpdateResult oResult = getCollection("downloadedfiles").updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
-            UpdateResult oResult = getCollection("downloadedfiles").updateOne(oFilter, oUpdateOperationDocument);
+            //UpdateResult oResult = getCollection(m_sThisCollection).updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
+            UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
 
             if (oResult.getModifiedCount()==1) return  true;
         }
@@ -76,7 +80,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      */
     public DownloadedFile getDownloadedFile(String sFileName) {
         try {
-            Document oSessionDocument = getCollection("downloadedfiles").find(new Document("fileName", sFileName)).first();
+            Document oSessionDocument = getCollection(m_sThisCollection).find(new Document("fileName", sFileName)).first();
 
             if (oSessionDocument==null) return  null;
 
@@ -101,7 +105,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 
     public DownloadedFile getDownloadedFileByPath(String sFileFullPath) {
         try {
-            Document oSessionDocument = getCollection("downloadedfiles").find(new Document("filePath", sFileFullPath)).first();
+            Document oSessionDocument = getCollection(m_sThisCollection).find(new Document("filePath", sFileFullPath)).first();
 
             if (oSessionDocument==null) return  null;
 
@@ -117,11 +121,16 @@ public class DownloadedFilesRepository extends MongoRepository {
         return  null;
     }          
 
+    /**
+     * Get the list of Downloaded files that have the same file name (can be in different paths)
+     * @param sFileName FileName to search
+     * @return List of found entries
+     */
     public List<DownloadedFile> getDownloadedFileListByName(String sFileName) {
         final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
         try {
 
-            FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find(new Document("fileName", sFileName));
+            FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find(new Document("fileName", sFileName));
 
             oDFDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -142,18 +151,22 @@ public class DownloadedFilesRepository extends MongoRepository {
         }
 
         return aoReturnList;    	
-
     }
     
+    /**
+     * Get a list of Downloaded files with specified path    
+     * @param sFilePath File path to search
+     * @return
+     */
     public List<DownloadedFile> getDownloadedFileListByPath(String sFilePath) {
         final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
         try {
 
         	BasicDBObject oLikeQuery = new BasicDBObject();
-        	Pattern oRegEx = Pattern.compile(sFilePath); // should be m in your case
+        	Pattern oRegEx = Pattern.compile(sFilePath);
         	oLikeQuery.put("filePath", oRegEx);
         	
-            FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find(oLikeQuery);
+            FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find(oLikeQuery);
 
             oDFDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -183,7 +196,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @param oDateTo end date
      * @param sFreeText free text to search in name
      * @param sCategory category
-     * @return
+     * @return list of entries found
      */
     public List<DownloadedFile> search(Date oDateFrom, Date oDateTo, String sFreeText, String sCategory) {
     	final List<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
@@ -210,7 +223,7 @@ public class DownloadedFilesRepository extends MongoRepository {
     	}
     	
     	Bson filter = Filters.and(aoFilters);
-    	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection("downloadedfiles").find() : getCollection("downloadedfiles").find(filter);
+    	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection(m_sThisCollection).find() : getCollection(m_sThisCollection).find(filter);
     	
     	aoDocs.forEach(new Block<Document>() {
             public void apply(Document oDocument) {
@@ -237,7 +250,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("downloadedfiles").deleteOne(Filters.eq("filePath", sFilePath));
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(Filters.eq("filePath", sFilePath));
 
             if (oDeleteResult != null)
             {
@@ -252,14 +265,14 @@ public class DownloadedFilesRepository extends MongoRepository {
     }
     
     /**
-     * Get full list
-     * @return
+     * Get full list of Donwloaded files
+     * @return All the collection
      */
     public List<DownloadedFile> getList() {
         final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
         try {
 
-            FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find();
+            FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find();
 
             oDFDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
