@@ -17,25 +17,25 @@ public class KillProcessTreeParameter extends BaseParameter {
 	/**
 	 * @return the sProcessObjId
 	 */
-	public String getsProcessObjId() {
-		return sProcessObjId;
+	public String getProcessToBeKilledObjId() {
+		return processToBeKilledObjId;
 	}
 	/**
 	 * @param sProcessObjId the sProcessObjId to set
 	 */
-	public void setsProcessObjId(String sProcessObjId) {
-		this.sProcessObjId = sProcessObjId;
+	public void setProcessToBeKilledObjId(String sProcessObjId) {
+		this.processToBeKilledObjId = sProcessObjId;
 	}
 	/**
 	 * @return the bKillTree
 	 */
-	public boolean isbKillTree() {
-		return bKillTree;
+	public boolean getKillTree() {
+		return killTree;
 	}
 	/**
-	 * @param bKillTree the bKillTree to set
+	 * @param killTree the bKillTree to set
 	 */
-	public void setbKillTree(boolean bKillTree) {
-		this.bKillTree = bKillTree;
+	public void setKillTree(boolean killTree) {
+		this.killTree = killTree;
 	}
 }
