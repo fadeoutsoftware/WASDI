@@ -18,10 +18,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
+
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -47,6 +51,7 @@ import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Preconditions;
 
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
@@ -73,6 +78,7 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
@@ -2985,7 +2991,84 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oKillProcessTreeParameter the parameters
 	 */
 	private void killProcessTree(KillProcessTreeParameter oKillProcessTreeParameter) {
-		// TODO Auto-generated method stub
-		
+		s_oLogger.info("killProcessTree");
+		try {
+			Preconditions.checkNotNull(oKillProcessTreeParameter, "parameter is null");
+			Preconditions.checkArgument(!Utils.isNullOrEmpty(oKillProcessTreeParameter.getProcessToBeKilledObjId()), "ObjId of process to be killed is null or empty" );
+			
+			String sProcessObjId = oKillProcessTreeParameter.getProcessToBeKilledObjId();
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessToKill = oRepository.getProcessByProcessObjId(sProcessObjId);
+			
+			if(null==oProcessToKill) {
+				//if the kill operation has been instantiated by the webserver, then this should never happen, so, it's just to err on the side of safety...
+				throw new NullPointerException("Process not found in DB");
+			}
+			
+			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+			
+			Stack<ProcessWorkspace> aoProcessesToBeChecked = new Stack<>();
+			aoProcessesToBeChecked.add(oProcessToKill);
+			
+			Set<ProcessWorkspace> aoProcessesToBeKilled = new HashSet<>();
+			
+			while(!aoProcessesToBeChecked.empty()) {
+				ProcessWorkspace oProcess = aoProcessesToBeChecked.pop();
+				if(null != oProcess) {
+					aoProcessesToBeKilled.add(oProcess);
+					//todo implement this
+					boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
+					if(oKillProcessTreeParameter.getKillTree() && bCanSpawnChildren) {
+						//todo find all children and add them to the set of processes to be checked
+					}
+				}
+			}
+			
+			
+			//kill the processes
+			
+			for (ProcessWorkspace oProcess : aoProcessesToBeKilled) {
+				//todo call docker kill
+				
+				int iPid = oProcess.getPid();
+
+				if (iPid>0) {
+					// Pid exists, kill the process
+					String sShellExString = ConfigReader.getPropValue("KillCommand") + " " + iPid;
+
+					s_oLogger.info("killProcessTree: shell exec " + sShellExString);
+					Process oProc = Runtime.getRuntime().exec(sShellExString);
+					s_oLogger.info("killProcessTree: kill result: " + oProc.waitFor());
+
+				} else {
+
+					s_oLogger.error("killProcessTree: Process pid not in data");
+
+				}
+
+				// set process state to STOPPED only if CREATED or RUNNING
+				String sPrevSatus = oProcess.getStatus();
+
+				if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
+						sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
+						sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
+						sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
+
+					oProcess.setStatus(ProcessStatus.STOPPED.name());
+					oProcess.setOperationEndDate(Utils.GetFormatDate(new Date()));
+
+					if (!oRepository.updateProcess(oProcess)) {
+						s_oLogger.info("killProcessTree: Unable to update process status");
+					}
+
+				} else {
+					s_oLogger.info("killProcessTree: Process already terminated: " + sPrevSatus);
+				}
+			}
+
+		} catch (Exception oE) {
+			s_oLogger.error("killProcessTree: " + oE);
+		}
 	}
+	
 }
