@@ -81,6 +81,7 @@ import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
@@ -569,7 +570,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				copyToSfpt(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("SFTP_ROOT_PATH", "/data/sftpuser"));
 			}
-				break;			
+				break;	
+			case KILLPROCESSTREE: {
+				KillProcessTreeParameter oKillProcessTreeParameter = (KillProcessTreeParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				killProcessTree(oKillProcessTreeParameter);
+			}
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -2972,5 +2977,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		
 		return "ERROR";
+	}
+	
+	
+	/**
+	 * Kills a process and, if required its subtree
+	 * @param oKillProcessTreeParameter the parameters
+	 */
+	private void killProcessTree(KillProcessTreeParameter oKillProcessTreeParameter) {
+		// TODO Auto-generated method stub
+		
 	}
 }
