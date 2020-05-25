@@ -463,101 +463,60 @@ public class ProcessWorkspaceResource {
 	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId, Boolean bKillTheEntireTree) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sProcessObjId + " )");
-	
 
 		try {
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user (or userId) null, aborting");
 				return Response.status(401).build();
 			}
-			// check that the user can access the processworkspace
-			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
-				return Response.status(403).build();
+			
+			if(Utils.isNullOrEmpty(sProcessObjId)) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: processObjId is null or empty, aborting");
+				return Response.status(401).build();
 			}
 			
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sProcessObjId);
 			
-			//todo make the operation asynchronous
+			//check that the process exists
+			if(null==oProcessToDelete) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
+				return Response.status(401).build();
+			}
+			
+			// check that the user can access the processworkspace
+			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
+				return Response.status(403).build();
+			}
+			
+			
+			//create the operation parameter
 			String sDeleteObjId = Utils.GetRandomName();
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			KillProcessTreeParameter oProcessorParameter = new KillProcessTreeParameter();
 			oProcessorParameter.setProcessObjId(sProcessObjId);
-			if(null==bKillTheEntireTree) {
-				//kill the entire tree by default
-				bKillTheEntireTree = true;
+			if(null!=bKillTheEntireTree) {
+				oProcessorParameter.setKillTree(bKillTheEntireTree);
 			}
-			oProcessorParameter.setbKillTree(bKillTheEntireTree);
 			
 			
 			String sWorkspaceId = oProcessToDelete.getWorkspaceId();
 			
-			//BASE PARAM
+			//base parameter atttributes
 			oProcessorParameter.setWorkspace(sWorkspaceId);
 			oProcessorParameter.setUserId(oUser.getUserId());
 			oProcessorParameter.setExchange(sWorkspaceId);
 			oProcessorParameter.setProcessObjId(sProcessObjId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
+			//schedule the deletion
 			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, sDeleteObjId, LauncherOperations.KILLPROCESSTREE.name(), sPath, oProcessorParameter, oProcessToDelete.getParentId());
 			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
 			
 			return Response.status(oResult.getIntValue()).build();
-			
-			//todo remove and put into launcher
-			
-
-			// Create repo
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sProcessObjId);
-			
-			if (oProcessToDelete != null)
-			{
-				
-				int iPid = oProcessToDelete.getPid();
-				
-				if (iPid>0) {
-					// Exists Pid, kill process
-					String sShellExString = m_oServletConfig.getInitParameter("KillCommand") + " " + iPid;
-					
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
-					
-					Process oProc = Runtime.getRuntime().exec(sShellExString);
-					
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill result: " + oProc.waitFor());
-
-				} else {
-					
-					Utils.debugLog("ProcessWorkspaceResource. Process pid not in data");
-					
-				}
-								
-				// set process state to STOPPED only if CREATED or RUNNING
-				String sPrecSatus = oProcessToDelete.getStatus();
-				
-				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
-					
-					oProcessToDelete.setStatus(ProcessStatus.STOPPED.name());
-					oProcessToDelete.setOperationEndDate(Utils.GetFormatDate(new Date()));
-					
-					if (!oRepository.updateProcess(oProcessToDelete)) {
-						Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
-					}
-					
-				} else {
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: Process already terminated: " + sPrecSatus);
-				}
-				
-				
-				return Response.ok().build();
-				
-			} else {
-				
-				Utils.debugLog("ProcessWorkspaceResource. Process not found in DB");
-				return Response.status(404).build();
-				
-			}
 						
 		}
 		catch (Exception oEx) {
