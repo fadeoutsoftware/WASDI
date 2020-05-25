@@ -155,7 +155,10 @@ public class BaseParameter {
 		}
 		else if (sOperationType.equals(LauncherOperations.LIBRARYUPDATE.name())) {
 			oParam = new ProcessorParameter();
-		}		
+		}
+		else if (sOperationType.equals(LauncherOperations.KILLPROCESSTREE.name())) {
+			oParam = new KillProcessTreeParameter();
+		}
 		
 		return oParam;
 	}
