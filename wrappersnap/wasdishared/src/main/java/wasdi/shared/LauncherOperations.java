@@ -31,5 +31,6 @@ public enum LauncherOperations {
     INFO,
     COPYTOSFTP,
     REDEPLOYPROCESSOR,
-    LIBRARYUPDATE
+    LIBRARYUPDATE,
+    KILLPROCESSTREE
 }
