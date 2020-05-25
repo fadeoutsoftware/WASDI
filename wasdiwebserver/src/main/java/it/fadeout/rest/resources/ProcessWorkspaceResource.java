@@ -20,6 +20,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -459,17 +460,53 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId) {
+	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId, Boolean bKillTheEntireTree) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sProcessObjId + " )");
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+	
 
 		try {
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 				return Response.status(401).build();
 			}
+			// check that the user can access the processworkspace
+			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+				return Response.status(403).build();
+			}
+			
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sProcessObjId);
+			
+			//todo make the operation asynchronous
+			String sDeleteObjId = Utils.GetRandomName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			KillProcessTreeParameter oProcessorParameter = new KillProcessTreeParameter();
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			if(null==bKillTheEntireTree) {
+				//kill the entire tree by default
+				bKillTheEntireTree = true;
+			}
+			oProcessorParameter.setbKillTree(bKillTheEntireTree);
+			
+			
+			String sWorkspaceId = oProcessToDelete.getWorkspaceId();
+			
+			//BASE PARAM
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(oUser.getUserId());
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, sDeleteObjId, LauncherOperations.KILLPROCESSTREE.name(), sPath, oProcessorParameter, oProcessToDelete.getParentId());
+			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
+			
+			return Response.status(oResult.getIntValue()).build();
+			
+			//todo remove and put into launcher
+			
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
