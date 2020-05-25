@@ -11,8 +11,11 @@ package wasdi.shared.parameters;
  *
  */
 public class KillProcessTreeParameter extends BaseParameter {
-	private String sProcessObjId;
-	private boolean bKillTree;
+	
+	private String processToBeKilledObjId;
+	
+	//by default, kill the entire process tree
+	private boolean killTree = true;
 	
 	/**
 	 * @return the sProcessObjId
