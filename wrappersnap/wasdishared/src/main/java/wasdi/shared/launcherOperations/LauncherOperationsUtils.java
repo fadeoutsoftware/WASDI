@@ -12,7 +12,24 @@ package wasdi.shared.launcherOperations;
  */
 public class LauncherOperationsUtils {
 	public boolean canOperationSpawnChildren(String sOperation) {
-		//todo implement
-		return false;
+		switch(sOperation.toUpperCase()) {
+		case "RUNPROCESSOR":
+		case "RUNIDL":
+		case "RUNMATLAB":
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	public boolean doesOperationLaunchDocker(String sOperation) {
+		switch(sOperation.toUpperCase()) {
+		case "RUNPROCESSOR":
+		case "RUNIDL":
+		case "RUNMATLAB":
+			return true;
+		default:
+			return false;
+		}
 	}
 }
