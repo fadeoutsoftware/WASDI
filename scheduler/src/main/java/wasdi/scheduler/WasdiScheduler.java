@@ -44,6 +44,7 @@ public class WasdiScheduler
 			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+			MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
 		} 
 		catch (Throwable oEx) {
 			oEx.printStackTrace();
