@@ -9,10 +9,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -67,6 +70,7 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
@@ -74,6 +78,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -3005,70 +3010,166 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				throw new NullPointerException("Process not found in DB");
 			}
 			
-			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
 			
+			
+			s_oLogger.info("killProcessTree: accumulating processes to be killed");
 			Stack<ProcessWorkspace> aoProcessesToBeChecked = new Stack<>();
 			aoProcessesToBeChecked.add(oProcessToKill);
-			
 			Set<ProcessWorkspace> aoProcessesToBeKilled = new HashSet<>();
-			
+			//accumulation loop
 			while(!aoProcessesToBeChecked.empty()) {
 				ProcessWorkspace oProcess = aoProcessesToBeChecked.pop();
-				if(null != oProcess) {
-					aoProcessesToBeKilled.add(oProcess);
-					//todo implement this
-					boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
-					if(oKillProcessTreeParameter.getKillTree() && bCanSpawnChildren) {
-						//todo find all children and add them to the set of processes to be checked
-					}
+				
+				if(null==oProcess) {
+					s_oLogger.error("killProcessTree: a null process was added, skipping");
+					continue;
+				}
+				aoProcessesToBeKilled.add(oProcess);
+				//maybe: we could kill the process immediately in a separate thread
+				
+				if(!oKillProcessTreeParameter.getKillTree()) {
+					s_oLogger.debug("killProcessTree: process tree must not be killed, interrupting accumulation");
+					break;
+				}
+				
+				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
+				if(!bCanSpawnChildren) {
+					s_oLogger.debug("killProcessTree: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+				}
+				
+				//find all children and add them to the set of processes to be checked
+				String sParentId = oProcess.getProcessObjId();
+				if(Utils.isNullOrEmpty(sParentId)) {
+					s_oLogger.error("killProcessTree: process has null or empty ObjId, skipping"); 
+					continue;
+				}
+				
+				List<ProcessWorkspace> aoChildren = oRepository.getProcessByParentId(sParentId);
+				if(null!=aoChildren && aoChildren.size() > 0) {
+					//we could push each one to control the order of visit, but it is not really relevant here
+					aoProcessesToBeChecked.addAll(aoChildren);
 				}
 			}
 			
+			s_oLogger.info("killProcessTree: accumulation complete, killing processes");
 			
-			//kill the processes
 			
 			for (ProcessWorkspace oProcess : aoProcessesToBeKilled) {
-				//todo call docker kill
-				
-				int iPid = oProcess.getPid();
-
-				if (iPid>0) {
-					// Pid exists, kill the process
-					String sShellExString = ConfigReader.getPropValue("KillCommand") + " " + iPid;
-
-					s_oLogger.info("killProcessTree: shell exec " + sShellExString);
-					Process oProc = Runtime.getRuntime().exec(sShellExString);
-					s_oLogger.info("killProcessTree: kill result: " + oProc.waitFor());
-
-				} else {
-
-					s_oLogger.error("killProcessTree: Process pid not in data");
-
-				}
-
-				// set process state to STOPPED only if CREATED or RUNNING
-				String sPrevSatus = oProcess.getStatus();
-
-				if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
-						sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
-						sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
-						sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
-
-					oProcess.setStatus(ProcessStatus.STOPPED.name());
-					oProcess.setOperationEndDate(Utils.GetFormatDate(new Date()));
-
-					if (!oRepository.updateProcess(oProcess)) {
-						s_oLogger.info("killProcessTree: Unable to update process status");
-					}
-
-				} else {
-					s_oLogger.info("killProcessTree: Process already terminated: " + sPrevSatus);
-				}
+				killProcessAndDocker(oProcess);
 			}
+			s_oLogger.info("killProcessTree: done killing processes");
 
 		} catch (Exception oE) {
 			s_oLogger.error("killProcessTree: " + oE);
 		}
 	}
+
+	/**
+	 * @param oRepository
+	 * @param oProcessToKill
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void killProcessAndDocker(ProcessWorkspace oProcessToKill){
+		try {
+			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+			if(oLauncherOperationsUtils.doesOperationLaunchDocker(oProcessToKill.getOperationType())) {
+				s_oLogger.info("killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
+				killDocker(oProcessToKill);
+			}
+
+			killProcess(oProcessToKill);
+		} catch (Exception oE) {
+			s_oLogger.error("killProcessAndDocker: " + oE);
+		}
+	}
+
+	/**
+	 * @param oProcessToKill the process to be killed
+	 */
+	protected void killProcess(ProcessWorkspace oProcessToKill){
+		//kill the process
+		//(code ported from webserver)
+
+		try {
+			int iPid = oProcessToKill.getPid();
 	
+			if (iPid>0) {
+				// Pid exists, kill the process
+				String sShellExString = ConfigReader.getPropValue("KillCommand") + " " + iPid;
+	
+				s_oLogger.info("killProcessAndDocker: shell exec " + sShellExString);
+				Process oProc = Runtime.getRuntime().exec(sShellExString);
+				s_oLogger.info("killProcessAndDocker: kill result: " + oProc.waitFor());
+	
+			} else {
+				s_oLogger.error("killProcessAndDocker: Process pid not in data");
+			}
+	
+			// set process state to STOPPED only if CREATED or RUNNING
+			String sPrevSatus = oProcessToKill.getStatus();
+	
+			if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
+	
+				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
+				oProcessToKill.setOperationEndDate(Utils.GetFormatDate(new Date()));
+	
+				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+				if (!oRepository.updateProcess(oProcessToKill)) {
+					s_oLogger.error("killProcessAndDocker: Unable to update process status of process " + oProcessToKill.getProcessObjId());
+				}
+	
+			} else {
+				s_oLogger.info("killProcessAndDocker: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sPrevSatus);
+			}
+		} catch (Exception oE) {
+			s_oLogger.error("killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+	
+	
+	/**
+	 * @param oProcessToKill the process for which the corresponding docker must be killed
+	 */
+	private void killDocker(ProcessWorkspace oProcessToKill) {
+		try {
+			String sProcessorName = oProcessToKill.getProductName();
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
+	
+			// Call localhost:port
+			String sUrl = "http://localhost:"+oProcessorToKill.getPort()+"/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
+
+			URL oProcessorUrl = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/json");
+			OutputStream oOutputStream = oConnection.getOutputStream();
+			oOutputStream.write("{}".getBytes());
+			oOutputStream.flush();
+	
+			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			}
+			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+			String sOutputResult;
+			String sOutputCumulativeResult = "";
+			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
+			while ((sOutputResult = oBufferedReader.readLine()) != null) {
+				Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
+				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
+			}
+			oConnection.disconnect();
+			
+			s_oLogger.info(sOutputCumulativeResult);
+		} catch (Exception oE) {
+			s_oLogger.error("killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+
 }
