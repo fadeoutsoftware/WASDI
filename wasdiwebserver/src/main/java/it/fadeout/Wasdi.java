@@ -86,6 +86,11 @@ public class Wasdi extends ResourceConfig {
 	public static String s_sMyNodeCode = "wasdi";
 	
 	/**
+	 * Name of the Node-Specific Workpsace
+	 */
+	public static String s_sLocalWorkspaceName = "wasdi_specific_node_ws_code";
+	
+	/**
 	 * Actual node Object
 	 */
 	public static Node s_oMyNode = null;
@@ -161,8 +166,6 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 
-
-
 		try {
 
 			RabbitFactory.s_sRABBIT_QUEUE_USER = getInitParameter("RABBIT_QUEUE_USER", "guest");
@@ -208,10 +211,44 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
+		
+		Utils.debugLog("-------initializing node local workspace...");
+		
+		try {
+			// Check if it exists
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, s_sMyNodeCode);
+			
+			if (oWorkspace == null) {
+				Utils.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
+				
+				oWorkspace = new Workspace();
+				
+				// Create the working Workspace in this node
+
+				// Default values
+				oWorkspace.setCreationDate((double) new Date().getTime());
+				oWorkspace.setLastEditDate((double) new Date().getTime());
+				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
+				// Leave this at "no user"
+				oWorkspace.setWorkspaceId(Utils.GetRandomName());
+				oWorkspace.setNodeCode("wasdi");
+				
+				// Insert in the db
+				oWorkspaceRepository.insertWorkspace(oWorkspace);
+				
+				Utils.debugLog("Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
+			}
+			
+		}
+		catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
 		Utils.debugLog("------- WASDI Init done\n\n");
-		Utils.debugLog("---------------------------------------------");
-		Utils.debugLog("-------- 	   Welcome to space      --------");
-		Utils.debugLog("---------------------------------------------\n\n");
+		Utils.debugLog("-----------------------------------------------");
+		Utils.debugLog("-------- 	   Welcome to space      ----------");
+		Utils.debugLog("-----------------------------------------------\n\n");
 		
 		try {
 			
