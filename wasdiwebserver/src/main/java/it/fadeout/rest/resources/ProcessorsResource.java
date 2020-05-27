@@ -91,7 +91,7 @@ public class ProcessorsResource {
 			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample, @QueryParam("public") Integer iPublic) throws Exception {
 
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
-				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
+				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -170,7 +170,7 @@ public class ProcessorsResource {
 			// XXX: check it also has a run
 			
 			if (Utils.isNullOrEmpty(sType)) {
-				sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
+				sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
 			}
 			
 			// Create processor entity
@@ -200,6 +200,16 @@ public class ProcessorsResource {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			oProcessorRepository.insertProcessor(oProcessor);
 			
+			
+			
+			
+			// We need to deploy the processor in the main node
+			
+			Utils.debugLog("ProcessorsResource.uploadProcessor: Forcing Update Lib");
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, "wasdi");
+
 			// Schedule the processworkspace to deploy the processor
 			
 			String sProcessObjId = Utils.GetRandomName();
@@ -207,7 +217,7 @@ public class ProcessorsResource {
 			ProcessorParameter oDeployProcessorParameter = new ProcessorParameter();
 			oDeployProcessorParameter.setName(sName);
 			oDeployProcessorParameter.setProcessorID(sProcessorId);
-			oDeployProcessorParameter.setWorkspace(sWorkspaceId);
+			oDeployProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oDeployProcessorParameter.setUserId(sUserId);
 			oDeployProcessorParameter.setExchange(sWorkspaceId);
 			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
@@ -1041,7 +1051,6 @@ public class ProcessorsResource {
 					Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
 					
 					// Computational Node: delete the zip file after update
-					
 					try {
 						oProcessorFile.delete();
 					}
@@ -1052,41 +1061,15 @@ public class ProcessorsResource {
 				
 				
 				// Trigger the library update on this specific node
-				
-				// Node specific workspace for internal operation
-				String sLocalWorkspaceName = "wasdi_specific_node_ws_code";
-				
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Forcing Update Lib");
 				
-				// Check if it exists
+				// Get the dedicated special workpsace
 				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
-				
-				if (oWorkspace == null) {
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Workspace " + sLocalWorkspaceName + " does not exist create it");
-					
-					oWorkspace = new Workspace();
-					
-					// Create the working Workspace in this node
-
-					// Default values
-					oWorkspace.setCreationDate((double) new Date().getTime());
-					oWorkspace.setLastEditDate((double) new Date().getTime());
-					oWorkspace.setName(sLocalWorkspaceName);
-					// Leave this at "no user"
-					//oWorkspace.setUserId(oUser.getUserId());
-					oWorkspace.setWorkspaceId(Utils.GetRandomName());
-					oWorkspace.setNodeCode(Wasdi.s_sMyNodeCode);
-					
-					// Insert in the db
-					oWorkspaceRepository.insertWorkspace(oWorkspace);
-					
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Workspace " + sLocalWorkspaceName + " created");
-				}
+				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
 				
 				// If we have our special workspace
 				if (oWorkspace != null) {
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Create updatelib operation in Workspace " + sLocalWorkspaceName);
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Create updatelib operation in Workspace " + Wasdi.s_sLocalWorkspaceName);
 					
 					// Create the processor Parameter
 					ProcessorParameter oProcessorParameter = new ProcessorParameter();
@@ -1102,6 +1085,9 @@ public class ProcessorsResource {
 					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), sPath, oProcessorParameter);
 					
 					Utils.debugLog("ProcessorsResource.updateProcessorFiles: LIBRARYUPDATE process scheduled");
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");
 				}
 
 			}
