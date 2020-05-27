@@ -21,14 +21,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.Stack;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
-
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -586,6 +583,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				KillProcessTreeParameter oKillProcessTreeParameter = (KillProcessTreeParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				killProcessTree(oKillProcessTreeParameter);
 			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -3011,24 +3009,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			
 			
-			
-			s_oLogger.info("killProcessTree: accumulating processes to be killed");
-			Stack<ProcessWorkspace> aoProcessesToBeChecked = new Stack<>();
-			aoProcessesToBeChecked.add(oProcessToKill);
-			Set<ProcessWorkspace> aoProcessesToBeKilled = new HashSet<>();
+			s_oLogger.info("killProcessTree: collecting and killing processes");
+			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
+			//new element added at the end
+			aoProcessesToBeKilled.add(oProcessToKill);
+			//todo check: kill the parent first (breadth first?)
 			//accumulation loop
-			while(!aoProcessesToBeChecked.empty()) {
-				ProcessWorkspace oProcess = aoProcessesToBeChecked.pop();
+			while(aoProcessesToBeKilled.size() > 0) {
+				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
 				
 				if(null==oProcess) {
 					s_oLogger.error("killProcessTree: a null process was added, skipping");
 					continue;
 				}
-				aoProcessesToBeKilled.add(oProcess);
-				//maybe: we could kill the process immediately in a separate thread
+				//kill the process immediately
+				killProcessAndDocker(oProcess);
 				
 				if(!oKillProcessTreeParameter.getKillTree()) {
-					s_oLogger.debug("killProcessTree: process tree must not be killed, interrupting accumulation");
+					s_oLogger.debug("killProcessTree: process tree must not be killed, ending here");
 					break;
 				}
 				
@@ -3036,33 +3034,26 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
 				if(!bCanSpawnChildren) {
 					s_oLogger.debug("killProcessTree: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+					continue;
 				}
 				
-				//find all children and add them to the set of processes to be checked
+				//now that the process cannot spawn any more children, it's time to add them to the set of processes to be killed
 				String sParentId = oProcess.getProcessObjId();
 				if(Utils.isNullOrEmpty(sParentId)) {
 					s_oLogger.error("killProcessTree: process has null or empty ObjId, skipping"); 
 					continue;
 				}
-				
 				List<ProcessWorkspace> aoChildren = oRepository.getProcessByParentId(sParentId);
 				if(null!=aoChildren && aoChildren.size() > 0) {
-					//we could push each one to control the order of visit, but it is not really relevant here
-					aoProcessesToBeChecked.addAll(aoChildren);
+					//append at the end
+					aoProcessesToBeKilled.addAll(aoChildren);
 				}
 			}
 			
-			s_oLogger.info("killProcessTree: accumulation complete, killing processes");
-			
-			
-			for (ProcessWorkspace oProcess : aoProcessesToBeKilled) {
-				killProcessAndDocker(oProcess);
-			}
-			s_oLogger.info("killProcessTree: done killing processes");
-
 		} catch (Exception oE) {
 			s_oLogger.error("killProcessTree: " + oE);
 		}
+		s_oLogger.info("killProcessTree: done");
 	}
 
 	/**
@@ -3088,7 +3079,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	/**
 	 * @param oProcessToKill the process to be killed
 	 */
-	protected void killProcess(ProcessWorkspace oProcessToKill){
+	private void killProcess(ProcessWorkspace oProcessToKill){
 		//kill the process
 		//(code ported from webserver)
 
@@ -3161,7 +3152,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			String sOutputCumulativeResult = "";
 			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
+				s_oLogger.debug("ProcessorsResource.help: " + sOutputResult);
 				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
 			}
 			oConnection.disconnect();
