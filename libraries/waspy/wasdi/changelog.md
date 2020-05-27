@@ -1,5 +1,13 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.5.1] - 2020-05-27
+
+## Fixed
+
+- add File to WASDI did a double file Ingest
+- Auto upload was active also on server
+- Moved upload and download as private methods
+
 ## [0.5.0] - 2020-05-15
 
 ## Added
