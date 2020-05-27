@@ -1262,7 +1262,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					s_oLogger.debug("Unzip done");
 				}
 			} else {
-				s_oLogger.debug("File already in place");
+				s_oLogger.debug("File already in the right path no need to copy");
 			}
 
 			File oDstFile = new File(oDstDir, sDestinationFileName);
