@@ -247,7 +247,7 @@ public class Wasdi extends ResourceConfig {
 		
 		Utils.debugLog("------- WASDI Init done\n\n");
 		Utils.debugLog("-----------------------------------------------");
-		Utils.debugLog("-------- 	   Welcome to space      ----------");
+		Utils.debugLog("-------- 	   Welcome to space      -------");
 		Utils.debugLog("-----------------------------------------------\n\n");
 		
 		try {
