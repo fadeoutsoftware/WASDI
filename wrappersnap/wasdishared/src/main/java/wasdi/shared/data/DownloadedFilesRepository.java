@@ -58,7 +58,7 @@ public class DownloadedFilesRepository extends MongoRepository {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
             
-            Bson oFilter = new Document("fileName", oFile.getFileName());
+            Bson oFilter = new Document("filePath", oFile.getFilePath());
             Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
             
             //UpdateResult oResult = getCollection(m_sThisCollection).updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
