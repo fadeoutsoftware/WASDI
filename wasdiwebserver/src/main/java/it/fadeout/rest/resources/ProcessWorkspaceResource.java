@@ -460,9 +460,9 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId, Boolean bKillTheEntireTree) {
+	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId, @QueryParam("treeKill") Boolean bKillTheEntireTree) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sProcessObjId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
 
 		try {
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
