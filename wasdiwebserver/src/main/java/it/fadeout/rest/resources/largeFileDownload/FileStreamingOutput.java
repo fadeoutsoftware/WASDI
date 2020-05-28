@@ -51,13 +51,15 @@ public class FileStreamingOutput implements StreamingOutput {
 			long lThreshold = 2L*1024*1024*1024;
 			long lSize = m_oFile.length(); 
 			if(lSize > lThreshold) {
+				Utils.debugLog("FileStreamingOutput.write: large file, using IOUtils.copyLarge");
 				lCopiedBytes = IOUtils.copyLarge(oInputStream, oOutputStream);
 			} else {
+				Utils.debugLog("FileStreamingOutput.write: small enough file, using IOUtils.copy");
 				lCopiedBytes = IOUtils.copy(oInputStream, oOutputStream);
 			}
 			Utils.debugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			Utils.debugLog("FileStreamingOutput.write: " + oE);
 		} finally {
 			// Flush output
 			if( oOutputStream!=null ) {
