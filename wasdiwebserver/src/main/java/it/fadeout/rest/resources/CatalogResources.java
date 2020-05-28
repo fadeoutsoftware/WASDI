@@ -161,6 +161,7 @@ public class CatalogResources {
 			return oFile;
 		}
 		else {
+			Utils.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
 			return null; 
 		}
 	}
