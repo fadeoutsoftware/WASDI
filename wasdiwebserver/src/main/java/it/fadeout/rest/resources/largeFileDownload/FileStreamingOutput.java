@@ -71,8 +71,7 @@ public class FileStreamingOutput implements StreamingOutput {
 				}
 				Utils.debugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );
 			} catch (Exception oE) {
-				//Utils.debugLog("FileStreamingOutput.write: " + oE);
-				oE.printStackTrace();
+				Utils.debugLog("FileStreamingOutput.write: " + oE);
 			} finally {
 				// Flush output
 				if( oOutputStream!=null ) {
