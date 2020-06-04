@@ -541,14 +541,8 @@ public class Wasdi extends ResourceConfig {
 					return oResult;
 				}				
 			}
-
-		} catch (IOException e) {
-			Utils.debugLog("Wasdi.runProcess: " + e);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		} catch (Exception e) {
-			Utils.debugLog("Wasdi.runProcess: " + e);
+		} catch (Exception oE) {
+			Utils.debugLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
