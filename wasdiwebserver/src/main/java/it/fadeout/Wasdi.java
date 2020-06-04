@@ -459,7 +459,7 @@ public class Wasdi extends ResourceConfig {
 			if (!oWorkspace.getNodeCode().equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
-				Utils.debugLog("Wasdi.runProcess: forewarding request to [" + oWorkspace.getNodeCode()+"]");
+				Utils.debugLog("Wasdi.runProcess: forwarding request to [" + oWorkspace.getNodeCode()+"]");
 				
 				// Get the Node
 				NodeRepository oNodeRepository = new NodeRepository();
