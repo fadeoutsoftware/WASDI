@@ -480,12 +480,13 @@ public class Wasdi extends ResourceConfig {
 
 				// Get the URL of the destination Node
 				String sUrl = oDestinationNode.getNodeBaseAddress();
+				Utils.debugLog("Wasdi.runProcess: base url is: " + sUrl );
 				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName);
+				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
-					sUrl += "&parent=" + URLEncoder.encode(sParentId);
+					sUrl += "&parent=" + URLEncoder.encode(sParentId, java.nio.charset.StandardCharsets.UTF_8.toString());
 				}
 				
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
