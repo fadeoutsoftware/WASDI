@@ -475,6 +475,7 @@ public class Wasdi extends ResourceConfig {
 				
 				// Get the JSON of the parameter
 				//String sPayload = MongoRepository.s_oMapper.writeValueAsString(oParameter);
+				Utils.debugLog("Wasdi.runProcess: serializing parameter to XML");
 				String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
 
 				// Get the URL of the destination Node
