@@ -456,17 +456,18 @@ public class Wasdi extends ResourceConfig {
 			if (Utils.isNullOrEmpty(sMyNodeCode)) sMyNodeCode = "wasdi";
 					
 			// Is the workspace here?
-			if (!oWorkspace.getNodeCode().equals(sMyNodeCode)) {
+			String sWsNodeCode = oWorkspace.getNodeCode();
+			if (!sWsNodeCode.equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
-				Utils.debugLog("Wasdi.runProcess: forwarding request to [" + oWorkspace.getNodeCode()+"]");
+				Utils.debugLog("Wasdi.runProcess: forwarding request to [" + sWsNodeCode+"]");
 				
 				// Get the Node
 				NodeRepository oNodeRepository = new NodeRepository();
-				wasdi.shared.business.Node oDestinationNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+				wasdi.shared.business.Node oDestinationNode = oNodeRepository.getNodeByCode(sWsNodeCode);
 				
 				if (oDestinationNode==null) {
-					Utils.debugLog("Wasdi.runProcess: Node [" + oWorkspace.getNodeCode()+"] not found. Return 500");
+					Utils.debugLog("Wasdi.runProcess: Node [" + sWsNodeCode+"] not found. Return 500");
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;									
@@ -531,7 +532,7 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setProcessObjId(sProcessObjId);
 					if (!Utils.isNullOrEmpty(sParentId)) oProcess.setParentId(sParentId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
-					oProcess.setNodeCode(oWorkspace.getNodeCode());
+					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
 					Utils.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
 				} catch (Exception oEx) {
