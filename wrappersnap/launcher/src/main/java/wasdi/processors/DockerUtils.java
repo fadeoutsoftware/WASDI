@@ -241,7 +241,7 @@ public class DockerUtils {
 			Runtime.getRuntime().exec(sDeleteScriptFile);
 
 			// Wait for docker to finish
-			Thread.sleep(10000);
+			Thread.sleep(15000);
 			
 			// Delete this image
 			ArrayList<String> asArgs = new ArrayList<>();
@@ -252,7 +252,10 @@ public class DockerUtils {
 			
 			String sCommand = "docker";
 			
-			WasdiProcessorEngine.shellExec(sCommand, asArgs, false);			
+			WasdiProcessorEngine.shellExec(sCommand, asArgs, false);
+			
+			// Wait for docker to finish
+			Thread.sleep(15000);			
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("DockerUtils.delete: " + oEx.toString());
