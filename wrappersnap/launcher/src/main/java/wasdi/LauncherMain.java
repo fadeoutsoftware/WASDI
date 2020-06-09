@@ -988,26 +988,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-		if (!Utils.isFilePathPlausible(oParam.getFullLocalPath())) {
-			s_oLogger.debug("ftpTransfer: null local path");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
-
-		// String sFullLocalPath =
-		// oDownRepo.GetDownloadedFile(oParam.getLocalFileName()).getFilePath();
+		
 		String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
-
-		// String fullLocalPath = oParam.getM_sLocalPath();
+		
 		File oFile = new File(sFullLocalPath);
+		
 		if (!oFile.exists()) {
-			s_oLogger.debug("ftpTransfer: local file does not exist");
+			s_oLogger.debug("ftpTransfer: local file does not exist " + oFile.getPath());
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
+		
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
 		String sFtpServer = oParam.getFtpServer();
 
@@ -2995,6 +2987,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 */
 	private void killProcessTree(KillProcessTreeParameter oKillProcessTreeParameter) {
 		s_oLogger.info("killProcessTree");
+		
 		try {
 			Preconditions.checkNotNull(oKillProcessTreeParameter, "parameter is null");
 			Preconditions.checkArgument(!Utils.isNullOrEmpty(oKillProcessTreeParameter.getProcessToBeKilledObjId()), "ObjId of process to be killed is null or empty" );
@@ -3007,7 +3000,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				//if the kill operation has been instantiated by the webserver, then this should never happen, so, it's just to err on the side of safety...
 				throw new NullPointerException("Process not found in DB");
 			}
-			
 			
 			s_oLogger.info("killProcessTree: collecting and killing processes");
 			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
@@ -3050,9 +3042,23 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				}
 			}
 			
+			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
+			oMyProcess.setStatus("DONE");
+			oRepository.updateProcess(oMyProcess);
+			
 		} catch (Exception oE) {
 			s_oLogger.error("killProcessTree: " + oE);
 		}
+		finally {
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
+			if (!oMyProcess.getStatus().equals("DONE")) {
+				oMyProcess.setStatus("ERROR");
+				oRepository.updateProcess(oMyProcess);
+			}
+			
+		}
+		
 		s_oLogger.info("killProcessTree: done");
 	}
 

@@ -835,29 +835,24 @@ public class CatalogResources {
 			Utils.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
 			
 			String sProcessObjId = Utils.GetRandomName();
-			
-			FtpUploadParameters oParams = new FtpUploadParameters();
-			oParams.setFtpServer(oFtpTransferVM.getServer());
-			oParams.setPort(oFtpTransferVM.getPort());
-			oParams.setUsername(oFtpTransferVM.getUser());
-			oParams.setPassword(oFtpTransferVM.getPassword());
-			oParams.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
 			String sFileName = oFtpTransferVM.getFileName();
-			oParams.setRemoteFileName(sFileName);
-			oParams.setLocalFileName(sFileName);
-			oParams.setExchange(sWorkspace);
-			oParams.setWorkspace(sWorkspace);
-			oParams.setProcessObjId(sProcessObjId);
 			
-			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sUserId), sWorkspace);
-			String sFullLocalPath = sFullPath+sFileName;
-			
-			oParams.setLocalPath(sFullLocalPath);
-			oParams.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sUserId));
+			FtpUploadParameters oParam = new FtpUploadParameters();
+			oParam.setFtpServer(oFtpTransferVM.getServer());
+			oParam.setPort(oFtpTransferVM.getPort());
+			oParam.setUsername(oFtpTransferVM.getUser());
+			oParam.setPassword(oFtpTransferVM.getPassword());
+			oParam.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
+			oParam.setRemoteFileName(sFileName);
+			oParam.setLocalFileName(sFileName);
+			oParam.setExchange(sWorkspace);
+			oParam.setWorkspace(sWorkspace);
+			oParam.setProcessObjId(sProcessObjId);
+			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 						
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParams, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParam, sParentProcessWorkspaceId);
 
 		} catch (Exception e) {
 			Utils.debugLog("CatalogueResource.ftpTransferFile: " + e);

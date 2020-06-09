@@ -510,7 +510,6 @@ public class ProcessWorkspaceResource {
 			oKillProcessParameter.setWorkspace(sWorkspaceId);
 			oKillProcessParameter.setUserId(oUser.getUserId());
 			oKillProcessParameter.setExchange(sWorkspaceId);
-			oKillProcessParameter.setProcessObjId(sToKillProcessObjId);
 			oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			//schedule the deletion

@@ -85,28 +85,5 @@ public class FtpUploadParameters extends BaseParameter {
 	public void setLocalFileName(String sLocalFileName) {
 		this.m_sLocalFileName = sLocalFileName;
 	}
-	public String getLocalPath() {
-		return m_sLocalPath;
-	}
-	public void setLocalPath(String sLocalPath) {
-		if(null == sLocalPath) {
-			throw new IllegalArgumentException();
-		}
-		if(!Utils.isFilePathPlausible(sLocalPath)) {
-			throw new IllegalArgumentException();
-		}
-		this.m_sLocalPath=new String( FilenameUtils.normalizeNoEndSeparator(sLocalPath, true) );
-	}
-	
-	public String getFullLocalPath() {
-		if(null == m_sLocalFileName || null == m_sLocalFileName) {
-			return null;
-		}
-		
-		String sRes = m_sLocalPath;
-		sRes = sRes + m_sLocalFileName;
-		
-		return sRes;
-	}
 	
 }
