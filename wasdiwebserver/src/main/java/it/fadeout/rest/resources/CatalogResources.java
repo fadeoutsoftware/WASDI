@@ -834,6 +834,8 @@ public class CatalogResources {
 		try {
 			Utils.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
 			
+			String sProcessObjId = Utils.GetRandomName();
+			
 			FtpUploadParameters oParams = new FtpUploadParameters();
 			oParams.setFtpServer(oFtpTransferVM.getServer());
 			oParams.setPort(oFtpTransferVM.getPort());
@@ -845,6 +847,7 @@ public class CatalogResources {
 			oParams.setLocalFileName(sFileName);
 			oParams.setExchange(sWorkspace);
 			oParams.setWorkspace(sWorkspace);
+			oParams.setProcessObjId(sProcessObjId);
 			
 			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sUserId), sWorkspace);
 			String sFullLocalPath = sFullPath+sFileName;
