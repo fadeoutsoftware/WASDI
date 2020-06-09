@@ -53,7 +53,7 @@ public class WasdiScheduler
 			//System.err.println( "WasdiScheduler.main: Error Configuring log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
 			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
 			oEx.printStackTrace();
-			System.exit(-1);
+//			System.exit(-1);
 		}
 		s_oLogger.info("main: Logger configured :-)\n");
 		
