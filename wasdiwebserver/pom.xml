@@ -1,5 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>fadeout.software.wasdi</groupId>
+		<artifactId>wasdi-parent</artifactId>	
+		<version>1.0</version>
+	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.fadeout.rest</groupId>
 	<artifactId>wasdiwebserver</artifactId>
@@ -20,7 +25,13 @@
 			<layout>default</layout>
 		</repository>
 	</repositories>
-
+	<pluginRepositories>
+		<pluginRepository>
+			<id>alfresco</id>
+			<name>Alfresco Repository</name>
+			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -37,6 +48,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
@@ -406,6 +418,14 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-		</plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<version>3.0-r1756463</version>
+				<configuration>
+					<port>8080</port>
+				</configuration>
+			</plugin>
+	</plugins>
 	</build>
 </project>
