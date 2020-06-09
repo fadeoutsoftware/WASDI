@@ -244,14 +244,19 @@ public class ProcessScheduler extends Thread {
 						if (!m_aoLaunchedProcesses.containsKey(oCreatedProcess.getProcessObjId())) {
 														
 							// Execute the process
-							executeProcess(oCreatedProcess);						
-							WasdiScheduler.log(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId());
-							
-							// Give a little bit of time to the launcher to start
-							waitForProcessToStart();
-							
-							// Move The process in the running list
-							aoRunningList.add(oCreatedProcess);		
+							if (executeProcess(oCreatedProcess) != null) {
+								
+								WasdiScheduler.log(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId());
+								
+								// Give a little bit of time to the launcher to start
+								waitForProcessToStart();
+								
+								// Move The process in the running list
+								aoRunningList.add(oCreatedProcess);		
+							}
+							else {
+								WasdiScheduler.log(m_sLogPrefix + ".run: ERROR Lauching " + oCreatedProcess.getProcessObjId());
+							}
 						}
 						
 						aoCreatedList.remove(0);
@@ -600,6 +605,12 @@ public class ProcessScheduler extends Thread {
 			
 			return null;
 		}
+		catch(Throwable oThrowable) {
+			WasdiScheduler.error(m_sLogPrefix + "executeProcess:  Exception" + oThrowable.toString());
+			oThrowable.printStackTrace();
+			return null;
+		}
+		
 		
 		return oProcessWorkspace.getProcessObjId();
 	}
