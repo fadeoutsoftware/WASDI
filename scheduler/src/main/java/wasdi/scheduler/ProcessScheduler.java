@@ -58,7 +58,7 @@ public class ProcessScheduler extends Thread {
 	/**
 	 * Process Scheduler Log Prefix
 	 */
-	protected String m_sLogPrefix = "ProcessScheduler: ";
+	protected String m_sLogPrefix = "ProcessScheduler.";
 	
 	/**
 	 * Key of this scheduler instance
@@ -99,7 +99,7 @@ public class ProcessScheduler extends Thread {
 			File oFolder = new File(ConfigReader.getPropValue("SerializationPath", "/usr/lib/wasdi/params/"));
 			
 			if (!oFolder.isDirectory()) {
-				WasdiScheduler.log("ERROR: cannot access parameters folder: " + oFolder.getAbsolutePath());
+				WasdiScheduler.error(m_sLogPrefix + ".init: cannot access parameters folder: " + oFolder.getAbsolutePath());
 			}
 			
 			// Save the path 
@@ -110,7 +110,7 @@ public class ProcessScheduler extends Thread {
 				int iMaxConcurrents = Integer.parseInt(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_MAX_QUEUE"));
 				if (iMaxConcurrents>0) {
 					m_iNumberOfConcurrentProcess = iMaxConcurrents;
-					WasdiScheduler.log(m_sLogPrefix + " Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+					WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -121,7 +121,7 @@ public class ProcessScheduler extends Thread {
 				long lTimeout = Long.parseLong(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_TIMEOUT_MS"));
 				if (lTimeout>0) {
 					m_lTimeOutMs = lTimeout;
-					WasdiScheduler.log(m_sLogPrefix + " TimeOut Ms: " + m_lTimeOutMs);
+					WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -151,7 +151,7 @@ public class ProcessScheduler extends Thread {
 				long iThreadSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadSleepingTimeMS", "2000"));
 				if (iThreadSleep>0) {
 					m_lSleepingTimeMS = iThreadSleep;
-					WasdiScheduler.log(m_sLogPrefix + " CatNap Ms: " + m_lSleepingTimeMS);
+					WasdiScheduler.log(m_sLogPrefix + ".init: CatNap Ms: " + m_lSleepingTimeMS);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -161,7 +161,7 @@ public class ProcessScheduler extends Thread {
 				long iStartWaitSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadWaitStartMS", "2000"));
 				if (iStartWaitSleep>0) {
 					m_lWaitProcessStartMS = iStartWaitSleep;
-					WasdiScheduler.log(m_sLogPrefix + " Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+					WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -180,16 +180,17 @@ public class ProcessScheduler extends Thread {
 			m_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		}
 		catch (Exception oEx) {
-			WasdiScheduler.error("ProcessScheduler.init Exception: " + oEx.toString());
+			WasdiScheduler.error(m_sLogPrefix + ".init: init Exception: " + oEx);
 			return false;
 		}
+		WasdiScheduler.log(m_sLogPrefix + ".init: good to go :-)\n");
 		return true;
 	}
 		
 	@Override
 	public void run() {
 		
-		WasdiScheduler.log(m_sLogPrefix+" Thread started");
+		WasdiScheduler.log(m_sLogPrefix + ".run: Thread started");
 		
 		int iSometimes = 0;
 		
@@ -222,7 +223,7 @@ public class ProcessScheduler extends Thread {
 						oReadyProcess.setStatus(ProcessStatus.RUNNING.name());
 						m_oProcessWorkspaceRepository.updateProcess(oReadyProcess);
 						
-						WasdiScheduler.log(m_sLogPrefix + "Resumed " + oReadyProcess.getProcessObjId());
+						WasdiScheduler.log(m_sLogPrefix + ".run: Resumed " + oReadyProcess.getProcessObjId());
 						
 						// Move in the running list
 						aoReadyList.remove(0);
@@ -244,7 +245,7 @@ public class ProcessScheduler extends Thread {
 														
 							// Execute the process
 							executeProcess(oCreatedProcess);						
-							WasdiScheduler.log(m_sLogPrefix + "Lauched " + oCreatedProcess.getProcessObjId());
+							WasdiScheduler.log(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId());
 							
 							// Give a little bit of time to the launcher to start
 							waitForProcessToStart();
@@ -265,7 +266,7 @@ public class ProcessScheduler extends Thread {
 					
 					iSometimes = 0;
 					
-					WasdiScheduler.log(m_sLogPrefix + "Launched Processes Size: " + m_aoLaunchedProcesses.size());
+					WasdiScheduler.log(m_sLogPrefix + ".run: Launched Processes Size: " + m_aoLaunchedProcesses.size());
 					
 					// Check Launched Proc list
 					ArrayList<String> asLaunchedToDelete = new ArrayList<String>();
@@ -281,7 +282,7 @@ public class ProcessScheduler extends Thread {
 					
 					// Remove launched elements
 					for (String sLaunchedToRemove : asLaunchedToDelete) {
-						WasdiScheduler.log(m_sLogPrefix + "Remove from launched : " + sLaunchedToRemove);
+						WasdiScheduler.log(m_sLogPrefix + ".run: Remove from launched : " + sLaunchedToRemove);
 						m_aoLaunchedProcesses.remove(sLaunchedToRemove);
 					}
 					
@@ -303,7 +304,7 @@ public class ProcessScheduler extends Thread {
 						if (!Utils.isNullOrEmpty(sPid)) {
 							if (!Utils.isProcessStillAllive(sPid)) {
 								// PID does not exists: recheck and remove
-								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
+								WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
 								
 								// Read Again to be sure
 								ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
@@ -319,12 +320,12 @@ public class ProcessScheduler extends Thread {
 									}
 									// Update the process
 									m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-									WasdiScheduler.log(m_sLogPrefix + "**************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
+									WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
 								}							
 							}
 						}
 						else {
-							WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
+							WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
 						}
 						
 						// Is there a timeout?
@@ -339,7 +340,7 @@ public class ProcessScheduler extends Thread {
 								// We ran over?
 								if (lTimeSpan > m_lTimeOutMs) {
 									// Change the status to STOPPED
-									WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " is in Timeout");
+									WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
 									
 									// Stop the process
 									stopProcess(oRunningPws.getPid());
@@ -352,11 +353,11 @@ public class ProcessScheduler extends Thread {
 									}
 		
 									m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
-									WasdiScheduler.log(m_sLogPrefix + "**************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
+									WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
 								}
 							}
 							else {
-								WasdiScheduler.log(m_sLogPrefix + "Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
+								WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
 							}
 						}
 					}
@@ -379,7 +380,7 @@ public class ProcessScheduler extends Thread {
 							// Wait 10 time more than standard waiting
 							if (lTimeSpan > 2000*m_lWaitProcessStartMS) {
 								// No good, set as ERROR
-								WasdiScheduler.log(m_sLogPrefix + "**************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
+								WasdiScheduler.warn(m_sLogPrefix + ".run: **************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
 								
 								/*
 								oCreatedProcess.setStatus(ProcessStatus.ERROR.name());
@@ -417,7 +418,7 @@ public class ProcessScheduler extends Thread {
 						if (!Utils.isNullOrEmpty(sPid)) {
 							if (!Utils.isProcessStillAllive(sPid)) {
 								// PID does not exists: recheck and remove
-								WasdiScheduler.log(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
+								WasdiScheduler.warn(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
 								
 								// Read Again to be sure
 								ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
@@ -438,24 +439,23 @@ public class ProcessScheduler extends Thread {
 									
 									// Update the process
 									m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-									WasdiScheduler.log(m_sLogPrefix + "**************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
+									WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
 								}							
 							}
 						}
 						else {
 							WasdiScheduler.log(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has null PID");
 						}
-					}
-					
-					
+					}					
 				}
 
 				iSometimes ++;
 
 				
 			} 
-			catch (Exception e) {
-				e.printStackTrace();
+			catch (Exception oEx) {
+				WasdiScheduler.error(m_sLogPrefix + ".run: " + oEx); 
+				oEx.printStackTrace();
 			} 
 			finally {
 				try {
@@ -463,7 +463,8 @@ public class ProcessScheduler extends Thread {
 					catnap();
 				} 
 				catch (Exception oEx) {
-					WasdiScheduler.error(oEx.getMessage());
+					WasdiScheduler.error(m_sLogPrefix + ".run: exception with finally: " + oEx);
+					oEx.printStackTrace();
 				}
 			}
 		}
@@ -476,15 +477,20 @@ public class ProcessScheduler extends Thread {
 	 * @return
 	 */
 	protected List<ProcessWorkspace> filterOperationTypes(List<ProcessWorkspace> aoInputList) {
-		
-		for (int iProcWs = aoInputList.size()-1; iProcWs>=0; iProcWs--) {
-			
-			if (!m_asOperationTypes.contains(aoInputList.get(iProcWs).getOperationType())) {
-				aoInputList.remove(iProcWs);
+		try {
+			for (int iProcWs = aoInputList.size()-1; iProcWs>=0; iProcWs--) {
+				
+				if (!m_asOperationTypes.contains(aoInputList.get(iProcWs).getOperationType())) {
+					aoInputList.remove(iProcWs);
+				}
 			}
+			
+			return aoInputList;
 		}
-		
-		return aoInputList;
+		catch (Exception oE) {
+			oE.printStackTrace();
+			return null;
+		}
 	}
 	
 	/**
@@ -492,11 +498,16 @@ public class ProcessScheduler extends Thread {
 	 * @return list of running processes
 	 */
 	protected List<ProcessWorkspace> getRunningList() {
-		
-		List<ProcessWorkspace> aoRunning = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.RUNNING.name(), m_sWasdiNode);
-		aoRunning = filterOperationTypes(aoRunning);
-		Collections.reverse(aoRunning);
-		return aoRunning;
+		try {
+			List<ProcessWorkspace> aoRunning = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.RUNNING.name(), m_sWasdiNode);
+			aoRunning = filterOperationTypes(aoRunning);
+			Collections.reverse(aoRunning);
+			return aoRunning;
+		}
+		catch (Exception oE) {
+			oE.printStackTrace();
+			return null;
+		}
 	}
 	
 	/**
@@ -504,10 +515,16 @@ public class ProcessScheduler extends Thread {
 	 * @return list of created processes
 	 */
 	protected List<ProcessWorkspace> getCreatedList() {
-		List<ProcessWorkspace> aoCreated = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.CREATED.name(), m_sWasdiNode);
-		aoCreated = filterOperationTypes(aoCreated);
-		Collections.reverse(aoCreated);
-		return aoCreated;
+		try {
+			List<ProcessWorkspace> aoCreated = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.CREATED.name(), m_sWasdiNode);
+			aoCreated = filterOperationTypes(aoCreated);
+			Collections.reverse(aoCreated);
+			return aoCreated;
+		}
+		catch (Exception oE) {
+			oE.printStackTrace();
+			return null;
+		}
 	}
 	
 	/**
@@ -515,10 +532,16 @@ public class ProcessScheduler extends Thread {
 	 * @return list of ready processes
 	 */
 	protected List<ProcessWorkspace> getReadyList() {
-		List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeDate");
-		aoReady = filterOperationTypes(aoReady);
-		Collections.reverse(aoReady);
-		return aoReady;
+		try {
+			List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeDate");
+			aoReady = filterOperationTypes(aoReady);
+			Collections.reverse(aoReady);
+			return aoReady;
+		}
+		catch (Exception oE) {
+			oE.printStackTrace();
+			return null;
+		}
 	}	
 	
 	/**
@@ -526,10 +549,16 @@ public class ProcessScheduler extends Thread {
 	 * @return list of WAITING processes
 	 */
 	protected List<ProcessWorkspace> getWaitingList() {
-		List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeDate");
-		aoReady = filterOperationTypes(aoReady);
-		Collections.reverse(aoReady);
-		return aoReady;
+		try {
+			List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeDate");
+			aoReady = filterOperationTypes(aoReady);
+			Collections.reverse(aoReady);
+			return aoReady;
+		}
+		catch (Exception oE) {
+			oE.printStackTrace();
+			return null;
+		}
 	}	
 	
 	/**
@@ -538,35 +567,34 @@ public class ProcessScheduler extends Thread {
 	 * @return Process Object Identifier
 	 */
 	private String executeProcess(ProcessWorkspace oProcessWorkspace) {
-		
-		File oParameterFilePath = new File(m_oParametersFilesFolder, oProcessWorkspace.getProcessObjId());
-
-		String sShellExString = m_sJavaExePath + " -jar " + m_sLauncherPath +
-				" -operation " + oProcessWorkspace.getOperationType() +
-				" -parameter " + oParameterFilePath.getAbsolutePath();
-
-		WasdiScheduler.log(m_sLogPrefix + "executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
-		WasdiScheduler.log(sShellExString);
-
 		try {
+			File oParameterFilePath = new File(m_oParametersFilesFolder, oProcessWorkspace.getProcessObjId());
+	
+			String sShellExString = m_sJavaExePath + " -jar " + m_sLauncherPath +
+					" -operation " + oProcessWorkspace.getOperationType() +
+					" -parameter " + oParameterFilePath.getAbsolutePath();
+	
+			WasdiScheduler.log(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
+			WasdiScheduler.log(sShellExString);
+
 			
 			Process oSystemProc = Runtime.getRuntime().exec(sShellExString);
-			WasdiScheduler.log(m_sLogPrefix + "executed!!!");
+			WasdiScheduler.log(m_sLogPrefix + "executeProcess: executed!!!");
 			m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());
 			
 		} 
 		catch (IOException oEx) {
-			WasdiScheduler.log(m_sLogPrefix + " executeProcess : Exception" + oEx.toString());
+			WasdiScheduler.error(m_sLogPrefix + "executeProcess:  Exception" + oEx.toString());
 			oEx.printStackTrace();
-			WasdiScheduler.log(m_sLogPrefix + " executeProcess : try to set the process in Error");
+			WasdiScheduler.error(m_sLogPrefix + "executeProcess : try to set the process in Error");
 			
 			try {
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);				
-				WasdiScheduler.log(m_sLogPrefix + " executeProcess : Error status set");
+				WasdiScheduler.error(m_sLogPrefix + "executeProcess: Error status set");
 			}
 			catch (Exception oInnerEx) {
-				WasdiScheduler.log(m_sLogPrefix + " executeProcess : INNER Exception" + oInnerEx.toString());
+				WasdiScheduler.error(m_sLogPrefix + "executeProcess:  INNER Exception" + oInnerEx);
 				oInnerEx.printStackTrace();
 			}
 			
@@ -582,18 +610,18 @@ public class ProcessScheduler extends Thread {
 	 * @return
 	 */
 	private int stopProcess(int iPid) {
-		
-		// kill process command
-		String sShellExString = m_sKillCommand + " " + iPid;
-		
-		WasdiScheduler.log(m_sLogPrefix + "stopProcess: shell exec " + sShellExString);
-		
-		Process oProc;
 		try {
+			// kill process command
+			String sShellExString = m_sKillCommand + " " + iPid;
+			
+			WasdiScheduler.log(m_sLogPrefix + "stopProcess: shell exec " + sShellExString);
+			
+			Process oProc;
+		
 			oProc = Runtime.getRuntime().exec(sShellExString);
 			return oProc.waitFor();
 		} catch (Exception e) {
-			WasdiScheduler.log(m_sLogPrefix + "stopProcess exception: " + e.getMessage());
+			WasdiScheduler.log(m_sLogPrefix + "stopProcess: exception: " + e.getMessage());
 			return -1;
 		}
 	}

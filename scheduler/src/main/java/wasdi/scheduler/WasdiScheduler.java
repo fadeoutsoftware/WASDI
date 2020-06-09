@@ -35,10 +35,32 @@ public class WasdiScheduler
 	 * Wasdi Scheduler Entry Point
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		System.out.println("WASDI SCHEDULER START");
+	public static void main(String[] args) {		
+		System.out.println("---------------------------- WASDI SCHEDULER START ----------------------------\n");
 		
+		//logger config
 		try {
+			System.out.println("WasdiScheduler.main: configuring logger...");
+			//get jar directory
+			File oCurrentFile = new File(WasdiScheduler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			//configure log
+			String sThisFilePath = oCurrentFile.getParentFile().getPath();
+			DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
+		}
+		catch(Exception oEx)
+		{
+			//no log4j configuration
+			//System.err.println( "WasdiScheduler.main: Error Configuring log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
+			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
+			oEx.printStackTrace();
+			System.exit(-1);
+		}
+		s_oLogger.info("main: Logger configured :-)\n");
+		
+		
+		//mongo config
+		try {
+			s_oLogger.info("main: Configuring mongo...");
 			// Init Mongo Configuration
 			MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
 			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
@@ -47,31 +69,18 @@ public class WasdiScheduler
 			MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
 		} 
 		catch (Throwable oEx) {
+			s_oLogger.fatal("main: Mongo configuration failed. Reason: " + oEx);
 			oEx.printStackTrace();
-		} 
-		
-		
-		try {
-			//get jar directory
-			File oCurrentFile = new File(WasdiScheduler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			//configure log
-			String sThisFilePath = oCurrentFile.getParentFile().getPath();
-			DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
+			System.exit(-1);
 		}
-		catch(Exception exp)
-		{
-			//no log4j configuration
-			System.err.println( "Scheduler - Error Configuring log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
-			//System.exit(-1);
-		}
-
-		s_oLogger.debug("Wasdi Scheduler Start");
+		s_oLogger.info("main: Mongo configured :-)\n");
+		
 		
 		// Read the list of configured schedulers
 		String sSchedulers = "";
 		ArrayList<String> asSchedulers = new ArrayList<String>();
-		
 		try {
+			s_oLogger.info("main: reading schedulers configurations...");
 			// Get the list of schedulers from config
 			sSchedulers = ConfigReader.getPropValue("SCHEDULERS", "");
 			// Split on comma
@@ -85,8 +94,13 @@ public class WasdiScheduler
 			}
 		} 
 		catch (IOException oEx) {
-			s_oLogger.debug("Exception " + oEx.toString());
+			s_oLogger.fatal("Could not read schedulers configurations. Reason: " + oEx);
+			oEx.printStackTrace();
+			System.exit(-1);
 		}
+		s_oLogger.info("main: schedulers configurations read :-)\n");
+		
+		s_oLogger.info("main: preparing operations...");
 		
 		// Get the list of all WASDI operations
 		LauncherOperations [] aoOperations = LauncherOperations.class.getEnumConstants();
@@ -103,7 +117,7 @@ public class WasdiScheduler
 			for (String sScheduler : asSchedulers) {
 				
 				// Create and init the scheduler
-				s_oLogger.debug("INFO: Creating Scheduler: " + sScheduler);
+				s_oLogger.info("main: Creating Scheduler: " + sScheduler);
 				ProcessScheduler oProcessScheduler = new ProcessScheduler();
 				oProcessScheduler.init(sScheduler);
 				
@@ -115,12 +129,12 @@ public class WasdiScheduler
 					// Check if the type is already "free"
 					if (asWasdiOperationTypes.contains(sSupportedType) == false) {
 						// No: remove from the scheduler
-						s_oLogger.debug("ERROR: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
+						s_oLogger.error("main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
 						oProcessScheduler.removeSupportedType(sSupportedType);
 					}
 					else {
 						// Yes: remove from the full list
-						s_oLogger.debug("INFO: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType);
+						s_oLogger.info("main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType);
 						asWasdiOperationTypes.remove(sSupportedType);
 					}
 				}
@@ -129,11 +143,11 @@ public class WasdiScheduler
 				
 				if (sSchedulerEnabled.equals("1")) {
 					// Start the scheduler
-					s_oLogger.debug("INFO: Starting Scheduler: " + sScheduler);
+					s_oLogger.info("main: Starting Scheduler: " + sScheduler);
 					oProcessScheduler.start();					
 				}
 				else {
-					s_oLogger.debug("INFO: Scheduler: " + sScheduler + " not enabled, will not start");
+					s_oLogger.warn("main: Scheduler: " + sScheduler + " not enabled, will not start");
 				}
 			}
 			
@@ -141,30 +155,33 @@ public class WasdiScheduler
 			if (asWasdiOperationTypes.size() > 0) {
 				
 				// Create and Init the Default Scheduler
-				s_oLogger.debug("INFO: Creating DEFAULT Scheduler");
+				s_oLogger.info("main: Creating DEFAULT Scheduler");
 				ProcessScheduler oProcessScheduler = new ProcessScheduler();
 				oProcessScheduler.init("DEFAULT");
 				
 				// Assign all the types
 				for (String sOtherType : asWasdiOperationTypes) {
-					s_oLogger.debug("INFO: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
+					s_oLogger.info("main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
 					oProcessScheduler.addSupportedType(sOtherType);
 				}
 				
 				// Start
-				s_oLogger.debug("INFO: Starting Scheduler: DEFAULT");
+				s_oLogger.info("main: Starting Scheduler: DEFAULT");
 				oProcessScheduler.start();
 			}
 			else {
-				s_oLogger.debug("INFO: All types covered, do not start DEFAULT scheduler");
+				s_oLogger.info("main: All types covered, do not start DEFAULT scheduler");
 			}
 			
 		}
 		catch( Exception oEx ) {
-			s_oLogger.debug("Exception " + oEx.toString());
+			s_oLogger.error("Could not complete operations preparations. Reason: " + oEx);
+			oEx.printStackTrace();
 		}
+		s_oLogger.info("main: operations prepared, good to go :-)\n");
 		
-		s_oLogger.debug(new EndMessageProvider().getGood());
+		s_oLogger.debug(new EndMessageProvider().getGood() + '\n');
+
 	}
 	
 	/**
@@ -184,6 +201,15 @@ public class WasdiScheduler
 	}
 	
 	/**
+	 * Warn Log thread safe method
+	 * @param sLogRow
+	 */
+	public static void warn(String sLogRow) {
+		log(sLogRow, Level.WARN);
+		
+	}
+	
+	/**
 	 * Log thread safe method
 	 * @param sLogRow
 	 * @param oLogLevel
@@ -193,6 +219,7 @@ public class WasdiScheduler
 			s_oLogger.log(oLogLevel, sLogRow);
 		}
 	}
+
 
 	
 }
