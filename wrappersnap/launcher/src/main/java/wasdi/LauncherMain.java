@@ -49,6 +49,7 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
+import org.quartz.xml.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
@@ -970,86 +971,76 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @throws IOException
 	 */
 	public void ftpExport(FtpUploadParameters oParam) throws IOException {
-		s_oLogger.debug("ftpExport begin");
+		s_oLogger.info("ftpExport begin");
 		try {
 			Preconditions.checkNotNull(oParam, "null parameter");
 			Preconditions.checkNotNull(oParam.getProcessObjId(), "null ProcessObjId");
-	
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParam.getProcessObjId());
-	
-			if (null == oProcessWorkspace) {
-				s_oLogger.debug("ftpExport: null Process Workspace");
-				return false;
+			try {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+				if (null == oProcessWorkspace) {
+					throw new NullPointerException("null Process Workspace");
+				}
+				
+				
+				//check server parameters are OK before trying connection
+				if(!Utils.isServerNamePlausible(oParam.getFtpServer())){
+					throw new ValidationException("FTP server name \"" + oParam.getFtpServer() + "\" not plausible");
+				}
+				if(!Utils.isPortNumberPlausible(oParam.getPort())){
+					throw new ValidationException("FTP server port \"" + oParam.getPort() + "\" not plausible");
+				}
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+				
+
+				String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
+				
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
+				File oFile = new File(sFullLocalPath);
+				if (!oFile.exists()) {
+					throw new IOException("local file " +oFile.getName() + "does not exist ");
+				}
+
+				
+		
+				FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
+		
+				if (!oFtpClient.open()) {
+					throw new IOException("could not connect to FTP");
+				}
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+		
+				// XXX see how to modify FTP client to update status
+				Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
+				if (!bPut) {
+					throw new IOException("put failed");
+				}
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+				// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+				String sRemotePath = ".";
+				Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
+				if (!bCheck) {
+					throw new IOException("could not find file on server");
+				}
+				oFtpClient.close();
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+				s_oLogger.info("ftpExport: completed successfully");
 			}
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			
-			String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
-			
-			File oFile = new File(sFullLocalPath);
-			
-			if (!oFile.exists()) {
-				s_oLogger.debug("ftpExport: local file does not exist " + oFile.getPath());
+			catch (Throwable oEx) {
+				s_oLogger.error("ftpExport: could not complete due to: " + oEx);
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-				return false;
 			}
-			
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
-			String sFtpServer = oParam.getFtpServer();
-	
-			if (!(Utils.isServerNamePlausible(sFtpServer) && Utils.isPortNumberPlausible(oParam.getPort())
-					&& !Utils.isNullOrEmpty(oParam.getUsername()) &&
-					// actually password might be empty
-					(null != oParam.getPassword()))) {
-	
-				s_oLogger.debug("ftpExport: invalid FTP parameters");
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			finally {
 				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-				return false;
+				s_oLogger.debug("ftpExport: workspace closed");
 			}
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
-	
-			FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
-	
-			if (!oFtpClient.open()) {
-				s_oLogger.debug("ftpExport: could not connect to FTP server with these credentials:");
-				s_oLogger.debug("server: " + oParam.getFtpServer());
-				s_oLogger.debug("por: " + oParam.getPort());
-				s_oLogger.debug("username: " + oParam.getUsername());
-				s_oLogger.debug("password: " + oParam.getPassword());
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-				return false;
-			}
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
-	
-			// XXX see how to modify FTP client to update status
-			Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
-			if (!bPut) {
-				s_oLogger.debug("ftpExport: put failed");
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-				return false;
-			}
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
-			// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
-			String sRemotePath = ".";
-			Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
-			if (!bCheck) {
-				s_oLogger.debug("ftpExport: could not find file on server");
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-				return false;
-			}
-			oFtpClient.close();
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			s_oLogger.debug("ftpExport completed successfully");
-		}
-		catch (Exception oEx) {
-			s_oLogger.error("ftpExport: could not complete due to: " + oEx);
+		} catch (Throwable oEx) {
+			s_oLogger.error("ftpExport: " + oEx);
+			s_oLogger.error("ftpExport: warning: cannot update process status");
 			oEx.printStackTrace();
 		}
 	}
