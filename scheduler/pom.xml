@@ -6,7 +6,6 @@
 	</parent>
   	<modelVersion>4.0.0</modelVersion>
 
-  	<groupId>fadeout.software.wasdi</groupId>
   	<artifactId>scheduler</artifactId>
   	<version>0.0.1</version>
   	<name>scheduler</name>

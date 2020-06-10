@@ -14,7 +14,6 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
-	<groupId>fadeout.software.wasdi</groupId>
 	<artifactId>launcher</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<build>
