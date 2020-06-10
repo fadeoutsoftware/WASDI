@@ -794,7 +794,9 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,  @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, FtpTransferViewModel oFtpTransferVM) {
+	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId,
+			FtpTransferViewModel oFtpTransferVM) {
 		Utils.debugLog("CatalogResource.ftpTransferFile");
 
 		//input validation
