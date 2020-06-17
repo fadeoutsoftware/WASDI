@@ -1002,7 +1002,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
                   '  ******************************************************************************')
             return ''
         else:
-            wasdiLog('[INFO] waspy.updateProcessStatus: iPerc = -1 - Not considered')
+            _log('[INFO] waspy.updateProcessStatus: iPerc = -1 - Not considered')
     elif iPerc > 100:
         wasdiLog('[ERROR] waspy.updateProcessStatus: iPerc > 100 not valid' +
               '  ******************************************************************************')
