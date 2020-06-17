@@ -555,6 +555,59 @@ public class ProductResource {
 			return Response.status(500).build();
 		}
 	}
+	
+	@POST
+	@Path("/uploadfilebylib")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
+
+		// Check the user session
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			return Response.status(401).build();
+		}
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) {
+			return Response.status(401).build();
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return Response.status(401).build();
+		}
+		String sUserId = oUser.getUserId();
+
+		// Check the file name
+		if (Utils.isNullOrEmpty(sName) || sName.isEmpty()) {
+			sName = "defaultName";
+		}
+		
+		try {
+			// Take path
+			String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+
+			File oOutputFilePath = new File(sPath + sName);
+
+			if (oOutputFilePath.getParentFile().exists() == false) {
+				oOutputFilePath.getParentFile().mkdirs();
+			}
+
+			// Copy the stream
+			int iRead = 0;
+			byte[] ayBytes = new byte[1024];
+			OutputStream oOutStream = new FileOutputStream(oOutputFilePath);
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutStream.write(ayBytes, 0, iRead);
+			}
+			oOutStream.flush();
+			oOutStream.close();
+			
+			return Response.ok().build();			
+		}
+		catch (Exception e) {
+			Utils.debugLog("ProductResource.uploadfile: " + e);
+			return Response.status(500).build();
+		}
+	}
 
 	@GET
 	@Path("delete")
@@ -702,11 +755,11 @@ public class ProductResource {
 				}
 			}
 
-			// delete product record on db
+			// delete the product-workspace related records on db and the Downloaded File Entry
 			try {
 				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
-				oDownloadedFilesRepository.deleteByFilePath(sDownloadPath + sProductName);
+				oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 			} catch (Exception oEx) {
 				Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
 				oReturn.setIntValue(500);
@@ -744,7 +797,7 @@ public class ProductResource {
 
 			
 			// Delete the database entry
-			oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
+			//oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 			
 
 		} catch (Exception oEx) {

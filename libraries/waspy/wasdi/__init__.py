@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.5.0
-Last Update: 15/05/2020
+Version 0.5.1
+Last Update: 27/05/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -898,7 +898,7 @@ def getFullProductPath(sProductName):
                 if fileExistsOnWasdi(sProductName) is True:
                     # Download The File from WASDI
                     print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
-                    downloadFile(sProductName)
+                    _downloadFile(sProductName)
                     print('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
 
     return sFullPath
@@ -1002,7 +1002,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
                   '  ******************************************************************************')
             return ''
         else:
-            wasdiLog('[INFO] waspy.updateProcessStatus: iPerc = -1 - Not considered')
+            _log('[INFO] waspy.updateProcessStatus: iPerc = -1 - Not considered')
     elif iPerc > 100:
         wasdiLog('[ERROR] waspy.updateProcessStatus: iPerc > 100 not valid' +
               '  ******************************************************************************')
@@ -1346,7 +1346,7 @@ def saveFile(sFileName):
     return sProcessId
 
 
-def downloadFile(sFileName):
+def _downloadFile(sFileName):
     """
     Download a file from WASDI
     :param sFileName: file to download
@@ -2197,7 +2197,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
 
 
 
-def uploadFile(sFileName):
+def _uploadFile(sFileName):
     """
     Uploads a file to WASDI
     :param sFileName: name of file inside working directory OR path to file RELATIVE to working directory
@@ -2205,7 +2205,10 @@ def uploadFile(sFileName):
     """
 
     _log('upload ' + sFileName)
-
+    
+    if getIsOnServer() is True:
+        return True
+    
     bResult = False
     try:
         if sFileName is None:
@@ -2216,7 +2219,7 @@ def uploadFile(sFileName):
 
         sFullPath = getPath(sFileName)
 
-        sUrl = getWorkspaceBaseUrl() + '/product/uploadfile?workspace=' + getActiveWorkspaceId() + '&name=' + sFileProperName
+        sUrl = getWorkspaceBaseUrl() + '/product/uploadfilebylib?workspace=' + getActiveWorkspaceId() + '&name=' + sFileProperName
         asHeaders = _getStandardHeaders()
         if 'Content-Type' in asHeaders:
             del (asHeaders['Content-Type'])
@@ -2621,7 +2624,7 @@ def copyFileToSftp(sFileName, bAsynch=None):
             if fileExistsOnWasdi(sFilePath) is False:
                 _log('[INFO] waspy.copyFileToSftp: remote file is missing, uploading')
                 try:
-                    uploadFile(sFileName)
+                    _uploadFile(sFileName)
                     _log('[INFO] waspy.moveFileToSftp: file uploaded, keep on working!')
                 except:
                     wasdiLog('[ERROR] waspy.copyFileToSftp: could not proceed with upload' +
@@ -2869,11 +2872,10 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
     sResult = ''
     try:
         if getUploadActive() is True:
-            sFilePath = os.path.join(getSavePath(), sFileName)
-            if fileExistsOnWasdi(sFilePath) is False:
+            if fileExistsOnWasdi(sFileName) is False:
                 _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
                 try:
-                    uploadFile(sFileName)
+                    _uploadFile(sFileName)
                     _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
                 except:
                     wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +

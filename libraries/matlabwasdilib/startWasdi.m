@@ -1,3 +1,4 @@
+function Wasdi = startWasdi(config_path)
 
 % Check if there is the wasdipath variable
 iPathExists = exist("wasdipath");
@@ -7,13 +8,18 @@ sPath = fileparts(mfilename('fullpath'));
 
 % Check if we need to use the user supplied one
 if iPathExists > 0
-   sPath = wasdipath
+   sPath = wasdipath;
 end
 
-% add internal path 
+% add internal path
 addpath(genpath(sPath))
 % add WASDI Library Jar
-javaaddpath(fullfile(sPath, 'jwasdilib-0.9.3.jar'))
+wasdilib = 'jwasdilib-0.9.3.jar';
+if isdeployed
+    javaaddpath(['./', wasdilib])
+else
+    javaaddpath(fullfile(sPath, wasdilib))
+end
 
 % Log
 disp('WASDI MATLAB LIB INITIALIZED (v.0.09.03)')
@@ -21,4 +27,8 @@ disp('WASDI MATLAB LIB INITIALIZED (v.0.09.03)')
 % Create the Wasdi Object
 Wasdi = javaObject ("wasdi.jwasdilib.WasdiLib");
 
-Wasdi.init();
+if nargin == 0
+    Wasdi.init();
+else
+    Wasdi.init(config_path);
+end

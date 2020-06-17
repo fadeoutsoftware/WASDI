@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 3.1.0
+; IDL WASDI Lib Version 3.1.1
 ; Last Update: 2020-05-15
 ;
 ; History
+; 3.1.1 - 2020-05-24
+;   Fixed local save file Bug
+;
 ; 3.1.0 - 2020-05-15
 ;   Added support to vertical partitioning
 ;
@@ -968,11 +971,19 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 		print, 'WASDIDOWNLOADFILE Url ', sUrlPath
 	END
 	
+	print, 'WASDIDOWNLOADFILE WORKSPACE URL = ', workspaceurl
+	
 	sUrlAddress = workspaceurl
 	
 	IF (sUrlAddress EQ !NULL) THEN BEGIN
 		sUrlAddress = '217.182.93.57'
 	ENDIF
+	
+	IF (sUrlAddress EQ '') THEN BEGIN
+		sUrlAddress = '217.182.93.57'
+	ENDIF	
+	
+	print, 'WASDIDOWNLOADFILE sUrlAddress = ', sUrlAddress
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
@@ -1605,31 +1616,37 @@ END
 FUNCTION WASDISAVEFILE, sFileName
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+	IF (isonserver EQ '0') THEN BEGIN
 
-	; API url
-	UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
+		; API url
+		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
 
-	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
+		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
-	; check bool response
-	sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
+		; check bool response
+		sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
 
-	sProcessId = ""
+		sProcessId = ""
 
-	; get the string value
-	IF sResponse THEN BEGIN
-		sValue = GETVALUEBYKEY (wasdiResult, 'stringValue')
-		sProcessID=sValue
-	ENDIF
+		; get the string value
+		IF sResponse THEN BEGIN
+			sValue = GETVALUEBYKEY (wasdiResult, 'stringValue')
+			sProcessID=sValue
+		ENDIF
 
-	sStatus = "ERROR"
+		sStatus = "ERROR"
 
-	; Wait for the process to finish
-	IF sProcessID THEN BEGIN
-		sStatus = WASDIWAITPROCESS(sProcessID)
-	ENDIF
+		; Wait for the process to finish
+		IF sProcessID THEN BEGIN
+			sStatus = WASDIWAITPROCESS(sProcessID)
+		ENDIF
 
-	RETURN, sStatus;
+		RETURN, sStatus;
+	END ELSE BEGIN
+		sStatus = "DONE"
+		RETURN, sStatus;
+	END 
 END
 
 

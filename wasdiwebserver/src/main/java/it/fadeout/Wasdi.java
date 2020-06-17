@@ -86,6 +86,11 @@ public class Wasdi extends ResourceConfig {
 	public static String s_sMyNodeCode = "wasdi";
 	
 	/**
+	 * Name of the Node-Specific Workpsace
+	 */
+	public static String s_sLocalWorkspaceName = "wasdi_specific_node_ws_code";
+	
+	/**
 	 * Actual node Object
 	 */
 	public static Node s_oMyNode = null;
@@ -161,8 +166,6 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 
-
-
 		try {
 
 			RabbitFactory.s_sRABBIT_QUEUE_USER = getInitParameter("RABBIT_QUEUE_USER", "guest");
@@ -208,10 +211,44 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
+		
+		Utils.debugLog("-------initializing node local workspace...");
+		
+		try {
+			// Check if it exists
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, s_sMyNodeCode);
+			
+			if (oWorkspace == null) {
+				Utils.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
+				
+				oWorkspace = new Workspace();
+				
+				// Create the working Workspace in this node
+
+				// Default values
+				oWorkspace.setCreationDate((double) new Date().getTime());
+				oWorkspace.setLastEditDate((double) new Date().getTime());
+				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
+				// Leave this at "no user"
+				oWorkspace.setWorkspaceId(Utils.GetRandomName());
+				oWorkspace.setNodeCode("wasdi");
+				
+				// Insert in the db
+				oWorkspaceRepository.insertWorkspace(oWorkspace);
+				
+				Utils.debugLog("Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
+			}
+			
+		}
+		catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
 		Utils.debugLog("------- WASDI Init done\n\n");
-		Utils.debugLog("---------------------------------------------");
-		Utils.debugLog("-------- 	   Welcome to space      --------");
-		Utils.debugLog("---------------------------------------------\n\n");
+		Utils.debugLog("-----------------------------------------------");
+		Utils.debugLog("-------- 	   Welcome to space      -------");
+		Utils.debugLog("-----------------------------------------------\n\n");
 		
 		try {
 			
@@ -419,17 +456,18 @@ public class Wasdi extends ResourceConfig {
 			if (Utils.isNullOrEmpty(sMyNodeCode)) sMyNodeCode = "wasdi";
 					
 			// Is the workspace here?
-			if (!oWorkspace.getNodeCode().equals(sMyNodeCode)) {
+			String sWsNodeCode = oWorkspace.getNodeCode();
+			if (!sWsNodeCode.equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
-				Utils.debugLog("Wasdi.runProcess: forewarding request to [" + oWorkspace.getNodeCode()+"]");
+				Utils.debugLog("Wasdi.runProcess: forwarding request to [" + sWsNodeCode+"]");
 				
 				// Get the Node
 				NodeRepository oNodeRepository = new NodeRepository();
-				wasdi.shared.business.Node oDestinationNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+				wasdi.shared.business.Node oDestinationNode = oNodeRepository.getNodeByCode(sWsNodeCode);
 				
 				if (oDestinationNode==null) {
-					Utils.debugLog("Wasdi.runProcess: Node [" + oWorkspace.getNodeCode()+"] not found. Return 500");
+					Utils.debugLog("Wasdi.runProcess: Node [" + sWsNodeCode+"] not found. Return 500");
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;									
@@ -437,16 +475,18 @@ public class Wasdi extends ResourceConfig {
 				
 				// Get the JSON of the parameter
 				//String sPayload = MongoRepository.s_oMapper.writeValueAsString(oParameter);
+				Utils.debugLog("Wasdi.runProcess: serializing parameter to XML");
 				String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
 
 				// Get the URL of the destination Node
 				String sUrl = oDestinationNode.getNodeBaseAddress();
+				Utils.debugLog("Wasdi.runProcess: base url is: " + sUrl );
 				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName);
+				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
-					sUrl += "&parent=" + URLEncoder.encode(sParentId);
+					sUrl += "&parent=" + URLEncoder.encode(sParentId, java.nio.charset.StandardCharsets.UTF_8.toString());
 				}
 				
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
@@ -494,7 +534,7 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setProcessObjId(sProcessObjId);
 					if (!Utils.isNullOrEmpty(sParentId)) oProcess.setParentId(sParentId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
-					oProcess.setNodeCode(oWorkspace.getNodeCode());
+					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
 					Utils.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
 				} catch (Exception oEx) {
@@ -504,14 +544,8 @@ public class Wasdi extends ResourceConfig {
 					return oResult;
 				}				
 			}
-
-		} catch (IOException e) {
-			Utils.debugLog("Wasdi.runProcess: " + e);
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		} catch (Exception e) {
-			Utils.debugLog("Wasdi.runProcess: " + e);
+		} catch (Exception oE) {
+			Utils.debugLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
