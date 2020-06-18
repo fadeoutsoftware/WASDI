@@ -78,6 +78,13 @@
 			<artifactId>wasdishared</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- Bouncy Castle is necessary to enable outgoing ssh connections -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.58</version>
+		</dependency>
 
 		<dependency>
 			<groupId>commons-cli</groupId>
@@ -403,11 +410,8 @@
 		<!-- https://mvnrepository.com/artifact/org.n52.wps/52n-wps-client-lib -->
 		<!--<dependency> <groupId>org.n52.wps</groupId> <artifactId>52n-wps-client-lib</artifactId> 
 			<version>4.0.0-beta.6</version> </dependency> -->
-	<!-- 	<dependency>
-			<groupId>org.n52.geoprocessing</groupId>
-			<artifactId>wps-client-lib</artifactId>
-			<version>1.0.1</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.n52.geoprocessing</groupId> <artifactId>wps-client-lib</artifactId> 
+			<version>1.0.1</version> </dependency> -->
 		<!-- FTP server + tests -->
 		<dependency>
 			<groupId>org.mockftpserver</groupId>
@@ -425,17 +429,9 @@
 	</dependencies>
 
 	<repositories>
-		<!-- <repository>
-			<id>n52-releases</id>
-			<name>52n Releases</name>
-			<url>http://52north.org/maven/repo/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository> -->
+		<!-- <repository> <id>n52-releases</id> <name>52n Releases</name> <url>http://52north.org/maven/repo/releases</url> 
+			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>true</enabled> 
+			</snapshots> </repository> -->
 	</repositories>
 
 </project>
