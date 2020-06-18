@@ -63,7 +63,7 @@ var FTPController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>UPLOAD FTP FILE ERROR");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR TRANSFERRING FILE TO FTP");
                     // oController.cleanFormInputData();
 
                 }
@@ -71,8 +71,8 @@ var FTPController = (function() {
 
             })
             .error(function(data,status){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>UPLOAD FTP FILE ERROR");
-                oController.cleanFormInputData();
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR TRANSFERRING FILE TO FTP");
+                //oController.cleanFormInputData();
             });
         return true;
     };
