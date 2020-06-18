@@ -10,9 +10,15 @@
                     <h4>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="row">
+                                File to upload: {{m_oController.getFileName()}}
+                            </div>
+                            <div class="row">
                                 <form class="form-signin" ng-submit="m_oController.sendFTPUploadRequest()" ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                                     <div class="form-group my-input-text">
                                         <input type="text"  placeholder="{{'DIALOG_FTP_INPUT_SERVER'|translate}}" class="" id="ipServerFTP" ng-model="m_oController.m_oFtpRequest.serverIp">
+                                    </div>
+                                    <div class="form-group my-input-text">
+                                        <input type="checkbox" placeholder="" class="" id="isSftp" ng-model="m_oController.m_oFtpRequest.sftp"> {{'DIALOG_FTP_INPUT_SFTPFLAG'|translate}}
                                     </div>
                                     <div class="form-group my-input-text">
                                         <input type="text" placeholder="{{'DIALOG_FTP_INPUT_PORT'|translate}}" class="" id="portServerFTP" ng-model="m_oController.m_oFtpRequest.port">
@@ -22,6 +28,9 @@
                                     </div>
                                     <div class="form-group my-input-text">
                                         <input type="password" placeholder="{{'DIALOG_FTP_INPUT_PASSWORD'|translate}}" class="" id="userFTPPassword" ng-model="m_oController.m_oFtpRequest.password">
+                                    </div>
+                                    <div class="form-group my-input-text">
+                                        <input type="text" placeholder="{{'DIALOG_FTP_REMOTE_PATH'|translate}}" class="" id="remoteFTPPath" ng-model="m_oController.m_oFtpRequest.destinationAbsolutePath">
                                     </div>
 
                                     <button class="my-button" type="submit">{{"DIALOG_FTP_INPUT_UPLOAD_BUTTON"|translate}}</button>
