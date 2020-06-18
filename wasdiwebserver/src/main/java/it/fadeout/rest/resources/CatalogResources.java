@@ -842,10 +842,11 @@ public class CatalogResources {
 			FtpUploadParameters oParam = new FtpUploadParameters();
 			oParam.setFtpServer(oFtpTransferVM.getServer());
 			oParam.setPort(oFtpTransferVM.getPort());
+			oParam.setSftp(oFtpTransferVM.getSftp());
 			oParam.setUsername(oFtpTransferVM.getUser());
 			oParam.setPassword(oFtpTransferVM.getPassword());
 			oParam.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
-			oParam.setRemoteFileName(sFileName);
+			
 			oParam.setLocalFileName(sFileName);
 			oParam.setExchange(sWorkspace);
 			oParam.setWorkspace(sWorkspace);
