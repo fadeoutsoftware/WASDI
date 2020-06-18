@@ -18,6 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -54,6 +55,9 @@ import org.quartz.xml.ValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
@@ -157,6 +161,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public static void main(String[] args) throws Exception {
 
 		try {
+			Security.setProperty("crypto.policy", "unlimited");
 			// get jar directory
 			File oCurrentFile = new File(
 					LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
@@ -971,7 +976,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @throws IOException
 	 */
 	public void ftpExport(FtpUploadParameters oParam) throws IOException {
-		s_oLogger.info("ftpExport begin");
+		s_oLogger.info("ftpExport");
 		try {
 			Preconditions.checkNotNull(oParam, "null parameter");
 			Preconditions.checkNotNull(oParam.getProcessObjId(), "null ProcessObjId");
@@ -1003,28 +1008,65 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					throw new IOException("local file " +oFile.getName() + "does not exist ");
 				}
 
+				if(!oParam.getRemotePath().endsWith("/") && !oParam.getRemotePath().endsWith("\\")) {
+					oParam.setRemotePath(oParam.getRemotePath()+"/");
+				}
 				
-		
-				FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
-		
-				if (!oFtpClient.open()) {
-					throw new IOException("could not connect to FTP");
+				if(oParam.getSftp()) {
+					s_oLogger.debug("ftpExport: SFTP");
+					s_oLogger.debug("ftpExport: SFTP: getting SSH client");
+					SSHClient oClient = new SSHClient();
+					s_oLogger.debug("ftpExport: SFTP: adding host key verifier");
+				    oClient.addHostKeyVerifier(new PromiscuousVerifier());
+				    s_oLogger.debug("ftpExport: SFTP: connecting to " + oParam.getFtpServer());
+				    oClient.connect(oParam.getFtpServer());
+				    s_oLogger.debug("ftpExport: SFTP: authenticating as " + oParam.getUsername());
+				    oClient.authPassword(oParam.getUsername(), oParam.getPassword());
+				    s_oLogger.debug("ftpExport: SFTP: getting SFTP client");
+				    SFTPClient sftpClient = oClient.newSFTPClient();
+				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+				    s_oLogger.debug("ftpExport: SFTP: transferring file");
+				    sftpClient.put(sFullLocalPath,oParam.getRemotePath() + oParam.getLocalFileName());
+				    //todo check that the file is there
+				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+				  
+				    s_oLogger.debug("ftpExport: SFTP: closing SFTP client");
+				    sftpClient.close();
+				    s_oLogger.debug("ftpExport: SFTP: disconnecting SSH client");
+				    oClient.disconnect();
+				    s_oLogger.debug("ftpExport: SFTP: closing SSH client");
+				    oClient.close();
+				    
 				}
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
-		
-				// XXX see how to modify FTP client to update status
-				Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
-				if (!bPut) {
-					throw new IOException("put failed");
+				else {
+					s_oLogger.debug("ftpExport: FTP"); 
+					s_oLogger.debug("ftpExport: FTP: getting FTP client");
+					FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
+			
+					s_oLogger.debug("ftpExport: FTP: opening connection"); 
+					if (!oFtpClient.open()) {
+						throw new IOException("could not connect to FTP");
+					}
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+			
+					s_oLogger.debug("ftpExport: FTP: transferring file");
+					// XXX see how to modify FTP client to update status
+					Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
+					if (!bPut) {
+						throw new IOException("put failed");
+					}
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+					// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+					String sRemotePath = ".";
+					s_oLogger.debug("ftpExport: FTP: checking the file is on server");
+					Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
+					if (!bCheck) {
+						throw new IOException("could not find file on server");
+					}
+					s_oLogger.debug("ftpExport: FTP: closing client");
+					oFtpClient.close();
 				}
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
-				// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
-				String sRemotePath = ".";
-				Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
-				if (!bCheck) {
-					throw new IOException("could not find file on server");
-				}
-				oFtpClient.close();
+				
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 				s_oLogger.info("ftpExport: completed successfully");
