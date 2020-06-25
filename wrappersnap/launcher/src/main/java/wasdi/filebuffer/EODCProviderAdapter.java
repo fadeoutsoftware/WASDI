@@ -5,14 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
+import org.esa.snap.core.datamodel.Product;
+
+import wasdi.io.WasdiProductReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
 public class EODCProviderAdapter extends ProviderAdapter{
 
 	@Override
-	public long GetDownloadFileSize(String sFileURL) throws Exception {
+	public long getDownloadFileSize(String sFileURL) throws Exception {
 		m_oLogger.debug("EODCProviderAdapter.GetDownloadSize: start " + sFileURL);
 
 		long lLenght = 0L;
@@ -39,7 +44,7 @@ public class EODCProviderAdapter extends ProviderAdapter{
 	}
 
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
+	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
 		// Domain check
@@ -52,7 +57,7 @@ public class EODCProviderAdapter extends ProviderAdapter{
 			return "";
 		}
 		
-		m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start");
+		m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: start");
 		
 		setProcessWorkspace(oProcessWorkspace);
 
@@ -69,7 +74,7 @@ public class EODCProviderAdapter extends ProviderAdapter{
 			File oSourceFile = new File(sPath);
 			
 			// Destination file name: start from the simple name
-			String sDestinationFileName = GetFileName(sFileURL);
+			String sDestinationFileName = getFileName(sFileURL);
 			// set the destination folder
 			if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
@@ -89,17 +94,73 @@ public class EODCProviderAdapter extends ProviderAdapter{
 				InputStream oInputStream = new FileInputStream(oSourceFile);
 				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
 				
-				m_oLogger.debug("ONDAProviderAdapter.EODCProviderAdapter: start copy stream");
+				m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: start copy stream");
 				
-				//TODO change method signature and check result: if it fails try https or retry if timeout
-				//MAYBE pass the entire pseudopath so that if one does not work, another one can be tried
-				copyStream(m_oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
+				int iAttempts = iMaxRetry;
+
+				while(iAttempts > 0) {
+					
+					m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: Attemp #" + (iMaxRetry-iAttempts+1));
+					
+					if (copyStream(m_oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream)) {
+						
+						String sNameOnly = oDestionationFile.getName();
+						
+						if (sNameOnly.startsWith("S1") || sNameOnly.startsWith("S2")) {
+							
+							try {
+								// Product Reader will be used to test if the image has been downloaded with success.
+								WasdiProductReader oReadProduct = new WasdiProductReader();
+								
+								Product oProduct = oReadProduct.readSnapProduct(oDestionationFile, null);
+								
+								if (oProduct != null)  {
+									// Break the retry attempt cycle
+									break;							
+								}
+								else {
+									m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: file not readable: " + oDestionationFile.getPath() + " try again");
+									try {
+										String sDestination = oDestionationFile.getPath();
+										sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
+										FileUtils.copyFile(oDestionationFile, new File(sDestination));										
+									}
+									catch (Exception oEx) {
+										m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: Exception making copy of attempt file " + oEx.toString());
+									}
+								}								
+							}
+							catch (Exception oReadEx) {
+								m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: exception reading file: " + oReadEx.toString() + " try again");
+							}
+							
+							
+							try {
+								m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: delete corrupted file");
+								oDestionationFile.delete();
+							}
+							catch (Exception oDeleteEx) {
+								m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: exception deleting not valid file ");
+							}
+						}
+						else {
+							// Break the retry attempt cycle
+							break;							
+						}						
+					}
+					else {
+						m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: error in the copy stream.");
+					}
+					
+					iAttempts--;
+					
+					TimeUnit.SECONDS.sleep(2);
+				}
 
 			} catch (Exception e) {
 				m_oLogger.info("EODCProviderAdapter.ExecuteDownloadFile: " + e);
 			}
-			//TODO else - i.e., if it fails - try get the file from https instead
-			//	- in this case the sUrl must be modified in order to include http, so that it can be retrieved  
+			
 			return sDestinationFileName;
 		} 
 		
@@ -107,7 +168,7 @@ public class EODCProviderAdapter extends ProviderAdapter{
 	}
 
 	@Override
-	public String GetFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL) throws Exception {
 		
 		//extract file name
 

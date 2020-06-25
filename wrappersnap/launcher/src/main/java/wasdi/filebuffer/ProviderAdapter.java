@@ -68,7 +68,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @param sFileURL URL of the file
      * @return
      */
-	public abstract long GetDownloadFileSize(String sFileURL) throws Exception;
+	public abstract long getDownloadFileSize(String sFileURL) throws Exception;
 	
 	/**
 	 * Abstract method to download the file
@@ -79,14 +79,14 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param oProcessWorkspace Process Workspace to update the user
 	 * @return
 	 */
-    public abstract String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception;
+    public abstract String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception;
     
     /**
      * Abstract method to get the name of the file from the url
      * @param sFileURL URL of the file
      * @return
      */
-    public abstract String GetFileName(String sFileURL) throws Exception;
+    public abstract String getFileName(String sFileURL) throws Exception;
     
 
     @Override
@@ -277,7 +277,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @param oProcessWorkspace
      * @param iProgress
      */
-    protected void UpdateProcessProgress(int iProgress) {
+    protected void updateProcessProgress(int iProgress) {
     	try {
 	    	if (m_oProcessWorkspace == null) return;
 	    	
@@ -454,13 +454,15 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					
 					// Update the progress
 					if (iZeroes == MAX_NUM_ZEORES_DURING_READ) {
-						//UpdateProcessProgress(iFilePercent);
+						if ((iFilePercent%10) == 0) {
+							updateProcessProgress(iFilePercent);
+						}
 					}
 				}
 			}
 			
 			m_oLogger.debug("ProviderAdapter.copyStream: EOF received, set process to 100% [was " + iFilePercent + "%]");
-			UpdateProcessProgress(100);
+			updateProcessProgress(100);
 			
 			oOutputStream.close();
 			oInputStream.close();			

@@ -37,7 +37,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 
 	@Override
-	public long GetDownloadFileSize(String sFileURL) throws Exception {
+	public long getDownloadFileSize(String sFileURL) throws Exception {
 		Preconditions.checkNotNull(sFileURL, "SOBLOOProviderAdapter.GetDownloadSize: input URL is null");
 		Preconditions.checkArgument(!sFileURL.isEmpty(), "SOBLOOProviderAdapter.GetDownloadSize: input URL is empty");
 
@@ -73,7 +73,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 	
 	@Override
-	public String GetFileName(String sComplexUrl) throws Exception {
+	public String getFileName(String sComplexUrl) throws Exception {
 		Preconditions.checkNotNull(sComplexUrl);
 		Preconditions.checkArgument(!sComplexUrl.isEmpty());
 		
@@ -180,7 +180,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
+	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
 		
@@ -241,7 +241,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				String sContentType = oHttpConn.getContentType();
 				long lContentLength = 0;
 				try {
-					lContentLength = GetDownloadFileSize(sFileURL);
+					lContentLength = getDownloadFileSize(sFileURL);
 				} catch (Exception oE) {
 					m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: " + oE);
 				}
@@ -249,30 +249,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: ContentLenght: " + lContentLength);
 				
-				/*
-				
-				// P.Campanella 2020-04-02: Content disposition return a name different from the one obtained from the URL.
-				// This create a misalignement between fileName and FilePath. Use the same method is safer
-				if (sDisposition != null) {
-					// extracts file name from header field
-					int index = sDisposition.indexOf(SOBLOOProviderAdapter.s_sFileNamePrefix);
-					if (index > 0) {
-						int iLen = SOBLOOProviderAdapter.s_sFileNamePrefix.length();
-						sFileName = sDisposition.substring(index + iLen, sDisposition.length() );
-						sFileName = sFileName.trim();
-						while(sFileName.startsWith("\"")) {
-							sFileName = sFileName.substring(1);
-						}
-						while(sFileName.endsWith("\"")) {
-							sFileName = sFileName.substring(0, sFileName.length()-1);
-						}
-					}
-				} else {
-					// extracts file name from URL
-					sFileName = GetFileName(sFileURL);
-				}*/
-				
-				sFileName = GetFileName(sFileURL);
+				sFileName = getFileName(sFileURL);
 	
 				m_oLogger.debug("Content-Type: " + sContentType);
 				m_oLogger.debug("Content-Disposition: " + sDisposition);

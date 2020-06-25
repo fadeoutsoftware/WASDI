@@ -151,6 +151,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Actual node, main by default
 	 */
 	public static String s_sNodeCode = "wasdi";
+	
+	/**
+	 * Flag to know if update or not the progress of download operations in the database
+	 */
+	protected boolean m_bNotifyDownloadUpdateActive = true;
 
 	/**
 	 * WASDI Launcher Main Entry Point
@@ -382,8 +387,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Config.instance().load();
 
 			SystemUtils.init3rdPartyLibs(null);
-			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER",
-					"/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
 
 			FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
 			oFileHandler.setLevel(Level.ALL);
@@ -391,6 +395,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			oFileHandler.setFormatter(oSimpleFormatter);
 			SystemUtils.LOG.setLevel(Level.ALL);
 			SystemUtils.LOG.addHandler(oFileHandler);
+			
+			// Flag to know if update the process workspace progress during download operations or not
+			String sNotifyDownloadUpdateActive = ConfigReader.getPropValue("DOWNLOAD_UPDATE_ACTIVE", "1");
+			
+			if (sNotifyDownloadUpdateActive.equals("1")) {
+				m_bNotifyDownloadUpdateActive = true;
+			}
+			else {
+				m_bNotifyDownloadUpdateActive = false;
+			}
 
 			Engine.start(false);
 
@@ -742,7 +756,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				// get file size
-				long lFileSizeByte = oProviderAdapter.GetDownloadFileSize(oParameter.getUrl());
+				long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
 				// set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 				
@@ -761,7 +775,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
 				// Get the file name
-				String sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
+				String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
 
 				DownloadedFile oAlreadyDownloaded = null;
@@ -821,7 +835,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 					// No: it isn't: download it
-					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
+					sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
 					if (Utils.isNullOrEmpty(sFileName)) {
 						
@@ -2948,6 +2962,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public void notify(ProcessWorkspace oProcessWorkspace) {
 		
 		if (oProcessWorkspace == null) return;
+		
+		if (!m_bNotifyDownloadUpdateActive) return;
 
 		try {
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -3077,6 +3093,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
 			oMyProcess.setStatus("DONE");
+			oMyProcess.setProgressPerc(100);
 			oRepository.updateProcess(oMyProcess);
 			
 		} catch (Exception oE) {

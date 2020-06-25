@@ -144,7 +144,9 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 							throw new IllegalArgumentException("Could not find cloud cover");
 						}
 						// +1 for the '['
-						iStart += s_sCLOUDCOVERPERCENTAGE.length() + 1;
+						//iStart += s_sCLOUDCOVERPERCENTAGE.length() + 1;
+						//p.campanella 2020 03 06: no, the '[' is already in the static text!
+						iStart += s_sCLOUDCOVERPERCENTAGE.length();
 						iEnd = sQuery.indexOf(']', iStart);
 						String sSubQuery = sQuery.substring(iStart, iEnd);
 
@@ -387,13 +389,14 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 		DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
 
 		//S1
-		String sQuery = "( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:33)&offset=21&limit=8";
-		String sResult = oEODC.translate(sQuery);
-		System.out.println(sResult);
+		//String sQuery = "( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:33)&offset=21&limit=8";
+		//String sResult = oEODC.translate(sQuery);
+		//System.out.println(sResult);
 
 		//S2
-		sQuery = "( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND cloudcoverpercentage:[10 TO 40])&offset=11&limit=5";
-		sResult = oEODC.translate(sQuery);
+		//sQuery = "( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND cloudcoverpercentage:[10 TO 40])&offset=11&limit=5";
+		String sQuery = "( footprint:\"intersects(POLYGON((4.772092603111307 46.20728338994605,4.772092603111307 47.17151988062961,7.057722358671709 47.17151988062961,7.057722358671709 46.20728338994605,4.772092603111307 46.20728338994605)))\" ) AND ( beginPosition:[2020-06-16T00:00:00.000Z TO 2020-06-23T23:59:59.999Z] AND endPosition:[2020-06-16T00:00:00.000Z TO 2020-06-23T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 9.4])";
+		String sResult = oEODC.translate(sQuery);
 		System.out.println(sResult);
 
 	}

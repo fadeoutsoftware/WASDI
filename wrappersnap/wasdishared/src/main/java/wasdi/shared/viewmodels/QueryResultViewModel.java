@@ -18,6 +18,18 @@ public class QueryResultViewModel {
 	
 	protected Map<String, String> properties = new HashMap<String, String>();
 	
+	@Override
+	public boolean equals(Object arg0) {
+		
+		if (arg0.getClass() == QueryResultViewModel.class) {
+			QueryResultViewModel oCompare = (QueryResultViewModel) arg0;
+			
+			return (this.provider.equals(oCompare.getProvider()) && this.link.equals(oCompare.getLink()) && this.title.equals(oCompare.getTitle()));
+		}
+		
+		return super.equals(arg0);
+	}
+	
 	public String getPreview() {
 		return preview;
 	}
