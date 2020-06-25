@@ -102,6 +102,33 @@
          }
      };
 
+     ProcessErrorLogsDialogController.prototype.copyPayload = function() {
+
+         if (this.m_oProcess.payload != null) {
+             // Create new element
+             var el = document.createElement('textarea');
+             // Set value (string to be copied)
+             el.value = this.m_oProcess.payload;
+             // Set non-editable to avoid focus and move outside of view
+             el.setAttribute('readonly', '');
+             el.style = {position: 'absolute', left: '-9999px'};
+             document.body.appendChild(el);
+             // Select text inside element
+             el.select();
+             // Copy text to clipboard
+             document.execCommand('copy');
+             // Remove temporary element
+             document.body.removeChild(el);
+
+             var oDialog = utilsVexDialogAlertBottomRightCorner("PAYLOAD COPIED<br>READY");
+             utilsVexCloseDialogAfter(4000,oDialog);
+         }
+         else {
+             var oDialog = utilsVexDialogAlertBottomRightCorner("NO PAYLOAD TO COPY<br>READY");
+             utilsVexCloseDialogAfter(4000,oDialog);
+         }
+     };
+
      ProcessErrorLogsDialogController.prototype.stopTick=function(oController) {
          if (angular.isDefined(oController.m_oTick)) {
              oController.m_oInterval.cancel(oController.m_oTick);

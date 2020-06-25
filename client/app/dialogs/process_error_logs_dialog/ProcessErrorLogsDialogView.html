@@ -20,10 +20,11 @@
                     <div class="col-v4" >
                         Search by text: <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch"> Operation: <b>{{m_oController.getProcessorType()}}</b> Name: <b>{{m_oController.getProcessorName()}}</b> Status: <b>{{m_oController.getProcessorStatus()}}</b>
                         <button style="margin-left: 20px;" type="button" ng-click="m_oController.getPayload()" class="btn btn-primary btn-wasdi " >
-                            Payload
+                            View Payload
                         </button>
-                    </div>
-                    <div class="col-v4" >
+                        <button style="margin-left: 20px;" type="button" ng-click="m_oController.copyPayload()" class="btn btn-primary btn-wasdi " >
+                            Copy Payload
+                        </button>
                     </div>
                 </div>
               	<div class="container-v4 table-container">
