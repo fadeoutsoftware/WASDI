@@ -24,7 +24,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	private static final String s_siOffset = "startPosition=\"";
 	private static final String s_sMaxRecords = "maxRecords=\"";
 	private static final String s_sRemainingPartOfPrefix = "outputFormat=\"application/json\" outputSchema=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd\"><csw:Query typeNames=\"csw:Record\"><csw:ElementSetName>full</csw:ElementSetName><csw:Constraint version=\"1.1.0\"><ogc:Filter><ogc:And>";
-	private static final String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint></csw:Query></csw:GetRecords>";
+	private static final String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint><ogc:SortBy><ogc:SortProperty><ogc:PropertyName>dc:title</ogc:PropertyName><ogc:SortOrder>ASC</ogc:SortOrder></ogc:SortProperty></ogc:SortBy></csw:Query></csw:GetRecords>";
 	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
 	private static final String s_sPRODUCTTYPE = "producttype:";
 	private static final String s_sRELATIVEORBITNUMBER = "relativeorbitnumber:";
