@@ -937,3 +937,7 @@ wasdiPython37Docker/venv/Scripts/python.exe
 wasdiPython37Docker/venv/Scripts/pythonw.exe
 wasdiwebserver/src/main/java/it/fadeout/web.xml
 client/app/.vscode/launch.json
+SEADRIF_DELTARES/
+libraries/matlabwasdilib/jwasdilib-0.9.3.jar
+libraries/matlabwasdilib.zip
+libraries/idlwasdilib/run_edriftlistflood_archive.sh
