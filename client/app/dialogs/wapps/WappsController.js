@@ -23,6 +23,8 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         this.m_oModalService = oModalService;
         this.m_oConstantsService = oConstantsService;
+        // this.m_sSearchTextApp = "";
+
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
@@ -139,8 +141,17 @@ var WappsController = (function() {
             })
             .error(function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
-                oController.cleanAllExecuteWorkflowFields();
             });
+
+    };
+
+    WappsController.prototype.downloadClick = function(oProcessor) {
+        if(utilsIsObjectNullOrUndefined(oProcessor) === true)
+        {
+            return false;
+        }
+
+        this.m_oProcessorService.downloadProcessor(oProcessor.processorId);
 
     };
 
@@ -243,6 +254,9 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         utilsCollapseBootstrapPanels();
     };
+
+
+
     WappsController.$inject = [
         '$scope',
         'close',

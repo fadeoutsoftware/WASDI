@@ -2,16 +2,20 @@ import wasdi
 
 
 def run():
+    wasdi.setVerbose(True)
+    bVerbosity = wasdi.getVerbose()
+        
+    wasdi.hello()
+
     wasdi.wasdiLog("Welcome to your first WASPY processor :-)")
-    sNome = wasdi.getParameter("NOME")
+    sNome = wasdi.getParameter("name")
     wasdi.wasdiLog("Hello " + str(sNome))
 
     aoProducts = wasdi.getProductsByActiveWorkspace()
 
     if aoProducts is not None:
         wasdi.wasdiLog("Found " + str(len(aoProducts)))
-    
-    
+
     sOutputName = "myOutputFile.tif"
     if sOutputName not in aoProducts:
         wasdi.wasdiLog("About to execute SNAP workflow")

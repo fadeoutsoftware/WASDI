@@ -1,14 +1,18 @@
 package wasdi.shared.data;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
@@ -21,7 +25,18 @@ import wasdi.shared.utils.Utils;
 /**
  * Created by s.adamo on 31/01/2017.
  */
+/**
+ * @author s.adamo
+ * @author c.nattero
+ * @author p.campanella
+ *
+ */
 public class ProcessWorkspaceRepository extends MongoRepository {
+	
+	public ProcessWorkspaceRepository() {
+		m_sThisCollection = "processworkpsace";
+		m_sRepoDb = "local";
+	}
 
 	/**
 	 * Insert a new Process Workspace 
@@ -32,14 +47,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         try {
         	
-        	Utils.debugLog("Inserting Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
-        	
         	// Initialize the Last State Change Date
         	oProcessWorkspace.setLastStateChangeDate(Utils.GetFormatDate(new Date()));
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document oDocument = Document.parse(sJSON);
-            getCollection("processworkpsace").insertOne(oDocument);
+            getCollection(m_sThisCollection).insertOne(oDocument);
             return oDocument.getObjectId("_id").toHexString();
 
         } catch (Exception oEx) {
@@ -47,6 +60,27 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         }
 
         return "";
+    }
+    
+	/**
+	 * Insert a list of Process Workspace Objects 
+	 * @param oProcessWorkspace Process Workpsace list to insert
+	 */
+    public void insertProcessListWorkspace(List<ProcessWorkspace> aoProcessWorkspace) {
+
+        try {
+        	
+        	List<Document> aoDocs = new ArrayList<>();
+        	for (ProcessWorkspace oProcessWorkspace : aoProcessWorkspace) {
+        		String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
+                Document oDocument = Document.parse(sJSON);
+                aoDocs.add(oDocument);
+			}
+        	getCollection(m_sThisCollection).insertMany(aoDocs);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
     }
 
     /**
@@ -57,7 +91,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     public boolean deleteProcessWorkspace(String sId) {
 
         try {
-            getCollection("processworkpsace").deleteOne(new Document("_id", new ObjectId(sId)));
+            getCollection(m_sThisCollection).deleteOne(new Document("_id", new ObjectId(sId)));
 
             return true;
 
@@ -76,7 +110,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     public boolean deleteProcessWorkspaceByPid(int iPid) {
 
         try {
-            getCollection("processworkpsace").deleteOne(new Document("pid", iPid));
+            getCollection(m_sThisCollection).deleteOne(new Document("pid", iPid));
 
             return true;
 
@@ -95,7 +129,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     public boolean deleteProcessWorkspaceByProcessObjId(String sProcessObjId) {
 
         try {
-            getCollection("processworkpsace").deleteOne(new Document("processObjId", sProcessObjId));
+            getCollection(m_sThisCollection).deleteOne(new Document("processObjId", sProcessObjId));
 
             return true;
 
@@ -108,15 +142,37 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
     /**
      * Get List of Process Workspaces in a Workspace
-     * @param sWorkspaceId
-     * @return
+     * @param sWorkspaceId unique id of the workspace
+     * @param eStatus the status of the process
+     * @param eOperation the type of Launcher Operation
+     * @param oDateFRom starting date (included)
+     * @param oDateTo ending date (included)
+     * @return list of results
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId) {
+
+        return getProcessByWorkspace(sWorkspaceId, null, null, null, null, null);
+    }
+    
+
+    /**
+     *  Get List of Process Workspaces in a Workspace
+     * @param sWorkspaceId Workspace
+     * @param eStatus State
+     * @param eOperation Op type
+     * @param sProductNameSubstring Product Name
+     * @param oDateFRom Start Date
+     * @param oDateTo End Date
+     * @return Found processworkspaces with applied filters
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, String sProductNameSubstring, Instant oDateFRom, Instant oDateTo) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1));
+        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFRom, oDateTo);
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
+            		.sort(new Document("operationDate", -1));
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
@@ -128,18 +184,41 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     
     /**
      * Get paginated list of process workspace in a workspace
-     * @param sWorkspaceId
-     * @param iStartIndex
-     * @param iEndIndex
-     * @return
+     * @param sWorkspaceId unique id of the workspace
+     * @param iStartIndex start index for pagination
+     * @param iEndIndex end index for pagination
+     * @return list of results
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, int iStartIndex, int iEndIndex) {
+
+        return getProcessByWorkspace(sWorkspaceId, null, null, null, null, null, iStartIndex, iEndIndex);
+    }
+    
+    /**
+     * Get paginated list of process workspace in a workspace
+     * @param sWorkspaceId unique id of the workspace
+     * @param eStatus the status of the process
+     * @param eOperation the type of Launcher Operation
+     * @param oDateFRom starting date (included)
+     * @param oDateTo ending date (included)
+     * @param iStartIndex start index for pagination
+     * @param iEndIndex end index for pagination
+     * @return list of results
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, String sProductNameSubstring, Instant oDateFRom, Instant oDateTo, int iStartIndex, int iEndIndex) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1)).skip(iStartIndex).limit(iEndIndex-iStartIndex);
+        	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFRom, oDateTo);
+        	
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
+            		.sort(new Document("operationDate", -1))
+            		.skip(iStartIndex)
+            		.limit(iEndIndex-iStartIndex);
+        	
             fillList(aoReturnList, oWSDocuments);
+        	
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -148,6 +227,58 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+
+	/**
+	 * @param sWorkspaceId
+	 * @param eStatus
+	 * @param eOperation
+	 * @param oDateFRom
+	 * @param oDateTo
+	 * @return
+	 */
+	private Bson buildFilter(String sWorkspaceId, ProcessStatus eStatus, LauncherOperations eOperation, String sProductNameSubstring, Instant oDateFRom, Instant oDateTo) {
+		Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
+		if(null!=eStatus) {
+			Bson oCond = Filters.eq("status", eStatus.name());
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=eOperation) {
+			Bson oCond = Filters.eq("operationType", eOperation.name());
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(!Utils.isNullOrEmpty(sProductNameSubstring)) {
+			
+			Pattern regex = Pattern.compile(sProductNameSubstring);
+			Bson oCond = Filters.eq("productName", regex);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=oDateFRom) {
+			Bson oCond = Filters.gte("operationDate", oDateFRom);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=oDateTo) {
+			Bson oCond = Filters.lte("operationDate", oDateFRom);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		return oFilter;
+	}
+	
+	/**
+	 * @param sProcessId the process id
+	 * @return process status as a string, null if the process is not found
+	 */
+	public String getProcessStatusFromId(String sProcessId) {
+		Document oDocument = getCollection(m_sThisCollection).find(Filters.eq("processObjId", sProcessId)).first();
+		String sJson = oDocument.toJson();
+		try {
+			ProcessWorkspace oProcessWorkspace = s_oMapper.readValue(sJson, ProcessWorkspace.class);
+			return oProcessWorkspace.getStatus();
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): " + oE );
+		}
+		return null;
+	}
+	
     /**
      * Get the total count of pw in a workspace
      * @param sWorkspaceId
@@ -155,7 +286,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public long countByWorkspace(String sWorkspaceId) {
     	try {
-    		long lCount = getCollection("processworkpsace").count(new Document("workspaceId", sWorkspaceId));
+    		long lCount = getCollection(m_sThisCollection).count(new Document("workspaceId", sWorkspaceId));
     		return lCount;
     	}
     	catch (Exception oEx) {
@@ -175,7 +306,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("userId", sUserId)).sort(new Document("operationDate", -1));
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new Document("operationDate", -1));
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
@@ -195,7 +326,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
@@ -222,7 +353,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
@@ -250,7 +381,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.READY.name()),
             				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
@@ -277,7 +408,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
@@ -304,7 +435,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
@@ -331,7 +462,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
@@ -357,7 +488,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()),
@@ -383,7 +514,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
@@ -409,7 +540,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name()),
@@ -435,7 +566,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
@@ -461,7 +592,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()),
@@ -487,7 +618,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.READY.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
@@ -513,7 +644,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.READY.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()),
@@ -540,7 +671,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
@@ -566,7 +697,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name()),
@@ -592,7 +723,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.READY.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
@@ -618,7 +749,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.READY.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name()),
@@ -659,7 +790,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("status", sProcessStatus),
             				Filters.eq("nodeCode", sComputingNodeCode)
@@ -677,7 +808,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     
     
     
-    
+    /**
+     * Fill a list of ProcessWorkpsace Entities
+     * @param aoReturnList
+     * @param oWSDocuments
+     */
 	private void fillList(final ArrayList<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
 		oWSDocuments.forEach(new Block<Document>() {
 		    public void apply(Document document) {
@@ -693,14 +828,17 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		    }
 		});
 	}
-
+	
+	/**
+	 * Get the last 5 Process Workpsace
+	 * @param sWorkspaceId
+	 * @return
+	 */
     public List<ProcessWorkspace> getLastProcessByWorkspace(String sWorkspaceId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
-
-            //FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("_id", -1)).limit(5);
-        	FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1)).limit(5);
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1)).limit(5);
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
@@ -712,13 +850,18 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
-
+    
+    /**
+     * Get the last 5 Process Workspace of a user
+     * @param sUserId
+     * @return
+     */
     public List<ProcessWorkspace> getLastProcessByUser(String sUserId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("userId", sUserId)).sort(new Document("operationDate", -1)).limit(5);
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new Document("operationDate", -1)).limit(5);
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
@@ -731,12 +874,16 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
-    
+    /**
+     * Get a Process Workpsace from product name
+     * @param sProductName
+     * @return
+     */
     public ProcessWorkspace getProcessByProductName(String sProductName) {
         ProcessWorkspace oProcessWorkspace = null;
         try {
 
-            Document oWSDocument = getCollection("processworkpsace").find(new Document("productName", sProductName)).first();
+            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("productName", sProductName)).first();
 
             if (oWSDocument==null) return  null;
 
@@ -753,13 +900,19 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return oProcessWorkspace;
     }
-
+    
+    /**
+     * Get a list of Process Workpsace by Product name in a Workpsace
+     * @param sProductName Product Name to search
+     * @param sWorkspace Workpsace
+     * @return List of found proc ws
+     */
     public List<ProcessWorkspace> getProcessByProductNameAndWorkspace(String sProductName, String sWorkspace) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
             				Filters.eq("productName", sProductName),
             				Filters.eq("workspaceId", sWorkspace)
@@ -775,11 +928,16 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    /**
+     * Get a Process Workpsace by the WASDI Id
+     * @param sProcessObjId Process Workspace Id
+     * @return Entity found or null
+     */
     public ProcessWorkspace getProcessByProcessObjId(String sProcessObjId) {
         ProcessWorkspace oProcessWorkspace = null;
         try {
 
-            Document oWSDocument = getCollection("processworkpsace").find(new Document("processObjId", sProcessObjId)).first();
+            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("processObjId", sProcessObjId)).first();
 
             if (oWSDocument==null) return  null;
 
@@ -796,7 +954,37 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return oProcessWorkspace;
     }
+    
+    /**
+     * Get the status of a list of process workspace
+     * @param asProcessesObjId List of string each with a ProcessWorkspace Id to query
+     * @return List of string, corresponding to the input one, with the status of the relative proc id
+     */
+    public ArrayList<String> getProcessesStatusByProcessObjId(ArrayList<String> asProcessesObjId) {
+    	
+    	ArrayList<String> asReturnStatus = new ArrayList<>();
+    	
+    	final ArrayList<ProcessWorkspace> aoProcessesList = new ArrayList<ProcessWorkspace>();
+        try {
+        	
+        	BasicDBObject oInQuery = new BasicDBObject();
+        	
+            oInQuery.put("processObjId", new BasicDBObject("$in", asProcessesObjId));
 
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oInQuery);
+            fillList(aoProcessesList, oWSDocuments);
+            
+            for (int i=0; i<aoProcessesList.size(); i++) {
+            	asReturnStatus.add(aoProcessesList.get(i).getStatus());
+            }
+        } 
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return asReturnStatus;
+    }
+    
     /**
      * Update a process Workspace. If there is a state change, the system will update also update lastStateChangeDate 
      * @param oProcessWorkspace Process Workpsace to update
@@ -817,7 +1005,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document filter = new Document("processObjId", oProcessWorkspace.getProcessObjId());
 			Document update = new Document("$set", new Document(Document.parse(sJSON)));
-			getCollection("processworkpsace").updateOne(filter, update);
+			getCollection(m_sThisCollection).updateOne(filter, update);
 
             return true;
 
@@ -828,6 +1016,10 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }
     
+    /**
+     * Clean the queue of Process Workpsace deleting all the created ones
+     * @return True of False in case of exception
+     */
     public boolean cleanQueue() {
 
         try {
@@ -836,7 +1028,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	String sJSON = "{\"status\":\"ERROR\"}";
             Document oFilter = new Document("status", "CREATED");
 			Document oUpdate = new Document("$set", new Document(Document.parse(sJSON)));
-			getCollection("processworkpsace").updateMany(oFilter, oUpdate);
+			getCollection(m_sThisCollection).updateMany(oFilter, oUpdate);
 
             return true;
 
@@ -847,14 +1039,18 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }
 
-
+    /**
+     * Check if a Process Workpsace with that pid exists
+     * @param iPid
+     * @return
+     */
     public boolean existsPidProcessWorkspace(Integer iPid) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         boolean bExists = false;
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(Filters.and(Filters.eq("pid", iPid)));
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.eq("pid", iPid)));
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -880,13 +1076,16 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return bExists;
     }
 
-    
+    /**
+     * Get the list of all running (including Waiting and Ready) process worksapces
+     * @return List of RUNING, WAITING and READY Process Workspaces
+     */
     public List<ProcessWorkspace> getRunningSummary() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.or(
             				Filters.eq("status", ProcessStatus.RUNNING.name()),
             				Filters.eq("status", ProcessStatus.WAITING.name()),
@@ -902,13 +1101,17 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
-
-    public List<ProcessWorkspace> getWaitingSummary() {
+    
+    /**
+     * Get a list of all the CREATED processes
+     * @return
+     */
+    public List<ProcessWorkspace> getCreatedSummary() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             			Filters.eq("status", ProcessStatus.CREATED.name())
             		)
             		.sort(new Document("operationDate", -1));
@@ -920,4 +1123,142 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+    
+    /**
+     * Get the list of all processes
+     * @return
+     */
+    public List<ProcessWorkspace> getList() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+	/**
+	 * Check if the user is the owner of the process workspace
+	 * @param sUserId a valid user id
+	 * @param sProcessObjId a valid process obj id
+	 * @return true if the user launched the process, false otherwise
+	 */
+	public boolean isProcessOwnedByUser(String sUserId, String sProcessObjId) {
+		try {
+			Document oDoc = getCollection(m_sThisCollection).find(Filters.and(
+					Filters.eq("userId", sUserId),
+					Filters.eq("processObjId", sProcessObjId)
+					)).first();
+			if(null!=oDoc) {
+				return true;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+		}
+		return false;
+	}
+	
+	/**
+	 * @param sProcessObjId a valid process obj id
+	 * @return the corresponding workspace id, if found, null otherwise
+	 */
+	public String getWorkspaceByProcessObjId(String sProcessObjId) {
+		try {
+			Document oDoc = getCollection(m_sThisCollection).find(
+					Filters.eq("processObjId", sProcessObjId)
+					).first();
+			if(null==oDoc) {
+				Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId: " + sProcessObjId + " is not a valid process obj id, aborting");
+				return null;
+			}
+			if(oDoc.containsKey("workspaceId")) {
+				String sWorkspaceId = oDoc.getString("workspaceId");
+				return sWorkspaceId;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
+		}
+		return null;
+	}
+
+	
+	/**
+	 * @param sProcessObjId a valid process obj id
+	 * @return the corresponding payload
+	 */
+	public String getPayload(String sProcessObjId) {
+		try {
+			Document oDoc = getCollection(m_sThisCollection).find(
+					Filters.eq("processObjId", sProcessObjId)
+					).first();
+			if(null==oDoc) {
+				Utils.debugLog("ProcessWorkspaceRepository.getPayload: " + sProcessObjId + " is not a valid process obj id, aborting");
+				return null;
+			}
+			if(oDoc.containsKey("payload")) {
+				String sPayload = oDoc.getString("payload");
+				return sPayload;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): " + oE);
+		}
+		return null;
+	}
+
+	
+	/**
+	 * Get the list of processes in a specific node. WARNING: use this method for
+	 * maintenance, since if you need to further filter the results it can be pretty
+	 * inefficient, so prefer other more specific queries
+	 * 
+	 * @param sComputingNodeCode computing node
+	 * @return
+	 */
+	public List<ProcessWorkspace> getByNode(String sComputingNodeCode) {
+		final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+					Filters.eq("nodeCode", sComputingNodeCode))
+					.sort(new Document("operationDate", -1));
+			fillList(aoReturnList, oWSDocuments);
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+	
+	/**
+     *  Get List of Process Workspaces in a Workspace
+     * @param sWorkspaceId Workspace
+     * @param eStatus State
+     * @param eOperation Op type
+     * @param sProductNameSubstring Product Name
+     * @param oDateFRom Start Date
+     * @param oDateTo End Date
+     * @return Found processworkspaces with applied filters
+     */
+    public List<ProcessWorkspace> getProcessByParentId(String sParentId) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+					Filters.eq("parentId", sParentId))
+					.sort(new Document("operationDate", -1));
+			fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }	
+
 }

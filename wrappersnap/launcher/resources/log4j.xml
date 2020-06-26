@@ -79,6 +79,11 @@
         <level value="debug" />
         <appender-ref ref="filePublisher" />
     </logger>
+    
+    <logger name="net.schmizz.sshj">
+        <level value="debug" />
+        <appender-ref ref="filePublisher" />
+    </logger>
 
 
 

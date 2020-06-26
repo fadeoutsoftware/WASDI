@@ -1,8 +1,8 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
-import java.util.Date;
 
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -13,19 +13,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.Provider;
+import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
@@ -36,13 +34,21 @@ import wasdi.shared.viewmodels.RabbitMessageViewModel;
 public class FileBufferResource {
 
 	@Context
-	ServletConfig m_oServletConfig;		
+	ServletConfig m_oServletConfig;
+
+	@Inject
+	ProvidersCatalog m_oProviderCatalog;
 	
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
+	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
+									@QueryParam("sFileUrl") String sFileUrl,
+									@QueryParam("sProvider") String sProvider,
+									@QueryParam("sWorkspaceId") String sWorkspaceId,
+									@QueryParam("sBoundingBox") String sBoundingBox,
+									@QueryParam("parent") String sParentProcessWorkspaceId)
+			throws IOException
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -70,7 +76,17 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 			
 			String sProcessObjId = Utils.GetRandomName();
-			
+
+			// if the provider is not specified, we fallback on the node default provider
+			Provider oProvider = null;
+			if (Utils.isNullOrEmpty(sProvider)) {
+				oProvider = m_oProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
+			} else {
+				oProvider = m_oProviderCatalog.getProvider(sProvider);
+			}
+
+			Utils.debugLog("FileBufferResource.Download, provider: " + oProvider.getName());
+
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
 			oParameter.setUrl(sFileUrl);
@@ -78,9 +94,9 @@ public class FileBufferResource {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setBoundingBox(sBoundingBox);
-			oParameter.setDownloadUser(m_oServletConfig.getInitParameter(sProvider+".OSUser"));
-			oParameter.setDownloadPassword(m_oServletConfig.getInitParameter(sProvider+".OSPwd"));
-			oParameter.setProvider(sProvider);
+			oParameter.setDownloadUser(oProvider.getOSUser());
+			oParameter.setDownloadPassword(oProvider.getOSPassword());
+			oParameter.setProvider(oProvider.getName());
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);

@@ -650,6 +650,7 @@ public class AuthResource extends BaseResource{
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oRegistrationInfoViewModel.getPassword().toCharArray()));
 					oNewUser.setValidAfterFirstAccess(false);
 					oNewUser.setRegistrationDate((new Date()).toString());
+					oNewUser.setDefaultNode("wasdi");
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
 					

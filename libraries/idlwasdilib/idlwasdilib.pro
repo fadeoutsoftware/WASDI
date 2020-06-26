@@ -2,10 +2,19 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 2.0.4
-; Last Update: 
+; IDL WASDI Lib Version 3.1.1
+; Last Update: 2020-05-15
 ;
 ; History
+; 3.1.1 - 2020-05-24
+;   Fixed local save file Bug
+;
+; 3.1.0 - 2020-05-15
+;   Added support to vertical partitioning
+;
+; 3.0.0 - 2020-03-23
+;   Added support to distributed nodes
+;
 ; 2.0.4 - 2020-01-26
 ;   Added time stamp to internal log
 ;
@@ -22,7 +31,7 @@
 
 PRO STARTWASDI, sConfigFilePath
   ; Define a set of shared variables
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
   
   IF (sConfigFilePath EQ !NULL) THEN BEGIN
 	print, 'Config File null, return'
@@ -40,6 +49,7 @@ PRO STARTWASDI, sConfigFilePath
   password = ''
   activeworkspace = ''
   workspaceowner = ''
+  workspaceurl = ''
   token = ''
   myprocid = ''
   baseurl='217.182.93.57'
@@ -197,7 +207,7 @@ PRO REFRESHPARAMETERS
 END
 
 ; IDL HTTP GET Function Utility
-FUNCTION WASDIHTTPGET, sUrlPath
+FUNCTION WASDIHTTPGET, sUrlPath, sHostName
 	
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
 	
@@ -210,7 +220,11 @@ FUNCTION WASDIHTTPGET, sUrlPath
 		sessioncookie = ''
 	END ELSE BEGIN
 		sessioncookie = token
-	END  
+	END 
+	
+	IF (sHostName EQ !NULL) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END
 
 	CATCH, iErrorStatus 
 
@@ -233,7 +247,7 @@ FUNCTION WASDIHTTPGET, sUrlPath
 	oUrl->SetProperty, URL_SCHEME = 'http'
 
 	; Use the http server string
-	oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
+	oUrl->SetProperty, URL_HOSTNAME = sHostName
 
 	; name of remote path
 	oUrl->SetProperty, URL_PATH = sUrlPath
@@ -255,7 +269,7 @@ FUNCTION WASDIHTTPGET, sUrlPath
 END
 
 ; IDL HTTP POST UTILITY FUNCTION
-FUNCTION WASDIHTTPPOST, sUrlPath, sBody
+FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
 	
@@ -263,6 +277,14 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody
 		print, 'Url Path is null, return'
 		RETURN, !NULL
 	END
+	
+	IF (sHostName EQ !NULL) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END	
+	
+	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END		
 
 	sessioncookie = token
 
@@ -273,7 +295,7 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody
 	oUrl->SetProperty, URL_SCHEME = 'http'
 
 	; Use the http server string
-	oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
+	oUrl->SetProperty, URL_HOSTNAME = sHostName
 
 	; name of remote path
 	oUrl->SetProperty, URL_PATH = sUrlPath
@@ -430,7 +452,7 @@ FUNCTION WASDILOGIN,wuser,wpassword
 	LoginString='{  "userId":"'+wuser+'",  "userPassword":"'+wpassword+'"}'
 
 	; Send post request
-	serverJSONResult = WASDIHTTPPOST(UrlPath, LoginString)
+	serverJSONResult = WASDIHTTPPOST(UrlPath, LoginString, !NULL)
 
 	; get back the session key
 	sessionCookie = GETVALUEBYKEY(serverJSONResult, "sessionId")
@@ -451,7 +473,7 @@ FUNCTION WASDICHECKSESSION,sessionId
 	UrlPath = '/wasdiwebserver/rest/auth/checksession'
 
 	; Send post request
-	serverJSONResult = WASDIHTTPGET(UrlPath)
+	serverJSONResult = WASDIHTTPGET(UrlPath, !NULL)
 	
 	sUser = GETVALUEBYKEY(serverJSONResult, 'userId')
 	
@@ -500,19 +522,19 @@ END
 
 ; Hello WASDI
 PRO HELLOWASDI
-	WASDIHTTPGET, '/wasdiwebserver/rest/wasdi/hello'
+	wasdiResult = WASDIHTTPGET('/wasdiwebserver/rest/wasdi/hello',!NULL)
 END
 
 ; Get the status of a WASDI Process
 FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 
 	; API URL
 	UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
 
 	; Call get status
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 	; read response JSON.
 	sStatus = GETVALUEBYKEY(wasdiResult, 'status')
@@ -613,7 +635,7 @@ FUNCTION WASDIGETWORKSPACES
 	; API URL
 	UrlPath = '/wasdiwebserver/rest/ws/byuser'  
 
-	RETURN, WASDIHTTPGET(UrlPath)
+	RETURN, WASDIHTTPGET(UrlPath, !NULL)
 END
 
 
@@ -629,7 +651,7 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
 	UrlPath = '/wasdiwebserver/rest/ws/byuser'
 
 	; Get the list of users workpsaces
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
 	; Search the Workspace with the desired name
 	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
@@ -656,6 +678,43 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
   
 END
 
+; Get the URL of a Workspace
+FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+
+	ownerUserId = "";
+	
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/ws?sWorkspaceId=' + workspaceid
+
+	; Get the workpsace view model
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+	
+	; Catch the possible null excetpion
+	CATCH, iErrorStatus 
+
+	IF iErrorStatus NE 0 THEN BEGIN
+		RETURN, ''
+	ENDIF	
+
+	; Check the name property
+	sWsUrl = GETVALUEBYKEY(wasdiResult, 'apiUrl')
+	
+	asURLValues = STRSPLIT(sWsUrl,'/',/EXTRACT)	
+	
+	sIpAddress = ''
+	
+	IF (N_ELEMENTS(asURLValues) GT 0) THEN BEGIN
+		sIpAddress = asURLValues[1]
+	ENDIF
+
+	; return the found address or ""
+	RETURN, sIpAddress
+  
+END
+
+
 ; Get the owner of a Workspace
 FUNCTION WASDIGETWORKSPACEOWNERBYWSID, workspaceid
 
@@ -667,7 +726,7 @@ FUNCTION WASDIGETWORKSPACEOWNERBYWSID, workspaceid
 	UrlPath = '/wasdiwebserver/rest/ws/byuser'
 
 	; Get the list of users workpsaces
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
 	; Search the Workspace with the desired name
 	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
@@ -705,7 +764,7 @@ FUNCTION WASDICHECKPRODUCTEXISTS, filename
 	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
 	iReturn = 0
 
@@ -739,7 +798,7 @@ FUNCTION WASDIGETPRODUCTBBOX, filename
 	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
 	; Catch the possible null excetpion
 	CATCH, iErrorStatus 
@@ -759,7 +818,7 @@ END
 ; Delete product
 FUNCTION WASDIDELETEPRODUCT, filename
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 
 	workspaceId = activeworkspace;
 
@@ -767,7 +826,7 @@ FUNCTION WASDIDELETEPRODUCT, filename
 	UrlPath = '/wasdiwebserver/rest/product/delete?sProductName='+filename+'&bDeleteFile=true&sWorkspaceId='+workspaceId+'&bDeleteLayer=true'
 
 	; Get the list of users workpsaces
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 	; The API does not return a text
 	CATCH, iErrorStatus 
@@ -785,10 +844,13 @@ END
 ; Open a  Workspace by name
 pro WASDIOPENWORKSPACE,workspacename
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
   ; Set active Workspace and owner
   activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
-  workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(workspacename)
+  workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
+  workspaceurl = WASDIGETWORKSPACEURLBYWSID(activeworkspace)
+  print, workspaceurl
+  
   
 END
 
@@ -805,7 +867,7 @@ FUNCTION WASDIGETPRODUCTSBYWORKSPACE,workspacename
   UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+workspaceid
 
   ; Get the list of products
-  wasdiResult = WASDIHTTPGET(UrlPath)
+  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
   
   ; Create the output array
   asProductsNames = []
@@ -832,7 +894,7 @@ FUNCTION WASDIGETACTIVEWORKSPACEPRODUCTS
   UrlPath = '/wasdiwebserver/rest/product/namesbyws?sWorkspaceId='+activeworkspace
 
   ; Get the list of products
-  wasdiResult = WASDIHTTPGET(UrlPath)
+  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
   
   iResults = n_elements(wasdiResult)
   
@@ -895,7 +957,7 @@ END
 ; Donwloads a File from WASDI
 PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 
 	IF (token EQ !NULL) OR (STRLEN(token) LE 1) THEN BEGIN
 		sessioncookie = ''
@@ -908,6 +970,20 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 	IF (verbose EQ '1') THEN BEGIN
 		print, 'WASDIDOWNLOADFILE Url ', sUrlPath
 	END
+	
+	print, 'WASDIDOWNLOADFILE WORKSPACE URL = ', workspaceurl
+	
+	sUrlAddress = workspaceurl
+	
+	IF (sUrlAddress EQ !NULL) THEN BEGIN
+		sUrlAddress = '217.182.93.57'
+	ENDIF
+	
+	IF (sUrlAddress EQ '') THEN BEGIN
+		sUrlAddress = '217.182.93.57'
+	ENDIF	
+	
+	print, 'WASDIDOWNLOADFILE sUrlAddress = ', sUrlAddress
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
@@ -916,7 +992,7 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 	oUrl->SetProperty, URL_SCHEME = 'http'
 
 	; Use the http server string
-	oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
+	oUrl->SetProperty, URL_HOSTNAME = sUrlAddress
 
 	; name of remote path
 	oUrl->SetProperty, URL_PATH = sUrlPath
@@ -958,7 +1034,7 @@ FUNCTION WASDIGETWORKFLOWS
   UrlPath = '/wasdiwebserver/rest/processing/getgraphsbyusr'
 
   ; Call API
-  wasdiResult = WASDIHTTPGET(UrlPath)
+  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
   RETURN, wasdiResult
 END
@@ -1048,7 +1124,7 @@ FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWor
 		print, 'Workflow JSON ' , sWorkFlowViewModelString
 	END
 
-	wasdiResult = WASDIHTTPPOST(UrlPath, sWorkFlowViewModelString)
+	wasdiResult = WASDIHTTPPOST(UrlPath, sWorkFlowViewModelString, !NULL)
 
 	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
 
@@ -1127,7 +1203,7 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 
 	UrlPath = UrlPath + sEncodedParametersJSON
 
-	wasdiResult = WASDIHTTPGET(UrlPath)
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
 	sProcessID = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
 	
@@ -1193,7 +1269,7 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreV
 	print, 'URL: ', UrlPath
   END
 
-  wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString)
+  wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString, !NULL)
  
   sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
  
@@ -1234,7 +1310,7 @@ FUNCTION WASDISUBSET, sInputFile, sOutputFile, sLatN, sLonW, sLatS, sLonE
 		print, 'URL: ', UrlPath
 	END
 
-	wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString)
+	wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString, !NULL)
 
 	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
 
@@ -1307,7 +1383,7 @@ FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asL
 		print, 'URL: ', UrlPath
 	END
 
-	wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString)
+	wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString, !NULL)
 
 	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
 
@@ -1424,7 +1500,7 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
 	print, 'SEARCH URL  ' , UrlPath
   END
 
-  wasdiResult = WASDIHTTPPOST(UrlPath, sQueryBody)
+  wasdiResult = WASDIHTTPPOST(UrlPath, sQueryBody, !NULL)
   
   RETURN, wasdiResult
 END
@@ -1463,7 +1539,7 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
   
   UrlPath = UrlPath + '?' + sQuery
   
-  wasdiResult = WASDIHTTPGET(UrlPath)
+  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
    
   sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
   
@@ -1488,7 +1564,7 @@ END
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 	sMyProcId = myprocid
 
 	sPerc = STRING(iPerc)
@@ -1498,7 +1574,7 @@ PRO WASDIUPDATEPROGRESS, iPerc
 	END ELSE BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
-		wasdiResult = WASDIHTTPGET(UrlPath)
+		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 		; Read updated status
 		sStatus = GETVALUEBYKEY(wasdiResult, 'status')
@@ -1509,25 +1585,25 @@ END
 ; Update the progress of this own process
 PRO WASDILOG, sLog
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 	
 	sTimestamp = SYSTIME()
 	print, '[', myprocid, '] - ', sTimestamp,': ', sLog
 	IF (isonserver EQ '1') THEN BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/processors/logs/add?processworkspace='+myprocid
-		wasdiResult = WASDIHTTPPOST(UrlPath, sLog)
+		wasdiResult = WASDIHTTPPOST(UrlPath, sLog, workspaceurl)
 	END  
 END
 
 ; Update the status of a WASDI Process
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 
   ; API URL
   UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+iPerc
-  wasdiResult = WASDIHTTPGET(UrlPath)
+  wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
   
   ; get the output status
   sUpdatedStatus = GETVALUEBYKEY(wasdiResult, 'status')
@@ -1539,32 +1615,38 @@ END
 ; Adds a new product to the Workspace in WASDI
 FUNCTION WASDISAVEFILE, sFileName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+	IF (isonserver EQ '0') THEN BEGIN
 
-	; API url
-	UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
+		; API url
+		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
 
-	wasdiResult = WASDIHTTPGET(UrlPath)
+		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
-	; check bool response
-	sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
+		; check bool response
+		sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
 
-	sProcessId = ""
+		sProcessId = ""
 
-	; get the string value
-	IF sResponse THEN BEGIN
-		sValue = GETVALUEBYKEY (wasdiResult, 'stringValue')
-		sProcessID=sValue
-	ENDIF
+		; get the string value
+		IF sResponse THEN BEGIN
+			sValue = GETVALUEBYKEY (wasdiResult, 'stringValue')
+			sProcessID=sValue
+		ENDIF
 
-	sStatus = "ERROR"
+		sStatus = "ERROR"
 
-	; Wait for the process to finish
-	IF sProcessID THEN BEGIN
-		sStatus = WASDIWAITPROCESS(sProcessID)
-	ENDIF
+		; Wait for the process to finish
+		IF sProcessID THEN BEGIN
+			sStatus = WASDIWAITPROCESS(sProcessID)
+		ENDIF
 
-	RETURN, sStatus;
+		RETURN, sStatus;
+	END ELSE BEGIN
+		sStatus = "DONE"
+		RETURN, sStatus;
+	END 
 END
 
 

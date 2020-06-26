@@ -28,5 +28,9 @@ public enum LauncherOperations {
     WPS,
     REGRID,
     DELETEPROCESSOR,
-    INFO
+    INFO,
+    COPYTOSFTP,
+    REDEPLOYPROCESSOR,
+    LIBRARYUPDATE,
+    KILLPROCESSTREE
 }

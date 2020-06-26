@@ -147,6 +147,18 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.WPS.name())) {
 			oParam = new WpsParameters();
 		}
+		else if (sOperationType.equals(LauncherOperations.REDEPLOYPROCESSOR.name())) {
+			oParam = new ProcessorParameter();
+		}
+		else if (sOperationType.equals(LauncherOperations.COPYTOSFTP.name())) {
+			oParam = new IngestFileParameter();
+		}
+		else if (sOperationType.equals(LauncherOperations.LIBRARYUPDATE.name())) {
+			oParam = new ProcessorParameter();
+		}
+		else if (sOperationType.equals(LauncherOperations.KILLPROCESSTREE.name())) {
+			oParam = new KillProcessTreeParameter();
+		}
 		
 		return oParam;
 	}

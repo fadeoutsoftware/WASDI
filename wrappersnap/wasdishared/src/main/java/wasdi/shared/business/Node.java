@@ -17,6 +17,11 @@ public class Node {
 	 * GeoServer URL
 	 */
 	private String nodeGeoserverAddress;
+
+	/**
+	 * Default provider for the node
+	 */
+	private String m_sDefaultProvider;
 	
 	
 	public String getNodeGeoserverAddress() {
@@ -43,5 +48,13 @@ public class Node {
 	}
 	public void setNodeDescription(String nodeDescription) {
 		this.nodeDescription = nodeDescription;
+	}
+
+	public String getDefaultProvider() {
+		return m_sDefaultProvider;
+	}
+
+	public void setDefaultProvider(String sValue) {
+		this.m_sDefaultProvider = sValue;
 	}
 }

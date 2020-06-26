@@ -4,35 +4,93 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
+import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 public class dbUtils {
+	
+	public static boolean isProductOnThisNode(DownloadedFile oDownloadedFile, WorkspaceRepository oWorkspaceRepository) {
+		try {
+			String sPath = oDownloadedFile.getFilePath();
+			
+			String [] asSplittedPath = sPath.split("/");
+			
+			if (asSplittedPath == null) {
+				System.out.println(oDownloadedFile.getFileName() + " - CANNOT SPLIT PATH");
+				return false;
+			}
+			
+			if (asSplittedPath.length<2) {
+				System.out.println(oDownloadedFile.getFileName() + " - SPLITTED PATH HAS ONLY ONE ELEMENT");
+				return false;
+			}
+			
+			String sWorkspaceId = asSplittedPath[asSplittedPath.length-2];
+			
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			if (oWorkspace == null) {
+				System.out.println(oDownloadedFile.getFileName() + " - IMPOSSIBILE TO FIND WORKSPACE " + sWorkspaceId);
+				return false;
+				
+			}
+			
+			String sNode = oWorkspace.getNodeCode();
+			
+			if (Utils.isNullOrEmpty(sNode)) {
+				sNode = "wasdi";
+			}
+			
+			if (sNode.equals(s_sMyNodeCode) == false) {
+				System.out.println(oDownloadedFile.getFileName() + " - IS ON ANOTHER NODE  [" + sNode + "]");
+				return false;
+			}
+			
+		}
+		catch (Exception oEx) {
+			System.out.println(" DOWNLOADED FILE EX " + oEx.toString());
+			oEx.printStackTrace();
+			return false;
+		}
+		
+		return true;
+	}
 
 	/**
 	 * Tools to fix the downloaded products table
@@ -61,6 +119,7 @@ public class dbUtils {
 		        	bDelete = true;
 		        }		        
 				
+		        WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 				
 				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 				
@@ -76,6 +135,8 @@ public class dbUtils {
 					File oFile = new File(sPath);
 					
 					if (oFile.exists() == false) {
+						
+						if (!isProductOnThisNode(oDownloadedFile, oWorkspaceRepository)) continue;
 						
 						iDeleted ++;
 						
@@ -126,10 +187,10 @@ public class dbUtils {
 	public static void productWorkspace() {
 		try {
 			
-	        System.out.println("Ok, what we do with downloaded products?");
+	        System.out.println("Ok, what we do with product Workspaces?");
 	        
-	        System.out.println("\t1 - Clean by Workspace");
-	        System.out.println("\t2 - Clean by Product Name");
+	        System.out.println("\t1 - Clean by not existing Workspace");
+	        System.out.println("\t2 - Clean by not existing Product Name");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -208,25 +269,28 @@ public class dbUtils {
 	}
 
 	
-	public static void logs() {
+	public static void processors() {
 		
 		try {
 			
-	        System.out.println("Ok, what we do with logs?");
+	        System.out.println("Ok, what we do with processors?");
 	        
 	        System.out.println("\t1 - Extract Log");
 	        System.out.println("\t2 - Clear Log");
+	        System.out.println("\t3 - Redeploy");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
-	        System.out.println("Please input ProcessWorkspaceId");
-	        String sProcessWorkspaceId = oScanner.nextLine();
 	        
 	        ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 
 	        if (sInputString.equals("1")) {
+	        	
+		        System.out.println("Please input ProcessWorkspaceId");
+		        String sProcessWorkspaceId = oScanner.nextLine();
+	        	
 	        	
 	        	String sOuptutFile = "./" + sProcessWorkspaceId + ".txt";
 	        	
@@ -262,13 +326,44 @@ public class dbUtils {
 				System.out.println("Log Extraction done");	        	
 	        }
 	        else if (sInputString.equals("2")) {
+	        	
+		        System.out.println("Please input ProcessWorkspaceId");
+		        String sProcessWorkspaceId = oScanner.nextLine();
+	        	
 	        	System.out.println("Deleting logs of " + sProcessWorkspaceId);
 	        	oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcessWorkspaceId);
 	        	System.out.println(sProcessWorkspaceId + " logs DELETED");
 	        }
+	        else if (sInputString.equals("3")) {
+		        System.out.println("Please input Processor Name");
+		        String sProcessorName = oScanner.nextLine();
+		        
+		        ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		        Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+		        
+		        if (oProcessor == null) {
+		        	System.out.println(sProcessorName + " does NOT exists");
+		        	return;
+		        }
+		        
+		        String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+		        String sDockerTemplatePath = ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH");
+		        
+		        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath);
+		        
+		        ProcessorParameter oParameter = new ProcessorParameter();
+		        
+		        oParameter.setName(oProcessor.getName());
+		        oParameter.setProcessorID(oProcessor.getProcessorId());
+		        
+		        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
+		        
+		        oEngine.redeploy(oParameter);
+		        
+	        }
 		}
 		catch (Exception oEx) {
-			System.out.println("logs Exception: " + oEx);
+			System.out.println("processors Exception: " + oEx);
 			oEx.printStackTrace();
 		}
 	}
@@ -293,6 +388,7 @@ public class dbUtils {
 	        	
 	        	File oMetadataPath = new File("/data/wasdi/metadata");
 	        	
+	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 	        	// Get all the downloaded files
 	        	DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 	        	List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getList();
@@ -301,6 +397,11 @@ public class dbUtils {
 	        	
 	        	// Generate the list of valid metadata file reference
 	        	for (DownloadedFile oDownloadedFile : aoDownloadedFileList) {
+	        		
+	        		if (!isProductOnThisNode(oDownloadedFile, oWorkspaceRepository)) {
+	        			System.out.println("Product " + oDownloadedFile.getFileName() + " NOT IN THIS NODE JUMP");
+	        			continue;
+	        		}
 	        		
 	        		// Get the view model
 	        		ProductViewModel oVM = oDownloadedFile.getProductViewModel();
@@ -401,6 +502,72 @@ public class dbUtils {
 		}
 	}
 	
+	private static void workflows () {
+		try {
+			
+	        System.out.println("Ok, what we do with workflows?");
+	        
+	        System.out.println("\t1 - Copy workflows from user folder to generic folder");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Getting workflows");
+	        	
+	        	SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+	        	List<SnapWorkflow> aoWorkflows = oSnapWorkflowRepository.getList();
+	        	
+	    		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+	    		if (!sBasePath.endsWith("/")) {
+	    			sBasePath += "/";
+	    		}
+	    		sBasePath += "workflows/";
+	    		
+	    		File oDestinationPath = new File(sBasePath);
+	    		
+	    		if (!oDestinationPath.exists()) {
+	    			oDestinationPath.mkdirs();
+	    		}
+	        	
+	        	// Search one by one
+	        	for (SnapWorkflow oWorkflow : aoWorkflows) {
+	        		
+	        		String sWorkflowPath = sBasePath + oWorkflow.getWorkflowId() + ".xml";
+	        		
+	        		File oOriginalFile = new File(sWorkflowPath);
+	        		File oDestinationFile = new File(oDestinationPath, oOriginalFile.getName());
+	        		
+	        		if (!oDestinationFile.exists()) {
+	        			System.out.println("File does not exists, make a copy [" + oDestinationFile.getPath() + "]");
+	        			
+	        			try {
+		        			FileUtils.copyFileToDirectory(oOriginalFile, oDestinationPath);
+		        			
+		        			oWorkflow.setFilePath(oDestinationFile.getPath());
+		        			oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);	        				
+	        			}
+	        			catch (Exception oEx) {
+	        				System.out.println("File Copy Exception: " + oEx);
+	        				oEx.printStackTrace();
+						}
+	        		}
+	        		else {
+	        			System.out.println("File already exists, jump");
+	        		}
+				}
+	        	
+	        	System.out.println("All workflows copied");
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Workflows Exception: " + oEx);
+			oEx.printStackTrace();
+		}		
+	}
 	
 	private static void users() {
 		try {
@@ -408,6 +575,7 @@ public class dbUtils {
 	        System.out.println("Ok, what we do with Users?");
 	        
 	        System.out.println("\t1 - Delete User");
+	        System.out.println("\t2 - Print User Mails");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -474,9 +642,17 @@ public class dbUtils {
 				FileUtils.deleteDirectory(new File(sBasePath));
 	        	
 	        }
+	        else if (sInputString.equals("2")) {
+	        	UserRepository oUserRepo = new  UserRepository();
+	        	ArrayList<User> aoUsers = oUserRepo.getAllUsers();
+	        	
+	        	for (User oUser : aoUsers) {
+					System.out.println(oUser.getUserId());
+				}
+	        }
 		}
 		catch (Exception oEx) {
-			System.out.println("password Exception: " + oEx);
+			System.out.println("USERS Exception: " + oEx);
 			oEx.printStackTrace();
 		}
 	}
@@ -502,6 +678,13 @@ public class dbUtils {
 			PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			if (oWorkspace.getNodeCode().equals(s_sMyNodeCode) == false) {
+				System.out.println("Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner + " IS IN NODE " + oWorkspace.getNodeCode());
+				return;
+			}
 			
 			// get workspace path
 			String sWorkspacePath = getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
@@ -642,6 +825,7 @@ public class dbUtils {
 				}
 			}
 			
+			
 		}
 	}
 
@@ -682,8 +866,116 @@ public class dbUtils {
 		
 
 		refreshProductsTable();
-	}	
+	}
+	
+	private static void workspaces() {
+		try {
+			
+	        System.out.println("Ok, what we do with workspaces?");
+	        
+	        System.out.println("\t1 - Clean shared ws errors");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
 
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Getting workspace sharings");
+	        	
+	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	        	WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+	        	
+	        	List<WorkspaceSharing> aoWorkspacesSharings = oWorkspaceSharingRepository.getWorkspaceSharings();
+	        	
+	        	for (WorkspaceSharing oWorkspaceSharing : aoWorkspacesSharings) {
+	        		
+					Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oWorkspaceSharing.getWorkspaceId());
+
+					if (oWorkspace == null) {
+						Utils.debugLog("WorkspaceSharings: DELETE WS Shared not available " + oWorkspaceSharing.getWorkspaceId());
+						
+						oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oWorkspaceSharing.getUserId(), oWorkspaceSharing.getWorkspaceId());
+						continue;
+					}	        		
+				}
+
+	        	System.out.println("All workspace sharings cleaned");
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Workspace Sharing Exception: " + oEx);
+			oEx.printStackTrace();
+		}				
+	}
+	
+	/*
+	 *
+	 */
+	public static void migrateToLocal() {
+
+		try {
+			
+	        System.out.println("Ok, what do we migrate?");
+	        
+	        System.out.println("\t1 - Copy Process Workspace of this Node in the local Database");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+	        if (sInputString.equals("1")) {
+	        	
+	    		//connect to main DB
+	    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+	    		oProcessWorkspaceRepository.setRepoDb("wasdi");
+	    		
+	    		//get processWorkspaces on local node from main DB 
+	    		String sNodeCode = s_sMyNodeCode;
+	    		
+	    		List<ProcessWorkspace> aoProcessesToBePorted = oProcessWorkspaceRepository.getByNode(sNodeCode);
+	    		
+	    		System.out.println("Got " + aoProcessesToBePorted.size() + " processes to migrate");
+	    		
+	    		ArrayList<String> asIds = new ArrayList<String>();
+	    		
+	    		for (ProcessWorkspace oProcessWS : aoProcessesToBePorted) {
+	    			asIds.add(oProcessWS.getProcessObjId());
+	    		}	    		
+	    		
+	    		System.out.println("Start logs search ");
+	    		
+	    		// Find and save corresponding logs 
+	    		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+	    		oProcessorLogRepository.setRepoDb("wasdi");
+	    		
+	    		List<ProcessorLog> aoLogsToBePorted = new ArrayList<>();
+	    		
+	    		aoLogsToBePorted = oProcessorLogRepository.getLogsByArrayProcessWorkspaceId(asIds);
+	    		
+	    		// Switch to local db
+	    		oProcessWorkspaceRepository.setRepoDb("local");
+	    		oProcessorLogRepository.setRepoDb("local");
+	    		
+	    		//insert processes
+	    		oProcessWorkspaceRepository.insertProcessListWorkspace(aoProcessesToBePorted);
+	    		
+	    		//insert logs
+	    		oProcessorLogRepository.insertProcessLogList(aoLogsToBePorted);
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Migrate Exception: " + oEx);
+			oEx.printStackTrace();
+		}			
+		
+
+	}
+	
+	public static String s_sMyNodeCode = "wasdi";
+	
 		
 	public static void main(String[] args) {
 		
@@ -695,6 +987,32 @@ public class dbUtils {
 	        MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 	        MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 	        
+	        String sNode = ConfigReader.getPropValue("NODECODE");
+	        if (!Utils.isNullOrEmpty(sNode)) {
+	        	s_sMyNodeCode = sNode;
+	        }
+	        
+			try {
+				// get jar directory
+				File oCurrentFile = new File(
+						dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+				// configure log
+				String sThisFilePath = oCurrentFile.getParentFile().getPath();
+				DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
+
+			} catch (Exception exp) {
+				// no log4j configuration
+				System.err.println("DbUtils - Error loading log configuration.  Reason: "
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+			}
+	        
+			// If this is not the main node
+			if (!s_sMyNodeCode.equals("wasdi")) {
+				System.out.println("Adding local mongo config");
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
+			}
+			
 	        boolean bExit = false;
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -705,10 +1023,13 @@ public class dbUtils {
 		        
 		        System.out.println("\t1 - Downloaded Products");
 		        System.out.println("\t2 - Product Workspace");
-		        System.out.println("\t3 - Logs");
+		        System.out.println("\t3 - Processors");
 		        System.out.println("\t4 - Metadata");
 		        System.out.println("\t5 - Password");
 		        System.out.println("\t6 - Users");
+		        System.out.println("\t7 - Workflows");
+		        System.out.println("\t8 - Workspaces");
+		        System.out.println("\t9 - Migrate DB to local");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -722,7 +1043,7 @@ public class dbUtils {
 		        	productWorkspace();
 		        }		        
 		        else if (sInputString.equals("3")) {
-		        	logs();
+		        	processors();
 		        }		        
 		        else if (sInputString.equals("4")) {
 		        	metadata();
@@ -732,6 +1053,15 @@ public class dbUtils {
 		        }
 		        else if (sInputString.equals("6")) {
 		        	users();
+		        }
+		        else if (sInputString.equals("7")) {
+		        	workflows();
+		        }
+		        else if (sInputString.equals("8")) {
+		        	workspaces();
+		        }		        
+		        else if(sInputString.equals("9")) {
+		        	migrateToLocal();
 		        }
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;

@@ -16,11 +16,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,12 +34,14 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FilenameUtils;
@@ -45,27 +49,27 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.BaseResource;
-import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Counter;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
+import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
-import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.ReviewRepository;
+import wasdi.shared.data.ProcessorSharingRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.ImageFile;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppCategoryViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
@@ -121,7 +125,7 @@ public class ProcessorsResource extends BaseResource {
 //		@QueryParam("categories") String[] asCategoriesId
 //		
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
-				+ sDescription + ", Type" + sType + ", ParamsSample: " + sParamsSample + " )");
+				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -165,10 +169,7 @@ public class ProcessorsResource extends BaseResource {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!sDownloadRootPath.endsWith("/")) {
-				sDownloadRootPath = sDownloadRootPath + "/";
-			}
+			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 			
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
 			
@@ -203,7 +204,7 @@ public class ProcessorsResource extends BaseResource {
 			// XXX: check it also has a run
 			
 			if (Utils.isNullOrEmpty(sType)) {
-				sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
+				sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
 			}
 			
 			Date oDate = new Date();
@@ -228,6 +229,14 @@ public class ProcessorsResource extends BaseResource {
 				oProcessor.setTimeoutMs(iTimeout);
 			}
 			
+			// Add info about the deploy node
+			Node oNode = Wasdi.getActualNode();
+			
+			if (oNode != null) {
+				oProcessor.setNodeCode(oNode.getNodeCode());
+				oProcessor.setNodeUrl(oNode.getNodeBaseAddress());
+			}
+			
 			if (!Utils.isNullOrEmpty(sParamsSample)) {
 				oProcessor.setParameterSample(sParamsSample);
 			}
@@ -236,6 +245,16 @@ public class ProcessorsResource extends BaseResource {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			oProcessorRepository.insertProcessor(oProcessor);
 			
+			
+			
+			
+			// We need to deploy the processor in the main node
+			
+			Utils.debugLog("ProcessorsResource.uploadProcessor: Forcing Update Lib");
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, "wasdi");
+
 			// Schedule the processworkspace to deploy the processor
 			
 			String sProcessObjId = Utils.GetRandomName();
@@ -243,7 +262,7 @@ public class ProcessorsResource extends BaseResource {
 			ProcessorParameter oDeployProcessorParameter = new ProcessorParameter();
 			oDeployProcessorParameter.setName(sName);
 			oDeployProcessorParameter.setProcessorID(sProcessorId);
-			oDeployProcessorParameter.setWorkspace(sWorkspaceId);
+			oDeployProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oDeployProcessorParameter.setUserId(sUserId);
 			oDeployProcessorParameter.setExchange(sWorkspaceId);
 			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
@@ -289,15 +308,22 @@ public class ProcessorsResource extends BaseResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
 				DeployedProcessorViewModel oVM = new DeployedProcessorViewModel();
 				Processor oProcessor = aoDeployed.get(i);
-				
+
+				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+
 				if (oProcessor.getIsPublic() != 1) {
-					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) continue;
+					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
+						if (oSharing == null) continue;
+					}
 				}
+				
+				if (oSharing != null) oVM.setSharedWithMe(true);
 				
 				oVM.setProcessorDescription(oProcessor.getDescription());
 				oVM.setProcessorId(oProcessor.getProcessorId());
@@ -307,7 +333,7 @@ public class ProcessorsResource extends BaseResource {
 				oVM.setParamsSample(oProcessor.getParameterSample());
 				oVM.setIsPublic(oProcessor.getIsPublic());
 				oVM.setType(oProcessor.getType());
-				oVM.setiTimeoutMs(oProcessor.getTimeoutMs());
+				oVM.setTimeoutMs(oProcessor.getTimeoutMs());
 				
 				aoRet.add(oVM);
 			}
@@ -320,13 +346,42 @@ public class ProcessorsResource extends BaseResource {
 	}
 	
 	
+	@POST
+	@Path("/run")
+	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("parent") String sParentProcessWorkspaceId, String sEncodedJson) throws Exception {
+		Utils.debugLog("ProcessorsResource.run( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
+		
+		Utils.debugLog("ProcessorsResource.internalRun: run@POST");
+		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
+	}
+	
+	
 	@GET
 	@Path("/run")
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId) throws Exception {
-		Utils.debugLog("ProcessorsResource.run( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
+		
+		
+		Utils.debugLog("ProcessorsResource.internalRun: run@GET");
+		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
+	}
+	
+	/**
+	 * Internal method to create run operation
+	 * @param sSessionId 
+	 * @param sName
+	 * @param sEncodedJson
+	 * @param sWorkspaceId
+	 * @param sParentProcessWorkspaceId
+	 * @return
+	 * @throws Exception
+	 */
+	public RunningProcessorViewModel internalRun(String sSessionId, String sName, String sEncodedJson, String sWorkspaceId, String sParentProcessWorkspaceId) throws Exception {
+		Utils.debugLog("ProcessorsResource.internalRun( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
 		
@@ -340,12 +395,12 @@ public class ProcessorsResource extends BaseResource {
 			
 			String sUserId = oUser.getUserId();
 		
-			Utils.debugLog("ProcessorsResource.run: get Processor");	
+			Utils.debugLog("ProcessorsResource.internalRun: get Processor");
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 			
-			if (oProcessorToRun == null) {
-				Utils.debugLog("ProcessorsResource.run: unable to find processor " + sName);
+			if (oProcessorToRun == null) { 
+				Utils.debugLog("ProcessorsResource.internalRun: unable to find processor " + sName);
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;
 			}
@@ -375,7 +430,7 @@ public class ProcessorsResource extends BaseResource {
 			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, sPath, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
-				Utils.debugLog("ProcessorsResource.run: create task");
+				Utils.debugLog("ProcessorsResource.internalRun: create task");
 				
 				if (oResult.getBoolValue()==false) {
 					throw new Exception();
@@ -386,16 +441,16 @@ public class ProcessorsResource extends BaseResource {
 				oRunningProcessorViewModel.setProcessingIdentifier(oResult.getStringValue());
 				oRunningProcessorViewModel.setProcessorId(oProcessorToRun.getProcessorId());
 				oRunningProcessorViewModel.setStatus("CREATED");
-				Utils.debugLog("ProcessorsResource.run: done"); 
+				Utils.debugLog("ProcessorsResource.internalRun: done"); 
 			}
 			catch(Exception oEx){
-				Utils.debugLog("ProcessorsResource.run: Error scheduling the run process " + oEx);
+				Utils.debugLog("ProcessorsResource.internalRun: Error scheduling the run process " + oEx);
 				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 				return oRunningProcessorViewModel;
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessorsResource.run: " + oEx );
+			Utils.debugLog("ProcessorsResource.internalRun: " + oEx );
 			oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 			return oRunningProcessorViewModel;
 		}
@@ -745,6 +800,140 @@ public class ProcessorsResource extends BaseResource {
 		}
 	}
 			
+	@GET
+	@Path("/redeploy")
+	public Response redeployProcessor(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Utils.debugLog("ProcessorResources.redeployProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+	
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.redeployProcessor: get Processor");	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToReDeploy = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToReDeploy == null) {
+				Utils.debugLog("ProcessorsResource.redeployProcessor: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToReDeploy.getUserId().equals(oUser.getUserId())) {
+				
+				ProcessorSharingRepository oSharingRepo = new ProcessorSharingRepository();
+				
+				ProcessorSharing oSharing = oSharingRepo.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.redeployProcessor: processor not of user " + oProcessorToReDeploy.getUserId());
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.redeployProcessor: processor shared with user " + oUser.getUserId());
+				}
+			}
+
+			// Schedule the process to run the processor
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(oProcessorToReDeploy.getName());
+			oProcessorParameter.setProcessorID(oProcessorToReDeploy.getProcessorId());
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setJson("{}");
+			oProcessorParameter.setProcessorType(oProcessorToReDeploy.getType());
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(), sPath,oProcessorParameter);			
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.redeployProcessor: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	@GET
+	@Path("/libupdate")
+	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+		
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.libraryUpdate: get Processor");	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToForceUpdate = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToForceUpdate == null) {
+				Utils.debugLog("ProcessorsResource.libraryUpdate: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.libraryUpdate: processor not of user " + oProcessorToForceUpdate.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			// Schedule the process to run the processor
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
+			oProcessorParameter.setProcessorID(oProcessorToForceUpdate.getProcessorId());
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setJson("{}");
+			oProcessorParameter.setProcessorType(oProcessorToForceUpdate.getType());
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);			
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.redeployProcessor: " + oEx);
+			return Response.serverError().build();
+		}
+	}
 	
 	@POST
 	@Path("/update")
@@ -771,14 +960,26 @@ public class ProcessorsResource extends BaseResource {
 			}
 			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oProcessorToUpdate.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();
+				
+				
+				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+				
+				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oUser.getUserId());
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.updateProcessor: processor of user " + oProcessorToUpdate.getUserId() + " is shared with " + oUser.getUserId());
+				}
+				
 			}
 
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
-			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getiTimeoutMs());
+			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getTimeoutMs());
 			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
 			Date oDate = new Date();
@@ -837,10 +1038,7 @@ public class ProcessorsResource extends BaseResource {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!sDownloadRootPath.endsWith("/")) {
-				sDownloadRootPath = sDownloadRootPath + "/";
-			}
+			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + oProcessorToUpdate.getName());
 			
 			// Create folders
@@ -865,9 +1063,77 @@ public class ProcessorsResource extends BaseResource {
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
-			if (UnzipProcessor(oProcessorFile)) {
+			if (unzipProcessor(oProcessorFile, false)) {
 				m_oProcessorRepository.updateProcessorDate(oProcessorToUpdate);
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
+				
+				if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+					
+					// In the main node: start a thread to update all the computing nodes
+					
+					try {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is the main node, starting Worker to update computing nodes");
+						
+						//This is the main node: forward the request to other nodes
+						UpdateProcessorFilesWorker oUpdateWorker = new UpdateProcessorFilesWorker();
+						
+						NodeRepository oNodeRepo = new NodeRepository();
+						List<Node> aoNodes = oNodeRepo.getNodesList();
+						
+						oUpdateWorker.init(aoNodes, oProcessorFile.getPath(), sSessionId, sWorkspaceId, sProcessorId);
+						oUpdateWorker.start();
+						
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Worker started");						
+					}
+					catch (Exception oEx) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error starting UpdateWorker " + oEx.toString());
+					}
+					
+				}
+				else {
+					
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
+					
+					// Computational Node: delete the zip file after update
+					try {
+						oProcessorFile.delete();
+					}
+					catch (Exception oEx) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
+					}
+				}
+				
+				
+				// Trigger the library update on this specific node
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Forcing Update Lib");
+				
+				// Get the dedicated special workpsace
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+				
+				// If we have our special workspace
+				if (oWorkspace != null) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Create updatelib operation in Workspace " + Wasdi.s_sLocalWorkspaceName);
+					
+					// Create the processor Parameter
+					ProcessorParameter oProcessorParameter = new ProcessorParameter();
+					oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
+					oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+					oProcessorParameter.setName(oProcessorToUpdate.getName());
+					oProcessorParameter.setProcessObjId(Utils.GetRandomName());
+					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
+					
+					String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+					
+					// Trigger the library update in this node
+					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), sPath, oProcessorParameter);
+					
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: LIBRARYUPDATE process scheduled");
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");
+				}
+
 			}
 			else {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: error in unzip");
@@ -880,8 +1146,55 @@ public class ProcessorsResource extends BaseResource {
 			return Response.serverError().build();
 		}
 		return Response.ok().build();
-	}	
+	}
 	
+	@GET
+	@Path("downloadprocessor")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadProcessor(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("token") String sTokenSessionId,
+			@QueryParam("processorId") String sProcessorId)
+	{			
+
+		Utils.debugLog("ProcessorsResource.downloadProcessor( Session: " + sSessionId + ", processorId: " + sProcessorId);
+		
+		try {
+			
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
+			
+			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+
+			if (oUser == null) {
+				Utils.debugLog("ProcessorsResource.downloadProcessor: user not authorized");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				Utils.debugLog("ProcessorsResource.downloadProcessor: processor does not exists");
+				return Response.status(Status.NO_CONTENT).build();				
+			}
+			
+			String sProcessorName = oProcessor.getName();
+			
+			// Take path
+			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
+			
+			File oFile = new File(sProcessorZipPath);
+			
+			return zipProcessor(oFile, oProcessor);			
+		} 
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.downloadProcessor: " + oEx);
+		}
+		
+		return null;
+	}		
 	
 	@POST
 	@Path("/uploadProcessorLogo")
@@ -948,9 +1261,7 @@ public class ProcessorsResource extends BaseResource {
 	    }
 	    m_oProcessorRepository.updateProcessorDate(oProcessor);
 		return Response.status(200).build();
-	}
-
-
+	}	
 	
 	@GET
 	@Path("/getlogo")
@@ -1434,9 +1745,6 @@ public class ProcessorsResource extends BaseResource {
 	private String getExtensionOfSavedLogo (String sPathLogoFolder){
 		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
 	}
-	
-
-	
 	private Processor getProcessor(String sProcessorId){
 	
 		if(Utils.isNullOrEmpty(sProcessorId)) {
@@ -1446,9 +1754,9 @@ public class ProcessorsResource extends BaseResource {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		return oProcessor;
 	}
-	
+
     
-	public boolean UnzipProcessor(File oProcessorZipFile) {
+	public boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
 		try {
 						
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists
@@ -1495,7 +1803,7 @@ public class ProcessorsResource extends BaseResource {
 		    
 		    try {
 			    // Remove the zip?
-			    oProcessorZipFile.delete();		    	
+			    if (bDeleteFile) oProcessorZipFile.delete();		    	
 		    }
 		    catch (Exception e) {
 				Utils.debugLog("ProcessorsResource.UnzipProcessor Exception Deleting Zip File " + e.toString());
@@ -1512,4 +1820,191 @@ public class ProcessorsResource extends BaseResource {
 	}
 	
 	
+	
+	
+	@PUT
+	@Path("share/add")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult shareProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId) {
+
+		Utils.debugLog("ProcessorsResource.shareProcessor( Session: " + sSessionId + ", WS: " + sProcessorId + ", User: " + sUserId + " )");
+
+		// Validate Session
+		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+
+		if (oOwnerUser == null) {
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		try {
+			
+			// Check if the processor exists and is of the user calling this API
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oValidateProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oValidateProcessor == null) {
+				oResult.setStringValue("Invalid processor");
+				return oResult;		
+			}
+			
+			if (!oValidateProcessor.getUserId().equals(oOwnerUser.getUserId())) {
+				oResult.setStringValue("Unauthorized");
+				return oResult;				
+			}
+			
+			// Check the destination user
+			UserRepository oUserRepository = new UserRepository();
+			User oDestinationUser = oUserRepository.getUser(sUserId);
+			
+			if (oDestinationUser == null) {
+				oResult.setStringValue("Unauthorized");
+				return oResult;				
+			}
+			
+			// Check if has been already shared
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			
+			ProcessorSharing oAlreadyExists = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
+			
+			if (oAlreadyExists != null) {
+				oResult.setStringValue("Already shared");
+				return oResult;					
+			}
+			
+			// Create and insert the sharing
+			ProcessorSharing oProcessorSharing = new ProcessorSharing();
+			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
+			oProcessorSharing.setOwnerId(oOwnerUser.getUserId());
+			oProcessorSharing.setUserId(sUserId);
+			oProcessorSharing.setProcessorId(sProcessorId);
+			oProcessorSharing.setShareDate((double) oTimestamp.getTime());
+			oProcessorSharingRepository.insertProcessorSharing(oProcessorSharing);
+			
+			Utils.debugLog("Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.shareProcessor: " + oEx);
+
+			oResult.setStringValue("Error in save proccess");
+			oResult.setBoolValue(false);
+
+			return oResult;
+		}
+
+		oResult.setStringValue("Done");
+		oResult.setBoolValue(true);
+
+		return oResult;
+	}
+	
+	
+	
+	@GET
+	@Path("share/byprocessor")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public List<ProcessorSharing> getEnableUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+
+		Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + " )");
+
+		// Validate Session
+		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		List<ProcessorSharing> aoProcessorSharing = null;
+
+		if (oOwnerUser == null) {
+			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: Owner null return");
+			return null;
+		}
+
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: User Id null return");
+			return null;
+		}
+		
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if (oProcessor == null) {
+			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: Unable to find processor return");
+			return null;
+		}
+
+
+		try {
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			
+			aoProcessorSharing = oProcessorSharingRepository.getProcessorSharingByProcessorId(sProcessorId);
+			
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: " + oEx);
+			return null;
+		}
+
+		return aoProcessorSharing;
+
+	}
+
+	@DELETE
+	@Path("share/delete")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult deleteUserSharingProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("userId") String sUserId) {
+
+		Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", User:" + sUserId + " )");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		// Validate Session
+		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+
+		if (oOwnerUser == null) {
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		if (Utils.isNullOrEmpty(sUserId)) {
+			oResult.setStringValue("Invalid shared user.");
+			return oResult;			
+		}
+
+		try {
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			
+			ProcessorSharing oProcShare = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
+			
+			if (oProcShare!= null) {
+				if (oProcShare.getUserId().equals(oOwnerUser.getUserId()) || oProcShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+					oProcessorSharingRepository.deleteByUserIdProcessorId(sUserId, sProcessorId);
+				}
+				else {
+					oResult.setStringValue("Unauthorized");
+					return oResult;					
+				}
+			}
+			else {
+				oResult.setStringValue("Sharing not found");
+				return oResult;				
+			}
+		} 
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor: " + oEx);
+			oResult.setStringValue("Error deleting processor sharing");
+			return oResult;
+		}
+
+		oResult.setStringValue("Done");
+		oResult.setBoolValue(true);
+		return oResult;
+
+	}
 }

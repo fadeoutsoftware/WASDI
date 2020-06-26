@@ -17,6 +17,7 @@ public class FtpTransferViewModel {
 	private Integer port;
 	private String user;
 	private String password;
+	private Boolean sftp = true;
 	
 	//file to upload
 	private String fileName;
@@ -69,5 +70,13 @@ public class FtpTransferViewModel {
 
 	public void setDestinationAbsolutePath(String sDestinationAbsolutePath) {
 		this.destinationAbsolutePath = sDestinationAbsolutePath;
+	}
+
+	public Boolean getSftp() {
+		return sftp;
+	}
+
+	public void setSftp(Boolean sftp) {
+		this.sftp = sftp;
 	}
 }

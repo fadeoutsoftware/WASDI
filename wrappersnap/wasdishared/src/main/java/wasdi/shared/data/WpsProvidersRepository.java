@@ -1,13 +1,3 @@
-/*
- * WPS providers entity
- * 
- * Created by Cristiano Nattero on 2018.11.16
- * 
- * Fadeout software
- * 
- */
-
-
 package wasdi.shared.data;
 
 import java.util.ArrayList;
@@ -20,11 +10,27 @@ import wasdi.shared.business.WpsProvider;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 
+/**
+ * WPS providers Repository
+ * 
+ * Created by Cristiano Nattero on 2018.11.16
+ * 
+ * Fadeout software
+ * 
+ */
 public class WpsProvidersRepository extends MongoRepository {
-
+	
+	public WpsProvidersRepository() {
+		m_sThisCollection = "wpsProviders";
+	}
+	
+	/**
+	 * Get the list of WPS providers
+	 * @return
+	 */
 	public ArrayList<WpsProvider> getWpsList(){
 		try {
-			FindIterable<Document> aoWPSprovidersDocumentList = getCollection("wpsProviders").find();
+			FindIterable<Document> aoWPSprovidersDocumentList = getCollection(m_sThisCollection).find();
 			if (aoWPSprovidersDocumentList != null) {
 				ArrayList<WpsProvider> aoResult = new ArrayList<WpsProvider>();
 				for (Document oDocument : aoWPSprovidersDocumentList) {
@@ -33,7 +39,6 @@ public class WpsProvidersRepository extends MongoRepository {
 						if(null!=sJSON) {
 							WpsProvider oWPS = null;
 							try {
-								//FIXME null values
 								oWPS = s_oMapper.readValue(sJSON, WpsProvider.class);
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -53,7 +58,12 @@ public class WpsProvidersRepository extends MongoRepository {
 
 		return null;
 	}
-
+	
+	/**
+	 * Get a specific Provider by Name
+	 * @param sProviderName
+	 * @return
+	 */
 	public WpsProvider getProvider(String sProviderName) {
 		Utils.debugLog("WpsProviderRepository.getProvider");
 		if(null==sProviderName) {
@@ -61,7 +71,7 @@ public class WpsProvidersRepository extends MongoRepository {
 		}
 		WpsProvider oWpsProvider = null;
 		try {
-			Document oWpsProviderDocument = getCollection("wpsProviders").find(new Document("provider", sProviderName)).first();
+			Document oWpsProviderDocument = getCollection(m_sThisCollection).find(new Document("provider", sProviderName)).first();
 			String sJson = oWpsProviderDocument.toJson();
 			oWpsProvider = s_oMapper.readValue(sJson, WpsProvider.class); 
 		}catch (Exception e) {
@@ -70,6 +80,11 @@ public class WpsProvidersRepository extends MongoRepository {
 		return oWpsProvider;
 	}
 	
+	/**
+	 * get the url of a provider by name
+	 * @param sProviderName
+	 * @return
+	 */
 	public String getProviderUrl(String sProviderName) {
 		Utils.debugLog("WpsProviderRepository.getProviderUrl");
 		if(null==sProviderName) {
@@ -83,6 +98,11 @@ public class WpsProvidersRepository extends MongoRepository {
 		}
 	}
 	
+	/**
+	 * Get the credentials for a specific provider by name
+	 * @param sProviderName
+	 * @return
+	 */
 	public AuthenticationCredentials getCredentials(String sProviderName) {
 		Utils.debugLog("WpsProvidersRepository");
 		if(null==sProviderName) {

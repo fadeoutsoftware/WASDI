@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.Utils;
 
 /**
  * Donwload File Utility Class for DhUS
@@ -23,20 +24,32 @@ public class DhUSProviderAdapter extends ProviderAdapter {
 	}
 
     @Override
-	public long GetDownloadFileSize(String sFileURL)  throws Exception  {
+	public long getDownloadFileSize(String sFileURL)  throws Exception  {
     	// Get File size using http
     	return getDownloadFileSizeViaHttp(sFileURL);
     }
 
     @Override
-    public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws IOException {
+    public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws IOException {
     	// Download using HTTP 
     	setProcessWorkspace(oProcessWorkspace);
-    	return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+    	
+    	int iAttemps = iMaxRetry;
+    	
+    	String sResult = "";
+    	
+    	while (iAttemps>0) {
+    		m_oLogger.debug("DhUS Provider: attemp # " + (iMaxRetry-iAttemps+1));
+    		sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+    		if (!Utils.isNullOrEmpty(sResult)) break;
+    		iAttemps--;
+    	}
+    	
+    	return sResult;
     }
 
     @Override
-    public String GetFileName(String sFileURL) throws IOException {
+    public String getFileName(String sFileURL) throws IOException {
     	// Get File Name via http
     	return getFileNameViaHttp(sFileURL);
     }

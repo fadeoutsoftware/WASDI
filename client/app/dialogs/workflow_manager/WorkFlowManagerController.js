@@ -439,6 +439,17 @@ var WorkFlowManagerController = (function() {
         return true;
     };
 
+    WorkFlowManagerController.prototype.downloadWorkflow = function(oWorkflow){
+        if(utilsIsObjectNullOrUndefined(oWorkflow) === true)
+        {
+            return false;
+        }
+        var oController = this;
+
+        this.m_oSnapOperationService.downloadWorkflow(oWorkflow.workflowId);
+        return true;
+    };
+
     WorkFlowManagerController.prototype.isTheOwnerOfWorkflow = function(oWorkflow)
     {
         var oUser = this.m_oConstantsService.getUser();

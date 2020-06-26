@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 MAINTAINER Fadeout Software <info@fadeout.it>
 
@@ -18,12 +18,14 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y python3.7-dev
 
+RUN mkdir /home/wasdi && chmod o+wrx /home/wasdi
+
 # Go at Home and copy files
-WORKDIR "/root"
-COPY ./get-pip.py /root/
+WORKDIR "/home/wasdi"
+COPY ./get-pip.py /home/wasdi/
 
 # Install PIP
-RUN /usr/bin/python3.7 /root/get-pip.py
+RUN /usr/bin/python3.7 /home/wasdi/get-pip.py
 
 # Install Flask
 RUN pip install flask
@@ -53,6 +55,9 @@ RUN export C_INCLUDE_PATH=/usr/include/gdal
 
 RUN /usr/bin/python3.7 -m pip install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
 
+#TODO DA PROVARE
+RUN apt-get update && apt install -y python-gdal
+
 # Install Rasterio
 #RUN pip install rasterio
 
@@ -61,19 +66,19 @@ RUN /usr/bin/python3.7 -m pip install --global-option=build_ext --global-option=
 RUN ln -sf /usr/bin/python3.7 /usr/bin/python
 
 # Copy WASDI Server Files
-COPY ./ /root/
+COPY ./ /home/wasdi/
 
 # Install Wasdi
 RUN pip install wasdi
 
 # Install User packages
-RUN apt-get install -y `cat /root/packages.txt | tr "\n" " "`; exit 0
+RUN apt-get install -y `cat /home/wasdi/packages.txt | tr "\n" " "`; exit 0
 
 # Install User Python Libs
-RUN pip install `cat /root/pip.txt | tr "\n" " "`; exit 0
+RUN pip install `cat /home/wasdi/pip.txt | tr "\n" " "`; exit 0
 
 # Set working dir
-WORKDIR /root
+WORKDIR /home/wasdi
 
 # Start the server
 RUN chmod 777 ./runServer.sh

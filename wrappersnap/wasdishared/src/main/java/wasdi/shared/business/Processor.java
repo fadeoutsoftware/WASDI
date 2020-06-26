@@ -40,11 +40,19 @@ public class Processor {
 	 * Processor type
 	 */
 	private String type;
+	/**
+	 * Processor first deploy nodeCode
+	 */
+	private String nodeCode;	
+	/**
+	 * Processor first deploy nodeUrl
+	 */
+	private String nodeUrl;
 
 	/**
 	 * timeoutMs: 3 hours by default
 	 */
-	private int timeoutMs = 1000*60*60*3;
+	private long timeoutMs = 1000*60*60*3;
 	
 	private Integer price = 0; 
 
@@ -62,12 +70,6 @@ public class Processor {
 	 */
 	private int isPublic = 1;
 		
-	public int getIsPublic() {
-		return isPublic;
-	}
-	public void setIsPublic(int isPublic) {
-		this.isPublic = isPublic;
-	}
 	/**
 	 * Sample JSON Parameter
 	 */
@@ -148,23 +150,22 @@ public class Processor {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public int getTimeoutMs() {
+	public long getTimeoutMs() {
 		return timeoutMs;
 	}
-	public void setTimeoutMs(int timeoutMs) {
+	public void setTimeoutMs(long timeoutMs) {
 		this.timeoutMs = timeoutMs;
 	}	
 	
-	public Double getUploadDate() {
-		return uploadDate;
+	public int getIsPublic() {
+		return isPublic;
 	}
-	public void setUploadDate(Double uploadDate) {
-		this.uploadDate = uploadDate;
+	public void setIsPublic(int isPublic) {
+		this.isPublic = isPublic;
 	}
-	public Double getUpdateDate() {
-		return updateDate;
+
 	}
-	public void setUpdateDate(Double updateDate) {
-		this.updateDate = updateDate;
+	}
+	}
 	}
 }

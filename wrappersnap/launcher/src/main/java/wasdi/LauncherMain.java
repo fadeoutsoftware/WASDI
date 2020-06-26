@@ -9,15 +9,21 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -44,9 +50,14 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
+import org.quartz.xml.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Preconditions;
 
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
@@ -61,6 +72,7 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
@@ -68,10 +80,12 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
@@ -80,6 +94,7 @@ import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
@@ -125,23 +140,33 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	/**
 	 * Static Logger that references the "MyApp" logger
 	 */
-	// public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
 	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(LauncherMain.class));
 
 	/**
 	 * Static reference to Send To Rabbit utility class
 	 */
 	public static Send s_oSendToRabbit = null;
+	
+	/**
+	 * Actual node, main by default
+	 */
+	public static String s_sNodeCode = "wasdi";
+	
+	/**
+	 * Flag to know if update or not the progress of download operations in the database
+	 */
+	protected boolean m_bNotifyDownloadUpdateActive = true;
 
 	/**
 	 * WASDI Launcher Main Entry Point
 	 * 
-	 * @param args -operation <operation> -elaboratefile <file>
+	 * @param args -o <operation> -p <parameterfile>
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
 
 		try {
+			Security.setProperty("crypto.policy", "unlimited");
 			// get jar directory
 			File oCurrentFile = new File(
 					LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
@@ -201,7 +226,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Create Launcher Instance
 			LauncherMain.s_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
 			LauncherMain oLauncher = new LauncherMain();
-
+			
+			// Deserialize the parameter referring the base class
 			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
@@ -213,9 +239,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Set the process object id
 			s_oLogger.setPrefix("[" + oProcessWorkspace.getProcessObjId() + "]");
-
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
-
+			
+			// Snap Log
 			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "0");
 
 			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
@@ -342,6 +368,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
+			// Read this node code
+			LauncherMain.s_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			
+			s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
+			
+			// If this is not the main node
+			if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
+				s_oLogger.debug("Adding local mongo config");
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);				
+			}
+
 			System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
 
 			Path oPropFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
@@ -349,8 +387,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Config.instance().load();
 
 			SystemUtils.init3rdPartyLibs(null);
-			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER",
-					"/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
 
 			FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
 			oFileHandler.setLevel(Level.ALL);
@@ -358,12 +395,21 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			oFileHandler.setFormatter(oSimpleFormatter);
 			SystemUtils.LOG.setLevel(Level.ALL);
 			SystemUtils.LOG.addHandler(oFileHandler);
+			
+			// Flag to know if update the process workspace progress during download operations or not
+			String sNotifyDownloadUpdateActive = ConfigReader.getPropValue("DOWNLOAD_UPDATE_ACTIVE", "1");
+			
+			if (sNotifyDownloadUpdateActive.equals("1")) {
+				m_bNotifyDownloadUpdateActive = true;
+			}
+			else {
+				m_bNotifyDownloadUpdateActive = false;
+			}
 
 			Engine.start(false);
 
 		} catch (Throwable e) {
-			s_oLogger.error("Launcher Main Constructor Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 		}
 	}
 
@@ -397,57 +443,49 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			switch (oLauncherOperation) {
 			case INGEST: {
 				// Deserialize Parameters
-				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 				break;
 			case DOWNLOAD: {
 				// Deserialize Parameters
-				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 				break;
 			case FTPUPLOAD: {
 				// FTP Upload
-				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils
-						.deserializeXMLToObject(sParameter);
-				ftpTransfer(oFtpTransferParameters);
+				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+				ftpExport(oFtpTransferParameters);
 			}
 				break;
 			case PUBLISHBAND: {
 				// Deserialize Parameters
-				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				publishBandImage(oPublishBandParameter);
 			}
 				break;
 			case APPLYORBIT: {
 				// Deserialize Parameters
-				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
 			}
 				break;
 			case CALIBRATE: {
 				// Deserialize Parameters
-				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
 			}
 				break;
 			case MULTILOOKING: {
 				// Deserialize Parameters
-				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
 			}
 				break;
 			case TERRAIN: {
 				// Deserialize Parameters
-				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
 			}
 				break;
@@ -465,8 +503,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case RASTERGEOMETRICRESAMPLE: {
 				// Deserialize Parameters
-				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				rasterGeometricResample(oParameter);
 			}
 				break;
@@ -478,8 +515,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case DEPLOYPROCESSOR: {
 				// Deploy new user processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -489,8 +525,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			case RUNIDL:
 			case RUNPROCESSOR: {
 				// Execute User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
@@ -499,18 +534,34 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case DELETEPROCESSOR: {
 				// Delete User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.delete(oParameter);
 			}
 				break;
+			case REDEPLOYPROCESSOR: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
+						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.redeploy(oParameter);
+			}			
+				break;
+			case LIBRARYUPDATE: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
+						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.libraryUpdate(oParameter);
+			}			
+				break;				
 			case RUNMATLAB: {
 				// Run Matlab Processor
-				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils
-						.deserializeXMLToObject(sParameter);
+				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMATLABProcessor(oParameter);
 			}
 				break;
@@ -528,9 +579,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				break;
 			case MULTISUBSET: {
 				// Execute Multi Subset Operation
-				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils
-						.deserializeXMLToObject(sParameter);
-				// executeMultiSubset(oParameter);
+				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeGDALMultiSubset(oParameter);
 			}
 				break;
@@ -538,12 +587,23 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeWPS(oParameter);
 			}
+				break;
 			case REGRID: {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeGDALRegrid(oParameter);
 			}
 				break;
+			case COPYTOSFTP: {
+				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				copyToSfpt(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("SFTP_ROOT_PATH", "/data/sftpuser"));
+			}
+				break;	
+			case KILLPROCESSTREE: {
+				KillProcessTreeParameter oKillProcessTreeParameter = (KillProcessTreeParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				killProcessTree(oKillProcessTreeParameter);
+			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -557,6 +617,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
 	}
+
 
 	/**
 	 * Execute a SNAP Workflow
@@ -673,18 +734,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @return
 	 */
 	public String download(DownloadFileParameter oParameter, String sDownloadPath) {
+		
 		String sFileName = "";
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 
-			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory()
-					.supplyProviderAdapter(oParameter.getProvider());
+			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
 
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
@@ -696,13 +756,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				// get file size
-				long lFileSizeByte = oProviderAdapter.GetDownloadFileSize(oParameter.getUrl());
+				long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
 				// set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
-
-				// get process pid
-				// oProcessWorkspace.setPid(getProcessId());
-
+				
 			} else {
 				s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
 			}
@@ -718,7 +775,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
 				// Get the file name
-				String sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
+				String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
 
 				DownloadedFile oAlreadyDownloaded = null;
@@ -730,14 +787,33 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
 
 					if (oAlreadyDownloaded == null) {
-						s_oLogger.debug(
-								"LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
+						
+						s_oLogger.debug( "LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
 						// Check if it is already downloaded, in any workpsace
-						oAlreadyDownloaded = oDownloadedRepo.getDownloadedFile(sFileNameWithoutPath);
+						List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
+						
+						// Check if any of this is in this node
+						for (DownloadedFile oDownloadedCandidate : aoExistingList) {
+							
+							if (new File(oDownloadedCandidate.getFilePath()).exists()) {
+								oAlreadyDownloaded = oDownloadedCandidate;
+								s_oLogger.debug( "LauncherMain.Download: found already existing copy on this computing node");
+								break;
+							}
+						}
+						
 					} else {
-						s_oLogger.debug("LauncherMain.Download: Product already found in the workspace");
+						
+						File oAlreadyDownloadedFileCheck = new File(oAlreadyDownloaded.getFilePath());
+						
+						if (oAlreadyDownloadedFileCheck.exists() == false) {
+							s_oLogger.debug("LauncherMain.Download: Product already found in the database but the file does not exists in the node");
+							oAlreadyDownloaded = null;
+						}
+						else {
+							s_oLogger.debug("LauncherMain.Download: Product already found in the node");
+						}
 					}
-
 				}
 
 				if (oAlreadyDownloaded == null) {
@@ -751,34 +827,38 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 						// send update process message
 						if (s_oSendToRabbit != null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-							s_oLogger.debug(
-									"LauncherMain.Download: Error sending rabbitmq message to update process list");
+							s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
 						}
+					}
+					else {
+						s_oLogger.error("LauncherMain.Download: sFileNameWithoutPath is null or empty!!");
 					}
 
 					// No: it isn't: download it
-					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(),
-							oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+					sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
 					if (Utils.isNullOrEmpty(sFileName)) {
+						
 						int iLastError = oProviderAdapter.getLastServerError();
 						String sError = "There was an error contacting the provider";
+						
 						if (iLastError > 0)
 							sError += ": query obtained HTTP Error Code " + iLastError;
 						throw new Exception(sError);
 					}
+					
 					oProviderAdapter.unsubscribe(this);
 
 					// Control Check for the file Name
 					sFileName = sFileName.replaceAll("//", "/");
 
 					if (sFileNameWithoutPath.startsWith("S3") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
-						s_oLogger.debug("File is a Sentinel 3 image, start unzip");
+						s_oLogger.debug("LauncherMain.download: File is a Sentinel 3 image, start unzip");
 						Utils.unzip(sFileNameWithoutPath, sDownloadPath);
 						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", ".SEN3");
-						s_oLogger.debug("Unzip done, folder name: " + sFolderName);
+						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
 						sFileName = sFolderName + "/" + "xfdumanifest.xml";
-						s_oLogger.debug("File Name changed in: " + sFileName);
+						s_oLogger.debug("LauncherMain.download: File Name changed in: " + sFileName);
 					}
 
 					// Get The product view Model
@@ -788,6 +868,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 					// Save Metadata
 					oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
+					
+					if (Utils.isNullOrEmpty(sFileNameWithoutPath)) {
+						sFileNameWithoutPath = oProductFile.getName();
+						s_oLogger.debug("LauncherMain.download: sFileNameWithoutPath still null, forced to: " + sFileNameWithoutPath);
+					}
 
 					// Save it in the register
 					oAlreadyDownloaded = new DownloadedFile();
@@ -796,13 +881,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded.setProductViewModel(oVM);
 
 					String sBoundingBox = oParameter.getBoundingBox();
-
-					if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
-						sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+					
+					if (!Utils.isNullOrEmpty(sBoundingBox)) {
+						if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
+							sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+						}
+						
+						oAlreadyDownloaded.setBoundingBox(sBoundingBox);
 					}
-
-					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
-					oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+					else {
+						s_oLogger.info("LauncherMain.download: bounding box not available in the parameter");
+					}
+					
+					if (oProduct.getStartTime()!=null) {
+						oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+					}
+					
 					oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());
 					oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
 				} else {
@@ -832,26 +926,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				}
 			} else {
-				s_oLogger.debug(
-						"LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
+				s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
 
 				sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
-
+				WasdiProductReader oReadProduct = new WasdiProductReader();
+				Product oProduct = oReadProduct.readSnapProduct(new File(sFileName), null);
+				s_oLogger.debug("Test reading product");
 			}
 
 			if (Utils.isNullOrEmpty(sFileName)) {
 				s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
 
 				String sError = "The name of the file to download result null";
-				if (s_oSendToRabbit != null)
-					s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(),
-							oParameter.getWorkspace(), sError, oParameter.getExchange());
-				if (oProcessWorkspace != null)
-					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			} else {
+				if (s_oSendToRabbit != null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(), sError, oParameter.getExchange());
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			} 
+			else {
 
-				addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(),
-						oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
+				addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
 
 				s_oLogger.debug("LauncherMain.Download: Add Product to Db and Send to Rabbit Done");
 
@@ -897,98 +989,116 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @return
 	 * @throws IOException
 	 */
-	public Boolean ftpTransfer(FtpUploadParameters oParam) throws IOException {
-		s_oLogger.debug("ftpTransfer begin");
-		if (null == oParam) {
-			s_oLogger.debug("ftpTransfer: null input");
-			return false;
-		}
-		if (null == oParam.getProcessObjId()) {
-			s_oLogger.debug("ftpTransfer: null ProcessObjId");
-			return false;
-		}
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParam.getProcessObjId());
+	public void ftpExport(FtpUploadParameters oParam) throws IOException {
+		s_oLogger.info("ftpExport");
+		try {
+			Preconditions.checkNotNull(oParam, "null parameter");
+			Preconditions.checkNotNull(oParam.getProcessObjId(), "null ProcessObjId");
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParam.getProcessObjId());
+			try {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+				if (null == oProcessWorkspace) {
+					throw new NullPointerException("null Process Workspace");
+				}
+				
+				
+				//check server parameters are OK before trying connection
+				if(!Utils.isServerNamePlausible(oParam.getFtpServer())){
+					throw new ValidationException("FTP server name \"" + oParam.getFtpServer() + "\" not plausible");
+				}
+				if(!Utils.isPortNumberPlausible(oParam.getPort())){
+					throw new ValidationException("FTP server port \"" + oParam.getPort() + "\" not plausible");
+				}
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+				
 
-		if (null == oProcessWorkspace) {
-			s_oLogger.debug("ftpTransfer: null Process Workspace");
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-		if (!Utils.isFilePathPlausible(oParam.getFullLocalPath())) {
-			s_oLogger.debug("ftpTransfer: null local path");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
+				String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
+				
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
+				File oFile = new File(sFullLocalPath);
+				if (!oFile.exists()) {
+					throw new IOException("local file " +oFile.getName() + "does not exist ");
+				}
 
-		// String sFullLocalPath =
-		// oDownRepo.GetDownloadedFile(oParam.getLocalFileName()).getFilePath();
-		String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
-
-		// String fullLocalPath = oParam.getM_sLocalPath();
-		File oFile = new File(sFullLocalPath);
-		if (!oFile.exists()) {
-			s_oLogger.debug("ftpTransfer: local file does not exist");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
+				if(!oParam.getRemotePath().endsWith("/") && !oParam.getRemotePath().endsWith("\\")) {
+					oParam.setRemotePath(oParam.getRemotePath()+"/");
+				}
+				
+				if(oParam.getSftp()) {
+					s_oLogger.debug("ftpExport: SFTP");
+					s_oLogger.debug("ftpExport: SFTP: getting SSH client");
+					SSHClient oClient = new SSHClient();
+					s_oLogger.debug("ftpExport: SFTP: adding host key verifier");
+				    oClient.addHostKeyVerifier(new PromiscuousVerifier());
+				    s_oLogger.debug("ftpExport: SFTP: connecting to " + oParam.getFtpServer());
+				    oClient.connect(oParam.getFtpServer());
+				    s_oLogger.debug("ftpExport: SFTP: authenticating as " + oParam.getUsername());
+				    oClient.authPassword(oParam.getUsername(), oParam.getPassword());
+				    s_oLogger.debug("ftpExport: SFTP: getting SFTP client");
+				    SFTPClient sftpClient = oClient.newSFTPClient();
+				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+				    s_oLogger.debug("ftpExport: SFTP: transferring file");
+				    sftpClient.put(sFullLocalPath,oParam.getRemotePath() + oParam.getLocalFileName());
+				    //todo check that the file is there
+				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+				  
+				    s_oLogger.debug("ftpExport: SFTP: closing SFTP client");
+				    sftpClient.close();
+				    s_oLogger.debug("ftpExport: SFTP: disconnecting SSH client");
+				    oClient.disconnect();
+				    s_oLogger.debug("ftpExport: SFTP: closing SSH client");
+				    oClient.close();
+				    
+				}
+				else {
+					s_oLogger.debug("ftpExport: FTP"); 
+					s_oLogger.debug("ftpExport: FTP: getting FTP client");
+					FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
+			
+					s_oLogger.debug("ftpExport: FTP: opening connection"); 
+					if (!oFtpClient.open()) {
+						throw new IOException("could not connect to FTP");
+					}
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+			
+					s_oLogger.debug("ftpExport: FTP: transferring file");
+					// XXX see how to modify FTP client to update status
+					Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
+					if (!bPut) {
+						throw new IOException("put failed");
+					}
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+					// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+					String sRemotePath = ".";
+					s_oLogger.debug("ftpExport: FTP: checking the file is on server");
+					Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
+					if (!bCheck) {
+						throw new IOException("could not find file on server");
+					}
+					s_oLogger.debug("ftpExport: FTP: closing client");
+					oFtpClient.close();
+				}
+				
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+				s_oLogger.info("ftpExport: completed successfully");
+			}
+			catch (Throwable oEx) {
+				s_oLogger.error("ftpExport: could not complete due to: " + oEx);
+				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			}
+			finally {
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+				s_oLogger.debug("ftpExport: workspace closed");
+			}
+		} catch (Throwable oEx) {
+			s_oLogger.error("ftpExport: " + oEx);
+			s_oLogger.error("ftpExport: warning: cannot update process status");
+			oEx.printStackTrace();
 		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
-		String sFtpServer = oParam.getFtpServer();
-
-		if (!(Utils.isServerNamePlausible(sFtpServer) && Utils.isPortNumberPlausible(oParam.getPort())
-				&& !Utils.isNullOrEmpty(oParam.getUsername()) &&
-				// actually password might be empty
-				(null != oParam.getPassword()))) {
-
-			s_oLogger.debug("ftpTransfer: invalid FTP parameters");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
-
-		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(),
-				oParam.getPassword());
-
-		if (!oFtpClient.open()) {
-			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
-			s_oLogger.debug("server: " + oParam.getFtpServer());
-			s_oLogger.debug("por: " + oParam.getPort());
-			s_oLogger.debug("username: " + oParam.getUsername());
-			s_oLogger.debug("password: " + oParam.getPassword());
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
-
-		// XXX see how to modify FTP client to update status
-		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
-		if (!bPut) {
-			s_oLogger.debug("ftpTransfer: put failed");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
-		// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
-		String sRemotePath = ".";
-		Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
-		if (!bCheck) {
-			s_oLogger.debug("ftpTransfer: could not find file on server");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		oFtpClient.close();
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-		closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-		s_oLogger.debug("ftpTransfer completed successfully");
-		return true;
 	}
 
 	public String saveMetadata(WasdiProductReader oReadProduct, File oProductFile) {
@@ -1191,7 +1301,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					s_oLogger.debug("Unzip done");
 				}
 			} else {
-				s_oLogger.debug("File already in place");
+				s_oLogger.debug("File already in the right path no need to copy");
 			}
 
 			File oDstFile = new File(oDstDir, sDestinationFileName);
@@ -1244,8 +1354,122 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		return "";
-
 	}
+	
+	/**
+	 * Copy a file from a workspace to the user sftp folder
+	 * @param oParameter IngestFileParameter with the reference of the file to move
+	 * @param sRootPath
+	 * @param sSftpPath
+	 * @return
+	 * @throws Exception
+	 */
+	public String copyToSfpt(IngestFileParameter oParameter, String sRootPath, String sSftpPath) throws Exception {
+		s_oLogger.debug("LauncherMain.copyToSfpt");
+
+		if (null == oParameter) {
+			String sMsg = "LauncherMain.copyToSfpt: null parameter";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+
+		if (null == sRootPath) {
+			String sMsg = "LauncherMain.copyToSfpt: null download path";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+
+		File oFileToMovePath = new File(oParameter.getFilePath());
+
+		if (!oFileToMovePath.canRead()) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: unable to access file to Move " + oFileToMovePath.getAbsolutePath();
+			s_oLogger.error(sMsg);
+			throw new IOException(sMsg);
+		}
+
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+
+		try {
+			if (oProcessWorkspace != null) {
+				// get file size
+				long lFileSizeByte = oFileToMovePath.length();
+
+				// set file size
+				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
+
+				// get process pid
+				// oProcessWorkspace.setPid(getProcessId());
+
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 5);
+			} else {
+				s_oLogger.error("LauncherMain.copyToSfpt: process workspace not found: " + oParameter.getProcessObjId());
+			}
+
+			String sDestinationPath = sSftpPath;
+			if (!sDestinationPath.endsWith("/")) sDestinationPath+="/";
+			sDestinationPath += oParameter.getUserId();
+			sDestinationPath += "/uploads/";
+
+			File oDstDir = new File(sDestinationPath);
+
+			if (!oDstDir.exists()) {
+				oDstDir.mkdirs();
+			}
+
+			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
+				s_oLogger.error("LauncherMain.copyToSfpt: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
+				throw new IOException("Unable to access destination directory for the Workspace");
+			}
+			
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+
+			// copy file to workspace directory
+			if (!oFileToMovePath.getParent().equals(oDstDir.getAbsolutePath())) {
+				s_oLogger.debug("LauncherMain.copyToSfpt: File in another folder make a copy");
+				FileUtils.copyFileToDirectory(oFileToMovePath, oDstDir);
+			} 
+			else {
+				s_oLogger.debug("LauncherMain.copyToSfpt: File already in place");
+			}
+
+			File oDstFile = new File(oDstDir, oFileToMovePath.getName());
+			
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+
+			return oDstFile.getAbsolutePath();
+
+		} catch (Exception e) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: Exception in copy file to sftp";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+
+		} 
+		catch (Throwable e) {
+			String sMsg = "LauncherMain.copyToSfpt: ERROR: Throwable occurrend during file ingestion";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+		} finally {
+			// update process status and send rabbit updateProcess message
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+
+		return "";		
+	}	
 
 	public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
 			ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc)
@@ -1292,11 +1516,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + oLauncherOperation);
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
-		s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == "
-				+ oProcessWorkspace.getProcessObjId());
+		s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == " + oProcessWorkspace.getProcessObjId());
 
 		try {
 			if (oProcessWorkspace != null) {
@@ -2039,201 +2261,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * 
 	 * @param oParameter
 	 */
-	public void executeMultiSubset(MultiSubsetParameter oParameter) {
-
-		s_oLogger.debug("LauncherMain.executeMultiSubset: Start");
-
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		Product oInputProduct = null;
-
-		try {
-
-			if (oProcessWorkspace != null) {
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			}
-
-			String sSourceProduct = oParameter.getSourceProductName();
-			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
-
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-			File oProductFile = new File(getWorspacePath(oParameter) + sSourceProduct);
-			oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
-
-			if (oInputProduct == null) {
-				s_oLogger.error("LauncherMain.executeMultiSubset: product is not a SNAP product ");
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-				return;
-			}
-
-			// Take the Geo Coding
-			final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
-
-			if (oProcessWorkspace != null) {
-				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
-			}
-
-			int iTileCount = oSettings.getOutputNames().size();
-
-			int iStepPerTile = 80;
-
-			if (iTileCount > 0) {
-				iStepPerTile = 80 / iTileCount;
-				;
-			}
-
-			int iProgress = 20;
-
-			for (int iTiles = 0; iTiles < oSettings.getOutputNames().size(); iTiles++) {
-
-				String sOutputProduct = oSettings.getOutputNames().get(iTiles);
-
-				if (oSettings.getLatNList().size() <= iTiles) {
-					s_oLogger.debug("Lat N List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLatSList().size() <= iTiles) {
-					s_oLogger.debug("Lat S List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLonEList().size() <= iTiles) {
-					s_oLogger.debug("Lon E List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				if (oSettings.getLonWList().size() <= iTiles) {
-					s_oLogger.debug("Lon W List does not have " + iTiles + " element. continue");
-					continue;
-				}
-
-				s_oLogger.debug("Computing tile " + sOutputProduct);
-
-				// Create 2 GeoPos points
-				GeoPos oGeoPosNW = new GeoPos(oSettings.getLatNList().get(iTiles), oSettings.getLonWList().get(iTiles));
-				GeoPos oGeoPosSE = new GeoPos(oSettings.getLatSList().get(iTiles), oSettings.getLonEList().get(iTiles));
-
-				// Convert to Pixel Position
-				PixelPos oPixelPosNW = oGeoCoding.getPixelPos(oGeoPosNW, null);
-				if (!oPixelPosNW.isValid()) {
-					oPixelPosNW.setLocation(0, 0);
-				}
-
-				PixelPos oPixelPosSW = oGeoCoding.getPixelPos(oGeoPosSE, null);
-				if (!oPixelPosSW.isValid()) {
-					oPixelPosSW.setLocation(oInputProduct.getSceneRasterWidth(), oInputProduct.getSceneRasterHeight());
-				}
-
-				// Create the final region
-				Rectangle.Float oRegion = new Rectangle.Float();
-				oRegion.setFrameFromDiagonal(oPixelPosNW.x, oPixelPosNW.y, oPixelPosSW.x, oPixelPosSW.y);
-
-				// Create the product bound rectangle
-				Rectangle.Float oProductBounds = new Rectangle.Float(0, 0, oInputProduct.getSceneRasterWidth(),
-						oInputProduct.getSceneRasterHeight());
-
-				// Intersect
-				Rectangle2D oSubsetRegion = oProductBounds.createIntersection(oRegion);
-
-				ProductSubsetDef oSubsetDef = new ProductSubsetDef();
-				oSubsetDef.setRegion(oSubsetRegion.getBounds());
-				oSubsetDef.setIgnoreMetadata(false);
-				oSubsetDef.setSubSampling(1, 1);
-				oSubsetDef.setSubsetName("subset");
-				oSubsetDef.setTreatVirtualBandsAsRealBands(false);
-
-				if (oSettings.getBands().size() == 0) {
-					oSubsetDef.setNodeNames(oInputProduct.getBandNames());
-					oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
-				} else {
-					oSubsetDef.setNodeNames(oSettings.getBands().toArray(new String[oSettings.getBands().size()]));
-				}
-
-				Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct,
-						oInputProduct.getDescription());
-
-				if (oSubsetProduct != null) {
-					String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
-
-					ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset done for index " + iTiles);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
-
-					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(),
-							oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false);
-
-					s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");
-				} else {
-					s_oLogger.debug("LauncherMain.executeMultiSubset Subset null for index " + iTiles);
-				}
-
-				oSubsetProduct.dispose();
-
-				if (oProcessWorkspace != null) {
-					iProgress = iProgress + iStepPerTile;
-					if (iProgress > 100)
-						iProgress = 100;
-					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING,
-							iProgress);
-				}
-
-			}
-
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.executeMultiSubset: exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(),
-						oParameter.getWorkspace(), sError, oParameter.getExchange());
-
-		} finally {
-
-			if (oInputProduct != null) {
-				try {
-					oInputProduct.closeProductReader();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				oInputProduct.dispose();
-			}
-
-			String sProcWSId = "";
-			if (oProcessWorkspace != null)
-				sProcWSId = oProcessWorkspace.getProcessObjId();
-
-			s_oLogger.debug("LauncherMain.executeMultiSubset: calling close Process Workspace");
-
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-
-			s_oLogger.debug("LauncherMain.executeMultiSubset: End [" + sProcWSId + "]");
-		}
-
-	}
-
-	/**
-	 * Computes and save a list subset all from an Input image (a tile or clip)
-	 * 
-	 * @param oParameter
-	 */
 	public void executeGDALMultiSubset(MultiSubsetParameter oParameter) {
 
 		s_oLogger.debug("LauncherMain.executeGDALMultiSubset: Start");
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 
@@ -2308,6 +2341,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				asArgs.add(oSettings.getLatNList().get(iTiles).toString());
 				asArgs.add(oSettings.getLonEList().get(iTiles).toString());
 				asArgs.add(oSettings.getLatSList().get(iTiles).toString());
+				
+				if (oSettings.getBigTiff()) {
+					asArgs.add("-co");
+					asArgs.add("BIGTIFF=YES");
+				}
 
 				asArgs.add(getWorspacePath(oParameter) + sSourceProduct);
 				asArgs.add(getWorspacePath(oParameter) + sOutputProduct);
@@ -2552,8 +2590,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("LauncherMain.executeMosaic: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
@@ -2634,23 +2671,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Try to insert
 				if (oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
 
-					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" + sProductFullPath + "] in WS: ["
-							+ sWorkspaceId + "]");
+					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
 					return true;
 				} else {
 
-					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding [" + sProductFullPath
-							+ "] in WS: [" + sWorkspaceId + "]");
+					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
 					return false;
 				}
 			} else {
-				s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" + sProductFullPath
-						+ "] Already exists in WS: [" + sWorkspaceId + "]");
+				s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" + sProductFullPath + "] Already exists in WS: [" + sWorkspaceId + "]");
 				return true;
 			}
 		} catch (Exception e) {
-			s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+			s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 		}
 
 		return false;
@@ -2759,8 +2792,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 */
 	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName,
 			String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception {
-		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox,
-				true);
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox,true);
 	}
 
 	/**
@@ -2781,8 +2813,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName,
 			String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata)
 			throws Exception {
-		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox,
-				bAsynchMetadata, true);
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, bAsynchMetadata, true);
 	}
 
 	/**
@@ -2914,9 +2945,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			getProcessIdMethod.setAccessible(true);
 			iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
 
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		} catch (Throwable oEx) {
+			try {
+				s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));				
+			}
+			finally {
+				s_oLogger.error("LauncherMain.GetProcessId: finally here");
+			}
 		}
 
 		return iPid;
@@ -2924,26 +2960,27 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 	@Override
 	public void notify(ProcessWorkspace oProcessWorkspace) {
-		if (oProcessWorkspace == null)
-			return;
+		
+		if (oProcessWorkspace == null) return;
+		
+		if (!m_bNotifyDownloadUpdateActive) return;
 
 		try {
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
 			// update the process
 			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace))
-				s_oLogger.debug("LauncherMain.DownloadFile: Error during process update with process Perc");
+				s_oLogger.error("LauncherMain.DownloadFile: Error during process update with process Perc");
 
 			// send update process message
 			if (LauncherMain.s_oSendToRabbit != null) {
 				if (!LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-					s_oLogger.debug("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
+					s_oLogger.error("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
 				}
 			}
 		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.DownloadFile: Exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			oEx.printStackTrace();
+			s_oLogger.error("LauncherMain.DownloadFile: Exception: " + oEx);
+			s_oLogger.debug("LauncherMain.DownloadFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 
@@ -2964,4 +3001,222 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			return "GTiff";
 		}
 	}
+	
+	
+	/**
+	 * Wait for a process to be resumed in a state like RUNNING, ERROR or DONE
+	 * @param oProcessWorkspace Process Workspace to wait that should be in READY
+	 * @return output status of the process
+	 */
+	public static String waitForProcessResume(ProcessWorkspace oProcessWorkspace) {
+		try {
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
+			while (true)  {
+				if (oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.ERROR.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.STOPPED.name())) {
+					return oProcessWorkspace.getStatus();
+				}
+				
+				Thread.sleep(5000);
+				oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+			}
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.waitForProcessResume: " + oEx.toString());
+		}
+		
+		return "ERROR";
+	}
+	
+	
+	/**
+	 * Kills a process and, if required its subtree
+	 * @param oKillProcessTreeParameter the parameters
+	 */
+	private void killProcessTree(KillProcessTreeParameter oKillProcessTreeParameter) {
+		s_oLogger.info("killProcessTree");
+		
+		try {
+			Preconditions.checkNotNull(oKillProcessTreeParameter, "parameter is null");
+			Preconditions.checkArgument(!Utils.isNullOrEmpty(oKillProcessTreeParameter.getProcessToBeKilledObjId()), "ObjId of process to be killed is null or empty" );
+			
+			String sProcessObjId = oKillProcessTreeParameter.getProcessToBeKilledObjId();
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessToKill = oRepository.getProcessByProcessObjId(sProcessObjId);
+			
+			if(null==oProcessToKill) {
+				//if the kill operation has been instantiated by the webserver, then this should never happen, so, it's just to err on the side of safety...
+				throw new NullPointerException("Process not found in DB");
+			}
+			
+			s_oLogger.info("killProcessTree: collecting and killing processes");
+			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
+			//new element added at the end
+			aoProcessesToBeKilled.add(oProcessToKill);
+			//todo check: kill the parent first (breadth first?)
+			//accumulation loop
+			while(aoProcessesToBeKilled.size() > 0) {
+				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
+				
+				if(null==oProcess) {
+					s_oLogger.error("killProcessTree: a null process was added, skipping");
+					continue;
+				}
+				//kill the process immediately
+				killProcessAndDocker(oProcess);
+				
+				if(!oKillProcessTreeParameter.getKillTree()) {
+					s_oLogger.debug("killProcessTree: process tree must not be killed, ending here");
+					break;
+				}
+				
+				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
+				if(!bCanSpawnChildren) {
+					s_oLogger.debug("killProcessTree: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+					continue;
+				}
+				
+				//now that the process cannot spawn any more children, it's time to add them to the set of processes to be killed
+				String sParentId = oProcess.getProcessObjId();
+				if(Utils.isNullOrEmpty(sParentId)) {
+					s_oLogger.error("killProcessTree: process has null or empty ObjId, skipping"); 
+					continue;
+				}
+				List<ProcessWorkspace> aoChildren = oRepository.getProcessByParentId(sParentId);
+				if(null!=aoChildren && aoChildren.size() > 0) {
+					//append at the end
+					aoProcessesToBeKilled.addAll(aoChildren);
+				}
+			}
+			
+			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
+			oMyProcess.setStatus("DONE");
+			oMyProcess.setProgressPerc(100);
+			oRepository.updateProcess(oMyProcess);
+			
+		} catch (Exception oE) {
+			s_oLogger.error("killProcessTree: " + oE);
+		}
+		finally {
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
+			if (!oMyProcess.getStatus().equals("DONE")) {
+				oMyProcess.setStatus("ERROR");
+				oRepository.updateProcess(oMyProcess);
+			}
+			
+		}
+		
+		s_oLogger.info("killProcessTree: done");
+	}
+
+	/**
+	 * @param oRepository
+	 * @param oProcessToKill
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void killProcessAndDocker(ProcessWorkspace oProcessToKill){
+		try {
+			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+			if(oLauncherOperationsUtils.doesOperationLaunchDocker(oProcessToKill.getOperationType())) {
+				s_oLogger.info("killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
+				killDocker(oProcessToKill);
+			}
+
+			killProcess(oProcessToKill);
+		} catch (Exception oE) {
+			s_oLogger.error("killProcessAndDocker: " + oE);
+		}
+	}
+
+	/**
+	 * @param oProcessToKill the process to be killed
+	 */
+	private void killProcess(ProcessWorkspace oProcessToKill){
+		//kill the process
+		//(code ported from webserver)
+
+		try {
+			int iPid = oProcessToKill.getPid();
+	
+			if (iPid>0) {
+				// Pid exists, kill the process
+				String sShellExString = ConfigReader.getPropValue("KillCommand") + " " + iPid;
+	
+				s_oLogger.info("killProcessAndDocker: shell exec " + sShellExString);
+				Process oProc = Runtime.getRuntime().exec(sShellExString);
+				s_oLogger.info("killProcessAndDocker: kill result: " + oProc.waitFor());
+	
+			} else {
+				s_oLogger.error("killProcessAndDocker: Process pid not in data");
+			}
+	
+			// set process state to STOPPED only if CREATED or RUNNING
+			String sPrevSatus = oProcessToKill.getStatus();
+	
+			if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
+	
+				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
+				oProcessToKill.setOperationEndDate(Utils.GetFormatDate(new Date()));
+	
+				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+				if (!oRepository.updateProcess(oProcessToKill)) {
+					s_oLogger.error("killProcessAndDocker: Unable to update process status of process " + oProcessToKill.getProcessObjId());
+				}
+	
+			} else {
+				s_oLogger.info("killProcessAndDocker: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sPrevSatus);
+			}
+		} catch (Exception oE) {
+			s_oLogger.error("killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+	
+	
+	/**
+	 * @param oProcessToKill the process for which the corresponding docker must be killed
+	 */
+	private void killDocker(ProcessWorkspace oProcessToKill) {
+		try {
+			String sProcessorName = oProcessToKill.getProductName();
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
+	
+			// Call localhost:port
+			String sUrl = "http://localhost:"+oProcessorToKill.getPort()+"/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
+
+			URL oProcessorUrl = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/json");
+			OutputStream oOutputStream = oConnection.getOutputStream();
+			oOutputStream.write("{}".getBytes());
+			oOutputStream.flush();
+	
+			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			}
+			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+			String sOutputResult;
+			String sOutputCumulativeResult = "";
+			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
+			while ((sOutputResult = oBufferedReader.readLine()) != null) {
+				s_oLogger.debug("ProcessorsResource.help: " + sOutputResult);
+				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
+			}
+			oConnection.disconnect();
+			
+			s_oLogger.info(sOutputCumulativeResult);
+		} catch (Exception oE) {
+			s_oLogger.error("killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+
 }

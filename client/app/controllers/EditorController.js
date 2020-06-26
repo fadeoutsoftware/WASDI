@@ -34,10 +34,11 @@ var EditorController = (function () {
 
         //filter query text in tree
         this.m_sTextQueryFilterInTree = "";
+        this.m_bIsFilteredTree = false;
 
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
-        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
+        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
         //Flag to know if the Preview Band Image is loaded or not (2D - Editor Mode)
         this.m_bIsLoadedPreviewBandImage = true;
@@ -165,7 +166,9 @@ var EditorController = (function () {
 
         //set default navbar menu
         this.generateDefaultNavBarMenu();
-        // this.navbarMenuTranslation();
+
+        // Go in geographic mode
+        this.switchEditorGeoReferencedMode();
 
         // Launch image editor modal to debug it
         //this.openImageEditorDialog();
@@ -253,46 +256,11 @@ var EditorController = (function () {
                         icon: "fa fa-lg fa-rocket"
                     },
                     {
-                        name: "",//mida
-                        caption_i18n: "EDITOR_OPERATION_TITLE_MIDA",
-                        subMenu: [],
-                        onClick: this.openMergeDialogInNavBar,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//OPERA
-                        caption_i18n: "EDITOR_OPERATION_TITLE_OPERA",
-                        subMenu: [],
-                        onClick: this.openWappDialog,
-                        icon: "fa fa-lg fa-tint"
-                    },
-                    {
                         name: "",//RASOR
                         caption_i18n: "EDITOR_OPERATION_TITLE_RASOR",
                         subMenu: [],
                         onClick: this.openRasorDialog,
                         icon: "fa fa-lg fa-users"
-                    },
-                    {
-                        name: "",//JRC Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_JRC_WORKFLOW",
-                        subMenu: [],
-                        onClick: this.openJRCWorkflowDialog,
-                        icon: "fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name: "",//JRC Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_JRC_CLASSIFICATION",
-                        subMenu: [],
-                        onClick: this.openJRCClassificationDialog,
-                        icon: "fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name: "",//JRC Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_JRCS2_TEST_PROCESSOR",
-                        subMenu: [],
-                        onClick: this.openJRCS2TestProcessor,
-                        icon: "fa fa-lg fa-file-code-o"
                     },
                     // --- WPS ---
                     {
@@ -1133,17 +1101,18 @@ var EditorController = (function () {
 
             this.m_aoVisibleBands.push(oBand);
 
-            //if there isn't Bounding Box is impossible to zoom
-            if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
-                this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
-            } else {
-                this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+            if (this.m_aoVisibleBands.length == 1) {
+                //if there isn't Bounding Box is impossible to zoom
+                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
+                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
+                } else {
+                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+                }
             }
-
         }
 
     };
@@ -1373,14 +1342,21 @@ var EditorController = (function () {
                 oController.m_oTree = oController.generateTree();
                 oController.m_bIsLoadingTree = false;
 
-                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                if( oController.m_b2DMapModeOn === false){
+                    oController.m_oMapService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                    oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+
+                } else {
+                    oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+                    oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                }
+
+
             }
         }).error(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         });
     };
-
 
     /**
      * Open a Workspace and relod it whe the page is reloaded
@@ -1728,7 +1704,13 @@ var EditorController = (function () {
 
                 //remove layer in 2D map
                 oMap2D.eachLayer(function (layer) {
-                    if (utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId) {
+                    var sMapLayer = layer.options.layers;
+                    var sMapLayer2 = "wasdi:" + layer.options.layers;
+
+                    if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer == sLayerId) {
+                        oMap2D.removeLayer(layer);
+                    }
+                    else if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer2 == sLayerId) {
                         oMap2D.removeLayer(layer);
                     }
                 });
@@ -1825,6 +1807,18 @@ var EditorController = (function () {
                 // oLayer = oGlobe.remove(oLayer);
                 //break;
                 iIndexLayer = 0;
+            }
+            else {
+
+                if (!utilsIsObjectNullOrUndefined(oLayer.imageryProvider.layers)) {
+                    var sMapLayer = "wasdi:" + oLayer.imageryProvider.layers;
+                    if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sMapLayer == sLayerId) {
+                        oLayer = aoGlobeLayers.remove(oLayer);
+                        // oLayer = oGlobe.remove(oLayer);
+                        //break;
+                        iIndexLayer = 0;
+                    }
+                }
             }
 
         }
@@ -2564,53 +2558,6 @@ var EditorController = (function () {
         });
     };
 
-    EditorController.prototype.openJRCClassificationDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRC_classification/JRCClassificationView.html",
-            controller: "JRCClassificationController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-    EditorController.prototype.openJRCS2TestProcessor = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRCS2/JRCS2.html",
-            controller: "JRCS2Controller",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-
     EditorController.prototype.openEDriftCheckImagesAvailability = function (oWindow) {
         var oController;
         if (utilsIsObjectNullOrUndefined(oWindow) === true) {
@@ -2647,33 +2594,6 @@ var EditorController = (function () {
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/eDrift_flood_automatic_chain/EDriftFloodAutomaticChainView.html",
             controller: "EDriftFloodAutomaticChainController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openJRCWorkflowDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRC_workflow/JRCWorkflowView.html",
-            controller: "JRCWorkflowController",
             inputs: {
                 extras: {
                     products: oController.m_aoProducts,
@@ -2798,42 +2718,6 @@ var EditorController = (function () {
         return true;
     };
 
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openWappDialog = function (oWindow) {
-
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/opera/OperaWappDialog.html",
-            controller: "OperaWappController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-
-                return true;
-            });
-        });
-
-        return true;
-    };
 
     /**
      *
@@ -3127,6 +3011,37 @@ var EditorController = (function () {
 
         return true;
     };
+
+
+    EditorController.prototype.openTransferToFtpDialog = function (oSelectedProduct, oWindow) {
+
+        var oController;
+
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/ftp_service/FTPView.html",
+            controller: "FTPController",
+            inputs: {
+                extras: {
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                return true;
+            });
+        });
+
+        return true;
+    };
+
     /**
      *
      * @param oWindow
@@ -3974,26 +3889,10 @@ var EditorController = (function () {
                                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
                                                     oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
-                                                        var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                        var iLengthChildren_d = that.temp.children_d.length;
 
-                                                        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-                                                            oController.removeAllRedSquareBoundingBox();
-                                                            oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
+                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
 
 
-                                                                if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
-                                                                    oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                                    break;
-                                                                }
-
-                                                            }
-
-                                                        }
-
-                                                        //reload product list
-                                                        oController.getProductListByWorkspace();
 
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
@@ -4136,7 +4035,16 @@ var EditorController = (function () {
                                             }
                                         }
                                     },
+                                    "SendToFtp": {
+                                        "label": "Send To Ftp",
+                                        "icon": "fa fa-upload",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var oFound = oController.findProductByFileName(sSourceFileName);
 
+                                            if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
+                                        }
+                                    }, //openTransferToFtpDialog
                                     "DeleteProduct": {
                                         "label": "Delete Product",
                                         "icon": "delete-icon-context-menu-jstree",
@@ -4152,25 +4060,7 @@ var EditorController = (function () {
                                                     this.temp = $node;
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
-                                                        var iLengthLayer = oController.m_aoVisibleBands.length;
-                                                        var iLengthChildren_d = that.temp.children_d.length;
-
-                                                        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
-                                                            oController.removeAllRedSquareBoundingBox();
-                                                            oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
-                                                            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
-                                                                if (that.temp.children_d[iIndexChildren] === oController.m_aoVisibleBands[iIndexLayer].layerId) {
-                                                                    oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
-                                                                    break;
-                                                                }
-
-                                                            }
-
-                                                        }
-
-                                                        //reload product list
-                                                        oController.getProductListByWorkspace();
-
+                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                     });
@@ -4263,18 +4153,21 @@ var EditorController = (function () {
         var sFileName = oEntry.fileName;
         // this.m_bIsDownloadingProduct = true;
         var oController = this;
-        // this.m_sProductNameInDownloadingStatus = oEntry.fileName;
-        this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
+
+        var sUrl = null;
+
+        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+
+        this.m_oCatalogService.downloadEntry(oJson, sUrl).success(function (data, status, headers, config) {
             if (utilsIsObjectNullOrUndefined(data) == false) {
                 var blob = new Blob([data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
             }
-            // oController.m_bIsDownloadingProduct = false;
-            // oController.m_sProductNameInDownloadingStatus = "";
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
-            // oController.m_bIsDownloadingProduct = false;
-            // oController.m_sProductNameInDownloadingStatus = "";
         });
 
         return true;
@@ -4284,7 +4177,13 @@ var EditorController = (function () {
             return false;
         }
 
-        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId);
+        var sUrl = null;
+        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+
+        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl);
 
         return true;
     };
@@ -4324,18 +4223,69 @@ var EditorController = (function () {
         }
         return false;
     };
+
     EditorController.prototype.isActiveEditorMode = function () {
         return this.m_bIsActiveGeoraphicalMode === false;
-    }
+    };
+
     EditorController.prototype.filterTree = function (sTextQuery) {
+
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
             sTextQuery = "";
+            this.m_bIsFilteredTree = false;
+        } else {
+            this.m_bIsFilteredTree = true;
         }
 
-        $('#jstree').jstree(true).search(sTextQuery);//,false,true
+        $('#jstree').jstree(true).search(sTextQuery);
 
         return true;
-    }
+    };
+
+    EditorController.prototype.cleanFilterTree = function () {
+        this.m_sTextQueryFilterInTree = '';
+        this.filterTree(null);
+    };
+
+    EditorController.prototype.deleteProductInNavigation = function(aoVisibleBands,oChildrenNode){
+        // // In georeferenced mode or not?
+        // if (this.m_bIsActiveGeoraphicalMode == true) {
+
+
+        if( this.m_b2DMapModeOn === false){
+            this.deleteProductInMap();
+        } else {
+            this.deleteProductInGlobe(aoVisibleBands,oChildrenNode);
+        }
+    };
+
+    EditorController.prototype.deleteProductInMap = function(){
+        this.m_oMapService.clearMap();
+        this.m_oMapService.initWasdiMap('wasdiMap2');
+
+        //reload product list
+        this.getProductListByWorkspace();
+    };
+
+    EditorController.prototype.deleteProductInGlobe = function(aoVisibleBands,oChildrenNode){
+        var iLengthLayer = aoVisibleBands.length;
+        var iLengthChildren_d = oChildrenNode.length;//that.temp.children_d
+
+        for (var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++) {
+
+            for (var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++) {
+                if (oChildrenNode[iIndexChildren] === aoVisibleBands[iIndexLayer].layerId) {
+                    this.removeBandImage(aoVisibleBands[iIndexChildren]);
+                    break;
+                }
+
+            }
+
+        }
+
+        //reload product list
+        this.getProductListByWorkspace();
+    };
     EditorController.$inject = [
         '$scope',
         '$location',

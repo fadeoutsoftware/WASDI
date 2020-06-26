@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 
 /**
  * Base Repository Class
@@ -62,36 +64,104 @@ public class MongoRepository {
     static  {
         s_oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-
+    
     /**
-     * Mongo Client
+     * Static Connections Dictionary
      */
-    private static MongoClient s_oMongoClient = null;
+    private static HashMap<String, MongoConnection> s_aoDbConnections = new HashMap<>();
+    
     /**
-     * Mongo Database
+     * Name of the collection related to this Repository
      */
-    private static  MongoDatabase s_oMongoDatabase = null;
-
+    protected String m_sThisCollection;
+    
+    /**
+     * Name of the database connected to this repo
+     */
+    protected String m_sRepoDb = "wasdi";
+    
+	/**
+     * Add a new Mongo Connection
+     * @param sDbCode Code of the connection
+     * @param sUser User 
+     * @param sPassword Pw
+     * @param sAddress Address 
+     * @param iServerPort Port
+     * @param sDbName db name
+     */
+    public static void addMongoConnection(String sDbCode, String sUser, String sPassword, String sAddress, int iServerPort, String sDbName) {
+    	try 
+    	{
+    		// Check if this does not exists yet
+    		MongoConnection oMongoConnection = s_aoDbConnections.get(sDbCode);
+    		
+    		if (oMongoConnection == null) {
+    			
+    			// Create the connection config
+    			oMongoConnection = new MongoConnection();
+            	MongoCredential oCredential = MongoCredential.createCredential(sUser, sDbName, sPassword.toCharArray());
+            	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(sAddress, iServerPort), Arrays.asList(oCredential));
+            	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(sDbName);
+            	
+            	// Add it to the dictionary
+            	s_aoDbConnections.put(sDbCode, oMongoConnection);
+            	
+            	Utils.debugLog("MongoRepository.addMongoConnection: Configuration added: " + sDbCode);
+    		}
+    	}
+    	catch (Exception e) 
+    	{
+    		Utils.debugLog("MongoRepository.addMongoConnection: exception " + e.getMessage());
+			e.printStackTrace();
+    	}    	
+    }
+    
+    private static boolean s_bDbSwitchLogged = false;
+    
     /**
      * Get The database Object
      * @return
      */
-    public static MongoDatabase getMongoDatabase() {
+    public static MongoDatabase getMongoDatabase(String sDbCode) {
     	try 
     	{
-    		if (s_oMongoClient == null) {
-
-            	MongoCredential oCredential = MongoCredential.createCredential(DB_USER, DB_NAME, DB_PWD.toCharArray());
-            	s_oMongoClient = new MongoClient(new ServerAddress(SERVER_ADDRESS, SERVER_PORT), Arrays.asList(oCredential));
-            	s_oMongoDatabase = s_oMongoClient.getDatabase(DB_NAME);
-        	}
+    		// Get the connection config from the dictionary
+    		MongoConnection oMongoConnection = s_aoDbConnections.get(sDbCode);
+    		
+    		// Check if exists
+    		if (oMongoConnection == null) {
+    			// If is the default wasdi and does not exist
+    			if (sDbCode.equals("wasdi")) {
+    				// Create default connection
+        			oMongoConnection = new MongoConnection();
+                	MongoCredential oCredential = MongoCredential.createCredential(DB_USER, DB_NAME, DB_PWD.toCharArray());
+                	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(SERVER_ADDRESS, SERVER_PORT), Arrays.asList(oCredential));
+                	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(DB_NAME);
+                	// Add it to the dictionary
+                	s_aoDbConnections.put("wasdi", oMongoConnection);
+    			}
+    			else {
+    				
+    				if (!s_bDbSwitchLogged) {
+    					Utils.debugLog("MongoRepository.getMongoDatabase: Db Code " + sDbCode + " NOT FOUND. try to recover with default db");
+    					s_bDbSwitchLogged = true;
+    				}
+    				
+    				
+    				// If is not the default one, but does not exists, recover with the defualt
+    				return getMongoDatabase("wasdi");
+    			}
+    		}
+    		
+    		// Return the database
+    		return oMongoConnection.m_oMongoDatabase;
     	}
     	catch (Exception e) 
     	{
     		Utils.debugLog("MongoRepository.getMongoDatabase: exception " + e.getMessage());
 			e.printStackTrace();
     	}
-        return s_oMongoDatabase;
+        return null;
     }
 
     /**
@@ -100,22 +170,32 @@ public class MongoRepository {
      * @return
      */
     public MongoCollection<Document> getCollection(String sCollection) {
-        return getMongoDatabase().getCollection(sCollection);
+        return getMongoDatabase(m_sRepoDb).getCollection(sCollection);
     }
     
     /**
      * Shut down the connection
      */
     public static void shutDownConnection() {
-    	if (s_oMongoClient != null) {
-    		try {
-    			s_oMongoClient.close();
-    		}
-    		catch (Exception e) {
-				Utils.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
-				e.printStackTrace();
+    	
+    	try {
+    		
+    		Collection<MongoConnection> aoConnections = s_aoDbConnections.values();
+    		
+    		for (MongoConnection oConnection : aoConnections) {
+        		try {
+        			oConnection.m_oMongoClient.close();
+        		}
+        		catch (Exception e) {
+    				Utils.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
+    				e.printStackTrace();
+    			}
 			}
     	}
+    	catch (Exception e) {
+			Utils.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
+			e.printStackTrace();
+		}    	
     }
     
     public <T> void fillList(final ArrayList<T> aoReturnList, FindIterable<Document> oWSDocuments, String sRepositoryName,Class<T> oClass) {
@@ -129,13 +209,10 @@ public class MongoRepository {
 		        } catch (IOException oEx) {
 		        	Utils.debugLog(sRepositoryName + ".fillList: " + oEx);
 		        }
-
 		    }
 		});
 	}
-    
 	public <T> String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
-		String sResult = "";
 		if(oNewDocument != null) {
 			try {
 				String sJSON = s_oMapper.writeValueAsString(oNewDocument);
@@ -147,26 +224,24 @@ public class MongoRepository {
 				Utils.debugLog(sRepositoryCommand + ": " + oEx);
 			}
 		}
-		return sResult;
 	}
 	
-	
 	public int delete(BasicDBObject oCriteria, String sCollectionName ){
-
         try {
-
             DeleteResult oDeleteResult = getCollection(sCollectionName).deleteOne(oCriteria);
-
             if (oDeleteResult != null)
             {
                 return (int) oDeleteResult.getDeletedCount();
             }
-
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
 
         return 0;
+	}
+	
+	public void setRepoDb(String sRepoDb) {	
+			this.m_sRepoDb = sRepoDb;
 	}
 	
 	public boolean update(BasicDBObject oCriteria, Object oNewDocument, String sCollectionName) {
@@ -185,7 +260,6 @@ public class MongoRepository {
 
         return  false;
     }
-	
 //	public void uploadImage (File oImageFile){
 //		
 //		GridFS gfsPhoto = new GridFS( s_oMongoClient.getDB(dbName), "userphotos");

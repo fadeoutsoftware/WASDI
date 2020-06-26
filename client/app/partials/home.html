@@ -6,8 +6,6 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
                             <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
-                        <!--li class="link-register pull-right  nav-item" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')">
-                            <a href="#" class="text-white"><span class="glyphicon glyphicon-user"></span> {{"LOGIN_LINK_REGISTER"|translate}}</a></li-->
                         <li class="link-login pull-right  nav-item"> <a href="#enduser" class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">STORIES</a> </li>
                         <li class="link-login pull-right  nav-item"> <a href="#developer"  class="text-white" ng-click="m_oController.m_oAnchorService('developer')">ADVANCED</a> </li>
                         <li class="link-login pull-right  nav-item"> <a href="#eoexpert"  class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">BASIC</a> </li>
@@ -15,15 +13,7 @@
                     </ul>
                 </div>
             </nav>
-            <!--LINKATO SOPRA
-            <div class="link-login pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')" >
-                {{"LOGIN_LINK_FORM"|translate}}
 
-            </div>
-            <div class="link-register pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')" >
-                {{"LOGIN_LINK_REGISTER"|translate}}
-            </div>
-            -->
             <!------------------------------- LOGO(write) ------------------------------->
             <div  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
 
@@ -62,9 +52,7 @@
 
                 <br>
 
-
-
-                <!--GOOGLE BUTTOn-->
+                <!--GOOGLE BUTTON-->
                 <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>
 
                 <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
@@ -92,8 +80,6 @@
                                class="form-control" id="mail" ng-model="m_oController.m_sEmailToRecoverPassword">
 
                     </div>
-                    <!-- recoveryForm.recoverymail.$dirty === false-->
-                    <!--ng-class="{disabled: ( recoveryForm.recoveryemail.$invalid === true || recoveryForm.recoveryemail.$dirty === false) }"-->
                     <button class="btn btn-md btn-primary btn-block btn-signin" type="submit"
                             ng-disabled="m_oController.isRecoverPasswordButtonEnable(m_oController.m_sEmailToRecoverPassword) === false"
                             ng-click="m_oController.recoverPassword(m_oController.m_sEmailToRecoverPassword)">
@@ -109,8 +95,6 @@
 
             </div>
 
-
-
             <!------------------------ REGISTRATION FORM ------------------------>
             <div class="signin-content" ng-show="m_oController.m_bRegisterIsVisible" >
                 <!--Work in progress... If you want a test account contact us: wasdi@fadeout.it-->
@@ -125,16 +109,11 @@
                     </div>
                     <div class="form-group">
                         <input type="password" name="userpassword"  ng-model="m_oController.m_oRegistrationUser.password"
-                               placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"
-                                ng-minlength="8" required><!-- ng-model="m_oController.m_oRegistrationUser.password"-->
-                        <h6 class="error-message" ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) &&
-                                                         (!signinForm.userpassword.$valid)">
+                               placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"  ng-minlength="8" required>
+                        <h6 class="error-message" ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) && (!signinForm.userpassword.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
                         </h6>
                     </div>
-
-                    <!--<input name="myInput" ng-model="myInput" ng-maxlength="5">-->
-
 
                     <div class="form-group">
                         <input type="password" name="userrepeatpassword" placeholder="{{'SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD'|translate}}" class="form-control"
@@ -162,7 +141,16 @@
                         </h6>
                     </div>
 
-                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: signinForm.$invalid === true }"
+                    <div class="form-group">
+                        <input type="checkbox" id="accept" name="accept"  ng-model="m_oController.m_oRegistrationUser.accept" required>
+                        I agree to WASDI <a href="http://www.wasdi.net/index.php?title=Terms" target="_blank">Terms of Service</a> and <a href="http://www.wasdi.net/index.php?title=Privacy" target="_blank">Privacy Statement</a>
+                        <h6 class="error-message" ng-if="(signinForm.accept.$dirty === true) &&
+                                                         (!signinForm.accept.$valid)">
+                            {{"SIGN_IN_ERROR_INVALID_ACCEPT_CONDITIONS"|translate}}
+                        </h6>
+                    </div>
+
+                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: signinForm.$invalid === true || m_oController.m_bRegistering }"
                             type="submit">
                         {{"SIGN_IN_BUTTON"|translate}}
                     </button>

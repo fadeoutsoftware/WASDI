@@ -150,7 +150,6 @@ angular.module('wasdi.TreeDirective', [])
                             {
                                 oController.openCloseNode(data.node.id);
 
-                                //$scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false &&
                                 //is it a band?
                                 if( data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {

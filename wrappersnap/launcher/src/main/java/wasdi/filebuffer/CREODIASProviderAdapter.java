@@ -46,7 +46,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.ProviderAdapter#GetDownloadFileSize(java.lang.String)
 	 */
 	@Override
-	public long GetDownloadFileSize(String sFileURL) throws Exception {
+	public long getDownloadFileSize(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.error("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
@@ -69,8 +69,8 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.ProviderAdapter#ExecuteDownloadFile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, wasdi.shared.business.ProcessWorkspace)
 	 */
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
-			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
+			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// TODO fail instead
 		if(Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty");
@@ -103,7 +103,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.ProviderAdapter#GetFileName(java.lang.String)
 	 */
 	@Override
-	public String GetFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.error("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");

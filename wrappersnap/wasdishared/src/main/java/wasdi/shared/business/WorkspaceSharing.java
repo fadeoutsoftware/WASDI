@@ -1,7 +1,5 @@
 package wasdi.shared.business;
 
-import java.util.Date;
-
 /**
  * Workshape sharing entity
  * Represent the association between a workspace and the user that can access it

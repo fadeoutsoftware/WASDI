@@ -19,9 +19,9 @@ public class FtpUploadParameters extends BaseParameter {
 	//FTP server-side info
 	String ftpServer;
 	Integer m_iPort;
+	Boolean m_bSftp=true;
 	String m_sUsername;
 	String m_sPassword;
-	String m_sRemoteFileName;
 	String m_sRemotePath;	
 	String m_sLocalFileName;
 	String m_sLocalPath;
@@ -55,6 +55,18 @@ public class FtpUploadParameters extends BaseParameter {
 	public void setPort(Integer iPort) {
 		this.m_iPort = iPort;
 	}
+	/**
+	 * @return the sftp
+	 */
+	public Boolean getSftp() {
+		return m_bSftp;
+	}
+	/**
+	 * @param sftp the sftp to set
+	 */
+	public void setSftp(Boolean sftp) {
+		this.m_bSftp = sftp;
+	}
 	public String getUsername() {
 		return m_sUsername;
 	}
@@ -67,12 +79,6 @@ public class FtpUploadParameters extends BaseParameter {
 	public void setPassword(String sPassword) {
 		this.m_sPassword = sPassword;
 	}
-	public String getRemoteFileName() {
-		return m_sRemoteFileName;
-	}
-	public void setRemoteFileName(String sFileName) {
-		this.m_sRemoteFileName = sFileName;
-	}
 	public String getRemotePath() {
 		return m_sRemotePath;
 	}
@@ -84,29 +90,6 @@ public class FtpUploadParameters extends BaseParameter {
 	}
 	public void setLocalFileName(String sLocalFileName) {
 		this.m_sLocalFileName = sLocalFileName;
-	}
-	public String getLocalPath() {
-		return m_sLocalPath;
-	}
-	public void setLocalPath(String sLocalPath) {
-		if(null == sLocalPath) {
-			throw new IllegalArgumentException();
-		}
-		if(!Utils.isFilePathPlausible(sLocalPath)) {
-			throw new IllegalArgumentException();
-		}
-		this.m_sLocalPath=new String( FilenameUtils.normalizeNoEndSeparator(sLocalPath, true) );
-	}
-	
-	public String getFullLocalPath() {
-		if(null == m_sLocalFileName || null == m_sLocalFileName) {
-			return null;
-		}
-		
-		String sRes = m_sLocalPath;
-		sRes = sRes + m_sLocalFileName;
-		
-		return sRes;
 	}
 	
 }

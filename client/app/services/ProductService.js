@@ -6,6 +6,7 @@
 angular.module('wasdi.ProductService', ['wasdi.ProductService']).
 service('ProductService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
+    this.m_oConstantsService = oConstantsService;
     this.m_oHttp = $http;
 
     this.getProductByName = function(sProductName) {
@@ -25,8 +26,12 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     };
 
     this.deleteProductFromWorkspace = function (sProductName, sWorkspaceId, bDeleteFile, bDeleteLayer) {
-        //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
-        return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
+
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        return this.m_oHttp.get(sUrl + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     };
 
     this.updateProduct = function (oProductViewModel,workspaceId) {
@@ -34,19 +39,29 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     };
 
     this.getApiMetadata= function(sProductName, sWorkspace){
-        return this.APIURL+"/product/metadatabyname?sProductName="+sProductName+"&workspace="+sWorkspace;
+
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        return sUrl + "/product/metadatabyname?sProductName="+sProductName+"&workspace="+sWorkspace;
     };
 
 
 
     this.uploadFile = function(sWorkspaceInput,oBody,sName)
     {
+
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
         var oOptions = {
             transformRequest: angular.identity,
             // headers: {'Content-Type': 'multipart/form-data'}
             headers: {'Content-Type': undefined}
         };
-        return this.m_oHttp.post(this.APIURL + '/product/uploadfile?workspace=' + sWorkspaceInput + '&name=' + sName  ,oBody ,oOptions);
+        return this.m_oHttp.post(sUrl + '/product/uploadfile?workspace=' + sWorkspaceInput + '&name=' + sName  ,oBody ,oOptions);
     };
 }]);
 

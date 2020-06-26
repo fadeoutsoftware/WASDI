@@ -221,6 +221,12 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
         case "INFO":
             sUserMessage =  oMessage.payload;
             break;
+        case "REDEPLOYPROCESSOR":
+            sUserMessage = "WASDI APP RE DEPLOYED<br>READY";
+            break;
+        case "LIBRARYUPDATE":
+            sUserMessage = "WASDI LIB UPDATED FOR APP<br>READY";
+            break;
         default:
             console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");
     }

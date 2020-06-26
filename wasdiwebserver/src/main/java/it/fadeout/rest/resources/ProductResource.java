@@ -556,6 +556,59 @@ public class ProductResource {
 			return Response.status(500).build();
 		}
 	}
+	
+	@POST
+	@Path("/uploadfilebylib")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
+
+		// Check the user session
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			return Response.status(401).build();
+		}
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) {
+			return Response.status(401).build();
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return Response.status(401).build();
+		}
+		String sUserId = oUser.getUserId();
+
+		// Check the file name
+		if (Utils.isNullOrEmpty(sName) || sName.isEmpty()) {
+			sName = "defaultName";
+		}
+		
+		try {
+			// Take path
+			String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+
+			File oOutputFilePath = new File(sPath + sName);
+
+			if (oOutputFilePath.getParentFile().exists() == false) {
+				oOutputFilePath.getParentFile().mkdirs();
+			}
+
+			// Copy the stream
+			int iRead = 0;
+			byte[] ayBytes = new byte[1024];
+			OutputStream oOutStream = new FileOutputStream(oOutputFilePath);
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutStream.write(ayBytes, 0, iRead);
+			}
+			oOutStream.flush();
+			oOutStream.close();
+			
+			return Response.ok().build();			
+		}
+		catch (Exception e) {
+			Utils.debugLog("ProductResource.uploadfile: " + e);
+			return Response.status(500).build();
+		}
+	}
 
 	@GET
 	@Path("delete")
@@ -563,6 +616,7 @@ public class ProductResource {
 	public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile,
 			@QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
+		
 		Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
 				+ sWorkspace + ", DeleteLayer: " + bDeleteLayer + " )");
 
@@ -594,33 +648,35 @@ public class ProductResource {
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
-
-			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace),
-					sWorkspace);
-			Utils.debugLog("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
+			
+			// Get the file path
+			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 			String sFilePath = sDownloadPath + sProductName;
+			
 			Utils.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);
 
 			// P.Campanella:20190724: try to fix the bug that pub bands are not deleted.
-			// Here the name has the extension. In the db the reference to the product is
-			// without
+			// Here the name has the extension. In the db the reference to the product is without
 			// Try to split the extension
 			String sProductNameWithoutExtension = Utils.GetFileNameWithoutExtension(sProductName);
-
+			
+			
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			List<PublishedBand> aoPublishedBands = null;
-
+			
+			// Get the list of published bands
 			if (bDeleteFile || bDeleteLayer) {
 				// Get all bands files
-				aoPublishedBands = oPublishedBandsRepository
-						.getPublishedBandsByProductName(sProductNameWithoutExtension);
+				aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(sProductNameWithoutExtension);
 			}
 
 			// get files that begin with the product name
 			if (bDeleteFile) {
+				
 				final List<PublishedBand> aoLocalPublishedBands = aoPublishedBands;
 				File oFolder = new File(sDownloadPath);
+				
 				FilenameFilter oFilter = new FilenameFilter() {
 
 					@Override
@@ -649,51 +705,49 @@ public class ProductResource {
 				};
 
 				File[] aoFiles = oFolder.listFiles(oFilter);
+				
+				// If we found the files
 				if (aoFiles != null) {
+					// Delete all
 					Utils.debugLog("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
 					for (File oFile : aoFiles) {
 
-						Utils.debugLog("ProductResource.DeleteProduct: deleting file product "
-								+ oFile.getAbsolutePath() + "...");
+						Utils.debugLog("ProductResource.DeleteProduct: deleting file product " + oFile.getAbsolutePath() + "...");
+						
 						if (!FileUtils.deleteQuietly(oFile)) {
 							Utils.debugLog("    ERROR");
 						} else {
 							Utils.debugLog("    OK");
 						}
 					}
-				} else {
+				} 
+				else {
 					Utils.debugLog("ProductResource.DeleteProduct: No File to delete ");
 				}
 			}
-
-			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace),
-					sWorkspace);
+			
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sDownloadPath + sProductName);
+			
 			if (bDeleteLayer) {
+				
 				// Delete layerId on Geoserver
-
-				DownloadedFile oDownloadedFile = oDownloadedFilesRepository
-						.getDownloadedFileByPath(sFullPath + sProductName);
-				GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"),
-						m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
-
+				GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
+				
+				// For all the published bands
 				for (PublishedBand oPublishedBand : aoPublishedBands) {
 					try {
-						Utils.debugLog(
-								"ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
+						Utils.debugLog("ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
 
 						if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-							Utils.debugLog("ProductResource.DeleteProduct: error deleting layer "
-									+ oPublishedBand.getLayerId() + " from geoserver");
+							Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
 						}
 
 						try {
 							// delete published band on data base
-							oPublishedBandsRepository.deleteByProductNameLayerId(
-									oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+							oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 						} catch (Exception oEx) {
-							Utils.debugLog(
-									"ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
+							Utils.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
 						}
 
 					} catch (Exception oEx) {
@@ -702,17 +756,50 @@ public class ProductResource {
 				}
 			}
 
-			// delete product record on db
+			// delete the product-workspace related records on db and the Downloaded File Entry
 			try {
 				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
-				oDownloadedFilesRepository.deleteByFilePath(sDownloadPath + sProductName);
+				oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 			} catch (Exception oEx) {
 				Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
 				oReturn.setIntValue(500);
 				oReturn.setStringValue(oEx.toString());
 				return oReturn;
 			}
+			
+			// Is the product used also in other workspaces?
+			List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getDownloadedFileListByName(oDownloadedFile.getFileName());
+
+			if (aoDownloadedFileList.size()<=1) {
+				// Delete metadata
+				try {
+					Utils.debugLog("Deleting Metadata file");
+					
+					if (oDownloadedFile.getProductViewModel()!=null) {
+						String sMetadataFilePath = oDownloadedFile.getProductViewModel().getMetadataFileReference();
+						if (!Utils.isNullOrEmpty(sMetadataFilePath)) {
+							FileUtils.deleteQuietly(new File(sMetadataFilePath));
+							Utils.debugLog("Metadata file cleaned");
+						}
+					}
+					
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+					oReturn.setIntValue(500);
+					oReturn.setStringValue(oEx.toString());
+					return oReturn;
+				}
+			}
+			else {
+				Utils.debugLog("ProductResource.DeleteProduct: product also in other WS, do not delete metadata");
+			}
+
+			
+			// Delete the database entry
+			//oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
+			
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);

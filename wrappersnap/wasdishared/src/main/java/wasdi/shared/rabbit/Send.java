@@ -97,7 +97,9 @@ public class Send {
         oUpdateProcessMessage.setWorkspaceId(oProcess.getWorkspaceId());
         oUpdateProcessMessage.setPayload(oProcess.getProcessObjId() + ";" + oProcess.getStatus() + ";" + oProcess.getProgressPerc());
         
-        Utils.debugLog("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
+        if(0 == oProcess.getProgressPerc() % 10) {
+        	Utils.debugLog("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
+        }
         
         String sJSON = MongoRepository.s_oMapper.writeValueAsString(oUpdateProcessMessage);
         return SendMsg(oProcess.getWorkspaceId(), sJSON);

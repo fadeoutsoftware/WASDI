@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,6 @@ import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
-import wasdi.shared.opensearch.OpenSearchQuery;
 import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
@@ -46,95 +44,7 @@ public class OpenSearchResource {
 
 	@Context
 	ServletConfig m_oServletConfig;
-
-	//legacy
-	@GET
-	@Path("/sentinel/result")
-	@Produces({ "application/xml", "application/json", "text/html" })
-	public String searchSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
-			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
-			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
-		
-		Utils.debugLog(s_sClassName + ".SearchSentinel( Session: "+sSessionId+", Query: " + sQuery + ", Offset: " +
-				sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
-		if (Utils.isNullOrEmpty(sSessionId)) {
-			Utils.debugLog(s_sClassName + ".SearchSentinel: session is null");
-			return null;
-		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			Utils.debugLog(s_sClassName + ".SearchSentinel: user corresponding to session is null");
-			return null;
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			Utils.debugLog(s_sClassName + ".SearchSentinel: user corresponding to session is not null, but it's userid is null");
-			return null;
-		}
-		try {
-			HashMap<String, String> asParameterMap = new HashMap<>();
-			//ArrayList<String> asParams = new ArrayList<>();
-			if (sOffset != null)
-				asParameterMap.put("offset", sOffset);
-			if (sLimit != null)
-				asParameterMap.put("limit", sLimit);
-			if (sSortedBy != null)
-				asParameterMap.put("sortedby", sSortedBy);
-			if (sOrder != null)
-				asParameterMap.put("order", sOrder);
-
-			asParameterMap.put("provider", m_oServletConfig.getInitParameter("OSProvider"));
-			asParameterMap.put("OSUser", m_oServletConfig.getInitParameter("OSUser"));
-			asParameterMap.put("OSPwd", m_oServletConfig.getInitParameter("OSPwd"));
-
-			Utils.debugLog(s_sClassName + ".SearchSentinel, user: " + oUser.getUserId() + " execute query " + sQuery);
-
-			// return OpenSearchQuery.ExecuteQuerySentinel(sQuery, asParams.toArray(new String[asParams.size()]));
-			String sResult = null;
-			try {
-				sResult = OpenSearchQuery.ExecuteQuery(sQuery, asParameterMap);
-				return sResult;
-			} catch (NumberFormatException oE) {
-				Utils.debugLog(s_sClassName + ".SearchSentinel: caught NumberFormatException: " + oE);
-			}
-		} catch (URISyntaxException | IOException oE) {
-			Utils.debugLog(s_sClassName + ".SearchSentinel: caught Exception: " + oE);
-		}
-		return null;
-	}
-
-	//legacy
-	@GET
-	@Path("/sentinel/count")
-	@Produces({ "application/xml", "application/json", "text/html" })
-	public String getProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery) {
-
-		Utils.debugLog(s_sClassName + ".GetProductsCountSentinel( Session: " + sSessionId + ", Query: " + sQuery + " )");
-		if (Utils.isNullOrEmpty(sSessionId)) {
-			return null;
-		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return null;
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			return null;
-		}
-		try {
-			Utils.debugLog(s_sClassName + ".GetProductsCount, user: " + oUser.getUserId() + " Query: " + sQuery);
-			String sResult = null;
-			try {
-				sResult = OpenSearchQuery.ExecuteQueryCount(sQuery, m_oServletConfig.getInitParameter("OSUser"),
-						m_oServletConfig.getInitParameter("OSPwd"), m_oServletConfig.getInitParameter("OSProvider")); 
-				return sResult;
-			} catch (NumberFormatException oNumberFormatException) {
-				Utils.debugLog(s_sClassName + ".getProductsCountSentinel: caught NumberFormatException: " + oNumberFormatException);
-				return null;
-			}
-		} catch (URISyntaxException | IOException oE) {
-			Utils.debugLog(s_sClassName + ".getProductsCountSentinel: caught Exception: " + oE);
-		}
-		return null;
-	}
+	
 
 	@GET
 	@Path("/query/count")
@@ -217,6 +127,8 @@ public class OpenSearchResource {
 		
 		Utils.debugLog(s_sClassName + ".search( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " +
 				sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
+		
+		// Domain Check
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
 			return null;
@@ -233,7 +145,9 @@ public class OpenSearchResource {
 				sSortedBy = "ingestiondate";
 			if (sOrder == null)
 				sOrder = "asc";
+			
 			Map<String, Integer> aiCounterMap = null;
+			
 			try {
 				Utils.debugLog(s_sClassName + ".Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
@@ -260,6 +174,8 @@ public class OpenSearchResource {
 				return null;
 			}
 			int iSkipped = 0;
+			
+			
 			for (Entry<String, Integer> oEntry : aiCounterMap.entrySet()) {
 				String sProvider = oEntry.getKey();
 				int iCount = oEntry.getValue();
@@ -274,8 +190,8 @@ public class OpenSearchResource {
 				String sCurrentLimit = "" + iCurrentLimit;
 				int iCurrentOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
 				String sCurrentOffset = "" + iCurrentOffset;
-				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +
-						sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
+				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
+				
 				try {
 					QueryExecutor oExecutor = getExecutor(sProviders);
 					try {
@@ -321,6 +237,9 @@ public class OpenSearchResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return null;
 			}
+
+			// TODO use the ProviderCatalog and map the business objects to the expected view models
+
 			ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
 			String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
 			if (sProviders != null && sProviders.length() > 0) {
@@ -400,7 +319,9 @@ public class OpenSearchResource {
 
 		Utils.debugLog(s_sClassName + ".SearchList( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " + sQuery+
 				", Offset: " + sOffset + ", Limit: " + sLimit + ", Sorted: " + sSortedBy + ", Order: " + sOrder + ", Queries: " + asQueries + " )");
-		try {
+		try { 
+			
+			// Validate the User
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", null user");
@@ -419,39 +340,93 @@ public class OpenSearchResource {
 				return null;
 			}
 	
-			Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", providers: " + sProviders + ", queries " + asQueries.size());
+			// Prepare the output list
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+			
+			// For Each Input query
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
 				try {
 					sQuery = asQueries.get(iQueries);
-					Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", count: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
+					
+					// Get for each provider the total count
 					Map<String, Integer> counterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+					
+					// For each provider
 					for (Entry<String, Integer> entry : counterMap.entrySet()) {
+						
+						// Get the Provider Name
 						String sProvider = entry.getKey();
+						// Get the Provider Total Count
 						int iTotalResultsForProviders = entry.getValue();
+						
+						Utils.debugLog(sProvider + " Images Found " + iTotalResultsForProviders);
+						
+						// Get the real results, paginated
 						int iObtainedResults = 0;
+						
+						// Page size
+						int iLimit = 100;
+						
+						String sProviderLimit = m_oServletConfig.getInitParameter(sProvider+".SearchListPageSize");
+						
+						if (!Utils.isNullOrEmpty(sProviderLimit)) {
+							try {
+								iLimit = Integer.parseInt(sProviderLimit);
+								Utils.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
+							}
+							catch (Exception e) {
+							}
+						}
+						
+						QueryExecutor oExecutor = getExecutor(sProviders);
+						
+						// Until we do not get all the results
 						while (iObtainedResults < iTotalResultsForProviders) {
+							
+							// Actual Offset
 							String sCurrentOffset = "" + iObtainedResults;
-							// TODO This limit should be a Provider Parameter
-							int iLimit = 100;
-		
+	
+							// How many elements do we need yet?
 							if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
 								iLimit = iTotalResultsForProviders - iObtainedResults;
 							}
 		
 							String sCurrentLimit = "" + iLimit;
+							
+							// Create the paginated Query
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
+							// Log the query
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
-							QueryExecutor oExecutor = getExecutor(sProviders);
+							
 							try {
+								// Execute the query
 								List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
+								
+								// Did we got a result?
 								if (aoTmp != null && !aoTmp.isEmpty()) {
+									
+									// Sum the grand total
 									iObtainedResults += aoTmp.size();
-									aoResults.addAll(aoTmp);
-									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
-											" results for Query#" + iQueries +" for " + sProvider);
+									
+									// Add the result to the output list
+									//aoResults.addAll(aoTmp);
+									
+									int iAddedResults = 0;
+									
+									// Here add the results checking to avoid duplicates
+									for (QueryResultViewModel oTempResult : aoTmp) {
+										if (!aoResults.contains(oTempResult)) {
+											aoResults.add(oTempResult);
+											iAddedResults++;
+										}
+										else {
+											Utils.debugLog(s_sClassName + ".SearchList: found duplicate image " + oTempResult.getTitle());
+										}
+									}
+									
+									Utils.debugLog(s_sClassName + ".SearchList added " + iAddedResults + " results for Query#" + iQueries +" for " + sProvider);
 								} else {
-									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+									Utils.debugLog(s_sClassName + ".SearchList, NO results found for " + sProvider);
 								}
 							} catch (Exception oE4s) {
 								Utils.debugLog(s_sClassName + ".SearchList: " + oE4s);

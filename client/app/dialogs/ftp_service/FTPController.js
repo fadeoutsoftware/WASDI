@@ -9,13 +9,15 @@ var FTPController = (function() {
         this.m_oExtras = oExtras;
         this.m_oCatalogService = oCatalogService ;
         this.m_oConstantsService = oConstantsService;
-        this.m_oProduct = this.m_oExtras.product;
+        this.m_oProduct = this.m_oExtras.selectedProduct;
 
         this.m_oFtpRequest = {
             user:"",
             password:"",
             serverIp:"",
-            port:"",
+            port:"22",
+            sftp: true,
+            destinationAbsolutePath:""
         }
         /*metadataAttributes:node.original.attributes*/
         //$scope.close = oClose;
@@ -27,15 +29,6 @@ var FTPController = (function() {
 
     FTPController.prototype.sendFTPUploadRequest = function()
     {
-        var oFtpTransferFile={
-            server:"",
-            port:"",
-            user:"",
-            password:"",
-            fileName:"",
-            destinationAbsolutePath:""
-        };
-
         var oController = this;
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace()
 
@@ -44,6 +37,7 @@ var FTPController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID DATA FTP");
             return false;
         }
+
         if(oActiveWorkspace === null)
         {
             utilsVexDialogAlertTop("GURU MEDITATION<br>YOU SHOULD SELECT AN ACTIVE WORKSPACE");
@@ -55,7 +49,7 @@ var FTPController = (function() {
             user:this.m_oFtpRequest.user,
             password:this.m_oFtpRequest.password,
             fileName:this.m_oProduct.fileName,
-            destinationAbsolutePath:"",
+            destinationAbsolutePath:this.m_oFtpRequest.destinationAbsolutePath,
             // workspace:oActiveWorkspace.workspaceId
         };
 
@@ -69,7 +63,7 @@ var FTPController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>UPLOAD FTP FILE ERROR");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR TRANSFERRING FILE TO FTP");
                     // oController.cleanFormInputData();
 
                 }
@@ -77,11 +71,20 @@ var FTPController = (function() {
 
             })
             .error(function(data,status){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>UPLOAD FTP FILE ERROR");
-                oController.cleanFormInputData();
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR TRANSFERRING FILE TO FTP");
+                //oController.cleanFormInputData();
             });
         return true;
     };
+
+    FTPController.prototype.getFileName = function(){
+        if (this.m_oProduct != null) {
+            return this.m_oProduct.fileName;
+        }
+        else {
+            return "N.A.";
+        }
+    }
 
     FTPController.prototype.isDataFtpRequestValid = function(){
 
@@ -89,10 +92,6 @@ var FTPController = (function() {
         {
             return false;
         }
-        // if(utilsIsStrNullOrEmpty(this.m_oFtpRequest.password)  === true)
-        // {
-        //     return false;
-        // }
         if(utilsIsStrNullOrEmpty(this.m_oFtpRequest.serverIp)  === true)
         {
             return false;
@@ -115,7 +114,9 @@ var FTPController = (function() {
             user:"",
             password:"",
             serverIp:"",
-            port:"",
+            port:"22",
+            sftp: true,
+            destinationAbsolutePath:""
         }
     };
     FTPController.$inject = [

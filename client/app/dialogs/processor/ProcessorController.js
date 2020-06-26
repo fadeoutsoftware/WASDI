@@ -35,14 +35,22 @@ var ProcessorController = (function() {
         this.m_oProcessorService = oProcessorService;
         this.m_bEditMode = false;
 
+        // Used for sharing
+        this.m_sUserEmail = "";
+        this.m_aoEnableUsers=[];
+        this.m_sProcessorId = "";
+
+
         var oController = this;
         $scope.close = function() {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
 
         $scope.add = function() {
+
             if (oController.m_bEditMode == true) {
                 var oFile = null;
+
                 if (oController.m_oFile!=null) {
                     oFile = oController.m_oFile[0];
                 }
@@ -60,6 +68,9 @@ var ProcessorController = (function() {
             this.m_sName = this.m_oInputProcessor.processorName;
             this.m_sDescription = this.m_oInputProcessor.processorDescription;
             this.m_sJSONSample = decodeURIComponent(this.m_oInputProcessor.paramsSample);
+            this.m_sProcessorId = this.m_oInputProcessor.processorId;
+
+            this.getListOfEnableUsers(this.m_sProcessorId)
 
             var i=0;
 
@@ -181,6 +192,120 @@ var ProcessorController = (function() {
 
         return sName + "_workflow";
     };
+
+     /**
+      * Get the list of users that has this processor shared
+      * @param sProcessorId
+      * @returns {boolean}
+      */
+     ProcessorController.prototype.getListOfEnableUsers = function(sProcessorId){
+
+         if(utilsIsStrNullOrEmpty(sProcessorId) === true)
+         {
+             return false;
+         }
+         var oController = this;
+         this.m_oProcessorService.getUsersBySharedProcessor(sProcessorId)
+             .success(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data) === false)
+                 {
+                     oController.m_aoEnableUsers = data;
+                 }
+                 else
+                 {
+                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
+                 }
+
+             }).error(function (error) {
+             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
+         });
+         return true;
+     };
+
+     ProcessorController.prototype.shareProcessorByUserEmail = function(sProcessorId, sEmail) {
+
+         if( (utilsIsObjectNullOrUndefined(sProcessorId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
+         {
+             return false;
+         }
+
+         utilsRemoveSpaces(sEmail);
+
+         var sFinalProcessorId = sProcessorId;
+
+         var oController = this;
+         this.m_oProcessorService.putShareProcessor(sProcessorId,sEmail)
+             .success(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+                 {
+                     // SHARING SAVED
+                 }else
+                 {
+                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+                 }
+                 oController.getListOfEnableUsers(sFinalProcessorId);
+
+             }).error(function (error) {
+             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+         });
+
+         this.m_sUserEmail="";
+         return true;
+     };
+
+     ProcessorController.prototype.disablePermissionsUsersByWorkspace = function(sProcessorId,sEmail){
+
+         if( (utilsIsObjectNullOrUndefined(sProcessorId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
+         {
+             return false;
+         }
+
+         utilsRemoveSpaces(sEmail);
+         var oController = this;
+         var sFinalProcessorId = sProcessorId;
+
+         this.m_oProcessorService.deleteUserSharedProcessor(sProcessorId,sEmail)
+             .success(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+                 {
+                     // SHARING SAVED
+                 }
+                 else
+                 {
+                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+                 }
+                 oController.getListOfEnableUsers(sFinalProcessorId);
+
+             }).error(function (error) {
+             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+         });
+
+         this.m_sUserEmail="";
+         return true;
+     };
+
+
+
+
+     ProcessorController.prototype.forceProcessorRefresh = function(sProcessorId) {
+
+         if (utilsIsObjectNullOrUndefined(sProcessorId) === true)
+         {
+             return false;
+         }
+
+         // TODO: ADD CONFIRMATION DIALOG
+         this.m_oProcessorService.redeployProcessor(sProcessorId)
+             .success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>REFRESH SCHEDULED");
+                 utilsVexCloseDialogAfter(5000,oDialog);
+             }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR REFRESHING PROCESSOR");
+         });
+
+         return true;
+     };
+
 
     ProcessorController.$inject = [
         '$scope',

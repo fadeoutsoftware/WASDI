@@ -1,91 +1,3 @@
-
-
-<!--<div class="row-v4 mt-2 mb-2 info-layer-container"-->
-     <!--ng-show="$ctrl.m_bIsVisibleListOfLayers && $ctrl.isEmptyProductsList() == false"-->
-     <!--ng-repeat="layer in $ctrl.m_aoProductsList | filter:{ provider: provider.name } "-->
-     <!--ng-mouseover="$ctrl.changeStyleRectangleMouseOver(layer.rectangle)"-->
-     <!--ng-mouseleave="$ctrl.changeStyleRectangleMouseLeave(layer.rectangle)"-->
-     <!--id='{{"layer"+layer.id}}'>-->
-    <!--<div class="col-v4-auto">-->
-        <!--<div class="btn-group-vertical ml-2" role="group" >-->
-            <!--&lt;!&ndash; CHECK PRODUCT&ndash;&gt;-->
-            <!--<button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"-->
-                    <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">-->
-                <!--<i class="fa fa-check-square-o" aria-hidden="true"></i>-->
-            <!--</button>-->
-            <!--&lt;!&ndash; UNCHECK PRODUCT&ndash;&gt;-->
-            <!--<button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "-->
-                    <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">-->
-                <!--<i class="fa fa-square-o" aria-hidden="true"></i>-->
-            <!--</button>-->
-            <!--<button type="button" class="btn btn btn-primary" ng-click="$ctrl.openModalDownloadProductInSelectedWorkspaces(layer)"-->
-                    <!--ng-disabled="$ctrl.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"-->
-                    <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">-->
-                <!--<i class="fa fa-plus " aria-hidden="true"></i>-->
-            <!--</button>-->
-            <!--<button type="button" class="btn btn btn-primary" ng-click="$ctrl.zoomOnBounds(layer.rectangle)"-->
-                    <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">-->
-                <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
-            <!--</button>-->
-            <!--<button type="button" class="btn btn btn-primary" ng-click="$ctrl.infoLayer(layer)"-->
-                    <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">-->
-                <!--<i class="fa fa-info-circle" aria-hidden="true"></i>-->
-            <!--</button>-->
-
-            <!--&lt;!&ndash;<button type="button" class="btn btn btn-primary"  data-toggle="tooltip" data-placement="top"&ndash;&gt;-->
-            <!--&lt;!&ndash;title="{{'IMPORT_TOOLTIP_DOWNLOAD'|translate}}"  ng-disabled="true">&ndash;&gt;-->
-            <!--&lt;!&ndash;<i class="fa fa-download" aria-hidden="true"></i>&ndash;&gt;-->
-            <!--&lt;!&ndash;</button>&ndash;&gt;-->
-        <!--</div>-->
-    <!--</div>-->
-
-    <!--&lt;!&ndash; IMAGE CELL &ndash;&gt;-->
-    <!--<div class="col-v4-auto image-cell">-->
-        <!--<span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;&lt;!&ndash;Mode&ndash;&gt;-->
-        <!--<span class="label label-success"> {{layer.summary.Instrument}}</span>&lt;!&ndash;Instrument&ndash;&gt;-->
-        <!--<div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>-->
-        <!--<span class="badge">{{layer.summary.Size}}</span>&lt;!&ndash;Size&ndash;&gt;-->
-    <!--</div>-->
-
-    <!--&lt;!&ndash; INFO CELL &ndash;&gt;-->
-    <!--<div class="col-v4-auto info-cell">-->
-
-        <!--<div>{{layer.summary.Date|date:'medium'}}</div>&lt;!&ndash;Date&ndash;&gt;-->
-        <!--</br>-->
-
-        <!--<div>-->
-            <!--<span>Name: </span>-->
-            <!--<span><b>{{layer.title}}</b></span>-->
-        <!--</div>-->
-
-        <!--<div>-->
-            <!--<span>Polarisation: </span>-->
-            <!--<span><b>{{layer.summary.Mode}}</b></span>-->
-        <!--</div>-->
-
-        <!--<div>-->
-            <!--<span>Relative Orbit: </span>-->
-            <!--<span><b>{{layer.properties.relativeorbitnumber}}</b></span>-->
-        <!--</div>-->
-
-        <!--&lt;!&ndash;<div>{{"layer"+layer.id}}</div>&ndash;&gt;-->
-        <!--<div>-->
-            <!--<span>Provider:</span>-->
-            <!--<span><b>{{layer.provider}}</b></span>-->
-        <!--</div>-->
-
-        <!--<div>-->
-            <!--<span>Platform name:</span>-->
-            <!--<span><b>{{layer.properties.platformname}}</b></span>-->
-        <!--</div>-->
-        <!--<div>-->
-            <!--<span>Sensor Operational mode:</span>-->
-            <!--<span><b>{{layer.properties.sensoroperationalmode}}</b></span>-->
-        <!--</div>-->
-    <!--</div>-->
-<!--</div>-->
-
-
 <table class="table table-hover layers " id="table_layers_list" ng-show="$ctrl.m_bIsVisibleListOfLayers && $ctrl.isEmptyProductsList() == false" >
 
     <tbody ng-repeat="layer in $ctrl.m_aoProductsList | filter:{ provider: provider.name } "
@@ -120,12 +32,6 @@
                         data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </button>
-
-                <!--<button type="button" class="btn btn btn-primary"  data-toggle="tooltip" data-placement="top"-->
-                <!--title="{{'IMPORT_TOOLTIP_DOWNLOAD'|translate}}"  ng-disabled="true">-->
-                <!--<i class="fa fa-download" aria-hidden="true"></i>-->
-                <!--</button>-->
-
 
             </div>
         </td>
