@@ -8,7 +8,13 @@ import wasdi.shared.utils.ImageFile;
 
 public class ImageResourceUtils {
 	
-	public boolean isValidExtension(String sExt,String[] sValidExtensions){
+	/**
+	 * Check the extension of a image
+	 * @param sExt
+	 * @param sValidExtensions
+	 * @return
+	 */
+	public static boolean isValidExtension(String sExt,String[] sValidExtensions){
 		//Check if the extension is valid
 		for (String sValidExtension : sValidExtensions) {
 			  if(sValidExtension.equals(sExt.toLowerCase()) ){
@@ -18,7 +24,11 @@ public class ImageResourceUtils {
 		return false;
 	}
 	
-	public void createDirectory(String sPath){
+	/**
+	 * Safe create directory in path
+	 * @param sPath
+	 */
+	public static void createDirectory(String sPath){
 		File oDirectory = new File(sPath);
 		//create directory
 	    if (! oDirectory.exists()){
@@ -26,8 +36,13 @@ public class ImageResourceUtils {
 	    }
 	} 
 	
-	// get image with unknow  extension
-	public ImageFile getImageInFolder(String sPathLogoFolder, String[] asEnableExtension){
+	/**
+	 * Get the image file of the logo
+	 * @param sPathLogoFolder
+	 * @param asEnableExtension
+	 * @return
+	 */
+	public static ImageFile getImageInFolder(String sPathLogoFolder, String[] asEnableExtension){
 		ImageFile oImage = null;
 		String sLogoExtension = checkExtensionOfImageInFolder(sPathLogoFolder, asEnableExtension);
 		if(sLogoExtension.isEmpty() == false){
@@ -38,8 +53,13 @@ public class ImageResourceUtils {
 	}
 	
 	
-	// get extension of the image if it's in the list of enable extension
-	public String checkExtensionOfImageInFolder (String sPathLogoFolder, String[] asEnableExtension){
+	/**
+	 * Search the extension of a image
+	 * @param sPathLogoFolder
+	 * @param asEnableExtension
+	 * @return
+	 */
+	public static String checkExtensionOfImageInFolder (String sPathLogoFolder, String[] asEnableExtension){
 		File oLogo = null;
 		String sExtensionReturnValue = "";
 		for (String sValidExtension : asEnableExtension) {
@@ -53,7 +73,12 @@ public class ImageResourceUtils {
 		return sExtensionReturnValue;
 	}
 	
-	public void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
+	/**
+	 * Delete a file in a folder
+	 * @param sPathFolder
+	 * @param sDeleteFileName
+	 */
+	public static void deleteFileInFolder(String sPathFolder,String sDeleteFileName){
 		File oFolder = new File(sPathFolder);
 		File[] aoListOfFiles = oFolder.listFiles();
 		for (File oImage : aoListOfFiles){ 

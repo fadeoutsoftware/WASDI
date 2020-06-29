@@ -15,8 +15,6 @@ import java.io.OutputStream;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.IOUtils;
-
 import com.google.api.client.util.ByteStreams;
 
 import wasdi.shared.utils.Utils;

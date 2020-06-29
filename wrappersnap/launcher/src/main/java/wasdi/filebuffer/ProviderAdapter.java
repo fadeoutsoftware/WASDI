@@ -13,9 +13,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.esa.snap.core.datamodel.Product;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
@@ -25,7 +22,6 @@ import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
-import wasdi.io.WasdiProductReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 

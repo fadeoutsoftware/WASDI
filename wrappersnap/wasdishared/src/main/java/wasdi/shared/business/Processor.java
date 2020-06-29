@@ -1,6 +1,5 @@
 package wasdi.shared.business;
 
-import java.util.Date;
 import java.util.List;
 
 /**

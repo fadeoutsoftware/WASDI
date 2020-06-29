@@ -25,14 +25,19 @@ import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+
 import it.fadeout.Wasdi;
-import it.fadeout.business.BaseResource;
 import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
@@ -46,16 +51,9 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-
 
 @Path("/auth")
-public class AuthResource extends BaseResource{
+public class AuthResource {
 	
 	
 	@Context
@@ -763,6 +761,7 @@ public class AuthResource extends BaseResource{
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
+		
 		Utils.debugLog("AuthService.editUserDetails");
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
@@ -1147,5 +1146,20 @@ public class AuthResource extends BaseResource{
 			return false;
 		}
 		return true;
+	}
+	
+	protected User getUser(String sSessionId){
+		
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			return null;
+		}
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) {
+			return null;
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return null;
+		}
+		return oUser;	
 	}
 }

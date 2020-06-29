@@ -1,7 +1,5 @@
 package wasdi.shared.business;
 
-import java.util.Date;
-
 public class Review {
 	private String processorId;
 	private Double date;

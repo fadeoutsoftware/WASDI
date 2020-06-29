@@ -89,6 +89,19 @@ var WappsController = (function() {
         }
     }
 
+    WappsController.prototype.tryParseJSON =function(sJsonString){
+        try {
+            var oJsonParsedObject = JSON.parse(sJsonString);
+
+            if (oJsonParsedObject && typeof oJsonParsedObject === "object") {
+                return oJsonParsedObject;
+            }
+        }
+        catch (e) { }
+
+        return false;
+    };
+
     WappsController.prototype.runProcessor = function()
     {
         console.log("RUN - " + this._selectedProcessor.processorName);
@@ -102,14 +115,19 @@ var WappsController = (function() {
             sJSON = this.m_sMyJsonString;
         }
 
-        var sStringJSON = "";
-        //CHECK: IF OBJECT AS STRING
+        let sStringJSON = "";
 
         if(utilsIsString(sJSON) === false)  {
             sStringJSON = JSON.stringify(sJSON);
         }
         else {
             sStringJSON = sJSON;
+        }
+
+        if (!this.tryParseJSON(sStringJSON)) {
+            let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE INPUT PARAMS");
+            utilsVexCloseDialogAfter(4000,oDialog);
+            return;
         }
 
         this.m_oProcessorService.runProcessor(this._selectedProcessor.processorName, sStringJSON)

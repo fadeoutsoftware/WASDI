@@ -103,7 +103,26 @@ var ProcessorController = (function() {
         return false;
     };
 
+    ProcessorController.prototype.tryParseJSON =function(sJsonString){
+         try {
+             var oJsonParsedObject = JSON.parse(sJsonString);
+
+             if (oJsonParsedObject && typeof oJsonParsedObject === "object") {
+                 return oJsonParsedObject;
+             }
+         }
+         catch (e) { }
+
+         return false;
+     };
+
      ProcessorController.prototype.updateProcessor = function (oController,oSelectedFile) {
+
+         if (!this.tryParseJSON(oController.m_sJSONSample)) {
+             var oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
+             utilsVexCloseDialogAfter(4000,oDialog);
+             return;
+         }
 
          // Update User Values
          oController.m_oInputProcessor.isPublic = 1;

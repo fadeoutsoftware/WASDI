@@ -8,14 +8,13 @@ import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 
 
 /**
- * Created by s.adamo on 24/05/2016.
+ * Created by s.adamo on 24/05/2016.	
  */
 public class Publisher {
 

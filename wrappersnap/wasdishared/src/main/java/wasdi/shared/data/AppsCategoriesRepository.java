@@ -10,8 +10,6 @@ import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.AppCategory;
-import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.utils.Utils;
 
 public class AppsCategoriesRepository extends MongoRepository {
