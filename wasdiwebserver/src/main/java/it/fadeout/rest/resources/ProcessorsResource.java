@@ -1,23 +1,17 @@
 package it.fadeout.rest.resources;
 
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +21,6 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -49,6 +42,10 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.BaseResource;
+import it.fadeout.business.ImageResourceUtils;
+import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
+import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Counter;
@@ -61,12 +58,16 @@ import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorSharingRepository;
+import wasdi.shared.data.ReviewRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.ImageFile;
@@ -1196,564 +1197,105 @@ public class ProcessorsResource extends BaseResource {
 		return null;
 	}		
 	
-	@POST
-	@Path("/uploadProcessorLogo")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
-		String sExt;
-		String sFileName;
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
+	/**
+	 * Zip a full processor
+	 * @param oInitialFile
+	 * @return
+	 */
+	private Response zipProcessor(File oInitialFile, Processor oProcessor) {
+		
+		// Create a stack of files
+		Stack<File> aoFileStack = new Stack<File>();
+		String sBasePath = oInitialFile.getParent();
+		
+		Utils.debugLog("ProcessorsResource.zipProcessor: sDir = " + sBasePath);
+		
+		// Get the processor folder
+		File oFile = new File(sBasePath);
+		aoFileStack.push(oFile);
+				
+		if(!sBasePath.endsWith("/") && !sBasePath.endsWith("\\")) {
+			sBasePath = sBasePath + "/";
 		}
 		
-		String sUserId = oUser.getUserId();
-		Processor oProcessor = getProcessor(sProcessorId);
+		int iBaseLen = sBasePath.length();
 		
-		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
-		}
+		String sProcTemplatePath = Wasdi.getDownloadPath(m_oServletConfig);
+		sProcTemplatePath += "dockertemplate/";
+		sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
 		
-		//check if the user is the owner of the processor 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
+		ArrayList<String> asTemplateFiles = new ArrayList<String>();
+		File oProcTemplateFolder = new File(sProcTemplatePath);
 		
-		//get filename and extension 
-		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
-			sFileName = fileMetaData.getFileName();
-			sExt = FilenameUtils.getExtension(sFileName);
-		} else {
-			return Response.status(400).build();
+		Utils.debugLog("ProcessorsResource.zipProcessor: Proc Template Path " + sProcTemplatePath);
+		
+		File[] aoTemplateChildren = oProcTemplateFolder.listFiles();
+		for (File oChild : aoTemplateChildren) {
+			asTemplateFiles.add(oChild.getName());
 		}
 		
 		
-		if(oImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
-			return Response.status(400).build();
-		}
-
-		// Take path
-		String sPath = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		// Create a map of the files to zip
+		Map<String, File> aoFileEntries = new HashMap<>();
 		
-		String sExtensionOfSavedLogo = getExtensionOfSavedLogo(sPath);
-		
-		//if there is a saved logo with a different extension remove it 
-		if( sExtensionOfSavedLogo.isEmpty() == false && sExtensionOfSavedLogo.equalsIgnoreCase(sExt) == false ){
-		    File oOldLogo = new File(sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExtensionOfSavedLogo);
-		    oOldLogo.delete();
-		}
+		while(aoFileStack.size()>=1) {
 			
-		oImageResourceUtils.createDirectory(sPath);
-	    
-	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
-	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
-	    
-	    boolean bIsSaved =  oOutputLogo.saveImage(fileInputStream);
-	    if(bIsSaved == false){
-	    	return Response.status(400).build();
-	    }
-	    
-	    boolean bIsResized = oOutputLogo.resizeImage(LOGO_SIZE, LOGO_SIZE);
-	    if(bIsResized == false){
-	    	return Response.status(400).build();
-	    }
-	    m_oProcessorRepository.updateProcessorDate(oProcessor);
-		return Response.status(200).build();
+			oFile = aoFileStack.pop();
+			String sAbsolutePath = oFile.getAbsolutePath();
+			
+			Utils.debugLog("ProcessorsResource.zipProcessor: sAbsolute Path " + sAbsolutePath);
+
+			if(oFile.isDirectory()) {
+				if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
+					sAbsolutePath = sAbsolutePath + "/";
+				}
+				File[] aoChildren = oFile.listFiles();
+				for (File oChild : aoChildren) {
+					
+					if (!asTemplateFiles.contains(oChild.getName())) {
+						aoFileStack.push(oChild);
+					}
+					else {
+						Utils.debugLog("ProcessorsResource.zipProcessor: jumping template file " + oChild.getName());
+					}
+					
+				}
+			}
+			
+			String sRelativePath = sAbsolutePath.substring(iBaseLen);
+			
+			if (!Utils.isNullOrEmpty(sRelativePath)) {
+				Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
+				aoFileEntries.put(sRelativePath,oFile);				
+			}
+			else {
+				Utils.debugLog("ProcessorsResource.zipProcessor: jumping empty file");
+			}
+		}
+		
+		Utils.debugLog("ProcessorsResource.zipProcessor: done preparing map, added " + aoFileEntries.size() + " files");
+					
+		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+
+		// Set response headers and return 
+		ResponseBuilder oResponseBuilder = Response.ok(oStream);
+		String sFileName = oInitialFile.getName();
+				
+		Utils.debugLog("ProcessorsResource.zipProcessor: sFileName " + sFileName);
+		
+		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+		Long lLength = 0L;
+		for (String sFile : aoFileEntries.keySet()) {
+			File oTempFile = aoFileEntries.get(sFile);
+			if(!oTempFile.isDirectory()) {
+				//NOTE: this way we are cheating, it is an upper bound, not the real size!
+				lLength += oTempFile.length();
+			}
+		}
+		oResponseBuilder.header("Content-Length", lLength);
+		Utils.debugLog("ProcessorsResource.zipProcessor: done");
+		return oResponseBuilder.build();
 	}	
-	
-	@GET
-	@Path("/getlogo")
-	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
-
-
-		Processor oProcessor = getProcessor(sProcessorId);
-		if(oProcessor == null){
-			return Response.status(401).build();
-		}
-			
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		
-		String sPathLogoFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + LOGO_PROCESSORS_PATH;
-		ImageFile oLogo = getLogoInFolder(sPathLogoFolder);
-		String sLogoExtension = getExtensionOfSavedLogo(sPathLogoFolder);
-		
-		//Check the logo and extension
-		if(oLogo == null || sLogoExtension.isEmpty() ){
-			return Response.status(204).build();
-		}
-		//prepare buffer and send the logo to the client 
-		ByteArrayInputStream abImageLogo = oLogo.getByteArrayImage();
-		
-	    return Response.ok(abImageLogo).build();
-
-	}
-	
-	
-	@GET
-	@Path("/getappimage")
-	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
-								@QueryParam("imageName") String sImageName) {
-
-
-		Processor oProcessor = getProcessor(sProcessorId);
-		if(oProcessor == null){
-			return Response.status(401).build();
-		}
-			
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		
-		String sPathLogoFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
-		ImageFile oImage = getImageInFolder(sPathLogoFolder,sImageName);
-		String sLogoExtension = getExtensionOfSavedImage(sPathLogoFolder,sImageName);
-		
-		//Check the logo and extension
-		if(oImage == null || sLogoExtension.isEmpty() ){
-			return Response.status(204).build();
-		}
-		//prepare buffer and send the logo to the client 
-		ByteArrayInputStream abImage = oImage.getByteArrayImage();
-		
-	    return Response.ok(abImage).build();
-
-	}
-	
-	@DELETE
-	@Path("/deleteprocessorimage")
-	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		
-		String sUserId = oUser.getUserId();
-		Processor oProcessor = getProcessor(sProcessorId);
-		
-		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
-		}
-		
-		if( sImageName== null || sImageName.isEmpty() ) {
-			return Response.status(400).build();
-		}
-
-		//check if the user is the owner of the processor 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
-		
-		String sPathFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
-		oImageResourceUtils.deleteFileInFolder(sPathFolder,sImageName);
-		
-		return Response.status(200).build();
-	}
-	
-	
-	@POST
-	@Path("/uploadProcessorImage")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
-	
-		String sExt;
-		String sFileName;
-
-		
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-	
-		String sUserId = oUser.getUserId();
-		Processor oProcessor = getProcessor(sProcessorId);
-		
-		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
-		}
-		
-		//check if the user is the owner of the processor 
-		if( oProcessor.getUserId().equals( oUser.getId() ) == false ){
-			return Response.status(401).build();
-		}
-		
-		//get filename and extension 
-		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
-			sFileName = fileMetaData.getFileName();
-			sExt = FilenameUtils.getExtension(sFileName);
-		} else {
-			return Response.status(400).build();
-		}
-		
-		if( oImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
-			return Response.status(400).build();
-		}
-		// Take path
-		String sPathFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
-		oImageResourceUtils.createDirectory(sPathFolder);
-		String sAvaibleFileName = getAvaibleFileName(sPathFolder);
-		
-		if(sAvaibleFileName.isEmpty()){
-			//the user have reach the max number of images 
-	    	return Response.status(400).build();
-		}
-		
-		String sPathImage = sPathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
-		ImageFile oNewImage = new ImageFile(sPathImage);
-
-		//TODO SCALE IMAGE ?
-		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
-	    if(bIsSaved == false){
-	    	return Response.status(400).build();
-	    }
-	    
-		double bytes = oNewImage.length();
-		double kilobytes = (bytes / 1024);
-		double megabytes = (kilobytes / 1024);
-		if( megabytes > 2 ){		
-			oNewImage.delete();
-	    	return Response.status(400).build();
-		}
-		
-		m_oProcessorRepository.updateProcessorDate(oProcessor);
-		return Response.status(200).build();
-	}
-	
-	@GET
-	@Path("/getcategories")
-	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
-
-
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-
-		
-		List<AppCategory> aoAppCategories = m_oAppCategoriesRepository.getCategories();
-		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = getCategoriesViewModel(aoAppCategories);
-		
-	    return Response.ok(aoAppCategoriesViewModel).build();
-
-	}
-	
-	@DELETE
-	@Path("/deletereview")
-	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
-		
-		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
-		
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		
-		String sUserId = oUser.getUserId();
-
-		Processor oProcessor = getProcessor(sProcessorId);
-
-		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
-		}
-		
-		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
-//		|| (m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false)
-		if( m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false ){
-			return Response.status(401).build();
-		}
-		
-		
-		
-		int iDeletedCount = m_oReviewRepository.deleteReview(sProcessorId, sReviewId);
-
-		if( iDeletedCount == 0 ){
-			return Response.status(400).build();
-		}
-		
-		return Response.status(200).build();
-	}
-	
-	@POST
-	@Path("/updatereview")
-	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
-	
-
-
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		
-		String sUserId = oUser.getUserId();
-
-		
-		if(oReviewViewModel == null ){
-			return Response.status(400).build();
-		}
-		
-		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
-		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false || (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false) ){
-			return Response.status(401).build();
-		}
-		//CHECK THE VALUE OF THE VOTE === 1 - 5
-		if( isValidVote(oReviewViewModel.getVote()) == false ){
-			return Response.status(400).build();
-		}
-		
-		//ADD DATE 
-		Date oDate = new Date();
-		oReviewViewModel.setDate(oDate);
-		
-		Review oReview = getReviewModel(oReviewViewModel);
-		
-		
-		boolean isUpdated = m_oReviewRepository.updateReview(oReview);
-		if(isUpdated == false){
-			return Response.status(400).build();
-		}
-		//TODO CHECK THE RESULT 
-		return Response.status(200).build();
-	}
-	
-	@POST
-	@Path("/addreview")
-//	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
-	
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		
-		String sUserId = oUser.getUserId();
-		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE === 
-		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false){
-			return Response.status(400).build();
-		}
-		
-		if(oReviewViewModel == null ){
-			return Response.status(400).build();
-		}
-		
-		//CHECK THE VALUE OF THE VOTE === 1 - 5
-		if( isValidVote(oReviewViewModel.getVote()) == false ){
-			return Response.status(400).build();
-		}
-		
-		//ADD DATE 
-		Date oDate = new Date();
-		oReviewViewModel.setDate(oDate);
-		
-		Review oReview = getReviewModel(oReviewViewModel);
-		
-		//LIMIT THE NUMBER OF COMMENTS
-		if(m_oReviewRepository.alreadyVoted(oReview) == true){
-			return Response.status(400).build();
-		}
-		
-		// ADD ID 
-		oReview.setId(Utils.GetRandomName()); 
-		
-		m_oReviewRepository.addReview(oReview);
-		
-		return Response.status(200).build();
-	}
-	
-	@GET
-	@Path("/getreviews")
-	public Response getReview (@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
-
-
-		User oUser = getUser(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-		Processor oProcessor = getProcessor(sProcessorId);
-		
-		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
-		}
-		
-		List<Review> aoReviewRepository = m_oReviewRepository.getReviews(sProcessorId);
-		
-		if(aoReviewRepository == null || aoReviewRepository.size() == 0){
-			  return Response.ok(null).build();
-		}
-		
-		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoReviewRepository);
-		
-	    return Response.ok(oListReviewsViewModel).build();
-
-	}
-	
-	
-	
-	private boolean isValidVote(String sVote){
-		boolean bIsValid = false;
-		for(String sValidVote : RANGE_OF_VOTES){
-			
-			if(sValidVote.equals(sVote.toLowerCase())){
-				bIsValid = true;
-			}
-		}
-		return bIsValid;
-	}
-	
-	private Review getReviewModel(ReviewViewModel oReviewViewModel){
-		if(oReviewViewModel != null){
-			Review oReview = new Review();
-			oReview.setComment(oReviewViewModel.getComment());
-			oReview.setDate((double)oReviewViewModel.getDate().getTime());
-			oReview.setId(oReviewViewModel.getId());//TODO GENERATE ID 
-			oReview.setProcessorId(oReviewViewModel.getProcessorId());
-			oReview.setUserId(oReviewViewModel.getUserId());
-			oReview.setVote(oReviewViewModel.getVote());
-			return oReview;
-		}
-		return null;
-	}
-	
-	private ListReviewsViewModel getListReviewsViewModel(List<Review> aoReviewRepository ){
-		ListReviewsViewModel oListReviews = new ListReviewsViewModel();
-		List<ReviewViewModel> aoReviews = new ArrayList<ReviewViewModel>();
-		if(aoReviewRepository == null){
-			return null; 
-		}
-		
-		//CHECK VALUE VOTE policy 1 - 5
-		int iSumVotes = 0;
-
-		for(Review oReview: aoReviewRepository){
-			ReviewViewModel oReviewViewModel = new ReviewViewModel();
-			oReviewViewModel.setComment(oReview.getComment());
-
-			oReviewViewModel.setDate( Utils.getDate(oReview.getDate()) );
-			
-			oReviewViewModel.setId(oReview.getId());
-			oReviewViewModel.setUserId(oReview.getUserId());
-			oReviewViewModel.setProcessorId(oReview.getUserId());
-			oReviewViewModel.setVote(oReview.getVote());
-			iSumVotes = iSumVotes + Integer.parseInt(oReview.getVote());
-			
-			aoReviews.add(oReviewViewModel);
-		}
-		
-		float avgVote = (float)iSumVotes / aoReviews.size();
-		
-		oListReviews.setReviews(aoReviews);
-		oListReviews.setAvgVote(avgVote);
-		oListReviews.setNumberOfOneStarVotes(getNumberOfVotes(aoReviews , 1));
-		oListReviews.setNumberOfTwoStarVotes(getNumberOfVotes(aoReviews , 2));
-		oListReviews.setNumberOfThreeStarVotes(getNumberOfVotes(aoReviews , 3));
-		oListReviews.setNumberOfFourStarVotes(getNumberOfVotes(aoReviews , 4));
-		oListReviews.setNumberOfFiveStarVotes(getNumberOfVotes(aoReviews , 5));
-
-		return oListReviews;
-	}
-	
-	private int getNumberOfVotes(List<ReviewViewModel> aoReviews, int iVotes ){
-		int iNumberOfVotes = 0;
-		for(ReviewViewModel oReview : aoReviews){
-			if( Integer.parseInt(oReview.getVote()) == iVotes){
-				iNumberOfVotes++;
-			}
-			
-		}
-		return iNumberOfVotes;
-	}
-	
-	private ArrayList<AppCategoryViewModel> getCategoriesViewModel(List<AppCategory> aoAppCategories ){
-		
-		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = new ArrayList<AppCategoryViewModel>();
-		
-		for(AppCategory oCategory:aoAppCategories){
-			AppCategoryViewModel oAppCategoryViewModel = new AppCategoryViewModel();
-			oAppCategoryViewModel.setId(oCategory.getId());
-			oAppCategoryViewModel.setCategory(oCategory.getCategory());
-			aoAppCategoriesViewModel.add(oAppCategoryViewModel);
-		}
-		
-		return aoAppCategoriesViewModel;
-	} 
-	
-
-
-	
-	// return a free name for the image (if is possible) 
-	private String getAvaibleFileName(String sPathFolder) {
-		File oFolder = new File(sPathFolder);
-		File[] aoListOfFiles = oFolder.listFiles();
-
-		String sReturnValueName = "";
-		boolean bIsAvaibleName = false; 
-		for (String sAvaibleFileName : IMAGES_NAME){
-			bIsAvaibleName = true;
-			sReturnValueName = sAvaibleFileName;
-			
-			for (File oImage : aoListOfFiles){ 
-				String sName = oImage.getName();
-				String sFileName = FilenameUtils.removeExtension(sName);	
-				
-				if(sAvaibleFileName.equalsIgnoreCase(sFileName)){
-					bIsAvaibleName = false;
-					break;
-				} 
-				
-			}
-			
-			if(bIsAvaibleName == true){
-				break;
-			}
-			sReturnValueName = "";
-		 }
-
-		return sReturnValueName;
-	}
-	
-//	//return null if there isn't any saved logo
-	private ImageFile getImageInFolder(String sPathLogoFolder, String sImageName){
-		return oImageResourceUtils.getImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
-	}
-	
-	//return empty string if there isn't any saved logo
-	private String getExtensionOfSavedImage (String sPathLogoFolder , String sImageName){
-		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
-	}
-	
-	//return null if there isn't any saved logo
-	private ImageFile getLogoInFolder(String sPathLogoFolder){
-		return oImageResourceUtils.getImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
-	}
-	
-	
-	//return empty string if there isn't any saved logo
-	private String getExtensionOfSavedLogo (String sPathLogoFolder){
-		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
-	}
-	private Processor getProcessor(String sProcessorId){
-	
-		if(Utils.isNullOrEmpty(sProcessorId)) {
-			return null;
-		}
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-		return oProcessor;
-	}
 
     
 	public boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
@@ -2005,6 +1547,563 @@ public class ProcessorsResource extends BaseResource {
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);
 		return oResult;
+	}
+	
+	
+	@POST
+	@Path("/uploadProcessorLogo")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+		String sExt;
+		String sFileName;
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		Processor oProcessor = getProcessor(sProcessorId);
+		
+		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		//check if the user is the owner of the processor 
+		if( oProcessor.getUserId().equals( oUser.getUserId() ) == false ){
+			return Response.status(401).build();
+		}
+		
+		//get filename and extension 
+		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
+			sFileName = fileMetaData.getFileName();
+			sExt = FilenameUtils.getExtension(sFileName);
+		} else {
+			return Response.status(400).build();
+		}
+		
+		
+		if(oImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
+			return Response.status(400).build();
+		}
+
+		// Take path
+		String sPath = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		
+		String sExtensionOfSavedLogo = getExtensionOfSavedLogo(sPath);
+		
+		//if there is a saved logo with a different extension remove it 
+		if( sExtensionOfSavedLogo.isEmpty() == false && sExtensionOfSavedLogo.equalsIgnoreCase(sExt) == false ){
+		    File oOldLogo = new File(sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExtensionOfSavedLogo);
+		    oOldLogo.delete();
+		}
+			
+		oImageResourceUtils.createDirectory(sPath);
+	    
+	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
+	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+	    
+	    boolean bIsSaved =  oOutputLogo.saveImage(fileInputStream);
+	    if(bIsSaved == false){
+	    	return Response.status(400).build();
+	    }
+	    
+	    boolean bIsResized = oOutputLogo.resizeImage(LOGO_SIZE, LOGO_SIZE);
+	    if(bIsResized == false){
+	    	return Response.status(400).build();
+	    }
+	    m_oProcessorRepository.updateProcessorDate(oProcessor);
+		return Response.status(200).build();
+	}	
+	
+	@GET
+	@Path("/getlogo")
+	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+
+
+		Processor oProcessor = getProcessor(sProcessorId);
+		if(oProcessor == null){
+			return Response.status(401).build();
+		}
+			
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sPathLogoFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		ImageFile oLogo = getLogoInFolder(sPathLogoFolder);
+		String sLogoExtension = getExtensionOfSavedLogo(sPathLogoFolder);
+		
+		//Check the logo and extension
+		if(oLogo == null || sLogoExtension.isEmpty() ){
+			return Response.status(204).build();
+		}
+		//prepare buffer and send the logo to the client 
+		ByteArrayInputStream abImageLogo = oLogo.getByteArrayImage();
+		
+	    return Response.ok(abImageLogo).build();
 
 	}
+	
+	
+	@GET
+	@Path("/getappimage")
+	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
+								@QueryParam("imageName") String sImageName) {
+
+
+		Processor oProcessor = getProcessor(sProcessorId);
+		if(oProcessor == null){
+			return Response.status(401).build();
+		}
+			
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sPathLogoFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		ImageFile oImage = getImageInFolder(sPathLogoFolder,sImageName);
+		String sLogoExtension = getExtensionOfSavedImage(sPathLogoFolder,sImageName);
+		
+		//Check the logo and extension
+		if(oImage == null || sLogoExtension.isEmpty() ){
+			return Response.status(204).build();
+		}
+		//prepare buffer and send the logo to the client 
+		ByteArrayInputStream abImage = oImage.getByteArrayImage();
+		
+	    return Response.ok(abImage).build();
+
+	}
+	
+	@DELETE
+	@Path("/deleteprocessorimage")
+	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		Processor oProcessor = getProcessor(sProcessorId);
+		
+		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		if( sImageName== null || sImageName.isEmpty() ) {
+			return Response.status(400).build();
+		}
+
+		//check if the user is the owner of the processor 
+		if( oProcessor.getUserId().equals( oUser.getUserId() ) == false ){
+			return Response.status(401).build();
+		}
+		
+		String sPathFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		oImageResourceUtils.deleteFileInFolder(sPathFolder,sImageName);
+		
+		return Response.status(200).build();
+	}
+	
+	
+	@POST
+	@Path("/uploadProcessorImage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+	
+		String sExt;
+		String sFileName;
+
+		
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+	
+		Processor oProcessor = getProcessor(sProcessorId);
+		
+		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		//check if the user is the owner of the processor 
+		if( oProcessor.getUserId().equals( oUser.getUserId() ) == false ){
+			return Response.status(401).build();
+		}
+		
+		//get filename and extension 
+		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
+			sFileName = fileMetaData.getFileName();
+			sExt = FilenameUtils.getExtension(sFileName);
+		} else {
+			return Response.status(400).build();
+		}
+		
+		if( oImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
+			return Response.status(400).build();
+		}
+		// Take path
+		String sPathFolder = m_oServletConfig.getInitParameter("ProcessorPath") + oProcessor.getName() + IMAGES_PROCESSORS_PATH;
+		oImageResourceUtils.createDirectory(sPathFolder);
+		String sAvaibleFileName = getAvaibleFileName(sPathFolder);
+		
+		if(sAvaibleFileName.isEmpty()){
+			//the user have reach the max number of images 
+	    	return Response.status(400).build();
+		}
+		
+		String sPathImage = sPathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
+		ImageFile oNewImage = new ImageFile(sPathImage);
+
+		//TODO SCALE IMAGE ?
+		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
+	    if(bIsSaved == false){
+	    	return Response.status(400).build();
+	    }
+	    
+		double bytes = oNewImage.length();
+		double kilobytes = (bytes / 1024);
+		double megabytes = (kilobytes / 1024);
+		if( megabytes > 2 ){		
+			oNewImage.delete();
+	    	return Response.status(400).build();
+		}
+		
+		m_oProcessorRepository.updateProcessorDate(oProcessor);
+		return Response.status(200).build();
+	}
+	
+	@GET
+	@Path("/getcategories")
+	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+
+		
+		List<AppCategory> aoAppCategories = m_oAppCategoriesRepository.getCategories();
+		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = getCategoriesViewModel(aoAppCategories);
+		
+	    return Response.ok(aoAppCategoriesViewModel).build();
+
+	}
+	
+	@DELETE
+	@Path("/deletereview")
+	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
+		
+		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
+		
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+
+		Processor oProcessor = getProcessor(sProcessorId);
+
+		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+//		|| (m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false)
+		if( m_oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false ){
+			return Response.status(401).build();
+		}
+		
+		
+		
+		int iDeletedCount = m_oReviewRepository.deleteReview(sProcessorId, sReviewId);
+
+		if( iDeletedCount == 0 ){
+			return Response.status(400).build();
+		}
+		
+		return Response.status(200).build();
+	}
+	
+	@POST
+	@Path("/updatereview")
+	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
+	
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+
+		
+		if(oReviewViewModel == null ){
+			return Response.status(400).build();
+		}
+		
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false || (m_oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false) ){
+			return Response.status(401).build();
+		}
+		//CHECK THE VALUE OF THE VOTE === 1 - 5
+		if( isValidVote(oReviewViewModel.getVote()) == false ){
+			return Response.status(400).build();
+		}
+		
+		//ADD DATE 
+		Date oDate = new Date();
+		oReviewViewModel.setDate(oDate);
+		
+		Review oReview = getReviewModel(oReviewViewModel);
+		
+		
+		boolean isUpdated = m_oReviewRepository.updateReview(oReview);
+		if(isUpdated == false){
+			return Response.status(400).build();
+		}
+		else {
+			return Response.status(200).build();
+		}
+	}
+	
+	@POST
+	@Path("/addreview")
+//	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
+	
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		if(oReviewViewModel == null ){
+			return Response.status(400).build();
+		}		
+		
+		String sUserId = oUser.getUserId();
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE === 
+		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false){
+			return Response.status(400).build();
+		}
+		
+				
+		//CHECK THE VALUE OF THE VOTE === 1 - 5
+		if( isValidVote(oReviewViewModel.getVote()) == false ){
+			return Response.status(400).build();
+		}
+		
+		//ADD DATE 
+		Date oDate = new Date();
+		oReviewViewModel.setDate(oDate);
+		
+		Review oReview = getReviewModel(oReviewViewModel);
+		
+		//LIMIT THE NUMBER OF COMMENTS
+		if(m_oReviewRepository.alreadyVoted(oReview) == true){
+			return Response.status(400).build();
+		}
+		
+		// ADD ID 
+		oReview.setId(Utils.GetRandomName()); 
+		
+		m_oReviewRepository.addReview(oReview);
+		
+		return Response.status(200).build();
+	}
+	
+	@GET
+	@Path("/getreviews")
+	public Response getReview (@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		Processor oProcessor = getProcessor(sProcessorId);
+		
+		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(400).build();
+		}
+		
+		List<Review> aoReviewRepository = m_oReviewRepository.getReviews(sProcessorId);
+		
+		if(aoReviewRepository == null || aoReviewRepository.size() == 0){
+			  return Response.ok(null).build();
+		}
+		
+		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoReviewRepository);
+		
+	    return Response.ok(oListReviewsViewModel).build();
+
+	}
+	
+	
+	
+	private boolean isValidVote(String sVote){
+		boolean bIsValid = false;
+		for(String sValidVote : RANGE_OF_VOTES){
+			
+			if(sValidVote.equals(sVote.toLowerCase())){
+				bIsValid = true;
+			}
+		}
+		return bIsValid;
+	}
+	
+	private Review getReviewModel(ReviewViewModel oReviewViewModel){
+		if(oReviewViewModel != null){
+			Review oReview = new Review();
+			oReview.setComment(oReviewViewModel.getComment());
+			oReview.setDate((double)oReviewViewModel.getDate().getTime());
+			oReview.setId(oReviewViewModel.getId());//TODO GENERATE ID 
+			oReview.setProcessorId(oReviewViewModel.getProcessorId());
+			oReview.setUserId(oReviewViewModel.getUserId());
+			oReview.setVote(oReviewViewModel.getVote());
+			return oReview;
+		}
+		return null;
+	}
+	
+	private ListReviewsViewModel getListReviewsViewModel(List<Review> aoReviewRepository ){
+		ListReviewsViewModel oListReviews = new ListReviewsViewModel();
+		List<ReviewViewModel> aoReviews = new ArrayList<ReviewViewModel>();
+		if(aoReviewRepository == null){
+			return null; 
+		}
+		
+		//CHECK VALUE VOTE policy 1 - 5
+		int iSumVotes = 0;
+
+		for(Review oReview: aoReviewRepository){
+			ReviewViewModel oReviewViewModel = new ReviewViewModel();
+			oReviewViewModel.setComment(oReview.getComment());
+
+			oReviewViewModel.setDate( Utils.getDate(oReview.getDate()) );
+			
+			oReviewViewModel.setId(oReview.getId());
+			oReviewViewModel.setUserId(oReview.getUserId());
+			oReviewViewModel.setProcessorId(oReview.getUserId());
+			oReviewViewModel.setVote(oReview.getVote());
+			iSumVotes = iSumVotes + Integer.parseInt(oReview.getVote());
+			
+			aoReviews.add(oReviewViewModel);
+		}
+		
+		float avgVote = (float)iSumVotes / aoReviews.size();
+		
+		oListReviews.setReviews(aoReviews);
+		oListReviews.setAvgVote(avgVote);
+		oListReviews.setNumberOfOneStarVotes(getNumberOfVotes(aoReviews , 1));
+		oListReviews.setNumberOfTwoStarVotes(getNumberOfVotes(aoReviews , 2));
+		oListReviews.setNumberOfThreeStarVotes(getNumberOfVotes(aoReviews , 3));
+		oListReviews.setNumberOfFourStarVotes(getNumberOfVotes(aoReviews , 4));
+		oListReviews.setNumberOfFiveStarVotes(getNumberOfVotes(aoReviews , 5));
+
+		return oListReviews;
+	}
+	
+	private int getNumberOfVotes(List<ReviewViewModel> aoReviews, int iVotes ){
+		int iNumberOfVotes = 0;
+		for(ReviewViewModel oReview : aoReviews){
+			if( Integer.parseInt(oReview.getVote()) == iVotes){
+				iNumberOfVotes++;
+			}
+			
+		}
+		return iNumberOfVotes;
+	}
+	
+	private ArrayList<AppCategoryViewModel> getCategoriesViewModel(List<AppCategory> aoAppCategories ){
+		
+		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = new ArrayList<AppCategoryViewModel>();
+		
+		for(AppCategory oCategory:aoAppCategories){
+			AppCategoryViewModel oAppCategoryViewModel = new AppCategoryViewModel();
+			oAppCategoryViewModel.setId(oCategory.getId());
+			oAppCategoryViewModel.setCategory(oCategory.getCategory());
+			aoAppCategoriesViewModel.add(oAppCategoryViewModel);
+		}
+		
+		return aoAppCategoriesViewModel;
+	} 
+	
+
+
+	
+	// return a free name for the image (if is possible) 
+	private String getAvaibleFileName(String sPathFolder) {
+		File oFolder = new File(sPathFolder);
+		File[] aoListOfFiles = oFolder.listFiles();
+
+		String sReturnValueName = "";
+		boolean bIsAvaibleName = false; 
+		for (String sAvaibleFileName : IMAGES_NAME){
+			bIsAvaibleName = true;
+			sReturnValueName = sAvaibleFileName;
+			
+			for (File oImage : aoListOfFiles){ 
+				String sName = oImage.getName();
+				String sFileName = FilenameUtils.removeExtension(sName);	
+				
+				if(sAvaibleFileName.equalsIgnoreCase(sFileName)){
+					bIsAvaibleName = false;
+					break;
+				} 
+				
+			}
+			
+			if(bIsAvaibleName == true){
+				break;
+			}
+			sReturnValueName = "";
+		 }
+
+		return sReturnValueName;
+	}
+	
+//	//return null if there isn't any saved logo
+	private ImageFile getImageInFolder(String sPathLogoFolder, String sImageName){
+		return oImageResourceUtils.getImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
+	}
+	
+	//return empty string if there isn't any saved logo
+	private String getExtensionOfSavedImage (String sPathLogoFolder , String sImageName){
+		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
+	}
+	
+	//return null if there isn't any saved logo
+	private ImageFile getLogoInFolder(String sPathLogoFolder){
+		return oImageResourceUtils.getImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
+	}
+	
+	
+	//return empty string if there isn't any saved logo
+	private String getExtensionOfSavedLogo (String sPathLogoFolder){
+		return oImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
+	}
+	private Processor getProcessor(String sProcessorId){
+	
+		if(Utils.isNullOrEmpty(sProcessorId)) {
+			return null;
+		}
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		return oProcessor;
+	}
+	
 }

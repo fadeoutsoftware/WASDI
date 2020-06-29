@@ -250,7 +250,6 @@ public class ProcessorRepository extends  MongoRepository {
 		Date oDate = new Date();
 		oProcessor.setUpdateDate( (double) oDate.getTime());
 		updateProcessor(oProcessor);
-		
 	}
 	
 }

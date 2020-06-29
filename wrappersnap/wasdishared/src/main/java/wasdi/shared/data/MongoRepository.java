@@ -80,6 +80,8 @@ public class MongoRepository {
      */
     protected String m_sRepoDb = "wasdi";
     
+    private static boolean s_bDbSwitchLogged = false;
+    
 	/**
      * Add a new Mongo Connection
      * @param sDbCode Code of the connection
@@ -115,8 +117,6 @@ public class MongoRepository {
 			e.printStackTrace();
     	}    	
     }
-    
-    private static boolean s_bDbSwitchLogged = false;
     
     /**
      * Get The database Object
@@ -213,6 +213,7 @@ public class MongoRepository {
 		});
 	}
 	public <T> String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
+		String sResult = "";
 		if(oNewDocument != null) {
 			try {
 				String sJSON = s_oMapper.writeValueAsString(oNewDocument);
@@ -224,6 +225,7 @@ public class MongoRepository {
 				Utils.debugLog(sRepositoryCommand + ": " + oEx);
 			}
 		}
+		return sResult;
 	}
 	
 	public int delete(BasicDBObject oCriteria, String sCollectionName ){

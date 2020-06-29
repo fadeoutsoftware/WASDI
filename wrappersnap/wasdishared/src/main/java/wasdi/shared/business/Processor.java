@@ -43,7 +43,8 @@ public class Processor {
 	/**
 	 * Processor first deploy nodeCode
 	 */
-	private String nodeCode;	
+	private String nodeCode;
+	
 	/**
 	 * Processor first deploy nodeUrl
 	 */
@@ -163,9 +164,31 @@ public class Processor {
 	public void setIsPublic(int isPublic) {
 		this.isPublic = isPublic;
 	}
-
+	
+	public Double getUploadDate() {
+		return uploadDate;
 	}
+	public void setUploadDate(Double uploadDate) {
+		this.uploadDate = uploadDate;
 	}
+	public Double getUpdateDate() {
+		return updateDate;
 	}
+	public void setUpdateDate(Double updateDate) {
+		this.updateDate = updateDate;
+	}	
+	
+	public String getNodeCode() {
+		return nodeCode;
 	}
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+	public String getNodeUrl() {
+		return nodeUrl;
+	}
+	public void setNodeUrl(String nodeUrl) {
+		this.nodeUrl = nodeUrl;
+	}
+	
 }
