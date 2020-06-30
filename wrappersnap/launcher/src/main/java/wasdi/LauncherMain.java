@@ -3057,12 +3057,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			//todo check: kill the parent first (breadth first?)
 			//accumulation loop
 			while(aoProcessesToBeKilled.size() > 0) {
+				
 				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
 				
 				if(null==oProcess) {
 					s_oLogger.error("killProcessTree: a null process was added, skipping");
 					continue;
 				}
+				
+				s_oLogger.info("killProcessTree: killing " + oProcess.getProcessObjId());
+				
 				//kill the process immediately
 				killProcessAndDocker(oProcess);
 				
@@ -3121,6 +3125,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	private void killProcessAndDocker(ProcessWorkspace oProcessToKill){
 		try {
 			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+			
 			if(oLauncherOperationsUtils.doesOperationLaunchDocker(oProcessToKill.getOperationType())) {
 				s_oLogger.info("killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
 				killDocker(oProcessToKill);
@@ -3206,14 +3211,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
 			String sOutputResult;
 			String sOutputCumulativeResult = "";
-			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
+			Utils.debugLog("killDocker: Output from Server .... \n");
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				s_oLogger.debug("ProcessorsResource.help: " + sOutputResult);
+				s_oLogger.debug("killDocker: " + sOutputResult);
 				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
 			}
 			oConnection.disconnect();
 			
 			s_oLogger.info(sOutputCumulativeResult);
+			s_oLogger.info("Kill docker done for " + oProcessToKill.getProcessObjId() + " SubPid: " + oProcessToKill.getSubprocessPid());
 		} catch (Exception oE) {
 			s_oLogger.error("killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
 		}
