@@ -867,7 +867,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 					// Save Metadata
-					oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
+					//oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
 					
 					if (Utils.isNullOrEmpty(sFileNameWithoutPath)) {
 						sFileNameWithoutPath = oProductFile.getName();
@@ -3050,7 +3050,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				throw new NullPointerException("Process not found in DB");
 			}
 			
-			s_oLogger.info("killProcessTree: collecting and killing processes");
+			s_oLogger.info("killProcessTree: collecting and killing processes for " + oProcessToKill.getProcessObjId());
 			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
 			//new element added at the end
 			aoProcessesToBeKilled.add(oProcessToKill);
@@ -3094,6 +3094,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					aoProcessesToBeKilled.addAll(aoChildren);
 				}
 			}
+			
+			s_oLogger.error("killProcessTree: Kill loop done");
 			
 			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
 			oMyProcess.setStatus("DONE");
@@ -3149,14 +3151,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	
 			if (iPid>0) {
 				// Pid exists, kill the process
-				String sShellExString = ConfigReader.getPropValue("KillCommand") + " " + iPid;
+				String sShellExString = ConfigReader.getPropValue("KillCommand");
+				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
+				sShellExString+= " " + iPid;
 	
-				s_oLogger.info("killProcessAndDocker: shell exec " + sShellExString);
+				s_oLogger.info("killProcess: shell exec " + sShellExString);
 				Process oProc = Runtime.getRuntime().exec(sShellExString);
-				s_oLogger.info("killProcessAndDocker: kill result: " + oProc.waitFor());
+				s_oLogger.info("killProcess: kill result: " + oProc.waitFor());
 	
 			} else {
-				s_oLogger.error("killProcessAndDocker: Process pid not in data");
+				s_oLogger.error("killProcess: Process pid not in data");
 			}
 	
 			// set process state to STOPPED only if CREATED or RUNNING
@@ -3172,11 +3176,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	
 				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 				if (!oRepository.updateProcess(oProcessToKill)) {
-					s_oLogger.error("killProcessAndDocker: Unable to update process status of process " + oProcessToKill.getProcessObjId());
+					s_oLogger.error("killProcess: Unable to update process status of process " + oProcessToKill.getProcessObjId());
 				}
 	
 			} else {
-				s_oLogger.info("killProcessAndDocker: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sPrevSatus);
+				s_oLogger.info("killProcess: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sPrevSatus);
 			}
 		} catch (Exception oE) {
 			s_oLogger.error("killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
@@ -3211,7 +3215,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
 			String sOutputResult;
 			String sOutputCumulativeResult = "";
-			Utils.debugLog("killDocker: Output from Server .... \n");
+			
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
 				s_oLogger.debug("killDocker: " + sOutputResult);
 				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
