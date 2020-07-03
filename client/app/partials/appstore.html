@@ -10,6 +10,10 @@
 <!--        </div>-->
     </div>
 
+    <div class="row">
+        <button ng-click="m_oController.readValues()">Read Values</button>
+    </div>
+
     <div class="row" ng-repeat="viewElement in m_oController.m_aoViewElements">
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
             {{viewElement.sLabel}}
@@ -33,7 +37,7 @@
 
             <lightsearchproductdirective  ng-if="viewElement.type === 'lighserachproduct'" light-search-object="viewElement"></lightsearchproductdirective>
 
-            <chipslistdirective></chipslistdirective>
+            <!--chipslistdirective></chipslistdirective-->
 
         </div>
 

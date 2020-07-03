@@ -22,8 +22,54 @@ function ViewElementFactory() {
         }
         oViewElement.type = type;
         oViewElement.sLabel = "";
+        oViewElement.paramName = "";
 
         return oViewElement;
+    }
+
+    this.getTabElements = function (oTab) {
+
+        let aoTabElements = [];
+
+        for (let iControl=0; iControl<oTab.controls.length; iControl ++) {
+            let oControl = oTab.controls[iControl];
+
+            var oViewElement;
+
+            if (oControl.type === "textbox") {
+                oViewElement = new TextBox();
+
+                if (oControl.default) {
+                    oViewElement.sTextBox = oControl.default;
+                }
+            }
+            else if (oControl.type === "dropdown") {
+                oViewElement = new DropDown();
+            }
+            else if (oControl.type === "bbox") {
+                oViewElement = new SelectArea();
+            }
+            else if (oControl.type === "date"){
+                oViewElement = new DateBox();
+            }
+            else if (oControl.type === "tableofproducts"){
+                oViewElement = new TableOfProducts();
+            }
+            else if (oControl.type === "lighserachproduct"){
+                oViewElement = new LightSearchProduct();
+            }
+            else {
+                oViewElement = new TextBox();
+            }
+
+            oViewElement.type = oControl.type;
+            oViewElement.sLabel = oControl.label;
+            oViewElement.paramName = oControl.param;
+
+            aoTabElements.push(oViewElement);
+        }
+
+        return aoTabElements;
     }
 }
 
