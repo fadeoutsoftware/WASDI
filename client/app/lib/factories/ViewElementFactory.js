@@ -1,28 +1,57 @@
 function ViewElementFactory() {
-    this.CreateViewElement = function (type) {
-        var oViewElement;
 
-        if (type === "textbox") {
+    /**
+     * Creates a single view element from a control in input.
+     * @param oControl Control Description: minimum properties are param, type, label
+     * @returns {TextBox|SelectArea|ProductList|CheckBox|SearchEOImage|DateTimePicker|*}
+     */
+    this.createViewElement = function (oControl) {
+
+        // Return variable
+        let oViewElement;
+
+        // Find the right type and create the element
+        if (oControl.type === "textbox") {
+
+            // Text box
             oViewElement = new TextBox();
+
+            // See if we have a default
+            if (oControl.default) {
+                oViewElement.m_sText = oControl.default;
+            }
         }
-        if (type === "dropdown") {
+        else if (oControl.type === "dropdown") {
+            // Drop Down
             oViewElement = new DropDown();
         }
-        if (type === "selectarea") {
+        else if (oControl.type === "bbox") {
+            // Bounding Box from Map
             oViewElement = new SelectArea();
         }
-        if(type === "date"){
-            oViewElement = new DateBox();
+        else if (oControl.type === "date"){
+            oViewElement = new DateTimePicker();
         }
-        if(type === "tableofproducts"){
-            oViewElement = new TableOfProducts();
+        else if (oControl.type === "productlist"){
+            oViewElement = new ProductList();
         }
-        if(type === "lighserachproduct"){
-            oViewElement = new LightSearchProduct();
+        else if (oControl.type === "searcheoimage"){
+            oViewElement = new SearchEOImage();
         }
-        oViewElement.type = type;
-        oViewElement.sLabel = "";
-        oViewElement.paramName = "";
+        else if(oControl.type === "boolean"){
+            oViewElement = new CheckBox();
+
+            if (oControl.default) {
+                oViewElement.m_bValue = oControl.default;
+            }
+        }
+        else {
+            oViewElement = new TextBox();
+        }
+
+        oViewElement.type = oControl.type;
+        oViewElement.label = oControl.label;
+        oViewElement.paramName = oControl.param;
 
         return oViewElement;
     }
@@ -34,37 +63,7 @@ function ViewElementFactory() {
         for (let iControl=0; iControl<oTab.controls.length; iControl ++) {
             let oControl = oTab.controls[iControl];
 
-            var oViewElement;
-
-            if (oControl.type === "textbox") {
-                oViewElement = new TextBox();
-
-                if (oControl.default) {
-                    oViewElement.sTextBox = oControl.default;
-                }
-            }
-            else if (oControl.type === "dropdown") {
-                oViewElement = new DropDown();
-            }
-            else if (oControl.type === "bbox") {
-                oViewElement = new SelectArea();
-            }
-            else if (oControl.type === "date"){
-                oViewElement = new DateBox();
-            }
-            else if (oControl.type === "tableofproducts"){
-                oViewElement = new TableOfProducts();
-            }
-            else if (oControl.type === "lighserachproduct"){
-                oViewElement = new LightSearchProduct();
-            }
-            else {
-                oViewElement = new TextBox();
-            }
-
-            oViewElement.type = oControl.type;
-            oViewElement.sLabel = oControl.label;
-            oViewElement.paramName = oControl.param;
+            let oViewElement = this.createViewElement(oControl);
 
             aoTabElements.push(oViewElement);
         }
@@ -73,43 +72,148 @@ function ViewElementFactory() {
     }
 }
 
-var LightSearchProduct = function() {
-    this.oTableOfProducts = new TableOfProducts();
-    this.oStartDate = new DateBox();
-    this.oEndDate = new DateBox();
+/**
+ * Search EO Image Control Class
+ * @constructor
+ */
+let SearchEOImage = function() {
+    this.oTableOfProducts = new ProductList();
+    this.oStartDate = new DateTimePicker();
+    this.oEndDate = new DateTimePicker();
     this.oSelectArea = new SelectArea();
     this.aoProviders = [];
     this.aoMissionsFilters = [];
+
+    /**
+     *
+     * @returns {string}
+     */
+    this.getValue = function () {
+        return "";
+    }
 };
 
-var TableOfProducts = function(){
+/**
+ * Product List Control Class
+ * @constructor
+ */
+let ProductList = function(){
     this.aoProducts = [];
     this.isAvailableSelection = false;
     this.isSingleSelection = true;
     this.oSingleSelectionLayer = {};
+
+    /**
+     *
+     * @returns {{}}
+     */
+    this.getValue = function () {
+        return this.oSingleSelectionLayer;
+    }
 };
 
-var DateBox = function(){
-    this.oDate = null;
+/**
+ * Date Time Picker Control Class
+ * @constructor
+ */
+let DateTimePicker = function(){
+    this.m_sDate = null;
+
+    /**
+     * Returns the selected Date
+     * @returns {string|null} Date as a string in format YYYY-MM-DD
+     */
+    this.getValue = function () {
+        if (this.m_sDate) {
+            return this.m_sDate;
+        }
+        else {
+            return "";
+        }
+    }
 };
 
-var SelectArea = function () {
+/**
+ * Select Area (bbox) Control Class
+ * @constructor
+ */
+let SelectArea = function () {
     this.oBoundingBox = {
         northEast : "",
         southWest : ""
     };
     this.iWidth = "";
     this.iHeight = "";
+
+    /**
+     * Return the bounding box as a string.
+     * @returns {string} BBox as string: LATN,LONW,LATS,LONE
+     */
+    this.getValue = function () {
+        if (this.oBoundingBox) {
+            return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2)+"," + this.oBoundingBox.southWest.lat.toFixed(2)+","+ + this.oBoundingBox.northEast.lng.toFixed(2);
+        }
+        else {
+            return "";
+        }
+
+    }
 };
 
-var TextBox = function () {
-    this.sTextBox = "";
+/**
+ * Text Box Control Class
+ * @constructor
+ */
+let TextBox = function () {
+    this.m_sText = "";
+
+    /**
+     * Get the value of the textbox
+     * @returns {string} String in the textbox
+     */
+    this.getValue = function () {
+        return this.m_sText;
+    }
 };
 
-var DropDown = function () {
+/**
+ * Check box Control Class
+ * @constructor
+ */
+let CheckBox = function () {
+    this.m_bValue = true;
+
+    /**
+     * Return the value of the checkbox
+     * @returns {boolean} True if selected, False if not
+     */
+    this.getValue = function () {
+        return this.m_bValue;
+        /*if () {
+            return "1";
+        }
+        else {
+            return "0";
+        }*/
+    }
+};
+
+/**
+ * Drop Down Control Class
+ * @constructor
+ */
+let DropDown = function () {
     this.asListValues = [];
     this.sSelectedValues = "";
     this.oOnClickFunction = null;
     this.bEnableSearchFilter = true;
     this.sDropdownName = "";
+
+    /**
+     * Get the selected value
+     * @returns {string}
+     */
+    this.getValue = function () {
+        return this.sSelectedValues;
+    }
 };

@@ -1,5 +1,5 @@
-angular.module('wasdi.Map2DDirective', [])
-    .directive('map2ddirective', ['MapService',function ($MapService) {
+angular.module('wasdi.wapSelectArea', [])
+    .directive('wapselectarea', ['MapService',function ($MapService) {
         "use strict";
         return {
             restrict: 'E',
@@ -13,31 +13,18 @@ angular.module('wasdi.Map2DDirective', [])
                 heightMap: '=',
                 widthMap: '=',
                 boundingBox: '='
-                // idMap: '=',
-                // deleted: '&'
             },
-            //         template: `
-            //   <h2>{{$ctrl.hero.name}} details!</h2>
-            //   <h2>{{$ctrl.hero.name}} details!</h2>
-            //   <div><label>id: </label>{{$ctrl.hero.id}}</div>
-            //   <button ng-click="$ctrl.onDelete()">Delete</button>
-            // `,
-            template: `
-<!--            <div id="testid" style="height: 400px;"></div>&lt;!&ndash;ng-attr-id="testid"&ndash;&gt;-->
-            <div ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div><!---->
-<!--            <div ng-attr-id="{{$ctrl.mapId}}" style="height: 400px;"></div>&lt;!&ndash;&ndash;&gt;-->
-         `,
+            template: `<div ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
+
             controller: function() {
+
                 // generated a new id map number and converted as string
                 this.mapId = "" + Date.now() + Math.random();
+
                 this.oMap = null;
-                // this.m_oBoundingBox = {
-                //     northEast: "",
-                //     southWest: ""
-                // };
                 this.m_oDrawnItems = {};
 
-                //CHECK IF ID MAP IS NULL OR UNDEFINED or height
+                //CHECK IF Height or width are null or undefined
                 if(utilsIsANumber(this.heightMap ) === false ){
                     this.heightMap = 0;
                     console.error('height-map parameter is not a number');
@@ -50,10 +37,12 @@ angular.module('wasdi.Map2DDirective', [])
                 this.oMapStyle = { height: this.heightMap + 'px',
                                    width: this.widthMap + 'px'  };
 
-                this.addBoundigBoxDrawerOnMap = function (oMap) {
+                this.addBoundingBoxDrawerOnMap = function (oMap) {
+
                     if(oMap === null || oMap === undefined ){
                         return null;
                     }
+
                     this.m_oDrawnItems = new L.FeatureGroup();
 
                     oMap.addLayer(this.m_oDrawnItems);
@@ -78,6 +67,7 @@ angular.module('wasdi.Map2DDirective', [])
                     var oDrawControl = new L.Control.Draw(oOptions);
 
                     oMap.addControl(oDrawControl);
+
                     //Without this.m_oWasdiMap.on() the shape isn't saved on map
                     var oController = this;
                     oMap.on(L.Draw.Event.CREATED, function (event)
@@ -85,8 +75,6 @@ angular.module('wasdi.Map2DDirective', [])
                         var layer = event.layer;
                         oController.boundingBox.northEast = layer._bounds._northEast;
                         oController.boundingBox.southWest = layer._bounds._southWest;
-                        // oController.m_oBoundingBox.northEast = layer._bounds._northEast;
-                        // oController.m_oBoundingBox.southWest = layer._bounds._southWest;
 
                         //remove old shape
                         if(oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length!==0){
@@ -108,7 +96,7 @@ angular.module('wasdi.Map2DDirective', [])
                     oController.oMap = $MapService.initMapSingleton(oController.mapId);
 
                     //is it an option?
-                    oController.oMap = oController.addBoundigBoxDrawerOnMap(oController.oMap);
+                    oController.oMap = oController.addBoundingBoxDrawerOnMap(oController.oMap);
                 }, 500);
 
             },

@@ -6,32 +6,75 @@
 angular.module('wasdi.ConstantsService', []).
 service('ConstantsService', [function () {
 
-    this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
+    /**
+     * Cookie expire time in days
+     * @type {number}
+     */
+    this.COOKIE_EXPIRE_TIME_DAYS = 1;
 
+    /**
+     * Main Server url
+     * @type {string}
+     */
     this.URL = environment.url;
+
+    /**
+     * Web Stomp url
+     * @type {string}
+     */
     this.WEBSTOMPURL = environment.webstompUrl;
+
+    /**
+     * WMS URL
+     * @type {string}
+     */
     this.WMSURL = environment.wmsUrl;
+
+    /**
+     * WPS Proxy Url
+     * @type {string}
+     */
     this.WPSPROXY = environment.wpsProxy;
 
+    /**
+     * API URL
+     * @type {string}
+     */
     this.APIURL = this.URL + 'rest';
 
-    this.TEST = false; //test global var
-
-    // Logged User
+    /**
+     * Logged User
+     * @type {null}
+     */
     this.m_oUser = null;
 
-    // Active Workspace
+    /**
+     * Active Workspace
+     * @type {null}
+     */
     this.m_oActiveWorkspace = null;
 
-    // Rabbit User
+    /**
+     * Rabbit User
+     * @type {string}
+     */
     this.m_sRabbitUser = Secrets.RABBIT_USER;
+    /**
+     * Rabbit Password
+     * @type {string}
+     */
     this.m_sRabbitPassword = Secrets.RABBIT_PASSWORD;
 
-    this.testMode = function()
-    {
-        return this.TEST;
-    }
+    /**
+     * Active Wasdi Application
+     * @type {string}
+     */
+    this.m_sSelectedApplication = "";
 
+    /**
+     * Test if we are on a mobile device or not
+     * @returns {boolean}
+     */
     this.isMobile = function() {
 
         if (navigator.userAgent.match((/Android/i)) ||
@@ -45,27 +88,51 @@ service('ConstantsService', [function () {
         return false;
     }
 
+    /**
+     * Get Rabbit User
+     * @returns {string}
+     */
     this.getRabbitUser = function () {
         return this.m_sRabbitUser;
     }
 
+    /**
+     * Get Rabbit Password
+     * @returns {string}
+     */
     this.getRabbitPassword = function () {
         return this.m_sRabbitPassword;
     }
 
+    /**
+     * Get WPS Proxy address
+     * @returns {string}
+     */
     this.getWPSPROXY = function()
     {
        return  this.WPSPROXY;
     }
 
+    /**
+     * Get Main server url
+     * @returns {*}
+     */
     this.getURL = function() {
         return this.URL;
     }
 
+    /**
+     * Get API Url
+     * @returns {*}
+     */
     this.getAPIURL = function() {
         return this.APIURL;
     }
 
+    /**
+     * Get session id (empty means no logged user)
+     * @returns {string|string}
+     */
     this.getSessionId = function() {
 
         if (this.m_oUser != null)
@@ -77,6 +144,12 @@ service('ConstantsService', [function () {
         return "";
     }
 
+    /**
+     * Pad a number with zeroes
+     * @param number
+     * @param length
+     * @returns {string}
+     */
     this.pad = function (number, length){
         var str = "" + number;
         while (str.length < length) {
@@ -85,6 +158,10 @@ service('ConstantsService', [function () {
         return str;
     }
 
+    /**
+     * Get local timezone offset
+     * @returns {string}
+     */
     this.getTimezoneOffset  = function () {
         var offset = new Date().getTimezoneOffset()
         offset = ((offset<0? '+':'-')+ // Note the reversed sign!
@@ -94,19 +171,29 @@ service('ConstantsService', [function () {
         return offset;
     }
 
+    /**
+     * Get the google client id
+     * @returns {string}
+     */
     this.getClientIdGoogle=function()
     {
         return Secrets.GOOGLE_ID;
     }
 
-    //-------------------- SET USER---------------------
+    /**
+     * Set active user
+     * @param oUser
+     */
     this.setUser = function (oUser) {
         this.m_oUser = oUser;
         //set coockie
         this.setCookie("oUser",this.m_oUser,this.COOKIE_EXPIRE_TIME_DAYS);
     }
 
-    //-------------------- GET USER ---------------------
+    /**
+     * Get Active user
+     * @returns {*}
+     */
     this.getUser = function () {
         // check if there is the user
         if(utilsIsObjectNullOrUndefined(this.m_oUser) )
@@ -121,6 +208,10 @@ service('ConstantsService', [function () {
         return this.m_oUser;
     }
 
+    /**
+     * Get active user id or empty string
+     * @returns {string|string|HomeController.login.m_sUserName|HomeController.signingUser.m_oRegistrationUser.userId}
+     */
     this.getUserId = function () {
         // check if there is the user
         if(utilsIsObjectNullOrUndefined(this.m_oUser) )
@@ -131,6 +222,10 @@ service('ConstantsService', [function () {
         return this.m_oUser.userId;
     }
 
+    /**
+     * Chek if the user is logged or not
+     * @returns {boolean}
+     */
     this.isUserLogged = function () {
 
         if (angular.isUndefined(this.m_oUser) || this.m_oUser == null) return false;
@@ -142,21 +237,49 @@ service('ConstantsService', [function () {
         return true;
     }
 
+    /**
+     * Set Active Workspace Object
+     * @param oWorkspace
+     */
     this.setActiveWorkspace = function (oWorkspace) {
         this.m_oActiveWorkspace = oWorkspace;
     }
 
+    /**
+     * Get Active Workpsace Object
+     * @returns {null}
+     */
     this.getActiveWorkspace = function () {
         return this.m_oActiveWorkspace;
     }
 
+    /**
+     * Set the name of the processor selected in the store
+     * @param sProcessorName
+     */
+    this.setSelectedApplication = function (sProcessorName) {
+        this.m_sSelectedApplication = sProcessorName;
+    }
+
+    /**
+     * Get the name of the processor selected in the store
+     * @returns {string}
+     */
+    this.getSelectedApplication = function () {
+        return this.m_sSelectedApplication;
+    }
+
+    /**
+     * Get the STOMP URL
+     * @returns {string}
+     */
     this.getStompUrl = function () {
 
         return this.WEBSTOMPURL;
     }
 
     /**
-     * getWasdiGeoserver
+     * get Wasdi Geoserver WPS Address
      * @returns {string}
      */
     this.getWasdiGeoserverWPS = function()
@@ -197,22 +320,21 @@ service('ConstantsService', [function () {
         this.setCookie(cname, "", -1000);
     }
     /**************************************************/
-    //LOG-OUT
+
+    /**
+     * LOG-OUT
+     */
     this.logOut= function()
     {
-
-        // if(!gapi.auth2){
-        //     gapi.load('auth2', function() {
-        //         gapi.auth2.init();
-        //         gapi.auth2.signOut();
-        //     });
-        // }
         this.deleteCookie("oUser");
         this.logOutGoogle();
 
         this.m_oUser = null;
     }
 
+    /**
+     * Logout from google
+     */
     this.logOutGoogle = function ()
     {
         try
@@ -242,6 +364,9 @@ service('ConstantsService', [function () {
         }
     }
 
+    /**
+     * Goggle sign out
+     */
     this.googleSignOutAPI = function()
     {
         var auth2 = gapi.auth2.getAuthInstance();
@@ -251,14 +376,16 @@ service('ConstantsService', [function () {
     };
 
 
-    //GET GEOSERVER
+    /**
+     * Get WASDI OGC WMS Server address
+     * @returns {string}
+     */
     this.getWmsUrlGeoserver = function()
     {
         return this.WMSURL;
     }
-    /* MEMBERS NEED TO USE METHODS*/
 
-    // if m_oUser == null try to load user in cookie, if fail m_oUser == null
+    /* MEMBERS NEED TO USE METHODS*/
     this.m_oUser = this.getUser();
 
 
@@ -290,9 +417,6 @@ service('ConstantsService', [function () {
         localStorage.setItem(sName,sValue);
         return true
     }
-
-
-
 
     /* Get local value
      * */

@@ -1,5 +1,5 @@
-angular.module('wasdi.DateDirective', [])
-    .directive('datedirective', function () {
+angular.module('wasdi.wapDateTimePicker', [])
+    .directive('wapdatetimepicker', function () {
         "use strict";
         return {
             restrict: 'E',
@@ -11,24 +11,17 @@ angular.module('wasdi.DateDirective', [])
             // * Function binding ('&' or '&?') *
             bindToController: {
                 dateTime : '='
-                // inputText: '=',
-                // deleted: '&'
             },
-            //         template: `
-            //   <h2>{{$ctrl.hero.name}} details!</h2>
-            //   <div><label>id: </label>{{$ctrl.hero.id}}</div>
-            //   <button ng-click="$ctrl.onDelete()">Delete</button>
-            // `,
             template: `
             <div class="date-directive">
                 <div class=" time-picker-container ">
                     <div    class="input-group"
                         moment-picker="$ctrl.dateTime"
-                        format="YYYY-MM-DD HH"
+                        format="YYYY-MM-DD"
                         today="true">
 
                         <input  class="form-control"
-                            placeholder="Select time"
+                            placeholder="Select Date"
                             ng-model="$ctrl.dateTime"
                             ng-model-options="{ updateOn: 'blur' }">
                             <span class="input-group-addon">
@@ -36,14 +29,9 @@ angular.module('wasdi.DateDirective', [])
                             </span>
                     </div>
                 </div>
-            </div>
-
-
-         `,
+            </div>`,
             controller: function() {
-
                 if( this.dateTime === null || this.dateTime === undefined){
-                    //TODO SET IT
                     this.dateTime = moment();
                 }
             },

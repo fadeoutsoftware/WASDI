@@ -9,7 +9,7 @@ var wasdiApp = angular.module('wasdi', [
     'JSONedit',
     'directive.g+signin',
 
-    //US SERVICE
+    //WASDI SERVICES
     'wasdi.ConstantsService',
     'wasdi.sessionInjector',
     'wasdi.AuthService',
@@ -36,7 +36,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.TreeService',
     'wasdi.LightSearchService',
 
-    //DIRECTIVE
+    //DIRECTIVES
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',
     'wasdi.SpaceInvaderDirective',
@@ -51,17 +51,19 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ImageEditorDirective',
     'wasdi.DropdownMenuDirective',
     'wasdi.ToDoListDirective',
-    'wasdi.InputTextDirective',
-    'wasdi.Map2DDirective',
-    'wasdi.DateDirective',
-    'wasdi.TableOfProductsDirective',
-    'wasdi.LightSearchProductDirective',
-    'wasdi.ChipsListDirective',
-    
+    'wasdi.wapTextBox',
+    'wasdi.wapSelectArea',
+    'wasdi.wapDateTimePicker',
+    'wasdi.wapProductList',
+    'wasdi.wapDropDown',
+    'wasdi.wapSearchEOImage',
+    'wasdi.wapCheckBox',
+    /*'wasdi.ChipsListDirective',*/
+
     //FILTERS
     'wasdi.stringUtils',
 
-    //EXTERNAL LIB
+    //EXTERNAL LIBS
     'ui.bootstrap',
     'checklist-model',
     'moment-picker',//time picker
@@ -89,15 +91,6 @@ wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, 
 }]);
 
 
-//wasdiApp.config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
-//    $locationProvider.hashPrefix('!');
-//    $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: 'HomeController'} );
-//    $routeProvider.when('/workspaces', {templateUrl: 'partials/workspaces.html', controller: 'WorkspaceController'} );
-//    $routeProvider.when('/editor', {templateUrl: 'partials/editor.html', controller: 'EditorController'} );
-//
-//    $routeProvider.otherwise({redirectTo: '/home'});
-//
-//}]);
 //ROUTER
 wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
 
@@ -125,12 +118,6 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         abstract: true,
         templateUrl: 'partials/RootView.html',
         controller : 'RootController',
-        // resolve: { authenticated: function () {
-        //         //decheckAuthentication
-        //         debugger;
-        //
-        //         return AuthService.checkSession();
-        //     } }
     });
 
     //WORKSPACES
@@ -166,20 +153,22 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
             'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}
         }
     });
+
     //CATALOG
     $stateProvider.state('root.catalog',{
-        url: '/catalog',// /{workSpace}
+        url: '/catalog',
 
         views:{
             'maincontent' : { templateUrl : 'partials/catalog.html', controller  : 'CatalogController'}
         }
     });
+
     //APP STORE
     $stateProvider.state('root.appstore',{
-        url: '/appstore',// /{workSpace}
+        url: '/appstore',
 
         views:{
-            'maincontent' : { templateUrl : 'partials/appstore.html', controller  : 'AppStoreController'}
+            'maincontent' : { templateUrl : 'partials/wasdiapplicationui.html', controller  : 'WasdiApplicationUIController'}
         }
     });
 
@@ -193,7 +182,7 @@ wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
 wasdiApp.controller("SearchOrbitController",SearchOrbitController);
 wasdiApp.controller("ValidateUserController",ValidateUserController);
-wasdiApp.controller("AppStoreController",AppStoreController);
+wasdiApp.controller("WasdiApplicationUIController",WasdiApplicationUIController);
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);
@@ -249,20 +238,6 @@ wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){
-        // if(toState.name.indexOf("root") >= 0)
-        // {
-        //     AuthService.checkSession()
-        //         .then(function(response){
-        //             debugger;
-        //         })
-        //     event.preventDefault();
-        // }
 
     })
-
-    // $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
-    //     // if (!Authorization.authorized && _.has(toState, 'data.authorization') && _.has(toState, 'data.redirectTo')) {
-    //     //     $state.go(toState.data.redirectTo);
-    //     // }
-    // });
 }])

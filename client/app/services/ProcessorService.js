@@ -86,7 +86,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oProcessId
      * @returns {*}
      */
-    this.getAllErrorLogs = function(oProcessId){
+    this.getProcessorLogs = function(oProcessId){
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
         if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
@@ -99,7 +99,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oProcessId
      * @returns {*}
      */
-    this.getCountLogs = function(oProcessId)
+    this.getLogsCount = function(oProcessId)
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
@@ -115,7 +115,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param iEndRow
      * @returns {*}
      */
-    this.getLogs = function(oProcessId,iStartRow,iEndRow)
+    this.getPaginatedLogs = function(oProcessId, iStartRow, iEndRow)
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
@@ -227,4 +227,12 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         window.location.href = sAPIUrl + "/processors/downloadprocessor" + urlParams;
     };
 
+    /**
+     * Get the representation of the Processor UI
+     * @param sProcessorName
+     * @returns {*}
+     */
+    this.getProcessorUI = function (sProcessorName) {
+        return this.m_oHttp.get(this.APIURL + '/processors/ui?name='+sProcessorName);
+    }
 }]);

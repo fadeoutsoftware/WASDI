@@ -1,5 +1,5 @@
-angular.module('wasdi.LightSearchProductDirective', [])
-    .directive('lightsearchproductdirective', ['SearchService','LightSearchService','OpenSearchService','ConfigurationService',
+angular.module('wasdi.wapSearchEOImage', [])
+    .directive('wapsearcheoimage', ['SearchService','LightSearchService','OpenSearchService','ConfigurationService',
                                                                                                         function ($SearchService,
                                                                                                                   $LightSearchService,
                                                                                                                   oOpenSearchService,
@@ -20,31 +20,27 @@ angular.module('wasdi.LightSearchProductDirective', [])
 
             template: `
             <div ng-hide="$ctrl.m_bAreVisibleProducts">
-                <map2ddirective bounding-box="$ctrl.lightSearchObject.oSelectArea.oBoundingBox"
+                <wapselectarea bounding-box="$ctrl.lightSearchObject.oSelectArea.oBoundingBox"
                                 height-map="$ctrl.lightSearchObject.oSelectArea.iHeight"
-                                width-map="$ctrl.lightSearchObject.oSelectArea.iWidth"></map2ddirective>
+                                width-map="$ctrl.lightSearchObject.oSelectArea.iWidth"></wapselectarea>
 
-                <datedirective date-time="$ctrl.lightSearchObject.oStartDate.oDate"></datedirective>
+                <wapdatetimepicker date-time="$ctrl.lightSearchObject.oStartDate.oDate"></wapdatetimepicker>
 
-                <datedirective date-time="$ctrl.lightSearchObject.oEndDate.oDate"></datedirective>
+                <wapdatetimepicker date-time="$ctrl.lightSearchObject.oEndDate.oDate"></wapdatetimepicker>
 
-                <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()"
-                                                                        ng-disabled = "$ctrl.isAreaSelected() === false">
+                <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()" ng-disabled = "$ctrl.isAreaSelected() === false">
                     Search
                 </button>
             </div>
 
 
-<!--            <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.loadMore()">-->
-<!--                Load more-->
-<!--            </button>-->
             <div ng-if="$ctrl.m_bAreVisibleProducts" >
                 <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.backToLightSearch()">
                     <i class="fa fa-arrow-left" aria-hidden="true"></i>
                     back
                 </button>
 
-                <tableofproductsdirective height-table = "'400'"
+                <wapproductlist height-table = "'400'"
                                           parent-controller = "$ctrl"
                                           products-list= "$ctrl.lightSearchObject.oTableOfProducts.aoProducts"
                                           loading-data = "$ctrl.m_bLoadingData"
@@ -52,7 +48,7 @@ angular.module('wasdi.LightSearchProductDirective', [])
                                           is-single-selection = "$ctrl.lightSearchObject.oTableOfProducts.isSingleSelection"
                                           single-selection-layer ="$ctrl.lightSearchObject.oTableOfProducts.oSingleSelectionLayer" >
 
-                </tableofproductsdirective>
+                </wapproductlist>
 
                 <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.selectedProducts()">
                     <i class="fa fa-floppy-o" aria-hidden="true"></i>
@@ -80,8 +76,8 @@ angular.module('wasdi.LightSearchProductDirective', [])
                 };
 
                 this.getOpenSearchDate = function(){
-                    var oStartDate = $LightSearchService.utcDateConverter(this.lightSearchObject.oStartDate.oDate);
-                    var oEndDate = $LightSearchService.utcDateConverter(this.lightSearchObject.oEndDate.oDate);
+                    var oStartDate = $LightSearchService.utcDateConverter(this.lightSearchObject.oStartDate.m_sDate);
+                    var oEndDate = $LightSearchService.utcDateConverter(this.lightSearchObject.oEndDate.m_sDate);
                     var oDates = {
                         sensingPeriodFrom : oStartDate,
                         sensingPeriodTo: oEndDate,

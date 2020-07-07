@@ -1,5 +1,5 @@
-angular.module('wasdi.TableOfProductsDirective', [])
-    .directive('tableofproductsdirective', function () {
+angular.module('wasdi.wapProductList', [])
+    .directive('wapproductlist', function () {
         "use strict";
         return {
             restrict: 'E',
@@ -17,16 +17,10 @@ angular.module('wasdi.TableOfProductsDirective', [])
                 isAvailableSelection: '=',
                 isSingleSelection : '=',
                 singleSelectionLayer: '='
-                // deleted: '&'
             },
 
             template: `
         <div class="table-of-products-directive"  ng-style="$ctrl.oTableStyle">
-
-<!--            &lt;!&ndash; TODO HIDE BUTTON IF PARENT CONTROLLER IS NULL&ndash;&gt;-->
-<!--            <button class="btn btn-primary btn-wasdi search-button"  ng-click="$ctrl.parentController.loadMore()">-->
-<!--                Load more-->
-<!--            </button>-->
 
             <table class="table table-hover layers "  >
 
