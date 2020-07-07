@@ -41,7 +41,7 @@ function ViewElementFactory() {
         else if(oControl.type === "boolean"){
             oViewElement = new CheckBox();
 
-            if (oControl.default) {
+            if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
                 oViewElement.m_bValue = oControl.default;
             }
         }
