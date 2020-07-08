@@ -1,37 +1,59 @@
 <div class="editor-view">
-
     <div class="row justify-content-end toolbar">
     </div>
-
     <div class="row">
-        <button ng-click="m_oController.readValues()">Read Values</button>
+        <button ng-click="m_oController.getProcessorParams()">Read Values</button>
     </div>
 
-    <div class="row" ng-repeat="viewElement in m_oController.m_aoViewElements">
-        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-            {{viewElement.label}}
-        </div>
-        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-            <waptextbox input-text="viewElement.m_sText" ng-if="viewElement.type === 'textbox'"></waptextbox>
+    <div class="wap-application-container">
+        <!-- TAB NAVIGATION -->
+        <ul class="nav nav-tabs" role="tablist">
 
-            <wapdropdown list-of-values="viewElement.asListValues"
-                                   selected-value="viewElement.sSelectedValues"
-                                   enable-search-filter="viewElement.bEnableSearchFilter"
-                                   dropdown-name="viewElement.sDropdownName"
-                                   on-click-function="viewElement.oOnClickFunction"
-                                   ng-if="viewElement.type === 'dropdown'"
-                                    ></wapdropdown>
+            <li ng-repeat="sTab in m_oController.getTabs()" ng-class="{'active':m_oController.m_sSelectedTab === sTab}" ng-click="m_oController.m_sSelectedTab = sTab" >
+                <a href="" role="tab" data-toggle="tab">
+                    {{sTab}}
+                </a>
+            </li>
+        </ul>
 
-            <wapselectarea  ng-if="viewElement.type === 'bbox'" bounding-box="viewElement.oBoundingBox" height-map="'200'" width-map="'500'"></wapselectarea>
 
-            <wapdatetimepicker ng-if="viewElement.type === 'date'" date-time="viewElement.m_sDate"></wapdatetimepicker>
+        <!-- TAB CONTENT -->
+        <div class="tab-content">
+            <!-------   TABLE WORKFLOWS + LIST OF PRODUCTS ------->
+            <div class="tab-pane fade in" ng-repeat="sTab in m_oController.getTabs()"
+                 ng-class="{'active':m_oController.m_sSelectedTab === sTab}">
 
-            <wapproductlist  ng-if="viewElement.type === 'productlist'" products-list="viewElement.aoProducts"></wapproductlist>
+                <div class="row" ng-repeat="viewElement in m_oController.getTabControls(sTab)">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        {{viewElement.label}}
+                    </div>
+                    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                        <waptextbox input-text="viewElement.m_sText" ng-if="viewElement.type === 'textbox'"></waptextbox>
 
-            <wapsearcheoimage  ng-if="viewElement.type === 'searcheoimage'" light-search-object="viewElement"></wapsearcheoimage>
+                        <wapdropdown list-of-values="viewElement.asListValues"
+                                     selected-value="viewElement.sSelectedValues"
+                                     enable-search-filter="viewElement.bEnableSearchFilter"
+                                     dropdown-name="viewElement.sDropdownName"
+                                     on-click-function="viewElement.oOnClickFunction"
+                                     ng-if="viewElement.type === 'dropdown'"
+                        ></wapdropdown>
 
-            <wapcheckbox ng-if="viewElement.type === 'boolean'" bool-value="viewElement.m_bValue" label-text="viewElement.label"></wapcheckbox>
+                        <wapselectarea  ng-if="viewElement.type === 'bbox'" bounding-box="viewElement.oBoundingBox" height-map="'200'" width-map="'500'"></wapselectarea>
+
+                        <wapdatetimepicker ng-if="viewElement.type === 'date'" date-time="viewElement.m_sDate"></wapdatetimepicker>
+
+                        <wapproductlist  ng-if="viewElement.type === 'productlist'" products-list="viewElement.aoProducts"></wapproductlist>
+
+                        <wapsearcheoimage  ng-if="viewElement.type === 'searcheoimage'" light-search-object="viewElement"></wapsearcheoimage>
+
+                        <wapcheckbox ng-if="viewElement.type === 'boolean'" bool-value="viewElement.m_bValue" label-text="viewElement.label"></wapcheckbox>
+
+                    </div>
+                </div>
+
+            </div>
 
         </div>
     </div>
+
 </div>

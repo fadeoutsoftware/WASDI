@@ -84,6 +84,20 @@ let SearchEOImage = function() {
     this.aoProviders = [];
     this.aoMissionsFilters = [];
 
+
+    /*
+    let tst7 = oFactory.CreateViewElement("searcheoimage");
+    tst7.sLabel = "Sono una light search";
+    tst7.oStartDate.m_sDate =  moment().subtract(1, 'days').startOf('day');
+    tst7.oEndDate.m_sDate = moment();
+    tst7.oSelectArea.iHeight = 200;
+    tst7.oSelectArea.iWidth = 500;
+    tst7.aoProviders.push(providers.ONDA);
+    tst7.aoMissionsFilters.push({name:"sentinel-1" },{name:"sentinel-2" });
+    tst7.oTableOfProducts.isAvailableSelection = true;
+    tst7.oTableOfProducts.isSingleSelection = true;
+    */
+
     /**
      *
      * @returns {string}
@@ -150,12 +164,18 @@ let SelectArea = function () {
      * @returns {string} BBox as string: LATN,LONW,LATS,LONE
      */
     this.getValue = function () {
-        if (this.oBoundingBox) {
-            return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2)+"," + this.oBoundingBox.southWest.lat.toFixed(2)+","+ + this.oBoundingBox.northEast.lng.toFixed(2);
+        try {
+            if (this.oBoundingBox) {
+                return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2)+"," + this.oBoundingBox.southWest.lat.toFixed(2)+","+ + this.oBoundingBox.northEast.lng.toFixed(2);
+            }
+            else {
+                return "";
+            }
         }
-        else {
+        catch (e) {
             return "";
         }
+
 
     }
 };
