@@ -505,9 +505,9 @@ var RootController = (function() {
         this.m_oState.go("root.searchorbit", { });
     };
 
-    RootController.prototype.openAppStore = function()
+    RootController.prototype.openMarketPlace = function()
     {
-        this.m_oState.go("root.appstore", { });
+        this.m_oState.go("root.marketplace", { });
     };
 
     RootController.prototype.openImportPage = function () {

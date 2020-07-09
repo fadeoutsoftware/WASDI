@@ -164,11 +164,20 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
     });
 
     //APP STORE
-    $stateProvider.state('root.appstore',{
-        url: '/appstore',
+    $stateProvider.state('root.appui',{
+        url: '/appui',
 
         views:{
             'maincontent' : { templateUrl : 'partials/wasdiapplicationui.html', controller  : 'WasdiApplicationUIController'}
+        }
+    });
+
+    //MARKET PLACE
+    $stateProvider.state('root.marketplace',{
+        url: '/marketplace',
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/marketplace.html', controller  : 'MarketPlaceController'}
         }
     });
 
@@ -183,6 +192,7 @@ wasdiApp.controller("ImportController",ImportController);
 wasdiApp.controller("SearchOrbitController",SearchOrbitController);
 wasdiApp.controller("ValidateUserController",ValidateUserController);
 wasdiApp.controller("WasdiApplicationUIController",WasdiApplicationUIController);
+wasdiApp.controller("MarketPlaceController",MarketPlaceController);
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);
