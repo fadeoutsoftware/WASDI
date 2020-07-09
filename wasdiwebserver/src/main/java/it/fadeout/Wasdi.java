@@ -37,6 +37,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONObject;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -323,10 +324,64 @@ public class Wasdi extends ResourceConfig {
 	/**
 	 * Get the User object from the session Id
 	 * 
+	 * @param sSessionToken
+	 * @return
+	 */
+	public static User GetUserFromSession(String sSessionToken) {
+
+		// validate sSessionId
+		if (!m_oCredentialPolicy.validSessionId(sSessionToken)) {
+			return null;
+		}
+		
+		/*
+		def introspect(self, client_id, client_secret, token):
+        params = {
+            'client_id': client_id, 
+            'client_secret': client_secret,
+            'token': token,
+        }
+        response = requests.post(
+                self._token_introspection_endpoint, data=params)
+        if response.status_code != 200:
+            raise Exception('Invalid introspection request')
+        return response.json()
+		 */
+		
+		String sKeyCloakIntrospectionUrl = "http://localhost:8080/auth/realms/demo/protocol/openid-connect/token/introspect";
+		String sClientId = "wasdi_api";
+		String sClientSecret = "1dd2e17c-3ce6-4851-891a-d689cf8bd107";
+		
+		String sPayload = "client_id=" + sClientId + 
+				"&client_secret=" + sClientSecret + 
+				"&token=" + sSessionToken;
+		
+		Map<String,String> asHeaders = new HashMap<>();
+		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+		
+		
+		String sResponse = httpPost(sKeyCloakIntrospectionUrl, sPayload, asHeaders);
+		if(!Utils.isNullOrEmpty(sResponse)) {
+			JSONObject oJSON = new JSONObject(sResponse);
+			String sUserId = oJSON.optString("preferred_username", null);
+			if(!Utils.isNullOrEmpty(sUserId)) {
+				UserRepository oUserRepo = new UserRepository();
+				User oUser = oUserRepo.getUser(sUserId);
+				return oUser;
+			}
+		}
+		
+		// No Session, No User
+		return null;
+	}
+	
+	/**
+	 * Get the User object from the session Id
+	 * 
 	 * @param sSessionId
 	 * @return
 	 */
-	public static User GetUserFromSession(String sSessionId) {
+	public static User OLD_GetUserFromSession(String sSessionId) {
 
 		// validate sSessionId
 		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
