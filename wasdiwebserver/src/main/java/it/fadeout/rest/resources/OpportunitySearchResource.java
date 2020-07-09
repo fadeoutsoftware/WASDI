@@ -60,7 +60,7 @@ public class OpportunitySearchResource {
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
 		Utils.debugLog("OpportunitySearchResource.Search( Session: " + sSessionId + ", ... )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
 
@@ -387,7 +387,7 @@ public class OpportunitySearchResource {
 	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
 			@QueryParam("footPrint") String sFootPrint) {
 		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Session: " + sSessionId + ", Text: " + sText + ", Footprint: " + sFootPrint + " )");
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			return null;

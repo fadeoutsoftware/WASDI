@@ -62,7 +62,7 @@ public class FileBufferResource {
 				return oResult;
 			}
 
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
 				oResult.setIntValue(401);
@@ -133,7 +133,7 @@ public class FileBufferResource {
 
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
 
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(401).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
@@ -186,7 +186,7 @@ public class FileBufferResource {
 			
 			// Check Authentication
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) return oReturnValue;
 			String sUserId = oUser.getUserId();
 			if (Utils.isNullOrEmpty(sUserId)) return oReturnValue;
@@ -264,7 +264,7 @@ public class FileBufferResource {
 		PrimitiveResult oReturnValue = null;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) return oReturnValue;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
 

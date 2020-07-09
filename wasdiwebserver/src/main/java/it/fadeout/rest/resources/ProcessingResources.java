@@ -292,7 +292,7 @@ public class ProcessingResources {
 		try {
 			// Check authorization
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) return Response.status(401).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
@@ -386,7 +386,7 @@ public class ProcessingResources {
 			Utils.debugLog("ProcessingResources.getWorkflowsByUser: session null");
 			return null;
 		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			Utils.debugLog("ProcessingResources.getWorkflowsByUser: user null");
@@ -437,7 +437,7 @@ public class ProcessingResources {
 
 		// Check User
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -499,7 +499,7 @@ public class ProcessingResources {
 			return oResult;
 		}
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			oResult.setBoolValue(false);
@@ -547,7 +547,7 @@ public class ProcessingResources {
 			oResult.setIntValue(401);
 			return oResult;
 		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
@@ -648,7 +648,7 @@ public class ProcessingResources {
 				sTokenSessionId = sSessionId;
 			}
 			
-			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
 				Utils.debugLog("ProcessingResource.downloadGraphByName: user not authorized");
@@ -720,7 +720,7 @@ public class ProcessingResources {
 		Utils.debugLog("ProcessingResources.getProductMasks");
 
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
@@ -770,7 +770,7 @@ public class ProcessingResources {
 		Utils.debugLog("ProcessingResources.getColorManipulation( Session: " + sSessionId + ", Product: " + sProductFile + ", Band:" + sBandName + ", Accurate: " + bAccurate + ", WS: " + sWorkspaceId + " )");
 
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
@@ -986,7 +986,7 @@ public class ProcessingResources {
 		// Check user
 		if (Utils.isNullOrEmpty(sSessionId))
 			return null;
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null)
 			return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId()))

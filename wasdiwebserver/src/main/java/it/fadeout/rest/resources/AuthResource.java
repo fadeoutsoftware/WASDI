@@ -182,7 +182,7 @@ public class AuthResource {
 			return UserViewModel.getInvalid();
 		}
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return UserViewModel.getInvalid();
 		}
@@ -207,10 +207,12 @@ public class AuthResource {
 			return PrimitiveResult.getInvalid();
 		}
 		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
-		if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
+		if (oUser == null) {
 			return PrimitiveResult.getInvalid();
 		}
+		
 		PrimitiveResult oResult = null;
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.getSession(sSessionId);
@@ -241,11 +243,11 @@ public class AuthResource {
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Utils.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
 		
-		if(! m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
+		if(!m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
@@ -285,7 +287,7 @@ public class AuthResource {
 	public Boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthService.ExistsSftpAccount");
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return null;
 		}
@@ -314,11 +316,7 @@ public class AuthResource {
 		
 		Utils.debugLog("AuthService.ListSftpAccount");
 		
-		if(! m_oCredentialPolicy.validSessionId(sSessionId) ) {
-			return null;
-		}
-		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return null;
 		}	
@@ -338,15 +336,15 @@ public class AuthResource {
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
 	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("AuthService.RemoveSftpAccount");
-		if( null==sSessionId || !m_oCredentialPolicy.validSessionId(sSessionId)) {
-			return Response.status(Status.BAD_REQUEST).build();
-		}
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		Utils.debugLog("AuthService.RemoveSftpAccount");
+		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
+		
 		String sAccount = oUser.getUserId();
 		
 		// Get service address
@@ -366,11 +364,12 @@ public class AuthResource {
 		
 		Utils.debugLog("AuthService.UpdateSftpPassword Mail: " + sEmail);
 		
-		if(!m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
+		if(!m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if(null == oUser || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build(); 
 		}
@@ -660,7 +659,7 @@ public class AuthResource {
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
 		
-		if(!m_oCredentialPolicy.validSessionId(sSessionId) || null == oInputUserVM ) {
+		if(null == oInputUserVM ) {
 			return UserViewModel.getInvalid();
 		}
 		//check only name and surname: they are the only fields that must be valid,
@@ -671,7 +670,7 @@ public class AuthResource {
 		
 		try {
 			//note: session validity is automatically checked		
-			User oUserId = Wasdi.GetUserFromSession(sSessionId);
+			User oUserId = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				Utils.debugLog("Null user from session id (does the user exist?)");
@@ -710,7 +709,7 @@ public class AuthResource {
 		Utils.debugLog("AuthService.ChangeUserPassword"  );
 		
 		//input validation
-		if(null == oChPasswViewModel || !m_oCredentialPolicy.validSessionId(sSessionId)) {
+		if(null == oChPasswViewModel) {
 			Utils.debugLog("AuthService.ChangeUserPassword: invalid input");
 			return PrimitiveResult.getInvalid();
 		}
@@ -723,7 +722,7 @@ public class AuthResource {
 		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		try {
 			//validity is automatically checked		
-			User oUserId = Wasdi.GetUserFromSession(sSessionId);
+			User oUserId = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				Utils.debugLog("Null user from session id (does the user exist?)");

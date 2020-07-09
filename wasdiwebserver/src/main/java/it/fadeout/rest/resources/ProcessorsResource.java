@@ -103,7 +103,7 @@ public class ProcessorsResource {
 				oResult.setIntValue(401);
 				return oResult;
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: user (from session) is null, aborting");
 				oResult.setIntValue(401);
@@ -257,7 +257,7 @@ public class ProcessorsResource {
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) return aoRet;
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return aoRet;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
@@ -343,7 +343,7 @@ public class ProcessorsResource {
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) return oRunningProcessorViewModel;
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return oRunningProcessorViewModel;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunningProcessorViewModel;
@@ -424,7 +424,7 @@ public class ProcessorsResource {
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) return oPrimitiveResult;
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return oPrimitiveResult;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oPrimitiveResult;
@@ -489,7 +489,7 @@ public class ProcessorsResource {
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) return oRunning;
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return oRunning;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunning;
@@ -560,7 +560,7 @@ public class ProcessorsResource {
 				Utils.debugLog("ProcessorResource.addLog: 401 session id null");
 				return Response.status(401).build();
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
 				Utils.debugLog("ProcessorResource.addLog: user null");
@@ -574,7 +574,7 @@ public class ProcessorsResource {
 			
 			ProcessorLog oLog = new ProcessorLog();
 			
-			oLog.setLogDate(Wasdi.GetFormatDate(new Date()));
+			oLog.setLogDate(Wasdi.getFormatDate(new Date()));
 			oLog.setProcessWorkspaceId(sProcessWorkspaceId);
 			oLog.setLogRow(sLog);
 			
@@ -605,7 +605,7 @@ public class ProcessorsResource {
 				Utils.debugLog("ProcessorResource.countLogs: 401 session id null");
 				return iResult;
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 	
 			if (oUser==null) {
 				Utils.debugLog("ProcessorResource.countLogs: user null");
@@ -650,7 +650,7 @@ public class ProcessorsResource {
 				Utils.debugLog("ProcessorResource.getLogs: addLog: 401 session id null");
 				return aoRetList;
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
 				Utils.debugLog("ProcessorResource.getLogs: addLog: user null");
@@ -702,7 +702,7 @@ public class ProcessorsResource {
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -766,7 +766,7 @@ public class ProcessorsResource {
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -840,7 +840,7 @@ public class ProcessorsResource {
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -904,7 +904,7 @@ public class ProcessorsResource {
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -968,7 +968,7 @@ public class ProcessorsResource {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: session is null or empty, aborting");
 				return Response.status(401).build();
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: user (from session) is null, aborting");
 				return Response.status(401).build();
@@ -1120,7 +1120,7 @@ public class ProcessorsResource {
 				sTokenSessionId = sSessionId;
 			}
 			
-			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
 				Utils.debugLog("ProcessorsResource.downloadProcessor: user not authorized");
@@ -1326,7 +1326,7 @@ public class ProcessorsResource {
 		Utils.debugLog("ProcessorsResource.shareProcessor( Session: " + sSessionId + ", WS: " + sProcessorId + ", User: " + sUserId + " )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
@@ -1411,7 +1411,7 @@ public class ProcessorsResource {
 		Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + " )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		List<ProcessorSharing> aoProcessorSharing = null;
 
 		if (oOwnerUser == null) {
@@ -1456,7 +1456,7 @@ public class ProcessorsResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
-		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oOwnerUser == null) {
 			oResult.setStringValue("Invalid user.");

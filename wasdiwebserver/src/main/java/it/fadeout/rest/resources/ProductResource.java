@@ -60,7 +60,7 @@ public class ProductResource {
 		Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
 
 		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null)
 			return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
@@ -121,7 +121,7 @@ public class ProductResource {
 		Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " )");
 
 		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
@@ -161,7 +161,7 @@ public class ProductResource {
 				+ sWorkspaceId + " )");
 
 		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null)
 			return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
@@ -228,7 +228,7 @@ public class ProductResource {
 		}
 
 		try {
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
@@ -327,7 +327,7 @@ public class ProductResource {
 		}
 
 		try {
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
@@ -372,7 +372,7 @@ public class ProductResource {
 
 		Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<String> aoProductList = new ArrayList<String>();
 
@@ -428,7 +428,7 @@ public class ProductResource {
 
 		Utils.debugLog("ProductResource.UpdateProductViewModel( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		try {
 
@@ -493,7 +493,7 @@ public class ProductResource {
 			return Response.status(401).build();
 		}
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			return Response.status(401).build();
 		}
@@ -567,7 +567,7 @@ public class ProductResource {
 			return Response.status(401).build();
 		}
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			return Response.status(401).build();
 		}
@@ -622,7 +622,7 @@ public class ProductResource {
 		PrimitiveResult oReturn = new PrimitiveResult();
 		oReturn.setBoolValue(false);
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		try {
 
 			// Domain Check

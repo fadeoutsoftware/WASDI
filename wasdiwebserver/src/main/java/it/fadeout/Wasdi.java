@@ -307,7 +307,7 @@ public class Wasdi extends ResourceConfig {
 	 * 
 	 * @return
 	 */
-	public static String GetSerializationFileName() {
+	public static String getSerializationFileName() {
 		return UUID.randomUUID().toString();
 	}
 
@@ -317,7 +317,7 @@ public class Wasdi extends ResourceConfig {
 	 * @param oDate
 	 * @return
 	 */
-	public static String GetFormatDate(Date oDate) {
+	public static String getFormatDate(Date oDate) {
 		return Utils.GetFormatDate(oDate);
 	}
 
@@ -381,7 +381,7 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionId
 	 * @return
 	 */
-	public static User OLD_GetUserFromSession(String sSessionId) {
+	public static User GetUserFromSession(String sSessionId) {
 
 		// validate sSessionId
 		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
@@ -581,7 +581,7 @@ public class Wasdi extends ResourceConfig {
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 
 				try {
-					oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
