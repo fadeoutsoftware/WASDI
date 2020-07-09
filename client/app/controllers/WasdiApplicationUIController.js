@@ -13,14 +13,14 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function AppStoreController($scope, oConstantsService, oAuthService, oProcessorService) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService) {
         /**
          * Angular Scope
          */
         this.m_oScope = $scope;
         /**
          * Reference to the controller
-         * @type {AppStoreController}
+         * @type {WasdiApplicationUIController}
          */
         this.m_oScope.m_oController = this;
         /**
@@ -95,7 +95,7 @@ var WasdiApplicationUIController = (function() {
      * Get the list of tabs
      * @returns {*[]} Array of strings, names of the tabs
      */
-    AppStoreController.prototype.getTabs = function() {
+    WasdiApplicationUIController.prototype.getTabs = function() {
         return this.m_asTabs;
     }
 
@@ -104,7 +104,7 @@ var WasdiApplicationUIController = (function() {
      * @param sTabName Name of the tab
      * @returns {*}
      */
-    AppStoreController.prototype.getTabControls = function(sTabName) {
+    WasdiApplicationUIController.prototype.getTabControls = function(sTabName) {
         return this.m_aoViewElements[sTabName];
     }
 
@@ -113,7 +113,7 @@ var WasdiApplicationUIController = (function() {
      * @param oFormToGenerate JSON Object representing the Processor UI
      * @returns {[]} an object with a property for each tab. Each property is an array of the controls of the tab
      */
-    AppStoreController.prototype.generateViewElements = function(oFormToGenerate){
+    WasdiApplicationUIController.prototype.generateViewElements = function(oFormToGenerate){
 
         // Output initialization
         let aoViewElements = [];
@@ -136,7 +136,7 @@ var WasdiApplicationUIController = (function() {
     /**
      * Generate the JSON that has to be sent to the Procesor
      */
-    AppStoreController.prototype.getProcessorParams = function() {
+    WasdiApplicationUIController.prototype.getProcessorParams = function() {
 
         // Output initialization
         let oProcessorInput = {};
@@ -161,12 +161,12 @@ var WasdiApplicationUIController = (function() {
     }
 
 
-    AppStoreController.$inject = [
+    WasdiApplicationUIController.$inject = [
         '$scope',
         'ConstantsService',
         'AuthService',
         'ProcessorService'
     ];
 
-    return AppStoreController;
+    return WasdiApplicationUIController;
 }) ();
