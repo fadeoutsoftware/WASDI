@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1539,5 +1542,55 @@ public class ProcessorsResource  {
 	}
 	
 
+	@GET
+	@Path("/ui")
+	public Response getUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProcessorsResource.getUI( Session: " + sSessionId + ", Name: " + sName + " )");
+		
+		try {
+			// Check User 
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.getUI: session invalid");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			//String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.getUI: read Processor " +sName);
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
+			
+			if (oProcessor == null) {
+				Utils.debugLog("ProcessorsResource.getUI: processor invalid");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			String sUIFilePath = m_oServletConfig.getInitParameter("DownloadRootPath");
+
+			if (!sUIFilePath.endsWith("/")) {
+				sUIFilePath = sUIFilePath + "/";
+			}			
+			sUIFilePath += "processors/" + sName + "/ui.json";
+			
+			File oUIFile = new File(sUIFilePath);
+			String sJsonUI = "{\"tabs\":[]}";
+			
+			if (oUIFile.exists()) {
+				Utils.debugLog("ProcessorsResource.getUI: ui.json File found for processor " +sName);
+				sJsonUI = new String(Files.readAllBytes(Paths.get(sUIFilePath)), StandardCharsets.UTF_8);
+			}
+			
+			return Response.status(Status.OK).entity(sJsonUI).build();
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.help: " + oEx);
+			return Response.serverError().build();
+		}
+		
+	}
+		
 	
 }
