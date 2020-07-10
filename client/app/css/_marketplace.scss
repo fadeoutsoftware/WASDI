@@ -1,0 +1,186 @@
+
+.sidenav {
+    height: 100%;
+    width: 250px;
+    position: sticky;
+    z-index: 1;
+    top: 100;
+    left: 10;
+    background-color: #ffffff;
+    border-width: 3px;
+    border-color:#43516a;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.sidenav a {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #ffffff;
+    display: block;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+
+.sidenav_internal_div {
+    border-style:solid;
+    border-width:3px;
+    border-color:#43516a;
+    text-align: center
+}
+
+.sidenav_search {
+    border-style: hidden
+}
+
+.sidenav_filters {
+    color:#ffffff;
+    background-color:#43516a;
+    padding-top:10px;
+    padding-right:20px;
+    padding-bottom:10px;
+    padding-left:20px;
+    text-align: center;
+}
+
+.sidenav_subelement {
+    text-align: center;
+    background-color:#43516a;
+    padding-right:20px;
+    padding-left:20px;
+}
+
+
+.sidenav_subelement_span {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.sidenav_subelement_image {
+    width:70px;
+    height:70px;
+}
+
+.sidenav_developers_combo {
+    border-style: hidden;
+    align-content: center;
+}
+
+.application_title {
+    color:#009036;
+    text-align: center;
+    cursor: pointer;
+}
+
+.application_image {
+    width: 200px;
+    cursor: pointer;
+}
+
+.application_description {
+    text-align: center;
+}
+
+.main {
+    margin-left: 250px; /* Same as the width of the sidenav */
+    font-size: 28px; /* Increased text to enable scrolling */
+    padding: 0px 10px;
+}
+
+@media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+}
+
+
+.value {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15;
+    width: 80%;
+    margin: 40px auto;
+    letter-spacing: -.07em;
+}
+
+input[type="range"] {
+    display: block;
+
+    -webkit-appearance: none;
+    background-color: #009036;
+    width: 180px;
+    height: 5px;
+    border-radius: 5px;
+    margin: 0 auto;
+    outline: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: #009036;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: .3s ease-in-out;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    background-color: white;
+    border: 2px solid #009036;
+}
+input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+}
+
+select {
+    font-family: 'FontAwesome', 'Second Font name';
+}
+
+.checked {
+    color: orange;
+}
+
+.filterDiv {
+    float: left;
+    padding: 15px 20px;
+    min-width: 260px;
+    max-width: 260px;
+}
+
+/* Style the buttons */
+.btnwasdis {
+    border: none;
+    outline: none;
+    padding: 12px 16px;
+    background-color: #43516a;
+    cursor: pointer;
+    color:#ffffff;
+}
+
+.btnwasdis:hover {
+    background-color: #009036;
+}
+
+.btnwasdis:active {
+    background-color: #009036;
+}
+
+.linkwasdi {
+    color:#2f2f2f;
+}
+
+.larghezza70 {
+    max-width: 70%;
+}
+
+.larghezza30 {
+    max-width: 20%;
+    float: left;
+}
+
+.contatti {
+    padding: 10px;
+}

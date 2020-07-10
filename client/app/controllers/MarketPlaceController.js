@@ -13,11 +13,16 @@ var MarketPlaceController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function MarketPlaceController($scope, oConstantsService, oAuthService, oProcessorService) {
+    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService) {
         /**
          * Angular Scope
          */
         this.m_oScope = $scope;
+
+        /**
+         * Appication State
+         */
+        this.m_oState=$state;
         /**
          * Reference to the controller
          * @type {MarketPlaceController}
@@ -36,30 +41,63 @@ var MarketPlaceController = (function() {
          */
         this.m_oProcessorService = oProcessorService;
 
+        /**
+         * List of applications
+         * @type {*[]}
+         */
+        this.m_aoApplicationList = []
+
         let oController = this;
 
         /**
-         * Ask the Processor UI to the WASDI server
+         * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessorService.getProcessorUI(this.m_oConstantsService.getSelectedApplication())
-            .success(function(data,status){
-            })
-            .error(function(){
-                // TODO: Temperary for debug with an hard coded UI
-                //utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
-            });
+        this.m_oProcessorService.getProcessorsList().success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_aoApplicationList = oController.setDefaultImages(data);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+        });
     }
 
     /**
-     * Get the list of tabs
+     * Open Application Page
      * @returns {*[]} Array of strings, names of the tabs
      */
-    MarketPlaceController.prototype.getApplications = function() {
-        return [];
+    MarketPlaceController.prototype.openApplicationPage = function(sApplicationName) {
+
+        this.m_oConstantsService.setSelectedApplication(sApplicationName);
+        //this.m_oState.go("root.appui", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
+        this.m_oState.go("root.appui");
     }
+
+    MarketPlaceController.prototype.setDefaultImages = function(aoProcessorList)
+    {
+        if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
+        {
+            return aoProcessorList;
+        }
+        var sDefaultImage = "assets/wasdi/miniLogoWasdi.png";
+        var iNumberOfProcessors = aoProcessorList.length;
+        for(var iIndexProcessor = 0; iIndexProcessor < iNumberOfProcessors; iIndexProcessor++)
+        {
+            if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
+            {
+                aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
+            }
+        }
+        return aoProcessorList;
+    };
 
     MarketPlaceController.$inject = [
         '$scope',
+        '$state',
         'ConstantsService',
         'AuthService',
         'ProcessorService'

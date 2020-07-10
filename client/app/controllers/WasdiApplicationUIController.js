@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService) {
         /**
          * Angular Scope
          */
@@ -36,6 +36,14 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_oProcessorService = oProcessorService;
         /**
+         * Workspace Service
+         */
+        this.m_oWorkspaceService = oWorkspaceService;
+        /**
+         * Rabbit Service
+         */
+        this.m_oRabbitStompService = oRabbitStompService;
+        /**
          * Contains one property for each tab. Each Property is an array of the Tab Controls
          * @type {*[]}
          */
@@ -52,7 +60,7 @@ var WasdiApplicationUIController = (function() {
         this.m_sSelectedTab = "";
 
         // TODO: Temporary fo test
-        this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
+        //this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
 
         let oController = this;
 
@@ -134,9 +142,59 @@ var WasdiApplicationUIController = (function() {
     };
 
     /**
+     * Triggers the execution of Application with Paramteres in a specific Workpsace
+     * @param oController Reference to the controller
+     * @param sApplicationName Name of the application
+     * @param oProcessorInput Processor Input Parameter Object
+     * @param oWorkspace Workpsace
+     */
+    WasdiApplicationUIController.prototype.executeProcessorInWorkspace = function(oController, sApplicationName, oProcessorInput, oWorkspace) {
+        try {
+            // Subscribe to the asynch notifications
+            oController.m_oRabbitStompService.subscribe(oWorkspace.workspaceId);
+        }
+        catch(error) {
+            let oDialog = utilsVexDialogAlertBottomRightCorner('ERROR SUBSCRIBING<br>THE WORKSPACE');
+            utilsVexCloseDialogAfter(4000, oDialog);
+        }
+
+        // Set the active workspace
+        oController.m_oConstantsService.setActiveWorkspace(oWorkspace);
+
+        // Run the processor
+        oController.m_oProcessorService.runProcessor(sApplicationName,JSON.stringify(oProcessorInput)).success(function (data, status) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                // Ok, processor scheduled, notify the user
+                var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
+                utilsVexCloseDialogAfter(4000,oDialog);
+
+                // Get the root scope
+                let oRootScope = oController.m_oScope.$parent;
+                while(oRootScope.$parent != null || oRootScope.$parent != undefined)
+                {
+                    oRootScope = oRootScope.$parent;
+                }
+
+                // send the message to show the processor log dialog
+                let oPayload = { processId: data.processingIdentifier };
+                oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
+            }
+        }).error(function () {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
+        });
+
+
+    }
+
+    /**
      * Generate the JSON that has to be sent to the Procesor
      */
-    WasdiApplicationUIController.prototype.getProcessorParams = function() {
+    WasdiApplicationUIController.prototype.generateParamsAndRun = function() {
 
         // Output initialization
         let oProcessorInput = {};
@@ -150,6 +208,8 @@ var WasdiApplicationUIController = (function() {
             for (let iControls=0; iControls<this.m_aoViewElements[sTab].length; iControls++) {
                 // Take the element
                 let oElement = this.m_aoViewElements[sTab][iControls];
+
+                // Debug only log
                 //console.log(oElement.paramName + " ["+oElement.type+"]: " + oElement.getValue());
 
                 // Save the value to the output json
@@ -157,7 +217,40 @@ var WasdiApplicationUIController = (function() {
             }
         }
 
+        // Log the parameters
         console.log(oProcessorInput);
+
+        // Reference to this controller
+        let oController = this;
+        // Reference to the application name
+        let sApplicationName = this.m_oConstantsService.getSelectedApplication();
+
+        let oToday = new Date();
+        let sToday = oToday.toISOString().substring(0, 10);
+
+        let sWorkspaceName = sToday + "_" + sApplicationName;
+
+        // Create a new Workspace
+        this.m_oWorkspaceService.createWorkspace(sWorkspaceName).success( function (data,status) {
+
+                // Get the new workpsace Id
+                let sWorkspaceId = data.stringValue;
+
+                // Get the view model of this workspace
+                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
+                    if (utilsIsObjectNullOrUndefined(data) == false)
+                    {
+                        // Ok execute
+                        oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, data);
+                    }
+                }).error(function (data,status) {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
+                });
+
+            }
+        ).error( function () {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
+        });
     }
 
 
@@ -165,7 +258,9 @@ var WasdiApplicationUIController = (function() {
         '$scope',
         'ConstantsService',
         'AuthService',
-        'ProcessorService'
+        'ProcessorService',
+        'WorkspaceService',
+        'RabbitStompService'
     ];
 
     return WasdiApplicationUIController;

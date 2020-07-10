@@ -5,20 +5,20 @@
 
     <div class="col-md-10 offset-md-2 pt-3" id="portfolioapp">
 
-        <button class="btn" onClick="filterSelection('flood')"><img src="images/004-flood-1.png"></button>
-        <button class="btn" onClick="filterSelection('fire')"><img src="images/002-fire-1.png"></button>
-        <button class="btn" onClick="filterSelection('rain')"><img src="images/UMBRELLA.png"></button>
-        <button class="btn" onClick="filterSelection('flood')"><img src="images/001-flood.png"></button>
-        <button class="btn" onClick="filterSelection('fire')"><img src="images/002-fire-1.png"></button>
-        <button class="btn" onClick="filterSelection('rain')"><img src="images/umbrellablack.png"></button>
-        <button class="btn" onClick="filterSelection('flood')"><img src="images/001-flood.png"></button>
-        <button class="btn" onClick="filterSelection('fire')"><img src="images/002-fire-1.png"></button>
-        <button class="btn" onClick="filterSelection('rain')"><img src="images/umbrellablack.png"></button>
-        <button class="btn" onClick="filterSelection('flood')"><img src="images/001-flood.png"></button>
-        <button class="btn" onClick="filterSelection('fire')"><img src="images/002-fire-1.png"></button>
-        <button class="btn" onClick="filterSelection('rain')"><img src="images/umbrellablack.png"></button>
+        <button class="btn" onClick=""><img src="images/004-flood-1.png"></button>
+        <button class="btn" onClick=""><img src="images/002-fire-1.png"></button>
+        <button class="btn" onClick=""><img src="images/UMBRELLA.png"></button>
+        <button class="btn" onClick=""><img src="images/001-flood.png"></button>
+        <button class="btn" onClick=""><img src="images/002-fire-1.png"></button>
+        <button class="btn" onClick=""><img src="images/umbrellablack.png"></button>
+        <button class="btn" onClick=""><img src="images/001-flood.png"></button>
+        <button class="btn" onClick=""><img src="images/002-fire-1.png"></button>
+        <button class="btn" onClick=""><img src="images/umbrellablack.png"></button>
+        <button class="btn" onClick=""><img src="images/001-flood.png"></button>
+        <button class="btn" onClick=""><img src="images/002-fire-1.png"></button>
+        <button class="btn" onClick=""><img src="images/umbrellablack.png"></button>
 
-        <button class="btn-active btnwasdis" onClick="filterSelection('all')">CATEGORY FILTER</button>
+        <button class="btn-active btnwasdis" onClick="">CATEGORY FILTER</button>
         <button class="btnwasdis btn-primary dropdown-toggle" type="button" data-toggle="dropdown">ORDER BY
             <span class="caret"></span></button>
         <ul class="dropdown-menu">
@@ -33,22 +33,32 @@
         <div class="row">
             <div class="col-md-2 sidenav">
 
-                <div style="border-style:solid; border-width:3px; border-color:#43516a; text-align: center">
+                <div class="sidenav_internal_div" >
                     <!-- search -->
-                    <input type="text" name="search" placeholder="SEARCH APP" style="border-style: hidden"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    <input type="text" name="search" placeholder="SEARCH APP" class="sidenav_search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                     <!-- filtri -->
-                    <h4 style="color:#ffffff; background-color:#43516a; padding-top:10px; padding-right:20px; padding-bottom:10px; padding-left:20px; text-align: center;">FILTERS	<img src="https://www.undercostruction.it/wp-content/uploads/2019/12/CLEAR.jpg">
+                    <h4 class="sidenav_filters">FILTERS	<!--img src="https://www.undercostruction.it/wp-content/uploads/2019/12/CLEAR.jpg"-->
+                        <i class="fa fa-bath mr-0" aria-hidden="true"></i>
                     </h4>
                     <!-- CATEGORIE -->
-                    <p style="text-align: center; background-color:#43516a; padding-right:20px: padding-left:20px;"><span style="font-size: 14px; color: #ffffff;"><strong>CATEGORY</strong></span></p>
-                    <img src="images/005-space.png" style="width:70px; height:70px;" class="mx-auto d-block">
+                    <p class="sidenav_subelement">
+                        <span class="sidenav_subelement_span">
+                            <strong>CATEGORY</strong>
+                        </span>
+                    </p>
+                    <img src="assets/icons/telescopio.png"  class="sidenav_subelement_image mx-auto d-block">
+
                     <button type="button" class="btn" data-toggle="modal" data-target="#category">EXPLORE WASDI UNIVERSE</button>
 
                     <!-- DEVELOPERS -->
-                    <p style="text-align: center; background-color:#43516a; padding-right:20px: padding-left:20px;"><span style="font-size: 14px; color: #ffffff;">
-					<strong>DEVELOPER</strong></span></p>
-                    <img src="https://www.undercostruction.it/wp-content/uploads/2019/12/abduction-1.png" style="width:70px; height:70px;" class="mx-auto d-block">
-                    <select name="Developer" style="border-style: hidden; align-content: center">
+                    <p class="sidenav_subelement" style="">
+                        <span class="sidenav_subelement_span">
+					        <strong>PUBLISHER</strong>
+                        </span>
+                    </p>
+
+                    <img src="assets/icons/abduction.png" class="sidenav_subelement_image mx-auto d-block">
+                    <select name="Developer" class="sidenav_developers_combo">
                         <option value="volvo"><strong>PICK SOMEONE</strong></option>
                         <option value="dart">Dart Fener</option>
                         <option value="luke">Luke Skywalker</option>
@@ -57,8 +67,11 @@
                     </select>
 
                     <!-- VALUTATION -->
-                    <p style="text-align: center; background-color:#43516a; padding-right:20px: padding-left:20px;"><span style="font-size: 14px; color: #ffffff;"><strong>RATINGS</strong></span></p>
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                    <p class="sidenav_subelement">
+                        <span class="sidenav_subelement_span">
+                            <strong>RATINGS</strong>
+                        </span>
+                    </p>
                     <div class="text-center">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
@@ -68,7 +81,11 @@
                     </div>
 
                     <!-- PRICE -->
-                    <p style="text-align: center; background-color:#43516a; padding-right:20px: padding-left:20px;"><span style="font-size: 14px; color: #ffffff;"><strong>PRICE</strong></span></p>
+                    <p class="sidenav_subelement">
+                        <span class="sidenav_subelement_span">
+                            <strong>PRICE</strong>
+                        </span>
+                    </p>
 
                     <input type="range" min="0" max="200" step="1" value="0">
                     <br>
@@ -78,10 +95,10 @@
             </div>
 
             <div class="col-md-10 pt-3">
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
+                <div class="filterDiv flood" ng-repeat="processor in m_oController.m_aoApplicationList">
+                    <img src={{processor.imgLink}}  class="application_image mx-auto d-block" ng-click="m_oController.openApplicationPage(processor.processorName)">
+                    <h5 class="application_title" ng-click="m_oController.openApplicationPage(processor.processorName)">{{processor.processorName}}</h5>
+                    <p class="application_description">{{processor.processorDescription}}</p>
                     <div class="text-center">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
@@ -90,140 +107,11 @@
                         <span class="fa fa-star checked"></span>
                     </div>
                 </div>
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-                <div class="filterDiv flood">
-                    <a href="edrift.html"><img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block"></a>
-                    <a href="edrift.html"><h5 style="color:#009036; text-align: center">edriftlistflood</h5></a>
-                    <p style="text-align: center">eDRIFT LIST Flood Detection from SAR images</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                    </div>
-                </div>
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                        <span class="fa fa-star "></span>
-                    </div>
-                </div>
-
-
-                <div class="filterDiv flood">
-                    <img src="images/ICONA2.jpg" width="200px" class="mx-auto d-block">
-                    <h5 style="color:#009036; text-align: center">app name</h5>
-                    <p style="text-align: center">insert a really short app description</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                    </div>
-                </div>
-
 
             </div>
-
-
-
 
         </div>
 
     </section>
-
-
-
-
 
 </div>
