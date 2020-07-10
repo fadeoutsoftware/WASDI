@@ -68,7 +68,8 @@ public class WorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: invalid session");
+			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( Session: " + sSessionId + ", Product: "
+					+ sProductName + " ): invalid session");
 			return null;			
 		}
 		
@@ -115,6 +116,7 @@ public class WorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("WorkspaceResource.GetListByUser( Session: " + sSessionId + " ): invalid session");
 				return aoWSList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -215,14 +217,16 @@ public class WorkspaceResource {
 	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + " )");
+		Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ", session id: " + sSessionId +" )");
 
 		WorkspaceEditorViewModel oVM = new WorkspaceEditorViewModel();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oUser == null)
+		if (oUser == null) {
+			Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ", session id: " + sSessionId +" ): invalid session");
 			return null;
+		}
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
 			return null;
 
@@ -301,8 +305,8 @@ public class WorkspaceResource {
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog("WorkspaceResource.CreateWorkspace: cannot get a valid user from session " + sSessionId
-					+ ", aborting");
+			Utils.debugLog(
+					"WorkspaceResource.CreateWorkspace( Session: " + sSessionId + ", " + sName + ", " + sNodeCode + " ): invalid session");
 			return null;
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -361,8 +365,10 @@ public class WorkspaceResource {
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null)
+		if (oUser == null) {
+			Utils.debugLog("WorkspaceResource.UpdateWorkspace( Session: " + sSessionId + ", ... ): invalid session");
 			return null;
+		}
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
 			return null;
 
@@ -407,8 +413,11 @@ public class WorkspaceResource {
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null)
+		if (oUser == null) {
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId
+					+ ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " ): invalid session");
 			return null;
+		}
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
 			return null;
 
@@ -580,12 +589,14 @@ public class WorkspaceResource {
 				+ sUserId + " )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			oResult.setStringValue("Invalid user.");
+			Utils.debugLog("WorkspaceResource.ShareWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", User: "
+					+ sUserId + " ): invalid session");
 			return oResult;
 		}
 
@@ -645,11 +656,12 @@ public class WorkspaceResource {
 
 		Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
-		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+	
 		List<WorkspaceSharing> aoWorkspaceSharing = null;
 
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
+			Utils.debugLog("WorkspaceResource.getUsersSharedWorksace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 			return null;
 		}
 
@@ -687,7 +699,8 @@ public class WorkspaceResource {
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oOwnerUser == null) {
-			oResult.setStringValue("Invalid user.");
+			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId
+					+ ", User:" + sUserId + " ): invalid session");
 			return oResult;
 		}
 
