@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.esa.s3tbx.aatsr.sst.ui.AatsrSstAction;
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
@@ -59,13 +60,14 @@ public class OpportunitySearchResource {
 	public ArrayList<CoverageSwathResultViewModel> search(@HeaderParam("x-session-token") String sSessionId,
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
 		Utils.debugLog("OpportunitySearchResource.Search( Session: " + sSessionId + ", ... )");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
+		
 		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
-
+		
 		try {
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog("OpportunitySearchResource.Search( " + sSessionId + ", ... ): invalid session");
 				return aoCoverageSwathResultViewModels;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -120,7 +122,7 @@ public class OpportunitySearchResource {
 	 * @param oSwath CoverageSwathResult of the Orbit Lib
 	 * @return CoverageSwathResultViewModel representig the oSwath entity
 	 */
-	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(
+	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(
 			CoverageSwathResult oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
@@ -198,7 +200,7 @@ public class OpportunitySearchResource {
 		return oVM;
 	}
 
-	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
+	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
 
@@ -334,6 +336,11 @@ public class OpportunitySearchResource {
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("satellitename") String sSatname) {
 
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if(null == oUser) {
+			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): invalid session");
+		}
+		
 		//Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 
 		// set nfs properties download
@@ -444,9 +451,13 @@ public class OpportunitySearchResource {
 	public ArrayList<SatelliteOrbitResultViewModel> getUpdatedSatelliteTrack(
 			@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitesname") String sSatName) {
 
-		// Wasdi.DebugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " +
-		// sSessionId + ", " + sSatName + "");
 
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if(null==oUser) {
+			 Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " +
+			 sSessionId + ", " + sSatName + "): invalid session");
+		}
+		
 		// Check if we have codes
 		if (Utils.isNullOrEmpty(sSatName))
 			return null;
@@ -510,36 +521,42 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(
 			@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( Session: " + sSessionId + " )");
-		// if(! m_oCredentialPolicy.validSessionId(sSessionId)) {
-		// //todo retur error
-		// //Satellite oSatellite = new
-		// }
-		String[] asSatellites = null;
-
-		// String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
-		String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
-		if (sSatellites != null && sSatellites.length() > 0) {
-			asSatellites = sSatellites.split(",|;");
-		}
+		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " )");
 
 		ArrayList<SatelliteResourceViewModel> aaoReturnValue = new ArrayList<SatelliteResourceViewModel>();
-		for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
-			try {
-				String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
-				Satellite oSatellite = SatFactory.buildSat(satres);
-				ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
-
-				SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
-				oSatelliteResource.setSatelliteName(oSatellite.getName());
-				oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
-				aaoReturnValue.add(oSatelliteResource);
-			} catch (Exception e) {
-				Utils.debugLog("getSatellitesResources Exception: " + e);
-				return null;
+		try {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null==oUser) {
+				Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " ): invalid session");
+				return aaoReturnValue;
 			}
+	
+			String[] asSatellites = null;
+	
+			// String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
+			String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
+			if (sSatellites != null && sSatellites.length() > 0) {
+				asSatellites = sSatellites.split(",|;");
+			}
+	
+			for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
+				try {
+					String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
+					Satellite oSatellite = SatFactory.buildSat(satres);
+					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
+	
+					SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
+					oSatelliteResource.setSatelliteName(oSatellite.getName());
+					oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
+					aaoReturnValue.add(oSatelliteResource);
+				} catch (Exception oE) {
+					Utils.debugLog("getSatellitesResources Exception: " + oE);
+					return null;
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " ): " + oE);
 		}
-
 		return aaoReturnValue;
 
 	}
