@@ -105,7 +105,7 @@ public class ProcessorsResource {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				Utils.debugLog("ProcessorsResource.uploadProcessor: user (from session) is null, aborting");
+				Utils.debugLog("ProcessorsResource.uploadProcessor: invalid session, aborting");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -259,7 +259,10 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(sSessionId)) return aoRet;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return aoRet;
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.getDeployedProcessors( Session: " + sSessionId + " ): invalid session");
+				return aoRet;
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -345,7 +348,10 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(sSessionId)) return oRunningProcessorViewModel;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return oRunningProcessorViewModel;
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.internalRun( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " ): invalid session");
+				return oRunningProcessorViewModel;
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunningProcessorViewModel;
 			
 			String sUserId = oUser.getUserId();
@@ -426,7 +432,10 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(sSessionId)) return oPrimitiveResult;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return oPrimitiveResult;
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.help( Session: " + sSessionId + ", Name: " + sName + " ): invalid session");
+				return oPrimitiveResult;
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oPrimitiveResult;
 			
 			//String sUserId = oUser.getUserId();
@@ -491,7 +500,10 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(sSessionId)) return oRunning;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return oRunning;
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.status( Session: " + sSessionId + ", ProcessingId: " + sProcessingId + " ): invalid session");
+				return oRunning;
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunning;
 			
 			String sUserId = oUser.getUserId();
@@ -563,7 +575,7 @@ public class ProcessorsResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("ProcessorResource.addLog: user null");
+				Utils.debugLog("ProcessorsResource.addLog( " + sSessionId + ", " + sProcessWorkspaceId + ", " + sLog + " ): invalid session");
 				return Response.status(401).build();
 			}
 			
@@ -608,7 +620,7 @@ public class ProcessorsResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 	
 			if (oUser==null) {
-				Utils.debugLog("ProcessorResource.countLogs: user null");
+				Utils.debugLog("ProcessorResource.countLogs( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + " ): invalid session");
 				return iResult;
 			}
 			
@@ -653,7 +665,7 @@ public class ProcessorsResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("ProcessorResource.getLogs: addLog: user null");
+				Utils.debugLog("ProcessorsResource.getLogs( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + ", Start: " + iStartRow + ", End: " + iEndRow + " ): invalid session");
 				return aoRetList;
 			}
 			
@@ -704,7 +716,10 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (oUser==null) {
+				Utils.debugLog("ProcessorResources.deleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 			String sUserId = oUser.getUserId();
@@ -768,7 +783,10 @@ public class ProcessorsResource {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (oUser==null) {
+				Utils.debugLog("ProcessorResources.redeployProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 			String sUserId = oUser.getUserId();
@@ -839,10 +857,16 @@ public class ProcessorsResource {
 		Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): passed a null session id");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (oUser==null) {
+				Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 			String sUserId = oUser.getUserId();
@@ -903,10 +927,16 @@ public class ProcessorsResource {
 		Utils.debugLog("ProcessorResources.updateProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("ProcessorResources.updateProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): session id is null");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (oUser==null) {
+				Utils.debugLog("ProcessorResources.updateProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 			
 			Utils.debugLog("ProcessorsResource.updateProcessor: get Processor " + sProcessorId);	
@@ -920,7 +950,6 @@ public class ProcessorsResource {
 			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
 				
-				
 				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
 				
 				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
@@ -932,7 +961,6 @@ public class ProcessorsResource {
 				else {
 					Utils.debugLog("ProcessorsResource.updateProcessor: processor of user " + oProcessorToUpdate.getUserId() + " is shared with " + oUser.getUserId());
 				}
-				
 			}
 
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
@@ -970,7 +998,7 @@ public class ProcessorsResource {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: user (from session) is null, aborting");
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " ): invalid session");
 				return Response.status(401).build();
 			}
 			
@@ -1123,7 +1151,7 @@ public class ProcessorsResource {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor: user not authorized");
+				Utils.debugLog("ProcessorsResource.downloadProcessor( Session: " + sSessionId + ", processorId: " + sProcessorId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -1149,7 +1177,7 @@ public class ProcessorsResource {
 			Utils.debugLog("ProcessorsResource.downloadProcessor: " + oEx);
 		}
 		
-		return null;
+		return Response.serverError().build();
 	}	
 	
 	/**
@@ -1158,98 +1186,102 @@ public class ProcessorsResource {
 	 * @return
 	 */
 	private Response zipProcessor(File oInitialFile, Processor oProcessor) {
-		
-		// Create a stack of files
-		Stack<File> aoFileStack = new Stack<File>();
-		String sBasePath = oInitialFile.getParent();
-		
-		Utils.debugLog("ProcessorsResource.zipProcessor: sDir = " + sBasePath);
-		
-		// Get the processor folder
-		File oFile = new File(sBasePath);
-		aoFileStack.push(oFile);
-				
-		if(!sBasePath.endsWith("/") && !sBasePath.endsWith("\\")) {
-			sBasePath = sBasePath + "/";
-		}
-		
-		int iBaseLen = sBasePath.length();
-		
-		String sProcTemplatePath = Wasdi.getDownloadPath(m_oServletConfig);
-		sProcTemplatePath += "dockertemplate/";
-		sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
-		
-		ArrayList<String> asTemplateFiles = new ArrayList<String>();
-		File oProcTemplateFolder = new File(sProcTemplatePath);
-		
-		Utils.debugLog("ProcessorsResource.zipProcessor: Proc Template Path " + sProcTemplatePath);
-		
-		File[] aoTemplateChildren = oProcTemplateFolder.listFiles();
-		for (File oChild : aoTemplateChildren) {
-			asTemplateFiles.add(oChild.getName());
-		}
-		
-		
-		// Create a map of the files to zip
-		Map<String, File> aoFileEntries = new HashMap<>();
-		
-		while(aoFileStack.size()>=1) {
-			
-			oFile = aoFileStack.pop();
-			String sAbsolutePath = oFile.getAbsolutePath();
-			
-			Utils.debugLog("ProcessorsResource.zipProcessor: sAbsolute Path " + sAbsolutePath);
+		try {
+			// Create a stack of files
+			Stack<File> aoFileStack = new Stack<File>();
+			String sBasePath = oInitialFile.getParent();
 
-			if(oFile.isDirectory()) {
-				if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
-					sAbsolutePath = sAbsolutePath + "/";
-				}
-				File[] aoChildren = oFile.listFiles();
-				for (File oChild : aoChildren) {
-					
-					if (!asTemplateFiles.contains(oChild.getName())) {
-						aoFileStack.push(oChild);
-					}
-					else {
-						Utils.debugLog("ProcessorsResource.zipProcessor: jumping template file " + oChild.getName());
-					}
-					
-				}
-			}
-			
-			String sRelativePath = sAbsolutePath.substring(iBaseLen);
-			
-			if (!Utils.isNullOrEmpty(sRelativePath)) {
-				Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
-				aoFileEntries.put(sRelativePath,oFile);				
-			}
-			else {
-				Utils.debugLog("ProcessorsResource.zipProcessor: jumping empty file");
-			}
-		}
-		
-		Utils.debugLog("ProcessorsResource.zipProcessor: done preparing map, added " + aoFileEntries.size() + " files");
-					
-		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+			Utils.debugLog("ProcessorsResource.zipProcessor: sDir = " + sBasePath);
 
-		// Set response headers and return 
-		ResponseBuilder oResponseBuilder = Response.ok(oStream);
-		String sFileName = oInitialFile.getName();
-				
-		Utils.debugLog("ProcessorsResource.zipProcessor: sFileName " + sFileName);
-		
-		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
-		Long lLength = 0L;
-		for (String sFile : aoFileEntries.keySet()) {
-			File oTempFile = aoFileEntries.get(sFile);
-			if(!oTempFile.isDirectory()) {
-				//NOTE: this way we are cheating, it is an upper bound, not the real size!
-				lLength += oTempFile.length();
+			// Get the processor folder
+			File oFile = new File(sBasePath);
+			aoFileStack.push(oFile);
+
+			if(!sBasePath.endsWith("/") && !sBasePath.endsWith("\\")) {
+				sBasePath = sBasePath + "/";
 			}
+
+			int iBaseLen = sBasePath.length();
+
+			String sProcTemplatePath = Wasdi.getDownloadPath(m_oServletConfig);
+			sProcTemplatePath += "dockertemplate/";
+			sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
+
+			ArrayList<String> asTemplateFiles = new ArrayList<String>();
+			File oProcTemplateFolder = new File(sProcTemplatePath);
+
+			Utils.debugLog("ProcessorsResource.zipProcessor: Proc Template Path " + sProcTemplatePath);
+
+			File[] aoTemplateChildren = oProcTemplateFolder.listFiles();
+			for (File oChild : aoTemplateChildren) {
+				asTemplateFiles.add(oChild.getName());
+			}
+
+
+			// Create a map of the files to zip
+			Map<String, File> aoFileEntries = new HashMap<>();
+
+			while(aoFileStack.size()>=1) {
+
+				oFile = aoFileStack.pop();
+				String sAbsolutePath = oFile.getAbsolutePath();
+
+				Utils.debugLog("ProcessorsResource.zipProcessor: sAbsolute Path " + sAbsolutePath);
+
+				if(oFile.isDirectory()) {
+					if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
+						sAbsolutePath = sAbsolutePath + "/";
+					}
+					File[] aoChildren = oFile.listFiles();
+					for (File oChild : aoChildren) {
+
+						if (!asTemplateFiles.contains(oChild.getName())) {
+							aoFileStack.push(oChild);
+						}
+						else {
+							Utils.debugLog("ProcessorsResource.zipProcessor: jumping template file " + oChild.getName());
+						}
+
+					}
+				}
+
+				String sRelativePath = sAbsolutePath.substring(iBaseLen);
+
+				if (!Utils.isNullOrEmpty(sRelativePath)) {
+					Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
+					aoFileEntries.put(sRelativePath,oFile);				
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.zipProcessor: jumping empty file");
+				}
+			}
+
+			Utils.debugLog("ProcessorsResource.zipProcessor: done preparing map, added " + aoFileEntries.size() + " files");
+
+			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+
+			// Set response headers and return 
+			ResponseBuilder oResponseBuilder = Response.ok(oStream);
+			String sFileName = oInitialFile.getName();
+
+			Utils.debugLog("ProcessorsResource.zipProcessor: sFileName " + sFileName);
+
+			oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+			Long lLength = 0L;
+			for (String sFile : aoFileEntries.keySet()) {
+				File oTempFile = aoFileEntries.get(sFile);
+				if(!oTempFile.isDirectory()) {
+					//NOTE: this way we are cheating, it is an upper bound, not the real size!
+					lLength += oTempFile.length();
+				}
+			}
+			oResponseBuilder.header("Content-Length", lLength);
+			Utils.debugLog("ProcessorsResource.zipProcessor: done");
+			return oResponseBuilder.build();
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessorsResource.zipProcessor: " + oE);
 		}
-		oResponseBuilder.header("Content-Length", lLength);
-		Utils.debugLog("ProcessorsResource.zipProcessor: done");
-		return oResponseBuilder.build();
+		return Response.serverError().build();
 	}
 	
 	public boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
@@ -1331,7 +1363,8 @@ public class ProcessorsResource {
 		oResult.setBoolValue(false);
 
 		if (oOwnerUser == null) {
-			oResult.setStringValue("Invalid user.");
+			Utils.debugLog("ProcessorsResource.shareProcessor( Session: " + sSessionId + ", WS: " + sProcessorId + ", User: " + sUserId + " ): invalid session");
+			oResult.setStringValue("Invalid session.");
 			return oResult;
 		}
 
@@ -1412,10 +1445,10 @@ public class ProcessorsResource {
 
 		// Validate Session
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
-		List<ProcessorSharing> aoProcessorSharing = null;
+		
 
 		if (oOwnerUser == null) {
-			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: Owner null return");
+			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + " ): invalid session");
 			return null;
 		}
 
@@ -1432,18 +1465,17 @@ public class ProcessorsResource {
 			return null;
 		}
 
-
 		try {
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
 			
-			aoProcessorSharing = oProcessorSharingRepository.getProcessorSharingByProcessorId(sProcessorId);
+			List<ProcessorSharing> aoProcessorSharing = oProcessorSharingRepository.getProcessorSharingByProcessorId(sProcessorId);
 			
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: " + oEx);
 			return null;
 		}
 
-		return aoProcessorSharing;
+		return null;
 
 	}
 
@@ -1455,51 +1487,56 @@ public class ProcessorsResource {
 		Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oOwnerUser == null) {
-			oResult.setStringValue("Invalid user.");
-			return oResult;
-		}
-
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
-			oResult.setStringValue("Invalid user.");
-			return oResult;
-		}
-		
-		if (Utils.isNullOrEmpty(sUserId)) {
-			oResult.setStringValue("Invalid shared user.");
-			return oResult;			
-		}
-
 		try {
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			
-			ProcessorSharing oProcShare = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
-			
-			if (oProcShare!= null) {
-				if (oProcShare.getUserId().equals(oOwnerUser.getUserId()) || oProcShare.getOwnerId().equals(oOwnerUser.getUserId())) {
-					oProcessorSharingRepository.deleteByUserIdProcessorId(sUserId, sProcessorId);
+			// Validate Session
+			User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oOwnerUser == null) {
+				Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", User:" + sUserId + " ): invalid session");
+				oResult.setStringValue("Invalid session");
+				return oResult;
+			}
+
+			if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+				oResult.setStringValue("Invalid user.");
+				return oResult;
+			}
+
+			if (Utils.isNullOrEmpty(sUserId)) {
+				oResult.setStringValue("Invalid shared user.");
+				return oResult;			
+			}
+
+			try {
+				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+
+				ProcessorSharing oProcShare = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
+
+				if (oProcShare!= null) {
+					if (oProcShare.getUserId().equals(oOwnerUser.getUserId()) || oProcShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+						oProcessorSharingRepository.deleteByUserIdProcessorId(sUserId, sProcessorId);
+					}
+					else {
+						oResult.setStringValue("Unauthorized");
+						return oResult;					
+					}
 				}
 				else {
-					oResult.setStringValue("Unauthorized");
-					return oResult;					
+					oResult.setStringValue("Sharing not found");
+					return oResult;				
 				}
+			} 
+			catch (Exception oEx) {
+				Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor: " + oEx);
+				oResult.setStringValue("Error deleting processor sharing");
+				return oResult;
 			}
-			else {
-				oResult.setStringValue("Sharing not found");
-				return oResult;				
-			}
-		} 
-		catch (Exception oEx) {
-			Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor: " + oEx);
-			oResult.setStringValue("Error deleting processor sharing");
-			return oResult;
-		}
 
-		oResult.setStringValue("Done");
-		oResult.setBoolValue(true);
+			oResult.setStringValue("Done");
+			oResult.setBoolValue(true);
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", User:" + sUserId + " ): " + oE);
+		}
 		return oResult;
 
 	}
