@@ -160,7 +160,7 @@ var HomeController = (function() {
         oUser.authProvider = "wasdi";
         oUser.link;
         oUser.description;
-        oUser.sessionId = data['refresh_token'];
+        oUser.sessionId = data['access_token'];
 
         oController.m_oConstantsService.setUser(oUser);//set user
         oController.m_oState.go("root.workspaces");// go workspaces
