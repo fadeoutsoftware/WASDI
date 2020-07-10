@@ -775,8 +775,9 @@ public class AuthResource {
 		
 		if(null == oUser) {
 			Utils.debugLog("User not found");
-			PrimitiveResult oResult = PrimitiveResult.getInvalid(); 
-			oResult.setIntValue(403);
+			PrimitiveResult oResult = PrimitiveResult.getInvalid();
+			//unauthorized
+			oResult.setIntValue(401);
 			return oResult;
 		} 
 		else {
