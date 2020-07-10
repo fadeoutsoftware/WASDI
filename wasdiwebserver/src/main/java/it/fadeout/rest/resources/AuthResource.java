@@ -159,6 +159,7 @@ public class AuthResource {
 	 * Clear all the user expired sessions
 	 * @param oUser
 	 */
+	//TODO remove, it's no longer relevant with keycloak
 	private void clearUserExpiredSessions(User oUser) {
 		SessionRepository oSessionRepository = new SessionRepository();
 		List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oUser.getUserId());
@@ -760,10 +761,12 @@ public class AuthResource {
 		Utils.debugLog("AuthService.lostPassword: sUserId: " + sUserId);
 		
 		if(null == sUserId ) {
+			Utils.debugLog("User id is null");
 			return PrimitiveResult.getInvalid();
 		}
 		
 		if(!m_oCredentialPolicy.validUserId(sUserId)) {
+			Utils.debugLog("User id not valid");
 			return PrimitiveResult.getInvalid();
 		}
 		
@@ -771,7 +774,10 @@ public class AuthResource {
 		User oUser = oUserRepository.getUser(sUserId);
 		
 		if(null == oUser) {
-			return PrimitiveResult.getInvalid();
+			Utils.debugLog("User not found");
+			PrimitiveResult oResult = PrimitiveResult.getInvalid(); 
+			oResult.setIntValue(403);
+			return oResult;
 		} 
 		else {
 			if(null != oUser.getAuthServiceProvider()){
