@@ -231,7 +231,7 @@ public class ProcessingResources {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null == oUser) {
 			Utils.debugLog("ProcessingResources.operatorParameters( Session: " + sSessionId + ", Operation: " + sOperation + " ): invalid session");
-			return oChoices;
+			return oChoices.toArray(new SnapOperatorParameterViewModel[oChoices.size()]);
 		}
 		try {
 			Class oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
