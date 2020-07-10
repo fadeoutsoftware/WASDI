@@ -65,6 +65,12 @@ public class FileBufferResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
+				Utils.debugLog("FileBufferResource.Download( " + sSessionId + ", " +
+						sFileUrl + ", " +
+						sProvider + ", " +
+						sWorkspaceId + ", " +
+						sBoundingBox + ", " +
+						sParentProcessWorkspaceId + " ): session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -125,7 +131,8 @@ public class FileBufferResource {
 	@GET
 	@Path("publish")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
+	public Response publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
 	{
 		try {
 			
@@ -135,7 +142,15 @@ public class FileBufferResource {
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			if (oUser==null) return Response.status(401).build();
+			if (oUser==null) {
+				Utils.debugLog("FileBufferResource.Publish( " +
+						sSessionId + ", " +
+						sFileUrl + ", " + 
+						sWorkspaceId + ", " +
+						sParentProcessWorkspaceId + " ): session is not valid");
+						
+				return Response.status(401).build();
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
 			String sUserId = oUser.getUserId();
@@ -187,7 +202,10 @@ public class FileBufferResource {
 			// Check Authentication
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser==null) return oReturnValue;
+			if (oUser==null) {
+				Utils.debugLog("FileBufferResource.PublishBand: session " + sSessionId + " is invalid"); 
+				return oReturnValue;
+			}
 			String sUserId = oUser.getUserId();
 			if (Utils.isNullOrEmpty(sUserId)) return oReturnValue;
 			
@@ -258,14 +276,22 @@ public class FileBufferResource {
 	@GET
 	@Path("getbandlayerid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
+	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
 	{
 		Utils.debugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
 		PrimitiveResult oReturnValue = null;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser==null) return oReturnValue;
+			if (oUser==null) {
+				Utils.debugLog("FileBufferResource.GetBandLayerId( " +
+						sSessionId + ", " +
+						sFileUrl + ", " + 
+						sWorkspaceId + ", " +
+						sBand + " ): session invalid");
+				return oReturnValue;
+			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
 
 			Utils.debugLog("FileBufferResource.GetBandLayerId: read product workspaces " + sWorkspaceId);
