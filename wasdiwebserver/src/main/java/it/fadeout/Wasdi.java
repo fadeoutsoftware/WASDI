@@ -61,7 +61,7 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 public class Wasdi extends ResourceConfig {
 	
 	@Context
-	static ServletConfig s_oServletConfig;
+	ServletConfig m_oServletConfig;
 
 	@Context
 	ServletContext m_oContext;
@@ -95,6 +95,11 @@ public class Wasdi extends ResourceConfig {
 	 * Actual node Object
 	 */
 	public static Node s_oMyNode = null;
+	
+	
+	public static String s_sKeyCloakIntrospectionUrl = "";
+	public static String s_sClientId = "";
+	public static String s_sClientSecret = ""; 
 	
 	/**
 	 * Credential Policy Utility class
@@ -153,6 +158,10 @@ public class Wasdi extends ResourceConfig {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token/introspect");
+		s_sClientId = getInitParameter("keycloak_confidentialClient", "wasdi_api");
+		s_sClientSecret = getInitParameter("keycloak_clientSecret", "1dd2e17c-3ce6-4851-891a-d689cf8bd107");
 		
 		try {
 			// If this is not the main node
@@ -289,8 +298,8 @@ public class Wasdi extends ResourceConfig {
 	 * @param sDefault
 	 * @return
 	 */
-	private static String getInitParameter(String sParmaneter, String sDefault) {
-		String sParameterValue = s_oServletConfig.getInitParameter(sParmaneter);
+	private String getInitParameter(String sParmaneter, String sDefault) {
+		String sParameterValue = m_oServletConfig.getInitParameter(sParmaneter);
 		return sParameterValue == null ? sDefault : sParameterValue;
 	}
 
@@ -347,9 +356,9 @@ public class Wasdi extends ResourceConfig {
             raise Exception('Invalid introspection request')
         return response.json()
 		 */
-		String sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token/introspect");
-		String sClientId = getInitParameter("keycloak_confidentialClient", "wasdi_api");
-		String sClientSecret = getInitParameter("keycloak_clientSecret", "1dd2e17c-3ce6-4851-891a-d689cf8bd107");
+		String sKeyCloakIntrospectionUrl = Wasdi.s_sKeyCloakIntrospectionUrl;
+		String sClientId = Wasdi.s_sClientId;
+		String sClientSecret = Wasdi.s_sClientSecret;
 		
 		String sPayload = "client_id=" + sClientId + 
 				"&client_secret=" + sClientSecret + 
