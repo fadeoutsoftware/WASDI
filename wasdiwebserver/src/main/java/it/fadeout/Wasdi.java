@@ -348,7 +348,7 @@ public class Wasdi extends ResourceConfig {
         return response.json()
 		 */
 		
-		String sKeyCloakIntrospectionUrl = "http://localhost:8080/auth/realms/demo/protocol/openid-connect/token/introspect";
+		String sKeyCloakIntrospectionUrl = "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token/introspect";
 		String sClientId = "wasdi_api";
 		String sClientSecret = "1dd2e17c-3ce6-4851-891a-d689cf8bd107";
 		
