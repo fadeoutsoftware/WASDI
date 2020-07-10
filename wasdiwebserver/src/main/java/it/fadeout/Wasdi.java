@@ -327,7 +327,7 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionToken
 	 * @return
 	 */
-	public static User getUserFromSession(String sSessionToken) {
+	public static User getUserFromSession(String sSessionId) {
 
 		// validate sSessionId
 		if (!m_oCredentialPolicy.validSessionId(sSessionToken)) {
