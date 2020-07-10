@@ -330,7 +330,7 @@ public class Wasdi extends ResourceConfig {
 	public static User getUserFromSession(String sSessionId) {
 
 		// validate sSessionId
-		if (!m_oCredentialPolicy.validSessionId(sSessionToken)) {
+		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 			return null;
 		}
 		
@@ -353,7 +353,7 @@ public class Wasdi extends ResourceConfig {
 		
 		String sPayload = "client_id=" + sClientId + 
 				"&client_secret=" + sClientSecret + 
-				"&token=" + sSessionToken;
+				"&token=" + sSessionId;
 		
 		Map<String,String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
