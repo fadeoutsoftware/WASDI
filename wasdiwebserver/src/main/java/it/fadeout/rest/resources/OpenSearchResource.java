@@ -59,6 +59,7 @@ public class OpenSearchResource {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog(s_sClassName + ".getProductsCount( Session: " + sSessionId + ", Query: " + sQuery + ", Providers: " + sProviders + " ): invalid session");
 				return -1;
 			}
 	
@@ -131,6 +132,8 @@ public class OpenSearchResource {
 		// Domain Check
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
+			Utils.debugLog(s_sClassName + ".search( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " +
+					sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " ): invalid session");
 			return null;
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -232,6 +235,7 @@ public class OpenSearchResource {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog(s_sClassName + ".getSearchProviders( Session: " + sSessionId +" ): invalid session");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -279,7 +283,7 @@ public class OpenSearchResource {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+", corresponding user is null");
+				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+" is invalid");
 				return -1;
 			}
 			if(null==asQueries || asQueries.size() <= 0) {
@@ -324,7 +328,7 @@ public class OpenSearchResource {
 			// Validate the User
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", null user");
+				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+" is invalid");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
