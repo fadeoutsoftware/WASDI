@@ -20,6 +20,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -459,68 +460,63 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId) {
+	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sToKillProcessObjId, @QueryParam("treeKill") Boolean bKillTheEntireTree) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sProcessObjId + " )");
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
 
 		try {
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user (or userId) null, aborting");
 				return Response.status(401).build();
 			}
-
-			// Create repo
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sProcessObjId);
 			
-			if (oProcessToDelete != null)
-			{
-				
-				int iPid = oProcessToDelete.getPid();
-				
-				if (iPid>0) {
-					// Exists Pid, kill process
-					String sShellExString = m_oServletConfig.getInitParameter("KillCommand") + " " + iPid;
-					
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
-					
-					Process oProc = Runtime.getRuntime().exec(sShellExString);
-					
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill result: " + oProc.waitFor());
-
-				} else {
-					
-					Utils.debugLog("ProcessWorkspaceResource. Process pid not in data");
-					
-				}
-								
-				// set process state to STOPPED only if CREATED or RUNNING
-				String sPrecSatus = oProcessToDelete.getStatus();
-				
-				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
-					
-					oProcessToDelete.setStatus(ProcessStatus.STOPPED.name());
-					oProcessToDelete.setOperationEndDate(Utils.GetFormatDate(new Date()));
-					
-					if (!oRepository.updateProcess(oProcessToDelete)) {
-						Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
-					}
-					
-				} else {
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: Process already terminated: " + sPrecSatus);
-				}
-				
-				
-				return Response.ok().build();
-				
-			} else {
-				
-				Utils.debugLog("ProcessWorkspaceResource. Process not found in DB");
-				return Response.status(404).build();
-				
+			if(Utils.isNullOrEmpty(sToKillProcessObjId)) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: processObjId is null or empty, aborting");
+				return Response.status(401).build();
 			}
+			
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sToKillProcessObjId);
+			
+			//check that the process exists
+			if(null==oProcessToDelete) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
+				return Response.status(401).build();
+			}
+			
+			// check that the user can access the processworkspace
+			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sToKillProcessObjId)) {
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
+				return Response.status(403).build();
+			}
+			
+			
+			//create the operation parameter
+			String sDeleteObjId = Utils.GetRandomName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
+			oKillProcessParameter.setProcessObjId(sDeleteObjId);
+			oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
+			if(null!=bKillTheEntireTree) {
+				oKillProcessParameter.setKillTree(bKillTheEntireTree);
+			}
+			
+			
+			String sWorkspaceId = oProcessToDelete.getWorkspaceId();
+			
+			//base parameter atttributes
+			oKillProcessParameter.setWorkspace(sWorkspaceId);
+			oKillProcessParameter.setUserId(oUser.getUserId());
+			oKillProcessParameter.setExchange(sWorkspaceId);
+			oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			//schedule the deletion
+			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), oProcessToDelete.getProductName(), sPath, oKillProcessParameter, null);
+			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
+			
+			return Response.status(oResult.getIntValue()).build();
 						
 		}
 		catch (Exception oEx) {

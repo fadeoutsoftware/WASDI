@@ -58,7 +58,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#GetDownloadFileSize(java.lang.String)
 	 */
 	@Override
-	public long GetDownloadFileSize(String sFileURL) throws Exception {
+	public long getDownloadFileSize(String sFileURL) throws Exception {
 		//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
 
 		m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: start " + sFileURL);
@@ -92,7 +92,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#ExecuteDownloadFile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, wasdi.shared.business.ProcessWorkspace)
 	 */
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
+	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -121,7 +121,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			File oSourceFile = new File(sPath);
 			
 			// Destination file name: start from the simple name
-			String sDestinationFileName = GetFileName(sFileURL);
+			String sDestinationFileName = getFileName(sFileURL);
 			// set the destination folder
 			if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
@@ -183,7 +183,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 						
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product name is still null, try to get it now");
 						
-						String sFileNameWithoutPath = this.GetFileName(sFileURL);
+						String sFileNameWithoutPath = this.getFileName(sFileURL);
 						
 						if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
 							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: got product name " + sFileNameWithoutPath);
@@ -521,7 +521,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#GetFileName(java.lang.String)
 	 */
 	@Override
-	public String GetFileName(String sFileURL) throws Exception {
+	public String getFileName(String sFileURL) throws Exception {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {

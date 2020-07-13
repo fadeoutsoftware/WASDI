@@ -755,11 +755,11 @@ public class ProductResource {
 				}
 			}
 
-			// delete product record on db
+			// delete the product-workspace related records on db and the Downloaded File Entry
 			try {
 				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
-				oDownloadedFilesRepository.deleteByFilePath(sDownloadPath + sProductName);
+				oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 			} catch (Exception oEx) {
 				Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
 				oReturn.setIntValue(500);
@@ -778,7 +778,7 @@ public class ProductResource {
 					if (oDownloadedFile.getProductViewModel()!=null) {
 						String sMetadataFilePath = oDownloadedFile.getProductViewModel().getMetadataFileReference();
 						if (!Utils.isNullOrEmpty(sMetadataFilePath)) {
-							FileUtils.deleteQuietly(new File(sMetadataFilePath));
+							FileUtils.deleteQuietly(new File(sDownloadPath+"/"+sMetadataFilePath));
 							Utils.debugLog("Metadata file cleaned");
 						}
 					}
@@ -797,7 +797,7 @@ public class ProductResource {
 
 			
 			// Delete the database entry
-			oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
+			//oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 			
 
 		} catch (Exception oEx) {

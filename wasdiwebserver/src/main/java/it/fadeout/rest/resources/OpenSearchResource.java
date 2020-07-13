@@ -319,7 +319,9 @@ public class OpenSearchResource {
 
 		Utils.debugLog(s_sClassName + ".SearchList( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " + sQuery+
 				", Offset: " + sOffset + ", Limit: " + sLimit + ", Sorted: " + sSortedBy + ", Order: " + sOrder + ", Queries: " + asQueries + " )");
-		try {
+		try { 
+			
+			// Validate the User
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", null user");
@@ -338,39 +340,93 @@ public class OpenSearchResource {
 				return null;
 			}
 	
-			Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", providers: " + sProviders + ", queries " + asQueries.size());
+			// Prepare the output list
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+			
+			// For Each Input query
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
 				try {
 					sQuery = asQueries.get(iQueries);
-					Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", count: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
+					
+					// Get for each provider the total count
 					Map<String, Integer> counterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+					
+					// For each provider
 					for (Entry<String, Integer> entry : counterMap.entrySet()) {
+						
+						// Get the Provider Name
 						String sProvider = entry.getKey();
+						// Get the Provider Total Count
 						int iTotalResultsForProviders = entry.getValue();
+						
+						Utils.debugLog(sProvider + " Images Found " + iTotalResultsForProviders);
+						
+						// Get the real results, paginated
 						int iObtainedResults = 0;
+						
+						// Page size
+						int iLimit = 100;
+						
+						String sProviderLimit = m_oServletConfig.getInitParameter(sProvider+".SearchListPageSize");
+						
+						if (!Utils.isNullOrEmpty(sProviderLimit)) {
+							try {
+								iLimit = Integer.parseInt(sProviderLimit);
+								Utils.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
+							}
+							catch (Exception e) {
+							}
+						}
+						
+						QueryExecutor oExecutor = getExecutor(sProviders);
+						
+						// Until we do not get all the results
 						while (iObtainedResults < iTotalResultsForProviders) {
+							
+							// Actual Offset
 							String sCurrentOffset = "" + iObtainedResults;
-							// TODO This limit should be a Provider Parameter
-							int iLimit = 100;
-		
+	
+							// How many elements do we need yet?
 							if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
 								iLimit = iTotalResultsForProviders - iObtainedResults;
 							}
 		
 							String sCurrentLimit = "" + iLimit;
+							
+							// Create the paginated Query
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
+							// Log the query
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
-							QueryExecutor oExecutor = getExecutor(sProviders);
+							
 							try {
+								// Execute the query
 								List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
+								
+								// Did we got a result?
 								if (aoTmp != null && !aoTmp.isEmpty()) {
+									
+									// Sum the grand total
 									iObtainedResults += aoTmp.size();
-									aoResults.addAll(aoTmp);
-									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
-											" results for Query#" + iQueries +" for " + sProvider);
+									
+									// Add the result to the output list
+									//aoResults.addAll(aoTmp);
+									
+									int iAddedResults = 0;
+									
+									// Here add the results checking to avoid duplicates
+									for (QueryResultViewModel oTempResult : aoTmp) {
+										if (!aoResults.contains(oTempResult)) {
+											aoResults.add(oTempResult);
+											iAddedResults++;
+										}
+										else {
+											Utils.debugLog(s_sClassName + ".SearchList: found duplicate image " + oTempResult.getTitle());
+										}
+									}
+									
+									Utils.debugLog(s_sClassName + ".SearchList added " + iAddedResults + " results for Query#" + iQueries +" for " + sProvider);
 								} else {
-									Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+									Utils.debugLog(s_sClassName + ".SearchList, NO results found for " + sProvider);
 								}
 							} catch (Exception oE4s) {
 								Utils.debugLog(s_sClassName + ".SearchList: " + oE4s);

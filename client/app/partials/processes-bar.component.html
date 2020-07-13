@@ -55,6 +55,12 @@
                 <span class="ml-2 badge">{{m_oController.m_iNumberOfProcesses}}</span>
             </div>
         </div>
+        <div class="col-v4-auto d-flex flex-column justify-content-center">
+            <button class="btn btn-wasdi-proc-bar" ng-click="m_oController.openProcessLogsDialog()">
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </button>
+        </div>
+
         <div class="col-v4-auto d-flex flex-column justify-content-center pl-0">
             <button class="btn btn-wasdi-proc-bar" ng-click="m_oController.toggleProcessesBar()">
                 <i class="fa" ng-class="{'fa-arrow-up' : m_oController.m_bIsOpenStatusBar == false, 'fa-arrow-down' : m_oController.m_bIsOpenStatusBar == true}" aria-hidden="true"></i>
@@ -144,7 +150,7 @@
         <div class="row-v4">
             <div class="col-v4-auto ml-auto">
                 <button class="btn btn-primary btn-wasdi" ng-click="m_oController.openProcessLogsDialog()">
-                    <i class="fa fa-refresh mr-2" aria-hidden="true"></i>Load more...
+                    <i class="fa fa-list mr-2" aria-hidden="true"></i>Load more...
                 </button>
             </div>
         </div>

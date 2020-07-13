@@ -9,15 +9,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -45,9 +50,14 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
+import org.quartz.xml.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Preconditions;
 
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
@@ -62,6 +72,7 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
@@ -69,10 +80,12 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
@@ -81,6 +94,7 @@ import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
@@ -137,6 +151,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Actual node, main by default
 	 */
 	public static String s_sNodeCode = "wasdi";
+	
+	/**
+	 * Flag to know if update or not the progress of download operations in the database
+	 */
+	protected boolean m_bNotifyDownloadUpdateActive = true;
 
 	/**
 	 * WASDI Launcher Main Entry Point
@@ -147,6 +166,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public static void main(String[] args) throws Exception {
 
 		try {
+			Security.setProperty("crypto.policy", "unlimited");
 			// get jar directory
 			File oCurrentFile = new File(
 					LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
@@ -367,8 +387,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Config.instance().load();
 
 			SystemUtils.init3rdPartyLibs(null);
-			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER",
-					"/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
 
 			FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
 			oFileHandler.setLevel(Level.ALL);
@@ -376,6 +395,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			oFileHandler.setFormatter(oSimpleFormatter);
 			SystemUtils.LOG.setLevel(Level.ALL);
 			SystemUtils.LOG.addHandler(oFileHandler);
+			
+			// Flag to know if update the process workspace progress during download operations or not
+			String sNotifyDownloadUpdateActive = ConfigReader.getPropValue("DOWNLOAD_UPDATE_ACTIVE", "1");
+			
+			if (sNotifyDownloadUpdateActive.equals("1")) {
+				m_bNotifyDownloadUpdateActive = true;
+			}
+			else {
+				m_bNotifyDownloadUpdateActive = false;
+			}
 
 			Engine.start(false);
 
@@ -427,7 +456,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			case FTPUPLOAD: {
 				// FTP Upload
 				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-				ftpTransfer(oFtpTransferParameters);
+				ftpExport(oFtpTransferParameters);
 			}
 				break;
 			case PUBLISHBAND: {
@@ -569,7 +598,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				copyToSfpt(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("SFTP_ROOT_PATH", "/data/sftpuser"));
 			}
-				break;			
+				break;	
+			case KILLPROCESSTREE: {
+				KillProcessTreeParameter oKillProcessTreeParameter = (KillProcessTreeParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				killProcessTree(oKillProcessTreeParameter);
+			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -722,7 +756,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				// get file size
-				long lFileSizeByte = oProviderAdapter.GetDownloadFileSize(oParameter.getUrl());
+				long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
 				// set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 				
@@ -741,7 +775,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
 				// Get the file name
-				String sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
+				String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
 
 				DownloadedFile oAlreadyDownloaded = null;
@@ -801,7 +835,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 					// No: it isn't: download it
-					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
+					sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
 					if (Utils.isNullOrEmpty(sFileName)) {
 						
@@ -833,7 +867,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 					// Save Metadata
-					oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
+					//oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
 					
 					if (Utils.isNullOrEmpty(sFileNameWithoutPath)) {
 						sFileNameWithoutPath = oProductFile.getName();
@@ -955,97 +989,116 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @return
 	 * @throws IOException
 	 */
-	public Boolean ftpTransfer(FtpUploadParameters oParam) throws IOException {
-		s_oLogger.debug("ftpTransfer begin");
-		if (null == oParam) {
-			s_oLogger.debug("ftpTransfer: null input");
-			return false;
-		}
-		if (null == oParam.getProcessObjId()) {
-			s_oLogger.debug("ftpTransfer: null ProcessObjId");
-			return false;
-		}
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParam.getProcessObjId());
+	public void ftpExport(FtpUploadParameters oParam) throws IOException {
+		s_oLogger.info("ftpExport");
+		try {
+			Preconditions.checkNotNull(oParam, "null parameter");
+			Preconditions.checkNotNull(oParam.getProcessObjId(), "null ProcessObjId");
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParam.getProcessObjId());
+			try {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+				if (null == oProcessWorkspace) {
+					throw new NullPointerException("null Process Workspace");
+				}
+				
+				
+				//check server parameters are OK before trying connection
+				if(!Utils.isServerNamePlausible(oParam.getFtpServer())){
+					throw new ValidationException("FTP server name \"" + oParam.getFtpServer() + "\" not plausible");
+				}
+				if(!Utils.isPortNumberPlausible(oParam.getPort())){
+					throw new ValidationException("FTP server port \"" + oParam.getPort() + "\" not plausible");
+				}
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+				
 
-		if (null == oProcessWorkspace) {
-			s_oLogger.debug("ftpTransfer: null Process Workspace");
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-		if (!Utils.isFilePathPlausible(oParam.getFullLocalPath())) {
-			s_oLogger.debug("ftpTransfer: null local path");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
+				String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
+				
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
+				File oFile = new File(sFullLocalPath);
+				if (!oFile.exists()) {
+					throw new IOException("local file " +oFile.getName() + "does not exist ");
+				}
 
-		// String sFullLocalPath =
-		// oDownRepo.GetDownloadedFile(oParam.getLocalFileName()).getFilePath();
-		String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
-
-		// String fullLocalPath = oParam.getM_sLocalPath();
-		File oFile = new File(sFullLocalPath);
-		if (!oFile.exists()) {
-			s_oLogger.debug("ftpTransfer: local file does not exist");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
+				if(!oParam.getRemotePath().endsWith("/") && !oParam.getRemotePath().endsWith("\\")) {
+					oParam.setRemotePath(oParam.getRemotePath()+"/");
+				}
+				
+				if(oParam.getSftp()) {
+					s_oLogger.debug("ftpExport: SFTP");
+					s_oLogger.debug("ftpExport: SFTP: getting SSH client");
+					SSHClient oClient = new SSHClient();
+					s_oLogger.debug("ftpExport: SFTP: adding host key verifier");
+				    oClient.addHostKeyVerifier(new PromiscuousVerifier());
+				    s_oLogger.debug("ftpExport: SFTP: connecting to " + oParam.getFtpServer());
+				    oClient.connect(oParam.getFtpServer());
+				    s_oLogger.debug("ftpExport: SFTP: authenticating as " + oParam.getUsername());
+				    oClient.authPassword(oParam.getUsername(), oParam.getPassword());
+				    s_oLogger.debug("ftpExport: SFTP: getting SFTP client");
+				    SFTPClient sftpClient = oClient.newSFTPClient();
+				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+				    s_oLogger.debug("ftpExport: SFTP: transferring file");
+				    sftpClient.put(sFullLocalPath,oParam.getRemotePath() + oParam.getLocalFileName());
+				    //todo check that the file is there
+				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+				  
+				    s_oLogger.debug("ftpExport: SFTP: closing SFTP client");
+				    sftpClient.close();
+				    s_oLogger.debug("ftpExport: SFTP: disconnecting SSH client");
+				    oClient.disconnect();
+				    s_oLogger.debug("ftpExport: SFTP: closing SSH client");
+				    oClient.close();
+				    
+				}
+				else {
+					s_oLogger.debug("ftpExport: FTP"); 
+					s_oLogger.debug("ftpExport: FTP: getting FTP client");
+					FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
+			
+					s_oLogger.debug("ftpExport: FTP: opening connection"); 
+					if (!oFtpClient.open()) {
+						throw new IOException("could not connect to FTP");
+					}
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+			
+					s_oLogger.debug("ftpExport: FTP: transferring file");
+					// XXX see how to modify FTP client to update status
+					Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
+					if (!bPut) {
+						throw new IOException("put failed");
+					}
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+					// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+					String sRemotePath = ".";
+					s_oLogger.debug("ftpExport: FTP: checking the file is on server");
+					Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
+					if (!bCheck) {
+						throw new IOException("could not find file on server");
+					}
+					s_oLogger.debug("ftpExport: FTP: closing client");
+					oFtpClient.close();
+				}
+				
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+				s_oLogger.info("ftpExport: completed successfully");
+			}
+			catch (Throwable oEx) {
+				s_oLogger.error("ftpExport: could not complete due to: " + oEx);
+				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			}
+			finally {
+				closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+				s_oLogger.debug("ftpExport: workspace closed");
+			}
+		} catch (Throwable oEx) {
+			s_oLogger.error("ftpExport: " + oEx);
+			s_oLogger.error("ftpExport: warning: cannot update process status");
+			oEx.printStackTrace();
 		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
-		String sFtpServer = oParam.getFtpServer();
-
-		if (!(Utils.isServerNamePlausible(sFtpServer) && Utils.isPortNumberPlausible(oParam.getPort())
-				&& !Utils.isNullOrEmpty(oParam.getUsername()) &&
-				// actually password might be empty
-				(null != oParam.getPassword()))) {
-
-			s_oLogger.debug("ftpTransfer: invalid FTP parameters");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
-
-		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(), oParam.getPort(), oParam.getUsername(), oParam.getPassword());
-
-		if (!oFtpClient.open()) {
-			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
-			s_oLogger.debug("server: " + oParam.getFtpServer());
-			s_oLogger.debug("por: " + oParam.getPort());
-			s_oLogger.debug("username: " + oParam.getUsername());
-			s_oLogger.debug("password: " + oParam.getPassword());
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
-
-		// XXX see how to modify FTP client to update status
-		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath());
-		if (!bPut) {
-			s_oLogger.debug("ftpTransfer: put failed");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
-		// String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
-		String sRemotePath = ".";
-		Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
-		if (!bCheck) {
-			s_oLogger.debug("ftpTransfer: could not find file on server");
-			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			return false;
-		}
-		oFtpClient.close();
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-		closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-		s_oLogger.debug("ftpTransfer completed successfully");
-		return true;
 	}
 
 	public String saveMetadata(WasdiProductReader oReadProduct, File oProductFile) {
@@ -2909,6 +2962,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public void notify(ProcessWorkspace oProcessWorkspace) {
 		
 		if (oProcessWorkspace == null) return;
+		
+		if (!m_bNotifyDownloadUpdateActive) return;
 
 		try {
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -2973,4 +3028,205 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		
 		return "ERROR";
 	}
+	
+	
+	/**
+	 * Kills a process and, if required its subtree
+	 * @param oKillProcessTreeParameter the parameters
+	 */
+	private void killProcessTree(KillProcessTreeParameter oKillProcessTreeParameter) {
+		s_oLogger.info("killProcessTree");
+		
+		try {
+			Preconditions.checkNotNull(oKillProcessTreeParameter, "parameter is null");
+			Preconditions.checkArgument(!Utils.isNullOrEmpty(oKillProcessTreeParameter.getProcessToBeKilledObjId()), "ObjId of process to be killed is null or empty" );
+			
+			String sProcessObjId = oKillProcessTreeParameter.getProcessToBeKilledObjId();
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessToKill = oRepository.getProcessByProcessObjId(sProcessObjId);
+			
+			if(null==oProcessToKill) {
+				//if the kill operation has been instantiated by the webserver, then this should never happen, so, it's just to err on the side of safety...
+				throw new NullPointerException("Process not found in DB");
+			}
+			
+			s_oLogger.info("killProcessTree: collecting and killing processes for " + oProcessToKill.getProcessObjId());
+			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
+			//new element added at the end
+			aoProcessesToBeKilled.add(oProcessToKill);
+			//todo check: kill the parent first (breadth first?)
+			//accumulation loop
+			while(aoProcessesToBeKilled.size() > 0) {
+				
+				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
+				
+				if(null==oProcess) {
+					s_oLogger.error("killProcessTree: a null process was added, skipping");
+					continue;
+				}
+				
+				s_oLogger.info("killProcessTree: killing " + oProcess.getProcessObjId());
+				
+				//kill the process immediately
+				killProcessAndDocker(oProcess);
+				
+				if(!oKillProcessTreeParameter.getKillTree()) {
+					s_oLogger.debug("killProcessTree: process tree must not be killed, ending here");
+					break;
+				}
+				
+				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
+				if(!bCanSpawnChildren) {
+					s_oLogger.debug("killProcessTree: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+					continue;
+				}
+				
+				//now that the process cannot spawn any more children, it's time to add them to the set of processes to be killed
+				String sParentId = oProcess.getProcessObjId();
+				if(Utils.isNullOrEmpty(sParentId)) {
+					s_oLogger.error("killProcessTree: process has null or empty ObjId, skipping"); 
+					continue;
+				}
+				List<ProcessWorkspace> aoChildren = oRepository.getProcessByParentId(sParentId);
+				if(null!=aoChildren && aoChildren.size() > 0) {
+					//append at the end
+					aoProcessesToBeKilled.addAll(aoChildren);
+				}
+			}
+			
+			s_oLogger.error("killProcessTree: Kill loop done");
+			
+			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
+			oMyProcess.setStatus("DONE");
+			oMyProcess.setProgressPerc(100);
+			oRepository.updateProcess(oMyProcess);
+			
+		} catch (Exception oE) {
+			s_oLogger.error("killProcessTree: " + oE);
+		}
+		finally {
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
+			if (!oMyProcess.getStatus().equals("DONE")) {
+				oMyProcess.setStatus("ERROR");
+				oRepository.updateProcess(oMyProcess);
+			}
+			
+		}
+		
+		s_oLogger.info("killProcessTree: done");
+	}
+
+	/**
+	 * @param oRepository
+	 * @param oProcessToKill
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void killProcessAndDocker(ProcessWorkspace oProcessToKill){
+		try {
+			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+			
+			if(oLauncherOperationsUtils.doesOperationLaunchDocker(oProcessToKill.getOperationType())) {
+				s_oLogger.info("killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
+				killDocker(oProcessToKill);
+			}
+
+			killProcess(oProcessToKill);
+		} catch (Exception oE) {
+			s_oLogger.error("killProcessAndDocker: " + oE);
+		}
+	}
+
+	/**
+	 * @param oProcessToKill the process to be killed
+	 */
+	private void killProcess(ProcessWorkspace oProcessToKill){
+		//kill the process
+		//(code ported from webserver)
+
+		try {
+			int iPid = oProcessToKill.getPid();
+	
+			if (iPid>0) {
+				// Pid exists, kill the process
+				String sShellExString = ConfigReader.getPropValue("KillCommand");
+				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
+				sShellExString+= " " + iPid;
+	
+				s_oLogger.info("killProcess: shell exec " + sShellExString);
+				Process oProc = Runtime.getRuntime().exec(sShellExString);
+				s_oLogger.info("killProcess: kill result: " + oProc.waitFor());
+	
+			} else {
+				s_oLogger.error("killProcess: Process pid not in data");
+			}
+	
+			// set process state to STOPPED only if CREATED or RUNNING
+			String sPrevSatus = oProcessToKill.getStatus();
+	
+			if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
+					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
+	
+				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
+				oProcessToKill.setOperationEndDate(Utils.GetFormatDate(new Date()));
+	
+				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+				if (!oRepository.updateProcess(oProcessToKill)) {
+					s_oLogger.error("killProcess: Unable to update process status of process " + oProcessToKill.getProcessObjId());
+				}
+	
+			} else {
+				s_oLogger.info("killProcess: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sPrevSatus);
+			}
+		} catch (Exception oE) {
+			s_oLogger.error("killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+	
+	
+	/**
+	 * @param oProcessToKill the process for which the corresponding docker must be killed
+	 */
+	private void killDocker(ProcessWorkspace oProcessToKill) {
+		try {
+			String sProcessorName = oProcessToKill.getProductName();
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
+	
+			// Call localhost:port
+			String sUrl = "http://localhost:"+oProcessorToKill.getPort()+"/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
+
+			URL oProcessorUrl = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/json");
+			OutputStream oOutputStream = oConnection.getOutputStream();
+			oOutputStream.write("{}".getBytes());
+			oOutputStream.flush();
+	
+			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			}
+			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+			String sOutputResult;
+			String sOutputCumulativeResult = "";
+			
+			while ((sOutputResult = oBufferedReader.readLine()) != null) {
+				s_oLogger.debug("killDocker: " + sOutputResult);
+				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
+			}
+			oConnection.disconnect();
+			
+			s_oLogger.info(sOutputCumulativeResult);
+			s_oLogger.info("Kill docker done for " + oProcessToKill.getProcessObjId() + " SubPid: " + oProcessToKill.getSubprocessPid());
+		} catch (Exception oE) {
+			s_oLogger.error("killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+
 }

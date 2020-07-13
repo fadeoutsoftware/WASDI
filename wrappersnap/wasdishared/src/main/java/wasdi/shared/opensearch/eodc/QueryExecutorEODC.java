@@ -127,6 +127,9 @@ public class QueryExecutorEODC extends QueryExecutor {
 			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
 			String sTranslatedQuery = oEODC.translate(sQuery);
 			sTranslatedQuery = sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
+			
+			Utils.debugLog("EODC Payload:");
+			Utils.debugLog(sTranslatedQuery);
 
 			String sResponse = httpPostResults(sUrl, "count", sTranslatedQuery);
 			int iResult = 0;
@@ -195,12 +198,21 @@ public class QueryExecutorEODC extends QueryExecutor {
 				if(sQuery.contains("limit=")) {
 					sQuery = sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
 				}
+				
+				sQuery += "&limit="+sLimit;
+				
 				if(sQuery.contains("offset=")) {
 					sQuery = sQuery.replace("offset=", "OFFSETAUTOMATICALLYREMOVED=");
 				}
+				
+				sQuery += "&offset="+sOffset;
 			}
 			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
 			sPayload = oEODC.translate(sQuery);
+			
+			Utils.debugLog("EODC Payload:");
+			Utils.debugLog(sPayload);
+			
 			sResult = httpPostResults(sUrl, "search", sPayload);		
 			List<QueryResultViewModel> aoResult = null;
 			if(!Utils.isNullOrEmpty(sResult)) {

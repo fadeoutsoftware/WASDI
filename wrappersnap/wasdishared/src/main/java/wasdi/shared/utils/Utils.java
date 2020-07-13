@@ -297,16 +297,14 @@ public class Utils {
 		if (!bRes) {
 			// then maybe it's a domain
 			bRes = DomainValidator.getInstance().isValid(sServer);
-			if (!bRes) {
-				// then maybe it's an URL
-				bRes = UrlValidator.getInstance().isValid(sServer);
-			}
-			if (!bRes) {
-				// then maybe it's localhost
-				if (sServer.equals("localhost")) {
-					bRes = true;
-				}
-			}
+		}
+		if (!bRes) {
+			// then maybe it's an URL
+			bRes = UrlValidator.getInstance().isValid(sServer);
+		}
+		if (!bRes) {
+			// then maybe it's localhost
+			bRes = sServer.equals("localhost");
 		}
 		return bRes;
 	}

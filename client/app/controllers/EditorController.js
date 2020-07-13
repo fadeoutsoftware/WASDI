@@ -3011,6 +3011,37 @@ var EditorController = (function () {
 
         return true;
     };
+
+
+    EditorController.prototype.openTransferToFtpDialog = function (oSelectedProduct, oWindow) {
+
+        var oController;
+
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/ftp_service/FTPView.html",
+            controller: "FTPController",
+            inputs: {
+                extras: {
+                    products: oController.m_aoProducts,
+                    selectedProduct: oSelectedProduct
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                return true;
+            });
+        });
+
+        return true;
+    };
+
     /**
      *
      * @param oWindow
@@ -4004,7 +4035,16 @@ var EditorController = (function () {
                                             }
                                         }
                                     },
+                                    "SendToFtp": {
+                                        "label": "Send To Ftp",
+                                        "icon": "fa fa-upload",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var oFound = oController.findProductByFileName(sSourceFileName);
 
+                                            if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
+                                        }
+                                    }, //openTransferToFtpDialog
                                     "DeleteProduct": {
                                         "label": "Delete Product",
                                         "icon": "delete-icon-context-menu-jstree",
