@@ -775,7 +775,7 @@ public class ProductResource {
 					if (oDownloadedFile.getProductViewModel()!=null) {
 						String sMetadataFilePath = oDownloadedFile.getProductViewModel().getMetadataFileReference();
 						if (!Utils.isNullOrEmpty(sMetadataFilePath)) {
-							FileUtils.deleteQuietly(new File(sMetadataFilePath));
+							FileUtils.deleteQuietly(new File(sDownloadPath+"/"+sMetadataFilePath));
 							Utils.debugLog("Metadata file cleaned");
 						}
 					}

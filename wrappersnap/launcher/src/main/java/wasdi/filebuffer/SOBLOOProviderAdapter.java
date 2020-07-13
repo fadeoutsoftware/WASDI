@@ -308,7 +308,11 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 						String sInfo = "Waiting for the transfer of the image from Sobloo Long Term Archive, this may take up to 24 hours from the request";
 						LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),m_oProcessWorkspace.getWorkspaceId(), sInfo,m_oProcessWorkspace.getWorkspaceId());
 						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: LTA status: " + sError);
-						TimeUnit.MINUTES.sleep(60 + SOBLOOProviderAdapter.s_iSLACKTOWAIT);
+						
+						int iMinutesToSleep = 60 + SOBLOOProviderAdapter.s_iSLACKTOWAIT;
+						
+						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: Going to sleep for: " + iMinutesToSleep);
+						TimeUnit.MINUTES.sleep(iMinutesToSleep);
 					} catch (InterruptedException oE) {
 						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Could not complete sleep: " + oE);
 					}

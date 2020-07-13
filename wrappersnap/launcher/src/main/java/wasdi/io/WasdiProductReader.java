@@ -520,8 +520,9 @@ public class WasdiProductReader {
 
         if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
 
+        LauncherMain.s_oLogger.debug("WasdiProductReader.FillBandsViewModel: add bands");
+        
         for (Band oBand : oProduct.getBands()) {
-            LauncherMain.s_oLogger.debug("WasdiProductReader.FillBandsViewModel: add band " + oBand.getName());
 
             if (oProductViewModel.getBandsGroups().getBands() == null)
                 oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());
