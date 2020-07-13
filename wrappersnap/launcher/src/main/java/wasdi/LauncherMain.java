@@ -106,6 +106,7 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
+import wasdi.shared.parameters.ReadMetadataParameter;
 import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.RegridSetting;
 import wasdi.shared.parameters.SubsetParameter;
@@ -604,6 +605,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				killProcessTree(oKillProcessTreeParameter);
 			}
 			break;
+			case READMETADATA: {
+				ReadMetadataParameter oReadMetadataParameter = (ReadMetadataParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
+				readMetadata(oReadMetadataParameter);
+			}
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -3226,6 +3231,71 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.info("Kill docker done for " + oProcessToKill.getProcessObjId() + " SubPid: " + oProcessToKill.getSubprocessPid());
 		} catch (Exception oE) {
 			s_oLogger.error("killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+	
+	public void readMetadata(ReadMetadataParameter oReadMetadataParameter) {
+		try {
+			s_oLogger.info("readMetadata: start");
+			
+			String sProcessObjId = oReadMetadataParameter.getProcessObjId();
+			String sProductPath = oReadMetadataParameter.getProductPath();
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+			
+			if (oProcessWorkspace == null) {
+				s_oLogger.error("readMetadata: Impossible to find the process workspace, exit");
+				return;
+			}
+			
+			if (sProductPath == null) {
+				s_oLogger.error("readMetadata: Product Path is null");
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return;
+			}
+			
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath);
+			if (oDownloadedFile == null) {
+				s_oLogger.error("readMetadata: Downloaded file not found for path " + sProductPath);
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return;				
+			}
+			
+			if (oDownloadedFile.getProductViewModel() == null) {
+				s_oLogger.error("readMetadata: Product View Model is null");
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return;
+				
+			}
+			
+			if (Utils.isNullOrEmpty(oDownloadedFile.getProductViewModel().getMetadataFileReference())) {
+				if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
+					
+					s_oLogger.error("readMetadata: Metadata File still not created. Generate it");
+					
+					oDownloadedFile.getProductViewModel().setMetadataFileCreated(true);
+					oDownloadedFile.getProductViewModel().setMetadataFileReference(asynchSaveMetadata(sProductPath));
+					
+					s_oLogger.error("readMetadata: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+					
+					oDownloadedFilesRepository.updateDownloadedFile(oDownloadedFile);
+				}
+				else {
+					s_oLogger.error("readMetadata: attemp to create metadata file has already been done");
+				}
+			}
+			else {
+				s_oLogger.error("readMetadata: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+			}
+						
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			
+			s_oLogger.error("readMetadata: done, bye");
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("readMetadata Exception " + oEx.toString());
 		}
 	}
 

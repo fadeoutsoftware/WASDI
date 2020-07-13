@@ -1,0 +1,32 @@
+.manual-insert-bbox
+{
+    .modal-dialog
+    {
+
+        .modal-content
+        {
+            //HEADER
+            .modal-header
+            {
+
+            }
+            //BODY
+            .modal-body
+            {
+                min-height: 50vh;
+                label{
+                    margin: 10px 0px 5px 0px;
+                    color:$wasdi-green-logo;
+                }
+                .manual-insert-bbox-container{
+
+                }
+            }
+            //FOOTER
+            .modal-footer
+            {
+
+            }
+        }
+    }
+}

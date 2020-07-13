@@ -134,7 +134,14 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 				} else {
 					sQuery = sQuery.substring(iStart, iEnd);
 				}
-				sSentinel2Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-2</ogc:Literal></ogc:PropertyIsEqualTo>";
+				
+				// P.Campanella 2020 07 13: changed the filter for a bug of EODC. Note that 
+				// EODC has only S2 MSIL1C data
+				//sSentinel2Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-2</ogc:Literal></ogc:PropertyIsEqualTo>";
+				
+				sSentinel2Query += "<ogc:PropertyIsLike wildCard=\"%\" singleChar=\"#\" escapeChar=\"!\"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>";
+				sSentinel2Query += "S2%MSIL1C%";
+				sSentinel2Query += "</ogc:Literal></ogc:PropertyIsLike>";				
 
 				//check for cloud coverage
 				try {
@@ -188,7 +195,9 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 					sQuery = sQuery.substring(iStart, iEnd);
 				}
 				sQuery = sQuery.trim();
-				sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-1</ogc:Literal></ogc:PropertyIsEqualTo>";
+				
+				// Changed the solution: query for name like and not on platform type
+				//sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:platform</ogc:PropertyName><ogc:Literal>Sentinel-1</ogc:Literal></ogc:PropertyIsEqualTo>";
 
 				//check for product type
 				try {
@@ -211,9 +220,18 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 						}
 						String sType = sQuery.substring(iStart, iEnd);
 						sType = sType.trim();
-						sSentinel1Query += "<ogc:PropertyIsEqualTo><ogc:PropertyName>eodc:product_type</ogc:PropertyName><ogc:Literal>";
+						
+						if (sType.equals("GRD")) {
+							sType = "%GRDH%";
+						}
+						else if (sType.equals("SLC")) {
+							sType = "S1%\\_SLC%";
+						}
+						
+						//<ogc:PropertyIsLike wildCard="%" singleChar="#" escapeChar="!"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>%GRDH%</ogc:Literal></ogc:PropertyIsLike>
+						sSentinel1Query += "<ogc:PropertyIsLike wildCard=\"%\" singleChar=\"#\" escapeChar=\"!\"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>";
 						sSentinel1Query += sType;
-						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsEqualTo>";
+						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsLike>";
 					}
 				} catch (Exception oE) {
 					Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): error while parsing product type: " + oE);

@@ -4,7 +4,7 @@
 
 'use strict';
 angular.module('wasdi.MapService', ['wasdi.ConstantsService']).
-service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http,$rootScope, oConstantsService) {
+service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',  function ($http,$rootScope, oConstantsService, oModalService) {
     // API URL
     this.APIURL = oConstantsService.getAPIURL();
 
@@ -13,6 +13,8 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.m_oConstantsService = oConstantsService;
     //this.m_oRectangleOpenSearch = null;
     this.m_oDrawItems = null;
+
+    this.m_oModalService = oModalService;
 
     /**
      * Init base layers
@@ -184,7 +186,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         var oDrawControl = new L.Control.Draw(oOptions);
 
-        this. m_oWasdiMap.addControl(oDrawControl);
+        this.m_oWasdiMap.addControl(oDrawControl);
 
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
         {
@@ -204,6 +206,40 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oWasdiMap.on(L.Draw.Event.DELETESTOP, function (event) {
            var layer = event.layers;
         });
+
+        let oModalService = this.m_oModalService;
+
+        L.control.custom({
+            position: 'topright',
+            content : '<button type="button" class="btn btn-default">'+
+                '    <i class="fa fa-crosshairs"></i>'+
+                '</button>',
+            classes : 'btn-group-vertical btn-group-sm',
+            style   :
+                {
+                    margin: '10px',
+                    padding: '0px 0 0 0',
+                    cursor: 'pointer',
+                },
+            events:
+                {
+                    click: function(data)
+                    {
+                        oModalService.showModal({
+                            templateUrl: "dialogs/manual_insert_bbox/ManualInsertBboxView.html",
+                            controller: "ManualInsertBboxController",
+                            inputs: {
+                                extras: {}
+                            }
+                        }).then(function (modal) {
+                            modal.element.modal();
+                            modal.close.then(function (oResult) {
+                                // TODO: here create the bbox and put it in to the map
+                            });
+                        });
+                    }
+                }
+        }).addTo(this.m_oWasdiMap);
 
     };
 

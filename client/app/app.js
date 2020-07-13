@@ -224,6 +224,7 @@ wasdiApp.controller("ProcessErrorLogsDialogController", ProcessErrorLogsDialogCo
 wasdiApp.controller("EdriftCheckImagesTool", EdriftCheckImagesTool);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("eDriftFloodEventDialogController", eDriftFloodEventDialogController);
+wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);

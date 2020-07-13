@@ -89,6 +89,7 @@
 @import "../dialogs/edrift_checkimagestool/edrift_checkimagestool";
 @import "../dialogs/share_workspace/share_workspace";
 @import "../dialogs/eDrift_Flood_Event_Dialog/e_drift__flood__event__dialog";
+@import "../dialogs/manual_insert_bbox/manual_insert_bbox";
 
 @import "buttons";
 
@@ -915,6 +916,14 @@ textarea{
             @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/compasses_green.svg", $leaflet-icon-size, $wasdi-blue-logo);
         }
     }
+
+    .leaflet-draw-input-rectangle {
+        @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_white.svg", $leaflet-icon-size, $wasdi-blue-logo);
+        &:hover {
+            @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_green.svg", $leaflet-icon-size, $wasdi-blue-logo);
+        }
+    }
+
 
     .leaflet-draw-edit-edit {
         @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_white.svg", $leaflet-icon-size, $wasdi-blue-logo);

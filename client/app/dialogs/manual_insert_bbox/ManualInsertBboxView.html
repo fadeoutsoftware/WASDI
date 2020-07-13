@@ -1,0 +1,34 @@
+<div class="modal fade manual-insert-bbox">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>
+                    Manual Bbox Insert
+                </h4>
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                <h4>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    </div>
+                </h4>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+
+                <button ng-click="m_oController.getUserBbox()" class="my-button" data-dismiss="modal">
+                    Draw
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
