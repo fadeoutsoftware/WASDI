@@ -163,9 +163,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
         //LEAFLET.DRAW LIB
 
         //add draw.search (opensearch)
-        var drawnItems = new L.FeatureGroup();
-        this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
-        this.m_oWasdiMap.addLayer(drawnItems);
+        var aoDrawnItems = new L.FeatureGroup();
+        this.m_oDrawItems = aoDrawnItems;//save draw items (used in delete shape)
+        this.m_oWasdiMap.addLayer(aoDrawnItems);
 
         var oOptions={
             position:'topright',//position of menu
@@ -178,7 +178,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
             },
 
             edit: {
-                featureGroup: drawnItems,//draw items are the "voice" of menu
+                featureGroup: aoDrawnItems,//draw items are the "voice" of menu
                 edit: false,// hide edit button
                 remove: false// hide remove button
             }
@@ -190,16 +190,16 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
         {
-            var layer = event.layer;
-            oController.m_oRectangleOpenSearch = layer;
+            var oLayer = event.layer;
+            oController.m_oRectangleOpenSearch = oLayer;
 
             //remove old shape
-            if(drawnItems && drawnItems.getLayers().length!==0){
-                drawnItems.clearLayers();
+            if(aoDrawnItems && aoDrawnItems.getLayers().length!==0){
+                aoDrawnItems.clearLayers();
             }
-            $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:layer});//SEND MESSAGE TO IMPORT CONTROLLER
+            $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:oLayer});//SEND MESSAGE TO IMPORT CONTROLLER
             //save new shape in map
-            drawnItems.addLayer(layer);
+            aoDrawnItems.addLayer(oLayer);
         });
 
         //REMOVE IT ?
@@ -211,15 +211,12 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
         L.control.custom({
             position: 'topright',
-            content : '<button type="button" class="btn btn-default">'+
-                '    <i class="fa fa-crosshairs"></i>'+
-                '</button>',
-            classes : 'btn-group-vertical btn-group-sm',
+            content : '<div type="button" class="import-insert-bbox-button btn btn-default">'+
+                '    <i class="import-insert-bbox-icon fa fa-edit" ></i>'+
+                '</div>',
+            classes : 'import-insert-bbox-wrapper-button btn-group-vertical btn-group-sm',
             style   :
                 {
-                    margin: '10px',
-                    padding: '0px 0 0 0',
-                    cursor: 'pointer',
                 },
             events:
                 {
@@ -234,7 +231,29 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
                         }).then(function (modal) {
                             modal.element.modal();
                             modal.close.then(function (oResult) {
-                                // TODO: here create the bbox and put it in to the map
+
+                                if (oResult==null) return;
+
+                                let fNorth = parseFloat(oResult.north);
+                                let fSouth = parseFloat(oResult.south);
+                                let fEast = parseFloat(oResult.east);
+                                let fWest = parseFloat(oResult.west);
+
+                                if (isNaN(fNorth) || isNaN(fSouth) || isNaN(fEast) || isNaN(fWest)) {
+                                    return;
+                                }
+
+                                var aoBounds = [[fNorth, fWest], [fSouth, fEast]];
+                                var oLayer = L.rectangle(aoBounds, {color: "#3388ff", weight: 1});
+                                oController.m_oRectangleOpenSearch = oLayer;
+
+                                //remove old shape
+                                if(aoDrawnItems && aoDrawnItems.getLayers().length!==0){
+                                    aoDrawnItems.clearLayers();
+                                }
+                                $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:oLayer});//SEND MESSAGE TO IMPORT CONTROLLER
+                                //save new shape in map
+                                aoDrawnItems.addLayer(oLayer);
                             });
                         });
                     }

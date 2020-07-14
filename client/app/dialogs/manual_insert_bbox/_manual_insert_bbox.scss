@@ -13,13 +13,18 @@
             //BODY
             .modal-body
             {
-                min-height: 50vh;
+                min-height: 0vh;
+
                 label{
                     margin: 10px 0px 5px 0px;
                     color:$wasdi-green-logo;
                 }
                 .manual-insert-bbox-container{
 
+                }
+
+                .inputLatLon {
+                    width: 100px;
                 }
             }
             //FOOTER

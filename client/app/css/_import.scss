@@ -31,36 +31,6 @@
             }
         }
 
-        //.time-container{
-        //  margin-left: 20px;
-        //  //float:left;
-        //  input[type=text]{
-        //    width: 100%;
-        //    border: 2px solid $wasdi-blue-logo;
-        //
-        //  }
-        //  .input-group{
-        //    float:right;
-        //    width: 15%;
-        //  }
-        //  .description-label{
-        //    float:right;
-        //    margin:13px 5px 0px 5px ;
-        //
-        //  }
-        //  .advanced-calendar-button {
-        //    color: $wasdi-white;
-        //    background-color: $wasdi-blue-logo;
-        //    border-color: $wasdi-blue-logo;
-        //  }
-        //  .advanced-calendar-button:hover
-        //  {
-        //    background-color: $wasdi-green-logo;
-        //  }
-        //  button{
-        //    border-color: $wasdi-blue-logo;
-        //  }
-        //}
         .search-button-container {
             text-align: right;
             margin-top: 15px;
@@ -803,336 +773,7 @@
         }
 
         /* input text override my class in style*/
-
     }
-    /********************************************************/
-
-    //#advanced-search-container{
-    //  position: fixed;
-    //  background-color: white;
-    //  width: 728px;
-    //  height: 700px;
-    //  z-index: 999;
-    //  top: 150px;
-    //  left: calc(-728px - 20px);
-    //  box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
-    //  padding: 8px;
-    //}
-
-    //#advanced-search-close-button{
-    //  position: absolute;
-    //  top:10px;
-    //  right:10px;
-    //}
-
-    //#advanced-search-content{
-    //
-    //  position: relative;
-    //  height: 100%;
-    //  width: 100%;
-    //  background-color: white;
-    //  overflow-y: auto;
-    //  overflow-x: hidden;
-    //}
-
-    //.advanced-search-collapse-title {
-    //  margin-left: 5px;
-    //  font-size: 14px;
-    //}
-    //
-    //.advanced-search-clear {
-    //  margin-right: 10px;
-    //  font-size: 14px;
-    //  float: right;
-    //  font-weight: normal !important;
-    //}
-    //
-    //.advanced-search-clear:hover {
-    //  text-decoration: underline;
-    //}
-    //
-    //.advanced-search-heading {
-    //  padding: 5px 10px !important;
-    //}
-    //.advanced-search-panel-title {
-    //  margin-top: -5px !important;
-    //  cursor: default !important;
-    //}
-
-    /******************* da mettere in ordine *******************************/
-    //.panel-heading .accordion-toggle:before {
-    //  font-family: 'Glyphicons Halflings';
-    //  content: '\e113';
-    //  float: left;
-    //  color: grey;
-    //}
-    //.panel-heading .accordion-toggle.collapsed:before {
-    //  content: "\e114";
-    //}
-    //.avanced-search-subtitle{
-    //  margin-top:10px;
-    //}
-    //
-    //.collapse {
-    //  position: inherit;
-    //}
-    //#section_0 {
-    //  overflow-y: hidden !important;
-    //}
-    //
-    //#advanced-search-content  .dropdown-menu{
-    //  position: fixed !important;
-    //  visibility: hidden;
-    //}
-    //.advanced-panel {
-    //  margin-bottom: 8px !important;
-    //}
-    //.advanced-calendar-button {
-    //  border:none;
-    //  top: 5px;
-    //}
-    //.advanced-calendar-label {
-    //  top: 10px;
-    //}
-    //
-    //.advanced-calendar-date-input {
-    //  padding: 0px;
-    //  text-align: center;
-    //}
-    //.advanced-calendar-date-input{
-    //  font-size: 11px;
-    //}
-    //
-    //.coll-product-container{
-    //  background-color: white;
-    //  /*min-width: 40%;*/
-    //  width: 100%;
-    //  height: 400px;
-    //
-    //}
-    //
-    //.coll-product-footer {
-    //  font-size: 14px;
-    //}
-    //
-    //@media screen and (min-width: 993px) and (max-width: 1200px) {
-    //  /*.list-container {
-    //    min-width: 50%  !important;
-    //  }*/
-    //  .coll-product-footer {
-    //    font-size: 14px;
-    //  }
-    //}
-    //
-    //@media screen and (min-width: 769px) and(max-width: 992px) {
-    //  /*.list-container {
-    //    min-width: 100% !important;
-    //  }*/
-    //  .coll-product-footer {
-    //    font-size: 13px;
-    //  }
-    //}
-    //
-    //@media screen and (max-width: 768px) {
-    //  /*.list-container {
-    //    min-width: 100% !important;
-    //  }*/
-    //  .coll-product-footer {
-    //    font-size: 13px;
-    //  }
-    //}
-    //
-    //.coll-product-list-container{
-    //  padding: 0px 0px 0px 0px;
-    //  position: relative;
-    //  height: 100%;
-    //  width: 100%;
-    //}
-    //
-    //.coll-product-list{
-    //  position: relative;
-    //  height: calc(100% - 85px);
-    //  width: 100%;
-    //  background-color: white;
-    //  overflow-y: auto;
-    //  overflow-x: auto;
-    //}
-    //
-    //.coll-product-toolbar{
-    //  position: relative;
-    //  width: 100%;
-    //  background-color: white;
-    //  padding: 10px;
-    //  background-color: #FAFAFA;
-    //  height: 50px;
-    //}
-    //
-    //.coll-product-header{
-    //  position: relative;
-    //  height: 35px;
-    //  background-color: white;
-    //  top: 0px;
-    //  background-color: #FAFAFA;
-    //}
-    //
-    //.disabled-button{
-    //  opacity:0.4;
-    //  cursor: default;
-    //}
-    //
-    //.select-page-button{
-    //  cursor: pointer;
-    //}
-    //
-    //.page-selector-input{
-    //  width: 40px !important;
-    //  cursor: pointer;
-    //  margin: 0px;
-    //  padding: 7px;
-    //  height: 30px;
-    //  border: 1px solid #9A9A9A !important;
-    //  display: inline;
-    //}
-    //
-    //.pagination-button{
-    //  margin-right: 2.5px;
-    //  margin-left: 2.5px;
-    //  display:inline;
-    //}
-    //
-    //.coll-product-list-checkbox {
-    //  width: 30px;
-    //}
-    //
-    //.coll-product{
-    //  display: inline-flex;
-    //  font-size: 12px;
-    //  font-family: Roboto;
-    //  height: 25px;
-    //  line-height: 20px;
-    //}
-    //
-    //.coll-product:hover{
-    //  background: #dedede;
-    //}
-    //
-    //.coll-products-left {
-    //  float: left;
-    //  display: inline-flex;
-    //  padding-left: 0px;
-    //}
-    //
-    //.coll-products-right {
-    //  float: right;
-    //  display: inline-flex;
-    //}
-    //
-    //.filter-label {
-    //  font-weight: normal !important;
-    //}
-    //.filter-highlight {
-    //  top: 50% !important;
-    //}
-    //.filter-checkbox-label {
-    //  font-weight: bold !important;
-    //}
-    //.filter-bar:before,.filter-bar:after {
-    //  height: 1px !important;
-    //  color: rgba(0,0,0,1) !important;
-    //  background: rgba(0,0,0,1) !important;
-    //}
-    //.filter-checkbox {
-    //  margin-bottom: 25px !important;
-    //}
-    //.filter-input:invalid {
-    //  color: red;
-    //}
-    //
-    //input::-webkit-calendar-picker-indicator {
-    //  display: none;
-    //}
-    //
-    //#adv-options label                {
-    //
-    //  font-weight: normal;
-    //
-    //  pointer-events: none;
-    //
-    //  transition: 0.2s ease all;
-    //  -moz-transition: 0.2s ease all;
-    //  -webkit-transition: 0.2s ease all;
-    //}
-    //.adv-selectfield label {display: none;}
-    //
-    //.adv-selectfield {
-    //  font-family: 'Roboto','Helvetica','Arial',sans-serif;
-    //  position: relative;
-    //}
-    //
-    //.adv-selectfield::after {
-    //  position: absolute;
-    //  top: -1em;
-    //  right: 0.5em;
-    //  /* Styling the down arrow */
-    //  width: 0;
-    //  height: 0;
-    //  padding: 0;
-    //  content: '';
-    //  border-left: .25em solid transparent;
-    //  border-right: .25em solid transparent;
-    //  border-top: .375em solid rgba(0,0,0, 1);
-    //  pointer-events: none;
-    //  color: black;
-    //
-    //}
-    //
-    //.adv-selectfield datalist {
-    //  -webkit-appearance: none;
-    //  -moz-appearance: none;
-    //  background-color: transparent;
-    //  width:	100%;
-    //}
-    //
-    //
-    //.adv-selectfield datalist::-ms-expand {display: none;}
-    //
-    //.adv-select-label {
-    //  top: -20px;
-    //  color: rgb(55, 59, 80);
-    //  font-size: 13px;
-    //}
-    //
-    //#adv-options .group            {
-    //  position:relative;
-    //  margin-bottom:15px;
-    //}
-
-    //.sidenav a {
-    //  padding: 8px 8px 8px 32px;
-    //  text-decoration: none;
-    //  font-size: 25px;
-    //  color: #818181;
-    //  display: block;
-    //  transition: 0.3s
-    //}
-
-    //.sidenav a:hover, .offcanvas a:focus{
-    //  color: #f1f1f1;
-    //}
-    //
-    //.sidenav .closebtn {
-    //
-    //  position: absolute;
-    //  top: 0;
-    //  left: 10px;
-    //  //font-size: 25px;
-    //  //margin-left: 50px;
-    //
-    //    color: $wasdi-import-left-side-navbar-color-background;
-    //    cursor:pointer;
-    //
-    //
-    //}
 
     @media screen and (max-height: 450px) {
         .sidenav {
@@ -1164,4 +805,34 @@
         background-color: $wasdi-green-logo;
     }
     //END SIDEBAR
+}
+
+
+.import-insert-bbox-wrapper-button {
+    background: $wasdi-input-text-color;
+    margin-top: 10px;
+    padding: 0px 0 0 0;
+    cursor: pointer;
+    width: 26px;
+
+}
+
+.import-insert-bbox-wrapper-button:hover {
+    background: $wasdi-input-text-color;
+}
+
+.import-insert-bbox-button {
+    background: $wasdi-input-text-color;
+}
+
+.import-insert-bbox-button:hover {
+    background: $wasdi-input-text-color;
+}
+
+.import-insert-bbox-icon {
+    color: white
+}
+
+.import-insert-bbox-icon:hover {
+    //color: $wasdi-green-logo;
 }

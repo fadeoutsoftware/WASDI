@@ -11,18 +11,21 @@ var ManualInsertBboxController = (function() {
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oConstantsService = oConstantsService;
+        this.m_oBbox = {};
+        this.m_oContoller = this;
+
+        this.m_oBbox.north="";
+        this.m_oBbox.south="";
+        this.m_oBbox.east="";
+        this.m_oBbox.west="";
+
+        let oController = this;
 
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
     };
-
-    ManualInsertBboxController.prototype.getUserBbox = function(){
-        console.log("Here I'm bb")
-        return "";
-    };
-
 
     ManualInsertBboxController.$inject = [
         '$scope',
