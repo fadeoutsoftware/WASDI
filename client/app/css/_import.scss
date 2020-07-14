@@ -812,27 +812,32 @@
     background: $wasdi-input-text-color;
     margin-top: 10px;
     padding: 0px 0 0 0;
-    cursor: pointer;
+    cursor: pointer !important;
     width: 26px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+    border-radius: 4px;
 
-}
-
-.import-insert-bbox-wrapper-button:hover {
-    background: $wasdi-input-text-color;
-}
-
-.import-insert-bbox-button {
-    background: $wasdi-input-text-color;
-}
-
-.import-insert-bbox-button:hover {
-    background: $wasdi-input-text-color;
 }
 
 .import-insert-bbox-icon {
     color: white
 }
 
+.import-insert-bbox-wrapper-button:hover {
+    .import-insert-bbox-icon {
+        color: $wasdi-green-logo;
+    }
+}
+
+.import-insert-bbox-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.import-insert-bbox-button:hover {
+}
+
 .import-insert-bbox-icon:hover {
-    //color: $wasdi-green-logo;
 }

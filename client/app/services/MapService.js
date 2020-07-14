@@ -211,7 +211,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
         L.control.custom({
             position: 'topright',
-            content : '<div type="button" class="import-insert-bbox-button btn btn-default">'+
+            content : '<div type="button" class="import-insert-bbox-button" title="Titolo Bottone">'+
                 '    <i class="import-insert-bbox-icon fa fa-edit" ></i>'+
                 '</div>',
             classes : 'import-insert-bbox-wrapper-button btn-group-vertical btn-group-sm',
