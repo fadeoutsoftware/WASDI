@@ -181,6 +181,15 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
+    //APP DETAILS
+    $stateProvider.state('root.appdetails',{
+        url: '/appdetails',
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/wasdiapplicationdetails.html', controller  : 'WasdiApplicationDetailsController'}
+        }
+    });
+
 
 }]);
 
@@ -193,6 +202,7 @@ wasdiApp.controller("SearchOrbitController",SearchOrbitController);
 wasdiApp.controller("ValidateUserController",ValidateUserController);
 wasdiApp.controller("WasdiApplicationUIController",WasdiApplicationUIController);
 wasdiApp.controller("MarketPlaceController",MarketPlaceController);
+wasdiApp.controller("WasdiApplicationDetailsController",WasdiApplicationDetailsController);
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);

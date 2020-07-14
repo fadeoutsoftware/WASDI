@@ -1,9 +1,9 @@
 /**
- * Marketplace
- * Created by p.campanella on 09/07/2020.
+ * Application Details
+ * Created by p.campanella on 14/07/2020.
  */
 
-var MarketPlaceController = (function() {
+var WasdiApplicationDetailsController = (function() {
 
     /**
      * Class constructor
@@ -13,7 +13,7 @@ var MarketPlaceController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService) {
         /**
          * Angular Scope
          */
@@ -25,7 +25,7 @@ var MarketPlaceController = (function() {
         this.m_oState=$state;
         /**
          * Reference to the controller
-         * @type {MarketPlaceController}
+         * @type {WasdiApplicationDetailsController}
          */
         this.m_oScope.m_oController = this;
         /**
@@ -70,14 +70,13 @@ var MarketPlaceController = (function() {
      * Open Application Page
      * @returns {*[]} Array of strings, names of the tabs
      */
-    MarketPlaceController.prototype.openApplicationPage = function(sApplicationName) {
+    WasdiApplicationDetailsController.prototype.openApplicationPage = function() {
 
-        this.m_oConstantsService.setSelectedApplication(sApplicationName);
         //this.m_oState.go("root.appui", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        this.m_oState.go("root.appdetails");
+        this.m_oState.go("root.appui");
     }
 
-    MarketPlaceController.prototype.setDefaultImages = function(aoProcessorList)
+    WasdiApplicationDetailsController.prototype.setDefaultImages = function(aoProcessorList)
     {
         if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
         {
@@ -95,7 +94,7 @@ var MarketPlaceController = (function() {
         return aoProcessorList;
     };
 
-    MarketPlaceController.$inject = [
+    WasdiApplicationDetailsController.$inject = [
         '$scope',
         '$state',
         'ConstantsService',
@@ -103,5 +102,5 @@ var MarketPlaceController = (function() {
         'ProcessorService'
     ];
 
-    return MarketPlaceController;
+    return WasdiApplicationDetailsController;
 }) ();
