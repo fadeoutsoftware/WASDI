@@ -606,9 +606,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			break;
 			case READMETADATA: {
-				ReadMetadataParameter oReadMetadataParameter = (ReadMetadataParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
+				ReadMetadataParameter oReadMetadataParameter = (ReadMetadataParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				readMetadata(oReadMetadataParameter);
 			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -3239,7 +3240,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.info("readMetadata: start");
 			
 			String sProcessObjId = oReadMetadataParameter.getProcessObjId();
-			String sProductPath = oReadMetadataParameter.getProductPath();
+			String sProductName = oReadMetadataParameter.getProductName();
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
@@ -3249,13 +3250,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				return;
 			}
 			
-			if (sProductPath == null) {
+			if (sProductName == null) {
 				s_oLogger.error("readMetadata: Product Path is null");
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return;
 			}
 			
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			
+			String sProductPath = LauncherMain.getWorspacePath(oReadMetadataParameter) + sProductName;
+			
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath);
 			if (oDownloadedFile == null) {
 				s_oLogger.error("readMetadata: Downloaded file not found for path " + sProductPath);

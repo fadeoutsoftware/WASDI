@@ -5,14 +5,14 @@ public class ReadMetadataParameter extends BaseParameter {
 	/**
 	 * Full server path of the product
 	 */
-	private String productPath;
+	private String productName;
 
-	public String getProductPath() {
-		return productPath;
+	public String getProductName() {
+		return productName;
 	}
 
-	public void setProductPath(String productPath) {
-		this.productPath = productPath;
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 	
 	

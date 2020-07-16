@@ -174,6 +174,9 @@ public class ProductResource {
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath + sProductName);
+		
+		
+		MetadataViewModel oMetadataViewModel = null;
 
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
@@ -211,19 +214,22 @@ public class ProductResource {
 							oParameter.setExchange(sWorkspaceId);
 							oParameter.setWorkspace(sWorkspaceId);
 							oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-							oParameter.setProductPath(sProductPath);
+							oParameter.setProductName(sProductName);
 							oParameter.setUserId(sUserId);
 							
 							String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 							
 							// Trigger the Launcher Operation
 							Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, sPath, oParameter, null);
-														
+							
+							oMetadataViewModel = new MetadataViewModel();
+							oMetadataViewModel.setName("Generating Metadata, try later");
+						}
+						else {
+							Utils.debugLog("ProductResource.GetMetadataByProductName: attemp to read metadata already done, just return");
 						}
 						
-						Utils.debugLog("ProductResource.GetMetadataByProductName: attemp to read metadata already done, just return");
-						
-						return null;
+						return oMetadataViewModel;
 					}
 
 					MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils.deserializeXMLToObject(sMetadataPath + sMetadataFile);
