@@ -38,6 +38,8 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.parameters.ReadMetadataParameter;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -167,13 +169,14 @@ public class ProductResource {
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
 			return null;
 
-		String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
-				sWorkspaceId);
+		String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository
-				.getDownloadedFileByPath(sProductPath + sProductName);
+		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath + sProductName);
+		
+		
+		MetadataViewModel oMetadataViewModel = null;
 
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
@@ -188,17 +191,51 @@ public class ProductResource {
 					}
 
 					String sMetadataFile = oDownloadedFile.getProductViewModel().getMetadataFileReference();
-
-					if (sMetadataFile == null) {
-						Utils.debugLog("ProductResource.GetMetadataByProductName: MetadataFile = null for product "
-								+ oDownloadedFile.getFilePath());
-						return null;
+					
+					// If we do not have a Metadata File
+					if (Utils.isNullOrEmpty(sMetadataFile)) {
+						
+						Utils.debugLog("ProductResource.GetMetadataByProductName: MetadataFile = null for product " + oDownloadedFile.getFilePath());
+						
+						// Was it created before or not?
+						if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
+							
+							Utils.debugLog("ProductResource.GetMetadataByProductName: first metadata request, create operation to read it");
+							
+							// Try to create it: get the user id
+							String sUserId = oUser.getUserId();
+							
+							// Create an Operation Id
+							String sProcessObjId = Utils.GetRandomName();
+							
+							// Create the Parameter 
+							ReadMetadataParameter oParameter = new ReadMetadataParameter();
+							oParameter.setProcessObjId(sProcessObjId);
+							oParameter.setExchange(sWorkspaceId);
+							oParameter.setWorkspace(sWorkspaceId);
+							oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+							oParameter.setProductName(sProductName);
+							oParameter.setUserId(sUserId);
+							
+							String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+							
+							// Trigger the Launcher Operation
+							Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, sPath, oParameter, null);
+							
+							oMetadataViewModel = new MetadataViewModel();
+							oMetadataViewModel.setName("Generating Metadata, try later");
+						}
+						else {
+							Utils.debugLog("ProductResource.GetMetadataByProductName: attemp to read metadata already done, just return");
+						}
+						
+						return oMetadataViewModel;
 					}
 
-					MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils
-							.deserializeXMLToObject(sMetadataPath + sMetadataFile);
-					Utils.debugLog("ProductResource.GetMetadataByProductName: return Metadata for product "
-							+ oDownloadedFile.getFilePath());
+					MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils.deserializeXMLToObject(sMetadataPath + sMetadataFile);
+					
+					Utils.debugLog("ProductResource.GetMetadataByProductName: return Metadata for product " + oDownloadedFile.getFilePath());
+					
 					// Ok return Metadata
 					return oReloaded;
 				} catch (Exception oEx) {

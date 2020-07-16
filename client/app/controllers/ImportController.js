@@ -1143,8 +1143,11 @@ var ImportController = (function() {
 
         for (var i=0; i<oController.m_aListOfProvider.length; i++) {
             if (oController.m_aListOfProvider[i].selected) break;
-            iActive++;
+
+            if (i>=iActive) iActive++;
         }
+
+
         var sProvider = oController.m_aListOfProvider[iActive].name;
         oController.updateLayerListForActiveTab(sProvider);
         // oController.m_oMapService.zoomOnBounds(aaoAllBounds);

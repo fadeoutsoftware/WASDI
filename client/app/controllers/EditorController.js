@@ -3568,31 +3568,6 @@ var EditorController = (function () {
         return ((this.m_oTree === null) || (this.m_oTree.core.data.length === 0));
     };
 
-
-    /**
-     * Generate tree for metadata
-     * @param oElement
-     * @param oNewTree
-     * @param iIndexNewTreeAttribute
-     */
-    EditorController.prototype.generateMetadatadTree = function (oElement, oNewTree, iIndexNewTreeAttribute) {
-        if (typeof oElement != "undefined" && oElement != null) {
-            var oNode = new Object();
-            oNode.text = oElement.name;
-            oNode.children = [];
-            oNewTree.push(oNode);
-
-            if (oElement.elements != null)// if is a leaf
-            {
-                // i call the algorithm for all child
-                for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++) {
-                    this.generateMetadatadTree(oElement.elements[iIndexNumberElements], oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
-                }
-            }
-        }
-
-    };
-
     /**
      * Set a node as deselected
      * @param sNode
@@ -4098,7 +4073,7 @@ var EditorController = (function () {
                     "icon": "assets/icons/metadata-24.png",
                     "children": [],
                     "clicked": false,//semaphore
-                    "url": oController.m_oProductService.getApiMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
+                    "url": oController.m_oProductService.getProductMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
                 },
                 {
                     "text": "Bands",

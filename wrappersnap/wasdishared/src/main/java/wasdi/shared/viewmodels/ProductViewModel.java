@@ -16,6 +16,8 @@ public class ProductViewModel {
     private NodeGroupViewModel bandsGroups;
     
     private String metadataFileReference;
+    
+    private boolean metadataFileCreated = false;
 
     
     public ProductViewModel() {
@@ -76,5 +78,13 @@ public class ProductViewModel {
 
 	public void setMetadataFileReference(String metadataFileReference) {
 		this.metadataFileReference = metadataFileReference;
+	}
+
+	public boolean getMetadataFileCreated() {
+		return metadataFileCreated;
+	}
+
+	public void setMetadataFileCreated(boolean metadataFileCreated) {
+		this.metadataFileCreated = metadataFileCreated;
 	}
 }

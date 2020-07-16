@@ -4,7 +4,7 @@
 
 'use strict';
 angular.module('wasdi.MapService', ['wasdi.ConstantsService']).
-service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http,$rootScope, oConstantsService) {
+service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',  function ($http,$rootScope, oConstantsService, oModalService) {
     // API URL
     this.APIURL = oConstantsService.getAPIURL();
 
@@ -13,6 +13,8 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.m_oConstantsService = oConstantsService;
     //this.m_oRectangleOpenSearch = null;
     this.m_oDrawItems = null;
+
+    this.m_oModalService = oModalService;
 
     /**
      * Init base layers
@@ -161,9 +163,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //LEAFLET.DRAW LIB
 
         //add draw.search (opensearch)
-        var drawnItems = new L.FeatureGroup();
-        this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
-        this.m_oWasdiMap.addLayer(drawnItems);
+        var aoDrawnItems = new L.FeatureGroup();
+        this.m_oDrawItems = aoDrawnItems;//save draw items (used in delete shape)
+        this.m_oWasdiMap.addLayer(aoDrawnItems);
 
         var oOptions={
             position:'topright',//position of menu
@@ -176,7 +178,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             },
 
             edit: {
-                featureGroup: drawnItems,//draw items are the "voice" of menu
+                featureGroup: aoDrawnItems,//draw items are the "voice" of menu
                 edit: false,// hide edit button
                 remove: false// hide remove button
             }
@@ -184,26 +186,79 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         var oDrawControl = new L.Control.Draw(oOptions);
 
-        this. m_oWasdiMap.addControl(oDrawControl);
+        this.m_oWasdiMap.addControl(oDrawControl);
 
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
         {
-            var layer = event.layer;
-            oController.m_oRectangleOpenSearch = layer;
+            var oLayer = event.layer;
+            oController.m_oRectangleOpenSearch = oLayer;
 
             //remove old shape
-            if(drawnItems && drawnItems.getLayers().length!==0){
-                drawnItems.clearLayers();
+            if(aoDrawnItems && aoDrawnItems.getLayers().length!==0){
+                aoDrawnItems.clearLayers();
             }
-            $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:layer});//SEND MESSAGE TO IMPORT CONTROLLER
+            $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:oLayer});//SEND MESSAGE TO IMPORT CONTROLLER
             //save new shape in map
-            drawnItems.addLayer(layer);
+            aoDrawnItems.addLayer(oLayer);
         });
 
         //REMOVE IT ?
         this.m_oWasdiMap.on(L.Draw.Event.DELETESTOP, function (event) {
            var layer = event.layers;
         });
+
+        let oModalService = this.m_oModalService;
+
+        L.control.custom({
+            position: 'topright',
+            content : '<div type="button" class="import-insert-bbox-button" title="Insert a bbox by text">'+
+                '    <i class="import-insert-bbox-icon fa fa-edit" ></i>'+
+                '</div>',
+            classes : 'import-insert-bbox-wrapper-button btn-group-vertical btn-group-sm',
+            style   :
+                {
+                },
+            events:
+                {
+                    click: function(data)
+                    {
+                        oModalService.showModal({
+                            templateUrl: "dialogs/manual_insert_bbox/ManualInsertBboxView.html",
+                            controller: "ManualInsertBboxController",
+                            inputs: {
+                                extras: {}
+                            }
+                        }).then(function (modal) {
+                            modal.element.modal();
+                            modal.close.then(function (oResult) {
+
+                                if (oResult==null) return;
+
+                                let fNorth = parseFloat(oResult.north);
+                                let fSouth = parseFloat(oResult.south);
+                                let fEast = parseFloat(oResult.east);
+                                let fWest = parseFloat(oResult.west);
+
+                                if (isNaN(fNorth) || isNaN(fSouth) || isNaN(fEast) || isNaN(fWest)) {
+                                    return;
+                                }
+
+                                var aoBounds = [[fNorth, fWest], [fSouth, fEast]];
+                                var oLayer = L.rectangle(aoBounds, {color: "#3388ff", weight: 1});
+                                oController.m_oRectangleOpenSearch = oLayer;
+
+                                //remove old shape
+                                if(aoDrawnItems && aoDrawnItems.getLayers().length!==0){
+                                    aoDrawnItems.clearLayers();
+                                }
+                                $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:oLayer});//SEND MESSAGE TO IMPORT CONTROLLER
+                                //save new shape in map
+                                aoDrawnItems.addLayer(oLayer);
+                            });
+                        });
+                    }
+                }
+        }).addTo(this.m_oWasdiMap);
 
     };
 

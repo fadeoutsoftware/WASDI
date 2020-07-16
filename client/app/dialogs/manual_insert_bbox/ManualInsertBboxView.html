@@ -1,0 +1,65 @@
+<div class="modal fade manual-insert-bbox">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>
+                    {{"DIALOG_MANUAL_INSERT_BBOX_TITLE"|translate}}
+                </h4>
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                <!div class="container"-->
+                    <div class="row">
+                        <div class="col col-lg-5">
+                            &nbsp;
+                        </div>
+                        <div class="col col-lg-2">
+                            <label>{{"DIALOG_MANUAL_INSERT_BBOX_NORTH"|translate}}</label> <input type="text" class="inputLatLon" ng-model="m_oController.m_oBbox.north">
+                        </div>
+                        <div class="col col-lg-4">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-lg-2">
+                            <label>{{"DIALOG_MANUAL_INSERT_BBOX_WEST"|translate}}</label> <input type="text" class="inputLatLon" ng-model="m_oController.m_oBbox.west">
+                        </div>
+                        <div class="col col-lg-8">
+
+                        </div>
+                        <div class="col col-lg-2">
+                            <label>{{"DIALOG_MANUAL_INSERT_BBOX_EAST"|translate}}</label> <input type="text" class="inputLatLon" ng-model="m_oController.m_oBbox.east">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-lg-5">
+                            &nbsp;
+                        </div>
+                        <div class="col col-lg-2">
+                            <label>{{"DIALOG_MANUAL_INSERT_BBOX_SOUTH"|translate}}</label> <input type="text" class="inputLatLon" ng-model="m_oController.m_oBbox.south">
+                        </div>
+                        <div class="col col-lg-4">
+                            &nbsp;
+                        </div>
+                    </div>
+                <!--/div-->
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+
+                <button ng-click="close(m_oController.m_oBbox)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_MANUAL_INSERT_BBOX_DRAW"|translate}}
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+

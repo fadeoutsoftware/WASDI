@@ -136,82 +136,123 @@ public class OpenSearchResource {
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
 			return null;
 		}
+		
+		// If we have providers to query
 		if (sProviders != null) {
-			if (sOffset == null)
-				sOffset = "0";
-			if (sLimit == null)
-				sLimit = "25";
-			if (sSortedBy == null)
-				sSortedBy = "ingestiondate";
-			if (sOrder == null)
-				sOrder = "asc";
 			
+			// Control and check input parameters for pagination
+			
+			if (sOffset == null) {
+				sOffset = "0";
+			}
+				
+			if (sLimit == null) {
+				sLimit = "25";
+			}
+				
+			if (sSortedBy == null) {
+				sSortedBy = "ingestiondate";
+			}
+				
+			if (sOrder == null) {
+				sOrder = "asc";
+			}
+				
+			// Query the result count for each provider
 			Map<String, Integer> aiCounterMap = null;
 			
 			try {
 				Utils.debugLog(s_sClassName + ".Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
-			} catch (NumberFormatException oNumberFormatException) {
+			} 
+			catch (NumberFormatException oNumberFormatException) {
 				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oNumberFormatException);
 				return null;
-			} catch (Exception oException) {
+			} 
+			catch (Exception oException) {
 				Utils.debugLog(s_sClassName + ".search: caught Exception: " + oException);
 				return null;
 			}
+			
+			// Get the number of elements per page
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
 			int iLimit = 25;
+			
 			try {
 				iLimit = Integer.parseInt(sLimit);
-			} catch (NumberFormatException oE1) {
+			} 
+			catch (NumberFormatException oE1) {
 				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
 				return null;
 			}
+			
+			if (iLimit < 0) {
+				// Not possible: back to default:
+				iLimit = 25;
+			}			
+			
 			int iOffset = 0;
+			
 			try {
 				iOffset = Integer.parseInt(sOffset);
-			} catch (NumberFormatException oE2) {
+			} 
+			catch (NumberFormatException oE2) {
 				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
 				return null;
 			}
-			int iSkipped = 0;
 			
 			
+			// For each provider
 			for (Entry<String, Integer> oEntry : aiCounterMap.entrySet()) {
+				
+				// Get the provider and the total count of its results
 				String sProvider = oEntry.getKey();
 				int iCount = oEntry.getValue();
+				
 				if (iCount < iOffset) {
-					iSkipped += iCount;
+					// We have finished 
 					continue;
 				}
-				int iCurrentLimit = iLimit - aoResults.size();
-				if (iCurrentLimit <= 0) {
-					break;
-				}
-				String sCurrentLimit = "" + iCurrentLimit;
-				int iCurrentOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
+								
+				String sCurrentLimit = "" + iLimit;
+				
+				int iCurrentOffset = Math.max(0, iOffset);
 				String sCurrentOffset = "" + iCurrentOffset;
+				
+				
 				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
 				
 				try {
-					QueryExecutor oExecutor = getExecutor(sProviders);
+					// Get the query executor
+					QueryExecutor oExecutor = getExecutor(sProvider);
 					try {
+						// Create the paginated query
 						PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
+						// Execute the query
 						List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
+						
+						// Do we have results?
 						if (aoTmp != null && !aoTmp.isEmpty()) {
+							// Yes perfect add all
 							aoResults.addAll(aoTmp);
 							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
-						} else {
+						} 
+						else {
+							// Nothing to add
 							Utils.debugLog(s_sClassName + ".search: no results found for " + sProvider);
 						}
-					} catch (NumberFormatException oNumberFormatException) {
+					} 
+					catch (NumberFormatException oNumberFormatException) {
 						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
 						aoResults.add(null);
-					} catch (IOException oIOException) {
+					} 
+					catch (IOException oIOException) {
 						Utils.debugLog(s_sClassName + ".search: " + oIOException);
 						aoResults.add(null);
 					}
-					iSkipped += iCount;
-				} catch (Exception oE) {
+					
+				}
+				catch (Exception oE) {
 					Utils.debugLog(s_sClassName + ".search: " + oE);
 					aoResults.add(null);
 				}
