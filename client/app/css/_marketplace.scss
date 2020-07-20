@@ -184,3 +184,57 @@ select {
 .contatti {
     padding: 10px;
 }
+
+
+/*KASA APP STORE*/
+$wasdigreen: #009036;
+$wasdiblue: #43516a;
+$lightgrey: #efefef;
+.item-wrapper {
+    font-size: 1.2em;
+}
+
+
+
+.market-toolbar-wrapper {
+    padding-left: 95px;
+}
+
+.market-toolbar {
+    background-color: $lightgrey;
+    padding:5px;
+    margin-top: 4px;
+    border-radius: 3px;
+}
+.search-wrapper{
+    .search-icon-wrapper {
+    background-color: $wasdiblue;
+    color: white;
+    cursor: pointer;
+        &:hover {
+            background-color: $wasdigreen;
+        }
+    }
+    .search-field {
+        border-style: hidden;
+        padding: 12px;
+    }
+    .glyphicon-search {
+        color: #ffffff;
+    }
+}
+
+.order-btn {
+    .dropdown-menu {
+        background-color: $wasdiblue;
+        color: white;
+        border-radius: 0px;
+        box-shadow: unset;
+        .dropdown-item {
+            cursor: pointer;
+            &:hover {
+                background-color: $wasdigreen;
+            }
+        }
+    }
+}
