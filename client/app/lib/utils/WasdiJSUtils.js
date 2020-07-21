@@ -227,6 +227,12 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
         case "LIBRARYUPDATE":
             sUserMessage = "WASDI LIB UPDATED FOR APP<br>READY";
             break;
+        case "KILLPROCESSTREE":
+            sUserMessage = "PROCESS KILLED<br>READY";
+            break;
+        case "READMETADATA":
+            sUserMessage = "METADATA READ<br>READY";
+            break;
         default:
             console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");
     }

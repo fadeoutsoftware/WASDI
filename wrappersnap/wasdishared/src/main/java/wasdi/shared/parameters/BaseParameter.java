@@ -159,6 +159,9 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.KILLPROCESSTREE.name())) {
 			oParam = new KillProcessTreeParameter();
 		}
+		else if (sOperationType.equals(LauncherOperations.READMETADATA.name())) {
+			oParam = new ReadMetadataParameter();
+		}
 		
 		return oParam;
 	}

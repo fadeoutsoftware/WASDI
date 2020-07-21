@@ -124,11 +124,16 @@ var WappsController = (function() {
             sStringJSON = sJSON;
         }
 
-        if (!this.tryParseJSON(sStringJSON)) {
-            let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE INPUT PARAMS");
-            utilsVexCloseDialogAfter(4000,oDialog);
+        try {
+            JSON.parse(sStringJSON);
+        } catch (e) {
+
+            let sErrorMessage = "INVALID JSON INPUT PARAMETERS<br>" + e.toString();
+            utilsVexDialogBigAlertTop(sErrorMessage);
+
             return;
         }
+
 
         this.m_oProcessorService.runProcessor(this._selectedProcessor.processorName, sStringJSON)
             .success(function (data) {

@@ -38,7 +38,7 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.post(this.APIURL + '/product/update?workspace=' + workspaceId, oProductViewModel);
     };
 
-    this.getApiMetadata= function(sProductName, sWorkspace){
+    this.getProductMetadata= function(sProductName, sWorkspace){
 
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;

@@ -921,6 +921,14 @@ textarea{
         }
     }
 
+    .leaflet-draw-input-rectangle {
+        @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_white.svg", $leaflet-icon-size, $wasdi-blue-logo);
+        &:hover {
+            @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_green.svg", $leaflet-icon-size, $wasdi-blue-logo);
+        }
+    }
+
+
     .leaflet-draw-edit-edit {
         @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_white.svg", $leaflet-icon-size, $wasdi-blue-logo);
         &:hover {
