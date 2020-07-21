@@ -3103,10 +3103,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			s_oLogger.error("killProcessTree: Kill loop done");
 			
+						
 			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
-			oMyProcess.setStatus("DONE");
-			oMyProcess.setProgressPerc(100);
-			oRepository.updateProcess(oMyProcess);
+			
+			updateProcessStatus(oRepository, oMyProcess, ProcessStatus.DONE, 100);
 			
 		} catch (Exception oE) {
 			s_oLogger.error("killProcessTree: " + oE);
@@ -3255,7 +3255,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return;
 			}
-			
+						
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			
 			String sProductPath = LauncherMain.getWorspacePath(oReadMetadataParameter) + sProductName;
@@ -3274,29 +3274,34 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 			}
 			
+			if (LauncherMain.s_oSendToRabbit != null) {
+				String sInfo = "Read Metadata Operation<br>Retriving File Metadata<br>Try again later";
+				LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+			}			
+			
 			if (Utils.isNullOrEmpty(oDownloadedFile.getProductViewModel().getMetadataFileReference())) {
 				if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
 					
-					s_oLogger.error("readMetadata: Metadata File still not created. Generate it");
+					s_oLogger.info("readMetadata: Metadata File still not created. Generate it");
 					
 					oDownloadedFile.getProductViewModel().setMetadataFileCreated(true);
 					oDownloadedFile.getProductViewModel().setMetadataFileReference(asynchSaveMetadata(sProductPath));
 					
-					s_oLogger.error("readMetadata: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+					s_oLogger.info("readMetadata: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
 					
 					oDownloadedFilesRepository.updateDownloadedFile(oDownloadedFile);
 				}
 				else {
-					s_oLogger.error("readMetadata: attemp to create metadata file has already been done");
+					s_oLogger.info("readMetadata: attemp to create metadata file has already been done");
 				}
 			}
 			else {
-				s_oLogger.error("readMetadata: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+				s_oLogger.info("readMetadata: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
 			}
 						
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
-			s_oLogger.error("readMetadata: done, bye");
+			s_oLogger.info("readMetadata: done, bye");
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("readMetadata Exception " + oEx.toString());
