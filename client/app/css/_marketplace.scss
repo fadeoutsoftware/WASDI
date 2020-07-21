@@ -271,6 +271,9 @@ $lightgrey: #efefef;
         label {
             margin-bottom: 0px;
             cursor: pointer;
+            &:hover {
+                color: $wasdigreen;
+            }
         }
     }
 
@@ -349,25 +352,25 @@ $lightgrey: #efefef;
                 img {
                     width: 100px;
                     height: 100px;
-                    animation: fly 2s alternate infinite;
+                    animation: fly 2s linear alternate infinite;
                 }
 
                 @keyframes fly {
                     0% {
                         transform-origin: center center;
-                        transform: rotate(10deg) translate(22px, 10px);
+                        transform: rotate(10deg) translate(22px, 10px) scale(0);
                     }
                     33% {
                        transform-origin: center center;
-                        transform: rotate(-20deg) translate(-20px, 12px);
+                        transform: rotate(-20deg) translate(-20px, 12px) scale(0.33);
                     }
                     66% {
                         transform-origin: center center;
-                        transform: rotate(5deg) translate(-12px, -12px);
+                        transform: rotate(5deg) translate(-12px, -12px) scale(0.66) ;
                     }
                     100% {
                         transform-origin: center center;
-                        transform: rotate(-30deg) translate(18px, -10px);
+                        transform: rotate(-30deg) translate(18px, -10px) scale(1);
                     }
                 }
             }
