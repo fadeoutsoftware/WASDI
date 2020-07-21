@@ -190,6 +190,11 @@ select {
 $wasdigreen: #009036;
 $wasdiblue: #43516a;
 $lightgrey: #efefef;
+
+
+/*===============================*/
+/*=========ITEM BAR==============*/
+/*===============================*/
 .item-wrapper {
     font-size: 1.2em;
 }
@@ -238,3 +243,67 @@ $lightgrey: #efefef;
         }
     }
 }
+
+/*===============================*/
+/*=========FILTER BAR==============*/
+/*===============================*/
+.marketplace-divider{
+    background-color: $wasdigreen;
+    height: 5px;
+    width: 100%;
+}
+.filter-side-bar {
+    background-color: $lightgrey;
+    .title {
+        color: white;
+        background-color: $wasdiblue;
+        margin-left: -15px;
+        margin-right: -15px;
+        font-size: 1.2em;
+    }
+    .subtitle {
+        font-size: 1.1em;
+    }
+    input[type=checkbox], input[type=radio], {
+        margin-top: 0px;
+        margin-right: 5px;
+        cursor: pointer;
+    }
+    .input-group-text {
+
+        label {
+            margin-bottom: 0px;
+            cursor: pointer;
+        }
+    }
+
+    .italic {
+        font-style: italic;
+    }
+
+    /*price renge*/
+    #amount {
+        background-color: transparent;
+        color: $wasdiblue;
+        border: 0px;
+    }
+    .ui-slider-handle {
+        border-radius: 50% !important;
+        background: $wasdiblue !important;
+        cursor: pointer !important;
+    }
+    .ui-state-hover{
+        background: $wasdigreen !important;
+    }
+    .ui-state-active{
+        background: $wasdigreen !important;
+    }
+
+}
+.fa-star {
+    color: grey;
+    &.checked {
+      color: orange;
+    }
+}
+

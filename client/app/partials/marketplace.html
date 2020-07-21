@@ -5,7 +5,7 @@
             <div class="col-12 market-toolbar d-flex justify-content-between">
                 <!--LEFT-->
                 <div class="item-wrapper d-flex align-items-center p-3">
-                    ITEMS FOUND: <strong class="ml-2">85</strong>
+                    WASDI APP STORE | ITEMS FOUND: <strong class="ml-2">85</strong>
                 </div>
 
                 <!-- RIGHT -->
@@ -35,67 +35,155 @@
         </div>
     </div>
     <section class="container-fluid">
-        <div class="row">
-            <div class="col-md-2 sidenav">
+        <div class="row mt-3">
+            <!--green divider-->
+            <div class="marketplace-divider">
+            </div>
+        </div>
 
-                <div class="sidenav_internal_div" >
-                    <!-- search -->
-                    <input type="text" name="search" placeholder="SEARCH APP" class="sidenav_search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                    <!-- filtri -->
-                    <h4 class="sidenav_filters">FILTERS	<!--img src="https://www.undercostruction.it/wp-content/uploads/2019/12/CLEAR.jpg"-->
-                        <i class="fa fa-bath mr-0" aria-hidden="true"></i>
-                    </h4>
-                    <!-- CATEGORIE -->
-                    <p class="sidenav_subelement">
-                        <span class="sidenav_subelement_span">
-                            <strong>CATEGORY</strong>
-                        </span>
-                    </p>
-                    <img src="assets/icons/telescopio.png"  class="sidenav_subelement_image mx-auto d-block">
+        <div class="row mt-3">
+            <!--SIDEBAR------------------------------------------------------------>
+            <div class="col-md-2 filter-side-bar">
+                <!--title-->
+                <div class="title p-2 px-3 mb-2">
+                    <span class="fa fa-bath mr-2" aria-hidden="true"></span>APPS FILTER
+                </div>
 
-                    <button type="button" class="btn" data-toggle="modal" data-target="#category">EXPLORE WASDI UNIVERSE</button>
-
-                    <!-- DEVELOPERS -->
-                    <p class="sidenav_subelement" style="">
-                        <span class="sidenav_subelement_span">
-					        <strong>PUBLISHER</strong>
-                        </span>
-                    </p>
-
-                    <img src="assets/icons/abduction.png" class="sidenav_subelement_image mx-auto d-block">
-                    <select name="Developer" class="sidenav_developers_combo">
-                        <option value="volvo"><strong>PICK SOMEONE</strong></option>
-                        <option value="dart">Dart Fener</option>
-                        <option value="luke">Luke Skywalker</option>
-                        <option value="leila">Princess Leila</option>
-                        <option value="obi">Obi-Wan Kenobi</option>
-                    </select>
-
-                    <!-- VALUTATION -->
-                    <p class="sidenav_subelement">
-                        <span class="sidenav_subelement_span">
-                            <strong>RATINGS</strong>
-                        </span>
-                    </p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
+                <!--category-->
+                <div class="category mt-1 mb-3">
+                    <div class="border-bottom py-1 mb-2 subtitle">CATEGORY:</div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="flood" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="flood">Flood <span class="italic">(8)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="gis" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="gis">GIS <span class="italic">(10)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="population" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="population">Population <span class="italic">(5)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="fire" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="fire">Fire <span class="italic">(12)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="rain" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="rain">Rain <span class="italic">(2)</span></label>
                     </div>
 
-                    <!-- PRICE -->
-                    <p class="sidenav_subelement">
-                        <span class="sidenav_subelement_span">
-                            <strong>PRICE</strong>
-                        </span>
-                    </p>
+                </div>
 
-                    <input type="range" min="0" max="200" step="1" value="0">
-                    <br>
+                <!--developer-->
+                <div class="developer mt-1 mb-3">
+                    <div class="border-bottom py-1 mb-2 subtitle">
+                        <span>DEVELOPER</span>
+                        <span class="fa fa-times"></span>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="Leia" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="Leia">Princess Leia <span class="italic">(8)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="JarJar" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="JarJar">Jar Jar Binks <span class="italic">(10)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="Dookue" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="Dookue">Count Dooku <span class="italic">(5)</span></label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="Maul" type="checkbox" aria-label="Checkbox for following text input">
+                        <label for="Maul">Darth Maul <span class="italic">(12)</span></label>
+                    </div>
 
                 </div>
+
+                <!--ratings-->
+                <div class="ratings mt-1 mb-3">
+                    <div class="border-bottom py-1 mb-2 subtitle">RATINGS:</div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked">
+                        <label for="allstar">
+                            <span>tutte le valutazioni</span>
+                        </label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="onestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                        <label for="onestar">
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="ml-2">e più</span>
+                        </label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="twostar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                        <label for="twostar">
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="ml-2">e più</span>
+                        </label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="threestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                        <label for="threestar">
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="ml-2">e più</span>
+                        </label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="fourstar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                        <label for="fourstar">
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="ml-2">e più</span>
+                        </label>
+                    </div>
+                    <div class="input-group-text d-flex align-items-center pb-1">
+                        <input id="fivestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                        <label for="fivestar">
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                        </label>
+                    </div>
+
+
+                </div>
+
+                <!--price-->
+                <div class="price mt-1 mb-3">
+                    <div class="border-bottom py-1 mb-2 subtitle">PRICES:</div>
+
+                    <div id="slider-range" class="my-4"></div>
+                    <p>
+                        <label for="amount">Price range:</label>
+                        <input type="text" id="amount" readonly>
+                    </p>
+
+
+                </div>
+
+
+
+
+
 
             </div>
 
@@ -120,3 +208,23 @@
     </section>
 
 </div>
+
+
+
+
+<!--SCRIPT PER DUAL HANDLE RANGE SLIDER TODO PAOLO spostare in controller?-->
+<script>
+    $( function() {
+        $( "#slider-range" ).slider({
+            range: true,
+            min: 0,
+            max: 500,
+            values: [ 75, 300 ],
+            slide: function( event, ui ) {
+                $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+            }
+        });
+        $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
+            " - $" + $( "#slider-range" ).slider( "values", 1 ) );
+    } );
+</script>
