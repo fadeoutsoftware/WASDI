@@ -70,11 +70,7 @@
     align-content: center;
 }
 
-.application_title {
-    color:#009036;
-    text-align: center;
-    cursor: pointer;
-}
+
 
 .application_image {
     width: 200px;
@@ -254,6 +250,7 @@ $lightgrey: #efefef;
 }
 .filter-side-bar {
     background-color: $lightgrey;
+    min-height: calc(100vh - 200px);
     .title {
         color: white;
         background-color: $wasdiblue;
@@ -287,6 +284,9 @@ $lightgrey: #efefef;
         color: $wasdiblue;
         border: 0px;
     }
+    .amount {
+        max-width: 100px;
+    }
     .ui-slider-handle {
         border-radius: 50% !important;
         background: $wasdiblue !important;
@@ -305,5 +305,118 @@ $lightgrey: #efefef;
     &.checked {
       color: orange;
     }
+}
+
+/*===============================*/
+/*=========APPS LIST==============*/
+/*===============================*/
+
+.apps-wrapper {
+    height: calc(100vh - 200px);
+    overflow: auto;
+    .apps-tile {
+        box-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
+        padding: 0 1em 1em 1em;
+        cursor: pointer;
+        &:hover {
+            box-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.25);
+            .featured-img .overlay {
+                width: 100%;
+                transition: width 0.3s ease;
+            }
+        }
+        .featured-img {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            margin-left: -15px;
+            margin-right: -15px;
+            position: relative;
+            .overlay {
+                background-color: $wasdigreen;
+                opacity: 0.7;
+                position: absolute;
+                overflow: hidden;
+                top:0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 0%;
+                transition: width 0.3s ease;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                img {
+                    width: 100px;
+                    height: 100px;
+                    animation: fly 2s alternate infinite;
+                }
+
+                @keyframes fly {
+                    0% {
+                        transform-origin: center center;
+                        transform: rotate(10deg) translate(22px, 10px);
+                    }
+                    33% {
+                       transform-origin: center center;
+                        transform: rotate(-20deg) translate(-20px, 12px);
+                    }
+                    66% {
+                        transform-origin: center center;
+                        transform: rotate(5deg) translate(-12px, -12px);
+                    }
+                    100% {
+                        transform-origin: center center;
+                        transform: rotate(-30deg) translate(18px, -10px);
+                    }
+                }
+            }
+        }
+        .application_title {
+            color:#009036;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 1.2em;
+        }
+        .application_description {
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 80px;
+
+        }
+        .price-tag {
+            background-color: $wasdigreen;
+            color: white;
+            padding: 3px 10px;
+            margin-right: -18px;
+        }
+    }
+}
+
+/*===============================*/
+/*=========CUSTOM SCROLLBAR==============*/
+/*===============================*/
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background-color: $lightgrey;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: $wasdiblue;
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: $wasdigreen;
 }
 

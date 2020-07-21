@@ -79,7 +79,7 @@
                 <div class="developer mt-1 mb-3">
                     <div class="border-bottom py-1 mb-2 subtitle">
                         <span>DEVELOPER</span>
-                        <span class="fa fa-times"></span>
+                        <span class="fas fa-meteor"></span>
                     </div>
                     <div class="input-group-text d-flex align-items-center pb-1">
                         <input id="Leia" type="checkbox" aria-label="Checkbox for following text input">
@@ -106,7 +106,7 @@
                     <div class="input-group-text d-flex align-items-center pb-1">
                         <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked">
                         <label for="allstar">
-                            <span>tutte le valutazioni</span>
+                            <span>all ratings</span>
                         </label>
                     </div>
                     <div class="input-group-text d-flex align-items-center pb-1">
@@ -174,32 +174,44 @@
                     <div id="slider-range" class="my-4"></div>
                     <p>
                         <label for="amount">Price range:</label>
-                        <input type="text" id="amount" readonly>
+                        <input class="amount" type="text" id="amount" readonly>
                     </p>
-
-
                 </div>
-
-
-
-
-
-
             </div>
+            <!--end filter bar-->
 
-            <div class="col-md-10 pt-3">
-                <div class="filterDiv flood" ng-repeat="processor in m_oController.m_aoApplicationList">
-                    <img src={{processor.imgLink}}  class="application_image mx-auto d-block" ng-click="m_oController.openApplicationPage(processor.processorName)">
-                    <h5 class="application_title" ng-click="m_oController.openApplicationPage(processor.processorName)">{{processor.processorName}}</h5>
-                    <p class="application_description">{{processor.processorDescription}}</p>
-                    <div class="text-center">
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
+
+            <!--APPS LIST-->
+            <div class="col-md-10 pb-3 apps-wrapper">
+                <div class="row">
+                    <div class="col-6 col-md-4 col-lg-3 pb-5"  ng-repeat="processor in m_oController.m_aoApplicationList">
+                        <div class="apps-tile" ng-click="m_oController.openApplicationPage(processor.processorName)">
+                            <div class="featured-img" style="background-image: url('https://picsum.photos/400')">
+                                <div class="overlay">
+                                    <img src="assets/img/tie-f.svg">
+                                </div>
+                            </div>
+
+<!--                            <img src={{processor.imgLink}}  class="application_image mx-auto d-block" ng-click="m_oController.openApplicationPage(processor.processorName)">-->
+                            <h5 class="application_title mt-4">{{processor.processorName}}</h5>
+                            <p class="application_description" title="{{processor.processorDescription}}">{{processor.processorDescription}}</p>
+                            <div class="tile-footer d-flex justify-content-between align-items-center border-top pt-3">
+                                <div class="star-rating">
+                                    <span class="fa fa-star checked"></span>
+                                    <span class="fa fa-star checked"></span>
+                                    <span class="fa fa-star checked"></span>
+                                    <span class="fa fa-star checked"></span>
+                                    <span class="fa fa-star checked"></span>
+                                </div>
+                                <div  class="price-tag shadow-sm">
+                                    <span>free</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+
 
             </div>
 
