@@ -1,8 +1,66 @@
 <div class="editor-view">
     <div class="row justify-content-end toolbar">
     </div>
-    <div>
-        CIAO APP DETAIL
-        <button ng-click="m_oController.openApplicationPage()">Open Application UI</button>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12 col-md-6">
+
+                <div class="appdetails-slider">
+                    <ul id="lightSlider">
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-1.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-1.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-2.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-2.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-3.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-3.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-4.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-4.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-5.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-5.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-6.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-6.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-7.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-7.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-8.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-8.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-9.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-9.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-10.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-10.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-11.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-12.jpg" />
+                        </li>
+                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-13.jpg">
+                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-13.jpg" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                TESTO
+            </div>
+        </div>
+
+<!--        <button ng-click="m_oController.openApplicationPage()">Open Application UI</button>-->
     </div>
 </div>
+
+    <script type="text/javascript">
+        $('#lightSlider').lightSlider({
+            gallery: true,
+            item: 1,
+            loop:true,
+            slideMargin: 0,
+            thumbItem: 9
+        });
+    </script>
