@@ -310,6 +310,24 @@ $lightgrey: #efefef;
     }
 }
 
+@media screen and (max-width: 990px) {
+    .filter-side-bar {
+        min-height: auto !important;
+    }
+
+    .fa-times {display: block}
+    .fa-chevron-down {display: none}
+    .collapsed {
+        .fa-times {display: none}
+        .fa-chevron-down {display: block}
+    }
+}
+@media screen and (min-width: 990px) {
+    .collapse {
+        display: block !important;
+    }
+}
+
 /*===============================*/
 /*=========APPS LIST==============*/
 /*===============================*/

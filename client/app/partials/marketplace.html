@@ -5,7 +5,7 @@
             <div class="col-12 market-toolbar d-flex justify-content-between">
                 <!--LEFT-->
                 <div class="item-wrapper d-flex align-items-center p-3">
-                    WASDI APP STORE | ITEMS FOUND: <strong class="ml-2">85</strong>
+                    <span class="d-none d-md-block">WASDI APP STORE | ITEMS FOUND: </span> <strong class="ml-2">85</strong>
                 </div>
 
                 <!-- RIGHT -->
@@ -43,139 +43,149 @@
 
         <div class="row mt-3">
             <!--SIDEBAR------------------------------------------------------------>
-            <div class="col-md-2 filter-side-bar">
-                <!--title-->
-                <div class="title p-2 px-3 mb-2">
+            <div class="col-12 col-md-2 filter-side-bar">
+                <!--title large screen-->
+                <div class="d-none d-md-block title p-2 px-3 mb-2">
                     <span class="fa fa-bath mr-2" aria-hidden="true"></span>APPS FILTER
                 </div>
-
-                <!--category-->
-                <div class="category mt-1 mb-3">
-                    <div class="border-bottom py-1 mb-2 subtitle">CATEGORY:</div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="flood" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="flood">Flood <span class="italic">(8)</span></label>
+                <!--title mobile screen-->
+                <div class="d-block d-md-none title p-2 px-3 mb-4 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    <div><span class="fa fa-bath mr-2" aria-hidden="true"></span>APPS FILTER</div>
+                    <div><span class="fa fa-chevron-down"></span>
+                        <span class="fa fa-times"></span>
                     </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="gis" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="gis">GIS <span class="italic">(10)</span></label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="population" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="population">Population <span class="italic">(5)</span></label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="fire" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="fire">Fire <span class="italic">(12)</span></label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="rain" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="rain">Rain <span class="italic">(2)</span></label>
-                    </div>
-
                 </div>
 
-                <!--developer-->
-                <div class="developer mt-1 mb-3">
-                    <div class="border-bottom py-1 mb-2 subtitle">
-                        <span>DEVELOPER</span>
-                        <span class="fas fa-meteor"></span>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="Leia" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="Leia">Princess Leia <span class="italic">(8)</span></label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="JarJar" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="JarJar">Jar Jar Binks <span class="italic">(10)</span></label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="Dookue" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="Dookue">Count Dooku <span class="italic">(5)</span></label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="Maul" type="checkbox" aria-label="Checkbox for following text input">
-                        <label for="Maul">Darth Maul <span class="italic">(12)</span></label>
+
+                <div class="collapse" id="collapseExample">
+                    <!--category-->
+                    <div class="category mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">CATEGORY:</div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="flood" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="flood">Flood <span class="italic">(8)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="gis" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="gis">GIS <span class="italic">(10)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="population" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="population">Population <span class="italic">(5)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="fire" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="fire">Fire <span class="italic">(12)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="rain" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="rain">Rain <span class="italic">(2)</span></label>
+                        </div>
+
                     </div>
 
-                </div>
+                    <!--developer-->
+                    <div class="developer mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">
+                            <span>DEVELOPER</span>
+                            <span class="fas fa-meteor"></span>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="Leia" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="Leia">Princess Leia <span class="italic">(8)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="JarJar" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="JarJar">Jar Jar Binks <span class="italic">(10)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="Dookue" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="Dookue">Count Dooku <span class="italic">(5)</span></label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="Maul" type="checkbox" aria-label="Checkbox for following text input">
+                            <label for="Maul">Darth Maul <span class="italic">(12)</span></label>
+                        </div>
 
-                <!--ratings-->
-                <div class="ratings mt-1 mb-3">
-                    <div class="border-bottom py-1 mb-2 subtitle">RATINGS:</div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked">
-                        <label for="allstar">
-                            <span>all ratings</span>
-                        </label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="onestar" type="radio" name="rating" aria-label="Checkbox for following text input">
-                        <label for="onestar">
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="ml-2">e più</span>
-                        </label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="twostar" type="radio" name="rating" aria-label="Checkbox for following text input">
-                        <label for="twostar">
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="ml-2">e più</span>
-                        </label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="threestar" type="radio" name="rating" aria-label="Checkbox for following text input">
-                        <label for="threestar">
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="ml-2">e più</span>
-                        </label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="fourstar" type="radio" name="rating" aria-label="Checkbox for following text input">
-                        <label for="fourstar">
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="ml-2">e più</span>
-                        </label>
-                    </div>
-                    <div class="input-group-text d-flex align-items-center pb-1">
-                        <input id="fivestar" type="radio" name="rating" aria-label="Checkbox for following text input">
-                        <label for="fivestar">
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                        </label>
                     </div>
 
+                    <!--ratings-->
+                    <div class="ratings mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">RATINGS:</div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked">
+                            <label for="allstar">
+                                <span>all ratings</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="onestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <label for="onestar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">e più</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="twostar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <label for="twostar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">e più</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="threestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <label for="threestar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">e più</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="fourstar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <label for="fourstar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">e più</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="fivestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <label for="fivestar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                            </label>
+                        </div>
 
-                </div>
 
-                <!--price-->
-                <div class="price mt-1 mb-3">
-                    <div class="border-bottom py-1 mb-2 subtitle">PRICES:</div>
+                    </div>
 
-                    <div id="slider-range" class="my-4"></div>
-                    <p>
-                        <label for="amount">Price range:</label>
-                        <input class="amount" type="text" id="amount" readonly>
-                    </p>
+                    <!--price-->
+                    <div class="price mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">PRICES:</div>
+
+                        <div id="slider-range" class="my-4"></div>
+                        <p>
+                            <label for="amount">Price range:</label>
+                            <input class="amount" type="text" id="amount" readonly>
+                        </p>
+                    </div>
                 </div>
             </div>
             <!--end filter bar-->
