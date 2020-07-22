@@ -3,7 +3,7 @@ package wasdi.shared.business;
 public class Review {
 	private String processorId;
 	private Double date;
-	private String vote;
+	private Float vote;
 	private String comment;
 	private String userId;
 	private String id;
@@ -20,10 +20,10 @@ public class Review {
 	public void setDate(Double date) {
 		this.date = date;
 	}
-	public String getVote() {
+	public Float getVote() {
 		return vote;
 	}
-	public void setVote(String vote) {
+	public void setVote(Float vote) {
 		this.vote = vote;
 	}
 	public String getComment() {

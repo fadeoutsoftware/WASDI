@@ -5,7 +5,7 @@ import java.util.Date;
 public class ReviewViewModel {
 	private String processorId;
 	private Date date;
-	private String vote;
+	private Float vote;
 	private String comment;
 	private String userId;
 	private String id;
@@ -22,10 +22,10 @@ public class ReviewViewModel {
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	public String getVote() {
+	public Float getVote() {
 		return vote;
 	}
-	public void setVote(String vote) {
+	public void setVote(Float vote) {
 		this.vote = vote;
 	}
 	public String getComment() {

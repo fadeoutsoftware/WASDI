@@ -52,7 +52,7 @@ var MarketPlaceController = (function() {
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessorService.getProcessorsList().success(function (data) {
+        this.m_oProcessorService.getMarketplaceList().success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_aoApplicationList = oController.setDefaultImages(data);
@@ -87,7 +87,7 @@ var MarketPlaceController = (function() {
         var iNumberOfProcessors = aoProcessorList.length;
         for(var iIndexProcessor = 0; iIndexProcessor < iNumberOfProcessors; iIndexProcessor++)
         {
-            if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
+            if(utilsIsObjectNullOrUndefined(aoProcessorList[iIndexProcessor].imgLink))
             {
                 aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
             }

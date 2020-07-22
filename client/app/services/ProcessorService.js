@@ -9,8 +9,18 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
     this.m_sResource = "/processors";
+
+
     this.getProcessorsList = function() {
         return this.m_oHttp.get(this.APIURL + '/processors/getdeployed');
+    };
+
+    this.getMarketplaceList = function(sCategories) {
+        return this.m_oHttp.get(this.APIURL + '/processors/getmarketlist');
+    };
+
+    this.getMarketplaceDetail = function(sApplication) {
+        return this.m_oHttp.get(this.APIURL + '/processors/getmarketdetail?processorname=' + sApplication);
     };
 
     /**

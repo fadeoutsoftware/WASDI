@@ -411,6 +411,11 @@ public class Wasdi extends ResourceConfig {
 
 		return sDownloadRootPath;
 	}
+	
+	public static String getProcessorLogoPath(String sProcessorName) {
+		String sPath = "./assets/img/processors/" + sProcessorName + "/";
+		return sPath;
+	}
 	/**
 	 * Get The owner of a workspace starting from the workspace id
 	 * 

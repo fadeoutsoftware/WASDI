@@ -50,8 +50,24 @@
                 TESTO
             </div>
         </div>
-
-<!--        <button ng-click="m_oController.openApplicationPage()">Open Application UI</button>-->
+        <div class="row">
+            <div>Name: {{m_oController.m_oApplication.friendlyName}}</div>
+        </div>
+        <div class="row">
+            <div>Description: {{m_oController.m_oApplication.processorDescription}}</div>
+        </div>
+        <div class="row">
+            <div>Link: {{m_oController.m_oApplication.link}}</div>
+        </div>
+        <div class="row">
+            <div>Contact: {{m_oController.m_oApplication.email}}</div>
+        </div>
+        <div class="row">
+            <div>Publisher: {{m_oController.m_oApplication.publisher}}</div>
+        </div>
+        <div class="row">
+            <button ng-click="m_oController.openApplicationPage()">Open Application UI</button>
+        </div>
     </div>
 </div>
 

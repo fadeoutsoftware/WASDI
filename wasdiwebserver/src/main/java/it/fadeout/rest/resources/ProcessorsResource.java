@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
@@ -53,6 +54,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CounterRepository;
@@ -62,10 +64,14 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorSharingRepository;
+import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.AppDetailViewModel;
+import wasdi.shared.viewmodels.AppListViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessorLogViewModel;
@@ -94,9 +100,7 @@ public class ProcessorsResource  {
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
-											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout		, 
-											@QueryParam("link") String sLink , @QueryParam("email") String sEmail, @QueryParam("price") Integer iPrice,
-											@QueryParam("categories") final List<String> asCategoriesId) throws Exception {
+											@QueryParam("public") Integer iPublic) throws Exception {
 		
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -203,17 +207,9 @@ public class ProcessorsResource  {
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
 			oProcessor.setIsPublic(iPublic);
-			oProcessor.setLink(sLink);
-			oProcessor.setEmail(sEmail);
-			oProcessor.setPrice(iPrice);
-			oProcessor.setCategoriesId(asCategoriesId);
 			oProcessor.setUpdateDate((double)oDate.getTime());
 			oProcessor.setUploadDate((double)oDate.getTime());
-			
-			if( iTimeout != null ){
-				oProcessor.setTimeoutMs(iTimeout);
-			}
-			
+						
 			// Add info about the deploy node
 			Node oNode = Wasdi.getActualNode();
 			
@@ -293,7 +289,7 @@ public class ProcessorsResource  {
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
-				DeployedProcessorViewModel oVM = new DeployedProcessorViewModel();
+				DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel();
 				Processor oProcessor = aoDeployed.get(i);
 
 				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
@@ -304,19 +300,20 @@ public class ProcessorsResource  {
 					}
 				}
 				
-				if (oSharing != null) oVM.setSharedWithMe(true);
+				if (oSharing != null) oDeployedProcessorViewModel.setSharedWithMe(true);
 				
-				oVM.setProcessorDescription(oProcessor.getDescription());
-				oVM.setProcessorId(oProcessor.getProcessorId());
-				oVM.setProcessorName(oProcessor.getName());
-				oVM.setProcessorVersion(oProcessor.getVersion());
-				oVM.setPublisher(oProcessor.getUserId());
-				oVM.setParamsSample(oProcessor.getParameterSample());
-				oVM.setIsPublic(oProcessor.getIsPublic());
-				oVM.setType(oProcessor.getType());
-				oVM.setTimeoutMs(oProcessor.getTimeoutMs());
+				oDeployedProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
+				oDeployedProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
+				oDeployedProcessorViewModel.setProcessorName(oProcessor.getName());
+				oDeployedProcessorViewModel.setProcessorVersion(oProcessor.getVersion());
+				oDeployedProcessorViewModel.setPublisher(oProcessor.getUserId());
+				oDeployedProcessorViewModel.setParamsSample(oProcessor.getParameterSample());
+				oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
+				oDeployedProcessorViewModel.setType(oProcessor.getType());
+				oDeployedProcessorViewModel.setTimeoutMs(oProcessor.getTimeoutMs());
+				//oVM.setScore(oProcessor.getS);
 				
-				aoRet.add(oVM);
+				aoRet.add(oDeployedProcessorViewModel);
 			}
 		}
 		catch (Exception oEx) {
@@ -326,6 +323,217 @@ public class ProcessorsResource  {
 		return aoRet;
 	}
 	
+	
+	@GET
+	@Path("/getmarketlist")
+	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("catfilter") String sCategoryFilters) throws Exception {
+
+		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
+		Utils.debugLog("ProcessorsResource.getMarketPlaceAppList( Session: " + sSessionId + " )");
+		
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) return aoRet;
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return aoRet;
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
+						
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
+			ReviewRepository oReviewRepository = new ReviewRepository();
+			
+			for (int i=0; i<aoDeployed.size(); i++) {
+				AppListViewModel oAppListViewModel = new AppListViewModel();
+				Processor oProcessor = aoDeployed.get(i);
+
+				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+
+				if (oProcessor.getIsPublic() != 1) {
+					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
+						if (oSharing == null) continue;
+					}
+				}
+				
+				if (oSharing != null || oProcessor.getUserId().equals(oUser.getUserId())) oAppListViewModel.setIsMine(true);
+				else oAppListViewModel.setIsMine(false);
+				
+				oAppListViewModel.setProcessorDescription(oProcessor.getDescription());
+				oAppListViewModel.setProcessorId(oProcessor.getProcessorId());
+				oAppListViewModel.setProcessorName(oProcessor.getName());
+				oAppListViewModel.setPublisher(oProcessor.getUserId());
+				oAppListViewModel.setBuyed(false);
+				oAppListViewModel.setPrice(oProcessor.getOndemandPrice());
+
+				oAppListViewModel.setImgLink(getProcessorLogoPath(oProcessor.getName()));
+				
+				// Set the friendly name, same of name if null
+				if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
+					oAppListViewModel.setFriendlyName(oProcessor.getFriendlyName());
+				}
+				else {
+					oAppListViewModel.setFriendlyName(oProcessor.getName());
+				}
+				
+				// Get the reviews to compute the vote
+				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+				
+				// Initialize as No Votes
+				float fScore = -1.0f;
+				
+				// If we have reviews
+				if (aoReviews != null) {
+					if (aoReviews.size()>0) {
+						// Take the sum
+						for (Review oReview : aoReviews) {
+							fScore += oReview.getVote();
+						}
+						
+						// Compute average
+						fScore /= aoReviews.size();
+					}
+				}
+				
+				// Set the score to the View Model
+				oAppListViewModel.setScore(fScore);
+				
+				aoRet.add(oAppListViewModel);
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.getMarketPlaceAppList: " + oEx);
+			oEx.printStackTrace();
+			return aoRet;
+		}		
+		return aoRet;
+	}
+	
+	public int getRandomNumber(int iMin, int iMax) {
+	    return (int) ((Math.random() * (iMax - iMin)) + iMin);
+	}
+	
+	public String getProcessorLogoPath(String sProcessorName) {
+		
+		String sLogoPath = Wasdi.getProcessorLogoPath(sProcessorName);
+		
+		//Utils.debugLog("Searching logo in " + sLogoPath);
+		
+		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sLogoPath, ProcessorsMediaResource.IMAGE_PROCESSORS_EXTENSIONS );
+		
+		boolean bExistsLogo = false;
+		
+		if (oLogo!=null) {
+			if (oLogo.exists()) bExistsLogo = true;
+		}
+		
+		if (bExistsLogo) {
+			//Utils.debugLog("Found logo:  " + sLogoPath+oLogo.getName());
+			return sLogoPath + oLogo.getName();
+		}
+		else {
+			String sPlaceHolder = "assets/img/placeholder/placeholder_" + getRandomNumber(1, 8) + ".jpg";
+			//Utils.debugLog("Logo not found, return placeholder:  " + sPlaceHolder);
+			return sPlaceHolder;
+		}
+		
+	}
+	
+	@GET
+	@Path("/getmarketdetail")
+	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
+
+		
+		Utils.debugLog("ProcessorsResource.getAppDetailView( Session: " + sSessionId + " )");
+		
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(400).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(400).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(400).build();
+			
+			
+			AppDetailViewModel oAppDetailViewModel = new AppDetailViewModel();
+						
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+			
+			if (oProcessor==null) {
+				Utils.debugLog("ProcessorsResource.getAppDetailView: processor is null");
+				return Response.status(400).build();
+			}
+			
+			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+
+			if (oProcessor.getIsPublic() != 1) {
+				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
+					if (oSharing == null) {
+						return Response.status(400).build();
+					}
+				}
+			}
+			
+			ReviewRepository oReviewRepository = new ReviewRepository();
+			
+			if (oSharing != null || oProcessor.getUserId().equals(oUser.getUserId())) oAppDetailViewModel.setIsMine(true);
+			else oAppDetailViewModel.setIsMine(false);
+			
+			oAppDetailViewModel.setProcessorDescription(oProcessor.getDescription());
+			oAppDetailViewModel.setProcessorId(oProcessor.getProcessorId());
+			oAppDetailViewModel.setProcessorName(oProcessor.getName());
+			oAppDetailViewModel.setPublisher(oProcessor.getUserId());
+			oAppDetailViewModel.setBuyed(false);
+			
+			oAppDetailViewModel.setImgLink(getProcessorLogoPath(oProcessor.getName()));
+			
+			// Set the friendly name, same of name if null
+			if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
+				oAppDetailViewModel.setFriendlyName(oProcessor.getFriendlyName());
+			}
+			else {
+				oAppDetailViewModel.setFriendlyName(oProcessor.getName());
+			}
+			
+			oAppDetailViewModel.setEmail(oProcessor.getEmail());
+			oAppDetailViewModel.setLink(oProcessor.getLink());
+			oAppDetailViewModel.setOndemandPrice(oProcessor.getOndemandPrice());
+			oAppDetailViewModel.setSubscriptionPrice(oProcessor.getSubscriptionPrice());
+			oAppDetailViewModel.setUpdateDate(oProcessor.getUpdateDate());
+			oAppDetailViewModel.setCategories(oProcessor.getCategories());
+			
+			// Get the reviews to compute the vote
+			List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+			
+			// Initialize as No Votes
+			float fScore = -1.0f;
+			
+			// If we have reviews
+			if (aoReviews != null) {
+				if (aoReviews.size()>0) {
+					// Take the sum
+					for (Review oReview : aoReviews) {
+						fScore += oReview.getVote();
+					}
+					
+					// Compute average
+					fScore /= aoReviews.size();
+				}
+			}
+			
+			// Set the score to the View Model
+			oAppDetailViewModel.setScore(fScore);
+			
+			return Response.ok(oAppDetailViewModel).build();
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.getMarketPlaceAppList: " + oEx);
+			return Response.serverError().build();
+		}		
+	}	
+		
 	
 	@POST
 	@Path("/run")

@@ -44,14 +44,14 @@ public class ProcessorsMediaResource {
 	@Context
 	ServletConfig m_oServletConfig;
 	
-	static String LOGO_PROCESSORS_PATH = "/logo/";
-	static String IMAGES_PROCESSORS_PATH = "/images/";
-	static String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
-	static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
-	static Integer LOGO_SIZE = 180;
-	static Integer NUMB_MAX_OF_IMAGES = 5;
-	static String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
-	static String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
+	public static String LOGO_PROCESSORS_PATH = "/logo/";
+	public static String IMAGES_PROCESSORS_PATH = "/images/";
+	public static String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
+	public static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
+	public static Integer LOGO_SIZE = 180;
+	public static Integer NUMB_MAX_OF_IMAGES = 5;
+	public static String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
+	public static String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
 	
 	@POST
 	@Path("/logo/upload")
@@ -96,7 +96,7 @@ public class ProcessorsMediaResource {
 		}
 
 		// Take path
-		String sPath = Wasdi.getDownloadPath(m_oServletConfig) + "/processors/" + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		String sPath = Wasdi.getProcessorLogoPath(oProcessor.getName());
 		
 		String sExtensionOfSavedLogo = ImageResourceUtils.checkExtensionOfImageInFolder(sPath, IMAGE_PROCESSORS_EXTENSIONS);
 		
@@ -146,7 +146,7 @@ public class ProcessorsMediaResource {
 		}
 		
 		
-		String sPathLogoFolder = Wasdi.getDownloadPath(m_oServletConfig) + "/processors/" + oProcessor.getName() + LOGO_PROCESSORS_PATH;
+		String sPathLogoFolder = Wasdi.getProcessorLogoPath(oProcessor.getName());
 		
 		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
 		String sLogoExtension = ImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
@@ -486,15 +486,9 @@ public class ProcessorsMediaResource {
 	
 	
 	
-	private boolean isValidVote(String sVote){
-		boolean bIsValid = false;
-		for(String sValidVote : RANGE_OF_VOTES){
-			
-			if(sValidVote.equals(sVote.toLowerCase())){
-				bIsValid = true;
-			}
-		}
-		return bIsValid;
+	private boolean isValidVote(Float fVote){
+		if (fVote>=0.0 && fVote<=5.0) return true;
+		else return false;
 	}
 	
 	private Review getReviewFromViewModel(ReviewViewModel oReviewViewModel){
@@ -519,7 +513,7 @@ public class ProcessorsMediaResource {
 		}
 		
 		//CHECK VALUE VOTE policy 1 - 5
-		int iSumVotes = 0;
+		float fSumVotes = 0;
 
 		for(Review oReview: aoReviewRepository){
 			ReviewViewModel oReviewViewModel = new ReviewViewModel();
@@ -531,12 +525,12 @@ public class ProcessorsMediaResource {
 			oReviewViewModel.setUserId(oReview.getUserId());
 			oReviewViewModel.setProcessorId(oReview.getUserId());
 			oReviewViewModel.setVote(oReview.getVote());
-			iSumVotes = iSumVotes + Integer.parseInt(oReview.getVote());
+			fSumVotes = fSumVotes + oReview.getVote();
 			
 			aoReviews.add(oReviewViewModel);
 		}
 		
-		float avgVote = (float)iSumVotes / aoReviews.size();
+		float avgVote = (float)fSumVotes / aoReviews.size();
 		
 		oListReviews.setReviews(aoReviews);
 		oListReviews.setAvgVote(avgVote);
@@ -549,10 +543,10 @@ public class ProcessorsMediaResource {
 		return oListReviews;
 	}
 	
-	private int getNumberOfVotes(List<ReviewViewModel> aoReviews, int iVotes ){
+	private int getNumberOfVotes(List<ReviewViewModel> aoReviews, int iReferenceVote ){
 		int iNumberOfVotes = 0;
 		for(ReviewViewModel oReview : aoReviews){
-			if( Integer.parseInt(oReview.getVote()) == iVotes){
+			if( oReview.getVote() == ((float)iReferenceVote)){
 				iNumberOfVotes++;
 			}
 			

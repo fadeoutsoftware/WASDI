@@ -1,5 +1,6 @@
 package wasdi.shared.business;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +24,10 @@ public class Processor {
 	 * Processor Name
 	 */
 	private String name;
+	/**
+	 * Processor Friendly Name
+	 */
+	private String friendlyName;
 	/**
 	 * Processor Version
 	 */
@@ -54,17 +59,41 @@ public class Processor {
 	 */
 	private long timeoutMs = 1000*60*60*3;
 	
-	private Integer price = 0; 
-
-	private List<String> categoriesId; 
-
-	private String link;
-
-	private String email;
+	/**
+	 * Price for on-demand execution
+	 */
+	private Float ondemandPrice = 0.0f;
 	
+	/**
+	 * Price for a subscription
+	 */
+	private Float subscriptionPrice = 0.0f; 
+	
+	/**
+	 * List of tagged categories
+	 */
+	private List<String> categoriesId; 
+	
+	/**
+	 * Application external link
+	 */
+	private String link = "";
+	
+	/**
+	 * Application reference email
+	 */
+	private String email = "";
+	
+	/**
+	 * Upload Date
+	 */
 	private Double uploadDate;
 	
+	/**
+	 * Last Update Date
+	 */
 	private Double updateDate;
+	
 	/**
 	 * Flag to know if it is public or not
 	 */
@@ -75,20 +104,21 @@ public class Processor {
 	 */
 	private String parameterSample="";
 	
+	private ArrayList<String> categories = new ArrayList<String>();
+	
+	public ArrayList<String> getCategories() {
+		return categories;
+	}
+	public void setCategories(ArrayList<String> categories) {
+		this.categories = categories;
+	}
 	public String getParameterSample() {
 		return parameterSample;
 	}
 	public void setParameterSample(String parameterSample) {
 		this.parameterSample = parameterSample;
 	}
-	
-	
-	public Integer getPrice() {
-		return price;
-	}
-	public void setPrice(Integer price) {
-		this.price = price;
-	}
+		
 	public List<String> getCategoriesId() {
 		return categoriesId;
 	}
@@ -188,6 +218,24 @@ public class Processor {
 	}
 	public void setNodeUrl(String nodeUrl) {
 		this.nodeUrl = nodeUrl;
+	}
+	public String getFriendlyName() {
+		return friendlyName;
+	}
+	public void setFriendlyName(String friendlyName) {
+		this.friendlyName = friendlyName;
+	}
+	public Float getOndemandPrice() {
+		return ondemandPrice;
+	}
+	public void setOndemandPrice(Float ondemandPrice) {
+		this.ondemandPrice = ondemandPrice;
+	}
+	public Float getSubscriptionPrice() {
+		return subscriptionPrice;
+	}
+	public void setSubscriptionPrice(Float subscriptionPrice) {
+		this.subscriptionPrice = subscriptionPrice;
 	}
 	
 }

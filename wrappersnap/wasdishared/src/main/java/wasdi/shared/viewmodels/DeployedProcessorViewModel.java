@@ -13,6 +13,7 @@ public class DeployedProcessorViewModel {
 	private String type = "";
 	private Boolean sharedWithMe = false;
 	
+	
 	public String getParamsSample() {
 		return paramsSample;
 	}
@@ -79,5 +80,5 @@ public class DeployedProcessorViewModel {
 	public void setSharedWithMe(Boolean sharedWithMe) {
 		this.sharedWithMe = sharedWithMe;
 	}
-	
+
 }

@@ -42,20 +42,26 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oProcessorService = oProcessorService;
 
         /**
-         * List of applications
+         * Name of the selected application
          * @type {*[]}
          */
-        this.m_aoApplicationList = []
+        this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
+
+        /**
+         * Application Object
+         * @type {{}}
+         */
+        this.m_oApplication = {};
 
         let oController = this;
 
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessorService.getProcessorsList().success(function (data) {
+        this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                oController.m_aoApplicationList = oController.setDefaultImages(data);
+                oController.m_oApplication = oController.setDefaultImages(data);
             }
             else
             {
