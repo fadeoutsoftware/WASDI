@@ -138,6 +138,18 @@ select {
 .checked {
     color: orange;
 }
+.checked-half {
+    background-image:
+        linear-gradient(
+                to right,
+                orange,
+                orange 50%,
+                lightgray 50%,
+                lightgray
+        );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
 .filterDiv {
     float: left;
@@ -249,7 +261,7 @@ $lightgrey: #efefef;
     width: 100%;
 }
 .filter-side-bar {
-    background-color: $lightgrey;
+    //background-color: $lightgrey;
     min-height: calc(100vh - 200px);
     .title {
         color: white;
@@ -304,7 +316,7 @@ $lightgrey: #efefef;
 
 }
 .fa-star {
-    color: grey;
+    color: lightgray;
     &.checked {
       color: orange;
     }
@@ -339,6 +351,7 @@ $lightgrey: #efefef;
         box-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
         padding: 0 1em 1em 1em;
         cursor: pointer;
+        position: relative;
         &:hover {
             box-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.25);
             .featured-img .overlay {
@@ -385,10 +398,12 @@ $lightgrey: #efefef;
                         transform: rotate(10deg) translate(22px, 10px) scale(0);
                     }
                     25% {
+                        opacity: 1;
                        transform-origin: center center;
                         transform: rotate(-20deg) translate(-20px, 12px) scale(0.33);
                     }
                     50% {
+                        opacity: 1;
                         transform-origin: center center;
                         transform: rotate(5deg) translate(-12px, -12px) scale(0.66) ;
                     }
@@ -404,6 +419,14 @@ $lightgrey: #efefef;
                     }
                 }
             }
+        }
+        .buyed-tag {
+            background-color: $wasdiblue;
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: white;
+            padding: 8px 15px;
         }
         .application_title {
             color:#009036;
@@ -423,6 +446,14 @@ $lightgrey: #efefef;
             text-overflow: ellipsis;
             height: 80px;
 
+        }
+        .publisher {
+            .pub-name {
+                color: $wasdigreen;
+            }
+            .fa-flask {
+                color: $wasdigreen;
+            }
         }
         .price-tag {
             background-color: $wasdigreen;

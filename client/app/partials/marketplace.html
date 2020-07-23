@@ -49,7 +49,7 @@
                     <span class="fa fa-bath mr-2" aria-hidden="true"></span>APPS FILTER
                 </div>
                 <!--title mobile screen-->
-                <div class="d-block d-md-none title p-2 px-3 mb-4 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                <div class="d-block d-md-none title p-2 px-3 mb-4 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsebleFilter" aria-expanded="false" aria-controls="collapsebleFilter">
                     <div><span class="fa fa-bath mr-2" aria-hidden="true"></span>APPS FILTER</div>
                     <div><span class="fa fa-chevron-down"></span>
                         <span class="fa fa-times"></span>
@@ -57,7 +57,7 @@
                 </div>
 
 
-                <div class="collapse" id="collapseExample">
+                <div class="collapse" id="collapsebleFilter">
                     <!--category-->
                     <div class="category mt-1 mb-3">
                         <div class="border-bottom py-1 mb-2 subtitle">CATEGORY:</div>
@@ -196,26 +196,35 @@
                 <div class="row">
                     <div class="col-6 col-md-4 col-lg-3 pb-5"  ng-repeat="processor in m_oController.m_aoApplicationList">
                         <div class="apps-tile" ng-click="m_oController.openApplicationPage(processor.processorName)">
-                            <!--div class="featured-img" style="background-image: url('https://picsum.photos/400')"> //processor.imgLink-->
+                            <!--APP FEATURED IMG-->
                             <div class="featured-img" style="background-image: url({{processor.imgLink}})">
                                 <div class="overlay">
                                     <img src="assets/img/tie-f.svg" class="scalein">
                                 </div>
                             </div>
-
-<!--                            <img src={{processor.imgLink}}  class="application_image mx-auto d-block" ng-click="m_oController.openApplicationPage(processor.processorName)">-->
-                            <h5 class="application_title mt-4">{{processor.processorName}}</h5>
+                            <div class="buyed-tag" ng-if="processor.buyed">
+                                <span class="fa fa-check mr-1"></span>Already Buyed!
+                            </div>
+                            <!--APP DETAILS-->
+                            <h5 class="application_title mt-4">{{processor.friendlyName}}</h5>
                             <p class="application_description" title="{{processor.processorDescription}}">{{processor.processorDescription}}</p>
+                            <div class="publisher mb-1">
+                                <span ng-if="!processor.isMine">Published by <span class="pub-name">{{processor.publisher}}</span></span>
+                                <span ng-if="processor.isMine"><span class="fa fa-flask mr-1"></span>You are the publisher my master!</span>
+                            </div>
                             <div class="tile-footer d-flex justify-content-between align-items-center border-top pt-3">
                                 <div class="star-rating">
-                                    <span class="fa fa-star checked"></span>
-                                    <span class="fa fa-star checked"></span>
-                                    <span class="fa fa-star checked"></span>
-                                    <span class="fa fa-star checked"></span>
-                                    <span class="fa fa-star checked"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>0.25&&processor.score<0.75?'checked-half':processor.score>=0.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>1.25&&processor.score<1.75?'checked-half':processor.score>=1.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>2.25&&processor.score<2.75?'checked-half':processor.score>=2.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>3.25&&processor.score<3.75?'checked-half':processor.score>=3.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>4.25&&processor.score<4.75?'checked-half':processor.score>=4.75?'checked':''"></span>
+
+
                                 </div>
                                 <div  class="price-tag shadow-sm">
-                                    <span>free</span>
+                                    <span ng-if="processor.price>0">€ {{processor.price}}</span>
+                                    <span ng-if="processor.price==0">Free</span>
                                 </div>
                             </div>
                         </div>

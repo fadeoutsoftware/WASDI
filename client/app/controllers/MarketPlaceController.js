@@ -41,6 +41,9 @@ var MarketPlaceController = (function() {
          */
         this.m_oProcessorService = oProcessorService;
 
+        /*KASA FOR TEST*/
+        $scope.testVar = true;
+
         /**
          * List of applications
          * @type {*[]}
@@ -65,6 +68,8 @@ var MarketPlaceController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
         });
     }
+
+
 
     /**
      * Open Application Page
