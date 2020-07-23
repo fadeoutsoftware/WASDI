@@ -41,6 +41,9 @@ var WasdiApplicationDetailsController = (function() {
          */
         this.m_oProcessorService = oProcessorService;
 
+        /*KASA FOR TEST*/
+        $scope.testVar = ['GIS', 'rain', 'flood', 'animals'];
+
         /**
          * Name of the selected application
          * @type {*[]}

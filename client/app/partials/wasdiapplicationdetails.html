@@ -1,10 +1,13 @@
-<div class="editor-view">
+<div class="editor-view app-details">
     <div class="row justify-content-end toolbar">
     </div>
     <div class="container mt-4">
         <div class="row">
+            <div class="border-bottom py-3 mb-5 d-print-flex justify-content-between">
+                <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the Future</span>
+            </div>
+            <!--APPS IMG SLIDER-->
             <div class="col-12 col-md-6">
-
                 <div class="appdetails-slider">
                     <ul id="lightSlider">
                         <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-1.jpg">
@@ -46,16 +49,60 @@
                     </ul>
                 </div>
             </div>
+
+            <!--APPS DETAILS-->
             <div class="col-12 col-md-6">
-                TESTO
+                <!--TITLE-->
+                <div>
+                    <h2>{{m_oController.m_oApplication.friendlyName}}</h2>
+                </div>
+                <!--STARS-->
+                <div class="star-rating mb-2">
+                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>0.25&&m_oController.m_oApplication.score<0.75?'checked-half':m_oController.m_oApplication.score>=0.75?'checked':''"></span>
+                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>1.25&&m_oController.m_oApplication.score<1.75?'checked-half':m_oController.m_oApplication.score>=1.75?'checked':''"></span>
+                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>2.25&&m_oController.m_oApplication.score<2.75?'checked-half':m_oController.m_oApplication.score>=2.75?'checked':''"></span>
+                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>3.25&&m_oController.m_oApplication.score<3.75?'checked-half':m_oController.m_oApplication.score>=3.75?'checked':''"></span>
+                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>4.25&&m_oController.m_oApplication.score<4.75?'checked-half':m_oController.m_oApplication.score>=4.75?'checked':''"></span>
+                </div>
+                <!--PUBLISHER-->
+                <div class="publisher mb-1>
+                    <span ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
+                    <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the publisher my master!</span>
+                </div>
+                <!--TAGS LIST-->
+                <div class="tags-list-wrapper">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <span class="fa fa-tags mr-2"></span>
+                            <span>CATEGORIES</span>
+                        </div>
+                        <hr class="ml-3 flex-grow-1">
+                    </div>
+                    <div class="tags-list d-flex">
+                        <!--<div class="d-flex tag-container" ng-repeat="tag in m_oController.m_oApplication.categories">-->
+                        <div class="d-flex tag-container mb-2 mr-3" ng-repeat="tag in testVar">
+                            <div class="pre-tag"></div>
+                            <div class="tag">
+                                <span>{{tag}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="mt-4">
+                </div>
+                <!--DESCRIPTION-->
+                <div class="app-details-description">
+                        <div class="mb-3">
+                            <span class="fa fa-briefcase mr-2"></span>
+                            <span>DESCRIPTION</span>
+                        </div>
+                    <div>
+                        {{m_oController.m_oApplication.processorDescription}}
+                    </div>
+                </div>
+
             </div>
         </div>
-        <div class="row">
-            <div>Name: {{m_oController.m_oApplication.friendlyName}}</div>
-        </div>
-        <div class="row">
-            <div>Description: {{m_oController.m_oApplication.processorDescription}}</div>
-        </div>
+
         <div class="row">
             <div>Link: {{m_oController.m_oApplication.link}}</div>
         </div>

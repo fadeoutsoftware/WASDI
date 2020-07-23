@@ -1,19 +1,72 @@
-.appdetails-slider {
-    ul {
-        list-style: none outside none;
-        padding-left: 0;
-        margin-bottom:0;
+.app-details {
+    .appdetails-slider {
+        ul {
+            list-style: none outside none;
+            padding-left: 0;
+            margin-bottom:0;
+        }
+        li {
+            display: block;
+            float: left;
+            margin-right: 6px;
+            cursor:pointer;
+        }
+        img {
+            display: block;
+            height: auto;
+            max-width: 100%;
+            width: 100% !important;
+        }
     }
-    li {
-        display: block;
-        float: left;
-        margin-right: 6px;
-        cursor:pointer;
+
+    .back-link {
+        cursor: pointer;
+        &:hover {
+            //text-decoration: underline;
+            color: $wasdigreen;
+        }
     }
-    img {
-        display: block;
-        height: auto;
-        max-width: 100%;
-        width: 100% !important;
+    .star-rating {
+       font-size: 1.2em;
+    }
+    .publisher {
+        .pub-name {
+            color: $wasdigreen;
+        }
+        .fa-flask {
+            color: $wasdigreen;
+        }
+    }
+    .tag-container {
+        .pre-tag{
+            width: 0px;
+            height: 0px;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid $wasdiblue;
+        }
+        .tag {
+            background-color: $wasdiblue;
+            text-transform: uppercase;
+            color: white;
+            font-size: 0.9em;
+            border-radius: 0px 4px 4px 0px;
+            padding-left: 8px;
+            padding-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        cursor: pointer;
+        &:hover {
+            .pre-tag {
+                border-right: 10px solid $wasdigreen;
+            }
+            .tag{
+                background-color: $wasdigreen;
+            }
+        }
+    }
+    .app-details-description {
+
     }
 }
