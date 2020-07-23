@@ -82,20 +82,20 @@ var WasdiApplicationUIController = (function() {
                 // Create all the components
                 oController.m_aoViewElements = oController.generateViewElements(data);
             })
-            .error(function(){
+            .error(function(oError ){
                 // TODO: Temperary for debug with an hard coded UI
-                //utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
-                let sSampleForm = "{\"tabs\":[{\"name\":\"Basic\",\"controls\":[{\"param\":\"ARCHIVE_START_DATE\",\"type\":\"date\",\"label\":\"Archive Start Date\"},{\"param\":\"ARCHIVE_END_DATE\",\"type\":\"date\",\"label\":\"Archive End Date\"},{\"param\":\"DELETE\",\"type\":\"boolean\",\"label\":\"Delete intermediate images\",\"default\":true},{\"param\":\"SIMULATE\",\"type\":\"boolean\",\"label\":\"Simulate Flood Detection\",\"default\":false},{\"param\":\"BBOX\",\"type\":\"bbox\",\"label\":\"Select Event Area\"}]},{\"name\":\"Advanced\",\"controls\":[{\"param\":\"ORBITS\",\"type\":\"textbox\",\"label\":\"Relative Orbit Numbers (comma separated)\"},{\"param\":\"GRIDSTEP\",\"type\":\"hidden\",\"label\":\"\",\"default\":\"1,1\"},{\"param\":\"PREPROCWORKFLOW\",\"type\":\"textbox\",\"label\":\"Preprocessing Workflow\",\"default\":\"LISTSinglePreproc2\"},{\"param\":\"MOSAICBASENAME\",\"type\":\"textbox\",\"label\":\"Event Code\",\"default\":\"LA\"}]}]}";
-                let oFormToGenerate = JSON.parse(sSampleForm);
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
+                //let sSampleForm = "{\"tabs\":[{\"name\":\"Basic\",\"controls\":[{\"param\":\"ARCHIVE_START_DATE\",\"type\":\"date\",\"label\":\"Archive Start Date\"},{\"param\":\"ARCHIVE_END_DATE\",\"type\":\"date\",\"label\":\"Archive End Date\"},{\"param\":\"DELETE\",\"type\":\"boolean\",\"label\":\"Delete intermediate images\",\"default\":true},{\"param\":\"SIMULATE\",\"type\":\"boolean\",\"label\":\"Simulate Flood Detection\",\"default\":false},{\"param\":\"BBOX\",\"type\":\"bbox\",\"label\":\"Select Event Area\"}]},{\"name\":\"Advanced\",\"controls\":[{\"param\":\"ORBITS\",\"type\":\"textbox\",\"label\":\"Relative Orbit Numbers (comma separated)\"},{\"param\":\"GRIDSTEP\",\"type\":\"hidden\",\"label\":\"\",\"default\":\"1,1\"},{\"param\":\"PREPROCWORKFLOW\",\"type\":\"textbox\",\"label\":\"Preprocessing Workflow\",\"default\":\"LISTSinglePreproc2\"},{\"param\":\"MOSAICBASENAME\",\"type\":\"textbox\",\"label\":\"Event Code\",\"default\":\"LA\"}]}]}";
+                //let oFormToGenerate = JSON.parse(sSampleForm);
 
-                for (let iTabs=0; iTabs<oFormToGenerate.tabs.length; iTabs++) {
-                    let oTab = oFormToGenerate.tabs[iTabs];
-                    oController.m_asTabs.push(oTab.name);
-                    if (iTabs == 0) oController.m_sSelectedTab = oTab.name;
-                }
+                //for (let iTabs=0; iTabs<oFormToGenerate.tabs.length; iTabs++) {
+                //    let oTab = oFormToGenerate.tabs[iTabs];
+                //    oController.m_asTabs.push(oTab.name);
+                //    if (iTabs == 0) oController.m_sSelectedTab = oTab.name;
+                //}
 
                 // Create all the components
-                oController.m_aoViewElements = oController.generateViewElements(oFormToGenerate);
+                //oController.m_aoViewElements = oController.generateViewElements(oFormToGenerate);
             });
     }
 
