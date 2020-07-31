@@ -41,7 +41,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		if(null == sQuery) {
 			throw new NullPointerException("QueryExecutorCREODIAS.getCountURL: sQuery is null");
 		}
-		int iResult = 0;
+		int iResult = -1;
 		try {
 			String sUrl = getCountUrl(sQuery);
 			String sResult = null;
