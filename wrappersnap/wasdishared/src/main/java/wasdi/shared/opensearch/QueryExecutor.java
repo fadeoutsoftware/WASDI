@@ -409,7 +409,7 @@ public abstract class QueryExecutor {
 					}
 					
 					if(!Utils.isNullOrEmpty(sResult)) {
-						if(sResult.length() > 200 ) {
+						if(sResult.length() > 201 ) {
 							sResponseExtract = sResult.substring(0, 200) + "...";
 						} else {
 							sResponseExtract = new String(sResult);
@@ -427,7 +427,7 @@ public abstract class QueryExecutor {
 					Util.copyStream(oErrorStream, oBytearrayOutputStream);
 					String sMessage = oBytearrayOutputStream.toString();
 					if(null!=sMessage) {
-						sResponseExtract = sMessage.substring(0,  200) + "...";
+						sResponseExtract = sMessage.substring(0,  Math.min(sMessage.length(), 200)) + "...";
 					}
 					Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
 							" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
