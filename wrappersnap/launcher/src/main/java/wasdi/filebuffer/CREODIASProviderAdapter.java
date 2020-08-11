@@ -52,16 +52,16 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			m_oLogger.error("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
-		
+
 		long lSizeInBytes = 0;
 		String sResult = "";
 		try {
-		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
-		lSizeInBytes = Long.parseLong(sResult);
+			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
+			lSizeInBytes = Long.parseLong(sResult);
 		} catch (Exception oE) {
 			this.m_oLogger.error(oE.toString());
 		}
-		
+
 		return lSizeInBytes;
 	}
 
@@ -92,7 +92,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	private String getZipperUrl(String sFileURL) {
 		String sResult = "";
 		try {
-		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
+			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
 		} catch (Exception oE) {
 			this.m_oLogger.error(oE.toString());
 		}
@@ -109,18 +109,18 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			m_oLogger.error("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
-		
-		
+
+
 		String sResult = "";
 		try {
-		sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
+			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 		} catch (Exception oE) {
 			this.m_oLogger.error(oE.toString());
 		}
-		
+
 		return sResult;
 	}
-	
+
 	private String obtainKeycloakToken(String sDownloadUser, String sDownloadPassword) {
 		try {
 			URL oURL = new URL("https://auth.creodias.eu/auth/realms/dias/protocol/openid-connect/token");
