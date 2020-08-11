@@ -70,7 +70,7 @@ public class QueryTranslationParser {
 				String sWasdiQueryValue = asWasdiKeyValuePair[1];
 				String sProviderKey = m_oKeysTranslation.optString(sWasdiQueryKey, null);
 				if (null == sProviderKey) {
-					Utils.log("ERROR", "QueryTranslationParser.parse: cannot translate key: " + sWasdiQueryKey);
+					Utils.log("WARNING", "QueryTranslationParser.parse: cannot translate key: " + sWasdiQueryKey + ", skipping");
 					// skip this filter if its key cannot be tranlsated
 					continue;
 				}
