@@ -6,13 +6,14 @@
  */
 package wasdi.shared.opensearch.creodias;
 
+import java.util.NoSuchElementException;
+
 import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.opensearch.QueryTranslationParser;
-import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 
@@ -21,6 +22,8 @@ import wasdi.shared.utils.WasdiFileUtils;
  *
  */
 public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
+
+	private static final String SCLOUDCOVERPERCENTAGE = "cloudcoverpercentage";
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
@@ -52,16 +55,28 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			//to:
 			//https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?maxRecords=10&startDate=2020-07-01T00%3A00%3A00Z&completionDate=2020-07-31T23%3A59%3A59Z&productType=GRD&relativeOrbitNumber=9&sortParam=startDate&sortOrder=descending&status=all&geometry=POLYGON((92.65416040497227+26.088955768777822%2C99.6675662125083+26.233334945401936%2C99.79625057598854+16.91245056850053%2C93.04021840440677+16.881668352246322%2C92.65416040497227+26.088955768777822))&dataset=ESA-DATASET
 			String sQuery = this.prepareQuery(sQueryFromClient);
+			//todo reformulate cloud cover intervals
+//			int iStart = 0;
+//			String sQueryPart = sQuery;
+//			while(sQueryPart.contains(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE)) {
+//				iStart = sQuery.indexOf(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE, iStart);
+//				iStart += DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE.length();
+//				iStart = sQuery.indexOf('[', iStart);
+//				int iEnd = sQuery.indexOf(" TO ", iStart);
+//				
+//			}
 
 			sResult = "";
-			sResult += parseFootPrint(sQuery);
-			sResult += parseTimeFrame(sQuery);
 
-
-			for (Object oObject : oAppConf.optJSONArray("missions")) {
-				JSONObject oJson = (JSONObject) oObject;
-				String sName = oJson.optString("indexname", null);
-				String sValue = oJson.optString("indexvalue", null);
+			if(!oAppConf.has("missions")) {
+				throw new NoSuchElementException("Could not find \"mission\" array in json configuration, aborting");
+			}
+			//first things first: append mission name + /search.json? 
+			
+			for (Object oMissionObject : oAppConf.optJSONArray("missions")) {
+				JSONObject oWasdiMissionJson = (JSONObject) oMissionObject;
+				String sName = oWasdiMissionJson.optString("indexname", null);
+				String sValue = oWasdiMissionJson.optString("indexvalue", null);
 				String sToken = sName + ':' + sValue; 
 				if(sQuery.contains(sToken)) {
 					//todo isolate relevant portion of query
@@ -71,11 +86,15 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 						iEnd = sQuery.length();
 					}
 					String sQueryPart = sQuery.substring(iStart, iEnd).trim();
-					QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oJson);
+					//note: we do not check if the parser configuration contains the required mission: we want the QueryTranslationParser to throw an exception and die
+					QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
 					String sLocalPart = oParser.parse(sQueryPart); 
 					sResult += sLocalPart;
 				}
 			}
+			sResult += parseFootPrint(sQuery);
+			sResult += parseTimeFrame(sQuery);
+			sResult += "&status=all";
 
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
@@ -108,7 +127,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 				if(0>iEnd) {
 					iEnd = sQuery.length();
 				}
-				sResult ="geometry=POLYGON((" + sQuery.substring(iStart, iEnd).replaceAll(" ", "+") + "))";
+				sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd).replaceAll(" ", "+") + "))";
 			}
 		} catch (Exception oE) {
 			Utils.log("ERROR", "DiasQueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: " + oE);
@@ -119,32 +138,26 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	
 	@Override
 	protected String parseTimeFrame(String sQuery) {
-		Long[] alStartEnd = {Long.MAX_VALUE, Long.MIN_VALUE};
-		
-		String sKeyword = "beginPosition";
-		//beginPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
-		parseInterval(sQuery, sKeyword, alStartEnd);
-		sKeyword = "endPosition";
-		//endPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
-		parseInterval(sQuery, sKeyword, alStartEnd);
-
+		Preconditions.checkNotNull(sQuery, "Null query");
 		String sResult = "";
-		if(alStartEnd[0].equals(Long.MAX_VALUE)) {
-			alStartEnd[0] = Long.MIN_VALUE;
+		try {
+			String[] asStartEnd = {"", ""};
+			
+			String sKeyword = "beginPosition";
+			//beginPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
+			parseInterval(sQuery, sKeyword, asStartEnd);
+			sKeyword = "endPosition";
+			//endPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
+			parseInterval(sQuery, sKeyword, asStartEnd);
+			if(Utils.isNullOrEmpty(asStartEnd[0]) || Utils.isNullOrEmpty(asStartEnd[1])) {
+				
+			}
+			sResult = "&startDate=" + asStartEnd[0];
+			sResult += "&completionDate=" + asStartEnd[1];
+			
+		}catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslatorCREODIAS.parseTimeFrame: " + oE);
 		}
-		if(alStartEnd[1].equals(Long.MIN_VALUE)) {
-			alStartEnd[1] = System.currentTimeMillis();
-		}
-		
-		//sResult = "&f=timeStamp:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
-		
-//		sResult = "&f=acquisition.beginViewingDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
-//		sResult += "&f=acquisition.endViewingDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
-		
-//		sResult = "&f=state.insertionDate:range:[" + alStartEnd[0] + '<' + alStartEnd[1] + ']';
-		
-		sResult = "&f=acquisition.beginViewingDate:gte:" + alStartEnd[0];
-		sResult += "&f=acquisition.endViewingDate:lte:" + alStartEnd[1];
 		
 		return sResult;
 	}
@@ -152,14 +165,14 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	/**
 	 * @param sQuery
 	 * @param sKeyword
-	 * @param alStartEnd
+	 * @param asStartEnd
 	 */
-	protected void parseInterval(String sQuery, String sKeyword, Long[] alStartEnd) {
+	protected void parseInterval(String sQuery, String sKeyword, String[] asStartEnd) {
 		Preconditions.checkNotNull(sQuery, "DiasQueryTranslatorCREODIAS.parseInterval: query is null");
 		Preconditions.checkNotNull(sKeyword, "DiasQueryTranslatorCREODIAS.parseInterval: field keyword is null");
-		Preconditions.checkNotNull(alStartEnd, "DiasQueryTranslatorCREODIAS.parseInterval: array is null");
-		Preconditions.checkElementIndex(0, alStartEnd.length, "DiasQueryTranslatorCREODIAS.parseInterval: 0 is not a valid element index");
-		Preconditions.checkElementIndex(1, alStartEnd.length, "DiasQueryTranslatorCREODIAS.parseInterval: 1 is not a valid element index");
+		Preconditions.checkNotNull(asStartEnd, "DiasQueryTranslatorCREODIAS.parseInterval: array is null");
+		Preconditions.checkElementIndex(0, asStartEnd.length, "DiasQueryTranslatorCREODIAS.parseInterval: 0 is not a valid element index");
+		Preconditions.checkElementIndex(1, asStartEnd.length, "DiasQueryTranslatorCREODIAS.parseInterval: 1 is not a valid element index");
 		
 		String sStart = null;
 		String sEnd = null;
@@ -171,10 +184,11 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 				iEnd = sQuery.length()-1;
 			};
 			String[] asTimeQuery= sQuery.substring(iStart, iEnd).trim().split(" TO ");
-			sStart = asTimeQuery[0];
-			alStartEnd[0] = Long.min(TimeEpochUtils.fromDateStringToEpoch(sStart), alStartEnd[0] );
-			sEnd = asTimeQuery[1];
-			alStartEnd[1] = Long.max(TimeEpochUtils.fromDateStringToEpoch(sEnd), alStartEnd[1] );
+			
+			sStart = asTimeQuery[0].trim();
+			asStartEnd[0] = sStart;
+			sEnd = asTimeQuery[1].trim();
+			asStartEnd[1] = sEnd;
 		}
 	}
 	
