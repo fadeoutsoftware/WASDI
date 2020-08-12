@@ -10,15 +10,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 import org.apache.commons.net.io.Util;
-import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
  * @author c.nattero
@@ -58,8 +59,9 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
 			lSizeInBytes = Long.parseLong(sResult);
+			m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: file size is: " + sResult);
 		} catch (Exception oE) {
-			this.m_oLogger.error(oE.toString());
+			m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
 		}
 
 		return lSizeInBytes;
@@ -73,20 +75,42 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// TODO fail instead
 		if(Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty");
+			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty, aborting");
 			return null;
 		}
-		//todo check remaining parameters (can assume default values?)
-		try {
-			String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
-			//reconstruct appropriate url
-			StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL) );
-			oUrl.append("?token=").append(sKeyCloakToken);
-			return downloadViaHttp(oUrl.toString(), sDownloadUser, sDownloadPassword, sSaveDirOnServer);
-		} catch (Exception oE) {
-			m_oLogger.error(oE.toString());
+		String sResult = null;
+		long lWaitStep = 10l;
+		long lUp = 10;
+		long lLo = 0l;
+		int iAttempt = 0;
+		while(iAttempt < iMaxRetry) {
+			try {
+				m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: attempt " + iAttempt + " at downloading from " + sFileURL ); 
+				//todo check product availability
+				String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
+				//reconstruct appropriate url
+				StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL) );
+				oUrl.append("?token=").append(sKeyCloakToken);
+				sResult = downloadViaHttp(oUrl.toString(), sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+				if(Utils.isNullOrEmpty(sResult)) {
+					//try again
+					++iAttempt;
+					long lRandomWaitSeconds = new Random().longs(lLo, lUp).findFirst().getAsLong();
+					//prepare to wait longer next time
+					lLo = lRandomWaitSeconds;
+					lUp += lWaitStep;
+					m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+					TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
+				} else {
+					//we're done
+					m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: download completed: " + sResult);
+					break;
+				}
+			} catch (Exception oE) {
+				m_oLogger.error("CREODIASProviderAdapter.executeDownloadFile: " + oE);
+			}
 		}
-		return null;
+		return sResult;
 	}
 
 	private String getZipperUrl(String sFileURL) {
@@ -94,7 +118,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
 		} catch (Exception oE) {
-			this.m_oLogger.error(oE.toString());
+			m_oLogger.error("CREODIASProviderAdapter.getZipperUrl: " + oE);
 		}
 		return sResult;
 	}
@@ -113,9 +137,10 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 		String sResult = "";
 		try {
-			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
+			String[] asTokens = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); 
+			sResult = asTokens[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 		} catch (Exception oE) {
-			this.m_oLogger.error(oE.toString());
+			m_oLogger.error("CREODIASProviderAdapter.GetFileName: " + oE);
 		}
 
 		return sResult;
@@ -131,29 +156,28 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oConnection.setDoOutput(true);
 			oConnection.getOutputStream().write(("client_id=CLOUDFERRO_PUBLIC&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password").getBytes());
 			int iStatus = oConnection.getResponseCode();
-			System.out.println("Response status: " + iStatus);
+			m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken: Response status: " + iStatus);
 			if( iStatus == 200) {
 				InputStream oInputStream = oConnection.getInputStream();
 				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 				if(null!=oInputStream) {
 					Util.copyStream(oInputStream, oBytearrayOutputStream);
 					String sResult = oBytearrayOutputStream.toString();
-					System.out.println(sResult);
-					return sResult;
+					m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken: json: " + sResult);
+					JSONObject oJson = new JSONObject(sResult);
+					String sToken = oJson.optString("access_token", null);
+					return sToken;
 				}
 			} else {
 				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 				InputStream oErrorStream = oConnection.getErrorStream();
 				Util.copyStream(oErrorStream, oBytearrayOutputStream);
 				String sMessage = oBytearrayOutputStream.toString();
-				System.out.println(sMessage);
+				m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken:" + sMessage);
 
 			}
-
-
 		} catch (Exception oE) {
-			// TODO Auto-generated catch block
-			oE.printStackTrace();
+			m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken: " + oE);
 		}
 
 		return null;
