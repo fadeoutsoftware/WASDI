@@ -173,8 +173,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		try {
 			// Domain check
 			if (Utils.isNullOrEmpty(sFileURL)) {
-				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
-				return "";
+				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
+				return null;
 			}
 
 			String sReturnFilePath = "";
@@ -212,12 +212,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			try {
 				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
 			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: connection timed out: " + oEx);
 			}
 			try {
 				iReadTimeOut = Integer.parseInt(sReadTimeOut);
 			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: read timed out: " + oEx);
 			}
 
 			URL oUrl = new URL(sFileURL);
@@ -235,14 +235,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 			// always check HTTP response code first
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-
 				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connected");
-
 				String sFileName = "";
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 				String sContentType = oHttpConn.getContentType();
 				int sContentLength = oHttpConn.getContentLength();
-
 				if (sDisposition != null) {
 					// extracts file name from header field
 					int iIndex = sDisposition.indexOf("filename=");
@@ -253,7 +250,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						else {
 							sFileName = sDisposition.substring(iIndex + 9, sDisposition.length());
 						}
-						
 					}
 				} else {
 					// extracts file name from URL
@@ -275,10 +271,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			m_oLogger.error("ProviderAdapter.getFileNameViaHttp: general error: " + oEx);
 		}
 
-		return "";
+		return null;
 	}
 	
     /**
@@ -305,7 +301,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
 		
 		// Return file path
-		String sReturnFilePath = "";
+		String sReturnFilePath = null;
 		
 		try {
 			// Basic HTTP Authentication
@@ -412,7 +408,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
 		catch (Exception oEx) {
 			m_oLogger.error("ProviderAdapter.downloadViaHttp: Exception " + oEx);
-			return "";
+			return null;
 		}
 
 
