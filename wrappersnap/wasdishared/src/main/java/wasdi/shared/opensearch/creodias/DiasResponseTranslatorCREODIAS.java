@@ -373,14 +373,15 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 				if(null!=oTemp) {
 					long lSize = oTemp.optLong(DiasResponseTranslatorCREODIAS.SSIZE, -1);
 					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES, ""+lSize);
+					String sSize = "0";
 					if(0<=lSize) {
 						double dTmp = (double) lSize;
-						String sSize = Utils.getNormalizedSize(dTmp);
+						sSize = Utils.getNormalizedSize(dTmp);
 						oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE, sSize);
 					}
 					if(oTemp.has(DiasResponseTranslatorCREODIAS.SURL) && !oTemp.isNull(DiasResponseTranslatorCREODIAS.SURL)) {
 						String sUrl = oTemp.optString(DiasResponseTranslatorCREODIAS.SURL, null);
-						oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, sUrl);
+						oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, sUrl);						
 						oResult.setLink(sUrl);
 					} else {
 						Utils.debugLog("DiasResponseTranslator.parseServices: download link not found! dumping json:\n" +
@@ -410,6 +411,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)); //2
 	
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
+			oResult.setLink(oLink.toString());
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);
 		}
