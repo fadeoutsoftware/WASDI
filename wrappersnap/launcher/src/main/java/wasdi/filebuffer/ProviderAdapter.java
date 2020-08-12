@@ -335,21 +335,33 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				String sContentType = oHttpConn.getContentType();
 				long lContentLength = oHttpConn.getContentLengthLong();
 
-				if (sDisposition != null) {
+				boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
+				if (bFromDisposition) {
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
 					// extracts file name from header field
-					int index = sDisposition.indexOf("filename=");
-					if (index > 0) {
-						sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
+					String sFileNameKey = "filename=";
+					int iStart = sDisposition.indexOf(sFileNameKey);
+					if (iStart > 0) {
+						m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
+						int iEnd = sDisposition.indexOf(' ', iStart);
+						if(iEnd < 0) {
+							iEnd = sDisposition.length();
+						}
+						sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
+					} else {
+						bFromDisposition = false;
 					}
-				} else {
-					// extracts file name from URL
-					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
 				}
-
-				m_oLogger.debug("Content-Type = " + sContentType);
-				m_oLogger.debug("Content-Disposition = " + sDisposition);
-				m_oLogger.debug("Content-Length = " + lContentLength);
+				if(!bFromDisposition) {
+					// extracts file name from URL
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
+					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
+				}
 				m_oLogger.debug("fileName = " + sFileName);
+				
+				m_oLogger.debug("Content-Type = " + sContentType);
+				m_oLogger.debug("Content-Length = " + lContentLength);
+				
 
 				// opens input stream from the HTTP connection
 				InputStream oInputStream = oHttpConn.getInputStream();
