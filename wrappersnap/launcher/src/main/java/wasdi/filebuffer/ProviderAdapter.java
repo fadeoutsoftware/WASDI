@@ -91,17 +91,25 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
     @Override
 	public void subscribe(ProcessWorkspaceUpdateSubscriber oSubscriber) {
-    	if(null != oSubscriber) {
-    		m_aoSubscribers.add(oSubscriber);
-    	} else {
-    		m_oLogger.warn("ProviderAdapter.subscribe: null subscriber");
-    	}
+    	try {
+	    	if(null != oSubscriber) {
+	    		m_aoSubscribers.add(oSubscriber);
+	    	} else {
+	    		m_oLogger.warn("ProviderAdapter.subscribe: null subscriber");
+	    	}
+    	} catch (Exception oE) {
+    		m_oLogger.error("ProviderAdapter.subscribe: " + oE); 
+		}
 	}
 
 	@Override
 	public void unsubscribe(ProcessWorkspaceUpdateSubscriber oSubscriber) {
-		if(!m_aoSubscribers.remove(oSubscriber)) {
-			m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
+		try {
+			if(!m_aoSubscribers.remove(oSubscriber)) {
+				m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
+			}
+		} catch (Exception oE) {
+    		m_oLogger.error("ProviderAdapter.unsubscribe: " + oE); 
 		}
 	}
 	
