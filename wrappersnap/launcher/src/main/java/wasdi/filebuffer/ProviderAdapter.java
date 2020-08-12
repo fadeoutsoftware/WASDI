@@ -389,13 +389,21 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				}
 
 			} else {
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
+				//todo retrieve error
+				InputStream oErrorStream = oHttpConn.getErrorStream();
+				if(null != oErrorStream) {
+					InputStreamReader oReader = new InputStreamReader(oErrorStream);
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: error message: " + oReader.toString() );
+				} else {
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: provider did not send an error message");
+				}
 				m_iLastError = iResponseCode;
 			}
 			oHttpConn.disconnect();			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Exception " + oEx.toString());
+			m_oLogger.error("ProviderAdapter.downloadViaHttp: Exception " + oEx);
 			return "";
 		}
 
