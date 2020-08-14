@@ -1,22 +1,20 @@
 package wasdi.shared.data;
 
-import com.mongodb.Block;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.DeleteResult;
-import org.bson.Document;
-
-import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.utils.Utils;
+import static com.mongodb.client.model.Filters.eq;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mongodb.client.model.Filters.eq;
+import org.bson.Document;
+
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
+
+import wasdi.shared.business.Workspace;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by p.campanella on 25/10/2016.

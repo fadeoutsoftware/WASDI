@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;

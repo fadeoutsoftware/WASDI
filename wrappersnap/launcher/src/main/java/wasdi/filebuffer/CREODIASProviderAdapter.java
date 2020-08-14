@@ -12,13 +12,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.apache.commons.net.io.Util;
-import org.apache.log4j.Logger;
 
 import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
  * @author c.nattero

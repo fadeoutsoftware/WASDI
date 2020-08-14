@@ -45,7 +45,6 @@ public class QueryTranslationParser {
 			for (String sQueryItem : asKeysAndValues) {
 
 				// todo translate mission/product first of all
-				String sName = m_oAppConf.optString("name");
 				String sPlatformIndexname = m_oAppConf.optString("indexname", null);
 				String sPlatformIndexvalue = m_oAppConf.optString("indexvalue", null);
 				if (sQueryItem.equals(sPlatformIndexname + ':' + sPlatformIndexvalue)) {
@@ -91,8 +90,7 @@ public class QueryTranslationParser {
 						Utils.log("WARNING", "QueryTranslationParser.parse: indexlabel for key " + sWasdiQueryKey
 								+ " is null, configuration does not look good");
 					}
-					// this one might be absent
-					String sIndexhint = oFilter.optString("indexhint", null);
+
 					String sIndexvalues = oFilter.optString("indexvalues", null);
 					if (null == sIndexvalues) {
 						Utils.log("ERROR", "QueryTranslationParser.parse: indexvalues for key " + sWasdiQueryKey
@@ -105,9 +103,6 @@ public class QueryTranslationParser {
 								+ " ): regex is null, configuration does not look good");
 						continue;
 					}
-					// these might be absent
-					int iIndexmin = oFilter.optInt("indexmin", -1);
-					int iIndexmax = oFilter.optInt("indexmax", -1);
 
 					if (
 							(sPlatformIndexvalue.equals("Sentinel-1") && (

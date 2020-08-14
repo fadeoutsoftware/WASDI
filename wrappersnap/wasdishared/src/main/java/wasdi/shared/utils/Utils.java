@@ -161,7 +161,7 @@ public class Utils {
 
 	}
 
-	public static String GetFormatDate(Date oDate) {
+	public static String getFormatDate(Date oDate) {
 
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
