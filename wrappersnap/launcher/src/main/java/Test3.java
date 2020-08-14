@@ -91,7 +91,7 @@ public class Test3 {
                 opMulti.setNumRangeLooks(4);
                 MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
                 param.nRgLooks = 4;
-                opMulti.getDerivedParameters(exportProduct, param);//filterProduct
+//                opMulti.getDerivedParameters(exportProduct, param);//filterProduct
                 //opMulti.setNumAzimuthLooks(param.nAzLooks);
                 Product multiProduct = opMulti.getTargetProduct();
 

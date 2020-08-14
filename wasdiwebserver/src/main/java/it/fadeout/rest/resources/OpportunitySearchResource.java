@@ -17,7 +17,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.esa.s3tbx.aatsr.sst.ui.AatsrSstAction;
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
@@ -359,7 +358,7 @@ public class OpportunitySearchResource {
 				Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
 			}
 
-			String sSatres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
+			String sSatres = InstanceFinder.s_asOrbitSatsMap.get(sSatname);
 
 			try {
 
@@ -502,7 +501,7 @@ public class OpportunitySearchResource {
 				// Create the View Mode
 				SatelliteOrbitResultViewModel oPositionViewModel = new SatelliteOrbitResultViewModel();
 
-				String oSatelliteResource = InstanceFinder.s_sOrbitSatsMap.get(sSat);
+				String oSatelliteResource = InstanceFinder.s_asOrbitSatsMap.get(sSat);
 
 				try {
 
@@ -560,7 +559,7 @@ public class OpportunitySearchResource {
 
 			for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
 				try {
-					String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
+					String satres = InstanceFinder.s_asOrbitSatsMap.get(asSatellites[iIndexSarellite]);
 					Satellite oSatellite = SatFactory.buildSat(satres);
 					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
 

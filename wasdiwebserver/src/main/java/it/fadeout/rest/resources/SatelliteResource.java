@@ -37,7 +37,7 @@ public class SatelliteResource {
 				Utils.debugLog("SatelliteResource.getSatelliteTrack( Session: " + sSessionId + ", Sat: " + sSatname + " ): invalid session");
 				return ret;
 			}
-			String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
+			String satres = InstanceFinder.s_asOrbitSatsMap.get(sSatname);
 			Time tconv = new Time();
 			double k = 180.0 / Math.PI;
 			tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
