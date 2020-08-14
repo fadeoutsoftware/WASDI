@@ -93,7 +93,7 @@ public class dbUtils {
 	 * Tools to fix the downloaded products table
 	 */
 	public static void downloadedProducts() {
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with downloaded products?");
 	        
@@ -102,7 +102,6 @@ public class dbUtils {
 	        System.out.println("\t3 - Clear S1 S2 published bands");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 	        
 	        boolean bDelete = false;
@@ -182,7 +181,7 @@ public class dbUtils {
 	 * Utils to fix product workspace table
 	 */
 	public static void productWorkspace() {
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with product Workspaces?");
 	        
@@ -190,7 +189,6 @@ public class dbUtils {
 	        System.out.println("\t2 - Clean by not existing Product Name");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 	        
 	        boolean bWorkspace = false;
@@ -268,7 +266,7 @@ public class dbUtils {
 	
 	public static void processors() {
 		
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with processors?");
 	        
@@ -277,7 +275,6 @@ public class dbUtils {
 	        System.out.println("\t3 - Redeploy");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
 	        
@@ -368,14 +365,13 @@ public class dbUtils {
 	
 	public static void metadata() {
 		
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with metadata?");
 	        
 	        System.out.println("\t1 - Clear Unlinked metadata");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
 
@@ -446,15 +442,14 @@ public class dbUtils {
 
 	
 	private static void password() {
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with Password?");
 	        
 	        System.out.println("\t1 - Encrypt Password");
 	        System.out.println("\t2 - Force Update User Password");
 	        System.out.println("");
-	        
-	        Scanner oScanner = new Scanner( System.in);
+
 	        String sInputString = oScanner.nextLine();
 
 	        PasswordAuthentication oAuth = new PasswordAuthentication();
@@ -500,14 +495,13 @@ public class dbUtils {
 	}
 	
 	private static void workflows () {
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with workflows?");
 	        
 	        System.out.println("\t1 - Copy workflows from user folder to generic folder");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
 	        if (sInputString.equals("1")) {
@@ -567,7 +561,7 @@ public class dbUtils {
 	}
 	
 	private static void users() {
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with Users?");
 	        
@@ -575,7 +569,6 @@ public class dbUtils {
 	        System.out.println("\t2 - Print User Mails");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
 	        if (sInputString.equals("1")) {
@@ -866,14 +859,13 @@ public class dbUtils {
 	}
 	
 	private static void workspaces() {
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what we do with workspaces?");
 	        
 	        System.out.println("\t1 - Clean shared ws errors");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
 	        if (sInputString.equals("1")) {
@@ -912,14 +904,13 @@ public class dbUtils {
 	 */
 	public static void migrateToLocal() {
 
-		try {
+		try(Scanner oScanner = new Scanner( System.in)) {
 			
 	        System.out.println("Ok, what do we migrate?");
 	        
 	        System.out.println("\t1 - Copy Process Workspace of this Node in the local Database");
 	        System.out.println("");
 	        
-	        Scanner oScanner = new Scanner( System.in);
 	        String sInputString = oScanner.nextLine();
 
 	        if (sInputString.equals("1")) {
