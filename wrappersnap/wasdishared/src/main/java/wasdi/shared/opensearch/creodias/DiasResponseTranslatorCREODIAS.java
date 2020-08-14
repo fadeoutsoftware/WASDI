@@ -32,6 +32,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	public static final int IPOSITIONOF_LINK = 0;
 	public static final int IPOSITIONOF_FILENAME = 1;
 	public static final int IPOSITIONOF_SIZEINBYTES = 2;
+	public static final int IPOSITIONOF_STATUS = 3;
 
 	//private string constants
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
@@ -262,6 +263,9 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
 				oResult.getProperties().put("relativeorbitnumber", oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
 			}
+			if(oProperties.has("status") && !oProperties.isNull("status")) {
+				oResult.getProperties().put("status", oProperties.optString("status"));
+			}
 
 			//polarisationmode
 			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPOLARISATION)){
@@ -408,7 +412,9 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			oLink.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
 			.append(oResult.getTitle()) //1
 			.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
-			.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)); //2
+			.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)) //2
+			.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
+			.append(oResult.getProperties().get("status")); //3
 	
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
 			oResult.setLink(oLink.toString());
