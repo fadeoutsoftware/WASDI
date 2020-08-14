@@ -321,7 +321,7 @@ public class ProcessScheduler extends Thread {
 									oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 									// Set the operation end date
 									if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
-										oCheckProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+										oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 									}
 									// Update the process
 									m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
@@ -354,7 +354,7 @@ public class ProcessScheduler extends Thread {
 									oRunningPws.setStatus(ProcessStatus.STOPPED.name());
 									
 									if (Utils.isNullOrEmpty(oRunningPws.getOperationEndDate())) {
-										oRunningPws.setOperationEndDate(Utils.GetFormatDate(new Date()));
+										oRunningPws.setOperationEndDate(Utils.getFormatDate(new Date()));
 									}
 		
 									m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
@@ -439,7 +439,7 @@ public class ProcessScheduler extends Thread {
 									oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 									// Set the operation end date
 									if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
-										oCheckProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+										oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 									}
 									
 									// Update the process

@@ -666,7 +666,7 @@ public class ProcessWorkspaceResource {
 				// The process finished
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 					// No end-date set: put it here
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}
 			}
 			
