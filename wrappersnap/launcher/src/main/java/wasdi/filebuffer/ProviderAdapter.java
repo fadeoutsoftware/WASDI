@@ -567,9 +567,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         return lLenght;
     }
 
-	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
-		return true;
-	}
 	
 	/**
 	 * @param oHttpConn
