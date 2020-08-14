@@ -14,7 +14,6 @@ service('ConstantsService', [function () {
     this.WPSPROXY = environment.wpsProxy;
 
     this.APIURL = this.URL + 'rest';
-    this.AUTHURL = environment.authUrl;
 
     this.TEST = false; //test global var
 
@@ -66,10 +65,6 @@ service('ConstantsService', [function () {
     this.getAPIURL = function() {
         return this.APIURL;
     }
-
-    this.getAUTHURL = function(){
-        return this.AUTHURL;
-    };
 
     this.getSessionId = function() {
 
