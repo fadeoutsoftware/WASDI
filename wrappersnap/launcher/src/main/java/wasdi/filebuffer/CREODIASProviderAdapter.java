@@ -16,6 +16,8 @@ import java.util.Random;
 import org.apache.commons.net.io.Util;
 import org.json.JSONObject;
 
+import com.google.common.base.Preconditions;
+
 import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
@@ -78,6 +80,20 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty, aborting");
 			return null;
 		}
+		//todo check availability
+		boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
+		if(bShallWeOrderIt) {
+			m_oLogger.warn("CREODIASProviderAdapter.ExecuteDownloadFile: ordering products not implemented yet"); 
+			// order
+			//see https://creodias.eu/faq-all/-/asset_publisher/SIs09LQL6Gct/content/how-to-order-products-using-finder-api-?inheritRedirect=true
+			  // do
+	  		    // go to sleep for the expected period (if specified)
+			    // check again
+			  //while not available
+		}
+
+		  
+		//proceed as usual and download it
 		String sResult = null;
 		long lWaitStep = 10l;
 		long lUp = 10;
@@ -111,6 +127,49 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			}
 		}
 		return sResult;
+	}
+
+	private boolean productShallBeOrdered(String sFileURL, String sDownloadUser, String sDownloadPassword) {
+		Preconditions.checkNotNull(sFileURL, "URL is null");
+		Preconditions.checkNotNull(sDownloadUser, "User is null");
+		Preconditions.checkNotNull(sDownloadPassword, "Password is null");
+		try {
+			String sStatus = extractStatusFromURL(sFileURL);
+			switch(sStatus.toLowerCase()) {
+				//order if...
+			    //31 means that product is orderable and waiting for download to our cache,
+				case "31":
+					return true;
+				//37 means that product is processed by our platform,
+				case "37":
+					return true;
+				//do not order if...
+				//34 means that product is downloaded in cache,
+				case "34":
+					return false;
+				//0 means that already processed product is waiting in our platform
+				case "0":
+					return false;
+				default:
+					return false;
+			}
+		} catch (Exception oE) {
+			m_oLogger.error("CREODIASProviderAdapter.checkAvailability: could not check availability due to: " + oE + ", assuming product available, try to do download it anyway");
+		}
+		//try and download it anyway
+		return false;
+	}
+
+	private String extractStatusFromURL(String sFileURL) {
+		Preconditions.checkNotNull(sFileURL, "URL is null");
+		try {
+			String[] asParts = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
+			String sStatus = asParts[DiasResponseTranslatorCREODIAS.IPOSITIONOF_STATUS];
+			return sStatus;
+		} catch (Exception oE) {
+			m_oLogger.error("CREODIASProviderAdapter.extractStatusFromURL: " + oE);
+		}
+		return null;
 	}
 
 	private String getZipperUrl(String sFileURL) {
