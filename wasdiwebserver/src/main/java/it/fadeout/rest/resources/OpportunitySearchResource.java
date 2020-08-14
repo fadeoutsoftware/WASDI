@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.esa.s3tbx.aatsr.sst.ui.AatsrSstAction;
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
@@ -60,12 +61,13 @@ public class OpportunitySearchResource {
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
 		Utils.debugLog("OpportunitySearchResource.Search( Session: " + sSessionId + ", ... )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
 		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
 
 		try {
+
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog("OpportunitySearchResource.Search( " + sSessionId + ", ... ): invalid session");
 				return aoCoverageSwathResultViewModels;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -120,210 +122,217 @@ public class OpportunitySearchResource {
 	 * @param oSwath CoverageSwathResult of the Orbit Lib
 	 * @return CoverageSwathResultViewModel representig the oSwath entity
 	 */
-	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(
+	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(
 			CoverageSwathResult oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
+
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
+		try {
+			if (oSwath != null) {
 
-		if (oSwath != null) {
+				oVM.SwathName = oSwath.getSwathName();
+				oVM.IsAscending = oSwath.isAscending();
+				if (oSwath.getSat() != null) {
+					oVM.SatelliteName = oSwath.getSat().getName();
+				}
 
-			oVM.SwathName = oSwath.getSwathName();
-			oVM.IsAscending = oSwath.isAscending();
-			if (oSwath.getSat() != null) {
-				oVM.SatelliteName = oSwath.getSat().getName();
-			}
+				if (oSwath.getSat() != null) {
+					oVM.SensorName = oSwath.getSensor().getSName();
 
-			if (oSwath.getSat() != null) {
-				oVM.SensorName = oSwath.getSensor().getSName();
+					if (oSwath.getSat().getType() != null)
+						oVM.SensorType = oSwath.getSat().getType().name();
 
-				if (oSwath.getSat().getType() != null)
-					oVM.SensorType = oSwath.getSat().getType().name();
+				}
 
-			}
+				if (oSwath.getCoveredArea() != null)
+					oVM.CoveredAreaName = oSwath.getCoveredArea().getName();
 
-			if (oSwath.getCoveredArea() != null)
-				oVM.CoveredAreaName = oSwath.getCoveredArea().getName();
+				if (oSwath.getSensor() != null) {
+					if (oSwath.getSensor().getLooking() != null)
+						oVM.SensorLookDirection = oSwath.getSensor().getLooking().toString();
+				}
 
-			if (oSwath.getSensor() != null) {
-				if (oSwath.getSensor().getLooking() != null)
-					oVM.SensorLookDirection = oSwath.getSensor().getLooking().toString();
-			}
+				if (oSwath.getTimeStart() != null) {
+					GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
+					oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
+				}
+				if (oSwath.getTimeEnd() != null) {
+					GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
+					oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
+				}
 
-			if (oSwath.getTimeStart() != null) {
-				GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
-				oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
-			}
-			if (oSwath.getTimeEnd() != null) {
-				GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
-				oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
-			}
+				oVM.AcquisitionDuration = oSwath.getDuration();
 
-			oVM.AcquisitionDuration = oSwath.getDuration();
+				if (oSwath.getFootprint() != null) {
+					Polygon oPolygon = oSwath.getFootprint();
+					apoint[] aoPoints = oPolygon.getVertex();
 
-			if (oSwath.getFootprint() != null) {
-				Polygon oPolygon = oSwath.getFootprint();
-				apoint[] aoPoints = oPolygon.getVertex();
+					if (aoPoints != null) {
 
-				if (aoPoints != null) {
+						oVM.SwathFootPrint = "POLYGON((";
 
-					oVM.SwathFootPrint = "POLYGON((";
+						for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
+							apoint oPoint = aoPoints[iPoints];
+							oVM.SwathFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
+							oVM.SwathFootPrint += " ";
+							oVM.SwathFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
+							oVM.SwathFootPrint += ",";
+						}
 
-					for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
-						apoint oPoint = aoPoints[iPoints];
-						oVM.SwathFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
-						oVM.SwathFootPrint += " ";
-						oVM.SwathFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
-						oVM.SwathFootPrint += ",";
+						oVM.SwathFootPrint = oVM.SwathFootPrint.substring(0, oVM.SwathFootPrint.length() - 2);
+
+						oVM.SwathFootPrint += "))";
 					}
-
-					oVM.SwathFootPrint = oVM.SwathFootPrint.substring(0, oVM.SwathFootPrint.length() - 2);
-
-					oVM.SwathFootPrint += "))";
 				}
 			}
+
+			// ADD CHILDS
+			ArrayList<SwathArea> aoChilds = oSwath.getChilds();
+			ArrayList<CoverageSwathResultViewModel> aoChildsViewModel = new ArrayList<CoverageSwathResultViewModel>();
+
+			for (SwathArea swathArea : aoChilds) {
+				CoverageSwathResultViewModel oChild;
+				oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(swathArea);
+				aoChildsViewModel.add(oChild);
+
+			}
+			oVM.aoChilds = aoChildsViewModel;
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
-
-		// ADD CHILDS
-		ArrayList<SwathArea> aoChilds = oSwath.getChilds();
-		ArrayList<CoverageSwathResultViewModel> aoChildsViewModel = new ArrayList<CoverageSwathResultViewModel>();
-
-		for (SwathArea swathArea : aoChilds) {
-			CoverageSwathResultViewModel oChild;
-			oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(swathArea);
-			aoChildsViewModel.add(oChild);
-
-		}
-		oVM.aoChilds = aoChildsViewModel;
-
 		return oVM;
 	}
 
-	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
+	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
+		try {
+			if (oSwath != null) {
 
-		if (oSwath != null) {
+				oVM.SwathName = oSwath.getSwathName();
+				oVM.IsAscending = oSwath.isAscending();
+				if (oSwath.getSat() != null) {
+					oVM.SatelliteName = oSwath.getSat().getName();
+				}
 
-			oVM.SwathName = oSwath.getSwathName();
-			oVM.IsAscending = oSwath.isAscending();
-			if (oSwath.getSat() != null) {
-				oVM.SatelliteName = oSwath.getSat().getName();
-			}
+				if (oSwath.getSat() != null) {
+					oVM.SensorName = oSwath.getSensor().getSName();
 
-			if (oSwath.getSat() != null) {
-				oVM.SensorName = oSwath.getSensor().getSName();
+					if (oSwath.getSat().getType() != null)
+						oVM.SensorType = oSwath.getSat().getType().name();
 
-				if (oSwath.getSat().getType() != null)
-					oVM.SensorType = oSwath.getSat().getType().name();
+				}
 
-			}
+				if (oSwath.getCoveredArea() != null)
+					oVM.CoveredAreaName = oSwath.getCoveredArea().getName();
 
-			if (oSwath.getCoveredArea() != null)
-				oVM.CoveredAreaName = oSwath.getCoveredArea().getName();
+				if (oSwath.getSensor() != null) {
+					if (oSwath.getSensor().getLooking() != null)
+						oVM.SensorLookDirection = oSwath.getSensor().getLooking().toString();
+				}
 
-			if (oSwath.getSensor() != null) {
-				if (oSwath.getSensor().getLooking() != null)
-					oVM.SensorLookDirection = oSwath.getSensor().getLooking().toString();
-			}
+				if (oSwath.getTimeStart() != null) {
+					GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
+					// oVM.AcquisitionStartTime = oCalendar.getTime();
+					oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
+				}
+				if (oSwath.getTimeEnd() != null) {
+					GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
+					// oVM.AcquisitionEndTime = oCalendar.getTime();
+					oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
+				}
 
-			if (oSwath.getTimeStart() != null) {
-				GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
-				// oVM.AcquisitionStartTime = oCalendar.getTime();
-				oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
-			}
-			if (oSwath.getTimeEnd() != null) {
-				GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
-				// oVM.AcquisitionEndTime = oCalendar.getTime();
-				oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
-			}
+				oVM.AcquisitionDuration = oSwath.getDuration();
 
-			oVM.AcquisitionDuration = oSwath.getDuration();
+				if (oSwath.getFootprint() != null) {
+					Polygon oPolygon = oSwath.getFootprint();
+					apoint[] aoPoints = oPolygon.getVertex();
 
-			if (oSwath.getFootprint() != null) {
-				Polygon oPolygon = oSwath.getFootprint();
-				apoint[] aoPoints = oPolygon.getVertex();
+					if (aoPoints != null) {
 
-				if (aoPoints != null) {
+						oVM.SwathFootPrint = "POLYGON((";
 
-					oVM.SwathFootPrint = "POLYGON((";
+						for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
+							apoint oPoint = aoPoints[iPoints];
+							oVM.SwathFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
+							oVM.SwathFootPrint += " ";
+							oVM.SwathFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
+							oVM.SwathFootPrint += ",";
+						}
 
-					for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
-						apoint oPoint = aoPoints[iPoints];
-						oVM.SwathFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
-						oVM.SwathFootPrint += " ";
-						oVM.SwathFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
-						oVM.SwathFootPrint += ",";
+						oVM.SwathFootPrint = oVM.SwathFootPrint.substring(0, oVM.SwathFootPrint.length() - 2);
+
+						oVM.SwathFootPrint += "))";
 					}
-
-					oVM.SwathFootPrint = oVM.SwathFootPrint.substring(0, oVM.SwathFootPrint.length() - 2);
-
-					oVM.SwathFootPrint += "))";
 				}
 			}
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
-
 		return oVM;
 	}
 
 	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getSwatViewModelFromResult");
 		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
+		try {
+			if (oSwath == null)
+				return aoResults;
 
-		if (oSwath == null)
-			return aoResults;
+			CoverageSwathResultViewModel oVM = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwath);
 
-		CoverageSwathResultViewModel oVM = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwath);
+			List<SwathArea> aoAreas = oSwath.getChilds();
 
-		List<SwathArea> aoAreas = oSwath.getChilds();
+			for (SwathArea oArea : aoAreas) {
 
-		for (SwathArea oArea : aoAreas) {
+				CoverageSwathResultViewModel oSwathResult = new CoverageSwathResultViewModel(oVM);
 
-			CoverageSwathResultViewModel oSwathResult = new CoverageSwathResultViewModel(oVM);
-
-			if (oArea.getMode() != null) {
-				oSwathResult.SensorMode = oArea.getMode().getName();
-				if (oArea.getMode().getViewAngle() != null)
-					oSwathResult.Angle = oArea.getMode().getViewAngle().toString();
-			}
-
-			if (oArea.getswathSize() != null) {
-				oSwathResult.CoverageLength = oArea.getswathSize().getLength();
-				oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
-			}
-
-			oSwathResult.Coverage = oArea.getCoverage() * 100;
-
-			if (oArea.getswathSize() != null) {
-				oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
-				oSwathResult.CoverageLength = oArea.getswathSize().getLength();
-			}
-
-			if (oArea.getFootprint() != null) {
-				Polygon oPolygon = oArea.getFootprint();
-				apoint[] aoPoints = oPolygon.getVertex();
-
-				if (aoPoints != null) {
-
-					oSwathResult.FrameFootPrint = "POLYGON((";
-
-					for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
-						apoint oPoint = aoPoints[iPoints];
-						oSwathResult.FrameFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
-						oSwathResult.FrameFootPrint += " ";
-						oSwathResult.FrameFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
-						oSwathResult.FrameFootPrint += ",";
-					}
-
-					oSwathResult.FrameFootPrint = oSwathResult.FrameFootPrint.substring(0,
-							oSwathResult.FrameFootPrint.length() - 2);
-
-					oSwathResult.FrameFootPrint += "))";
+				if (oArea.getMode() != null) {
+					oSwathResult.SensorMode = oArea.getMode().getName();
+					if (oArea.getMode().getViewAngle() != null)
+						oSwathResult.Angle = oArea.getMode().getViewAngle().toString();
 				}
+
+				if (oArea.getswathSize() != null) {
+					oSwathResult.CoverageLength = oArea.getswathSize().getLength();
+					oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
+				}
+
+				oSwathResult.Coverage = oArea.getCoverage() * 100;
+
+				if (oArea.getswathSize() != null) {
+					oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
+					oSwathResult.CoverageLength = oArea.getswathSize().getLength();
+				}
+
+				if (oArea.getFootprint() != null) {
+					Polygon oPolygon = oArea.getFootprint();
+					apoint[] aoPoints = oPolygon.getVertex();
+
+					if (aoPoints != null) {
+
+						oSwathResult.FrameFootPrint = "POLYGON((";
+
+						for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
+							apoint oPoint = aoPoints[iPoints];
+							oSwathResult.FrameFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
+							oSwathResult.FrameFootPrint += " ";
+							oSwathResult.FrameFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
+							oSwathResult.FrameFootPrint += ",";
+						}
+
+						oSwathResult.FrameFootPrint = oSwathResult.FrameFootPrint.substring(0,
+								oSwathResult.FrameFootPrint.length() - 2);
+
+						oSwathResult.FrameFootPrint += "))";
+					}
+				}
+
+				aoResults.add(oSwathResult);
 			}
-
-			aoResults.add(oSwathResult);
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getSwatViewModelFromResult: " + oE);
 		}
-
 		return aoResults;
 	}
 
@@ -334,45 +343,53 @@ public class OpportunitySearchResource {
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("satellitename") String sSatname) {
 
-		//Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
-
-		// set nfs properties download
-		String sUserHome = System.getProperty("user.home");
-		String sNfs = System.getProperty("nfs.data.download");
-		if (sNfs == null) {
-			System.setProperty("nfs.data.download", sUserHome + "/nfs/download");
-			Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if(null == oUser) {
+			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): invalid session");
 		}
 
+		//Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 		SatelliteOrbitResultViewModel oReturnViewModel = new SatelliteOrbitResultViewModel();
-		String sSatres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
-		
 		try {
+			// set nfs properties download
+			String sUserHome = System.getProperty("user.home");
+			String sNfs = System.getProperty("nfs.data.download");
+			if (sNfs == null) {
+				System.setProperty("nfs.data.download", sUserHome + "/nfs/download");
+				Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
+			}
 
-			Time oTimeConv = new Time();
-			oTimeConv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			Satellite oSat = SatFactory.buildSat(sSatres);
-			
-			if (oSat == null) return oReturnViewModel;
+			String sSatres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
 
-			oReturnViewModel.code = sSatname;
+			try {
 
-			oReturnViewModel.satelliteName = oSat.getDescription();
-			oSat.getSatController().moveToNow();
-			oReturnViewModel.currentTime = oTimeConv.convertJD2String(oSat.getOrbitCore().getCurrentJulDate());
-			oReturnViewModel.setCurrentPosition(oSat.getOrbitCore().getLLA());
+				Time oTimeConv = new Time();
+				oTimeConv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				Satellite oSat = SatFactory.buildSat(sSatres);
 
-			oSat.getOrbitCore().setShowGroundTrack(true);
+				if (oSat == null) return oReturnViewModel;
 
-			// lag
-			double[] tm = oSat.getOrbitCore().getTimeLag();
-			for (int i = oSat.getOrbitCore().getNumGroundTrackLagPts() - 1; i >= 0; i--)
-				oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLagPt(i), oTimeConv.convertJD2String(tm[i]));
+				oReturnViewModel.code = sSatname;
 
-			// lead
-			tm = oSat.getOrbitCore().getTimeLead();
-			for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
-				oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
+				oReturnViewModel.satelliteName = oSat.getDescription();
+				oSat.getSatController().moveToNow();
+				oReturnViewModel.currentTime = oTimeConv.convertJD2String(oSat.getOrbitCore().getCurrentJulDate());
+				oReturnViewModel.setCurrentPosition(oSat.getOrbitCore().getLLA());
+
+				oSat.getOrbitCore().setShowGroundTrack(true);
+
+				// lag
+				double[] tm = oSat.getOrbitCore().getTimeLag();
+				for (int i = oSat.getOrbitCore().getNumGroundTrackLagPts() - 1; i >= 0; i--)
+					oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLagPt(i), oTimeConv.convertJD2String(tm[i]));
+
+				// lead
+				tm = oSat.getOrbitCore().getTimeLead();
+				for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
+					oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
+			} catch (Exception oE) {
+				Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): " + oE);
+			}
 		} catch (Exception oE) {
 			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): " + oE);
 		}
@@ -387,7 +404,7 @@ public class OpportunitySearchResource {
 	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
 			@QueryParam("footPrint") String sFootPrint) {
 		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Session: " + sSessionId + ", Text: " + sText + ", Footprint: " + sFootPrint + " )");
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			return null;
@@ -398,41 +415,45 @@ public class OpportunitySearchResource {
 		if (sFootPrint.isEmpty() || sText.isEmpty()) {
 			return null;
 		}
+		Kml kml = null;
+		try {
+			String[] asPoints = Utils.convertPolygonToArray(sFootPrint);
+			kml = KmlFactory.createKml();
 
-		String[] asPoints = Utils.convertPolygonToArray(sFootPrint);
-		Kml kml = KmlFactory.createKml();
+			// get coordinates
+			Boundary oOuterBoundaryIs = new Boundary();
+			LinearRing oLinearRing = new LinearRing();
+			List<Coordinate> aoCoordinates = new ArrayList<Coordinate>();
+			for (String string : asPoints) {
+				string = string.replaceAll(" ", ",");
+				Coordinate oCoordinate = new Coordinate(string);
 
-		// get coordinates
-		Boundary oOuterBoundaryIs = new Boundary();
-		LinearRing oLinearRing = new LinearRing();
-		List<Coordinate> aoCoordinates = new ArrayList<Coordinate>();
-		for (String string : asPoints) {
-			string = string.replaceAll(" ", ",");
-			Coordinate oCoordinate = new Coordinate(string);
+				aoCoordinates.add(oCoordinate);
 
-			aoCoordinates.add(oCoordinate);
+			}
 
+			oLinearRing.setCoordinates(aoCoordinates);
+
+			oOuterBoundaryIs.setLinearRing(oLinearRing);
+
+			// set placemark
+			Placemark oPlacemark = kml.createAndSetPlacemark().withName(sText).withVisibility(true);
+			// styleLine
+			oPlacemark.createAndAddStyleMap().createAndAddPair().withKey(StyleState.NORMAL).createAndSetStyle()
+			.createAndSetLineStyle().withColor("FF0000FF").withColorMode(ColorMode.NORMAL).withWidth(1);
+
+			// set polystyle
+			oPlacemark.createAndAddStyleMap().createAndAddPair().createAndSetStyle().createAndSetPolyStyle()
+			.withColor("FF0000FF").withColorMode(ColorMode.NORMAL).withFill(true).withOutline(true);
+
+			// set polygon
+			oPlacemark.createAndSetPolygon().withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND).withExtrude(false)
+			.withOuterBoundaryIs(oOuterBoundaryIs);
+
+			kml.setFeature(oPlacemark);
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Session: " + sSessionId + ", Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
 		}
-
-		oLinearRing.setCoordinates(aoCoordinates);
-
-		oOuterBoundaryIs.setLinearRing(oLinearRing);
-
-		// set placemark
-		Placemark oPlacemark = kml.createAndSetPlacemark().withName(sText).withVisibility(true);
-		// styleLine
-		oPlacemark.createAndAddStyleMap().createAndAddPair().withKey(StyleState.NORMAL).createAndSetStyle()
-				.createAndSetLineStyle().withColor("FF0000FF").withColorMode(ColorMode.NORMAL).withWidth(1);
-
-		// set polystyle
-		oPlacemark.createAndAddStyleMap().createAndAddPair().createAndSetStyle().createAndSetPolyStyle()
-				.withColor("FF0000FF").withColorMode(ColorMode.NORMAL).withFill(true).withOutline(true);
-
-		// set polygon
-		oPlacemark.createAndSetPolygon().withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND).withExtrude(false)
-				.withOuterBoundaryIs(oOuterBoundaryIs);
-
-		kml.setFeature(oPlacemark);
 
 		return kml;
 	}
@@ -444,8 +465,12 @@ public class OpportunitySearchResource {
 	public ArrayList<SatelliteOrbitResultViewModel> getUpdatedSatelliteTrack(
 			@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitesname") String sSatName) {
 
-		// Wasdi.DebugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " +
-		// sSessionId + ", " + sSatName + "");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if(null==oUser) {
+			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " +
+					sSessionId + ", " + sSatName + "): invalid session");
+		}
 
 		// Check if we have codes
 		if (Utils.isNullOrEmpty(sSatName))
@@ -454,50 +479,55 @@ public class OpportunitySearchResource {
 		// Return array
 		ArrayList<SatelliteOrbitResultViewModel> aoRet = new ArrayList<SatelliteOrbitResultViewModel>();
 
-		// Clear the string
-		if (sSatName.endsWith("-")) {
-			sSatName = sSatName.substring(0, sSatName.length() - 1);
-		}
+		try {
 
-		// Split the codes
-		String[] asSatellites = sSatName.split("-");
-
-		// Get "now" in the right format
-		Time tconv = new Time();
-		double k = 180.0 / Math.PI;
-		tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-		// For all the satellites
-		for (int iSat = 0; iSat < asSatellites.length; iSat++) {
-
-			String sSat = asSatellites[iSat];
-
-			// Create the View Mode
-			SatelliteOrbitResultViewModel oPositionViewModel = new SatelliteOrbitResultViewModel();
-
-			String oSatelliteResource = InstanceFinder.s_sOrbitSatsMap.get(sSat);
-
-			try {
-
-				// Create the Satellite
-				Satellite oSatellite = SatFactory.buildSat(oSatelliteResource);
-				oSatellite.getSatController().moveToNow();
-
-				// Set Data to the view model
-				oPositionViewModel.satelliteName = oSatellite.getDescription();
-				oPositionViewModel.code = sSat;
-				oPositionViewModel.currentPosition = (oSatellite.getOrbitCore().getLatitude() * k) + ";"
-						+ (oSatellite.getOrbitCore().getLongitude() * k) + ";"
-						+ oSatellite.getOrbitCore().getAltitude();
-
-				oSatellite.getOrbitCore().setShowGroundTrack(true);
-
-			} catch (Exception e) {
-				Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
-				continue;
+			// Clear the string
+			if (sSatName.endsWith("-")) {
+				sSatName = sSatName.substring(0, sSatName.length() - 1);
 			}
 
-			aoRet.add(oPositionViewModel);
+			// Split the codes
+			String[] asSatellites = sSatName.split("-");
+
+			// Get "now" in the right format
+			Time tconv = new Time();
+			double k = 180.0 / Math.PI;
+			tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+			// For all the satellites
+			for (int iSat = 0; iSat < asSatellites.length; iSat++) {
+
+				String sSat = asSatellites[iSat];
+
+				// Create the View Mode
+				SatelliteOrbitResultViewModel oPositionViewModel = new SatelliteOrbitResultViewModel();
+
+				String oSatelliteResource = InstanceFinder.s_sOrbitSatsMap.get(sSat);
+
+				try {
+
+					// Create the Satellite
+					Satellite oSatellite = SatFactory.buildSat(oSatelliteResource);
+					oSatellite.getSatController().moveToNow();
+
+					// Set Data to the view model
+					oPositionViewModel.satelliteName = oSatellite.getDescription();
+					oPositionViewModel.code = sSat;
+					oPositionViewModel.currentPosition = (oSatellite.getOrbitCore().getLatitude() * k) + ";"
+							+ (oSatellite.getOrbitCore().getLongitude() * k) + ";"
+							+ oSatellite.getOrbitCore().getAltitude();
+
+					oSatellite.getOrbitCore().setShowGroundTrack(true);
+
+				} catch (Exception e) {
+					Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
+					continue;
+				}
+
+				aoRet.add(oPositionViewModel);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSessionId + ", " + sSatName + "): " + oE);
 		}
 
 		return aoRet;
@@ -510,36 +540,42 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(
 			@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( Session: " + sSessionId + " )");
-		// if(! m_oCredentialPolicy.validSessionId(sSessionId)) {
-		// //todo retur error
-		// //Satellite oSatellite = new
-		// }
-		String[] asSatellites = null;
-
-		// String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
-		String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
-		if (sSatellites != null && sSatellites.length() > 0) {
-			asSatellites = sSatellites.split(",|;");
-		}
+		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " )");
 
 		ArrayList<SatelliteResourceViewModel> aaoReturnValue = new ArrayList<SatelliteResourceViewModel>();
-		for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
-			try {
-				String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
-				Satellite oSatellite = SatFactory.buildSat(satres);
-				ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
-
-				SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
-				oSatelliteResource.setSatelliteName(oSatellite.getName());
-				oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
-				aaoReturnValue.add(oSatelliteResource);
-			} catch (Exception e) {
-				Utils.debugLog("getSatellitesResources Exception: " + e);
-				return null;
+		try {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null==oUser) {
+				Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " ): invalid session");
+				return aaoReturnValue;
 			}
-		}
 
+			String[] asSatellites = null;
+
+			// String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
+			String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
+			if (sSatellites != null && sSatellites.length() > 0) {
+				asSatellites = sSatellites.split(",|;");
+			}
+
+			for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
+				try {
+					String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
+					Satellite oSatellite = SatFactory.buildSat(satres);
+					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
+
+					SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
+					oSatelliteResource.setSatelliteName(oSatellite.getName());
+					oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
+					aaoReturnValue.add(oSatelliteResource);
+				} catch (Exception oE) {
+					Utils.debugLog("getSatellitesResources Exception: " + oE);
+					return null;
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " ): " + oE);
+		}
 		return aaoReturnValue;
 
 	}

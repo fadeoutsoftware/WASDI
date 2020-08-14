@@ -11,9 +11,11 @@ import javax.ws.rs.core.MediaType;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.Satellite;
 
+import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
 import satLib.astro.time.Time;
+import wasdi.shared.business.User;
 import wasdi.shared.utils.Utils;
 
 @Path("/satellite")
@@ -28,9 +30,14 @@ public class SatelliteResource {
 		Utils.debugLog("SatelliteResource.getSatelliteTrack( Session: " + sSessionId + ", Sat: " + sSatname + " )");
 
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
-		String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
+		
 		try {
-
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null==oUser) {
+				Utils.debugLog("SatelliteResource.getSatelliteTrack( Session: " + sSessionId + ", Sat: " + sSatname + " ): invalid session");
+				return ret;
+			}
+			String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
 			Time tconv = new Time();
 			double k = 180.0 / Math.PI;
 			tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");

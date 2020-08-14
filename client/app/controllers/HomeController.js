@@ -139,26 +139,54 @@ var HomeController = (function() {
 
     HomeController.prototype.callbackLogin = function(data, status,oController)
     {
-        if (data != null)
-        {
-            if (data != undefined)
-            {
-                if (data.userId != null && data.userId != "")
-                {
-                    //LOGIN OK
-                    if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
-                    {
-                        oController.m_oConstantsService.setUser(data);//set user
-                        oController.m_oState.go("root.workspaces");// go workspaces
-                    }
-                }
-                else
-                {
-                    //LOGIN FAIL
-                    utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
-                }
-            }
-        }
+        console.log('AUTH: token obtained')
+        console.log(data)
+        // var now = new Date();
+        // var validitySeconds = data['expires_in'] - 30
+        // data['myexpires'] = new Date(now.getTime() + validitySeconds * 1000)
+        // console.log('AUTH: token obtained. Expires at ' + data['myexpires'])
+
+        window.localStorage.access_token = data['access_token']
+        window.localStorage.refresh_token = data['refresh_token']
+
+        var oDecodedToken = jwt_decode(data['access_token']);
+
+        console.log(oDecodedToken)
+
+        let oUser = {}
+        oUser.userId =oDecodedToken.preferred_username;
+        oUser.name = oDecodedToken.given_name;
+        oUser.surname = oDecodedToken.family_name;
+        oUser.authProvider = "wasdi";
+        oUser.link;
+        oUser.description;
+        oUser.sessionId = data['access_token'];
+
+        oController.m_oConstantsService.setUser(oUser);//set user
+        oController.m_oState.go("root.workspaces");// go workspaces
+
+        // raiseSessionChanged();
+
+        // if (data != null)
+        // {
+        //     if (data != undefined)
+        //     {
+        //         if (data.userId != null && data.userId != "")
+        //         {
+        //             //LOGIN OK
+        //             if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
+        //             {
+        //                 oController.m_oConstantsService.setUser(data);//set user
+        //                 oController.m_oState.go("root.workspaces");// go workspaces
+        //             }
+        //         }
+        //         else
+        //         {
+        //             //LOGIN FAIL
+        //             utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
+        //         }
+        //     }
+        // }
     }
 
     HomeController.prototype.getUserName = function () {

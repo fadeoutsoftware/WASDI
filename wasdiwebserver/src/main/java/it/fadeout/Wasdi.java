@@ -37,6 +37,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONObject;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -95,6 +96,11 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static Node s_oMyNode = null;
 	
+	
+	public static String s_sKeyCloakIntrospectionUrl = "";
+	public static String s_sClientId = "";
+	public static String s_sClientSecret = ""; 
+	
 	/**
 	 * Credential Policy Utility class
 	 */
@@ -152,6 +158,10 @@ public class Wasdi extends ResourceConfig {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token/introspect");
+		s_sClientId = getInitParameter("keycloak_confidentialClient", "wasdi_api");
+		s_sClientSecret = getInitParameter("keycloak_clientSecret", "1dd2e17c-3ce6-4851-891a-d689cf8bd107");
 		
 		try {
 			// If this is not the main node
@@ -306,7 +316,7 @@ public class Wasdi extends ResourceConfig {
 	 * 
 	 * @return
 	 */
-	public static String GetSerializationFileName() {
+	public static String getSerializationFileName() {
 		return UUID.randomUUID().toString();
 	}
 
@@ -316,17 +326,70 @@ public class Wasdi extends ResourceConfig {
 	 * @param oDate
 	 * @return
 	 */
-	public static String GetFormatDate(Date oDate) {
+	public static String getFormatDate(Date oDate) {
 		return Utils.GetFormatDate(oDate);
 	}
 
 	/**
 	 * Get the User object from the session Id
 	 * 
+	 * @param sSessionToken
+	 * @return
+	 */
+	public static User getUserFromSession(String sSessionId) {
+
+		// validate sSessionId
+		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
+			return null;
+		}
+		
+		/*
+		def introspect(self, client_id, client_secret, token):
+        params = {
+            'client_id': client_id, 
+            'client_secret': client_secret,
+            'token': token,
+        }
+        response = requests.post(
+                self._token_introspection_endpoint, data=params)
+        if response.status_code != 200:
+            raise Exception('Invalid introspection request')
+        return response.json()
+		 */
+		String sKeyCloakIntrospectionUrl = Wasdi.s_sKeyCloakIntrospectionUrl;
+		String sClientId = Wasdi.s_sClientId;
+		String sClientSecret = Wasdi.s_sClientSecret;
+		
+		String sPayload = "client_id=" + sClientId + 
+				"&client_secret=" + sClientSecret + 
+				"&token=" + sSessionId;
+		
+		Map<String,String> asHeaders = new HashMap<>();
+		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+		
+		
+		String sResponse = httpPost(sKeyCloakIntrospectionUrl, sPayload, asHeaders);
+		if(!Utils.isNullOrEmpty(sResponse)) {
+			JSONObject oJSON = new JSONObject(sResponse);
+			String sUserId = oJSON.optString("preferred_username", null);
+			if(!Utils.isNullOrEmpty(sUserId)) {
+				UserRepository oUserRepo = new UserRepository();
+				User oUser = oUserRepo.getUser(sUserId);
+				return oUser;
+			}
+		}
+		
+		// No Session, No User
+		return null;
+	}
+	
+	/**
+	 * Get the User object from the session Id
+	 * 
 	 * @param sSessionId
 	 * @return
 	 */
-	public static User GetUserFromSession(String sSessionId) {
+	public static User GetUserFromSession_OLD(String sSessionId) {
 
 		// validate sSessionId
 		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
@@ -526,7 +589,7 @@ public class Wasdi extends ResourceConfig {
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 
 				try {
-					oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
