@@ -38,6 +38,8 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import com.google.common.base.Preconditions;
+
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.UserSession;
 
@@ -57,6 +59,29 @@ public class Utils {
 		return false;
 	}
 
+	//adapted from:
+	//4. Generate Random Alphanumeric String With Java 8 
+	//https://www.baeldung.com/java-random-string
+	public static String getRandomName(int iLen) {
+		if(iLen < 0) {
+			iLen = - iLen;
+		}
+		
+		int iLeftLimit = 48; // numeral '0'
+	    int iRightLimit = 122; // letter 'z'
+	    Random random = new Random();
+	 
+	    String sGeneratedString = random.ints(iLeftLimit, iRightLimit + 1)
+    		//filter method above to leave out Unicode characters between 65 and 90
+	    	//to avoid out of range characters.
+    		.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+    		.limit(iLen)
+    		.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+    		.toString();
+	    
+	    return sGeneratedString;
+	}
+	
 	public static String GetRandomName() {
 		return UUID.randomUUID().toString();
 	}
