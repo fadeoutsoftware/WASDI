@@ -32,6 +32,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	public static final int IPOSITIONOF_LINK = 0;
 	public static final int IPOSITIONOF_FILENAME = 1;
 	public static final int IPOSITIONOF_SIZEINBYTES = 2;
+	public static final int IPOSITIONOF_STATUS = 3;
 
 	//private string constants
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
@@ -75,23 +76,29 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 
 	public QueryResultViewModel translate(JSONObject oInJson, String sDownloadProtocol, boolean bFullViewModel) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.translate: null json");
-
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		oResult.setProvider("CREODIAS");
-		if (null == sDownloadProtocol ) {
-			//default protocol to https, trying to stay safe
-			sDownloadProtocol = "https";
+		try {
+			if (null == sDownloadProtocol ) {
+				//default protocol to https, trying to stay safe
+				sDownloadProtocol = "https";
+			}
+			oResult.getProperties().put("protocol", sDownloadProtocol);
+
+
+			parseMainInfo(oInJson, oResult);		
+			parseFootPrint(oInJson, oResult);
+			parseProperties(oInJson, bFullViewModel, oResult);
+
+			buildLink(oResult);
+			buildSummary(oResult);
+			System.out.println(oResult);
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorCREODIAS.translate( " +
+					oInJson.toString() + ", " +
+					sDownloadProtocol + ", " +
+					bFullViewModel + " ): " + oE );
 		}
-		oResult.getProperties().put("protocol", sDownloadProtocol);
-
-
-		parseMainInfo(oInJson, oResult);		
-		parseFootPrint(oInJson, oResult);
-		parseProperties(oInJson, bFullViewModel, oResult);
-
-		buildLink(oResult);
-		buildSummary(oResult);
-
 		return oResult;
 	}
 
@@ -99,13 +106,17 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	private void parseMainInfo(JSONObject oInJson, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.addMainInfo: input json is null");
 		Preconditions.checkNotNull(oResult,"DiasResponseTranslatorCREODIAS.addMainInfo: QueryResultViewModel is null");
+		try {
+			if(!oInJson.isNull("id")) {
+				oResult.setId(oInJson.optString("id", null));
+			}
 
-		if(!oInJson.isNull("id")) {
-			oResult.setId(oInJson.optString("id", null));
-		}
-
-		if(!oInJson.isNull(DiasResponseTranslatorCREODIAS.STYPE)){
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STYPE, oInJson.optString(DiasResponseTranslatorCREODIAS.STYPE, null));
+			if(!oInJson.isNull(DiasResponseTranslatorCREODIAS.STYPE)){
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STYPE, oInJson.optString(DiasResponseTranslatorCREODIAS.STYPE, null));
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorCREODIAS.parseMainInfo( " +
+					oInJson.toString() + ", ...): " + oE );
 		}
 	}
 
@@ -117,27 +128,30 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREODIAS.parseFootPrint: input json is null");
 		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorCREODIAS.parseFootPrint: QueryResultViewModel is null");
 
-		String sBuffer = null;
-		JSONObject oGeometry = oInJson.optJSONObject("geometry");
-		if(null!=oGeometry) {
-			sBuffer = oGeometry.optString(DiasResponseTranslatorCREODIAS.STYPE, null);
-			if(null != sBuffer) {
-				StringBuilder oFootPrint = new StringBuilder(sBuffer.toUpperCase());
-				oFootPrint.append(" (((");
-				
-				parseCoordinates(oGeometry, oFootPrint);
-				
-				//remove ending spaces and commas in excess
-				String sFootPrint = oFootPrint.toString();
-				sFootPrint = sFootPrint.trim();
-				while(sFootPrint.endsWith(",") ) {			
-					sFootPrint = sFootPrint.substring(0,  sFootPrint.length() - 1 );
-					sFootPrint = sFootPrint.trim();
-				}
-				sFootPrint += ")))";
-				oResult.setFootprint(sFootPrint);
-			}
+		try {
+			String sBuffer = null;
+			JSONObject oGeometry = oInJson.optJSONObject("geometry");
+			if(null!=oGeometry) {
+				sBuffer = oGeometry.optString(DiasResponseTranslatorCREODIAS.STYPE, null);
+				if(null != sBuffer) {
+					StringBuilder oFootPrint = new StringBuilder(sBuffer.toUpperCase());
+					oFootPrint.append(" (((");
 
+					parseCoordinates(oGeometry, oFootPrint);
+
+					//remove ending spaces and commas in excess
+					String sFootPrint = oFootPrint.toString();
+					sFootPrint = sFootPrint.trim();
+					while(sFootPrint.endsWith(",") ) {			
+						sFootPrint = sFootPrint.substring(0,  sFootPrint.length() - 1 );
+						sFootPrint = sFootPrint.trim();
+					}
+					sFootPrint += ")))";
+					oResult.setFootprint(sFootPrint);
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslatorCREODIAS.parseFootPrint( " + oInJson.toString() + ", ... ): " + oE );
 		}
 	}
 
@@ -197,73 +211,130 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	private void parseProperties(JSONObject oInJson, boolean bFullViewModel, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oInJson, "DiasResponseTranslatorCREDODIAS.addProperties: input json is null");
 		Preconditions.checkNotNull(oResult, "DiasResponseTranslatorCREDODIAS.addProperties: QueryResultViewModel is null");
-
-		JSONObject oProperties = oInJson.optJSONObject("properties");
-		if(null == oProperties) {
-			Utils.debugLog("DiasResponseTranslatorCREDODIAS.addProperties: input json has null properties");
-			return;
-		}
-
-		String sBuffer = null;
-
-		loadMostProperties(oResult, oProperties);
-
-		//title
-		oResult.setTitle("");
-		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.STITLE)) {
-			oResult.setTitle(oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
-		}
-
-		//preview
-		if(bFullViewModel) {
-			sBuffer = oProperties.optString("quicklook", null);
-			if(null!= sBuffer) {
-				oResult.setPreview(sBuffer);
+		try {
+			JSONObject oProperties = oInJson.optJSONObject("properties");
+			if(null == oProperties) {
+				Utils.debugLog("DiasResponseTranslatorCREDODIAS.addProperties: input json has null properties");
+				return;
 			}
-		}
 
-		sBuffer = oProperties.optString("startDate", null);
-		if(null!=sBuffer) {
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SDATE, sBuffer);
-			oResult.getProperties().put("startDate", sBuffer);
-			oResult.getProperties().put("beginposition", sBuffer);
-		}
+			String sBuffer = null;
 
-		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SINSTRUMENT)) {
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SINSTRUMENT, oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
-			oResult.getProperties().put("instrumentshortname", oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
-		}
+			loadMostProperties(oResult, oProperties);
 
-		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SSENSOR_MODE)) {
-			oResult.getProperties().put((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
-			oResult.getProperties().put("sensoroperationalmode", oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
-		}
+			//title
+			oResult.setTitle("");
+			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.STITLE)) {
+				oResult.setTitle(oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
+			}
 
-		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPLATFORM)) {
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SPLATFORM, oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
-			oResult.getProperties().put("platformname", oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
-		}
+			//preview
+			if(bFullViewModel) {
+				sBuffer = oProperties.optString("quicklook", null);
+				if(null!= sBuffer) {
+					oResult.setPreview(sBuffer);
+				}
+			}
 
-		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER)) {
-			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
-			oResult.getProperties().put("relativeorbitnumber", oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
-		}
+			sBuffer = oProperties.optString("startDate", null);
+			if(null!=sBuffer) {
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SDATE, sBuffer);
+				oResult.getProperties().put("startDate", sBuffer);
+				oResult.getProperties().put("beginposition", sBuffer);
+			}
 
-		//polarisationmode
-		if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPOLARISATION)){
-			oResult.getProperties().put("polarisationmode", oProperties.optString(DiasResponseTranslatorCREODIAS.SPOLARISATION, null));
-		}
+			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SINSTRUMENT)) {
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SINSTRUMENT, oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
+				oResult.getProperties().put("instrumentshortname", oProperties.optString(DiasResponseTranslatorCREODIAS.SINSTRUMENT, null));
+			}
 
-		//links
-		if(!oProperties.isNull("links")) {
+			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SSENSOR_MODE)) {
+				oResult.getProperties().put((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
+				oResult.getProperties().put("sensoroperationalmode", oProperties.optString((DiasResponseTranslatorCREODIAS.SSENSOR_MODE), null));
+			}
+
+			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPLATFORM)) {
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SPLATFORM, oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
+				oResult.getProperties().put("platformname", oProperties.optString(DiasResponseTranslatorCREODIAS.SPLATFORM, null));
+			}
+
+			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER)) {
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
+				oResult.getProperties().put("relativeorbitnumber", oProperties.optString(DiasResponseTranslatorCREODIAS.SRELATIVEORBITNUMBER, null));
+			}
+			if(oProperties.has("status") && !oProperties.isNull("status")) {
+				oResult.getProperties().put("status", oProperties.optString("status"));
+			}
+
+			//polarisationmode
+			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.SPOLARISATION)){
+				oResult.getProperties().put("polarisationmode", oProperties.optString(DiasResponseTranslatorCREODIAS.SPOLARISATION, null));
+			}
+
+			parseLinks(oProperties, oResult);
+
+			parseServices(oResult, oProperties);
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorCREODIAS.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
+		}
+	}
+
+
+	/**
+	 * @param oProperties
+	 * @param oResult
+	 */
+	private void parseLinks(JSONObject oProperties, QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oProperties, "properties JSON is null");
+		Preconditions.checkNotNull(oResult, "result view model is null");
+		
+		try {
+			//links
+			if(!oProperties.has("links")) {
+				Utils.debugLog("DiasResponseTranslatorCREODIAS.parseProperties: warning: field \"links\" was expected but not found, here's the json:\nJSON DUMP BEGIN\n" +
+						oProperties + "\nJSON DUMP END");
+			}
+			if(oProperties.isNull("links")) {
+				Utils.debugLog("DiasResponseTranslatorCREODIAS.parseProperties: warning: field \"links\" is present but has null value, here's the json:\nJSON DUMP BEGIN\n" +
+						oProperties + "\nJSON DUMP END");
+			}
+			//try as object
 			JSONObject oLinks = oProperties.optJSONObject("links");
-			if(!oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
-				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+			if(null!=oLinks) {
+				if(oLinks.has(DiasResponseTranslatorCREODIAS.SHREF) && !oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
+					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+				}
+			} else {
+				//try as array
+				JSONArray oLinksArray = oProperties.optJSONArray("links");
+				if(null!=oLinksArray) {
+					for (Object oObject : oLinksArray) {
+						try {
+							JSONObject oItem = (JSONObject) oObject;
+							if(!oItem.has("rel") || !oItem.isNull("rel")) {
+								continue;
+							}
+							String sRel = oItem.optString("rel", null);
+							if(Utils.isNullOrEmpty(sRel)) {
+								continue;
+							}
+							if(!sRel.equals("self")) {
+								continue;
+							}
+							//just store the "self" link
+							if(oLinks.has(DiasResponseTranslatorCREODIAS.SHREF) && !oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
+								oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+							}
+						} catch (Exception oE) {
+							Utils.debugLog("DiasResponseTranslatorCREODIAS.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
+						}
+					}
+				}
 			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslator.parseLinks( " + oProperties.toString() + ", ... ): " + oE);
 		}
-
-		parseServices(oResult, oProperties);
 	}
 
 
@@ -298,32 +369,58 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			}
 		},
 		 */
-		JSONObject oTemp = oProperties.optJSONObject("services");
-		if(null != oTemp) {
-			oTemp = oTemp.optJSONObject("download");
-			if(null!=oTemp) {
-				long lSize = oTemp.optLong(DiasResponseTranslatorCREODIAS.SSIZE, -1);
-				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES, ""+lSize);
-				if(0<=lSize) {
-					double dTmp = (double) lSize;
-					String sSize = Utils.getNormalizedSize(dTmp);
-					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE, sSize);
-				}
-				if(!oTemp.isNull(DiasResponseTranslatorCREODIAS.SURL)) {
-					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, oProperties.optString(DiasResponseTranslatorCREODIAS.SURL, null));
+		try {
+			JSONObject oTemp = oProperties.optJSONObject("services");
+			if(null != oTemp) {
+				//the link for download is extracted here!
+				oTemp = oTemp.optJSONObject("download");
+				if(null!=oTemp) {
+					long lSize = oTemp.optLong(DiasResponseTranslatorCREODIAS.SSIZE, -1);
+					oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES, ""+lSize);
+					String sSize = "0";
+					if(0<=lSize) {
+						double dTmp = (double) lSize;
+						sSize = Utils.getNormalizedSize(dTmp);
+						oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSIZE, sSize);
+					}
+					if(oTemp.has(DiasResponseTranslatorCREODIAS.SURL) && !oTemp.isNull(DiasResponseTranslatorCREODIAS.SURL)) {
+						String sUrl = oTemp.optString(DiasResponseTranslatorCREODIAS.SURL, null);
+						oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, sUrl);						
+						oResult.setLink(sUrl);
+					} else {
+						Utils.debugLog("DiasResponseTranslator.parseServices: download link not found! dumping json:\n" +
+								"JSON DUMP BEGIN\n" +
+								oProperties.toString() + 
+								"JSON DUMP END" );
+					}
+				} else {
+					Utils.debugLog("DiasResponseTranslator.parseServices: download link not found! dumping json:\n" +
+							"JSON DUMP BEGIN\n" +
+							oProperties.toString() + 
+							"JSON DUMP END" );
 				}
 			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices( ..., " + oProperties.toString() + " ):" + oE );
 		}
 	}
 
 	private void buildLink(QueryResultViewModel oResult) {
-		StringBuilder oLink = new StringBuilder(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL)); //0
-		oLink.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
-		.append(oResult.getTitle()) //1
-		.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
-		.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)); //2
-
-		oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
+		Preconditions.checkNotNull(oResult, "result view model is null");
+		try {
+			StringBuilder oLink = new StringBuilder(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL)); //0
+			oLink.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
+			.append(oResult.getTitle()) //1
+			.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
+			.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)) //2
+			.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
+			.append(oResult.getProperties().get("status")); //3
+	
+			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
+			oResult.setLink(oLink.toString());
+		} catch (Exception oE) {
+			Utils.debugLog("DiasResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);
+		}
 	}
 
 	protected void buildSummary(QueryResultViewModel oResult) {
