@@ -8,15 +8,21 @@ package wasdi.filebuffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.net.io.Util;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.CharStreams;
 
 import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
@@ -83,16 +89,55 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		//todo check availability
 		boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
 		if(bShallWeOrderIt) {
-			m_oLogger.warn("CREODIASProviderAdapter.ExecuteDownloadFile: ordering products not implemented yet"); 
+			m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
 			// order
-			//see https://creodias.eu/faq-all/-/asset_publisher/SIs09LQL6Gct/content/how-to-order-products-using-finder-api-?inheritRedirect=true
-			  // do
-	  		    // go to sleep for the expected period (if specified)
-			    // check again
-			  //while not available
+			try {
+				JSONObject oJsonStatus = orderProduct(sFileURL, sDownloadUser, sDownloadPassword);
+				String sStatus = "";
+				//todo tune waiting times
+				long lWaitStep = 60l;
+				long lUp = 300l;
+				long lLo = 60l;
+				boolean bInit = true;
+				while(true) {
+					if(null==oJsonStatus || !oJsonStatus.has("status") || !oJsonStatus.isNull("status")) {
+						throw new NullPointerException("JSON status is null, aborting");
+					}
+					//get, not opt: we want it to throw an exception if it is not present
+					sStatus = oJsonStatus.getString("status");
+					switch(sStatus) {
+					case "done_with_error":
+					case "cancelled":
+						m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed: " + oJsonStatus);
+						return null;
+					case "done":
+						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: order complete, proceeding to download");
+						break;
+					default:
+						//todo replace this polling using a callback
+						//todo set processor status to waiting
+						if(bInit) {
+							m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete");
+							TimeUnit.SECONDS.sleep(3600l);
+						} else {
+							long lRandomWaitSeconds = new Random().longs(lLo, lUp).findFirst().getAsLong();
+							//prepare to wait longer next time
+							lLo = lRandomWaitSeconds;
+							lUp += lWaitStep;
+							m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+							TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
+						}
+					}
+					oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
+
+				}
+			} catch (Exception oE) {
+				m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could check order status due to: " + oE);
+				return null;
+			}
 		}
 
-		  
+
 		//proceed as usual and download it
 		String sResult = null;
 		long lWaitStep = 10l;
@@ -116,6 +161,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 					lLo = lRandomWaitSeconds;
 					lUp += lWaitStep;
 					m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+					//todo set the processor as waiting
 					TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
 				} else {
 					//we're done
@@ -129,6 +175,147 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 
+	private JSONObject checkStatus(JSONObject oJsonOrder, String sDownloadUser, String sDownloadPassword) {
+		try {
+			String sCheckUrl =  "https://finder.creodias.eu/api/order/";
+			String sId = oJsonOrder.optString("id", null);
+			if(null==sId) {
+				throw new IllegalArgumentException("Could not find id in json: " + oJsonOrder);
+			}
+			URL oUrl = new URL(sCheckUrl);
+
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			oHttpConn.setRequestMethod("POST");
+			oHttpConn.addRequestProperty("Content-Type","application/json");
+			//oHttpConn.setRequestProperty("Accept", "*/*");
+			//oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+
+			oHttpConn.addRequestProperty("Keycloak-Token", obtainKeycloakToken(sDownloadUser, sDownloadPassword));
+		} catch (Exception oE) {
+			m_oLogger.error("CREODIASProviderAdapter.checkStatus( " + oJsonOrder + ", ... ): " + oE );
+		}
+		return null;
+	}
+
+
+	private JSONObject orderProduct(String sFileURL, String sDownloadUser, String sDownloadPassword) {
+		Preconditions.checkNotNull(sFileURL, "url is null");
+		Preconditions.checkArgument(!sFileURL.isEmpty(), "url is empty");
+		Preconditions.checkNotNull(sDownloadUser, "user is null");
+		Preconditions.checkArgument(!sDownloadUser.isEmpty(), "user is empty");
+		Preconditions.checkNotNull(sDownloadPassword, "password is null");
+		Preconditions.checkArgument(!sDownloadPassword.isEmpty(), "password is empty");
+
+
+		String[] sTokens = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
+		if(sTokens.length < 1) {
+			m_oLogger.error("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): not enough tokens, aborting" ); 
+			return null;
+		}
+
+		String sProductName = sTokens[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
+		if(sProductName.isEmpty()) {
+			m_oLogger.error("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): product name is empty, aborting" );
+			return null;
+		}
+
+		String sOrderUrl = "https://finder.creodias.eu/api/order/";
+
+		try {
+			URL oUrl = new URL(sOrderUrl);
+
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			oHttpConn.setRequestMethod("POST");
+			oHttpConn.addRequestProperty("Content-Type","application/json");
+			//oHttpConn.setRequestProperty("Accept", "*/*");
+			//oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+
+			oHttpConn.addRequestProperty("Keycloak-Token", obtainKeycloakToken(sDownloadUser, sDownloadPassword));
+
+			JSONObject oJsonRequest = new JSONObject();
+
+
+			//https://finder.creodias.eu/api/doc/#operation/order_create
+			/*
+	        REQUEST BODY SCHEMA: application/json
+
+			order_name: string (Order name) [ 1 .. 255 ] characters
+			priority: integer (Priority) [ 0 .. 2147483647 ] Nullable
+			destination: string (Destination) <= 255 characters: DIAS Collection or user bucket
+			callback: string (Callback) <= 255 characters: Callback URL ie. http://yourdomain.com/callback_handler
+			identifier_list: Array of strings
+			processor (*required): string (Processor) non-empty
+			resto_query: string (Resto query) non-empty
+			extra: object (Extra)
+			 */
+
+			//order_name
+			//255 is the maximum length
+			String sOrderName = Utils.getRandomName(255);
+			oJsonRequest.put("order_name", sOrderName);
+
+			//priority
+			//todo set priority to the highest possible value, according to the application. Is it 0 or 1?
+			int iPriority = 1;
+			oJsonRequest.put("priority", iPriority);
+
+			//maybe destination
+
+			//maybe use a callback
+
+			//identifier_list
+			List<String> asProducts = new ArrayList<String>();
+			asProducts.add(sProductName);
+			JSONArray oJsonProductsToOrder = new JSONArray(asProducts);
+			oJsonRequest.put("identifier_list", oJsonProductsToOrder);
+
+			//processor
+			//todo identify necessary processor according to the type of image required
+			oJsonRequest.put("processor", "sen2cor");
+
+
+			int iResponseCode = oHttpConn.getResponseCode();
+			
+			if (iResponseCode == HttpURLConnection.HTTP_CREATED ||
+					//actually it's just 201 that we expect, but just in case...
+					iResponseCode == HttpURLConnection.HTTP_OK) {
+				//good to go
+				String sResponse = "";
+				InputStream oInputStream = oHttpConn.getInputStream();
+				if(null!=oInputStream) {
+					try (Reader oReader = new InputStreamReader(oInputStream)){
+						sResponse = CharStreams.toString(oReader);
+						JSONObject oJson = new JSONObject(sResponse);
+						m_oLogger.info("CREODIASProviderAdapter.orderProduct: order placed");
+						return oJson;
+					} catch (Exception oE) {
+						m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE + " while trying to retrieve response from CREODIAS server" );
+					}
+				}
+			} else {
+				//not good
+				String sError = "";
+				InputStream oInputStream = oHttpConn.getErrorStream();
+				if(null!=oInputStream) {
+					try (Reader oReader = new InputStreamReader(oInputStream)){
+						sError = CharStreams.toString(oReader);
+						//todo check: is it a json object? If yes, parse and return it
+					} catch (Exception oE) {
+						m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE + " while trying to retrieve error from CREODIAS server" );
+					}
+				} 
+				String sLog = "CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): could not complete order, server returned status " + iResponseCode;
+				if(!Utils.isNullOrEmpty(sError)) {
+					sLog += " with message: " + sError;
+				}
+				m_oLogger.error(sLog);
+			}
+		} catch (Exception oE) {
+			m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE );
+		}
+		return null;
+	}
+
 	private boolean productShallBeOrdered(String sFileURL, String sDownloadUser, String sDownloadPassword) {
 		Preconditions.checkNotNull(sFileURL, "URL is null");
 		Preconditions.checkNotNull(sDownloadUser, "User is null");
@@ -136,22 +323,22 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 			String sStatus = extractStatusFromURL(sFileURL);
 			switch(sStatus.toLowerCase()) {
-				//order if...
-			    //31 means that product is orderable and waiting for download to our cache,
-				case "31":
-					return true;
+			//order if...
+			//31 means that product is orderable and waiting for download to our cache,
+			case "31":
+				return true;
 				//37 means that product is processed by our platform,
-				case "37":
-					return true;
+			case "37":
+				return true;
 				//do not order if...
 				//34 means that product is downloaded in cache,
-				case "34":
-					return false;
+			case "34":
+				return false;
 				//0 means that already processed product is waiting in our platform
-				case "0":
-					return false;
-				default:
-					return false;
+			case "0":
+				return false;
+			default:
+				return false;
 			}
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASProviderAdapter.checkAvailability: could not check availability due to: " + oE + ", assuming product available, try to do download it anyway");
