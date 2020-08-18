@@ -348,6 +348,16 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 							iEnd = sDisposition.length();
 						}
 						sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
+						while(sFileName.startsWith("\"") && sFileName.length()>1) {
+							sFileName=sFileName.substring(1);
+						}
+						assert(!sFileName.startsWith("\""));
+						while(sFileName.endsWith("\"") && sFileName.length()>1) {
+							sFileName=sFileName.substring(0, sFileName.length()-1);
+						}
+						assert(!sFileName.endsWith("\""));
+						
+						
 					} else {
 						bFromDisposition = false;
 					}
