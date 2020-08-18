@@ -7,6 +7,7 @@
 package wasdi.filebuffer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -129,7 +130,6 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 						}
 					}
 					oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
-
 				}
 			} catch (Exception oE) {
 				m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could check order status due to: " + oE);
@@ -176,21 +176,28 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	}
 
 	private JSONObject checkStatus(JSONObject oJsonOrder, String sDownloadUser, String sDownloadPassword) {
+		Preconditions.checkNotNull(oJsonOrder, "url is null");
+		Preconditions.checkNotNull(sDownloadUser, "user is null");
+		Preconditions.checkArgument(!sDownloadUser.isEmpty(), "user is empty");
+		Preconditions.checkNotNull(sDownloadPassword, "password is null");
+		Preconditions.checkArgument(!sDownloadPassword.isEmpty(), "password is empty");
+		
 		try {
 			String sCheckUrl =  "https://finder.creodias.eu/api/order/";
-			String sId = oJsonOrder.optString("id", null);
-			if(null==sId) {
-				throw new IllegalArgumentException("Could not find id in json: " + oJsonOrder);
-			}
+			//don't check, it's in a try/catch
+			String sId = oJsonOrder.getString("id");
+			sCheckUrl += sId + "/";
+			
 			URL oUrl = new URL(sCheckUrl);
 
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-			oHttpConn.setRequestMethod("POST");
+			oHttpConn.setRequestMethod("GET");
 			oHttpConn.addRequestProperty("Content-Type","application/json");
-			//oHttpConn.setRequestProperty("Accept", "*/*");
-			//oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
-
 			oHttpConn.addRequestProperty("Keycloak-Token", obtainKeycloakToken(sDownloadUser, sDownloadPassword));
+			
+			return handleResponseStatus(oHttpConn);
+			
+			
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASProviderAdapter.checkStatus( " + oJsonOrder + ", ... ): " + oE );
 		}
@@ -273,45 +280,54 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			//todo identify necessary processor according to the type of image required
 			oJsonRequest.put("processor", "sen2cor");
 
-
-			int iResponseCode = oHttpConn.getResponseCode();
-			
-			if (iResponseCode == HttpURLConnection.HTTP_CREATED ||
-					//actually it's just 201 that we expect, but just in case...
-					iResponseCode == HttpURLConnection.HTTP_OK) {
-				//good to go
-				String sResponse = "";
-				InputStream oInputStream = oHttpConn.getInputStream();
-				if(null!=oInputStream) {
-					try (Reader oReader = new InputStreamReader(oInputStream)){
-						sResponse = CharStreams.toString(oReader);
-						JSONObject oJson = new JSONObject(sResponse);
-						m_oLogger.info("CREODIASProviderAdapter.orderProduct: order placed");
-						return oJson;
-					} catch (Exception oE) {
-						m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE + " while trying to retrieve response from CREODIAS server" );
-					}
-				}
-			} else {
-				//not good
-				String sError = "";
-				InputStream oInputStream = oHttpConn.getErrorStream();
-				if(null!=oInputStream) {
-					try (Reader oReader = new InputStreamReader(oInputStream)){
-						sError = CharStreams.toString(oReader);
-						//todo check: is it a json object? If yes, parse and return it
-					} catch (Exception oE) {
-						m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE + " while trying to retrieve error from CREODIAS server" );
-					}
-				} 
-				String sLog = "CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): could not complete order, server returned status " + iResponseCode;
-				if(!Utils.isNullOrEmpty(sError)) {
-					sLog += " with message: " + sError;
-				}
-				m_oLogger.error(sLog);
-			}
+			return handleResponseStatus(oHttpConn);
 		} catch (Exception oE) {
 			m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE );
+		}
+		return null;
+	}
+
+	/**
+	 * @param oHttpConn
+	 * @return
+	 * @throws IOException
+	 */
+	private JSONObject handleResponseStatus(HttpURLConnection oHttpConn) throws IOException {
+		int iResponseCode = oHttpConn.getResponseCode();
+		
+		if (iResponseCode == HttpURLConnection.HTTP_CREATED ||
+				//actually it's just 201 that we expect, but just in case...
+				iResponseCode == HttpURLConnection.HTTP_OK) {
+			//good to go
+			String sResponse = "";
+			InputStream oInputStream = oHttpConn.getInputStream();
+			if(null!=oInputStream) {
+				try (Reader oReader = new InputStreamReader(oInputStream)){
+					sResponse = CharStreams.toString(oReader);
+					JSONObject oJson = new JSONObject(sResponse);
+					m_oLogger.info("CREODIASProviderAdapter.handleResponseStatus: order placed");
+					return oJson;
+				} catch (Exception oE) {
+					m_oLogger.warn("CREODIASProviderAdapter.handleResponseStatus: " + oE + " while trying to retrieve response from CREODIAS server" );
+				}
+			}
+		} else {
+			//not good
+			String sError = "";
+			InputStream oInputStream = oHttpConn.getErrorStream();
+			if(null!=oInputStream) {
+				try (Reader oReader = new InputStreamReader(oInputStream)){
+					sError = CharStreams.toString(oReader);
+					//todo check: is it a json object? If yes, parse and return it
+				} catch (Exception oE) {
+					m_oLogger.warn("CREODIASProviderAdapter.handleResponseStatus: " + oE + " while trying to retrieve error from CREODIAS server" );
+				}
+			} 
+			String sLog = "CREODIASProviderAdapter.handleResponseStatus: could not complete order, server returned status " + iResponseCode;
+			if(!Utils.isNullOrEmpty(sError)) {
+				sLog += " with message: " + sError;
+			}
+			m_oLogger.error(sLog);
 		}
 		return null;
 	}
