@@ -92,10 +92,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
 		
-//		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
-//		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
-		
-		
+	
 //		String sUrl = "https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?startDate=2019-12-01T00:00:00Z&completionDate=2019-12-03T23:59:59Z&geometry=POLYGON((7.397874989401342+45.00475144371268,10.373746303074263+44.94785607558927,10.389830621260842+43.612039503172866,7.703504034412235+43.809704932512176,7.397874989401342+45.00475144371268))";
 		String sUrl = getSearchUrl(oQuery);
 		
@@ -132,8 +129,6 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		if(Utils.isNullOrEmpty(sQuery)) {
 			Utils.debugLog(s_sClassName + ".getUrl: sQuery is null");
 		}
-//		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
-//		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
 		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
 		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		return sUrl;
@@ -169,14 +164,11 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	@Override
 	protected String getCountUrl(String sQuery) {
 		
-//		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
-//		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
-		
-		//accurate, but slower
-		//String sUrl = getUrl(sQuery) +  "&exactCount=1&maxRecords=1";
-		
 		//faster, but the number is only an estimate:
 		String sUrl = getUrl(sQuery) +  "&maxRecords=1";
+
+		//accurate, but slower
+		sUrl += "&exactCount=1";
 		
 		return sUrl;
 	}
