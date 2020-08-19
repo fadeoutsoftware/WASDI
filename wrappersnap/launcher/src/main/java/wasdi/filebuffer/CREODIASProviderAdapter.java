@@ -10,11 +10,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -35,6 +37,8 @@ import wasdi.shared.utils.Utils;
  *
  */
 public class CREODIASProviderAdapter extends ProviderAdapter {
+	
+	private String m_sOrderName = "";
 
 	/**
 	 * 
@@ -87,39 +91,52 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty, aborting");
 			return null;
 		}
-		//todo check availability
-		boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
-		if(bShallWeOrderIt) {
-			m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
-			// order
-			try {
+		try {
+			//todo check availability
+			boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
+			if(bShallWeOrderIt) {
+				m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
 				JSONObject oJsonStatus = orderProduct(sFileURL, sDownloadUser, sDownloadPassword);
-				String sStatus = "";
-				//todo tune waiting times
-				long lWaitStep = 60l;
-				long lUp = 300l;
-				long lLo = 60l;
+				if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
+					throw new NullPointerException("Order failed: JSON status is null, aborting");
+				}
+				m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: product ordered");
+				boolean bLoop = true;
+				String sStatus = oJsonStatus.getString("status");
+				if(sStatus.equals("done")) {
+					m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: good news! The requested file is already available :-)");
+					bLoop = false;
+				}
 				boolean bInit = true;
-				while(true) {
-					if(null==oJsonStatus || !oJsonStatus.has("status") || !oJsonStatus.isNull("status")) {
-						throw new NullPointerException("JSON status is null, aborting");
-					}
+
+				while(bLoop) {
+					//todo tune waiting times
+					long lWaitStep = 60l;
+					long lUp = 300l;
+					long lLo = 60l;
 					//get, not opt: we want it to throw an exception if it is not present
 					sStatus = oJsonStatus.getString("status");
 					switch(sStatus) {
 					case "done_with_error":
+						//todo shall we download it anyway?
+						m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed with status: done_with_error: " + oJsonStatus);
+						break;
 					case "cancelled":
 						m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed: " + oJsonStatus);
 						return null;
 					case "done":
-						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: order complete, proceeding to download");
+						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: order complete :-) proceeding to download");
+						bLoop = false;
 						break;
 					default:
+						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: status is: " + sStatus);
 						//todo replace this polling using a callback
 						//todo set processor status to waiting
 						if(bInit) {
-							m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete");
-							TimeUnit.SECONDS.sleep(3600l);
+							m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete");
+							Long lFirstWait = 3600l;
+							TimeUnit.SECONDS.sleep(lFirstWait);
+							bInit = false;
 						} else {
 							long lRandomWaitSeconds = new Random().longs(lLo, lUp).findFirst().getAsLong();
 							//prepare to wait longer next time
@@ -128,13 +145,17 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 							m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
 							TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
 						}
+						oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
+						if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
+							throw new NullPointerException("JSON status is null, aborting");
+						}
 					}
-					oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
 				}
-			} catch (Exception oE) {
-				m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could check order status due to: " + oE);
-				return null;
 			}
+
+		} catch (Exception oE) {
+			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could not check order status due to: " + oE);
+			return null;
 		}
 
 
@@ -181,23 +202,23 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		Preconditions.checkArgument(!sDownloadUser.isEmpty(), "user is empty");
 		Preconditions.checkNotNull(sDownloadPassword, "password is null");
 		Preconditions.checkArgument(!sDownloadPassword.isEmpty(), "password is empty");
-		
+
 		try {
 			String sCheckUrl =  "https://finder.creodias.eu/api/order/";
 			//don't check, it's in a try/catch
-			String sId = oJsonOrder.getString("id");
+			int sId = oJsonOrder.getInt("id");
 			sCheckUrl += sId + "/";
-			
+
 			URL oUrl = new URL(sCheckUrl);
 
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			oHttpConn.setRequestMethod("GET");
 			oHttpConn.addRequestProperty("Content-Type","application/json");
 			oHttpConn.addRequestProperty("Keycloak-Token", obtainKeycloakToken(sDownloadUser, sDownloadPassword));
-			
+
 			return handleResponseStatus(oHttpConn);
-			
-			
+
+
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASProviderAdapter.checkStatus( " + oJsonOrder + ", ... ): " + oE );
 		}
@@ -258,8 +279,8 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 			//order_name
 			//255 is the maximum length
-			String sOrderName = Utils.getRandomName(255);
-			oJsonRequest.put("order_name", sOrderName);
+			m_sOrderName = Utils.getRandomName(255);
+			oJsonRequest.put("order_name", m_sOrderName);
 
 			//priority
 			//todo set priority to the highest possible value, according to the application. Is it 0 or 1?
@@ -277,14 +298,23 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oJsonRequest.put("identifier_list", oJsonProductsToOrder);
 
 			//processor
-			//todo identify necessary processor according to the type of image required
-			oJsonRequest.put("processor", "sen2cor");
+			oJsonRequest.put("processor", getProcessor(sFileURL));
+
+			oHttpConn.setDoOutput(true);
+			oHttpConn.connect();
+			OutputStream oOutputStream = oHttpConn.getOutputStream();
+			oOutputStream.write(oJsonRequest.toString().getBytes());
 
 			return handleResponseStatus(oHttpConn);
 		} catch (Exception oE) {
 			m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE );
 		}
 		return null;
+	}
+
+	private String getProcessor(String sFileURL) {
+		//todo identify necessary processor according to the type of image required
+		return "sen2cor";
 	}
 
 	/**
@@ -294,7 +324,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 */
 	private JSONObject handleResponseStatus(HttpURLConnection oHttpConn) throws IOException {
 		int iResponseCode = oHttpConn.getResponseCode();
-		
+
 		if (iResponseCode == HttpURLConnection.HTTP_CREATED ||
 				//actually it's just 201 that we expect, but just in case...
 				iResponseCode == HttpURLConnection.HTTP_OK) {
@@ -304,6 +334,14 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			if(null!=oInputStream) {
 				try (Reader oReader = new InputStreamReader(oInputStream)){
 					sResponse = CharStreams.toString(oReader);
+					int iStatusPosition = sResponse.indexOf("status");
+					int iStart = sResponse.lastIndexOf('{', iStatusPosition);
+					int iEnd = Math.min(sResponse.indexOf('}', iStart)+1, sResponse.length());
+					sResponse = sResponse.substring(iStart, iEnd);
+					sResponse.trim();
+					if(!sResponse.endsWith("}")) {
+						sResponse += "}";
+					}
 					JSONObject oJson = new JSONObject(sResponse);
 					m_oLogger.info("CREODIASProviderAdapter.handleResponseStatus: order placed");
 					return oJson;
@@ -342,17 +380,15 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			//order if...
 			//31 means that product is orderable and waiting for download to our cache,
 			case "31":
-				return true;
 				//37 means that product is processed by our platform,
 			case "37":
 				return true;
+
 				//do not order if...
 				//34 means that product is downloaded in cache,
 			case "34":
-				return false;
 				//0 means that already processed product is waiting in our platform
 			case "0":
-				return false;
 			default:
 				return false;
 			}
