@@ -12,11 +12,8 @@ import java.util.List;
 import org.apache.abdera.i18n.templates.Template;
 import org.json.JSONObject;
 
-import com.google.common.base.Preconditions;
-
 import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
-import wasdi.shared.opensearch.creodias.DiasQueryTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 

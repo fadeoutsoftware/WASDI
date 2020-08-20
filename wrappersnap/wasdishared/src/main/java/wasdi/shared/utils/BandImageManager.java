@@ -31,7 +31,6 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.SceneTransformProvider;
 import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
 import org.esa.snap.core.image.ImageManager;
@@ -717,9 +716,11 @@ public class BandImageManager {
 	        lStartTime = System.currentTimeMillis();
 	        
 	        CollectionLayer oCollectionLayer = new CollectionLayer();
-	        LayerContext oContext = new MyLayerContext (m_oProduct,oCollectionLayer);
+
+	        //commented out the next two lines, as they are not used
+//	        LayerContext oContext = new MyLayerContext (m_oProduct,oCollectionLayer);
 	        
-	        SceneTransformProvider oProvider = oRedBand;
+//	        SceneTransformProvider oProvider = oRedBand;
 	        
 	        // RGB
 	        ImageLayer oRGBLayer = new ImageLayer(oRenderedImage);

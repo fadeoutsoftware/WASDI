@@ -1,7 +1,6 @@
 package wasdi.snapopearations;
 
 
-import org.esa.s2tbx.radiometry.TndviOp;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.ndvi.NdviOp;
 

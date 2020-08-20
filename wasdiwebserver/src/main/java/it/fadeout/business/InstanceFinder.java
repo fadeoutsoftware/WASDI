@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.nfs.orbits.CoverageTool.CoverageRequest;
@@ -36,7 +37,7 @@ public class InstanceFinder {
 	/**
 	 * List of Orbit's CosmoSkyMed satellites references
 	 */
-	public static final String[] s_sOrbitSats = new String[] {
+	public static final String[] s_asOrbitSats = new String[] {
 			"/org/nfs/orbits/sat/resource/cosmosky1.xml",
 			"/org/nfs/orbits/sat/resource/cosmosky2.xml",
 			"/org/nfs/orbits/sat/resource/cosmosky3.xml",
@@ -51,7 +52,7 @@ public class InstanceFinder {
 		    "/org/nfs/orbits/sat/resource/worldview2.xml"
 	};
 
-	public static final HashMap<String, String> s_sOrbitSatsMap = new HashMap<String, String>(){
+	public static final Map<String, String> s_asOrbitSatsMap = new HashMap<String, String>(){
 		{
 			put("COSMOSKY1", "/org/nfs/orbits/sat/resource/cosmosky1.xml");
 			put("COSMOSKY2", "/org/nfs/orbits/sat/resource/cosmosky2.xml");
@@ -107,16 +108,16 @@ public class InstanceFinder {
 
 
 		// use all cosmo skymed satellites
-		for (int i = 0; i < s_sOrbitSats.length; i++) {
+		for (int i = 0; i < s_asOrbitSats.length; i++) {
 			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
 
 			Satellite oSatellite;
 			try {
 				//oSatellite = new Satellite(oInputStream);
-				oSatellite=SatFactory.buildSat(s_sOrbitSats[i]);
+				oSatellite=SatFactory.buildSat(s_asOrbitSats[i]);
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
-				Utils.debugLog("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+				Utils.debugLog("InstanceFinder::findSwats: unable to instantiate satellite " + s_asOrbitSats[i] + " - " + oEx);
 				return null;
 			}
 
@@ -243,19 +244,19 @@ public class InstanceFinder {
 			m_aoSatellites = new ArrayList<ISatellite>();
 
 			// use all cosmo skymed satellites
-			for (int i = 0; i < s_sOrbitSats.length; i++) {
+			for (int i = 0; i < s_asOrbitSats.length; i++) {
 
-				Utils.debugLog("findSwats: cerco satellite: " + s_sOrbitSats[i]);
+				Utils.debugLog("findSwats: cerco satellite: " + s_asOrbitSats[i]);
 				//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
 
 				Satellite oSatellite;
 				try {
 					//oSatellite = new Satellite(oInputStream);
-					oSatellite=SatFactory.buildSat(s_sOrbitSats[i]);
+					oSatellite=SatFactory.buildSat(s_asOrbitSats[i]);
 					Utils.debugLog("costruito");
 				} catch (Throwable oEx) {
 					oEx.printStackTrace();
-					Utils.debugLog("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+					Utils.debugLog("InstanceFinder::findSwats: unable to instantiate satellite " + s_asOrbitSats[i] + " - " + oEx);
 					return null;
 				}
 
@@ -589,11 +590,11 @@ public class InstanceFinder {
 			Satellite oSatellite;
 			try {
 				//oSatellite = new Satellite(oInputStream);
-				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(sSatelliteName));
+				oSatellite=SatFactory.buildSat(s_asOrbitSatsMap.get(sSatelliteName));
 				Utils.debugLog("costruito");
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
-				Utils.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
+				Utils.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_asOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
 				return null;
 			}
 
@@ -865,13 +866,13 @@ public class InstanceFinder {
 		// inizializzo i satelliti
 		ArrayList<ISatellite> satelliti = new ArrayList<ISatellite>();
 
-		for (int i = 0; i < s_sOrbitSats.length; i++) {
+		for (int i = 0; i < s_asOrbitSats.length; i++) {
 //			InputStream strm = TestSat.class
 //					.getResourceAsStream(s_sOrbitSats[i]);
 			Satellite sat;
 			try {
 				//sat = new Satellite(strm);
-				sat=SatFactory.buildSat(s_sOrbitSats[i]);
+				sat=SatFactory.buildSat(s_asOrbitSats[i]);
 			} catch (Throwable oEx) {
 				// TODO Auto-generated catch block
 				oEx.printStackTrace();

@@ -316,8 +316,8 @@ public class Wasdi extends ResourceConfig {
 	 * @param oDate
 	 * @return
 	 */
-	public static String GetFormatDate(Date oDate) {
-		return Utils.GetFormatDate(oDate);
+	public static String getFormatDate(Date oDate) {
+		return Utils.getFormatDate(oDate);
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSessionId
 	 * @return
 	 */
-	public static User GetUserFromSession(String sSessionId) {
+	public static User getUserFromSession(String sSessionId) {
 
 		// validate sSessionId
 		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
@@ -526,7 +526,7 @@ public class Wasdi extends ResourceConfig {
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 
 				try {
-					oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());

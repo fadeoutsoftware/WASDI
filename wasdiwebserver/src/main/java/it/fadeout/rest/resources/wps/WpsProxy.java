@@ -23,7 +23,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
 
-import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;

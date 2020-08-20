@@ -1,18 +1,15 @@
 package wasdi.processors;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -537,7 +534,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Check and set the operation end-date
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				// P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
 				//LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
 			}
@@ -612,7 +609,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Check and set the operation end-date
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 			}			
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -624,7 +621,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			try {
 				// Check and set the operation end-date
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}			
 				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -712,7 +709,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			try {
 				// Check and set the operation end-date
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}			
 				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -801,7 +798,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			try {
 				// Check and set the operation end-date
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}			
 				
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);

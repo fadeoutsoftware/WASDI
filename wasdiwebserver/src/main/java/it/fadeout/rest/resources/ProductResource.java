@@ -6,7 +6,6 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -27,19 +26,14 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
-import wasdi.shared.parameters.ReadMetadataParameter;
-import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -59,59 +53,66 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId) {
-		Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
-
-		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null)
-			return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return null;
-
-		String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
-
-		// Create the entity
-		ProductWorkspace oProductWorkspace = new ProductWorkspace();
-		oProductWorkspace.setProductName(sPath + sProductName);
-		oProductWorkspace.setWorkspaceId(sWorkspaceId);
-
-		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-
-		if (oProductWorkspaceRepository.existsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
-			Utils.debugLog("ProductResource.AddProductToWorkspace:  Product already in the workspace");
-
-			// Ok done
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(true);
-			return oResult;
+		try {
+			Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
+	
+			// Validate Session
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName + " ): invalid session");
+				return null;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId()))
+				return null;
+	
+			String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+	
+			// Create the entity
+			ProductWorkspace oProductWorkspace = new ProductWorkspace();
+			oProductWorkspace.setProductName(sPath + sProductName);
+			oProductWorkspace.setWorkspaceId(sWorkspaceId);
+	
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+	
+			if (oProductWorkspaceRepository.existsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
+				Utils.debugLog("ProductResource.AddProductToWorkspace:  Product already in the workspace");
+	
+				// Ok done
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setBoolValue(true);
+				return oResult;
+			}
+			
+			DownloadedFilesRepository oDownFileRepo = new DownloadedFilesRepository();
+			DownloadedFile oDownFile = oDownFileRepo.getDownloadedFileByPath(oProductWorkspace.getProductName());
+			
+			if (oDownFile != null) {
+				GeorefProductViewModel oGeoRefViewModel = new GeorefProductViewModel(oDownFile.getProductViewModel());
+				if (oGeoRefViewModel!=null) oProductWorkspace.setBbox(oGeoRefViewModel.getBbox());
+			}
+	
+			// Try to insert
+			if (oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
+	
+				Utils.debugLog("ProductResource.AddProductToWorkspace:  Inserted");
+	
+				// Ok done
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setBoolValue(true);
+				return oResult;
+			} else {
+				Utils.debugLog("ProductResource.AddProductToWorkspace:  Error");
+	
+				// There was a problem
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setBoolValue(false);
+	
+				return oResult;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
 		}
-		
-		DownloadedFilesRepository oDownFileRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownFile = oDownFileRepo.getDownloadedFileByPath(oProductWorkspace.getProductName());
-		
-		if (oDownFile != null) {
-			GeorefProductViewModel oGeoRefViewModel = new GeorefProductViewModel(oDownFile.getProductViewModel());
-			if (oGeoRefViewModel!=null) oProductWorkspace.setBbox(oGeoRefViewModel.getBbox());
-		}
-
-		// Try to insert
-		if (oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
-
-			Utils.debugLog("ProductResource.AddProductToWorkspace:  Inserted");
-
-			// Ok done
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(true);
-			return oResult;
-		} else {
-			Utils.debugLog("ProductResource.AddProductToWorkspace:  Error");
-
-			// There was a problem
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-
-			return oResult;
-		}
+		return PrimitiveResult.getInvalid();
 	}
 
 	@GET
@@ -119,38 +120,42 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspace) {
+		try {
+			Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " )");
 
-		Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " )");
+			// Validate Session
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		
-		if (oUser == null) return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+			if (oUser == null) {
+				Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " ): invalid session");
+				return null;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
-		String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 
-		// Read the product from db
-		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath + sProductName);
+			// Read the product from db
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath + sProductName);
 
-		Utils.debugLog("ProductResource.GetByProductName: search file " + sFullPath + sProductName);
+			Utils.debugLog("ProductResource.GetByProductName: search file " + sFullPath + sProductName);
 
-		if (oDownloadedFile != null) {
+			if (oDownloadedFile != null) {
 
-			Utils.debugLog("ProductResource.GetByProductName: product found");
+				Utils.debugLog("ProductResource.GetByProductName: product found");
 
-			GeorefProductViewModel oGeoViewModel = new GeorefProductViewModel(oDownloadedFile.getProductViewModel());
-			oGeoViewModel.setBbox(oDownloadedFile.getBoundingBox());
+				GeorefProductViewModel oGeoViewModel = new GeorefProductViewModel(oDownloadedFile.getProductViewModel());
+				oGeoViewModel.setBbox(oDownloadedFile.getBoundingBox());
 
-			// Ok read
-			return oGeoViewModel;
-		} else {
-			Utils.debugLog("ProductResource.GetByProductName: product not found");
-
-			// Product not available
-			return null;
+				// Ok read
+				return oGeoViewModel;
+			} else {
+				Utils.debugLog("ProductResource.GetByProductName: product not found");
+			}
+		}catch (Exception oE) {
+			Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " ): " + oE);
 		}
+		return null;
 	}
 
 	@GET
@@ -158,92 +163,64 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
-
-		Utils.debugLog("ProductResource.GetMetadataByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: "
-				+ sWorkspaceId + " )");
-
-		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null)
-			return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return null;
-
-		String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
-
-		// Read the product from db
-		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath + sProductName);
-		
-		
-		MetadataViewModel oMetadataViewModel = null;
-
-		if (oDownloadedFile != null) {
-			if (oDownloadedFile.getProductViewModel() != null) {
-
-				try {
-					String sMetadataPath = "";
-
-					if (m_oServletConfig.getInitParameter("MetadataPath") != null) {
-						sMetadataPath = m_oServletConfig.getInitParameter("MetadataPath");
-						if (!m_oServletConfig.getInitParameter("MetadataPath").endsWith("/"))
-							sMetadataPath += "/";
-					}
-
-					String sMetadataFile = oDownloadedFile.getProductViewModel().getMetadataFileReference();
-					
-					// If we do not have a Metadata File
-					if (Utils.isNullOrEmpty(sMetadataFile)) {
-						
-						Utils.debugLog("ProductResource.GetMetadataByProductName: MetadataFile = null for product " + oDownloadedFile.getFilePath());
-						
-						// Was it created before or not?
-						if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
-							
-							Utils.debugLog("ProductResource.GetMetadataByProductName: first metadata request, create operation to read it");
-							
-							// Try to create it: get the user id
-							String sUserId = oUser.getUserId();
-							
-							// Create an Operation Id
-							String sProcessObjId = Utils.GetRandomName();
-							
-							// Create the Parameter 
-							ReadMetadataParameter oParameter = new ReadMetadataParameter();
-							oParameter.setProcessObjId(sProcessObjId);
-							oParameter.setExchange(sWorkspaceId);
-							oParameter.setWorkspace(sWorkspaceId);
-							oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-							oParameter.setProductName(sProductName);
-							oParameter.setUserId(sUserId);
-							
-							String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-							
-							// Trigger the Launcher Operation
-							Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, sPath, oParameter, null);
-							
-							oMetadataViewModel = new MetadataViewModel();
-							oMetadataViewModel.setName("Generating Metadata, try later");
-						}
-						else {
-							Utils.debugLog("ProductResource.GetMetadataByProductName: attemp to read metadata already done, just return");
-						}
-						
-						return oMetadataViewModel;
-					}
-
-					MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils.deserializeXMLToObject(sMetadataPath + sMetadataFile);
-					
-					Utils.debugLog("ProductResource.GetMetadataByProductName: return Metadata for product " + oDownloadedFile.getFilePath());
-					
-					// Ok return Metadata
-					return oReloaded;
-				} catch (Exception oEx) {
-					Utils.debugLog("ProductResource.GetMetadataByProductName: " + oEx);
-					return null;
-				}
-
+		try {
+			Utils.debugLog("ProductResource.GetMetadataByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: "
+					+ sWorkspaceId + " )");
+	
+			// Validate Session
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				Utils.debugLog("ProductResource.GetMetadataByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: "
+						+ sWorkspaceId + " ): invalid session");
+				return null;
 			}
+			if (Utils.isNullOrEmpty(oUser.getUserId()))
+				return null;
+	
+			String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
+					sWorkspaceId);
+	
+			// Read the product from db
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository
+					.getDownloadedFileByPath(sProductPath + sProductName);
+	
+			if (oDownloadedFile != null) {
+				if (oDownloadedFile.getProductViewModel() != null) {
+	
+					try {
+						String sMetadataPath = "";
+	
+						if (m_oServletConfig.getInitParameter("MetadataPath") != null) {
+							sMetadataPath = m_oServletConfig.getInitParameter("MetadataPath");
+							if (!m_oServletConfig.getInitParameter("MetadataPath").endsWith("/"))
+								sMetadataPath += "/";
+						}
+	
+						String sMetadataFile = oDownloadedFile.getProductViewModel().getMetadataFileReference();
+	
+						if (sMetadataFile == null) {
+							Utils.debugLog("ProductResource.GetMetadataByProductName: MetadataFile = null for product "
+									+ oDownloadedFile.getFilePath());
+							return null;
+						}
+	
+						MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils
+								.deserializeXMLToObject(sMetadataPath + sMetadataFile);
+						Utils.debugLog("ProductResource.GetMetadataByProductName: return Metadata for product "
+								+ oDownloadedFile.getFilePath());
+						// Ok return Metadata
+						return oReloaded;
+					} catch (Exception oEx) {
+						Utils.debugLog("ProductResource.GetMetadataByProductName: " + oEx);
+						return null;
+					}
+	
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("ProductResource.GetMetadataByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: "
+					+ sWorkspaceId + " ): " + oE);
 		}
 
 		// There was a problem
@@ -265,9 +242,10 @@ public class ProductResource {
 		}
 
 		try {
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -364,9 +342,10 @@ public class ProductResource {
 		}
 
 		try {
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProductResource.getLightListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -409,7 +388,7 @@ public class ProductResource {
 
 		Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<String> aoProductList = new ArrayList<String>();
 
@@ -417,6 +396,7 @@ public class ProductResource {
 
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -465,12 +445,13 @@ public class ProductResource {
 
 		Utils.debugLog("ProductResource.UpdateProductViewModel( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		try {
 
 			// Domain Check
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog("ProductResource.UpdateProductViewModel( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... ): invalid session");
 				return Response.status(401).build();
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -530,8 +511,9 @@ public class ProductResource {
 			return Response.status(401).build();
 		}
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): invalid session");
 			return Response.status(401).build();
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -601,10 +583,11 @@ public class ProductResource {
 
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): invalid session");
 			return Response.status(401).build();
 		}
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			return Response.status(401).build();
 		}
@@ -659,14 +642,13 @@ public class ProductResource {
 		PrimitiveResult oReturn = new PrimitiveResult();
 		oReturn.setBoolValue(false);
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		try {
 
 			// Domain Check
 			if (oUser == null) {
-				String sMessage = "passed a null user";
-				Utils.debugLog("ProductResource.DeleteProduct: " + sMessage);
-				oReturn.setStringValue(sMessage);
+				Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
+						+ sWorkspace + ", DeleteLayer: " + bDeleteLayer + " ): invalid session");
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
