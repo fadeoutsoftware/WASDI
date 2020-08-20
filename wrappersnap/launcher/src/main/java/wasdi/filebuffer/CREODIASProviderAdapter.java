@@ -298,7 +298,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oJsonRequest.put("identifier_list", oJsonProductsToOrder);
 
 			//processor
-			oJsonRequest.put("processor", getProcessor(sFileURL));
+			oJsonRequest.put("processor", getRequiredProcessor(sFileURL));
 
 			oHttpConn.setDoOutput(true);
 			oHttpConn.connect();
@@ -312,8 +312,16 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		return null;
 	}
 
-	private String getProcessor(String sFileURL) {
+	private String getRequiredProcessor(String sFileURL) {
 		//todo identify necessary processor according to the type of image required
+		try {
+			String sProduct = getFileName(sFileURL);
+			if(sProduct.startsWith("S1")) {
+				return "";
+			}
+		} catch (Exception oE) {
+			m_oLogger.error("CREODIASPRoviderAdapter.getRequiredProcessor: " + oE);
+		}
 		return "sen2cor";
 	}
 
