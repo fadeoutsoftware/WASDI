@@ -1,3 +1,4 @@
+@import "color-scheme";
 
 .sidenav {
     height: 100%;
@@ -194,10 +195,7 @@ select {
 }
 
 
-/*KASA APP STORE*/
-$wasdigreen: #009036;
-$wasdiblue: #43516a;
-$lightgrey: #efefef;
+
 
 
 /*===============================*/
@@ -448,6 +446,9 @@ $lightgrey: #efefef;
 
         }
         .publisher {
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
             .pub-name {
                 color: $wasdigreen;
             }
@@ -461,6 +462,18 @@ $lightgrey: #efefef;
             padding: 3px 10px;
             margin-right: -18px;
         }
+    }
+}
+
+.load-more-btn {
+    background-color: $wasdigreen;
+    color: white;
+    padding: 10px 25px;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    &:hover {
+        background-color: $darkwasdigreen;
     }
 }
 
