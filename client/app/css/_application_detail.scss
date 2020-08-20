@@ -1,3 +1,5 @@
+@import "color-scheme";
+
 .app-details {
     .appdetails-slider {
         ul {
@@ -44,11 +46,23 @@
         flex-direction: column;
         color: white;
         font-size: 1.4em;
+        cursor: pointer;
         &.subscription {
         background-color: $wasdigreen;
+            &:hover {
+                background-color: $darkwasdigreen;
+            }
         }
         &.one-shot {
         background-color: $wasdiblue;
+            &:hover {
+                background-color: $darkwasdiblue;
+            }
+        }
+        &.buyed {
+            span {
+                text-decoration: line-through;
+            }
         }
     }
     .tag-container {

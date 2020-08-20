@@ -95,9 +95,19 @@
             <!--PRICES-->
             <div class="row">
                 <div class="col-12 col-md-6">
-                    <div class="big-price-tag subscription">
+                    <!--USER NON PREMIUM-->
+                    <div class="big-price-tag subscription"> <!--ng-if="userStatus != 'premium'"-->
                         <div class="text-center">
                             <span>9.90</span><span> €/month</span>
+                        </div>
+                        <div class="text-center small">
+                            GET WASDI PREMIUM
+                        </div>
+                    </div>
+                    <!--PREMIUM USER-->
+                    <div class="big-price-tag subscription"> <!--ng-if="userStatus == 'premium'"-->
+                        <div class="text-center">
+                            <span>FREE WITH</span>
                         </div>
                         <div class="text-center small">
                             WASDI PREMIUM
@@ -105,8 +115,23 @@
                     </div>
                 </div>
                 <div class="col-12 col-md-6">
-                    <div class="big-price-tag one-shot">
-
+                    <!--APP NOT BUYED-->
+                    <div class="big-price-tag one-shot"> <!--ng-if="!userOwner"-->
+                        <div class="text-center">
+                            <span>2.90</span><span> €</span>
+                        </div>
+                        <div class="text-center small">
+                            BUY NOW!
+                        </div>
+                    </div>
+                    <!--APP ALREADY BUYED-->
+                    <div class="big-price-tag one-shot buyed"> <!--ng-if="userOwner || userStatus == 'premium'"-->
+                        <div class="text-center">
+                            <span>2.90</span><span> €</span>
+                        </div>
+                        <div class="text-center small">
+                            ALREADY BUYED
+                        </div>
                     </div>
                 </div>
             </div>
