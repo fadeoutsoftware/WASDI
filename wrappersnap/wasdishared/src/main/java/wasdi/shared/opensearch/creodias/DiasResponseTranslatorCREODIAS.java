@@ -24,7 +24,6 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  */
 public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 
-	private static final String STITLE = "title";
 
 	//String constants to be used elsewhere
 	public static final String SLINK_SEPARATOR_CREODIAS = ",";
@@ -33,6 +32,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	public static final int IPOSITIONOF_FILENAME = 1;
 	public static final int IPOSITIONOF_SIZEINBYTES = 2;
 	public static final int IPOSITIONOF_STATUS = 3;
+	public static final int IPOSITIONOF_REL = 3;
 
 	//private string constants
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
@@ -46,6 +46,8 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
 	private static final String STYPE = "type";
+	private static final String SSELF = "self";
+	private static final String STITLE = "title";
 
 
 	@Override
@@ -319,8 +321,12 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 							if(Utils.isNullOrEmpty(sRel)) {
 								continue;
 							}
-							if(!sRel.equals("self")) {
-								continue;
+							if(!sRel.equals(DiasResponseTranslatorCREODIAS.SSELF)) {
+								//if the product is missing, this link can be used to later ask again for it, after the order has been completed
+								String sHref = oItem.optString(DiasResponseTranslatorCREODIAS.SHREF, null);
+								if(null!=sHref) {
+									oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSELF, sHref);
+								}
 							}
 							//just store the "self" link
 							if(oLinks.has(DiasResponseTranslatorCREODIAS.SHREF) && !oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
@@ -388,17 +394,19 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 						oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SURL, sUrl);						
 						oResult.setLink(sUrl);
 					} else {
-						Utils.debugLog("DiasResponseTranslator.parseServices: download link not found! dumping json:\n" +
+						Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices: download link not found! dumping json:\n" +
 								"JSON DUMP BEGIN\n" +
 								oProperties.toString() + 
 								"JSON DUMP END" );
 					}
 				} else {
-					Utils.debugLog("DiasResponseTranslator.parseServices: download link not found! dumping json:\n" +
+					Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices: download link not found! dumping json:\n" +
 							"JSON DUMP BEGIN\n" +
 							oProperties.toString() + 
 							"JSON DUMP END" );
 				}
+			} else {
+				Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices: \"services\" field not found, aborting");
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices( ..., " + oProperties.toString() + " ):" + oE );
@@ -408,13 +416,42 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	private void buildLink(QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oResult, "result view model is null");
 		try {
-			StringBuilder oLink = new StringBuilder(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL)); //0
-			oLink.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
-			.append(oResult.getTitle()) //1
-			.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
-			.append(oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES)) //2
-			.append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)
-			.append(oResult.getProperties().get("status")); //3
+			StringBuilder oLink = new StringBuilder("");
+			
+			String sItem = "";
+			
+			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL);
+			if(null==sItem) {
+				sItem = "";
+			} 
+			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //0
+		
+			sItem = oResult.getTitle();
+			if(null==sItem) {
+				sItem = "";
+			} 
+			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //1
+			
+			
+			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSIZE_IN_BYTES);
+			if(null==sItem) {
+				sItem = "";
+			} 
+			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //2
+
+			
+			sItem = oResult.getProperties().get("status");
+			if(null==sItem) {
+				sItem = "";
+			} 
+			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //3
+			
+			
+			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SSELF);
+			if(null==sItem) {
+				sItem = "";
+			} 
+			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //4
 	
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
 			oResult.setLink(oLink.toString());
