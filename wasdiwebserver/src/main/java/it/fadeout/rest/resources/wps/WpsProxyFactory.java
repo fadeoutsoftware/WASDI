@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.utils.Utils;
 
 /**

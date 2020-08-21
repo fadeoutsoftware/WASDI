@@ -3,8 +3,6 @@ package wasdi.shared.data;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.Schedule;
 
 public class ScheduleRepository extends MongoRepository {

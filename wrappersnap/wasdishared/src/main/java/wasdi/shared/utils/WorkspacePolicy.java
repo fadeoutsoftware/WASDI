@@ -9,7 +9,7 @@ public class WorkspacePolicy {
 
 	public Boolean validProductName(String sName) {
 		if(null == sName) {
-			throw new NullArgumentException();
+			return false;
 		}
 		if( sName.length() < MINPRODUCTNAMELEN) {
 			return false;

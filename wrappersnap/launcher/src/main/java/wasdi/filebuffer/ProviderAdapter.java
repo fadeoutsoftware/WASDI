@@ -13,9 +13,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.esa.snap.core.datamodel.Product;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
@@ -25,7 +22,6 @@ import wasdi.LauncherMain;
 import wasdi.LoggerWrapper;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
-import wasdi.io.WasdiProductReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
@@ -91,17 +87,25 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
     @Override
 	public void subscribe(ProcessWorkspaceUpdateSubscriber oSubscriber) {
-    	if(null != oSubscriber) {
-    		m_aoSubscribers.add(oSubscriber);
-    	} else {
-    		m_oLogger.warn("ProviderAdapter.subscribe: null subscriber");
-    	}
+    	try {
+	    	if(null != oSubscriber) {
+	    		m_aoSubscribers.add(oSubscriber);
+	    	} else {
+	    		m_oLogger.warn("ProviderAdapter.subscribe: null subscriber");
+	    	}
+    	} catch (Exception oE) {
+    		m_oLogger.error("ProviderAdapter.subscribe: " + oE); 
+		}
 	}
 
 	@Override
 	public void unsubscribe(ProcessWorkspaceUpdateSubscriber oSubscriber) {
-		if(!m_aoSubscribers.remove(oSubscriber)) {
-			m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
+		try {
+			if(!m_aoSubscribers.remove(oSubscriber)) {
+				m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
+			}
+		} catch (Exception oE) {
+    		m_oLogger.error("ProviderAdapter.unsubscribe: " + oE); 
 		}
 	}
 	
@@ -165,8 +169,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		try {
 			// Domain check
 			if (Utils.isNullOrEmpty(sFileURL)) {
-				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
-				return "";
+				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
+				return null;
 			}
 
 			String sReturnFilePath = "";
@@ -204,12 +208,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			try {
 				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
 			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: connection timed out: " + oEx);
 			}
 			try {
 				iReadTimeOut = Integer.parseInt(sReadTimeOut);
 			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: read timed out: " + oEx);
 			}
 
 			URL oUrl = new URL(sFileURL);
@@ -227,14 +231,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 			// always check HTTP response code first
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-
 				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connected");
-
 				String sFileName = "";
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 				String sContentType = oHttpConn.getContentType();
 				int sContentLength = oHttpConn.getContentLength();
-
 				if (sDisposition != null) {
 					// extracts file name from header field
 					int iIndex = sDisposition.indexOf("filename=");
@@ -245,7 +246,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						else {
 							sFileName = sDisposition.substring(iIndex + 9, sDisposition.length());
 						}
-						
 					}
 				} else {
 					// extracts file name from URL
@@ -267,10 +267,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			m_oLogger.error("ProviderAdapter.getFileNameViaHttp: general error: " + oEx);
 		}
 
-		return "";
+		return null;
 	}
 	
     /**
@@ -297,7 +297,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
 		
 		// Return file path
-		String sReturnFilePath = "";
+		String sReturnFilePath = null;
 		
 		try {
 			// Basic HTTP Authentication
@@ -335,21 +335,43 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				String sContentType = oHttpConn.getContentType();
 				long lContentLength = oHttpConn.getContentLengthLong();
 
-				if (sDisposition != null) {
+				boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
+				if (bFromDisposition) {
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
 					// extracts file name from header field
-					int index = sDisposition.indexOf("filename=");
-					if (index > 0) {
-						sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
+					String sFileNameKey = "filename=";
+					int iStart = sDisposition.indexOf(sFileNameKey);
+					if (iStart > 0) {
+						m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
+						int iEnd = sDisposition.indexOf(' ', iStart);
+						if(iEnd < 0) {
+							iEnd = sDisposition.length();
+						}
+						sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
+						while(sFileName.startsWith("\"") && sFileName.length()>1) {
+							sFileName=sFileName.substring(1);
+						}
+						assert(!sFileName.startsWith("\""));
+						while(sFileName.endsWith("\"") && sFileName.length()>1) {
+							sFileName=sFileName.substring(0, sFileName.length()-1);
+						}
+						assert(!sFileName.endsWith("\""));
+						
+						
+					} else {
+						bFromDisposition = false;
 					}
-				} else {
-					// extracts file name from URL
-					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
 				}
-
-				m_oLogger.debug("Content-Type = " + sContentType);
-				m_oLogger.debug("Content-Disposition = " + sDisposition);
-				m_oLogger.debug("Content-Length = " + lContentLength);
+				if(!bFromDisposition) {
+					// extracts file name from URL
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
+					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
+				}
 				m_oLogger.debug("fileName = " + sFileName);
+				
+				m_oLogger.debug("Content-Type = " + sContentType);
+				m_oLogger.debug("Content-Length = " + lContentLength);
+				
 
 				// opens input stream from the HTTP connection
 				InputStream oInputStream = oHttpConn.getInputStream();
@@ -377,14 +399,22 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				}
 
 			} else {
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+				m_oLogger.debug("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
+				//todo retrieve error
+				InputStream oErrorStream = oHttpConn.getErrorStream();
+				if(null != oErrorStream) {
+					InputStreamReader oReader = new InputStreamReader(oErrorStream);
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: error message: " + oReader.toString() );
+				} else {
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: provider did not send an error message");
+				}
 				m_iLastError = iResponseCode;
 			}
 			oHttpConn.disconnect();			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Exception " + oEx.toString());
-			return "";
+			m_oLogger.error("ProviderAdapter.downloadViaHttp: Exception " + oEx);
+			return null;
 		}
 
 
@@ -543,9 +573,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         return lLenght;
     }
 
-	protected Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
-		return true;
-	}
 	
 	/**
 	 * @param oHttpConn

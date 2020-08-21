@@ -263,7 +263,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Set the process as running
 			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
-			oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
+			oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
 			oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 			oProcessWorkspace.setPid(getProcessId());
 
@@ -297,7 +297,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				if (oProcessWorkspace != null) {
 					oProcessWorkspace.setProgressPerc(100);
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 					if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
 						s_oLogger.debug(
@@ -2708,7 +2708,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 				// update the process
 				oProcessWorkspace.setProgressPerc(100);
-				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
 					s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Error during process update (terminated)");
 				}
@@ -3103,10 +3103,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			s_oLogger.error("killProcessTree: Kill loop done");
 			
+						
 			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
-			oMyProcess.setStatus("DONE");
-			oMyProcess.setProgressPerc(100);
-			oRepository.updateProcess(oMyProcess);
+			
+			updateProcessStatus(oRepository, oMyProcess, ProcessStatus.DONE, 100);
 			
 		} catch (Exception oE) {
 			s_oLogger.error("killProcessTree: " + oE);
@@ -3178,7 +3178,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
 	
 				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
-				oProcessToKill.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				oProcessToKill.setOperationEndDate(Utils.getFormatDate(new Date()));
 	
 				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 				if (!oRepository.updateProcess(oProcessToKill)) {
@@ -3255,7 +3255,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return;
 			}
-			
+						
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			
 			String sProductPath = LauncherMain.getWorspacePath(oReadMetadataParameter) + sProductName;
@@ -3274,29 +3274,34 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 			}
 			
+			if (LauncherMain.s_oSendToRabbit != null) {
+				String sInfo = "Read Metadata Operation<br>Retriving File Metadata<br>Try again later";
+				LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+			}			
+			
 			if (Utils.isNullOrEmpty(oDownloadedFile.getProductViewModel().getMetadataFileReference())) {
 				if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
 					
-					s_oLogger.error("readMetadata: Metadata File still not created. Generate it");
+					s_oLogger.info("readMetadata: Metadata File still not created. Generate it");
 					
 					oDownloadedFile.getProductViewModel().setMetadataFileCreated(true);
 					oDownloadedFile.getProductViewModel().setMetadataFileReference(asynchSaveMetadata(sProductPath));
 					
-					s_oLogger.error("readMetadata: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+					s_oLogger.info("readMetadata: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
 					
 					oDownloadedFilesRepository.updateDownloadedFile(oDownloadedFile);
 				}
 				else {
-					s_oLogger.error("readMetadata: attemp to create metadata file has already been done");
+					s_oLogger.info("readMetadata: attemp to create metadata file has already been done");
 				}
 			}
 			else {
-				s_oLogger.error("readMetadata: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+				s_oLogger.info("readMetadata: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
 			}
 						
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
-			s_oLogger.error("readMetadata: done, bye");
+			s_oLogger.info("readMetadata: done, bye");
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("readMetadata Exception " + oEx.toString());

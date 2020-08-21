@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -6,27 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.runtime.Config;
-import org.esa.snap.runtime.Engine;
-
 import wasdi.ConfigReader;
-import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessorLog;
-import wasdi.shared.business.ProductWorkspace;
-import wasdi.shared.business.PublishedBand;
-import wasdi.shared.business.SnapWorkflow;
-import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProcessorLogRepository;
-import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.data.SnapWorkflowRepository;
-import wasdi.shared.data.WorkspaceSharingRepository;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.GeorefProductViewModel;
 
 public class TestDataLayer {
 

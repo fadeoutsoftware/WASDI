@@ -512,7 +512,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				// ok
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: process done with code 0");
 				if (oProcessWorkspace != null) {
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 				}
 			}
@@ -520,7 +520,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				// errore
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.run: process done with ERROR code = " + iExitStatus);
 				if (oProcessWorkspace != null) {
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				}
 			}			
@@ -531,7 +531,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			//if (LauncherMain.s_oSendToRabbit!=null) LauncherMain.s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.run Exception", oEx);
 			try {
-				if (oProcessWorkspace != null) oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				if (oProcessWorkspace != null) oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			} catch (JsonProcessingException e) {
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.run Exception", e);

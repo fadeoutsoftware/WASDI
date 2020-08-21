@@ -6,8 +6,6 @@
  */
 package wasdi.shared.parameters;
 
-import org.apache.commons.io.FilenameUtils;
-
 import wasdi.shared.utils.Utils;
 
 /**
