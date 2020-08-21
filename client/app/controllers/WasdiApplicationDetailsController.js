@@ -54,10 +54,10 @@ var WasdiApplicationDetailsController = (function() {
 
 
         /*KASA FOR TEST*/
-        $scope.userStatus = 'premium';
-        $scope.userOwner = true;
-        $scope.reviewsNbr = '42';
-        $scope.processorPrice = '2.50';
+        $scope.userStatus = '';
+        $scope.userOwner = false;
+        $scope.reviewsNbr = '36';
+        $scope.processorPrice = '2';
 
         /**
          * Application Object

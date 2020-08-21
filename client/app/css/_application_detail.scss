@@ -60,7 +60,7 @@
             }
         }
         &.one-shot {
-        background-color: $wasdigreen;
+        background-color: $wasdiblue;
             &:hover {
                 background-color: $darkwasdiblue;
             }
@@ -136,6 +136,9 @@
             background-color: $darkwasdiblue;
         }
 
+    }
+    .text-green-wasdi {
+        color: $wasdigreen;
     }
 }
 

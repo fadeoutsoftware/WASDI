@@ -104,6 +104,8 @@
                             GET WASDI PREMIUM
                         </div>
                     </div>
+                </div>
+                <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
                     <div class="big-price-tag one-shot">
                         <div class="text-center">
                             <span>2.90</span><span> €</span>
@@ -115,7 +117,7 @@
                 </div>
 
                 <!--CASE 2 - PREMIUM-->
-                <div class="col-12 col-md-6" ng-if="userStatus == 'premium'">
+                <div class="col-12 col-md-6" ng-if="userStatus == 'premium' && processorPrice > 0 && !userOwner">
                     <div class="big-price-tag subscription premium" >
                         <div class="text-center">
                             <span> <span>{{processorPrice}}</span><span> €</span></span>
@@ -136,7 +138,7 @@
                 </div>
 
                 <!--CASE 4 - FREE APP-->
-                <div class="col-12 col-md-6" ng-if="processorPrice == 0">
+                <div class="col-12 col-md-6" ng-if="processorPrice == 0 && !userOwner">
                     <div class="big-price-tag free" >
                         <div class="text-center large">
                             FREE!
@@ -164,7 +166,7 @@
                 </div>
 
             <!--LOUNCH APP-->
-            <div class="launch-btn">
+            <div class="launch-btn" ng-click="m_oController.openApplicationPage()">
                 <span>Open Application UI</span>
                 <div class="arrow">
                     <span></span>
@@ -177,18 +179,60 @@
             </div>
         </div>
 
-        <div class="row">
-            <div>Link: {{m_oController.m_oApplication.link}}</div>
+    <!--APP DETAILS-->
+    <div class="row">
+        <div class="mb-3 mt-5">
+            <div class="d-flex align-items-center">
+                <div>
+                    <span class="fa fa-sliders mr-2"></span>
+                    <span>APPLICATION DETAILS</span>
+                </div>
+                <hr class="ml-3 flex-grow-1">
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-6 border-right">
+                    <div>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></div>
+                    <div>Contact: <span class="text-green-wasdi">{{m_oController.m_oApplication.email}}</span></div>
+                    <div>WebSite: <span class="text-green-wasdi">{{m_oController.m_oApplication.link}}</span></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div>Pubblication Date: <span class="text-green-wasdi">18/06/2020</span></div>
+                    <div>Last Update: <span class="text-green-wasdi">22/08/2020</span></div>
+                    <div>Purchased: <span class="text-green-wasdi">214</span></div>
+                </div>
+
+            </div>
         </div>
-        <div class="row">
-            <div>Contact: {{m_oController.m_oApplication.email}}</div>
+    </div>
+
+    <!--APP DETAILS-->
+    <div class="row">
+        <div class="mb-5 pb-5">
+            <div class="d-flex align-items-center">
+                <div>
+                    <span class="fa fa-sliders mr-2"></span>
+                    <span>APPLICATION DETAILS</span>
+                </div>
+                <hr class="ml-3 flex-grow-1">
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-6 border-right">
+                    <div>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></div>
+                    <div>Contact: <span class="text-green-wasdi">{{m_oController.m_oApplication.email}}</span></div>
+                    <div>WebSite: <span class="text-green-wasdi">{{m_oController.m_oApplication.link}}</span></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div>Pubblication Date: <span class="text-green-wasdi">18/06/2020</span></div>
+                    <div>Last Update: <span class="text-green-wasdi">22/08/2020</span></div>
+                    <div>Purchased: <span class="text-green-wasdi">214</span></div>
+                </div>
+
+            </div>
         </div>
-        <div class="row">
-            <div>Publisher: {{m_oController.m_oApplication.publisher}}</div>
-        </div>
-        <div class="row">
-            <button ng-click="m_oController.openApplicationPage()">Open Application UI</button>
-        </div>
+    </div>
+    <div>
+
+    </div>
     </div>
 </div>
 
