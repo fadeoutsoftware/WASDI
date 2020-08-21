@@ -1,187 +1,190 @@
 <div class="editor-view app-details">
     <div class="row justify-content-end toolbar">
     </div>
-    <div class="container mt-4">
-        <div class="row">
-            <div class="border-bottom py-3 mb-5 d-print-flex justify-content-between">
-                <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the Future</span>
-            </div>
-            <!--APPS IMG SLIDER-->
-            <div class="col-12 col-md-6">
-                <div class="appdetails-slider">
-                    <ul id="lightSlider">
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-1.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-1.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-2.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-2.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-3.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-3.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-4.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-4.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-5.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-5.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-6.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-6.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-7.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-7.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-8.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-8.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-9.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-9.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-10.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-10.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-11.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-12.jpg" />
-                        </li>
-                        <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-13.jpg">
-                            <img src="https://sachinchoolur.github.io/lightslider/img/cS-13.jpg" />
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!--APPS DETAILS-->
-            <div class="col-12 col-md-6">
-                <!--TITLE-->
-                <div class="application-title">
-                    <h2>{{m_oController.m_oApplication.friendlyName}}</h2>
-                </div>
-                <!--STARS-->
-                <div class="star-rating mb-2">
-                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>0.25&&m_oController.m_oApplication.score<0.75?'checked-half':m_oController.m_oApplication.score>=0.75?'checked':''"></span>
-                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>1.25&&m_oController.m_oApplication.score<1.75?'checked-half':m_oController.m_oApplication.score>=1.75?'checked':''"></span>
-                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>2.25&&m_oController.m_oApplication.score<2.75?'checked-half':m_oController.m_oApplication.score>=2.75?'checked':''"></span>
-                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>3.25&&m_oController.m_oApplication.score<3.75?'checked-half':m_oController.m_oApplication.score>=3.75?'checked':''"></span>
-                    <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>4.25&&m_oController.m_oApplication.score<4.75?'checked-half':m_oController.m_oApplication.score>=4.75?'checked':''"></span>
-                    <span class="ml-2 small">{{reviewsNbr}} reviews</span>
-                </div>
-                <!--PUBLISHER-->
-                <div class="publisher mb-1>
-                    <span ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
-                    <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the publisher my master!</span>
-                </div>
-                <!--TAGS LIST-->
-                <div class="tags-list-wrapper">
-                    <div class="d-flex align-items-center">
-                        <div>
-                            <span class="fa fa-tags mr-2"></span>
-                            <span>CATEGORIES</span>
-                        </div>
-                        <hr class="ml-3 flex-grow-1">
-                    </div>
-                    <div class="tags-list d-flex">
-                        <!--<div class="d-flex tag-container" ng-repeat="tag in m_oController.m_oApplication.categories">-->
-                        <div class="d-flex tag-container mb-2 mr-3" ng-repeat="tag in testVar">
-                            <div class="pre-tag">
-                                <div class="white-circle"></div>
-                            </div>
-                            <div class="tag">
-                                <span>{{tag}}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="mt-4">
-                </div>
-            <!--PRICES-->
+    <div class="scroll-wrapper">
+        <div class="container mt-4">
             <div class="row">
-                <!--CASE 1 - NO PREMIUM / NO BUYED / NO FREE-->
-                <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
-                    <div class="big-price-tag subscription">
-                        <div class="text-center">
-                            <span>9.90</span><span> €/month</span>
-                        </div>
-                        <div class="text-center small">
-                            GET WASDI PREMIUM
-                        </div>
-                    </div>
+                <div class="border-bottom py-3 mb-5 d-print-flex justify-content-between">
+                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the Future</span>
                 </div>
-                <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
-                    <div class="big-price-tag one-shot">
-                        <div class="text-center">
-                            <span>2.90</span><span> €</span>
-                        </div>
-                        <div class="text-center small">
-                            BUY NOW!
-                        </div>
+                <!--APPS IMG SLIDER-->
+                <div class="col-12 col-md-6">
+                    <div class="appdetails-slider">
+                        <ul id="lightSlider">
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-1.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-1.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-2.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-2.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-3.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-3.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-4.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-4.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-5.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-5.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-6.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-6.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-7.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-7.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-8.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-8.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-9.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-9.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-10.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-10.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-11.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-12.jpg" />
+                            </li>
+                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-13.jpg">
+                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-13.jpg" />
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
-                <!--CASE 2 - PREMIUM-->
-                <div class="col-12 col-md-6" ng-if="userStatus == 'premium' && processorPrice > 0 && !userOwner">
-                    <div class="big-price-tag subscription premium" >
-                        <div class="text-center">
-                            <span> <span>{{processorPrice}}</span><span> €</span></span>
-                        </div>
-                        <div class="text-center small">
-                            FREE WITH WASDI PREMIUM
-                        </div>
+                <!--APPS DETAILS-->
+                <div class="col-12 col-md-6">
+                    <!--TITLE-->
+                    <div class="application-title">
+                        <h2>{{m_oController.m_oApplication.friendlyName}}</h2>
                     </div>
-                </div>
-
-                <!--CASE 3 - BUYED-->
-                <div class="col-12 col-md-6" ng-if="userOwner">
-                    <div class="big-price-tag buyed" >
-                        <div class="text-center large">
-                            BUYED!
-                        </div>
+                    <!--STARS-->
+                    <div class="star-rating mb-2">
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>0.25&&m_oController.m_oApplication.score<0.75?'checked-half':m_oController.m_oApplication.score>=0.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>1.25&&m_oController.m_oApplication.score<1.75?'checked-half':m_oController.m_oApplication.score>=1.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>2.25&&m_oController.m_oApplication.score<2.75?'checked-half':m_oController.m_oApplication.score>=2.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>3.25&&m_oController.m_oApplication.score<3.75?'checked-half':m_oController.m_oApplication.score>=3.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>4.25&&m_oController.m_oApplication.score<4.75?'checked-half':m_oController.m_oApplication.score>=4.75?'checked':''"></span>
+                        <span class="ml-2 small">{{reviewsNbr}} reviews</span>
                     </div>
-                </div>
-
-                <!--CASE 4 - FREE APP-->
-                <div class="col-12 col-md-6" ng-if="processorPrice == 0 && !userOwner">
-                    <div class="big-price-tag free" >
-                        <div class="text-center large">
-                            FREE!
-                        </div>
+                    <!--PUBLISHER-->
+                    <div class="publisher mb-1>
+                        <span ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
+                        <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the publisher my master!</span>
                     </div>
-                </div>
-            </div>
 
-
-                <!--DESCRIPTION-->
-                <div class="app-details-description mt-2">
-                        <div class="mb-3">
-                            <div class="d-flex align-items-center">
-                                <div>
-                                    <span class="fa fa-briefcase mr-2"></span>
-                                    <span>DESCRIPTION</span>
-                                </div>
-                                <hr class="ml-3 flex-grow-1">
-                            </div>
+                    <!--TAGS LIST-->
+                    <div class="tags-list-wrapper">
+                        <div class="d-flex align-items-center">
                             <div>
-                                {{m_oController.m_oApplication.processorDescription}}
+                                <span class="fa fa-tags mr-2"></span>
+                                <span>CATEGORIES</span>
+                            </div>
+                            <hr class="ml-3 flex-grow-1">
+                        </div>
+                        <div class="tags-list d-flex">
+                            <!--<div class="d-flex tag-container" ng-repeat="tag in m_oController.m_oApplication.categories">-->
+                            <div class="d-flex tag-container mb-2 mr-3" ng-repeat="tag in testVar">
+                                <div class="pre-tag">
+                                    <div class="white-circle"></div>
+                                </div>
+                                <div class="tag">
+                                    <span>{{tag}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="mt-4">
+                    </div>
+                    <!--PRICES-->
+                    <div class="row">
+                        <!--CASE 1 - NO PREMIUM / NO BUYED / NO FREE-->
+                        <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
+                            <div class="big-price-tag subscription">
+                                <div class="text-center">
+                                    <span>9.90</span><span> €/month</span>
+                                </div>
+                                <div class="text-center small">
+                                    GET WASDI PREMIUM
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
+                            <div class="big-price-tag one-shot">
+                                <div class="text-center">
+                                    <span>2.90</span><span> €</span>
+                                </div>
+                                <div class="text-center small">
+                                    BUY NOW!
+                                </div>
                             </div>
                         </div>
 
-                </div>
+                        <!--CASE 2 - PREMIUM-->
+                        <div class="col-12 col-md-6" ng-if="userStatus == 'premium' && processorPrice > 0 && !userOwner">
+                            <div class="big-price-tag subscription premium" >
+                                <div class="text-center">
+                                    <span> <span>{{processorPrice}}</span><span> €</span></span>
+                                </div>
+                                <div class="text-center small">
+                                    FREE WITH WASDI PREMIUM
+                                </div>
+                            </div>
+                        </div>
 
-            <!--LOUNCH APP-->
-            <div class="launch-btn" ng-click="m_oController.openApplicationPage()">
-                <span>Open Application UI</span>
-                <div class="arrow">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                        <!--CASE 3 - BUYED-->
+                        <div class="col-12 col-md-6" ng-if="userOwner">
+                            <div class="big-price-tag buyed" >
+                                <div class="text-center large">
+                                    BUYED!
+                                </div>
+                            </div>
+                        </div>
 
-                </div>
-            </div>
+                        <!--CASE 4 - FREE APP-->
+                        <div class="col-12 col-md-6" ng-if="processorPrice == 0 && !userOwner">
+                            <div class="big-price-tag free" >
+                                <div class="text-center large">
+                                    FREE!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!--DESCRIPTION-->
+                    <div class="app-details-description mt-2">
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <span class="fa fa-briefcase mr-2"></span>
+                                        <span>DESCRIPTION</span>
+                                    </div>
+                                    <hr class="ml-3 flex-grow-1">
+                                </div>
+                                <div>
+                                    {{m_oController.m_oApplication.processorDescription}}
+                                </div>
+                            </div>
+
+                    </div>
+
+                    <!--LOUNCH APP-->
+                    <div class="launch-btn" ng-click="m_oController.openApplicationPage()">
+                        <span>Open Application UI</span>
+                        <div class="arrow">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+
+                        </div>
+                    </div>
 
             </div>
         </div>
 
+
     <!--APP DETAILS-->
     <div class="row">
-        <div class="mb-3 mt-5">
+        <div class="col-12 px-4 mb-3 mt-5">
             <div class="d-flex align-items-center">
                 <div>
                     <span class="fa fa-sliders mr-2"></span>
@@ -205,26 +208,22 @@
         </div>
     </div>
 
-    <!--APP DETAILS-->
+    <!--REVIEWS-->
     <div class="row">
-        <div class="mb-5 pb-5">
+        <div class="col-12 px-4 mb-5 pb-5">
             <div class="d-flex align-items-center">
                 <div>
-                    <span class="fa fa-sliders mr-2"></span>
-                    <span>APPLICATION DETAILS</span>
+                    <span class="fa fa-comments mr-2"></span>
+                    <span>REVIEWS</span>
                 </div>
                 <hr class="ml-3 flex-grow-1">
             </div>
             <div class="row">
-                <div class="col-12 col-md-6 border-right">
-                    <div>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></div>
-                    <div>Contact: <span class="text-green-wasdi">{{m_oController.m_oApplication.email}}</span></div>
-                    <div>WebSite: <span class="text-green-wasdi">{{m_oController.m_oApplication.link}}</span></div>
+                <div class="col-12 col-md-4 bg-light">
+                    left
                 </div>
-                <div class="col-12 col-md-6">
-                    <div>Pubblication Date: <span class="text-green-wasdi">18/06/2020</span></div>
-                    <div>Last Update: <span class="text-green-wasdi">22/08/2020</span></div>
-                    <div>Purchased: <span class="text-green-wasdi">214</span></div>
+                <div class="col-12 col-md-8">
+                    right
                 </div>
 
             </div>

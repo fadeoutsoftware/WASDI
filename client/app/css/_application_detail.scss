@@ -1,5 +1,9 @@
 @import "color-scheme";
-
+.scroll-wrapper {
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 .app-details {
     .appdetails-slider {
         ul {
