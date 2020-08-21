@@ -5,6 +5,8 @@
 
 var WasdiApplicationDetailsController = (function() {
 
+
+
     /**
      * Class constructor
      * @param $scope
@@ -49,6 +51,13 @@ var WasdiApplicationDetailsController = (function() {
          * @type {*[]}
          */
         this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
+
+
+        /*KASA FOR TEST*/
+        $scope.userStatus = 'premium';
+        $scope.userOwner = true;
+        $scope.reviewsNbr = '42';
+        $scope.processorPrice = '2.50';
 
         /**
          * Application Object

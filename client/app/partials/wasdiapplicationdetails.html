@@ -53,7 +53,7 @@
             <!--APPS DETAILS-->
             <div class="col-12 col-md-6">
                 <!--TITLE-->
-                <div>
+                <div class="application-title">
                     <h2>{{m_oController.m_oApplication.friendlyName}}</h2>
                 </div>
                 <!--STARS-->
@@ -63,7 +63,7 @@
                     <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>2.25&&m_oController.m_oApplication.score<2.75?'checked-half':m_oController.m_oApplication.score>=2.75?'checked':''"></span>
                     <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>3.25&&m_oController.m_oApplication.score<3.75?'checked-half':m_oController.m_oApplication.score>=3.75?'checked':''"></span>
                     <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>4.25&&m_oController.m_oApplication.score<4.75?'checked-half':m_oController.m_oApplication.score>=4.75?'checked':''"></span>
-                    <span class="ml-2 small">49 reviews</span>
+                    <span class="ml-2 small">{{reviewsNbr}} reviews</span>
                 </div>
                 <!--PUBLISHER-->
                 <div class="publisher mb-1>
@@ -94,9 +94,9 @@
                 </div>
             <!--PRICES-->
             <div class="row">
-                <div class="col-12 col-md-6">
-                    <!--USER NON PREMIUM-->
-                    <div class="big-price-tag subscription"> <!--ng-if="userStatus != 'premium'"-->
+                <!--CASE 1 - NO PREMIUM / NO BUYED / NO FREE-->
+                <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
+                    <div class="big-price-tag subscription">
                         <div class="text-center">
                             <span>9.90</span><span> €/month</span>
                         </div>
@@ -104,19 +104,7 @@
                             GET WASDI PREMIUM
                         </div>
                     </div>
-                    <!--PREMIUM USER-->
-                    <div class="big-price-tag subscription"> <!--ng-if="userStatus == 'premium'"-->
-                        <div class="text-center">
-                            <span>FREE WITH</span>
-                        </div>
-                        <div class="text-center small">
-                            WASDI PREMIUM
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <!--APP NOT BUYED-->
-                    <div class="big-price-tag one-shot"> <!--ng-if="!userOwner"-->
+                    <div class="big-price-tag one-shot">
                         <div class="text-center">
                             <span>2.90</span><span> €</span>
                         </div>
@@ -124,13 +112,34 @@
                             BUY NOW!
                         </div>
                     </div>
-                    <!--APP ALREADY BUYED-->
-                    <div class="big-price-tag one-shot buyed"> <!--ng-if="userOwner || userStatus == 'premium'"-->
+                </div>
+
+                <!--CASE 2 - PREMIUM-->
+                <div class="col-12 col-md-6" ng-if="userStatus == 'premium'">
+                    <div class="big-price-tag subscription premium" >
                         <div class="text-center">
-                            <span>2.90</span><span> €</span>
+                            <span> <span>{{processorPrice}}</span><span> €</span></span>
                         </div>
                         <div class="text-center small">
-                            ALREADY BUYED
+                            FREE WITH WASDI PREMIUM
+                        </div>
+                    </div>
+                </div>
+
+                <!--CASE 3 - BUYED-->
+                <div class="col-12 col-md-6" ng-if="userOwner">
+                    <div class="big-price-tag buyed" >
+                        <div class="text-center large">
+                            BUYED!
+                        </div>
+                    </div>
+                </div>
+
+                <!--CASE 4 - FREE APP-->
+                <div class="col-12 col-md-6" ng-if="processorPrice == 0">
+                    <div class="big-price-tag free" >
+                        <div class="text-center large">
+                            FREE!
                         </div>
                     </div>
                 </div>
@@ -138,15 +147,32 @@
 
 
                 <!--DESCRIPTION-->
-                <div class="app-details-description">
+                <div class="app-details-description mt-2">
                         <div class="mb-3">
-                            <span class="fa fa-briefcase mr-2"></span>
-                            <span>DESCRIPTION</span>
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <span class="fa fa-briefcase mr-2"></span>
+                                    <span>DESCRIPTION</span>
+                                </div>
+                                <hr class="ml-3 flex-grow-1">
+                            </div>
+                            <div>
+                                {{m_oController.m_oApplication.processorDescription}}
+                            </div>
                         </div>
-                    <div>
-                        {{m_oController.m_oApplication.processorDescription}}
-                    </div>
+
                 </div>
+
+            <!--LOUNCH APP-->
+            <div class="launch-btn">
+                <span>Open Application UI</span>
+                <div class="arrow">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </div>
+            </div>
 
             </div>
         </div>
