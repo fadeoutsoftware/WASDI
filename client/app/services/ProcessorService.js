@@ -15,8 +15,8 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         return this.m_oHttp.get(this.APIURL + '/processors/getdeployed');
     };
 
-    this.getMarketplaceList = function(sCategories) {
-        return this.m_oHttp.get(this.APIURL + '/processors/getmarketlist');
+    this.getMarketplaceList = function(oFilter) {
+        return this.m_oHttp.post(this.APIURL + '/processors/getmarketlist',oFilter);
     };
 
     this.getMarketplaceDetail = function(sApplication) {

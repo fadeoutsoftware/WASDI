@@ -71,6 +71,7 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppDetailViewModel;
+import wasdi.shared.viewmodels.AppFilterViewModel;
 import wasdi.shared.viewmodels.AppListViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -324,9 +325,9 @@ public class ProcessorsResource  {
 	}
 	
 	
-	@GET
+	@POST
 	@Path("/getmarketlist")
-	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("catfilter") String sCategoryFilters) throws Exception {
+	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, AppFilterViewModel oFilters) throws Exception {
 
 		ArrayList<AppListViewModel> aoRet = new ArrayList<>(); 
 		Utils.debugLog("ProcessorsResource.getMarketPlaceAppList( Session: " + sSessionId + " )");
@@ -341,20 +342,119 @@ public class ProcessorsResource  {
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
+			
+			String sOrderBy = "name";
+			
+			if (!Utils.isNullOrEmpty(oFilters.getOrderBy())) {
+				if (oFilters.getOrderBy().toLowerCase().equals("date")) {
+					sOrderBy = "updateDate";
+				}
+				else if  (oFilters.getOrderBy().toLowerCase().equals("name")) {
+					sOrderBy = "name";
+				}
+				else if  (oFilters.getOrderBy().toLowerCase().equals("price")) {
+					sOrderBy = "ondemandPrice";
+				}
+			}
+			
+			// Initialize ascending direction
+			int iDirection = 1;
+			// Set descending if it was -1
+			if (oFilters.getOrderDirection() == -1) iDirection = -1;
+			
+			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors(sOrderBy, iDirection);
 			ReviewRepository oReviewRepository = new ReviewRepository();
 			
+			int iAvailableApps = 0;
+			
 			for (int i=0; i<aoDeployed.size(); i++) {
+								
 				AppListViewModel oAppListViewModel = new AppListViewModel();
 				Processor oProcessor = aoDeployed.get(i);
+				// Initialize as No Votes
+				float fScore = -1.0f;				
 
 				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
-
+				
+				// See if this is a processor the user can access to
 				if (oProcessor.getIsPublic() != 1) {
 					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
 						if (oSharing == null) continue;
 					}
 				}
+				
+				// Check and apply name filter
+				if (!Utils.isNullOrEmpty(oFilters.getName())) {
+					if (!oProcessor.getName().contains(oFilters.getName())) continue;
+				}
+				
+				// Check and apply category filter
+				if (oFilters.getCategories().size()>0) {
+					
+					boolean bCategoryFound = false;
+					
+					for (String sProcessorCategory : oProcessor.getCategories()) {
+						if (oFilters.getCategories().contains(sProcessorCategory)) {
+							bCategoryFound = true;
+							break;
+						}
+					}
+					
+					if (!bCategoryFound) continue;
+				}
+				
+				// Check and apply publisher filter
+				if (oFilters.getPublishers().size()>0) {
+					
+					if (!oFilters.getPublishers().contains(oProcessor.getUserId())) {
+						continue;
+					}
+				}
+				
+				if (oFilters.getScore()> 0) {
+					
+					// Get the reviews to compute the vote
+					List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+										
+					// If we have reviews
+					if (aoReviews != null) {
+						if (aoReviews.size()>0) {
+							// Take the sum
+							for (Review oReview : aoReviews) {
+								fScore += oReview.getVote();
+							}
+							
+							// Compute average
+							fScore /= aoReviews.size();
+						}
+					}
+					
+					if (fScore<=oFilters.getScore() && fScore != -1.0f) {
+						continue;
+					}
+				}
+				
+				// Check and apply min price filter
+				if (oFilters.getMinPrice()>0) {
+					if (oProcessor.getOndemandPrice() < oFilters.getMinPrice()) continue;
+				}
+				
+				// Check and apply max price filter
+				if (oFilters.getMaxPrice()>0) {
+					if (oProcessor.getOndemandPrice() > oFilters.getMaxPrice()) continue;
+				}
+				
+				// This is a app compatible with the filter: handle the pagination
+				
+				// Jump if this is an app of previous pages
+				if (iAvailableApps<oFilters.getPage()*oFilters.getItemsPerPage()) {
+					iAvailableApps++;
+					continue;
+				}
+				// Stop if this is an app after the actual page
+				if (iAvailableApps>= (oFilters.getPage()+1) * oFilters.getItemsPerPage()) break;
+				
+				iAvailableApps++;
 				
 				if (oSharing != null || oProcessor.getUserId().equals(oUser.getUserId())) oAppListViewModel.setIsMine(true);
 				else oAppListViewModel.setIsMine(false);
@@ -375,26 +475,7 @@ public class ProcessorsResource  {
 				else {
 					oAppListViewModel.setFriendlyName(oProcessor.getName());
 				}
-				
-				// Get the reviews to compute the vote
-				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
-				
-				// Initialize as No Votes
-				float fScore = -1.0f;
-				
-				// If we have reviews
-				if (aoReviews != null) {
-					if (aoReviews.size()>0) {
-						// Take the sum
-						for (Review oReview : aoReviews) {
-							fScore += oReview.getVote();
-						}
-						
-						// Compute average
-						fScore /= aoReviews.size();
-					}
-				}
-				
+								
 				// Set the score to the View Model
 				oAppListViewModel.setScore(fScore);
 				

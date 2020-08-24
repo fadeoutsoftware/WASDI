@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -275,6 +276,7 @@ public class dbUtils {
 	        System.out.println("\t1 - Extract Log");
 	        System.out.println("\t2 - Clear Log");
 	        System.out.println("\t3 - Redeploy");
+	        System.out.println("\t4 - Fix Processor Creation/Update date");
 	        System.out.println("");
 	        
 	        Scanner oScanner = new Scanner( System.in);
@@ -357,6 +359,45 @@ public class dbUtils {
 		        
 		        oEngine.redeploy(oParameter);
 		        
+	        }
+	        else if (sInputString.equals("4")) { 
+	        	ProcessorRepository oProcessorRepository = new ProcessorRepository();
+	        	List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+	        	
+	        	System.out.println("Found " + aoProcessors.size() + " Processors");
+	        	
+	        	Date oNow = new Date();
+	        	
+	        	for (Processor oProcessor : aoProcessors) {
+	        		
+	        		boolean bUpdate = false;
+	        		
+	        		if (oProcessor.getUploadDate() == null) {
+	        			oProcessor.setUploadDate((double) oNow.getTime());
+	        			bUpdate = true;	        			
+	        		}
+	        		else if (oProcessor.getUploadDate()<=0) {
+	        			oProcessor.setUploadDate((double) oNow.getTime());
+	        			bUpdate = true;
+	        		}
+	        		
+	        		
+	        		if (oProcessor.getUpdateDate() == null) {
+						oProcessor.setUpdateDate((double) oNow.getTime());
+						bUpdate = true;	        			
+	        		}
+	        		else if (oProcessor.getUpdateDate()<=0) {
+						oProcessor.setUpdateDate((double) oNow.getTime());
+						bUpdate = true;
+					}
+					
+					if (bUpdate) {
+						System.out.println("Updating " + oProcessor.getName());
+						oProcessorRepository.updateProcessor(oProcessor);
+					}
+				}
+	        	
+	        	System.out.println("Processors Update Done");
 	        }
 		}
 		catch (Exception oEx) {

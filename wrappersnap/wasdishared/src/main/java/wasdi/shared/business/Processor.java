@@ -104,6 +104,9 @@ public class Processor {
 	 */
 	private String parameterSample="";
 	
+	/**
+	 * List of associated categories
+	 */
 	private ArrayList<String> categories = new ArrayList<String>();
 	
 	public ArrayList<String> getCategories() {

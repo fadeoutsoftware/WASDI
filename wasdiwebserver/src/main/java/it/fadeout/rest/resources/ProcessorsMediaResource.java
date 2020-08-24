@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -27,15 +28,18 @@ import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppCategoryViewModel;
 import wasdi.shared.viewmodels.ListReviewsViewModel;
+import wasdi.shared.viewmodels.PublisherFilterViewModel;
 import wasdi.shared.viewmodels.ReviewViewModel;
 
 @Path("processormedia")
@@ -59,6 +63,8 @@ public class ProcessorsMediaResource {
 	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
+		
+		Utils.debugLog("ProcessorsMediaResource.uploadProcessorLogo( Session: " + sSessionId + ", ProcId: " + sProcessorId + ")");
 		// Check the user session
 		User oUser = getUser(sSessionId);
 		
@@ -131,6 +137,8 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/logo/get")
 	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+		
+		Utils.debugLog("ProcessorsMediaResource.getProcessorLogo ( Session: " + sSessionId + ", ProcId: " + sProcessorId + " )");
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
@@ -167,8 +175,8 @@ public class ProcessorsMediaResource {
 	@Path("/images/get")
 	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
 								@QueryParam("imageName") String sImageName) {
-
-
+		
+		Utils.debugLog("ProcessorsMediaResource.getAppImage( Session: " + sSessionId + " )");
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
@@ -200,6 +208,9 @@ public class ProcessorsMediaResource {
 	@DELETE
 	@Path("/image/delete")
 	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
+		
+		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + "  )");
+		
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
@@ -235,6 +246,8 @@ public class ProcessorsMediaResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+		
+		Utils.debugLog("ProcessorsMediaResource.uploadProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + " )");
 	
 		String sExt;
 		String sFileName;
@@ -306,6 +319,8 @@ public class ProcessorsMediaResource {
 	@Path("categories/get")
 	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		
+		Utils.debugLog("ProcessorsMediaResource.getCategories( Session: " + sSessionId + " )");
+		
 		User oUser = getUser(sSessionId);
 		
 		AppsCategoriesRepository oAppCategoriesRepository = new AppsCategoriesRepository();
@@ -326,6 +341,8 @@ public class ProcessorsMediaResource {
 	@DELETE
 	@Path("/reviews/delete")
 	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
+		
+		Utils.debugLog("ProcessorsMediaResource.deleteReview( Session: " + sSessionId + " )");
 		
 		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
 		
@@ -364,6 +381,8 @@ public class ProcessorsMediaResource {
 	@POST
 	@Path("/reviews/update")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
+		
+		Utils.debugLog("ProcessorsMediaResource.updateReview( Session: " + sSessionId + " )");
 	
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -408,6 +427,8 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/add")
 //	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
+		
+		Utils.debugLog("ProcessorsMediaResource.addReview( Session: " + sSessionId + " )");
 	
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -455,6 +476,8 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/reviews/get")
 	public Response getReview (@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+		
+		Utils.debugLog("ProcessorsMediaResource.getReview( Session: " + sSessionId + " )");
 
 
 		User oUser = getUser(sSessionId);
@@ -485,6 +508,67 @@ public class ProcessorsMediaResource {
 	}
 	
 	
+	@GET
+	@Path("/publisher/getlist")
+	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Utils.debugLog("ProcessorsMediaResource.getPublishers( Session: " + sSessionId + " )");
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		// Get all the processors
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+		
+		List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+		
+		if(aoProcessors == null) {
+			return Response.status(500).build();
+		}
+		
+		// Create a return list of publishers
+		ArrayList<PublisherFilterViewModel> aoPublishers = new ArrayList<PublisherFilterViewModel>();
+		
+		// For each processor
+		for (Processor oProcessor : aoProcessors) {
+			
+			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+			
+			if (oProcessor.getIsPublic() != 1) {
+				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
+					if (oSharing == null) continue;
+				}
+			}			
+			
+			boolean bFound = false;
+			
+			// Check if there is already a view model of the publisher
+			for (PublisherFilterViewModel oPublisher : aoPublishers) {
+				if (oPublisher.getPublisher().equals(oProcessor.getUserId())) {
+					// Yes, increment the count and break;
+					bFound = true;
+					oPublisher.setAppCount(oPublisher.getAppCount()+1);
+					break;
+				}
+			}
+			
+			if (!bFound) {
+				// New Publisher, create the View Model
+				PublisherFilterViewModel oPublisherFilter = new PublisherFilterViewModel();
+				oPublisherFilter.setPublisher(oProcessor.getUserId());
+				oPublisherFilter.setAppCount(1);
+				aoPublishers.add(oPublisherFilter);
+			}
+		}
+		
+	    return Response.ok(aoPublishers).build();
+
+	}
 	
 	private boolean isValidVote(Float fVote){
 		if (fVote>=0.0 && fVote<=5.0) return true;

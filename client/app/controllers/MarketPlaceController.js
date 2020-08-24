@@ -11,9 +11,10 @@ var MarketPlaceController = (function() {
      * @param oConstantsService
      * @param oAuthService
      * @param oProcessorService
+     * @param oProcessorMediaService
      * @constructor
      */
-    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService) {
+    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService) {
         /**
          * Angular Scope
          */
@@ -41,6 +42,23 @@ var MarketPlaceController = (function() {
          */
         this.m_oProcessorService = oProcessorService;
 
+        /**
+         * Processors Media Service
+         */
+        this.m_oProcessorMediaService = oProcessorMediaService;
+
+        /**
+         * Name Filter
+         * @type {string}
+         */
+        this.m_sNameFilter = "";
+
+        /**
+         * Flag to know if load more is enabled or not
+         * @type {boolean}
+         */
+        this.m_bLoadMoreEnabled = true;
+
         /*KASA FOR TEST*/
         $scope.testVar = true;
 
@@ -50,12 +68,39 @@ var MarketPlaceController = (function() {
          */
         this.m_aoApplicationList = []
 
-        let oController = this;
+        /**
+         * List of Categories
+         * @type {*[]}
+         */
+        this.m_aoCategories = []
+
 
         /**
-         * Ask the list of Applications to the WASDI server
+         * List of Publishers
+         * @type {*[]}
          */
-        this.m_oProcessorService.getMarketplaceList().success(function (data) {
+        this.m_aoPublishers = []
+
+        this.m_oAppFilter = {
+            categories: [],
+            publishers: [],
+            name: "",
+            score: 0,
+            minPrice: -1,
+            maxPrice: -1,
+            itemsPerPage: 12,
+            page: 0,
+            orderBy: "name"
+        }
+
+        /**
+         * Local reference to the controller
+         * @type {MarketPlaceController}
+         */
+        let oController = this;
+
+        // Ask the list of Applications to the WASDI server
+        this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_aoApplicationList = oController.setDefaultImages(data);
@@ -67,9 +112,142 @@ var MarketPlaceController = (function() {
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
         });
+
+        // Get the list of categories
+        this.m_oProcessorMediaService.getCategories().success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_aoCategories = data;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING CATEGORIES");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING CATEGORIES");
+        });
+
+        // Get the list of publishers
+        this.m_oProcessorMediaService.getPublishersFilterList().success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_aoPublishers = data;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING PUBLISHERS");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING PUBLISHERS");
+        });
     }
 
 
+    /**
+     * Refresh the application list
+     */
+    MarketPlaceController.prototype.refreshAppList = function() {
+
+        let oController = this;
+
+        if (this.m_sNameFilter !== this.m_oAppFilter.name) {
+            this.m_oAppFilter.page = 0;
+            this.m_oAppFilter.name = this.m_sNameFilter;
+        }
+
+        this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                if (oController.m_oAppFilter.page == 0) {
+                    oController.m_aoApplicationList = oController.setDefaultImages(data);
+                }
+                else {
+                    if (data.length>0) {
+                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImages(data));
+                    }
+                }
+
+                // If there is no data, we do not need Load More Button
+                if (data.length > 0) {
+                    oController.m_bLoadMoreEnabled = true;
+                }
+                else {
+                    oController.m_bLoadMoreEnabled = false;
+                }
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+        });
+
+    }
+
+    /**
+     * Handle load more button
+     */
+    MarketPlaceController.prototype.loadMore = function () {
+        this.m_oAppFilter.page = this.m_oAppFilter.page+1;
+        this.refreshAppList();
+    }
+
+    /**
+     * Handle a click on a order by menu
+     * @param sColumn
+     */
+    MarketPlaceController.prototype.orderByClicked = function (sColumn) {
+
+        if (this.m_oAppFilter.orderBy === sColumn) {
+            if (this.m_oAppFilter.orderDirection === 1) this.m_oAppFilter.orderDirection = -1;
+            else if (this.m_oAppFilter.orderDirection === -1) this.m_oAppFilter.orderDirection = 1;
+            else this.m_oAppFilter.orderDirection = 1;
+        }
+
+        this.m_oAppFilter.orderBy = sColumn;
+        this.m_oAppFilter.page = 0;
+
+        this.refreshAppList();
+    }
+
+    /**
+     * Handle a click on a category
+     * @param sCategoryId
+     */
+    MarketPlaceController.prototype.categoryClicked = function (sCategoryId) {
+        if (this.m_oAppFilter.categories.includes(sCategoryId)) {
+            this.m_oAppFilter.categories = this.m_oAppFilter.categories.filter(function(e) { return e !== sCategoryId })
+        }
+        else {
+            this.m_oAppFilter.categories.push(sCategoryId);
+        }
+        this.m_oAppFilter.page = 0;
+    }
+
+    /**
+     * Handle a click on a publisher
+     * @param sPublisher
+     */
+    MarketPlaceController.prototype.publisherClicked = function (sPublisher) {
+        if (this.m_oAppFilter.publishers.includes(sPublisher)) {
+            this.m_oAppFilter.publishers = this.m_oAppFilter.publishers.filter(function(e) { return e !== sPublisher })
+        }
+        else {
+            this.m_oAppFilter.publishers.push(sPublisher);
+        }
+
+        this.m_oAppFilter.page = 0;
+    }
+
+    /**
+     * Handle a click on a score filter
+     * @param iRanking
+     */
+    MarketPlaceController.prototype.rankingClicked = function (iRanking) {
+        this.m_oAppFilter.score = iRanking;
+        this.m_oAppFilter.page = 0;
+    }
 
     /**
      * Open Application Page
@@ -82,6 +260,11 @@ var MarketPlaceController = (function() {
         this.m_oState.go("root.appdetails");
     }
 
+    /**
+     * Initialize application default logo
+     * @param aoProcessorList
+     * @returns {*}
+     */
     MarketPlaceController.prototype.setDefaultImages = function(aoProcessorList)
     {
         if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
@@ -100,12 +283,27 @@ var MarketPlaceController = (function() {
         return aoProcessorList;
     };
 
+    MarketPlaceController.prototype.isMine = function(oProcessor) {
+
+        if (!oProcessor.isMine) return false;
+        else {
+            if (oProcessor.publisher === this.m_oConstantsService.getUserId()) {
+                return true;
+            }
+            else {
+                return  false;
+            }
+        }
+
+    }
+
     MarketPlaceController.$inject = [
         '$scope',
         '$state',
         'ConstantsService',
         'AuthService',
-        'ProcessorService'
+        'ProcessorService',
+        'ProcessorMediaService'
     ];
 
     return MarketPlaceController;

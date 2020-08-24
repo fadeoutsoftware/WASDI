@@ -5,15 +5,15 @@
             <div class="col-12 market-toolbar d-flex justify-content-between">
                 <!--LEFT-->
                 <div class="item-wrapper d-flex align-items-center p-3">
-                    <span class="d-none d-md-block">WASDI APP STORE | ITEMS FOUND: </span> <strong class="ml-2">85</strong>
+                    <span class="d-none d-md-block">WASDI SPACE APP MARKETPLACE</span>
                 </div>
 
                 <!-- RIGHT -->
                 <div class="right-side d-flex">
                     <!--SEARCH-->
                     <div class="search-wrapper mr-2 d-flex">
-                        <input type="text" name="search" placeholder="SEARCH APP" class="search-field">
-                        <div class="search-icon-wrapper px-4 d-flex align-items-center">
+                        <input type="text" name="search" placeholder="SEARCH APP" class="search-field" ng-model="m_oController.m_sNameFilter">
+                        <div class="search-icon-wrapper px-4 d-flex align-items-center" ng-click="m_oController.refreshAppList()">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </div>
                     </div>
@@ -24,10 +24,9 @@
                             <span class="caret"></span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownOrder">
-                            <div class="dropdown-item p-2 px-3" href="#">NEWEST</div>
-                            <div class="dropdown-item p-2 px-3" href="#">BESTSELLERS</div>
-                            <div class="dropdown-item p-2 px-3" href="#">BEST RATED</div>
-                            <div class="dropdown-item p-2 px-3" href="#">PRICE</div>
+                            <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('name')">NAME</div>
+                            <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('date')">DATE</div>
+                            <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('price')">PRICE</div>
                         </div>
                     </div>
                 </div>
@@ -61,25 +60,10 @@
                     <!--category-->
                     <div class="category mt-1 mb-3">
                         <div class="border-bottom py-1 mb-2 subtitle">CATEGORY:</div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="flood" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="flood">Flood <span class="italic">(8)</span></label>
-                        </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="gis" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="gis">GIS <span class="italic">(10)</span></label>
-                        </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="population" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="population">Population <span class="italic">(5)</span></label>
-                        </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="fire" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="fire">Fire <span class="italic">(12)</span></label>
-                        </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="rain" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="rain">Rain <span class="italic">(2)</span></label>
+
+                        <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
+                            <input id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.categoryClicked(oCategory.id)">
+                            <label for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
                         </div>
 
                     </div>
@@ -90,80 +74,67 @@
                             <span>DEVELOPER</span>
                             <span class="fas fa-meteor"></span>
                         </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="Leia" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="Leia">Princess Leia <span class="italic">(8)</span></label>
+                        <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oPublisher in m_oController.m_aoPublishers">
+                            <input id="{{oPublisher.publisher}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.publisherClicked(oPublisher.publisher)">
+                            <label for="{{oPublisher.publisher}}">{{oPublisher.publisher}}<span class="italic">({{oPublisher.appCount}})</span></label>
                         </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="JarJar" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="JarJar">Jar Jar Binks <span class="italic">(10)</span></label>
-                        </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="Dookue" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="Dookue">Count Dooku <span class="italic">(5)</span></label>
-                        </div>
-                        <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="Maul" type="checkbox" aria-label="Checkbox for following text input">
-                            <label for="Maul">Darth Maul <span class="italic">(12)</span></label>
-                        </div>
-
                     </div>
 
                     <!--ratings-->
                     <div class="ratings mt-1 mb-3">
                         <div class="border-bottom py-1 mb-2 subtitle">RATINGS:</div>
                         <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked">
+                            <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked" ng-click="m_oController.rankingClicked(0)">
                             <label for="allstar">
                                 <span>all ratings</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="onestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <input id="onestar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(1)">
                             <label for="onestar">
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">e più</span>
+                                <span class="ml-2">and more</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="twostar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <input id="twostar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(2)">
                             <label for="twostar">
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">e più</span>
+                                <span class="ml-2">and more</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="threestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <input id="threestar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(3)">
                             <label for="threestar">
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">e più</span>
+                                <span class="ml-2">and more</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="fourstar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <input id="fourstar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(4)">
                             <label for="fourstar">
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">e più</span>
+                                <span class="ml-2">and more</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
-                            <input id="fivestar" type="radio" name="rating" aria-label="Checkbox for following text input">
+                            <input id="fivestar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(5)">
                             <label for="fivestar">
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
@@ -209,8 +180,8 @@
                             <h5 class="application_title mt-4">{{processor.friendlyName}}</h5>
                             <p class="application_description" title="{{processor.processorDescription}}">{{processor.processorDescription}}</p>
                             <div class="publisher mb-1">
-                                <span ng-if="!processor.isMine">Published by <span class="pub-name">{{processor.publisher}}</span></span>
-                                <span ng-if="processor.isMine"><span class="fa fa-flask mr-1"></span>You are the publisher my master!</span>
+                                <span ng-if="!m_oController.isMine(processor)">Published by <span class="pub-name">{{processor.publisher}}</span></span>
+                                <span ng-if="m_oController.isMine(processor)"><span class="fa fa-flask mr-1"></span>You are the Master!</span>
                             </div>
                             <div class="tile-footer d-flex justify-content-between align-items-center border-top pt-3">
                                 <div class="star-rating">
@@ -232,7 +203,7 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-center">
-                    <div class="load-more-btn"><span class="fa fa-refresh mr-2"></span>LOAD MORE FUNNY APPS</div>
+                    <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-disabled="!m_oController.m_bLoadMoreEnabled"><span class="fa fa-refresh mr-2"></span>LOAD MORE SPACE APPS</div>
                 </div>
 
 

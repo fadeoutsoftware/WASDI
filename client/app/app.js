@@ -35,6 +35,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.AuthServiceGoogle',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
+    'wasdi.ProcessorMediaService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
