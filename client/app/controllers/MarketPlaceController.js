@@ -81,6 +81,10 @@ var MarketPlaceController = (function() {
          */
         this.m_aoPublishers = []
 
+        /**
+         * Filters
+         * @type {{score: number, itemsPerPage: number, minPrice: number, name: string, publishers: [], orderBy: string, orderDirection: number, categories: [], maxPrice: number, page: number}}
+         */
         this.m_oAppFilter = {
             categories: [],
             publishers: [],
@@ -90,7 +94,8 @@ var MarketPlaceController = (function() {
             maxPrice: -1,
             itemsPerPage: 12,
             page: 0,
-            orderBy: "name"
+            orderBy: "name",
+            orderDirection: 1
         }
 
         /**
@@ -98,6 +103,26 @@ var MarketPlaceController = (function() {
          * @type {MarketPlaceController}
          */
         let oController = this;
+
+
+        /**
+         * Price Slider
+         * @type {{options: {stepsArray: ({legend: string, value: number}|{value: number})[], ticksTooltip: MarketPlaceController.m_oSlider.options.ticksTooltip, ceil: number, floor: number, showTicksValues: boolean}, value: number}}
+         */
+        this.m_oSlider = {
+            value: 0,
+            options: {
+                floor: 0,
+                ceil: 1000,
+                showTicksValues: false,
+                onEnd: function (sliderId, modelValue, highValue, pointerType) {
+                    oController.m_oAppFilter.maxPrice=modelValue;
+                    oController.m_oAppFilter.page = 0;
+                    oController.refreshAppList();
+                }
+            }
+        };
+
 
         // Ask the list of Applications to the WASDI server
         this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
@@ -223,6 +248,8 @@ var MarketPlaceController = (function() {
             this.m_oAppFilter.categories.push(sCategoryId);
         }
         this.m_oAppFilter.page = 0;
+
+        this.refreshAppList();
     }
 
     /**
@@ -238,6 +265,8 @@ var MarketPlaceController = (function() {
         }
 
         this.m_oAppFilter.page = 0;
+
+        this.refreshAppList();
     }
 
     /**
@@ -247,6 +276,8 @@ var MarketPlaceController = (function() {
     MarketPlaceController.prototype.rankingClicked = function (iRanking) {
         this.m_oAppFilter.score = iRanking;
         this.m_oAppFilter.page = 0;
+
+        this.refreshAppList();
     }
 
     /**
@@ -283,6 +314,11 @@ var MarketPlaceController = (function() {
         return aoProcessorList;
     };
 
+    /**
+     * Function to decide if the application is of the actual user or not
+     * @param oProcessor
+     * @returns {boolean}
+     */
     MarketPlaceController.prototype.isMine = function(oProcessor) {
 
         if (!oProcessor.isMine) return false;
