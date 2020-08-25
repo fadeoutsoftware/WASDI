@@ -97,7 +97,7 @@
 .value {
     text-align: center;
     font-weight: bold;
-    font-size: 15;
+    font-size: 15px;
     width: 80%;
     margin: 40px auto;
     letter-spacing: -.07em;
@@ -281,6 +281,10 @@ select {
         label {
             margin-bottom: 0px;
             cursor: pointer;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            padding: 1px;
             &:hover {
                 color: $wasdigreen;
             }
@@ -474,6 +478,10 @@ select {
     cursor: pointer;
     &:hover {
         background-color: $darkwasdigreen;
+    }
+    &.btn-disabled {
+        background-color: #efefef;
+        cursor: unset;
     }
 }
 

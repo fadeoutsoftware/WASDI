@@ -76,7 +76,7 @@
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oPublisher in m_oController.m_aoPublishers">
                             <input id="{{oPublisher.publisher}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.publisherClicked(oPublisher.publisher)">
-                            <label for="{{oPublisher.publisher}}">{{oPublisher.publisher}}<span class="italic">({{oPublisher.appCount}})</span></label>
+                            <label title="{{oPublisher.publisher}} - {{oPublisher.appCount}}" for="{{oPublisher.publisher}}">{{oPublisher.publisher}}<span class="italic">({{oPublisher.appCount}})</span></label>
                         </div>
                     </div>
 
@@ -203,7 +203,7 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-center">
-                    <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-disabled="!m_oController.m_bLoadMoreEnabled"><span class="fa fa-refresh mr-2"></span>LOAD MORE SPACE APPS</div>
+                    <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-class="!m_oController.m_bLoadMoreEnabled?'btn-disabled':''"><span class="fa fa-refresh mr-2"></span>LOAD MORE SPACE APPS</div>
                 </div>
 
 
