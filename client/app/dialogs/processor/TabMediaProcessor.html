@@ -1,10 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<div class="container-fluid">
+
+    <!--APP FEATURED IMG-->
+    <div class="row">
+        Application Logo:
+    </div>
+    <div class="row">
+        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="featured-img" style="height: 150px; width: 285px; background-image: url({{m_oController.m_oProcessorDetails.imgLink}})">
+            </div>
+        </div>
+        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="drag-and-drop ">
+                <div ngf-drop ngf-select ng-model="m_oController.m_oProcessorLogo" class="drop-box"
+                     ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+                     accept="application/image"
+                     ngf-pattern="'.png'">
+                    Drag and Drop here the Application Logo
+
+                    <div ng-show="m_oController.m_oProcessorLogo">File: {{m_oController.m_oProcessorLogo[0].name}}</div>
+                </div>
+
+                <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
+            </div>
+        </div>
+    </div>
+
+</div>

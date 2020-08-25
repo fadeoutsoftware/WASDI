@@ -10,15 +10,28 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.m_oHttp = $http;
     this.m_sResource = "/processors";
 
-
+    /**
+     * Get the full light list of deployed processors
+     * @returns {*}
+     */
     this.getProcessorsList = function() {
         return this.m_oHttp.get(this.APIURL + '/processors/getdeployed');
     };
 
+    /**
+     * Get the list of applications to be shown in the marketplace
+     * @param oFilter
+     * @returns {*}
+     */
     this.getMarketplaceList = function(oFilter) {
         return this.m_oHttp.post(this.APIURL + '/processors/getmarketlist',oFilter);
     };
 
+    /**
+     * Get the details of an application for the marketplace
+     * @param sApplication
+     * @returns {*}
+     */
     this.getMarketplaceDetail = function(sApplication) {
         return this.m_oHttp.get(this.APIURL + '/processors/getmarketdetail?processorname=' + sApplication);
     };
@@ -144,6 +157,17 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.updateProcessor = function (sWorkspaceId, sProcessorId, oBody) {
 
         return this.m_oHttp.post(this.APIURL + '/processors/update?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody);
+    };
+
+    /**
+     * Update the details of a processor
+     * @param sWorkspaceId
+     * @param sProcessorId
+     * @param oBody
+     * @returns {*}
+     */
+    this.updateProcessorDetails = function (sProcessorId, oBody) {
+        return this.m_oHttp.post(this.APIURL + '/processors/updatedetails?processorId=' + encodeURI(sProcessorId),oBody);
     };
 
     /**

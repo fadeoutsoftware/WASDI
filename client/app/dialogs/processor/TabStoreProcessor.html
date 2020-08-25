@@ -1,10 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="friendlyname">Friendly Name</label>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <input id="friendlyname" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Friendly Name" ng-model="m_oController.m_oProcessorDetails.friendlyName">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="link">Link</label>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <input id="link" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Link" ng-model="m_oController.m_oProcessorDetails.link">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="email">E-Mail</label>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <input id="email" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="E-Mail" ng-model="m_oController.m_oProcessorDetails.email">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="ondemandPrice">On Demand Price</label>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <input id="ondemandPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="On Demand Price" ng-model="m_oController.m_oProcessorDetails.ondemandPrice">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="subscriptionPrice">Subscription Price</label>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <input id="subscriptionPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Subscription Price" ng-model="m_oController.m_oProcessorDetails.subscriptionPrice">
+        </div>
+    </div>
+    <div class="row">
+        <!--category-->
+        <div class="category mt-1 mb-3">
+            <div class="border-bottom py-1 mb-2 subtitle">CATEGORY</div>
+
+            <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
+                <input id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox" ng-checked="checked=m_oController.isCategoryChecked(oCategory.id)" ng-click="m_oController.categoryClicked(oCategory.id)">
+                <label for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
+            </div>
+
+        </div>
+    </div>
+
+</div>

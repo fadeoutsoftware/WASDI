@@ -16,6 +16,7 @@ public class AppDetailViewModel {
 	private Float subscriptionPrice;
 	private Double updateDate;
 	private ArrayList<String> categories = new ArrayList<String>();
+	private ArrayList<String> images = new ArrayList<String>();
 	private Boolean isMine;
 	private Boolean buyed;
 	
@@ -108,6 +109,12 @@ public class AppDetailViewModel {
 	}
 	public void setBuyed(Boolean buyed) {
 		this.buyed = buyed;
+	}
+	public ArrayList<String> getImages() {
+		return images;
+	}
+	public void setImages(ArrayList<String> images) {
+		this.images = images;
 	}
 	
 	

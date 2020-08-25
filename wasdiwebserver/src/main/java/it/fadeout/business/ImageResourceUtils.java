@@ -4,7 +4,10 @@ import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
 
+import it.fadeout.Wasdi;
+import it.fadeout.rest.resources.ProcessorsMediaResource;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.Utils;
 
 public class ImageResourceUtils {
 	
@@ -50,6 +53,32 @@ public class ImageResourceUtils {
 		}
 		return oImage;
 		
+	}
+	
+	public static String getProcessorLogoBasePath(String sProcessorName) {
+		String sPath = "./assets/img/processors/" + sProcessorName + "/";
+		return sPath;
+	}
+	
+	public static String getProcessorLogoFullPath(String sProcessorName) {
+		
+		String sLogoPath = ImageResourceUtils.getProcessorLogoBasePath(sProcessorName);
+		
+		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sLogoPath, ProcessorsMediaResource.IMAGE_PROCESSORS_EXTENSIONS );
+		
+		boolean bExistsLogo = false;
+		
+		if (oLogo!=null) {
+			if (oLogo.exists()) bExistsLogo = true;
+		}
+		
+		if (bExistsLogo) {
+			return sLogoPath + oLogo.getName();
+		}
+		else {
+			String sPlaceHolder = "assets/img/placeholder/placeholder_" + Utils.getRandomNumber(1, 8) + ".jpg";
+			return sPlaceHolder;
+		}
 	}
 	
 	

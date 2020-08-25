@@ -620,4 +620,14 @@ public class Utils {
 	}
 
 	///// end units conversion
+	
+	/**
+	 * Get Random Number in Range
+	 * @param iMin
+	 * @param iMax
+	 * @return
+	 */
+	public static int getRandomNumber(int iMin, int iMax) {
+	    return (int) ((Math.random() * (iMax - iMin)) + iMin);
+	}	
 }

@@ -5,47 +5,180 @@
 
 var ProcessorController = (function() {
 
-    function ProcessorController($scope, oClose,oExtras,oWorkspaceService,oProductService,oConstantsService,oHttp, oProcessorService) {
-        //MEMBERS
+    function ProcessorController($scope, oClose,oExtras,oWorkspaceService,oProductService,oConstantsService,oHttp, oProcessorService, oProcessorMediaService) {
+
+        /**
+         * Angular Scope
+         */
         this.m_oScope = $scope;
+        /**
+         * Reference to the controller
+         */
         this.m_oScope.m_oController = this;
+        /**
+         * Extra params received in input
+         */
         this.m_oExtras = oExtras;
+        /**
+         * Input processor base data
+         * @type {null}
+         */
         this.m_oInputProcessor = this.m_oExtras.processor;
+        /**
+         * Workpsace service
+         */
         this.m_oWorkspaceService = oWorkspaceService;
+        /**
+         * Product service
+         */
         this.m_oProductService = oProductService;
-        this.m_aoWorkspaceList = [];
-        this.m_aWorkspacesName = [];
-        this.m_aoSelectedWorkspaces = [];
-        this.m_sFileName = "";
+        /**
+         * Product Media Service
+         */
+        this.m_oProcessorMediaService = oProcessorMediaService;
+        /**
+         * Constants service
+         */
         this.m_oConstantsService = oConstantsService;
+        /**
+         * Active Workspace
+         */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        /**
+         * Http Service
+         */
         this.m_oHttp =  oHttp;
-        //file .zip
-        this.m_oFile = null;
-        this.m_sName = "";
-        this.m_sDescription = "";
-        this.m_sVersion = "1";
-        this.m_sJSONSample = "";
-        this.m_aoProcessorTypes = [{'name':'Python 2.7','id':'ubuntu_python_snap'},{'name':'Python 3.7','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'}];
-        this.m_sSelectedType = "";
-        // Used only in Edit Mode
-        this.m_sTypeNameOnly = "";
-        this.m_sTypeIdOnly = "";
-        this.m_oPublic = true;
+        /**
+         * Processors Service
+         */
         this.m_oProcessorService = oProcessorService;
+        /**
+         * User Uploaded Zip file
+         * @type {null}
+         */
+        this.m_oFile = null;
+        /**
+         * Processor Name
+         * @type {string}
+         */
+        this.m_sName = "";
+        /**
+         * Processor Description
+         * @type {string}
+         */
+        this.m_sDescription = "";
+        /**
+         * Processor Version
+         */
+        this.m_sVersion = "1";
+        /**
+         * JSON Input Paramters Sample
+         * @type {string}
+         */
+        this.m_sJSONSample = "";
+        /**
+         * Types of available processors
+         * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
+         */
+        this.m_aoProcessorTypes = [{'name':'Python 2.7','id':'ubuntu_python_snap'},{'name':'Python 3.7','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'}];
+        /**
+         * Selected Processor Type
+         * @type {string}
+         */
+        this.m_sSelectedType = "";
+
+        /**
+         * Name of the Type  of a processor in edit mode
+         * @type {string}
+         */
+        this.m_sTypeNameOnly = "";
+        /**
+         * Id of the Type  of a processor in edit mode
+         * @type {string}
+         */
+        this.m_sTypeIdOnly = "";
+        /**
+         * Public flag
+         * @type {boolean}
+         */
+        this.m_oPublic = true;
+        /**
+         * Flag to know if we are in Edit Mode
+         * @type {boolean}
+         */
         this.m_bEditMode = false;
 
-        // Used for sharing
+        /**
+         * Share user mail
+         * @type {string}
+         */
         this.m_sUserEmail = "";
+        /**
+         * List of user id that has access to the processor
+         * @type {*[]}
+         */
         this.m_aoEnableUsers=[];
+        /**
+         * Processor Id
+         * @type {string}
+         */
         this.m_sProcessorId = "";
 
+        /**
+         * Selected Tab
+         * @type {string}
+         */
+        this.m_sSelectedTab = "Base";
 
+        /**
+         * View Model with the Processor Detailed Info.
+         * Is fetched and saved with different APIs
+         * @type {{processorDescription: string, updateDate: number, images: [], imgLink: string, ondemandPrice: number, link: string, score: number, processorId: string, publisher: string, buyed: boolean, processorName: string, categories: [], isMine: boolean, friendlyName: string, email: string, subscriptionPrice: number}}
+         */
+        this.m_oProcessorDetails = {
+            processorId: "",
+            processorName: "",
+            processorDescription: "",
+            imgLink: "",
+            publisher: "",
+            score: 0.0,
+            friendlyName: "",
+            link: "",
+            email: "",
+            ondemandPrice: 0.0,
+            subscriptionPrice: 0.0,
+            updateDate: 0,
+            categories: [],
+            images: [],
+            isMine: true,
+            buyed: false
+        }
+
+        /**
+         * Application Categories
+         * @type {*[]}
+         */
+        this.m_aoCategories = [];
+
+        /**
+         * Local Reference to the controller
+         * @type {ProcessorController}
+         */
         var oController = this;
+
+        /**
+         * Processor Logo File
+         * @type {null}
+         */
+        var m_oProcessorLogo = null;
+
+        // Close this Dialog handler
         $scope.close = function() {
-            oClose(null, 300); // close, but give 500ms for bootstrap to animate
+            // close, but give 500ms for bootstrap to animate
+            oClose(null, 300);
         };
 
+        // Apply the user actions handler
         $scope.add = function() {
 
             if (oController.m_bEditMode == true) {
@@ -63,15 +196,22 @@ var ProcessorController = (function() {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
 
+        // Are we creating a new processor or editing an existing one?
         if (this.m_oInputProcessor !== null) {
+
+            // We are in edit mode:
             this.m_bEditMode = true;
+
+            // Copy the input data to the model
             this.m_sName = this.m_oInputProcessor.processorName;
             this.m_sDescription = this.m_oInputProcessor.processorDescription;
             this.m_sJSONSample = decodeURIComponent(this.m_oInputProcessor.paramsSample);
             this.m_sProcessorId = this.m_oInputProcessor.processorId;
 
+            // Get the list of Enabled users for sharing
             this.getListOfEnableUsers(this.m_sProcessorId)
 
+            // Select the right processor type
             var i=0;
 
             for (i=0; i<this.m_aoProcessorTypes.length; i++) {
@@ -89,9 +229,36 @@ var ProcessorController = (function() {
                 this.m_oPublic = false;
             }
 
+            // Read also the details
+            this.m_oProcessorService.getMarketplaceDetail(this.m_oInputProcessor.processorName).success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) === false)
+                {
+                    oController.m_oProcessorDetails = data;
+
+                    oController.m_oProcessorMediaService.getCategories().success(function (data) {
+                        oController.m_aoCategories = data;
+
+                    }).error(function (error) {
+
+                    });
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
+                }
+
+            }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
+            });
+
+
         }
     };
 
+     /**
+      * Utility method to define if the drag and drop box can be shown or not
+      * @returns {boolean}
+      */
     ProcessorController.prototype.showDragAndDrop = function() {
         if (this.m_bEditMode == false) {
             return true;
@@ -103,6 +270,11 @@ var ProcessorController = (function() {
         return false;
     };
 
+     /**
+      * Utility method to test JSON Validity
+      * @param sJsonString
+      * @returns {boolean|any}
+      */
     ProcessorController.prototype.tryParseJSON =function(sJsonString){
          try {
              var oJsonParsedObject = JSON.parse(sJsonString);
@@ -116,6 +288,12 @@ var ProcessorController = (function() {
          return false;
      };
 
+     /**
+      * Internal method to update en existing processor in edit mode
+      * @param oController
+      * @param oSelectedFile
+      * @returns {boolean}
+      */
      ProcessorController.prototype.updateProcessor = function (oController,oSelectedFile) {
 
          if (!this.tryParseJSON(oController.m_sJSONSample)) {
@@ -134,12 +312,19 @@ var ProcessorController = (function() {
          oController.m_oInputProcessor.paramsSample = encodeURI(oController.m_sJSONSample);
 
          // Update processor data
-         this.m_oProcessorService.updateProcessor(oController.m_oActiveWorkspace.workspaceId, oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
-             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");
-             utilsVexCloseDialogAfter(4000,oDialog);
+         oController.m_oProcessorService.updateProcessor(oController.m_oActiveWorkspace.workspaceId, oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
+
+             oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
+             });
+
          }).error(function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
          });
+
 
          // There was also a file?
          if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)
@@ -159,6 +344,12 @@ var ProcessorController = (function() {
          return true;
      }
 
+     /**
+      * Utility method to Create a new processor
+      * @param oController
+      * @param oSelectedFile
+      * @returns {boolean}
+      */
     ProcessorController.prototype.postProcessor = function (oController,oSelectedFile)
     {
         if(utilsIsObjectNullOrUndefined(oSelectedFile) === true)
@@ -200,18 +391,6 @@ var ProcessorController = (function() {
         return true;
     };
 
-    /**
-     *
-     * @param sName
-     * @returns {*}
-     */
-    ProcessorController.prototype.changeProductName = function(sName){
-        if(utilsIsStrNullOrEmpty(sName) === true)
-            return "";
-
-        return sName + "_workflow";
-    };
-
      /**
       * Get the list of users that has this processor shared
       * @param sProcessorId
@@ -232,15 +411,21 @@ var ProcessorController = (function() {
                  }
                  else
                  {
-                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
+                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
                  }
 
              }).error(function (error) {
-             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
+             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
          });
          return true;
      };
 
+     /**
+      * Add a user to the sharing list
+      * @param sProcessorId
+      * @param sEmail
+      * @returns {boolean}
+      */
      ProcessorController.prototype.shareProcessorByUserEmail = function(sProcessorId, sEmail) {
 
          if( (utilsIsObjectNullOrUndefined(sProcessorId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
@@ -272,7 +457,13 @@ var ProcessorController = (function() {
          return true;
      };
 
-     ProcessorController.prototype.disablePermissionsUsersByWorkspace = function(sProcessorId,sEmail){
+     /**
+      * Removes a user from the sharing list
+      * @param sProcessorId
+      * @param sEmail
+      * @returns {boolean}
+      */
+     ProcessorController.prototype.removeUserSharing = function(sProcessorId,sEmail){
 
          if( (utilsIsObjectNullOrUndefined(sProcessorId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
          {
@@ -303,9 +494,11 @@ var ProcessorController = (function() {
          return true;
      };
 
-
-
-
+     /**
+      * Force the redeploy of the processor on the server
+      * @param sProcessorId
+      * @returns {boolean}
+      */
      ProcessorController.prototype.forceProcessorRefresh = function(sProcessorId) {
 
          if (utilsIsObjectNullOrUndefined(sProcessorId) === true)
@@ -325,8 +518,35 @@ var ProcessorController = (function() {
          return true;
      };
 
+     /**
+      * Handle a click on a category
+      * @param sCategoryId
+      */
+     ProcessorController.prototype.categoryClicked = function (sCategoryId) {
+         if (this.m_oProcessorDetails.categories.includes(sCategoryId)) {
+             this.m_oProcessorDetails.categories = this.m_oProcessorDetails.categories.filter(function(e) { return e !== sCategoryId })
+         }
+         else {
+             this.m_oProcessorDetails.categories.push(sCategoryId);
+         }
+     }
 
-    ProcessorController.$inject = [
+     /**
+      * Utility method to decide if a category checkbox is checked or not
+      * @param sCategoryId
+      * @returns {boolean}
+      */
+     ProcessorController.prototype.isCategoryChecked = function (sCategoryId) {
+         if (this.m_oProcessorDetails.categories.includes(sCategoryId)) {
+            return true;
+         }
+         else {
+             return false;
+         }
+     }
+
+
+     ProcessorController.$inject = [
         '$scope',
         'close',
         'extras',
@@ -334,8 +554,8 @@ var ProcessorController = (function() {
         'ProductService',
         'ConstantsService',
         '$http',
-        'ProcessorService'
-
+        'ProcessorService',
+        'ProcessorMediaService'
     ];
     return ProcessorController;
 })();

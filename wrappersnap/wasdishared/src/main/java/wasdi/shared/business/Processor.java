@@ -70,11 +70,6 @@ public class Processor {
 	private Float subscriptionPrice = 0.0f; 
 	
 	/**
-	 * List of tagged categories
-	 */
-	private List<String> categoriesId; 
-	
-	/**
 	 * Application external link
 	 */
 	private String link = "";
@@ -121,14 +116,7 @@ public class Processor {
 	public void setParameterSample(String parameterSample) {
 		this.parameterSample = parameterSample;
 	}
-		
-	public List<String> getCategoriesId() {
-		return categoriesId;
-	}
-	public void setCategoriesId(List<String> asCategoriesId) {
-		this.categoriesId = asCategoriesId;
-	}
-	
+			
 	public String getLink() {
 		return link;
 	}

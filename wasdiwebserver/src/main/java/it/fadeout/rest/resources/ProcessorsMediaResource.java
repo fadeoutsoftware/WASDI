@@ -54,13 +54,13 @@ public class ProcessorsMediaResource {
 	public static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
 	public static Integer LOGO_SIZE = 180;
 	public static Integer NUMB_MAX_OF_IMAGES = 5;
-	public static String[] IMAGES_NAME = { "1", "2", "3", "4", "5" };
+	public static String[] IMAGE_NAMES = { "1", "2", "3", "4", "5" };
 	public static String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
 	
 	@POST
 	@Path("/logo/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessorLogo(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+	public Response uploadProcessorLogo(@FormDataParam("image") InputStream oInputFileStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
 		
@@ -89,8 +89,8 @@ public class ProcessorsMediaResource {
 		String sFileName;
 		
 		//get filename and extension 
-		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
-			sFileName = fileMetaData.getFileName();
+		if(oFileMetaData != null && Utils.isNullOrEmpty(oFileMetaData.getFileName()) == false){
+			sFileName = oFileMetaData.getFileName();
 			sExt = FilenameUtils.getExtension(sFileName);
 		} else {
 			return Response.status(400).build();
@@ -102,7 +102,7 @@ public class ProcessorsMediaResource {
 		}
 
 		// Take path
-		String sPath = Wasdi.getProcessorLogoPath(oProcessor.getName());
+		String sPath = ImageResourceUtils.getProcessorLogoBasePath(oProcessor.getName());
 		
 		String sExtensionOfSavedLogo = ImageResourceUtils.checkExtensionOfImageInFolder(sPath, IMAGE_PROCESSORS_EXTENSIONS);
 		
@@ -117,7 +117,7 @@ public class ProcessorsMediaResource {
 	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
 	    
 	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
-	    boolean bIsSaved =  oOutputLogo.saveImage(fileInputStream);
+	    boolean bIsSaved =  oOutputLogo.saveImage(oInputFileStream);
 	    
 	    if(bIsSaved == false){
 	    	return Response.status(400).build();
@@ -154,7 +154,7 @@ public class ProcessorsMediaResource {
 		}
 		
 		
-		String sPathLogoFolder = Wasdi.getProcessorLogoPath(oProcessor.getName());
+		String sPathLogoFolder = ImageResourceUtils.getProcessorLogoBasePath(oProcessor.getName());
 		
 		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
 		String sLogoExtension = ImageResourceUtils.checkExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
@@ -251,7 +251,6 @@ public class ProcessorsMediaResource {
 	
 		String sExt;
 		String sFileName;
-
 		
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -662,7 +661,7 @@ public class ProcessorsMediaResource {
 
 		String sReturnValueName = "";
 		boolean bIsAvaibleName = false; 
-		for (String sAvaibleFileName : IMAGES_NAME){
+		for (String sAvaibleFileName : IMAGE_NAMES){
 			bIsAvaibleName = true;
 			sReturnValueName = sAvaibleFileName;
 			
