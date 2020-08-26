@@ -58,6 +58,29 @@ var WasdiApplicationDetailsController = (function() {
         $scope.userOwner = false;
         $scope.reviewsNbr = '36';
         $scope.processorPrice = '2';
+        $scope.reviews = [
+            {
+                name:'Luke Camminatore del Cielo',
+                rating: '4',
+                date:'12/05/2021',
+                title: 'Veloce come il Falcon',
+                comment:'bella app - veloce come il Falcon - fatto la rotta di kessel in meno di 12 parsec - spettacolo ',
+            },
+            {
+                name:'Chube',
+                rating: '2',
+                date:'12/05/2021',
+                title: 'Potrebbe andare meglio',
+                comment:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            },
+            {
+                name:'Emmett Brown',
+                rating: '1',
+                date:'12/05/2021',
+                title: 'Un tuffo nel passato!',
+                comment:'Se i miei calcoli sono esatti, quando questa app toccherà le 88 miglia orarie ne vedremo delle belle, anche se consuma 1.21 gigawatt - un pò troppo',
+            }
+        ];
 
         /**
          * Application Object

@@ -1,6 +1,6 @@
 @import "color-scheme";
 .scroll-wrapper {
-    height: calc(100vh - 200px);
+    height: calc(100vh - 155px);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -143,6 +143,50 @@
     }
     .text-green-wasdi {
         color: $wasdigreen;
+    }
+}
+
+.green-big-btn {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: $wasdigreen;
+
+        &:hover {
+            background-color: $darkwasdigreen;
+        }
+
+}
+
+/*REVIEWS*/
+.reviews-list {
+    border-radius: 0px 8px 8px 8px;
+    .userImage {
+        width: 30px;
+        height: 30px;
+        background-position: center center;
+        background-size: cover;
+        border-radius: 50%;
+        border: 1px solid #e8e7e7;
+    }
+    .reviews-name {
+        font-size: 1.1em;
+    }
+    .reviews-title {
+        font-size: 1.2em;
+    }
+    .reviews-comment {
+        font-style: italic;
+    }
+}
+.reviews-load-more {
+    cursor: pointer;
+    &:hover{
+        text-decoration: underline;
     }
 }
 

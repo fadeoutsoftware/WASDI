@@ -219,12 +219,100 @@
                 <hr class="ml-3 flex-grow-1">
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 bg-light">
-                    left
+                <div class="col-12 col-md-3 py-4 bg-light">
+                    <!--AVERAGE STARS-->
+                    <div class="star-rating mb-2">
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>0.25&&m_oController.m_oApplication.AverageScore<0.75?'checked-half':m_oController.m_oApplication.AverageScore>=0.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>1.25&&m_oController.m_oApplication.AverageScore<1.75?'checked-half':m_oController.m_oApplication.AverageScore>=1.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>2.25&&m_oController.m_oApplication.AverageScore<2.75?'checked-half':m_oController.m_oApplication.AverageScore>=2.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>3.25&&m_oController.m_oApplication.AverageScore<3.75?'checked-half':m_oController.m_oApplication.AverageScore>=3.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>4.25&&m_oController.m_oApplication.AverageScore<4.75?'checked-half':m_oController.m_oApplication.AverageScore>=4.75?'checked':''"></span>
+                        <span class="ml-2">3.8 on 5</span>
+                    </div>
+                    <!--TOTAL REVIEWS-->
+                    <div><span class="">{{reviewsNbr}} total reviews</span></div>
+                    <hr>
+                    <!--5 STAR PERCENTAGE -->
+                    <div class="mb-2">
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="ml-2">52%</span>
+                    </div>
+                    <!--5 STAR PERCENTAGE -->
+                    <div class="mb-2">
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="ml-2">16%</span>
+                    </div>
+                    <!--5 STAR PERCENTAGE -->
+                    <div class="mb-2">
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="ml-2">12%</span>
+                    </div>
+                    <!--5 STAR PERCENTAGE -->
+                    <div class="mb-2">
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="ml-2">6%</span>
+                    </div>
+                    <!--5 STAR PERCENTAGE -->
+                    <div class="mb-2">
+                        <span class="fa fa-star checked"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star"></span>
+                        <span class="ml-2">14%</span>
+                    </div>
+                    <hr>
+                    <div class="green-big-btn">
+                        WRITE A REVIEW
+                    </div>
+
                 </div>
-                <div class="col-12 col-md-8">
-                    right
+                <div class="col-12 col-md-9">
+                    <div ng-repeat="review in reviews " class="reviews-list border shadow-sm p-3 mb-4">
+                        <!--REVIWER NAME-->
+                        <div class="d-flex align-items-center">
+                            <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
+                            <span class="reviews-name">{{review.name}}</span>
+                        </div>
+                        <!--RATE-->
+                        <div class="my-2">
+                            <span class="fa fa-star" ng-class="review.rating>0.25&&review.rating<0.75?'checked-half':review.rating>=0.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>1.25&&review.rating<1.75?'checked-half':review.rating>=1.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>2.25&&review.rating<2.75?'checked-half':review.rating>=2.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>3.25&&review.rating<3.75?'checked-half':review.rating>=3.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>4.25&&review.rating<4.75?'checked-half':review.rating>=4.75?'checked':''"></span>
+                        </div>
+                        <div class="reviews-title">
+                            {{review.title}}
+                        </div>
+                        <div class="reviews-comment mt-2">
+                            "{{review.comment}}"
+                        </div>
+                        <div class="text-green-wasdi mt-2">
+                            {{review.date}}
+                        </div>
+                    </div>
+                    <div class="reviews-load-more text-center">
+                        LOAD MORE REVIEWS...
+                    </div>
                 </div>
+
 
             </div>
         </div>
