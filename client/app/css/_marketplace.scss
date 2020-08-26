@@ -236,7 +236,8 @@ select {
 }
 
 .order-btn {
-    .dropdown-menu {
+    margin-left: 1px;
+/*    .dropdown-menu {
         background-color: $wasdiblue;
         color: white;
         border-radius: 0px;
@@ -247,6 +248,16 @@ select {
                 background-color: $wasdigreen;
             }
         }
+    }*/
+}
+.direction {display: none}
+.filter-active {
+    background-color: $wasdigreen;
+    .fa-filter {
+        display: none;
+    }
+    .direction {
+        display: inline;
     }
 }
 

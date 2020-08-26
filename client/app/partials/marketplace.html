@@ -18,7 +18,35 @@
                         </div>
                     </div>
                     <!--ORDER BY-->
-                    <div class="order-btn dropdown">
+                    <!--NAME-->
+                    <button
+                        class="btnwasdis order-btn btn-primary"
+                        type="button"
+                        ng-class="m_oController.m_oAppFilter.orderBy=='name'?'filter-active':''"
+                        ng-click="m_oController.orderByClicked('name')">
+                        NAME
+                        <span class="fa fa-filter"></span>
+                        <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
+                    </button>
+                    <button
+                        class="btnwasdis order-btn btn-primary"
+                        type="button"
+                        ng-class="m_oController.m_oAppFilter.orderBy=='date'?'filter-active':''"
+                        ng-click="m_oController.orderByClicked('date')">
+                        DATE
+                        <span class="fa fa-filter"></span>
+                        <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
+                    </button>
+                    <button
+                        class="btnwasdis order-btn btn-primary"
+                        type="button"
+                        ng-class="m_oController.m_oAppFilter.orderBy=='price'?'filter-active':''"
+                        ng-click="m_oController.orderByClicked('price')">
+                        PRICE
+                        <span class="fa fa-filter"></span>
+                        <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
+                    </button>
+                    <!--<div class="order-btn dropdown">
                         <button class="btnwasdis btn-primary dropdown-toggle" type="button" id="dropdownOrder" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             ORDER BY
                             <span class="caret"></span>
@@ -28,7 +56,7 @@
                             <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('date')">DATE</div>
                             <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('price')">PRICE</div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
             </div>
         </div>
