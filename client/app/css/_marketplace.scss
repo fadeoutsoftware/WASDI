@@ -259,6 +259,9 @@ select {
     .direction {
         display: inline;
     }
+    &:focus {
+        background-color: $wasdigreen;
+    }
 }
 
 /*===============================*/
@@ -271,7 +274,7 @@ select {
 }
 .filter-side-bar {
     //background-color: $lightgrey;
-    min-height: calc(100vh - 200px);
+    min-height: calc(100vh - 155px);
     .title {
         color: white;
         background-color: $wasdiblue;
@@ -358,7 +361,7 @@ select {
 /*===============================*/
 
 .apps-wrapper {
-    height: calc(100vh - 200px);
+    height: calc(100vh - 155px);
     overflow: auto;
     .apps-tile {
         box-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
