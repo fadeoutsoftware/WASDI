@@ -273,7 +273,6 @@ select {
     width: 100%;
 }
 .filter-side-bar {
-    //background-color: $lightgrey;
     min-height: calc(100vh - 155px);
     .title {
         color: white;
@@ -309,26 +308,27 @@ select {
         font-style: italic;
     }
 
-    /*price renge*/
-    #amount {
-        background-color: transparent;
-        color: $wasdiblue;
-        border: 0px;
+    /*RZ SLIDER CUSTOMIZATION*/
+    .rzslider {
+        .rz-pointer {
+            top: -11px;
+            z-index: 3;
+            width: 25px;
+            height: 25px;
+            background-color:  $wasdiblue;
+            &:after {
+                top: 9px;
+                left: 9px;
+            }
+            &:active:after, &:focus:after{
+                background-color: $wasdigreen;
+            }
+        }
+        .rz-selection {
+            background-color: $wasdiblue;
+        }
     }
-    .amount {
-        max-width: 100px;
-    }
-    .ui-slider-handle {
-        border-radius: 50% !important;
-        background: $wasdiblue !important;
-        cursor: pointer !important;
-    }
-    .ui-state-hover{
-        background: $wasdigreen !important;
-    }
-    .ui-state-active{
-        background: $wasdigreen !important;
-    }
+
 
 }
 .fa-star {

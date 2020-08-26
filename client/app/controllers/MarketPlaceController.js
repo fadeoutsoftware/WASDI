@@ -112,6 +112,7 @@ var MarketPlaceController = (function() {
         this.m_oSlider = {
             value: 0,
             options: {
+                showSelectionBar: true,
                 floor: 0,
                 ceil: 1000,
                 showTicksValues: false,
