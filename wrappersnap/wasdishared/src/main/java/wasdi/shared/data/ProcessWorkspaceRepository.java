@@ -297,6 +297,24 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
     
     /**
+     * Get the total count of run of a processor
+     * @param sProcessorName
+     * @return
+     */
+    public long countByProcessor(String sProcessorName) {
+    	try {
+    		long lCount = getCollection(m_sThisCollection).count(new Document("productName", sProcessorName));
+    		return lCount;
+    	}
+    	catch (Exception oEx) {
+    		oEx.printStackTrace();
+		}
+    	
+    	return 0;
+    }
+    
+    
+    /**
      * Get the list of process workspace for a user
      * @param sUserId
      * @return

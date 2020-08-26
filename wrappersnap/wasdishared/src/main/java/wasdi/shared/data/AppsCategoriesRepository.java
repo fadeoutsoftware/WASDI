@@ -34,6 +34,24 @@ public class AppsCategoriesRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public AppCategory getCategoryById(String sCategoryId) {
+
+        try {
+
+        	Document oWSDocument = getCollection("appscategories").find(new Document("id", sCategoryId)).first();
+        	String sJSON = oWSDocument.toJson();
+        	
+        	AppCategory oAppCategory = s_oMapper.readValue(sJSON, AppCategory.class);
+        	
+        	return oAppCategory;
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    
 	private void fillList(final ArrayList<AppCategory> aoReturnList, FindIterable<Document> oWSDocuments) {
 		oWSDocuments.forEach(new Block<Document>() {
 		    public void apply(Document document) {

@@ -103,6 +103,11 @@ var ProcessorController = (function() {
          */
         this.m_oPublic = true;
         /**
+         * Time Out in Minutes
+         * @type {number}
+         */
+        this.m_iMinuteTimeout = 180;
+        /**
          * Flag to know if we are in Edit Mode
          * @type {boolean}
          */
@@ -153,8 +158,15 @@ var ProcessorController = (function() {
             isMine: true,
             buyed: false,
             longDescription: "",
-            showInStore: false
+            showInStore: false,
+            maxImages: 6,
+            reviewsCount: 0,
+            purchased: 0, // NOTE: at the moment here is the count of run on the main server
+            totalRuns: 0, // NOTE: not set at the moment
+            userRuns: 0   // NOTE: not set at the moment
         }
+
+        this.m_oImageToUpload;
 
         /**
          * Application Categories
@@ -209,6 +221,7 @@ var ProcessorController = (function() {
             this.m_sDescription = this.m_oInputProcessor.processorDescription;
             this.m_sJSONSample = decodeURIComponent(this.m_oInputProcessor.paramsSample);
             this.m_sProcessorId = this.m_oInputProcessor.processorId;
+            this.m_iMinuteTimeout = this.m_oInputProcessor.minuteTimeout;
 
             // Get the list of Enabled users for sharing
             this.getListOfEnableUsers(this.m_sProcessorId)
@@ -312,6 +325,7 @@ var ProcessorController = (function() {
          //oController.m_oInputProcessor.processorVersion = oController.m_sVersion;
          oController.m_oInputProcessor.processorDescription = oController.m_sDescription;
          oController.m_oInputProcessor.paramsSample = encodeURI(oController.m_sJSONSample);
+         oController.m_oInputProcessor.minuteTimeout = oController.m_iMinuteTimeout;
 
          // Update processor data
          oController.m_oProcessorService.updateProcessor(oController.m_oActiveWorkspace.workspaceId, oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
@@ -547,6 +561,9 @@ var ProcessorController = (function() {
          }
      }
 
+     /**
+      * Uploads or updates the application logo
+      */
      ProcessorController.prototype.updateLogo = function () {
 
          var oSelectedFile = null;
@@ -572,6 +589,61 @@ var ProcessorController = (function() {
 
      }
 
+     /**
+      * Add an image to the processor
+      */
+     ProcessorController.prototype.addApplicationImage = function () {
+
+         var oSelectedFile = null;
+
+         if (this.m_oImageToUpload!=null) {
+             oSelectedFile = this.m_oImageToUpload[0];
+         }
+
+         // The user uploaded a logo?
+         if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)
+         {
+             var oController = this;
+
+             // Update the file
+             var oBody = new FormData();
+             oBody.append('image', oSelectedFile);
+
+             this.m_oProcessorMediaService.uploadProcessorImage(this.m_oInputProcessor.processorId, oBody).success(function (data) {
+
+                 oController.m_oProcessorDetails.images.push(data.stringValue);
+
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE ADDED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPLOADING IMAGE");
+             });
+         }
+     }
+
+     /**
+      * Remove an image of the processor
+      * @param sImage
+      */
+     ProcessorController.prototype.removeProcessorImage = function (sImage) {
+
+         let oController = this;
+
+         let asSplit = sImage.split('/');
+         if (asSplit == null) return;
+         if (asSplit.length == 0) return;
+         let sImageIndex = asSplit[asSplit.length-1];
+
+         this.m_oProcessorMediaService.removeProcessorImage(this.m_oInputProcessor.processorId, sImageIndex).success(function (data) {
+
+             oController.m_oProcessorDetails.images = oController.m_oProcessorDetails.images.filter(function(e) { return e !== sImage });
+
+             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE REMOVED");
+             utilsVexCloseDialogAfter(4000,oDialog);
+         }).error(function (error) {
+             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DELETING THE IMAGE");
+         });
+     }
 
      ProcessorController.$inject = [
         '$scope',

@@ -15,7 +15,7 @@ var WasdiApplicationDetailsController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService) {
         /**
          * Angular Scope
          */
@@ -42,6 +42,10 @@ var WasdiApplicationDetailsController = (function() {
          * Processors Service
          */
         this.m_oProcessorService = oProcessorService;
+        /**
+         * Processor Media Service
+         */
+        this.m_oProcessorMediaService = oProcessorMediaService;
 
         /*KASA FOR TEST*/
         $scope.testVar = ['GIS', 'rain', 'flood', 'animals'];
@@ -100,10 +104,10 @@ var WasdiApplicationDetailsController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
             }
         }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
         });
     }
 
@@ -135,12 +139,25 @@ var WasdiApplicationDetailsController = (function() {
         return aoProcessorList;
     };
 
+    WasdiApplicationDetailsController.prototype.getCategoryName = function(sCategoryId)
+    {
+        for(var iIndexProcessor = 0; iIndexProcessor < iNumberOfProcessors; iIndexProcessor++)
+        {
+            if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
+            {
+                aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
+            }
+        }
+        return aoProcessorList;
+    };
+
     WasdiApplicationDetailsController.$inject = [
         '$scope',
         '$state',
         'ConstantsService',
         'AuthService',
-        'ProcessorService'
+        'ProcessorService',
+        'ProcessorMediaService'
     ];
 
     return WasdiApplicationDetailsController;

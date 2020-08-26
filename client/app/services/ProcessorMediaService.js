@@ -28,7 +28,7 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
     };
 
     /**
-     * Update Processor files
+     * Upload or Update Processor logo
      * @param sWorkspaceId
      * @param sProcessorId
      * @param oBody
@@ -44,5 +44,25 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
         return this.m_oHttp.post(this.APIURL + this.m_sResource + '/logo/upload?processorId=' + encodeURI(sProcessorId), oBody ,oOptions);
     };
 
+    /**
+     * Upload Processor Image
+     * @param sProcessorId
+     * @param oBody
+     * @returns {*}
+     */
+    this.uploadProcessorImage = function (sProcessorId, oBody) {
+
+        var oOptions = {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        };
+
+        return this.m_oHttp.post(this.APIURL + this.m_sResource + '/images/upload?processorId=' + encodeURI(sProcessorId), oBody ,oOptions);
+    };
+
+
+    this.removeProcessorImage = function (sProcessorId, sImage) {
+        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/images/delete?processorId=' + encodeURI(sProcessorId) + "&imageName=" + sImage);
+    };
 
 }]);

@@ -40,6 +40,7 @@ import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppCategoryViewModel;
 import wasdi.shared.viewmodels.ListReviewsViewModel;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PublisherFilterViewModel;
 import wasdi.shared.viewmodels.ReviewViewModel;
 
@@ -49,10 +50,10 @@ public class ProcessorsMediaResource {
 	@Context
 	ServletConfig m_oServletConfig;
 	
+	public static int MAX_IMAGE_MB_SIZE = 2;
 	public static String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
 	public static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
 	public static Integer LOGO_SIZE = 180;
-	public static Integer NUMB_MAX_OF_IMAGES = 5;
 	public static String[] IMAGE_NAMES = { "1", "2", "3", "4", "5", "6" };
 	public static String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
 	
@@ -275,10 +276,10 @@ public class ProcessorsMediaResource {
 	}
 	
 	@DELETE
-	@Path("/image/delete")
+	@Path("/images/delete")
 	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + "  )");
+		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", Image Name: " + sImageName + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -311,11 +312,17 @@ public class ProcessorsMediaResource {
 		}
 				
 		if(Utils.isNullOrEmpty(sImageName)) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name is null" );
 			return Response.status(400).build();
 		}
 		
-		String sPathFolder = Wasdi.getDownloadPath(m_oServletConfig) + "/processors/" + oProcessor.getName() ;
-		ImageResourceUtils.deleteFileInFolder(sPathFolder,sImageName);
+		String sPathFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
+		
+		File oImageFile = new File(sPathFolder + sImageName);
+		
+		if (oImageFile.exists()) {
+			oImageFile.delete();
+		}
 		
 		return Response.status(200).build();
 	}
@@ -367,27 +374,34 @@ public class ProcessorsMediaResource {
 			sFileName = fileMetaData.getFileName();
 			sExt = FilenameUtils.getExtension(sFileName);
 		} else {
+			Utils.debugLog("ProcessorsResource.uploadProcessorImage: Invalid uploaded file");
 			return Response.status(400).build();
 		}
 		
 		if( ImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
+			Utils.debugLog("ProcessorsResource.uploadProcessorImage: Invalid extension");
 			return Response.status(400).build();
 		}
 		
 		// Take path
-		String sPathFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName());
+		String sAbsolutePathFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
+		String sRelativePathFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName());
 		
-		ImageResourceUtils.createDirectory(sPathFolder);
-		String sAvaibleFileName = getAvaibleFileName(sPathFolder);
+		ImageResourceUtils.createDirectory(sAbsolutePathFolder);
+		String sAvaibleFileName = ImageResourceUtils.getAvaibleProcessorImageFileName(sAbsolutePathFolder);
+		
+		Utils.debugLog("ProcessorsResource.uploadProcessorImage: available file name: " + sAvaibleFileName);
 		
 		if(sAvaibleFileName.isEmpty()){
+			Utils.debugLog("ProcessorsResource.uploadProcessorImage: max images count reached");
 			//the user have reach the max number of images 
 	    	return Response.status(400).build();
 		}
 		
-		String sPathImage = sPathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
+		String sAbsoluteImageFilePath = sAbsolutePathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
+		String sRelativeImageFilePath = sRelativePathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
 		
-	    File oTouchFile = new File(sPathImage);
+	    File oTouchFile = new File(sAbsoluteImageFilePath);
 	    
 	    try {
 			oTouchFile.createNewFile();
@@ -396,24 +410,34 @@ public class ProcessorsMediaResource {
 			e.printStackTrace();
 		}
 		
-		ImageFile oNewImage = new ImageFile(sPathImage);
+		ImageFile oNewImage = new ImageFile(sAbsoluteImageFilePath);
 
 		//TODO SCALE IMAGE ?
 		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
 	    if(bIsSaved == false){
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: error saving the image");
 	    	return Response.status(400).build();
 	    }
 	    
-		double bytes = oNewImage.length();
-		double kilobytes = (bytes / 1024);
-		double megabytes = (kilobytes / 1024);
-		if( megabytes > 2 ){		
+	    Utils.debugLog("ProcessorsResource.uploadProcessorImage: image saved, check size");
+	    
+		double dBytes = (double) oNewImage.length();
+		double dKilobytes = (dBytes / 1024);
+		double dMegabytes = (dKilobytes / 1024);
+		
+		if( dMegabytes > (double) ProcessorsMediaResource.MAX_IMAGE_MB_SIZE){
+			Utils.debugLog("ProcessorsResource.uploadProcessorImage: image too big, delete it");
 			oNewImage.delete();
 	    	return Response.status(400).build();
 		}
 		
+		Utils.debugLog("ProcessorsResource.uploadProcessorImage: image uploaded");
 		oProcessorRepository.updateProcessorDate(oProcessor);
-		return Response.status(200).build();
+		
+		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+		oPrimitiveResult.setStringValue(sRelativeImageFilePath);
+		
+		return Response.ok(oPrimitiveResult).build();
 	}
 	
 	@GET
@@ -638,6 +662,8 @@ public class ProcessorsMediaResource {
 		// For each processor
 		for (Processor oProcessor : aoProcessors) {
 			
+			if (!oProcessor.getShowInStore()) continue;
+			
 			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 			
 			if (oProcessor.getIsPublic() != 1) {
@@ -752,41 +778,6 @@ public class ProcessorsMediaResource {
 		
 		return aoAppCategoriesViewModel;
 	} 
-	
-
-
-	
-	// return a free name for the image (if is possible) 
-	private String getAvaibleFileName(String sPathFolder) {
-		File oFolder = new File(sPathFolder);
-		File[] aoListOfFiles = oFolder.listFiles();
-
-		String sReturnValueName = "";
-		boolean bIsAvaibleName = false; 
-		for (String sAvaibleFileName : IMAGE_NAMES){
-			bIsAvaibleName = true;
-			sReturnValueName = sAvaibleFileName;
-			
-			for (File oImage : aoListOfFiles){ 
-				String sName = oImage.getName();
-				String sFileName = FilenameUtils.removeExtension(sName);	
-				
-				if(sAvaibleFileName.equalsIgnoreCase(sFileName)){
-					bIsAvaibleName = false;
-					break;
-				} 
-				
-			}
-			
-			if(bIsAvaibleName == true){
-				break;
-			}
-			sReturnValueName = "";
-		 }
-
-		return sReturnValueName;
-	}
-	
 	
 	protected User getUser(String sSessionId){
 		

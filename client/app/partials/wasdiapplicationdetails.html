@@ -64,12 +64,12 @@
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>2.25&&m_oController.m_oApplication.score<2.75?'checked-half':m_oController.m_oApplication.score>=2.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>3.25&&m_oController.m_oApplication.score<3.75?'checked-half':m_oController.m_oApplication.score>=3.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>4.25&&m_oController.m_oApplication.score<4.75?'checked-half':m_oController.m_oApplication.score>=4.75?'checked':''"></span>
-                        <span class="ml-2 small">{{reviewsNbr}} reviews</span>
+                        <span class="ml-2 small">{{m_oController.m_oApplication.reviewsCount}} reviews</span>
                     </div>
                     <!--PUBLISHER-->
-                    <div class="publisher mb-1>
-                        <span ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
-                        <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the publisher my master!</span>
+                    <div class="publisher mb-1">
+                        <span  ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
+                        <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the master!</span>
                     </div>
 
                     <!--TAGS LIST-->
@@ -82,8 +82,7 @@
                             <hr class="ml-3 flex-grow-1">
                         </div>
                         <div class="tags-list d-flex">
-                            <!--<div class="d-flex tag-container" ng-repeat="tag in m_oController.m_oApplication.categories">-->
-                            <div class="d-flex tag-container mb-2 mr-3" ng-repeat="tag in testVar">
+                            <div class="d-flex tag-container mb-2 mr-3" ng-repeat="tag in m_oController.m_oApplication.categoryNames">
                                 <div class="pre-tag">
                                     <div class="white-circle"></div>
                                 </div>
@@ -96,6 +95,17 @@
                     </div>
                     <!--PRICES-->
                     <div class="row">
+                        <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
+                            <div class="big-price-tag one-shot">
+                                <div class="text-center">
+                                    <span>2.90</span><span> €</span>
+                                </div>
+                                <div class="text-center small">
+                                    RUN ONCE
+                                </div>
+                            </div>
+                        </div>
+
                         <!--CASE 1 - NO PREMIUM / NO BUYED / NO FREE-->
                         <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
                             <div class="big-price-tag subscription">
@@ -103,17 +113,7 @@
                                     <span>9.90</span><span> €/month</span>
                                 </div>
                                 <div class="text-center small">
-                                    GET WASDI PREMIUM
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
-                            <div class="big-price-tag one-shot">
-                                <div class="text-center">
-                                    <span>2.90</span><span> €</span>
-                                </div>
-                                <div class="text-center small">
-                                    BUY NOW!
+                                    BUY APP
                                 </div>
                             </div>
                         </div>
@@ -169,7 +169,7 @@
 
                     <!--LOUNCH APP-->
                     <div class="launch-btn" ng-click="m_oController.openApplicationPage()">
-                        <span>Open Application UI</span>
+                        <span>Start Application</span>
                         <div class="arrow">
                             <span></span>
                             <span></span>
@@ -199,9 +199,9 @@
                     <div>WebSite: <span class="text-green-wasdi">{{m_oController.m_oApplication.link}}</span></div>
                 </div>
                 <div class="col-12 col-md-6">
-                    <div>Pubblication Date: <span class="text-green-wasdi">18/06/2020</span></div>
+                    <div>Publication Date: <span class="text-green-wasdi">18/06/2020</span></div>
                     <div>Last Update: <span class="text-green-wasdi">22/08/2020</span></div>
-                    <div>Purchased: <span class="text-green-wasdi">214</span></div>
+                    <div>Purchased: <span class="text-green-wasdi">{{m_oController.m_oApplication.purchased}}</span></div>
                 </div>
 
             </div>

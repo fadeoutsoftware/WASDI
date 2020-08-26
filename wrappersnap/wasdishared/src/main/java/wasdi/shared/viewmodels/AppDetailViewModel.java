@@ -21,6 +21,12 @@ public class AppDetailViewModel {
 	private Boolean buyed;
 	private String longDescription;
 	private Boolean showInStore = false;
+	private int maxImages = 6;
+	private int reviewsCount = 0;
+	private int purchased = 0;
+	private int totalRuns = 0;
+	private int userRuns = 0;
+	private ArrayList<String> categoryNames = new ArrayList<String>();
 	
 	public ArrayList<String> getCategories() {
 		return categories;
@@ -130,5 +136,41 @@ public class AppDetailViewModel {
 	public void setShowInStore(Boolean showInStore) {
 		this.showInStore = showInStore;
 	}	
+	public int getMaxImages() {
+		return maxImages;
+	}
+	public void setMaxImages(int maxImages) {
+		this.maxImages = maxImages;
+	}
+	public int getReviewsCount() {
+		return reviewsCount;
+	}
+	public void setReviewsCount(int reviewsCount) {
+		this.reviewsCount = reviewsCount;
+	}
+	public int getPurchased() {
+		return purchased;
+	}
+	public void setPurchased(int purchased) {
+		this.purchased = purchased;
+	}
+	public int getTotalRuns() {
+		return totalRuns;
+	}
+	public void setTotalRuns(int totalRuns) {
+		this.totalRuns = totalRuns;
+	}
+	public int getUserRuns() {
+		return userRuns;
+	}
+	public void setUserRuns(int userRuns) {
+		this.userRuns = userRuns;
+	}
+	public ArrayList<String> getCategoryNames() {
+		return categoryNames;
+	}
+	public void setCategoryNames(ArrayList<String> categoryNames) {
+		this.categoryNames = categoryNames;
+	}
 	
 }

@@ -60,13 +60,21 @@
     </div>
 
     <div class="row">
-        <br/>
-        <i class="fa fa-square-o " aria-hidden="true"
-           ng-hide = "m_oController.m_oPublic === true"
-           ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
-        <i class="fa fa-check-square-o " aria-hidden="true"
-           ng-hide="m_oController.m_oPublic === false"
-           ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
-        <span>Make Application Public</span>
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <br/>
+            <i class="fa fa-square-o " aria-hidden="true"
+               ng-hide = "m_oController.m_oPublic === true"
+               ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
+            <i class="fa fa-check-square-o " aria-hidden="true"
+               ng-hide="m_oController.m_oPublic === false"
+               ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
+            <span>Make Application Public</span>
+        </div>
+        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+            <label for="timeout">TimeOut [min]</label>
+        </div>
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <input id="timeout" type="text" class="form-control" placeholder="Timeout [min]" ng-model="m_oController.m_iMinuteTimeout">
+        </div>
     </div>
 </div>

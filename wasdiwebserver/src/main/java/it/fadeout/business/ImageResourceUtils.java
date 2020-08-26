@@ -1,6 +1,8 @@
 package it.fadeout.business;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -162,5 +164,74 @@ public class ImageResourceUtils {
 			} 
 			
 		}
+	}
+	
+	/**
+	 * return a free name for the image (if it is available) 
+	 * @param sPathFolder
+	 * @return
+	 */
+	public static String getAvaibleProcessorImageFileName(String sPathFolder) {
+		File oFolder = new File(sPathFolder);
+		File[] aoListOfFiles = oFolder.listFiles();
+
+		String sReturnValueName = "";
+		boolean bIsAvaibleName = false; 
+		for (String sAvaibleFileName : ProcessorsMediaResource.IMAGE_NAMES){
+			bIsAvaibleName = true;
+			sReturnValueName = sAvaibleFileName;
+			
+			for (File oImage : aoListOfFiles){ 
+				String sName = oImage.getName();
+				String sFileName = FilenameUtils.removeExtension(sName);	
+				
+				if(sAvaibleFileName.equalsIgnoreCase(sFileName)){
+					bIsAvaibleName = false;
+					break;
+				} 
+				
+			}
+			
+			if(bIsAvaibleName == true){
+				break;
+			}
+			sReturnValueName = "";
+		 }
+
+		return sReturnValueName;
+	}	
+	
+	/**
+	 * Get the list of relative path of images available for the processor
+	 * @param oProcessor
+	 * @return
+	 */
+	public static ArrayList<String> getProcessorImagesList(Processor oProcessor) {
+		
+		ArrayList<String> asImages = new ArrayList<String>();
+		
+		String sAbsoluteImagesPath = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
+		String sRelativeImagesPath = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName());
+						
+		File oFolder = new File(sAbsoluteImagesPath);
+		
+		File[] aoListOfFiles = oFolder.listFiles();
+		
+		ArrayList<String> asValidNames = new ArrayList<String>(Arrays.asList(ProcessorsMediaResource.IMAGE_NAMES));
+		
+		if ( aoListOfFiles != null) {
+			for (File oImage : aoListOfFiles){
+				
+				String sImageFileName = oImage.getName();
+				String sFileNameWithoutExtension = FilenameUtils.removeExtension(sImageFileName);
+				
+				if (asValidNames.contains(sFileNameWithoutExtension)) {
+					asImages.add(sRelativeImagesPath+sImageFileName);
+				}
+			}			
+		}
+		
+		
+		return asImages;
 	}
 }

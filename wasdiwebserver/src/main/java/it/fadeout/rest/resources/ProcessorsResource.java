@@ -46,6 +46,7 @@ import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -57,6 +58,7 @@ import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
@@ -100,7 +102,7 @@ public class ProcessorsResource  {
 											@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName,
 											@QueryParam("version") String sVersion,	@QueryParam("description") String sDescription,
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
-											@QueryParam("public") Integer iPublic) throws Exception {
+											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout) throws Exception {
 		
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
@@ -210,6 +212,10 @@ public class ProcessorsResource  {
 			oProcessor.setUpdateDate((double)oDate.getTime());
 			oProcessor.setUploadDate((double)oDate.getTime());
 			
+			if (iTimeout != null) {
+				oProcessor.setTimeoutMs( ((long)iTimeout)*60l*1000l);
+			}
+			
 			int iPlaceHolderIndex = Utils.getRandomNumber(1, 8);
 			oProcessor.setNoLogoPlaceholderIndex(iPlaceHolderIndex);
 			oProcessor.setShowInStore(false);
@@ -315,8 +321,7 @@ public class ProcessorsResource  {
 				oDeployedProcessorViewModel.setParamsSample(oProcessor.getParameterSample());
 				oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
 				oDeployedProcessorViewModel.setType(oProcessor.getType());
-				oDeployedProcessorViewModel.setTimeoutMs(oProcessor.getTimeoutMs());
-				//oVM.setScore(oProcessor.getS);
+				oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
 				
 				aoRet.add(oDeployedProcessorViewModel);
 			}
@@ -500,7 +505,7 @@ public class ProcessorsResource  {
 	@Path("/getmarketdetail")
 	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
 		
-		Utils.debugLog("ProcessorsResource.getAppDetailView( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail( Session: " + sSessionId + " )");
 		
 		try {
 			// Check User 
@@ -518,7 +523,7 @@ public class ProcessorsResource  {
 			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 			
 			if (oProcessor==null) {
-				Utils.debugLog("ProcessorsResource.getAppDetailView: processor is null");
+				Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail: processor is null");
 				return Response.status(400).build();
 			}
 
@@ -569,6 +574,26 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setUpdateDate(oProcessor.getUpdateDate());
 			oAppDetailViewModel.setCategories(oProcessor.getCategories());
 			
+			AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
+			
+			for (String sCategoryId : oAppDetailViewModel.getCategories()) {
+				
+				AppCategory oAppCategory = oAppsCategoriesRepository.getCategoryById(sCategoryId);
+				
+				if (oAppCategory != null) {
+					oAppDetailViewModel.getCategoryNames().add(oAppCategory.getCategory());
+				}
+			}
+			
+			Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail: call set images");
+			oAppDetailViewModel.setImages(ImageResourceUtils.getProcessorImagesList(oProcessor));
+			Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail: set max imgs");
+			oAppDetailViewModel.setMaxImages(ProcessorsMediaResource.IMAGE_NAMES.length);
+			
+			// TODO: At the moment we do not have this data: put the number of run in the main server
+			// But this has to be changed
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oAppDetailViewModel.setPurchased((int)oProcessWorkspaceRepository.countByProcessor(oProcessor.getName()));
 			
 			// Get the reviews to compute the vote
 			List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
@@ -579,6 +604,9 @@ public class ProcessorsResource  {
 			// If we have reviews
 			if (aoReviews != null) {
 				if (aoReviews.size()>0) {
+					
+					oAppDetailViewModel.setReviewsCount(aoReviews.size());
+					
 					// Take the sum
 					for (Review oReview : aoReviews) {
 						fScore += oReview.getVote();
@@ -595,7 +623,7 @@ public class ProcessorsResource  {
 			return Response.ok(oAppDetailViewModel).build();
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessorsResource.getMarketPlaceAppList: " + oEx);
+			Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail: " + oEx);
 			return Response.serverError().build();
 		}		
 	}	
@@ -1246,7 +1274,7 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
-			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getTimeoutMs());
+			oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
 			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
 			Date oDate = new Date();

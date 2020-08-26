@@ -1,6 +1,6 @@
 <div class="container-fluid">
 
-    <!--APP FEATURED IMG-->
+    <!-- APPLICATION LOGO-->
     <div class="row">
         Application Logo:
     </div>
@@ -26,6 +26,47 @@
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
             <button type="button" ng-click="m_oController.updateLogo()" class="my-button" data-dismiss="modal">
                 Update Logo
+            </button>
+        </div>
+    </div>
+
+    <!-- ROW TO ADD NEW IMAGE-->
+    <div class="row" ng-show="m_oController.m_oProcessorDetails.images.length<m_oController.m_oProcessorDetails.maxImages">
+        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+            <div>
+                Add an Image to the App Gallery (Available: {{m_oController.m_oProcessorDetails.maxImages-m_oController.m_oProcessorDetails.images.length}})
+            </div>
+        </div>
+        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="drag-and-drop ">
+                <div ngf-drop ngf-select ng-model="m_oController.m_oImageToUpload" class="drop-box"
+                     ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+                     accept="application/image"
+                     ngf-pattern="'.png,.jpg,.svg'">
+                    Drag and Drop here a new Application Image
+
+                    <div ng-show="m_oController.m_oImageToUpload">File: {{m_oController.m_oImageToUpload[0].name}}</div>
+                </div>
+
+                <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
+            </div>
+        </div>
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+            <button type="button" ng-click="m_oController.addApplicationImage()" class="my-button">
+                Add App Image
+            </button>
+        </div>
+    </div>
+
+    <!-- ONE ROW FOR EACH IMAGE-->
+    <div class="row" ng-repeat="sImage in m_oController.m_oProcessorDetails.images">
+        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="featured-img" style="height: 150px; width: 285px; background-image: url({{sImage}})">
+            </div>
+        </div>
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+            <button type="button" ng-click="m_oController.removeProcessorImage(sImage)" class="my-button">
+                Remove Image
             </button>
         </div>
     </div>

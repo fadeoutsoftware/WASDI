@@ -9,7 +9,7 @@ public class DeployedProcessorViewModel {
 	private String publisher;
 	private String paramsSample = "";
 	private int isPublic = 0;
-	private long timeoutMs = 1000*60*60*3;
+	private int minuteTimeout = 180;
 	private String type = "";
 	private Boolean sharedWithMe = false;
 	
@@ -68,17 +68,17 @@ public class DeployedProcessorViewModel {
 	public void setType(String type) {
 		this.type = type;
 	}
-	public long getTimeoutMs() {
-		return timeoutMs;
-	}
-	public void setTimeoutMs(long lTimeoutMs) {
-		this.timeoutMs = lTimeoutMs;
-	}
 	public Boolean getSharedWithMe() {
 		return sharedWithMe;
 	}
 	public void setSharedWithMe(Boolean sharedWithMe) {
 		this.sharedWithMe = sharedWithMe;
+	}
+	public int getMinuteTimeout() {
+		return minuteTimeout;
+	}
+	public void setMinuteTimeout(int minuteTimeout) {
+		this.minuteTimeout = minuteTimeout;
 	}
 
 }
