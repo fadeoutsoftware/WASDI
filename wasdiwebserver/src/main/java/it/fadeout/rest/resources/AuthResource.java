@@ -468,7 +468,7 @@ public class AuthResource {
 		
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
 		ImageFile oUserImage = oImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
-		String sImageExtension = oImageResourceUtils.checkExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		String sImageExtension = oImageResourceUtils.getExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
 		
 		//Check the image and extension
 		if(oUserImage == null || sImageExtension.isEmpty() ){

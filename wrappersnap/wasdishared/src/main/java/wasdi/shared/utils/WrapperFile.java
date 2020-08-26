@@ -16,7 +16,7 @@ public class WrapperFile  extends File  {
 
 	}
 	
-	public boolean save (InputStream oInputStream){
+	public boolean save(InputStream oInputStream){
 		
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];

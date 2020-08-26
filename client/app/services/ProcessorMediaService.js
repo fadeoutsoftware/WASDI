@@ -27,5 +27,22 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
         return this.m_oHttp.get(this.APIURL + this.m_sResource + '/publisher/getlist');
     };
 
+    /**
+     * Update Processor files
+     * @param sWorkspaceId
+     * @param sProcessorId
+     * @param oBody
+     * @returns {*}
+     */
+    this.uploadProcessorLogo = function (sProcessorId, oBody) {
+
+        var oOptions = {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        };
+
+        return this.m_oHttp.post(this.APIURL + this.m_sResource + '/logo/upload?processorId=' + encodeURI(sProcessorId), oBody ,oOptions);
+    };
+
 
 }]);

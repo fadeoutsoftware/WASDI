@@ -35,7 +35,6 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
-import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;

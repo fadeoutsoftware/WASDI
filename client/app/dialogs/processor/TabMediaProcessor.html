@@ -14,7 +14,7 @@
                 <div ngf-drop ngf-select ng-model="m_oController.m_oProcessorLogo" class="drop-box"
                      ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                      accept="application/image"
-                     ngf-pattern="'.png'">
+                     ngf-pattern="'.png,.jpg,.svg'">
                     Drag and Drop here the Application Logo
 
                     <div ng-show="m_oController.m_oProcessorLogo">File: {{m_oController.m_oProcessorLogo[0].name}}</div>
@@ -22,6 +22,11 @@
 
                 <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
             </div>
+        </div>
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+            <button type="button" ng-click="m_oController.updateLogo()" class="my-button" data-dismiss="modal">
+                Update Logo
+            </button>
         </div>
     </div>
 

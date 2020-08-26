@@ -151,7 +151,9 @@ var ProcessorController = (function() {
             categories: [],
             images: [],
             isMine: true,
-            buyed: false
+            buyed: false,
+            longDescription: "",
+            showInStore: false
         }
 
         /**
@@ -543,6 +545,31 @@ var ProcessorController = (function() {
          else {
              return false;
          }
+     }
+
+     ProcessorController.prototype.updateLogo = function () {
+
+         var oSelectedFile = null;
+
+         if (this.m_oProcessorLogo!=null) {
+             oSelectedFile = this.m_oProcessorLogo[0];
+         }
+
+         // The user uploaded a logo?
+         if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)
+         {
+             // Update the file
+             var oBody = new FormData();
+             oBody.append('image', oSelectedFile);
+
+             this.m_oProcessorMediaService.uploadProcessorLogo(this.m_oInputProcessor.processorId, oBody).success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR LOGO UPDATED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR LOGO");
+             });
+         }
+
      }
 
 

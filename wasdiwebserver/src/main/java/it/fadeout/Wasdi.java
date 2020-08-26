@@ -38,8 +38,6 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import it.fadeout.business.ImageResourceUtils;
-import it.fadeout.rest.resources.ProcessorsMediaResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -55,7 +53,6 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
-import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;

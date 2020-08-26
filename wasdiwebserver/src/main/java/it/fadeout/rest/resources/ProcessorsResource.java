@@ -68,14 +68,12 @@ import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppDetailViewModel;
 import wasdi.shared.viewmodels.AppFilterViewModel;
 import wasdi.shared.viewmodels.AppListViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessorDetailsViewModel;
 import wasdi.shared.viewmodels.ProcessorLogViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
@@ -211,7 +209,12 @@ public class ProcessorsResource  {
 			oProcessor.setIsPublic(iPublic);
 			oProcessor.setUpdateDate((double)oDate.getTime());
 			oProcessor.setUploadDate((double)oDate.getTime());
-						
+			
+			int iPlaceHolderIndex = Utils.getRandomNumber(1, 8);
+			oProcessor.setNoLogoPlaceholderIndex(iPlaceHolderIndex);
+			oProcessor.setShowInStore(false);
+			oProcessor.setLongDescription("");
+			
 			// Add info about the deploy node
 			Node oNode = Wasdi.getActualNode();
 			
@@ -374,6 +377,8 @@ public class ProcessorsResource  {
 				Processor oProcessor = aoDeployed.get(i);
 				// Initialize as No Votes
 				float fScore = -1.0f;
+				
+				if (!oProcessor.getShowInStore()) continue;
 
 				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				
@@ -467,7 +472,7 @@ public class ProcessorsResource  {
 				oAppListViewModel.setBuyed(false);
 				oAppListViewModel.setPrice(oProcessor.getOndemandPrice());
 
-				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoFullPath(oProcessor.getName()));
+				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
 				
 				// Set the friendly name, same of name if null
 				if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -516,6 +521,12 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorsResource.getAppDetailView: processor is null");
 				return Response.status(400).build();
 			}
+
+			// The same API is used also by the backed. The filter is on the list view.
+//			if (!oProcessor.getShowInStore()) {
+//				Utils.debugLog("ProcessorsResource.getAppDetailView: processor is not for the store");
+//				return Response.status(400).build();				
+//			}
 			
 			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 
@@ -538,7 +549,10 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setPublisher(oProcessor.getUserId());
 			oAppDetailViewModel.setBuyed(false);
 			
-			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoFullPath(oProcessor.getName()));
+			oAppDetailViewModel.setShowInStore(oProcessor.getShowInStore());
+			oAppDetailViewModel.setLongDescription(oProcessor.getLongDescription());
+			
+			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
 			
 			// Set the friendly name, same of name if null
 			if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -554,6 +568,7 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setSubscriptionPrice(oProcessor.getSubscriptionPrice());
 			oAppDetailViewModel.setUpdateDate(oProcessor.getUpdateDate());
 			oAppDetailViewModel.setCategories(oProcessor.getCategories());
+			
 			
 			// Get the reviews to compute the vote
 			List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
@@ -1452,6 +1467,8 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setSubscriptionPrice(oUpdatedProcessorVM.getSubscriptionPrice());			
 			Date oDate = new Date();
 			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
+			oProcessorToUpdate.setShowInStore(oUpdatedProcessorVM.getShowInStore());
+			oProcessorToUpdate.setLongDescription(oUpdatedProcessorVM.getLongDescription());
 			
 			oProcessorRepository.updateProcessor(oProcessorToUpdate);
 			

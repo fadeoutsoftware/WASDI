@@ -4,15 +4,18 @@ import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
 
-import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.ProcessorsMediaResource;
+import wasdi.shared.business.Processor;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 
 public class ImageResourceUtils {
 	
+	public static String s_sWebAppBasePath = "/var/lib/tomcat8/webapps/wasdiwebserver/";
+	
 	/**
-	 * Check the extension of a image
+	 * Check if the extension of a image is valid for WASDI
 	 * @param sExt
 	 * @param sValidExtensions
 	 * @return
@@ -47,24 +50,51 @@ public class ImageResourceUtils {
 	 */
 	public static ImageFile getImageInFolder(String sPathLogoFolder, String[] asEnableExtension){
 		ImageFile oImage = null;
-		String sLogoExtension = checkExtensionOfImageInFolder(sPathLogoFolder, asEnableExtension);
+		String sLogoExtension = getExtensionOfImageInFolder(sPathLogoFolder, asEnableExtension);
 		if(sLogoExtension.isEmpty() == false){
 			oImage = new ImageFile(sPathLogoFolder + "." + sLogoExtension );
 		}
 		return oImage;
 		
 	}
+
+	/**
+	 * Get the base relative Path of the folder where processor images are stored
+	 * @param sProcessorName
+	 * @return
+	 */
+	public static String getProcessorImagesBasePath(String sProcessorName) {
+		
+		return ImageResourceUtils.getProcessorImagesBasePath(sProcessorName, true);
+	}
 	
-	public static String getProcessorLogoBasePath(String sProcessorName) {
-		String sPath = "./assets/img/processors/" + sProcessorName + "/";
+	/**
+	 * Get the path, relative or absolute, of the folder where processor images are stored
+	 * @param sProcessorName
+	 * @param bRelative
+	 * @return
+	 */
+	public static String getProcessorImagesBasePath(String sProcessorName, boolean bRelative) {
+		String sPath = "assets/img/processors/" + sProcessorName + "/";
+		
+		if (!bRelative) sPath = s_sWebAppBasePath + sPath;
+		
 		return sPath;
 	}
 	
-	public static String getProcessorLogoFullPath(String sProcessorName) {
+	/**
+	 * Get the relative path of the processor Logo
+	 * @param oProcessor
+	 * @return
+	 */
+	public static String getProcessorLogoRelativePath(Processor oProcessor) {
 		
-		String sLogoPath = ImageResourceUtils.getProcessorLogoBasePath(sProcessorName);
+		String sProcessorName = oProcessor.getName();
 		
-		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sLogoPath, ProcessorsMediaResource.IMAGE_PROCESSORS_EXTENSIONS );
+		String sRelativeLogoPath = ImageResourceUtils.getProcessorImagesBasePath(sProcessorName);
+		String sAbsoluteLogoPath = ImageResourceUtils.getProcessorImagesBasePath(sProcessorName, false);
+				
+		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sAbsoluteLogoPath + ProcessorsMediaResource.DEFAULT_LOGO_PROCESSOR_NAME, ProcessorsMediaResource.IMAGE_PROCESSORS_EXTENSIONS );
 		
 		boolean bExistsLogo = false;
 		
@@ -73,10 +103,22 @@ public class ImageResourceUtils {
 		}
 		
 		if (bExistsLogo) {
-			return sLogoPath + oLogo.getName();
+			return sRelativeLogoPath + oLogo.getName();
 		}
 		else {
-			String sPlaceHolder = "assets/img/placeholder/placeholder_" + Utils.getRandomNumber(1, 8) + ".jpg";
+			
+			int iPlaceHolderIndex = oProcessor.getNoLogoPlaceholderIndex();
+			
+			if (iPlaceHolderIndex == -1) {
+				// If we do not have a logo, and a random placeholder has not been assigned, assign it.
+				iPlaceHolderIndex = Utils.getRandomNumber(1, 8);
+				oProcessor.setNoLogoPlaceholderIndex(iPlaceHolderIndex);
+				ProcessorRepository oProcessorRepository = new ProcessorRepository();
+				oProcessorRepository.updateProcessor(oProcessor);
+			}
+			
+			String sPlaceHolder = "assets/img/placeholder/placeholder_" + iPlaceHolderIndex + ".jpg";
+			
 			return sPlaceHolder;
 		}
 	}
@@ -88,7 +130,7 @@ public class ImageResourceUtils {
 	 * @param asEnableExtension
 	 * @return
 	 */
-	public static String checkExtensionOfImageInFolder (String sPathLogoFolder, String[] asEnableExtension){
+	public static String getExtensionOfImageInFolder (String sPathLogoFolder, String[] asEnableExtension){
 		File oLogo = null;
 		String sExtensionReturnValue = "";
 		for (String sValidExtension : asEnableExtension) {

@@ -1,5 +1,15 @@
 <div class="container-fluid">
     <div class="row">
+        <br/>
+        <i class="fa fa-square-o " aria-hidden="true"
+           ng-hide = "m_oController.m_oProcessorDetails.showInStore === true"
+           ng-click = "m_oController.m_oProcessorDetails.showInStore = !m_oController.m_oProcessorDetails.showInStore"></i>
+        <i class="fa fa-check-square-o " aria-hidden="true"
+           ng-hide="m_oController.m_oProcessorDetails.showInStore === false"
+           ng-click = "m_oController.m_oProcessorDetails.showInStore = !m_oController.m_oProcessorDetails.showInStore"></i>
+        <span>Show Application in the Store</span>
+    </div>
+    <div class="row">
         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
             <label for="friendlyname">Friendly Name</label>
         </div>
@@ -40,6 +50,14 @@
         </div>
         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
             <input id="subscriptionPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Subscription Price" ng-model="m_oController.m_oProcessorDetails.subscriptionPrice">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="longDescription">Long Description</label>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <textarea class="form-control h-100" ng-readonly="!m_oController.m_bEditMode" rows="10"  id = "longDescription"  ng-model="m_oController.m_oProcessorDetails.longDescription"></textarea>
         </div>
     </div>
     <div class="row">

@@ -1,7 +1,6 @@
 package wasdi.shared.business;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Processor Entity
@@ -98,6 +97,23 @@ public class Processor {
 	 * Sample JSON Parameter
 	 */
 	private String parameterSample="";
+	
+	/**
+	 * Flag to know if the application must be shown in the store or not
+	 */
+	private boolean showInStore = false;
+	
+	/**
+	 * Long description
+	 */
+	private String longDescription = "";
+	
+	/**
+	 * If the application has no logo it has a placeholder image. Here there is stored 
+	 * the random placeholder image index assigned once for each processor
+	 */
+	private int noLogoPlaceholderIndex = -1;
+	
 	
 	/**
 	 * List of associated categories
@@ -227,6 +243,24 @@ public class Processor {
 	}
 	public void setSubscriptionPrice(Float subscriptionPrice) {
 		this.subscriptionPrice = subscriptionPrice;
+	}
+	public boolean getShowInStore() {
+		return showInStore;
+	}
+	public void setShowInStore(boolean showInStore) {
+		this.showInStore = showInStore;
+	}
+	public String getLongDescription() {
+		return longDescription;
+	}
+	public void setLongDescription(String longDescription) {
+		this.longDescription = longDescription;
+	}
+	public int getNoLogoPlaceholderIndex() {
+		return noLogoPlaceholderIndex;
+	}
+	public void setNoLogoPlaceholderIndex(int noLogoPlaceholderIndex) {
+		this.noLogoPlaceholderIndex = noLogoPlaceholderIndex;
 	}
 	
 }

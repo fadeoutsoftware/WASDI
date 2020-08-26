@@ -19,6 +19,8 @@ public class AppDetailViewModel {
 	private ArrayList<String> images = new ArrayList<String>();
 	private Boolean isMine;
 	private Boolean buyed;
+	private String longDescription;
+	private Boolean showInStore = false;
 	
 	public ArrayList<String> getCategories() {
 		return categories;
@@ -116,7 +118,17 @@ public class AppDetailViewModel {
 	public void setImages(ArrayList<String> images) {
 		this.images = images;
 	}
-	
-	
+	public String getLongDescription() {
+		return longDescription;
+	}
+	public void setLongDescription(String longDescription) {
+		this.longDescription = longDescription;
+	}
+	public Boolean getShowInStore() {
+		return showInStore;
+	}
+	public void setShowInStore(Boolean showInStore) {
+		this.showInStore = showInStore;
+	}	
 	
 }
