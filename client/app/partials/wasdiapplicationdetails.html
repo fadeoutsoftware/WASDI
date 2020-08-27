@@ -11,21 +11,12 @@
                 <div class="col-12 col-md-6">
                     <div class="appdetails-slider">
                         <ul id="lightSlider">
-                            <span ng-repeat="sImage in m_oController.m_asImages">
-                                <li data-thumb="{{sImage}}" >
-                                    <img src="{{sImage}}" />
-                                </li>
-                            </span>
-                            <span>
+                            <li ng-repeat="sImage in m_oController.m_asImages" data-thumb="" >
+                                <img src="{{sImage}}" />
+                            </li>
                             <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-2.jpg">
                                 <img src="https://sachinchoolur.github.io/lightslider/img/cS-2.jpg" />
                             </li>
-                            </span>
-                            <span>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-3.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-3.jpg" />
-                            </li>
-                            </span>
                         </ul>
                     </div>
                 </div>
