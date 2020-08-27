@@ -941,3 +941,5 @@ SEADRIF_DELTARES/
 libraries/matlabwasdilib/jwasdilib-0.9.3.jar
 libraries/matlabwasdilib.zip
 libraries/idlwasdilib/run_edriftlistflood_archive.sh
+target/sonar/.sonar_lock
+target/sonar/report-task.txt
