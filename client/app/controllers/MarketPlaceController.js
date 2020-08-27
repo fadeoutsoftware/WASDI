@@ -59,9 +59,6 @@ var MarketPlaceController = (function() {
          */
         this.m_bLoadMoreEnabled = true;
 
-        /*KASA FOR TEST*/
-        $scope.testVar = true;
-
         /**
          * List of applications
          * @type {*[]}
@@ -73,7 +70,6 @@ var MarketPlaceController = (function() {
          * @type {*[]}
          */
         this.m_aoCategories = []
-
 
         /**
          * List of Publishers

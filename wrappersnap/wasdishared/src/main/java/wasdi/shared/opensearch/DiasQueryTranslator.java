@@ -6,6 +6,8 @@
  */
 package wasdi.shared.opensearch;
 
+import com.google.common.base.Preconditions;
+
 import wasdi.shared.utils.Utils;
 
 /**
@@ -23,10 +25,20 @@ public abstract class DiasQueryTranslator {
 	}
 	
 	public void setParserConfigPath(String sParserConfigPath) {
+		if(null==sParserConfigPath) {
+			Utils.debugLog("DiasQueryTranslator.setParserConfigPath: warning: parser config path is null");
+		} else if(sParserConfigPath.isEmpty()) {
+			Utils.debugLog("DiasQueryTranslator.setParserConfigPath: warning: parser config path is empty");
+		}
 		this.m_sParserConfigPath = sParserConfigPath;
 	}
 	
 	public void setAppconfigPath(String sAppConfigPath) {
+		if(null==sAppConfigPath) {
+			Utils.debugLog("DiasQueryTranslator.setParserConfigPath: warning: app config path is null");
+		} else if(sAppConfigPath.isEmpty()) {
+			Utils.debugLog("DiasQueryTranslator.setParserConfigPath: warning: app config path is empty");
+		}
 		this.m_sAppConfigPath = sAppConfigPath;
 	}
 	

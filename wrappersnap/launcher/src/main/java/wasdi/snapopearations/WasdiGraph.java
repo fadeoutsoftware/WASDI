@@ -363,7 +363,7 @@ public class WasdiGraph {
 		        //update the process
 				m_oProcess.setProgressPerc(100);
 				m_oProcess.setStatus(ProcessStatus.DONE.name());
-				m_oProcess.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				m_oProcess.setOperationEndDate(Utils.getFormatDate(new Date()));
 		        if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		        	m_oLogger.error("WasdiGraph: Error during process update (terminated)");
 		        }

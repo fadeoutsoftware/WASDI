@@ -263,7 +263,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Set the process as running
 			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
-			oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
+			oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
 			oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 			oProcessWorkspace.setPid(getProcessId());
 
@@ -297,7 +297,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				if (oProcessWorkspace != null) {
 					oProcessWorkspace.setProgressPerc(100);
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 					if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
 						s_oLogger.debug(
@@ -2708,7 +2708,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 				// update the process
 				oProcessWorkspace.setProgressPerc(100);
-				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
 					s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Error during process update (terminated)");
 				}
@@ -3178,7 +3178,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
 	
 				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
-				oProcessToKill.setOperationEndDate(Utils.GetFormatDate(new Date()));
+				oProcessToKill.setOperationEndDate(Utils.getFormatDate(new Date()));
 	
 				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 				if (!oRepository.updateProcess(oProcessToKill)) {

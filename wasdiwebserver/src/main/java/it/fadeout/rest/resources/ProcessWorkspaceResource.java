@@ -58,9 +58,11 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: workspace id is null, aborting");
 				return aoProcessList;
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user from session is null, aborting");
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId +
+						", status: " + sStatus + ", name pattern: " + sNamePattern +
+						", Start: " + iStartIndex + ", End: " + iEndIndex + " ): invalid session");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -145,15 +147,17 @@ public class ProcessWorkspaceResource {
 		
 		Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser( Session: " + sSessionId + " )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
+			
 
 		try {
 			// Domain Check
-			if (oUser == null) {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null == oUser) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser( Session: " + sSessionId + " ): invalid session");
 				return aoProcessList;
 			}
+			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProcessList;
 			}
@@ -224,14 +228,14 @@ public class ProcessWorkspaceResource {
 	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
 		Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user not found from session");
+				Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -272,13 +276,14 @@ public class ProcessWorkspaceResource {
 		
 		Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser( Session: " + sSessionId + " )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser( Session: " + sSessionId + " ): invalid session");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -313,12 +318,13 @@ public class ProcessWorkspaceResource {
 		
 		Utils.debugLog("ProcessWorkspaceResource.GetSummary( Session: " + sSessionId + " )");
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.GetSummary( Session: " + sSessionId + " ): invalid session");
 				return oSummaryViewModel;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -465,10 +471,10 @@ public class ProcessWorkspaceResource {
 		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
 
 		try {
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user (or userId) null, aborting");
+				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " ): invalid session");
 				return Response.status(401).build();
 			}
 			
@@ -535,7 +541,7 @@ public class ProcessWorkspaceResource {
 		
 		Utils.debugLog("ProcessWorkspaceResource.GetProcessById( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + " )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 		
@@ -545,6 +551,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessById( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + " ): invalid session");
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -574,13 +581,14 @@ public class ProcessWorkspaceResource {
 		
 		Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById( Session: " + sSessionId + " )");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		ArrayList<String> asReturnStatusList = new ArrayList<String>();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById( Session: " + sSessionId + " ): invalid session");
 				return asReturnStatusList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -607,7 +615,10 @@ public class ProcessWorkspaceResource {
 	public String getProcessStatusById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processObjId") String sProcessObjId) {
 		Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " )" );
 		try {
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null == oUser) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " ): invalid session" );
+			}
 			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
@@ -628,13 +639,15 @@ public class ProcessWorkspaceResource {
 		Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( Session: " + sSessionId + ", ProcWsId: " +
 				sProcessWorkspaceId + ", Status: " + sNewStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( Session: " + sSessionId + ", ProcWsId: " +
+						sProcessWorkspaceId + ", Status: " + sNewStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " ): invalid session" );
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -653,7 +666,7 @@ public class ProcessWorkspaceResource {
 				// The process finished
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 					// No end-date set: put it here
-					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}
 			}
 			
@@ -705,13 +718,15 @@ public class ProcessWorkspaceResource {
 		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId +
 				", Payload: " + sPayload + " )" );
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId +
+						", Payload: " + sPayload + " ): invalid session" );
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -749,13 +764,14 @@ public class ProcessWorkspaceResource {
 		
 		Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId +", Payload: " + iSubPid + " )" );
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
 
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId +", Payload: " + iSubPid + " ): invalid session" );
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -800,11 +816,12 @@ public class ProcessWorkspaceResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Utils.debugLog("ProcessWorkspaceResource.CleanQueue( Session: " + sSessionId + " ): invalid session");
 				return oResult;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -833,7 +850,11 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.getPayload: session is null or empty, aborting");
 				return null;
 			}
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null == oUser) {
+				Utils.debugLog("ProcessWorkspaceResource.getPayload( " + sSessionId + ", " + sProcessObjId + " ): invalid session" );
+				return null;
+			}
 			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getPayload(sProcessObjId);
