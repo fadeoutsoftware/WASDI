@@ -3,13 +3,16 @@ package wasdi.shared.viewmodels;
 import java.util.Date;
 
 public class ReviewViewModel {
-	private String processorId;
-	private Date date;
-	private Float vote;
-	private String comment;
-	private String userId;
 	private String id;
+	private String processorId;
+
 	
+	private String userId;
+	private Float vote;
+	private Date date;
+	private String title;
+	private String comment;
+		
 	public String getProcessorId() {
 		return processorId;
 	}
@@ -45,6 +48,12 @@ public class ReviewViewModel {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	
 }

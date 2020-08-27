@@ -427,24 +427,26 @@ public class ProcessorsResource  {
 					}
 				}
 				
-				if (oFilters.getScore()> 0) {
-					
-					// Get the reviews to compute the vote
-					List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
-										
-					// If we have reviews
-					if (aoReviews != null) {
-						if (aoReviews.size()>0) {
-							// Take the sum
-							for (Review oReview : aoReviews) {
-								fScore += oReview.getVote();
-							}
-							
-							// Compute average
-							fScore /= aoReviews.size();
+				// Get the reviews to compute the vote
+				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+									
+				// If we have reviews
+				if (aoReviews != null) {
+					if (aoReviews.size()>0) {
+						fScore = 0;
+						
+						// Take the sum
+						for (Review oReview : aoReviews) {
+							fScore += oReview.getVote();
 						}
+						
+						// Compute average
+						fScore /= aoReviews.size();
 					}
-					
+				}				
+				
+				if (oFilters.getScore()> 0) {
+										
 					if (fScore<=oFilters.getScore() && fScore != -1.0f) {
 						continue;
 					}
@@ -577,6 +579,7 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setOndemandPrice(oProcessor.getOndemandPrice());
 			oAppDetailViewModel.setSubscriptionPrice(oProcessor.getSubscriptionPrice());
 			oAppDetailViewModel.setUpdateDate(oProcessor.getUpdateDate());
+			oAppDetailViewModel.setPublishDate(oProcessor.getUploadDate());
 			oAppDetailViewModel.setCategories(oProcessor.getCategories());
 			
 			AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
@@ -590,9 +593,7 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail: call set images");
 			oAppDetailViewModel.setImages(ImageResourceUtils.getProcessorImagesList(oProcessor));
-			Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail: set max imgs");
 			oAppDetailViewModel.setMaxImages(ProcessorsMediaResource.IMAGE_NAMES.length);
 			
 			// TODO: At the moment we do not have this data: put the number of run in the main server
@@ -609,6 +610,8 @@ public class ProcessorsResource  {
 			// If we have reviews
 			if (aoReviews != null) {
 				if (aoReviews.size()>0) {
+					
+					fScore = 0.0f;
 					
 					oAppDetailViewModel.setReviewsCount(aoReviews.size());
 					

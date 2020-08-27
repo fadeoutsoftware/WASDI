@@ -11,42 +11,21 @@
                 <div class="col-12 col-md-6">
                     <div class="appdetails-slider">
                         <ul id="lightSlider">
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-1.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-1.jpg" />
-                            </li>
+                            <span ng-repeat="sImage in m_oController.m_asImages">
+                                <li data-thumb="{{sImage}}" >
+                                    <img src="{{sImage}}" />
+                                </li>
+                            </span>
+                            <span>
                             <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-2.jpg">
                                 <img src="https://sachinchoolur.github.io/lightslider/img/cS-2.jpg" />
                             </li>
+                            </span>
+                            <span>
                             <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-3.jpg">
                                 <img src="https://sachinchoolur.github.io/lightslider/img/cS-3.jpg" />
                             </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-4.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-4.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-5.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-5.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-6.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-6.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-7.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-7.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-8.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-8.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-9.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-9.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-10.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-10.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-11.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-12.jpg" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-13.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-13.jpg" />
-                            </li>
+                            </span>
                         </ul>
                     </div>
                 </div>
@@ -95,10 +74,11 @@
                     </div>
                     <!--PRICES-->
                     <div class="row">
-                        <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
+                        <!--CASE 1 - NO PREMIUM / NO BUYED / NO FREE-->
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==false && m_oController.m_oApplication.buyed == false && (m_oController.m_oApplication.ondemandPrice>0 || m_oController.m_oApplication.subscriptionPrice>0)">
                             <div class="big-price-tag one-shot">
                                 <div class="text-center">
-                                    <span>2.90</span><span> €</span>
+                                    <span>{{m_oController.m_oApplication.ondemandPrice}}</span><span> €</span>
                                 </div>
                                 <div class="text-center small">
                                     RUN ONCE
@@ -106,44 +86,40 @@
                             </div>
                         </div>
 
-                        <!--CASE 1 - NO PREMIUM / NO BUYED / NO FREE-->
-                        <div class="col-12 col-md-6" ng-if="userStatus != 'premium' && !userOwner && processorPrice > 0">
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==false && m_oController.m_oApplication.buyed == false && (m_oController.m_oApplication.ondemandPrice>0 || m_oController.m_oApplication.subscriptionPrice>0)">
                             <div class="big-price-tag subscription">
                                 <div class="text-center">
-                                    <span>9.90</span><span> €/month</span>
+                                    <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
                                 </div>
                                 <div class="text-center small">
-                                    BUY APP
+                                    SUBSCRIBE
                                 </div>
                             </div>
                         </div>
 
-                        <!--CASE 2 - PREMIUM-->
-                        <div class="col-12 col-md-6" ng-if="userStatus == 'premium' && processorPrice > 0 && !userOwner">
+                        <!--CASE 2 - USER SUBCRIBED THE APP-->
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==false && m_oController.m_oApplication.buyed == true">
                             <div class="big-price-tag subscription premium" >
-                                <div class="text-center">
-                                    <span> <span>{{processorPrice}}</span><span> €</span></span>
-                                </div>
-                                <div class="text-center small">
-                                    FREE WITH WASDI PREMIUM
+                                <div class="text-center large">
+                                    BOUGHT
                                 </div>
                             </div>
                         </div>
 
-                        <!--CASE 3 - BUYED-->
-                        <div class="col-12 col-md-6" ng-if="userOwner">
+                        <!--CASE 3 USER'S APP-->
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true">
                             <div class="big-price-tag buyed" >
                                 <div class="text-center large">
-                                    BUYED!
+                                    YOUR APP
                                 </div>
                             </div>
                         </div>
 
                         <!--CASE 4 - FREE APP-->
-                        <div class="col-12 col-md-6" ng-if="processorPrice == 0 && !userOwner">
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==false && m_oController.m_oApplication.ondemandPrice == 0 && m_oController.m_oApplication.subscriptionPrice == 0">
                             <div class="big-price-tag free" >
                                 <div class="text-center large">
-                                    FREE!
+                                    FREE
                                 </div>
                             </div>
                         </div>
@@ -199,8 +175,8 @@
                     <div>WebSite: <span class="text-green-wasdi"><a ng-href="{{m_oController.m_oApplication.link}}" target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
                 </div>
                 <div class="col-12 col-md-6">
-                    <div>Publication Date: <span class="text-green-wasdi">18/06/2020</span></div>
-                    <div>Last Update: <span class="text-green-wasdi">22/08/2020</span></div>
+                    <div>Publication Date: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.publishDate)}}</span></div>
+                    <div>Last Update: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span></div>
                     <div>Purchased: <span class="text-green-wasdi">{{m_oController.m_oApplication.purchased}}</span></div>
                 </div>
 
@@ -227,10 +203,11 @@
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>2.25&&m_oController.m_oApplication.AverageScore<2.75?'checked-half':m_oController.m_oApplication.AverageScore>=2.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>3.25&&m_oController.m_oApplication.AverageScore<3.75?'checked-half':m_oController.m_oApplication.AverageScore>=3.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>4.25&&m_oController.m_oApplication.AverageScore<4.75?'checked-half':m_oController.m_oApplication.AverageScore>=4.75?'checked':''"></span>
-                        <span class="ml-2">3.8 on 5</span>
+                        <span class="ml-2" ng-show="m_oController.m_oReviewsWrapper.avgVote>=0">{{m_oController.m_oReviewsWrapper.avgVote}} on 5</span>
+                        <span class="" ng-show="m_oController.m_oReviewsWrapper.avgVote<0"><br/>Be the first to rate this app</span>
                     </div>
                     <!--TOTAL REVIEWS-->
-                    <div><span class="">{{reviewsNbr}} total reviews</span></div>
+                    <div><span class="">{{m_oController.m_oApplication.reviewsCount}} total reviews</span></div>
                     <hr>
                     <!--5 STAR PERCENTAGE -->
                     <div class="mb-2">
@@ -239,64 +216,68 @@
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
-                        <span class="ml-2">52%</span>
+                        <span class="ml-2">{{m_oController.m_oReviewsWrapper.numberOfFiveStarVotes}}</span>
                     </div>
-                    <!--5 STAR PERCENTAGE -->
+                    <!--4 STAR PERCENTAGE -->
                     <div class="mb-2">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star"></span>
-                        <span class="ml-2">16%</span>
+                        <span class="ml-2">{{m_oController.m_oReviewsWrapper.numberOfFourStarVotes}}</span>
                     </div>
-                    <!--5 STAR PERCENTAGE -->
+                    <!--3 STAR PERCENTAGE -->
                     <div class="mb-2">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star"></span>
                         <span class="fa fa-star"></span>
-                        <span class="ml-2">12%</span>
+                        <span class="ml-2">{{m_oController.m_oReviewsWrapper.numberOfThreeStarVotes}}</span>
                     </div>
-                    <!--5 STAR PERCENTAGE -->
+                    <!--2 STAR PERCENTAGE -->
                     <div class="mb-2">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star"></span>
                         <span class="fa fa-star"></span>
                         <span class="fa fa-star"></span>
-                        <span class="ml-2">6%</span>
+                        <span class="ml-2">{{m_oController.m_oReviewsWrapper.numberOfTwoStarVotes}}</span>
                     </div>
-                    <!--5 STAR PERCENTAGE -->
+                    <!--1 STAR PERCENTAGE -->
                     <div class="mb-2">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star"></span>
                         <span class="fa fa-star"></span>
                         <span class="fa fa-star"></span>
                         <span class="fa fa-star"></span>
-                        <span class="ml-2">14%</span>
+                        <span class="ml-2">{{m_oController.m_oReviewsWrapper.numberOfOneStarVotes}}</span>
                     </div>
                     <hr>
-                    <div class="green-big-btn" type="button" data-toggle="modal" data-target="#writeReviewsModal">
+                    <div class="green-big-btn" type="button" data-toggle="modal" ng-show="!m_oController.m_oReviewsWrapper.alreadyVoted" data-target="#writeReviewsModal">
                         WRITE A REVIEW
                     </div>
+                    <div class="green-big-btn" type="button" ng-show="m_oController.m_oReviewsWrapper.alreadyVoted">
+                        ALREADY REVIEWED
+                    </div>
+
 
                 </div>
                 <div class="col-12 col-md-9">
-                    <div ng-repeat="review in reviews " class="reviews-list border shadow-sm p-3 mb-4">
+                    <div ng-repeat="review in m_oController.m_oReviewsWrapper.reviews " class="reviews-list border shadow-sm p-3 mb-4">
                         <!--REVIWER NAME-->
                         <div class="d-flex align-items-center">
                             <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
-                            <span class="reviews-name">{{review.name}}</span>
+                            <span class="reviews-name">{{review.userId}}</span>
                         </div>
                         <!--RATE-->
                         <div class="my-2">
-                            <span class="fa fa-star" ng-class="review.rating>0.25&&review.rating<0.75?'checked-half':review.rating>=0.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>1.25&&review.rating<1.75?'checked-half':review.rating>=1.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>2.25&&review.rating<2.75?'checked-half':review.rating>=2.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>3.25&&review.rating<3.75?'checked-half':review.rating>=3.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>4.25&&review.rating<4.75?'checked-half':review.rating>=4.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>0.25&&review.vote<0.75?'checked-half':review.rating>=0.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>1.25&&review.vote<1.75?'checked-half':review.rating>=1.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>2.25&&review.vote<2.75?'checked-half':review.rating>=2.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>3.25&&review.vote<3.75?'checked-half':review.rating>=3.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.rating>4.25&&review.vote<4.75?'checked-half':review.rating>=4.75?'checked':''"></span>
                         </div>
                         <div class="reviews-title">
                             {{review.title}}
@@ -305,12 +286,16 @@
                             "{{review.comment}}"
                         </div>
                         <div class="text-green-wasdi mt-2">
-                            {{review.date}}
+                            {{m_oController.formatDate(review.date)}}
                         </div>
                     </div>
-                    <div class="reviews-load-more text-center">
+                    <div class="reviews-load-more text-center" ng-click="m_oController.loadMoreReviews()" ng-show="m_oController.m_bShowLoadMoreReviews">
                         LOAD MORE REVIEWS...
                     </div>
+                    <div class="reviews-load-more text-center" ng-show="!m_oController.m_bShowLoadMoreReviews">
+                        NO MORE REVIEWS
+                    </div>
+
                 </div>
 
 
@@ -328,36 +313,36 @@
                                 <div>
                                     <p>Select your rating*</p>
                                     <div class="star-rating mb-2">
-                                        <span class="fa fa-star" ng-mouseover="previewRating=1" ng-mouseleave="previewRating=0" ng-click="ratingValue=1" ng-class="previewRating>=1?'checked':ratingValue>=1?'checked':''"></span>
-                                        <span class="fa fa-star" ng-mouseover="previewRating=2" ng-mouseleave="previewRating=0" ng-click="ratingValue=2" ng-class="previewRating>=2?'checked':ratingValue>=2?'checked':''"></span>
-                                        <span class="fa fa-star" ng-mouseover="previewRating=3" ng-mouseleave="previewRating=0" ng-click="ratingValue=3" ng-class="previewRating>=3?'checked':ratingValue>=3?'checked':''"></span>
-                                        <span class="fa fa-star" ng-mouseover="previewRating=4" ng-mouseleave="previewRating=0" ng-click="ratingValue=4" ng-class="previewRating>=4?'checked':ratingValue>=4?'checked':''"></span>
-                                        <span class="fa fa-star" ng-mouseover="previewRating=5" ng-mouseleave="previewRating=0" ng-click="ratingValue=5" ng-class="previewRating>=5?'checked':ratingValue>=5?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=1" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=1" ng-class="previewRating>=1?'checked':m_oController.m_oUserReview.vote>=1?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=2" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=2" ng-class="previewRating>=2?'checked':m_oController.m_oUserReview.vote>=2?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=3" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=3" ng-class="previewRating>=3?'checked':m_oController.m_oUserReview.vote>=3?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=4" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=4" ng-class="previewRating>=4?'checked':m_oController.m_oUserReview.vote>=4?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=5" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=5" ng-class="previewRating>=5?'checked':m_oController.m_oUserReview.vote>=5?'checked':''"></span>
                                     </div>
                                 </div>
                                 <!--REVIEW FORM-->
                                 <form class="py-4">
                                     <div class="form-group">
                                         <label for="title">Write a title for your review*</label>
-                                        <input type="text" class="form-control" id="title" aria-describedby="title" placeholder="Title">
+                                        <input type="text" class="form-control" id="title" aria-describedby="title" placeholder="Title" ng-model="m_oController.m_oUserReview.title">
                                         <small id="titleHelp" class="form-text text-muted">Summary about your experience whit this app.</small>
                                     </div>
                                     <div class="form-group">
                                         <label for="comment">Write a comment*</label>
-                                        <textarea type="text" class="form-control" id="comment" placeholder="A long time ago, in a galaxy far far away..."></textarea>
+                                        <textarea type="text" class="form-control" id="comment" placeholder="A long time ago, in a galaxy far far away..." ng-model="m_oController.m_oUserReview.comment"></textarea>
                                         <small id="coomentHelp" class="form-text text-muted">Give more information about your feedback</small>
                                     </div>
-                                    <div class="form-check">
+                                    <!--div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="exampleCheck1">
                                         <label class="form-check-label" for="exampleCheck1">I agree to the <a href="#" target="_blank" class="text-green-wasdi">Terms o Service</a> and  <a href="#" target="_blank" class="text-green-wasdi">Privacy Policy</a></label>
-                                    </div>
+                                    </div-->
                                 </form>
 
 
                             </div>
                             <div class="modal-footer rounded-0">
                                 <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal"> <span class="fa fa-trash mr-2"></span>Cancel</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0"><span class="fa fa-save mr-2"></span>Save My Review</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0"  data-dismiss="modal" ng-show="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>Save My Review</button>
                             </div>
                         </div>
                     </div>

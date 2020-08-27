@@ -15,6 +15,7 @@ public class AppDetailViewModel {
 	private Float ondemandPrice;
 	private Float subscriptionPrice;
 	private Double updateDate;
+	private Double publishDate;
 	private ArrayList<String> categories = new ArrayList<String>();
 	private ArrayList<String> images = new ArrayList<String>();
 	private Boolean isMine;
@@ -27,6 +28,7 @@ public class AppDetailViewModel {
 	private int totalRuns = 0;
 	private int userRuns = 0;
 	private ArrayList<String> categoryNames = new ArrayList<String>();
+	
 	
 	public ArrayList<String> getCategories() {
 		return categories;
@@ -171,6 +173,12 @@ public class AppDetailViewModel {
 	}
 	public void setCategoryNames(ArrayList<String> categoryNames) {
 		this.categoryNames = categoryNames;
+	}
+	public Double getPublishDate() {
+		return publishDate;
+	}
+	public void setPublishDate(Double publishDate) {
+		this.publishDate = publishDate;
 	}
 	
 }

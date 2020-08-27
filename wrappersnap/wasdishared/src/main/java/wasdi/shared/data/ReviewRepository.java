@@ -20,7 +20,7 @@ public class ReviewRepository extends MongoRepository {
         final ArrayList<Review> aoReturnList = new ArrayList<Review>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection(COLLECTION_NAME).find(new Document("processorId", sProcessorId));
+            FindIterable<Document> oWSDocuments = getCollection(COLLECTION_NAME).find(new Document("processorId", sProcessorId)).sort(new Document("date", -1));
             fillList(aoReturnList, oWSDocuments, "ReviewRepository", Review.class);
 
         } catch (Exception oEx) {
@@ -85,24 +85,20 @@ public class ReviewRepository extends MongoRepository {
 		return bIsTheOwner;
 	}
     
-	public boolean alreadyVoted(Review oReview) {
+	public boolean alreadyVoted(String sProcessorId, String sUserId) {
 		boolean bAlreadyVoted = false;
-		if(oReview != null) {
-			String sProcessorId = oReview.getProcessorId();
-			String sUserId = oReview.getUserId();
-			try {
-				
-				BasicDBObject oCriteria = new BasicDBObject();
-				oCriteria.append("processorId", sProcessorId);
-				oCriteria.append("userId", sUserId);
-				Document oWSDocument = getCollection(COLLECTION_NAME).find(oCriteria).first();
-				if(oWSDocument != null ){
-					bAlreadyVoted = true;
-				}
-				
-			} catch (Exception oEx) {
-				Utils.debugLog("ReviewRepository.InsertReview: " + oEx);
+		try {
+			
+			BasicDBObject oCriteria = new BasicDBObject();
+			oCriteria.append("processorId", sProcessorId);
+			oCriteria.append("userId", sUserId);
+			Document oWSDocument = getCollection(COLLECTION_NAME).find(oCriteria).first();
+			if(oWSDocument != null ){
+				bAlreadyVoted = true;
 			}
+			
+		} catch (Exception oEx) {
+			Utils.debugLog("ReviewRepository.InsertReview: " + oEx);
 		}
 		return bAlreadyVoted;
 	}

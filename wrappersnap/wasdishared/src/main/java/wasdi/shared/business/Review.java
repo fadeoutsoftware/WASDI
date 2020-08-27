@@ -4,6 +4,7 @@ public class Review {
 	private String processorId;
 	private Double date;
 	private Float vote;
+	private String title;
 	private String comment;
 	private String userId;
 	private String id;
@@ -43,5 +44,11 @@ public class Review {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }

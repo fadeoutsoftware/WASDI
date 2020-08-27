@@ -1,15 +1,18 @@
 package wasdi.shared.viewmodels;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListReviewsViewModel {
-	private List<ReviewViewModel> reviews;
-	float avgVote;
-	int numberOfOneStarVotes;
-	int numberOfTwoStarVotes;
-	int numberOfThreeStarVotes;
-	int numberOfFourStarVotes;
-	int numberOfFiveStarVotes;
+	private List<ReviewViewModel> reviews = new ArrayList<ReviewViewModel>();
+	float avgVote=-1.0f;
+	int numberOfOneStarVotes = 0;
+	int numberOfTwoStarVotes = 0;
+	int numberOfThreeStarVotes = 0;
+	int numberOfFourStarVotes = 0;
+	int numberOfFiveStarVotes = 0;
+	boolean alreadyVoted = false;
+	
 	public List<ReviewViewModel> getReviews() {
 		return reviews;
 	}
@@ -51,6 +54,12 @@ public class ListReviewsViewModel {
 	}
 	public void setNumberOfFiveStarVotes(int numberOfFiveStarVotes) {
 		this.numberOfFiveStarVotes = numberOfFiveStarVotes;
+	}
+	public boolean getAlreadyVoted() {
+		return alreadyVoted;
+	}
+	public void setAlreadyVoted(boolean alreadyVoted) {
+		this.alreadyVoted = alreadyVoted;
 	}
 	
 }

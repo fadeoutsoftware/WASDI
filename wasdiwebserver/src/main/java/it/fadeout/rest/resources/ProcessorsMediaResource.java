@@ -523,21 +523,12 @@ public class ProcessorsMediaResource {
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
-		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
-		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false || (oReviewRepository.isTheOwnerOfTheReview(oReviewViewModel.getProcessorId(),oReviewViewModel.getId(),sUserId) == false) ){
-			return Response.status(401).build();
-		}
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
 			return Response.status(400).build();
 		}
-		
-		//ADD DATE 
-		Date oDate = new Date();
-		oReviewViewModel.setDate(oDate);
-		
-		Review oReview = getReviewFromViewModel(oReviewViewModel);
-		
+				
+		Review oReview = getReviewFromViewModel(oReviewViewModel, sUserId);
 		
 		boolean isUpdated = oReviewRepository.updateReview(oReview);
 		if(isUpdated == false){
@@ -566,11 +557,6 @@ public class ProcessorsMediaResource {
 		}		
 		
 		String sUserId = oUser.getUserId();
-		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE === 
-		if(oReviewViewModel.getUserId().toLowerCase().equals(sUserId.toLowerCase()) == false){
-			return Response.status(400).build();
-		}
-		
 				
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
@@ -579,14 +565,10 @@ public class ProcessorsMediaResource {
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
-		//ADD DATE 
-		Date oDate = new Date();
-		oReviewViewModel.setDate(oDate);
-		
-		Review oReview = getReviewFromViewModel(oReviewViewModel);
+		Review oReview = getReviewFromViewModel(oReviewViewModel,sUserId);
 		
 		//LIMIT THE NUMBER OF COMMENTS
-		if(oReviewRepository.alreadyVoted(oReview) == true){
+		if(oReviewRepository.alreadyVoted(oReviewViewModel.getProcessorId(), sUserId) == true){
 			return Response.status(400).build();
 		}
 		
@@ -599,8 +581,8 @@ public class ProcessorsMediaResource {
 	}
 	
 	@GET
-	@Path("/reviews/get")
-	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
+	@Path("/reviews/getlist")
+	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
 		Utils.debugLog("ProcessorsMediaResource.getReview( Session: " + sSessionId + " )");
 
@@ -612,21 +594,43 @@ public class ProcessorsMediaResource {
 		}
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 		
 		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			return Response.status(400).build();
 		}
 		
+		if (iPage==null) iPage = 0;
+		if (iItemsPerPage==null) iItemsPerPage = 4;
+		
+		
+		// Get all the reviews
 		ReviewRepository oReviewRepository =  new ReviewRepository();
+		List<Review> aoApplicationReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
 		
-		List<Review> aoReviewRepository = oReviewRepository.getReviews(sProcessorId);
-		
-		if(aoReviewRepository == null || aoReviewRepository.size() == 0){
-			  return Response.ok(null).build();
+		if(aoApplicationReviews == null || aoApplicationReviews.size() == 0){
+			  return Response.ok(new ListReviewsViewModel()).build();
 		}
 		
-		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoReviewRepository);
+		// Cast in a list, computing all the statistics
+		ListReviewsViewModel oListReviewsViewModel = getListReviewsViewModel(aoApplicationReviews);
+		oListReviewsViewModel.setAlreadyVoted(oReviewRepository.alreadyVoted(oProcessor.getProcessorId(), oUser.getUserId()));
+		
+		ArrayList<ReviewViewModel> aoCleanedList = new ArrayList<ReviewViewModel>();
+		
+		// Clean the list: return only elements in the pagination
+		for(int iReviews=0; iReviews<oListReviewsViewModel.getReviews().size(); iReviews ++) {
+			
+			if (iReviews<iPage*iItemsPerPage) continue;
+			
+			aoCleanedList.add(oListReviewsViewModel.getReviews().get(iReviews));
+			
+			if (iReviews>=((iPage+1)*iItemsPerPage)) {
+				break;
+			}
+		}
+		
+		oListReviewsViewModel.setReviews(aoCleanedList);
 		
 	    return Response.ok(oListReviewsViewModel).build();
 
@@ -702,14 +706,14 @@ public class ProcessorsMediaResource {
 		else return false;
 	}
 	
-	private Review getReviewFromViewModel(ReviewViewModel oReviewViewModel){
+	private Review getReviewFromViewModel(ReviewViewModel oReviewViewModel, String sUserId){
 		if(oReviewViewModel != null){
 			Review oReview = new Review();
 			oReview.setComment(oReviewViewModel.getComment());
-			oReview.setDate((double)oReviewViewModel.getDate().getTime());
-			oReview.setId(oReviewViewModel.getId());//TODO GENERATE ID 
+			oReview.setDate((double)(new Date()).getTime());
+			oReview.setId(Utils.GetRandomName()); 
 			oReview.setProcessorId(oReviewViewModel.getProcessorId());
-			oReview.setUserId(oReviewViewModel.getUserId());
+			oReview.setUserId(sUserId);
 			oReview.setVote(oReviewViewModel.getVote());
 			return oReview;
 		}
@@ -736,6 +740,7 @@ public class ProcessorsMediaResource {
 			oReviewViewModel.setUserId(oReview.getUserId());
 			oReviewViewModel.setProcessorId(oReview.getUserId());
 			oReviewViewModel.setVote(oReview.getVote());
+			oReviewViewModel.setTitle(oReview.getTitle());
 			fSumVotes = fSumVotes + oReview.getVote();
 			
 			aoReviews.add(oReviewViewModel);

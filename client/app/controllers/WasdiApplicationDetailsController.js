@@ -47,8 +47,11 @@ var WasdiApplicationDetailsController = (function() {
          */
         this.m_oProcessorMediaService = oProcessorMediaService;
 
-        /*KASA FOR TEST*/
-        $scope.testVar = ['GIS', 'rain', 'flood', 'animals'];
+        /**
+         * Flat to decide to show or not more reviews link
+         * @type {boolean}
+         */
+        this.m_bShowLoadMoreReviews = true;
 
         /**
          * Name of the selected application
@@ -56,41 +59,35 @@ var WasdiApplicationDetailsController = (function() {
          */
         this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
 
+        /**
+         * array of images
+         * @type {*[]}
+         */
+        this.m_asImages = [];
 
-        /*KASA FOR TEST*/
-        $scope.userStatus = '';
-        $scope.userOwner = false;
-        $scope.reviewsNbr = '36';
-        $scope.processorPrice = '2';
-        $scope.contactMail ='info@info.com';
-        $scope.contactLink = 'http://www.wasdi.com';
-        /*REVIEW MODAL*/
+        /**
+         * Reviews Wrapper View Mode with the summary and the list of reviews
+         * @type {{avgVote: number, numberOfFiveStarVotes: number, numberOfOneStarVotes: number, reviews: [], numberOfFourStarVotes: number, numberOfTwoStarVotes: number, numberOfThreeStarVotes: number}}
+         */
+        this.m_oReviewsWrapper = {
+            avgVote: -1,
+            numberOfOneStarVotes: 0,
+            numberOfTwoStarVotes: 0,
+            numberOfThreeStarVotes: 0,
+            numberOfFourStarVotes: 0,
+            numberOfFiveStarVotes: 0,
+            alreadyVoted: false,
+            reviews: []
+        }
+
+        this.m_oUserReview = {
+            vote: -1,
+            title: "",
+            comment: "",
+            processorId: ""
+        }
+
         $scope.previewRating = 0;
-        $scope.ratingValue = 0;
-        /*REVIEWS LIST*/
-        $scope.reviews = [
-            {
-                name:'Luke Camminatore del Cielo',
-                rating: '4',
-                date:'12/05/2021',
-                title: 'Veloce come il Falcon',
-                comment:'bella app - veloce come il Falcon - fatto la rotta di kessel in meno di 12 parsec - spettacolo ',
-            },
-            {
-                name:'Chube',
-                rating: '2',
-                date:'12/05/2021',
-                title: 'Potrebbe andare meglio',
-                comment:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            },
-            {
-                name:'Emmett Brown',
-                rating: '1',
-                date:'12/05/2021',
-                title: 'Un tuffo nel passato!',
-                comment:'Se i miei calcoli sono esatti, quando questa app toccherà le 88 miglia orarie ne vedremo delle belle, anche se consuma 1.21 gigawatt - un pò troppo',
-            }
-        ];
 
         /**
          * Application Object
@@ -98,6 +95,19 @@ var WasdiApplicationDetailsController = (function() {
          */
         this.m_oApplication = {};
 
+        /**
+         * Actual page of reviews
+         * @type {number}
+         */
+        this.m_iReviewsPage = 0;
+
+        /**
+         * Number of reviews per page
+         * @type {number}
+         */
+        this.m_iReviewItemsPerPage = 4;
+
+        // Local reference to the controller
         let oController = this;
 
         /**
@@ -106,7 +116,11 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                oController.m_oApplication = oController.setDefaultImages(data);
+                oController.m_oApplication = data;
+                oController.m_asImages.push(oController.m_oApplication.imgLink)
+                if (oController.m_oApplication.images.length>0) {
+                    oController.m_asImages = oController.m_asImages.concat(oController.m_oApplication.images);
+                }
             }
             else
             {
@@ -115,6 +129,29 @@ var WasdiApplicationDetailsController = (function() {
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
         });
+
+        // Get the reviews
+        this.refreshReviews();
+    }
+
+    WasdiApplicationDetailsController.prototype.refreshReviews = function() {
+
+        var oController = this;
+
+        this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_oReviewsWrapper = data;
+                if (data.reviews.length == 0) oController.m_bShowLoadMoreReviews = false;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+        });
+
     }
 
     /**
@@ -127,35 +164,67 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oState.go("root.appui");
     }
 
-    WasdiApplicationDetailsController.prototype.setDefaultImages = function(aoProcessorList)
+
+    /**
+     * Get the name of a category from the id
+     * @param sCategoryId
+     * @returns {*}
+     */
+    WasdiApplicationDetailsController.prototype.formatDate = function(iTimestamp)
     {
-        if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
-        {
-            return aoProcessorList;
-        }
-        var sDefaultImage = "assets/wasdi/miniLogoWasdi.png";
-        var iNumberOfProcessors = aoProcessorList.length;
-        for(var iIndexProcessor = 0; iIndexProcessor < iNumberOfProcessors; iIndexProcessor++)
-        {
-            if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
-            {
-                aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
-            }
-        }
-        return aoProcessorList;
+        // Create a new JavaScript Date object based on the timestamp
+        let oDate = new Date(iTimestamp);
+        return oDate.toLocaleDateString();
     };
 
-    WasdiApplicationDetailsController.prototype.getCategoryName = function(sCategoryId)
-    {
-        for(var iIndexProcessor = 0; iIndexProcessor < iNumberOfProcessors; iIndexProcessor++)
-        {
-            if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
+    WasdiApplicationDetailsController.prototype.loadMoreReviews = function () {
+        var oController =this;
+        this.m_iReviewsPage = this.m_iReviewsPage + 1;
+        // Get the reviews
+        this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
+
+                if (data.reviews.length == 0){
+                    oController.m_bShowLoadMoreReviews = false;
+                }
+                else {
+                    oController.m_oReviewsWrapper.reviews = oController.m_oReviewsWrapper.reviews.concat(data.reviews);
+                }
             }
-        }
-        return aoProcessorList;
-    };
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+        });
+    }
+
+    WasdiApplicationDetailsController.prototype.addNewReview = function () {
+        var oController = this;
+
+        this.m_oUserReview.processorId = this.m_oApplication.processorId;
+
+        this.m_oProcessorMediaService.addProcessorReview(this.m_oUserReview).success(function (data) {
+            oController.m_oUserReview.title="";
+            oController.m_oUserReview.comment="";
+            oController.m_oUserReview.vote=-1;
+
+            var oDialog = utilsVexDialogAlertBottomRightCorner("REVIEW SAVED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iReviewsPage = 0;
+            oController.refreshReviews();
+
+        }).error(function (error) {
+            oController.m_oUserReview.title="";
+            oController.m_oUserReview.comment="";
+            oController.m_oUserReview.vote=-1;
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SAVING THE REVIEW");
+        });
+    }
 
     WasdiApplicationDetailsController.$inject = [
         '$scope',

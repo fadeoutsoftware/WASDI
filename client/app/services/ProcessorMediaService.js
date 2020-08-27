@@ -60,9 +60,34 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
         return this.m_oHttp.post(this.APIURL + this.m_sResource + '/images/upload?processorId=' + encodeURI(sProcessorId), oBody ,oOptions);
     };
 
-
+    /**
+     * Removes one of the images of the processor
+     * @param sProcessorId
+     * @param sImage
+     * @returns {*}
+     */
     this.removeProcessorImage = function (sProcessorId, sImage) {
         return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/images/delete?processorId=' + encodeURI(sProcessorId) + "&imageName=" + sImage);
     };
+
+    /**
+     * Get the review summary of an application
+     * @param sProcessorName
+     * @param iPage
+     * @param iItemsPerPage
+     * @returns {*}
+     */
+    this.getProcessorReviews = function (sProcessorName, iPage, iItemsPerPage) {
+        return this.m_oHttp.get(this.APIURL + this.m_sResource + '/reviews/getlist?processorName='+sProcessorName+'&page='+iPage+"&itemsPerPage="+iItemsPerPage);
+    }
+
+    /**
+     * Add a new Review
+     * @param oReview
+     * @returns {*}
+     */
+    this.addProcessorReview = function (oReview) {
+        return this.m_oHttp.post(this.APIURL + this.m_sResource + '/reviews/add', oReview);
+    }
 
 }]);
