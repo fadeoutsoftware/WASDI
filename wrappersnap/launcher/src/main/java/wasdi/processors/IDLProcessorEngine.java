@@ -138,81 +138,80 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			// GENERATE Call IDL File
 			File oCallIdlFile = new File (sCallIdlFile);
 			
-			BufferedWriter oCallIdlWriter = new BufferedWriter(new FileWriter(oCallIdlFile));
-			
-			if(null!= oCallIdlWriter) {
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating call_idl.pro file");
-				
-				oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write("STARTWASDI, '"+sProcessorFolder+"config.properties'");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write(".r "+sProcessorFolder + sProcessorName + ".pro");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write(".r "+sProcessorFolder + "wasdi_wrapper.pro");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write("CALLWASDI");
-				oCallIdlWriter.newLine();
-				oCallIdlWriter.write("exit");
-				oCallIdlWriter.flush();
-				oCallIdlWriter.close();
-				
+			try (BufferedWriter oCallIdlWriter = new BufferedWriter(new FileWriter(oCallIdlFile))) {
+				if(null!= oCallIdlWriter) {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating call_idl.pro file");
+					
+					oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
+					oCallIdlWriter.newLine();
+					oCallIdlWriter.write("STARTWASDI, '"+sProcessorFolder+"config.properties'");
+					oCallIdlWriter.newLine();
+					oCallIdlWriter.write(".r "+sProcessorFolder + sProcessorName + ".pro");
+					oCallIdlWriter.newLine();
+					oCallIdlWriter.write(".r "+sProcessorFolder + "wasdi_wrapper.pro");
+					oCallIdlWriter.newLine();
+					oCallIdlWriter.write("CALLWASDI");
+					oCallIdlWriter.newLine();
+					oCallIdlWriter.write("exit");
+					oCallIdlWriter.flush();
+					oCallIdlWriter.close();
+				}				
 			}
-			
+						
 			// GENERATE WASDI WRAPPER File
 			File oWasdiWrapperFile = new File (sWasdiWrapperFile);
 			
-			BufferedWriter oWasdiWrapperWriter = new BufferedWriter(new FileWriter(oWasdiWrapperFile));
-			
-			if(null!= oWasdiWrapperWriter) {
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating wasdi_wrapper.pro file");
+			try (BufferedWriter oWasdiWrapperWriter = new BufferedWriter(new FileWriter(oWasdiWrapperFile))) {
+				if(null!= oWasdiWrapperWriter) {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating wasdi_wrapper.pro file");
 
-				oWasdiWrapperWriter.write("PRO CALLWASDI");
-				oWasdiWrapperWriter.newLine();
-				oWasdiWrapperWriter.write("\tCATCH, Error_status");
-				oWasdiWrapperWriter.newLine();				
-				oWasdiWrapperWriter.write("\tIF (Error_status NE 0L) THEN BEGIN");
-				oWasdiWrapperWriter.newLine();
-				oWasdiWrapperWriter.write("\t\tWASDILOG, 'Error message: ' + !ERROR_STATE.MSG");
-				oWasdiWrapperWriter.newLine();				
-				oWasdiWrapperWriter.write("\t\tEXIT");
-				oWasdiWrapperWriter.newLine();				
-				oWasdiWrapperWriter.write("\tENDIF");
-				oWasdiWrapperWriter.newLine();				
-				oWasdiWrapperWriter.write("\t"+sProcessorName);
-				oWasdiWrapperWriter.newLine();				
-				oWasdiWrapperWriter.write("END");
-				oWasdiWrapperWriter.newLine();				
-				oWasdiWrapperWriter.flush();
-				oWasdiWrapperWriter.close();
-				
-			}			
-			
+					oWasdiWrapperWriter.write("PRO CALLWASDI");
+					oWasdiWrapperWriter.newLine();
+					oWasdiWrapperWriter.write("\tCATCH, Error_status");
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.write("\tIF (Error_status NE 0L) THEN BEGIN");
+					oWasdiWrapperWriter.newLine();
+					oWasdiWrapperWriter.write("\t\tWASDILOG, 'Error message: ' + !ERROR_STATE.MSG");
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.write("\t\tEXIT");
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.write("\tENDIF");
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.write("\t"+sProcessorName);
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.write("END");
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.flush();
+					oWasdiWrapperWriter.close();
+				}							
+			}
+						
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
 			
 			File oRunFile = new File(sRunFile);
 			
-			BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
-			
-			if(null!= oRunWriter) {
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating run_"+sProcessorName+".sh file");
+			try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
+				if(null!= oRunWriter) {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating run_"+sProcessorName+".sh file");
 
-				oRunWriter.write("#!/bin/bash");
-				oRunWriter.newLine();
-				oRunWriter.write("wkdir=\""+sProcessorFolder+"\"");
-				oRunWriter.newLine();
-				oRunWriter.write("script_file=\"${wkdir}/call_idl.pro\"");
-				oRunWriter.newLine();
-				oRunWriter.write("echo \"executing WASDI idl script...\"");
-				oRunWriter.newLine();
-				oRunWriter.write("umask 000; /usr/local/bin/idl ${script_file}  &>> /usr/lib/wasdi/launcher/logs/envi.log");
-				oRunWriter.newLine();
-				oRunWriter.write("echo \"IDL Processor done!\"");
-				oRunWriter.newLine();
-				oRunWriter.flush();
-				oRunWriter.close();
-			}			
-			
+					oRunWriter.write("#!/bin/bash");
+					oRunWriter.newLine();
+					oRunWriter.write("wkdir=\""+sProcessorFolder+"\"");
+					oRunWriter.newLine();
+					oRunWriter.write("script_file=\"${wkdir}/call_idl.pro\"");
+					oRunWriter.newLine();
+					oRunWriter.write("echo \"executing WASDI idl script...\"");
+					oRunWriter.newLine();
+					oRunWriter.write("umask 000; /usr/local/bin/idl ${script_file}  &>> /usr/lib/wasdi/launcher/logs/envi.log");
+					oRunWriter.newLine();
+					oRunWriter.write("echo \"IDL Processor done!\"");
+					oRunWriter.newLine();
+					oRunWriter.flush();
+					oRunWriter.close();
+				}			
+				
+			}
+						
 			Runtime.getRuntime().exec("chmod u+x "+sRunFile);
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -253,54 +252,57 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			boolean bMyProcessorExists = false;
 			
 			byte[] ayBuffer = new byte[1024];
-		    ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile));
-		    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
-		    
-		    while(oZipEntry != null){
-		    	
-		    	try  {
-			    	String sZippedFileName = oZipEntry.getName();
+			
+		    try (ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile))) {
+			    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
+			    
+			    while(oZipEntry != null){
 			    	
-			    	if (sZippedFileName.startsWith(sProcessorName)) {
-			    		bMyProcessorExists = true;
-			    		// Force extension case
-			    		sZippedFileName = sProcessorName + ".pro";
-			    	}
-			    	
-			    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-			    	
-			    	if (oZipEntry.isDirectory()) {
-			    		File oUnzippedDir = new File(sUnzipFilePath);
-		                oUnzippedDir.mkdirs();
-			    	}
-			    	else {
+			    	try  {
+				    	String sZippedFileName = oZipEntry.getName();
 				    	
-				        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-				        
-				        if (oUnzippedFile.getParentFile().isDirectory()) {
-				        	if (!oUnzippedFile.getParentFile().exists()) {
-				        		oUnzippedFile.getParentFile().mkdirs();
-				        	}
-				        }
-				        
-				        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
-				        int iLen;
-				        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-				        	oOutputStream.write(ayBuffer, 0, iLen);
-				        }
-				        oOutputStream.close();		    		
-			    	}	    		
-		    	}
-		    	catch (Exception e) {
-		    		LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor exception in zip entry " + e.getMessage());
-				}
-		    	
-		    	
+				    	if (sZippedFileName.startsWith(sProcessorName)) {
+				    		bMyProcessorExists = true;
+				    		// Force extension case
+				    		sZippedFileName = sProcessorName + ".pro";
+				    	}
+				    	
+				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+				    	
+				    	if (oZipEntry.isDirectory()) {
+				    		File oUnzippedDir = new File(sUnzipFilePath);
+			                oUnzippedDir.mkdirs();
+				    	}
+				    	else {
+					    	
+					        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
+					        
+					        if (oUnzippedFile.getParentFile().isDirectory()) {
+					        	if (!oUnzippedFile.getParentFile().exists()) {
+					        		oUnzippedFile.getParentFile().mkdirs();
+					        	}
+					        }
+					        
+					        try (FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile)) {
+						        int iLen;
+						        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
+						        	oOutputStream.write(ayBuffer, 0, iLen);
+						        }
+						        oOutputStream.close();				        	
+					        }
+				    	}	    		
+			    	}
+			    	catch (Exception e) {
+			    		LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor exception in zip entry " + e.getMessage());
+					}
+			    	
+			    	
 
-		        oZipEntry = oZipInputStream.getNextEntry();
-	        }
-		    oZipInputStream.closeEntry();
-		    oZipInputStream.close();
+			        oZipEntry = oZipInputStream.getNextEntry();
+		        }
+			    oZipInputStream.closeEntry();
+			    oZipInputStream.close();		    	
+		    }
 		    
 		    if (!bMyProcessorExists) {
 		    	LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor" + sProcessorName + ".pro not present in processor " + sZipFileName);
@@ -309,11 +311,12 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		    
 		    try {
 			    // Remove the zip?
-			    oProcessorZipFile.delete();		    	
+			    if (oProcessorZipFile.delete()==false) {
+			    	LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor Error Deleting Zip File");
+			    }
 		    }
 		    catch (Exception e) {
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
-				//return false;
 			}
 		    
 		}
@@ -432,68 +435,70 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			File oParameterFile = new File(sParamFile);
 			File oConfigFile = new File (sConfigFile);
 			
-			BufferedWriter oConfigWriter = new BufferedWriter(new FileWriter(oConfigFile));
-			
-			if(null!= oConfigWriter) {
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Creating config.properties file");
+			try (BufferedWriter oConfigWriter = new BufferedWriter(new FileWriter(oConfigFile))) {
+				if(null!= oConfigWriter) {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Creating config.properties file");
 
-				oConfigWriter.write("BASEPATH=" + m_sWorkingRootPath);
-				oConfigWriter.newLine();
-				oConfigWriter.write("USER=" + oParameter.getUserId());
-				oConfigWriter.newLine();
-				oConfigWriter.write("WORKSPACE=" + sWorkspaceName);
-				oConfigWriter.newLine();
-				oConfigWriter.write("SESSIONID="+oParameter.getSessionID());
-				oConfigWriter.newLine();
-				oConfigWriter.write("ISONSERVER=1");
-				oConfigWriter.newLine();
-				oConfigWriter.write("DOWNLOADACTIVE=0");
-				oConfigWriter.newLine();
-				oConfigWriter.write("UPLOADACTIVE=0");
-				oConfigWriter.newLine();
-				oConfigWriter.write("VERBOSE=0");
-				oConfigWriter.newLine();
-				oConfigWriter.write("PARAMETERSFILEPATH=" + sParamFile);
-				oConfigWriter.newLine();
-				oConfigWriter.write("MYPROCID="+oParameter.getProcessObjId());
-				oConfigWriter.newLine();				
-				oConfigWriter.flush();
-				oConfigWriter.close();
-			}			
-			
-			BufferedWriter oParamWriter = new BufferedWriter(new FileWriter(oParameterFile));
-			
-			if(oParamWriter != null) {
-				
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Creating parameters file " + sParamFile);
-				
-				// Get the JSON
-				String sJson = oParameter.getJson();
-				
-				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: JSON " + sJson);
-				
-				// URL Decode
-				try {
-				    sJson = java.net.URLDecoder.decode(sJson, StandardCharsets.UTF_8.name());
-				    
-				    LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Decoded JSON " + sJson);
-				} catch (UnsupportedEncodingException e) {
-					LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Exception decoding JSON " + e.toString());
-				}
-				
-				// Get the JSON as a Map
-				Map<String, Object> aoParametersMap = s_oMapper.readValue(sJson, new TypeReference<Map<String,Object>>(){});
-				
-				// Write KEY=VALUE in the file
-				for (String sKey : aoParametersMap.keySet()) {
-					oParamWriter.write(sKey+"="+aoParametersMap.get(sKey).toString());
-					oParamWriter.newLine();
-				}
-				
-				// Flush and Close
-				oParamWriter.flush();
-				oParamWriter.close();
+					oConfigWriter.write("BASEPATH=" + m_sWorkingRootPath);
+					oConfigWriter.newLine();
+					oConfigWriter.write("USER=" + oParameter.getUserId());
+					oConfigWriter.newLine();
+					oConfigWriter.write("WORKSPACE=" + sWorkspaceName);
+					oConfigWriter.newLine();
+					oConfigWriter.write("SESSIONID="+oParameter.getSessionID());
+					oConfigWriter.newLine();
+					oConfigWriter.write("ISONSERVER=1");
+					oConfigWriter.newLine();
+					oConfigWriter.write("DOWNLOADACTIVE=0");
+					oConfigWriter.newLine();
+					oConfigWriter.write("UPLOADACTIVE=0");
+					oConfigWriter.newLine();
+					oConfigWriter.write("VERBOSE=0");
+					oConfigWriter.newLine();
+					oConfigWriter.write("PARAMETERSFILEPATH=" + sParamFile);
+					oConfigWriter.newLine();
+					oConfigWriter.write("MYPROCID="+oParameter.getProcessObjId());
+					oConfigWriter.newLine();				
+					oConfigWriter.flush();
+					oConfigWriter.close();
+				}				
 			}
+			
+			
+			try (BufferedWriter oParamWriter = new BufferedWriter(new FileWriter(oParameterFile))) {
+				if(oParamWriter != null) {
+					
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Creating parameters file " + sParamFile);
+					
+					// Get the JSON
+					String sJson = oParameter.getJson();
+					
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: JSON " + sJson);
+					
+					// URL Decode
+					try {
+					    sJson = java.net.URLDecoder.decode(sJson, StandardCharsets.UTF_8.name());
+					    
+					    LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Decoded JSON " + sJson);
+					} catch (UnsupportedEncodingException e) {
+						LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Exception decoding JSON " + e.toString());
+					}
+					
+					// Get the JSON as a Map
+					Map<String, Object> aoParametersMap = s_oMapper.readValue(sJson, new TypeReference<Map<String,Object>>(){});
+					
+					// Write KEY=VALUE in the file
+					for (String sKey : aoParametersMap.keySet()) {
+						oParamWriter.write(sKey+"="+aoParametersMap.get(sKey).toString());
+						oParamWriter.newLine();
+					}
+					
+					// Flush and Close
+					oParamWriter.flush();
+					oParamWriter.close();
+				}
+			}
+			
 			
 			// Cmq for the shell exex
 			String asCmd[] = new String[] {
@@ -609,7 +614,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			return false;
 		}
 
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -668,9 +673,10 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.libraryUpdate: exception " + oEx.toString());
+			return false;
 		}
 		
-		return false;
+		return true;
 	}
 	
 }

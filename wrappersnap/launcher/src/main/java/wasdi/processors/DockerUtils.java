@@ -73,23 +73,23 @@ public class DockerUtils {
 			
 			File oBuildScriptFile = new File(sBuildScriptFile);
 			
-			BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile));
-			
-			// Fill the script file
-			if(oBuildScriptWriter != null ) {
-				LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating "+sBuildScriptFile+" file");
+			try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
+				// Fill the script file
+				if(oBuildScriptWriter != null ) {
+					LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating "+sBuildScriptFile+" file");
 
-				oBuildScriptWriter.write("#!/bin/bash");
-				oBuildScriptWriter.newLine();
-				oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
-				oBuildScriptWriter.newLine();
-				oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " $1 >> " + m_sDockerLogFile + " 2>&1");
-				oBuildScriptWriter.newLine();
-				oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
-				oBuildScriptWriter.flush();
-				oBuildScriptWriter.close();
-			}			
-			
+					oBuildScriptWriter.write("#!/bin/bash");
+					oBuildScriptWriter.newLine();
+					oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
+					oBuildScriptWriter.newLine();
+					oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " $1 >> " + m_sDockerLogFile + " 2>&1");
+					oBuildScriptWriter.newLine();
+					oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
+					oBuildScriptWriter.flush();
+					oBuildScriptWriter.close();
+				}
+			}
+						
 			// Make it executable
 			Runtime.getRuntime().exec("chmod u+x "+sBuildScriptFile);
 			
@@ -166,22 +166,22 @@ public class DockerUtils {
 				
 				LauncherMain.s_oLogger.debug("DockerUtils.run CommandLine: " + sCommandLine);
 							
-				BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile));
-				
-				if(null!= oRunWriter) {
-					LauncherMain.s_oLogger.debug("DockerUtils.run: Creating "+sRunFile+" file");
+				try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
+					if(null!= oRunWriter) {
+						LauncherMain.s_oLogger.debug("DockerUtils.run: Creating "+sRunFile+" file");
 
-					oRunWriter.write("#!/bin/bash");
-					oRunWriter.newLine();
-					oRunWriter.write("echo Run Docker Started >> " + m_sDockerLogFile);
-					oRunWriter.newLine();
-					oRunWriter.write(sCommandLine + " $1 >> " + m_sDockerLogFile + " 2>&1");
-					oRunWriter.newLine();
-					oRunWriter.write("echo Run Docker Done >> " + m_sDockerLogFile);
-					oRunWriter.flush();
-					oRunWriter.close();
-				}			
-				
+						oRunWriter.write("#!/bin/bash");
+						oRunWriter.newLine();
+						oRunWriter.write("echo Run Docker Started >> " + m_sDockerLogFile);
+						oRunWriter.newLine();
+						oRunWriter.write(sCommandLine + " $1 >> " + m_sDockerLogFile + " 2>&1");
+						oRunWriter.newLine();
+						oRunWriter.write("echo Run Docker Done >> " + m_sDockerLogFile);
+						oRunWriter.flush();
+						oRunWriter.close();
+					}
+				}
+								
 				Runtime.getRuntime().exec("chmod u+x "+sRunFile);
 				
 				asArgs.clear();
@@ -222,18 +222,19 @@ public class DockerUtils {
 			File oDeleteScriptFile = new File(sDeleteScriptFile);
 			
 			if (!oDeleteScriptFile.exists()) {
-				BufferedWriter oDeleteScriptWriter = new BufferedWriter(new FileWriter(oDeleteScriptFile));
-				
-				if(oDeleteScriptWriter != null) {
-					LauncherMain.s_oLogger.debug("DockerUtils.delete: Creating "+sDeleteScriptFile+" file");
+				try (BufferedWriter oDeleteScriptWriter = new BufferedWriter(new FileWriter(oDeleteScriptFile))) {
+					if(oDeleteScriptWriter != null) {
+						LauncherMain.s_oLogger.debug("DockerUtils.delete: Creating "+sDeleteScriptFile+" file");
 
-					oDeleteScriptWriter.write("#!/bin/bash");
-					oDeleteScriptWriter.newLine();
-					oDeleteScriptWriter.write("docker ps -a | awk '{ print $1,$2 }' | grep " + sDockerName + " | awk '{print $1 }' | xargs -I {} docker rm -f {}");
-					oDeleteScriptWriter.newLine();
-					oDeleteScriptWriter.flush();
-					oDeleteScriptWriter.close();
-				}			
+						oDeleteScriptWriter.write("#!/bin/bash");
+						oDeleteScriptWriter.newLine();
+						oDeleteScriptWriter.write("docker ps -a | awk '{ print $1,$2 }' | grep " + sDockerName + " | awk '{print $1 }' | xargs -I {} docker rm -f {}");
+						oDeleteScriptWriter.newLine();
+						oDeleteScriptWriter.flush();
+						oDeleteScriptWriter.close();
+					}					
+				}
+				
 				
 				Runtime.getRuntime().exec("chmod u+x "+sDeleteScriptFile);				
 			}

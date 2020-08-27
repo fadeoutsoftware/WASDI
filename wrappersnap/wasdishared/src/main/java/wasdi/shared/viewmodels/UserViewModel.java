@@ -1,5 +1,7 @@
 package wasdi.shared.viewmodels;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * Created by p.campanella on 21/10/2016.
  */
@@ -44,6 +46,26 @@ public class UserViewModel {
         	return true;
         } else
         	return false;
+    }
+    
+    @Override
+    public int hashCode() {
+    	
+    	String sUserId = "";
+    	String sName = "";
+    	String sSurname = "";
+    	String sSessionId = "";
+    	String sAuthProvider = "";
+    	
+    	if (!Utils.isNullOrEmpty(userId)) sUserId = userId;
+    	if (!Utils.isNullOrEmpty(name)) sName = name;
+    	if (!Utils.isNullOrEmpty(surname)) sSurname = surname;
+    	if (!Utils.isNullOrEmpty(sessionId)) sSessionId = sessionId;
+    	if (!Utils.isNullOrEmpty(authProvider)) sAuthProvider = authProvider;
+    	
+    	String sHashCode = sUserId+sName+sSurname+sSessionId+sAuthProvider;
+    	
+    	return sHashCode.hashCode();
     }
     
     public String getUserId() {

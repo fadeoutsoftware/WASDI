@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import wasdi.shared.utils.Utils;
+
 @XmlRootElement
 public class QueryResultViewModel {
 	
@@ -21,6 +23,8 @@ public class QueryResultViewModel {
 	@Override
 	public boolean equals(Object arg0) {
 		
+		if (arg0 ==null) return false;
+		
 		if (arg0.getClass() == QueryResultViewModel.class) {
 			QueryResultViewModel oCompare = (QueryResultViewModel) arg0;
 			
@@ -28,6 +32,21 @@ public class QueryResultViewModel {
 		}
 		
 		return super.equals(arg0);
+	}
+	
+	@Override
+	public int hashCode() {
+		
+		String sProvider = "";
+		String sLink = "";
+		String sTitle = "";
+		
+		if (!Utils.isNullOrEmpty(provider)) sProvider = provider;
+		if (!Utils.isNullOrEmpty(link)) sLink = link;
+		if (!Utils.isNullOrEmpty(title)) sTitle = title;
+		
+		String sHashCode = sProvider+sLink+sTitle;
+		return sHashCode.hashCode();
 	}
 	
 	public String getPreview() {

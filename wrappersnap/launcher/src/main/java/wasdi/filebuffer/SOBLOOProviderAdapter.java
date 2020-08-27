@@ -315,6 +315,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 						TimeUnit.MINUTES.sleep(iMinutesToSleep);
 					} catch (InterruptedException oE) {
 						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Could not complete sleep: " + oE);
+						Thread.currentThread().interrupt();
 					}
 					
 				}

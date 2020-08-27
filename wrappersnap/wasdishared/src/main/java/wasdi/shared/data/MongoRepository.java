@@ -164,7 +164,14 @@ public class MongoRepository {
      * @return
      */
     public MongoCollection<Document> getCollection(String sCollection) {
-        return getMongoDatabase(m_sRepoDb).getCollection(sCollection);
+    	MongoDatabase oMongoDb = getMongoDatabase(m_sRepoDb);
+    	
+    	if (oMongoDb != null) {
+    		return oMongoDb.getCollection(sCollection);
+    	}
+    	else {
+    		return null;
+    	}
     }
     
     /**

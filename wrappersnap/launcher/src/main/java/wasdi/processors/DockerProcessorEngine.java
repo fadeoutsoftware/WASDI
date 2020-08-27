@@ -187,39 +187,44 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			boolean bMyProcessorExists = false;
 			
 			byte[] ayBuffer = new byte[1024];
-		    ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile));
-		    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
-		    while(oZipEntry != null){
+			
+		    try (ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile))) {
 		    	
-		    	try {
-			    	String sZippedFileName = oZipEntry.getName();
+			    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
+			    while(oZipEntry != null){
 			    	
-			    	if (sZippedFileName.equals("myProcessor.py")) bMyProcessorExists = true;
-			    	
-			    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-			    	
-			    	if (oZipEntry.isDirectory()) {
-			    		File oUnzippedDir = new File(sUnzipFilePath);
-		                oUnzippedDir.mkdir();
+			    	try {
+				    	String sZippedFileName = oZipEntry.getName();
+				    	
+				    	if (sZippedFileName.equals("myProcessor.py")) bMyProcessorExists = true;
+				    	
+				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+				    	
+				    	if (oZipEntry.isDirectory()) {
+				    		File oUnzippedDir = new File(sUnzipFilePath);
+			                oUnzippedDir.mkdir();
+				    	}
+				    	else {
+					        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
+					        try (FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile)) {
+						        int iLen;
+						        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
+						        	oOutputStream.write(ayBuffer, 0, iLen);
+						        }
+						        oOutputStream.close();				        	
+					        }
+				    	}		    		
 			    	}
-			    	else {
-				        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-				        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
-				        int iLen;
-				        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-				        	oOutputStream.write(ayBuffer, 0, iLen);
-				        }
-				        oOutputStream.close();		    		
-			    	}		    		
-		    	}
-		    	catch (Exception oInnerEx) {
-		    		LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception unzipping Zip entry", oInnerEx);
-				}
+			    	catch (Exception oInnerEx) {
+			    		LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception unzipping Zip entry", oInnerEx);
+					}
 
-		        oZipEntry = oZipInputStream.getNextEntry();
-	        }
-		    oZipInputStream.closeEntry();
-		    oZipInputStream.close();
+			        oZipEntry = oZipInputStream.getNextEntry();
+		        }
+			    oZipInputStream.closeEntry();
+			    oZipInputStream.close();		    	
+		    }
+
 		    
 		    if (!bMyProcessorExists) {
 		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
@@ -228,7 +233,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		    
 		    try {
 			    // Remove the zip?
-			    oProcessorZipFile.delete();		    	
+			    if (oProcessorZipFile.delete()==false) {
+			    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
+			    }
 		    }
 		    catch (Exception e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
@@ -486,6 +493,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 								Thread.sleep(iThreadSleepMs);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
+								Thread.currentThread().interrupt();
 							}
 							
 							// Increase the time
@@ -619,12 +627,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.delete Exception", oEx);
 			try {
-				// Check and set the operation end-date
-				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-				}			
 				
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (oProcessWorkspace!=null) {
+					// Check and set the operation end-date
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					}			
+					
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);					
+				}
 			} catch (Exception e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete Exception", e);
 			}
@@ -707,12 +718,14 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.redeploy Exception", oEx);
 			try {
-				// Check and set the operation end-date
-				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-				}			
-				
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (oProcessWorkspace != null) {
+					// Check and set the operation end-date
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					}			
+					
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);					
+				}
 			} catch (Exception e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.redeploy Exception", e);
 			}
@@ -796,12 +809,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", oEx);
 			try {
-				// Check and set the operation end-date
-				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-				}			
 				
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				if (oProcessWorkspace != null) {
+					// Check and set the operation end-date
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					}			
+					
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);					
+				}
 			} catch (Exception e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", e);
 			}

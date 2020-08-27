@@ -2,6 +2,8 @@ package wasdi.shared.viewmodels;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * Created by p.campanella on 21/10/2016.
  */
@@ -40,6 +42,20 @@ public class LoginInfo {
         	return true;
         } else
         	return false;
+    }
+    
+    @Override
+    public int hashCode() {
+    	String sUserId = "";
+    	String sUserPw = "";
+    	String sGoogleToken = "";
+    	
+    	if (!Utils.isNullOrEmpty(userId)) sUserId = userId;
+    	if (!Utils.isNullOrEmpty(userPassword)) sUserPw = userId;
+    	if (!Utils.isNullOrEmpty(googleIdToken)) sGoogleToken = googleIdToken;
+    	
+    	String sInternal = sUserId+sUserPw+sGoogleToken;
+    	return sInternal.hashCode();
     }
 
     public String getUserId() {

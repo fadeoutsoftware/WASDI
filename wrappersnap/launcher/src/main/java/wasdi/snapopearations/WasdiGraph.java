@@ -211,10 +211,7 @@ public class WasdiGraph {
 		        	m_oInputFile= oInputFile;
 		        }
 				
-				if (!setNodeValue(oNodeReader, "file", oInputFile.getAbsolutePath()))
-				{
-					throw new Exception("Error setting input file");
-				}
+		        setNodeValue(oNodeReader, "file", oInputFile.getAbsolutePath());
 				
 				m_oLogger.info("WasdiGraph.execute: input file set " + oInputFile.getAbsolutePath());
 			}
@@ -267,12 +264,8 @@ public class WasdiGraph {
 		        
 		        aoOutputFiles.add(oOutputFile);
 				
-				if (!setNodeValue(oNodeWriter, "file", oOutputFile.getAbsolutePath())) 
-						//|| !setNodeValue(nodeWriter, "formatName", DimapProductWriterPlugIn.DIMAP_FORMAT_NAME) 
-				{
-					throw new Exception("Error setting output file");
-				}
-				
+		        setNodeValue(oNodeWriter, "file", oOutputFile.getAbsolutePath());
+		        				
 				m_oLogger.info("WasdiGraph.execute: output file set " + oOutputFile.getAbsolutePath());
 			}
 			
@@ -434,7 +427,7 @@ public class WasdiGraph {
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
         DownloadedFile oCheck = oDownloadedRepo.getDownloadedFileByPath(oProductFile.getAbsolutePath());
         
-        boolean bAddProductToWS = true;
+        //boolean bAddProductToWS = true;
         
         if (oCheck == null) {
         	m_oLogger.debug("Insert in db");
@@ -472,12 +465,12 @@ public class WasdiGraph {
             }
         }
         
-        if (bAddProductToWS) {
-        	addProductToWorkspace(oProductFile.getAbsolutePath(),sBBox);
-        }
-        else {
-        	m_oLogger.error("Product NOT added to the Workspace");
-        }
+        //if (bAddProductToWS) {
+        addProductToWorkspace(oProductFile.getAbsolutePath(),sBBox);
+        //}
+        //else {
+        //	m_oLogger.error("Product NOT added to the Workspace");
+        //}
         
         m_oLogger.debug("OK DONE");
         
@@ -541,22 +534,18 @@ public class WasdiGraph {
 	 * @param sValue
 	 * @return
 	 */
-	public static boolean setNodeValue(Node oNode, String sChildName, String sValue) {
+	public static void setNodeValue(Node oNode, String sChildName, String sValue) {
 		DomElement oDomElement = oNode.getConfiguration();
 		DomElement[] aoChildren = oDomElement.getChildren(sChildName);
-		if (aoChildren==null || aoChildren.length!=1) {
-			
+		
+		if (aoChildren==null || aoChildren.length!=1) {	
 			XppDomElement oFileElement = new XppDomElement("file");
 			oFileElement.setValue(sValue);
 			oDomElement.addChild(oFileElement);
-			
-			return true;
 		}
 		else {
 			aoChildren[0].setValue(sValue);
 		}
-
-		return true;
 	}
 
 

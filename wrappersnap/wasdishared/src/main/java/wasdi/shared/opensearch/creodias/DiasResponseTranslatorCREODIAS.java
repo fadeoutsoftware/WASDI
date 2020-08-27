@@ -328,9 +328,12 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 									oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSELF, sHref);
 								}
 							}
-							//just store the "self" link
-							if(oLinks.has(DiasResponseTranslatorCREODIAS.SHREF) && !oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
-								oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+							
+							if (oLinks != null) {
+								//just store the "self" link
+								if(oLinks.has(DiasResponseTranslatorCREODIAS.SHREF) && !oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
+									oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+								}								
 							}
 						} catch (Exception oE) {
 							Utils.debugLog("DiasResponseTranslatorCREODIAS.parseProperties: exception while trying to cast item object to JSONObject: " + oE);

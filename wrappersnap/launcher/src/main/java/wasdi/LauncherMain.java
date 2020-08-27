@@ -1035,27 +1035,31 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				if(oParam.getSftp()) {
 					s_oLogger.debug("ftpExport: SFTP");
 					s_oLogger.debug("ftpExport: SFTP: getting SSH client");
-					SSHClient oClient = new SSHClient();
-					s_oLogger.debug("ftpExport: SFTP: adding host key verifier");
-				    oClient.addHostKeyVerifier(new PromiscuousVerifier());
-				    s_oLogger.debug("ftpExport: SFTP: connecting to " + oParam.getFtpServer());
-				    oClient.connect(oParam.getFtpServer());
-				    s_oLogger.debug("ftpExport: SFTP: authenticating as " + oParam.getUsername());
-				    oClient.authPassword(oParam.getUsername(), oParam.getPassword());
-				    s_oLogger.debug("ftpExport: SFTP: getting SFTP client");
-				    SFTPClient sftpClient = oClient.newSFTPClient();
-				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
-				    s_oLogger.debug("ftpExport: SFTP: transferring file");
-				    sftpClient.put(sFullLocalPath,oParam.getRemotePath() + oParam.getLocalFileName());
-				    //todo check that the file is there
-				    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
-				  
-				    s_oLogger.debug("ftpExport: SFTP: closing SFTP client");
-				    sftpClient.close();
-				    s_oLogger.debug("ftpExport: SFTP: disconnecting SSH client");
-				    oClient.disconnect();
-				    s_oLogger.debug("ftpExport: SFTP: closing SSH client");
-				    oClient.close();
+					try (SSHClient oClient = new SSHClient()) {
+						s_oLogger.debug("ftpExport: SFTP: adding host key verifier");
+					    oClient.addHostKeyVerifier(new PromiscuousVerifier());
+					    s_oLogger.debug("ftpExport: SFTP: connecting to " + oParam.getFtpServer());
+					    oClient.connect(oParam.getFtpServer());
+					    s_oLogger.debug("ftpExport: SFTP: authenticating as " + oParam.getUsername());
+					    oClient.authPassword(oParam.getUsername(), oParam.getPassword());
+					    s_oLogger.debug("ftpExport: SFTP: getting SFTP client");
+					    
+					    try (SFTPClient sftpClient = oClient.newSFTPClient()) {
+						    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+						    s_oLogger.debug("ftpExport: SFTP: transferring file");
+						    sftpClient.put(sFullLocalPath,oParam.getRemotePath() + oParam.getLocalFileName());
+						    //todo check that the file is there
+						    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+						  
+						    s_oLogger.debug("ftpExport: SFTP: closing SFTP client");
+						    sftpClient.close();
+						    s_oLogger.debug("ftpExport: SFTP: disconnecting SSH client");
+						    oClient.disconnect();
+						    s_oLogger.debug("ftpExport: SFTP: closing SSH client");
+						    oClient.close();						
+					    	
+					    }
+					}
 				    
 				}
 				else {
@@ -1505,8 +1509,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("Error creating Rabbit Send " + e.toString());
 			}
 		}
-		if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-			s_oLogger.debug("Error sending rabbitmq message to update process list");
+		
+		if (s_oSendToRabbit != null) {
+			if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+				s_oLogger.debug("Error sending rabbitmq message to update process list");
+			}			
 		}
 	}
 
@@ -2642,8 +2649,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						sError, oParameter.getExchange());
 
 		} finally {
-			s_oLogger.debug("LauncherMain.executeMosaic: End Closing Process Workspace with status "
-					+ oProcessWorkspace.getStatus());
+			String sStatus = "ND";
+			if (oProcessWorkspace != null) {
+				sStatus = oProcessWorkspace.getStatus().toString();
+			}
+			s_oLogger.debug("LauncherMain.executeMosaic: End Closing Process Workspace with status " + sStatus);
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 

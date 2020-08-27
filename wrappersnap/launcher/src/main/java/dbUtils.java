@@ -302,19 +302,19 @@ public class dbUtils {
 				
 				System.out.println("Log Rows " + aoLogs.size());
 				
-				try {
-					FileWriter oWriter = new FileWriter(sOuptutFile);
-					BufferedWriter oBufferedWriter = new BufferedWriter(oWriter);
+				try (FileWriter oWriter = new FileWriter(sOuptutFile)) {
 					
-					for (ProcessorLog oLogRow : aoLogs) {
-						oBufferedWriter.write(oLogRow.getLogDate());
-						oBufferedWriter.write(" - " );
-						oBufferedWriter.write(oLogRow.getLogRow());
-						oBufferedWriter.write("\n");
+					try (BufferedWriter oBufferedWriter = new BufferedWriter(oWriter)) {
+						for (ProcessorLog oLogRow : aoLogs) {
+							oBufferedWriter.write(oLogRow.getLogDate());
+							oBufferedWriter.write(" - " );
+							oBufferedWriter.write(oLogRow.getLogRow());
+							oBufferedWriter.write("\n");
+						}
+						
+						oBufferedWriter.flush();
+						oBufferedWriter.close();						
 					}
-					
-					oBufferedWriter.flush();
-					oBufferedWriter.close();
 				} 
 				catch (IOException e) {
 					System.err.format("IOException: %s%n", e);
@@ -471,7 +471,9 @@ public class dbUtils {
 	        	
 	        	for (File oFile : aoFilesToDelete) {
 	        		System.out.println("Deleting metadata File: " + oFile.getPath());
-	        		oFile.delete();
+	        		if (oFile.delete()==false) {
+	        			System.out.println("Error Deleting metadata File: " + oFile.getPath());
+	        		}
 				}
       	
 	        }
