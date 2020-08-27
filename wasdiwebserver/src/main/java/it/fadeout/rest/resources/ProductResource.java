@@ -538,12 +538,14 @@ public class ProductResource {
 		// Copy the stream
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
-		OutputStream oOutStream = new FileOutputStream(oOutputFilePath);
-		while ((iRead = fileInputStream.read(ayBytes)) != -1) {
-			oOutStream.write(ayBytes, 0, iRead);
+		
+		try (OutputStream oOutStream = new FileOutputStream(oOutputFilePath)) {
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutStream.write(ayBytes, 0, iRead);
+			}
+			oOutStream.flush();
+			oOutStream.close();			
 		}
-		oOutStream.flush();
-		oOutStream.close();
 
 		// Start ingestion
 		try {
@@ -614,12 +616,14 @@ public class ProductResource {
 			// Copy the stream
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
-			OutputStream oOutStream = new FileOutputStream(oOutputFilePath);
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
-				oOutStream.write(ayBytes, 0, iRead);
+			
+			try (OutputStream oOutStream = new FileOutputStream(oOutputFilePath)) {
+				while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+					oOutStream.write(ayBytes, 0, iRead);
+				}
+				oOutStream.flush();
+				oOutStream.close();				
 			}
-			oOutStream.flush();
-			oOutStream.close();
 			
 			return Response.ok().build();			
 		}

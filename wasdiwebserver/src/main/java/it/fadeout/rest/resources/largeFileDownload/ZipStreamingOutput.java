@@ -119,14 +119,28 @@ public class ZipStreamingOutput implements StreamingOutput {
 		} finally {
 			// Flush output
 			if( oOutputStream!=null ) {
-				oOutputStream.flush();
-				oOutputStream.close();
-				Utils.debugLog("ZipStreamingOutput.write: OutputStream closed");
+				
+				try {
+					oOutputStream.flush();
+					oOutputStream.close();
+					Utils.debugLog("ZipStreamingOutput.write: OutputStream closed");						
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ZipStreamingOutput.write: OutputStream close exception: " + oEx.toString());
+				}				
 			}
 			// Close input
 			if( oInputStream !=null ) {
-				oInputStream.close();
-				Utils.debugLog("ZipStreamingOutput.write: InputStream closed");
+				try {
+					oInputStream.close();
+					Utils.debugLog("ZipStreamingOutput.write: InputStream closed");						
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ZipStreamingOutput.write: InputStream close exception: " + oEx.toString());
+				}				
+				
+				
+				
 			}
 		}
 	}

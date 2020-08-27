@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.abdera.Abdera;
@@ -387,13 +388,15 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			}
 			Utils.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE);
 		}
-		InputStream reader = new ByteArrayInputStream(outStream.toByteArray());
-		DocumentBuilderFactory f = 
-				DocumentBuilderFactory.newInstance();
-		DocumentBuilder b;
+		
+		InputStream oInputStreamReader = new ByteArrayInputStream(outStream.toByteArray());
+		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
+		oDocBuildFactory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+		oDocBuildFactory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalSchema", "");
+		DocumentBuilder oDocBuilder;
 		try {
-			b = f.newDocumentBuilder();
-			org.w3c.dom.Document doc = b.parse(reader);
+			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
+			org.w3c.dom.Document doc = oDocBuilder.parse(oInputStreamReader);
 			doc.getDocumentElement().normalize();
 			Utils.debugLog("Root element: " + doc.getDocumentElement().getNodeName());
 			// loop through each item

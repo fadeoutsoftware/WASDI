@@ -492,14 +492,24 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			}
 			
 			m_oLogger.debug("ProviderAdapter.copyStream: EOF received, set process to 100% [was " + iFilePercent + "%]");
-			updateProcessProgress(100);
-			
-			oOutputStream.close();
-			oInputStream.close();			
+			updateProcessProgress(100);			
 		}
 		catch (Exception oEx) {
 			m_oLogger.debug("ProviderAdapter.copyStream: after reading " + lTotalLen + "/" + lContentLength + " an exception was caught: " + oEx);
 			return false;
+		}
+		finally {
+			try {
+				oOutputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				oInputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}			
+			
 		}
 
 		m_oLogger.debug("ProviderAdapter.copyStream: read " + lTotalLen + "/" + lContentLength + ", copy done");

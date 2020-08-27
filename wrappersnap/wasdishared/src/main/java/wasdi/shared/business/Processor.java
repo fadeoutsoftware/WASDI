@@ -48,7 +48,7 @@ public class Processor {
 	/**
 	 * timeoutMs: 3 hours by default
 	 */
-	private long timeoutMs = 1000*60*60*3;
+	private long timeoutMs = 1000l*60l*60l*3l;
 	
 	/**
 	 * Flag to know if it is public or not

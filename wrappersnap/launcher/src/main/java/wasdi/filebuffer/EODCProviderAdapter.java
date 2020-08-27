@@ -3,6 +3,7 @@ package wasdi.filebuffer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
@@ -80,6 +81,9 @@ public class EODCProviderAdapter extends ProviderAdapter{
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
 			
 			m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: destination file: " + sDestinationFileName);
+			
+			InputStream oInputStream = null;
+			OutputStream oOutputStream = null;
 
 			// copy the product from file system
 			try {
@@ -91,8 +95,8 @@ public class EODCProviderAdapter extends ProviderAdapter{
 					}
 				}
 				
-				InputStream oInputStream = new FileInputStream(oSourceFile);
-				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
+				oInputStream = new FileInputStream(oSourceFile);
+				oOutputStream = new FileOutputStream(oDestionationFile);
 				
 				m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: start copy stream");
 				
@@ -137,7 +141,9 @@ public class EODCProviderAdapter extends ProviderAdapter{
 							
 							try {
 								m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: delete corrupted file");
-								oDestionationFile.delete();
+								if (oDestionationFile.delete()== false) {
+									m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: error deleting corrupted file");
+								}
 							}
 							catch (Exception oDeleteEx) {
 								m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: exception deleting not valid file ");
@@ -159,6 +165,22 @@ public class EODCProviderAdapter extends ProviderAdapter{
 
 			} catch (Exception e) {
 				m_oLogger.info("EODCProviderAdapter.ExecuteDownloadFile: " + e);
+			}
+			finally {
+				try {
+					if (oOutputStream != null) {
+						oOutputStream.close();
+					}
+				} catch (IOException e) {
+					
+				}
+				try {
+					if (oInputStream!= null) {
+						oInputStream.close();
+					}
+				} catch (IOException e) {
+					
+				}
 			}
 			
 			return sDestinationFileName;

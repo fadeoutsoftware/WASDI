@@ -68,8 +68,11 @@ public class OpenSearchResource {
 				Utils.debugLog(s_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				try {
 					Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
-					for (Integer count : aiQueryCountResultsPerProvider.values()) {
-						iCounter += count;
+					
+					if (aiQueryCountResultsPerProvider != null) {
+						for (Integer count : aiQueryCountResultsPerProvider.values()) {
+							iCounter += count;
+						}						
 					}
 				} catch (NumberFormatException oE) {
 					Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
@@ -93,15 +96,25 @@ public class OpenSearchResource {
 				Integer iProviderCountResults = 0;
 				try {
 					QueryExecutor oExecutor = getExecutor(sProvider);
+					
+					if (oExecutor == null) {
+						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: Query Executor = null ");
+						aiQueryCountResultsPerProvider.put(sProvider, -1);
+						continue;
+					}
+					
 					try {
 						iProviderCountResults = oExecutor.executeCount(sQuery);
-					} catch (NumberFormatException oNumberFormatException) {
+					} 
+					catch (NumberFormatException oNumberFormatException) {
 						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NumberFormatException: " + oNumberFormatException);
 						iProviderCountResults = -1;
-					} catch (IOException oIOException) {
+					} 
+					catch (IOException oIOException) {
 						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught IOException: " + oIOException);
 						iProviderCountResults = -1;
-					}catch (NullPointerException oNp) {
+					}
+					catch (NullPointerException oNp) {
 						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NullPointerException: " +oNp);
 						iProviderCountResults = -1;
 					}
@@ -115,7 +128,7 @@ public class OpenSearchResource {
 		} catch (Exception oE) {
 			Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 		}
-		return null;
+		return aiQueryCountResultsPerProvider;
 	}
 
 	@GET
@@ -177,6 +190,11 @@ public class OpenSearchResource {
 				return null;
 			}
 			
+			if (aiCounterMap == null) {
+				Utils.debugLog(s_sClassName + ".search: aiCounterMap is null ");
+				return null;				
+			}
+			
 			// Get the number of elements per page
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
 			int iLimit = 25;
@@ -228,6 +246,13 @@ public class OpenSearchResource {
 				try {
 					// Get the query executor
 					QueryExecutor oExecutor = getExecutor(sProvider);
+					
+					if (oExecutor == null) {
+						Utils.debugLog(s_sClassName + ".search: executor null for Provider: " + sProvider);
+						aoResults.add(null);
+						continue;
+					}
+					
 					try {
 						// Create the paginated query
 						PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
@@ -337,9 +362,12 @@ public class OpenSearchResource {
 				sQuery = asQueries.get(iQueries);
 				try {
 					if (sProviders != null) {
-						Map<String, Integer> pMap = getQueryCountResultsPerProvider(sQuery, sProviders);
-						for (Integer count : pMap.values()) {
-							iCounter += count;
+						Map<String, Integer> aoMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+						
+						if (aoMap != null) {
+							for (Integer iCount : aoMap.values()) {
+								iCounter += iCount;
+							}							
 						}
 					}
 				} catch (NumberFormatException oE) {
@@ -394,10 +422,16 @@ public class OpenSearchResource {
 					sQuery = asQueries.get(iQueries);
 					
 					// Get for each provider the total count
-					Map<String, Integer> counterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+					Map<String, Integer> aoCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+					
+					if (aoCounterMap == null) {
+						Utils.debugLog(" aoCounterMap null ");
+						aoResults.add(null);
+						continue;
+					}
 					
 					// For each provider
-					for (Entry<String, Integer> entry : counterMap.entrySet()) {
+					for (Entry<String, Integer> entry : aoCounterMap.entrySet()) {
 						
 						// Get the Provider Name
 						String sProvider = entry.getKey();
@@ -423,7 +457,12 @@ public class OpenSearchResource {
 							}
 						}
 						
-						QueryExecutor oExecutor = getExecutor(sProviders);
+						QueryExecutor oExecutor = getExecutor(sProvider);
+						
+						if (oExecutor == null) {
+							Utils.debugLog("Executor Null for Provider: " + sProvider);
+							continue;
+						}
 						
 						// Until we do not get all the results
 						while (iObtainedResults < iTotalResultsForProviders) {
