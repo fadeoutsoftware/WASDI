@@ -62,6 +62,8 @@ var WasdiApplicationDetailsController = (function() {
         $scope.userOwner = false;
         $scope.reviewsNbr = '36';
         $scope.processorPrice = '2';
+        $scope.contactMail ='info@info.com';
+        $scope.contactLink = 'http://www.wasdi.com';
         /*REVIEW MODAL*/
         $scope.previewRating = 0;
         $scope.ratingValue = 0;

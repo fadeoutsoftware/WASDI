@@ -195,8 +195,8 @@
             <div class="row">
                 <div class="col-12 col-md-6 border-right">
                     <div>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></div>
-                    <div>Contact: <span class="text-green-wasdi">{{m_oController.m_oApplication.email}}</span></div>
-                    <div>WebSite: <span class="text-green-wasdi">{{m_oController.m_oApplication.link}}</span></div>
+                    <div>Contact: <span class="text-green-wasdi"><a ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span></div>
+                    <div>WebSite: <span class="text-green-wasdi"><a ng-href="{{m_oController.m_oApplication.link}}" target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
                 </div>
                 <div class="col-12 col-md-6">
                     <div>Publication Date: <span class="text-green-wasdi">18/06/2020</span></div>
