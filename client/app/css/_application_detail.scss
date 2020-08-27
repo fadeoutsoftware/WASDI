@@ -162,6 +162,22 @@
 
 }
 
+.blue-big-btn {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: $wasdiblue;
+
+    &:hover {
+        background-color: $darkwasdiblue;
+    }
+
+}
+
 /*REVIEWS*/
 .reviews-list {
     border-radius: 0px 8px 8px 8px;
