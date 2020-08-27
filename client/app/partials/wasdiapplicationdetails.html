@@ -278,7 +278,7 @@
                         <span class="ml-2">14%</span>
                     </div>
                     <hr>
-                    <div class="green-big-btn">
+                    <div class="green-big-btn" type="button" data-toggle="modal" data-target="#writeReviewsModal">
                         WRITE A REVIEW
                     </div>
 
@@ -310,6 +310,56 @@
                     </div>
                     <div class="reviews-load-more text-center">
                         LOAD MORE REVIEWS...
+                    </div>
+                </div>
+
+
+                <!-- Modal -->
+                <div class="modal fade writeReviewsModal" id="writeReviewsModal" tabindex="-1" role="dialog" aria-labelledby="writeReviewsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content rounded-0">
+                            <div class="modal-header d-flex justify-content-between">
+                                <h2 class="modal-title w-100">Write Review</h2>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div>
+                                    <p>Select your rating*</p>
+                                    <div class="star-rating mb-2">
+                                        <span class="fa fa-star" ng-mouseover="previewRating=1" ng-mouseleave="previewRating=0" ng-click="ratingValue=1" ng-class="previewRating>=1?'checked':ratingValue>=1?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=2" ng-mouseleave="previewRating=0" ng-click="ratingValue=2" ng-class="previewRating>=2?'checked':ratingValue>=2?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=3" ng-mouseleave="previewRating=0" ng-click="ratingValue=3" ng-class="previewRating>=3?'checked':ratingValue>=3?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=4" ng-mouseleave="previewRating=0" ng-click="ratingValue=4" ng-class="previewRating>=4?'checked':ratingValue>=4?'checked':''"></span>
+                                        <span class="fa fa-star" ng-mouseover="previewRating=5" ng-mouseleave="previewRating=0" ng-click="ratingValue=5" ng-class="previewRating>=5?'checked':ratingValue>=5?'checked':''"></span>
+                                    </div>
+                                </div>
+                                <!--REVIEW FORM-->
+                                <form class="py-4">
+                                    <div class="form-group">
+                                        <label for="title">Write a title for your review*</label>
+                                        <input type="text" class="form-control" id="title" aria-describedby="title" placeholder="Title">
+                                        <small id="titleHelp" class="form-text text-muted">Summary about your experience whit this app.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="comment">Password</label>
+                                        <textarea type="text" class="form-control" id="comment" placeholder="A long time ago, in a galaxy far far away..."></textarea>
+                                        <small id="coomentHelp" class="form-text text-muted">Give more information about your feedback</small>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                        <label class="form-check-label" for="exampleCheck1">I agree to the <a href="#" target="_blank">Terms o Service</a> and  <a href="#" target="_blank">Privacy Policy</a></label>
+                                    </div>
+                                </form>
+
+
+                            </div>
+                            <div class="modal-footer rounded-0">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal"> <span class="fa fa-trash mr-2"></span>Cancel</button>
+                                <button type="button" class="btn btn-primary"><span class="fa fa-save mr-2"></span>Save My Review</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
