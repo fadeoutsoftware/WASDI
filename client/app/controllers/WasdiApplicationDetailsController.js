@@ -62,6 +62,10 @@ var WasdiApplicationDetailsController = (function() {
         $scope.userOwner = false;
         $scope.reviewsNbr = '36';
         $scope.processorPrice = '2';
+        /*REVIEW MODAL*/
+        $scope.previewRating = 0;
+        $scope.ratingValue = 0;
+        /*REVIEWS LIST*/
         $scope.reviews = [
             {
                 name:'Luke Camminatore del Cielo',

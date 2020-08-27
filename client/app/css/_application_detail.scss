@@ -190,6 +190,17 @@
     }
 }
 
+/*MODAL REVIEWS*/
+.writeReviewsModal{
+    .fa-star {
+        cursor: pointer;
+    }
+    .star-rating {
+        font-size: 1.5em;
+    }
+
+}
+
 /*ANIMATION*/
 .arrow{
     display: flex;
