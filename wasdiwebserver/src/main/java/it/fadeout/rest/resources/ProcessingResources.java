@@ -297,6 +297,8 @@ public class ProcessingResources {
 			@QueryParam("public") Boolean bPublic) throws Exception {
 
 		Utils.debugLog("ProcessingResources.uploadGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkspace + ", Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " )");
+		
+		OutputStream oOutStream = null;
 
 		try {
 			// Check authorization
@@ -330,14 +332,15 @@ public class ProcessingResources {
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
 
-			OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFile);
+			oOutStream = new FileOutputStream(oWorkflowXmlFile);
 
 			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 
 			oOutStream.flush();
-			oOutStream.close();
+			// Close it in the finally clause
+			//oOutStream.close();
 
 			// Create Entity
 			SnapWorkflow oWorkflow = new SnapWorkflow();
@@ -378,6 +381,16 @@ public class ProcessingResources {
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResources.uploadGraph: " + oEx);
 			return Response.serverError().build();
+		}
+		finally {
+			if (oOutStream != null) {
+				try {
+					oOutStream.close();
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessingResources.uploadGraph: Error " + oEx.toString());
+				}
+			}
 		}
 
 		return Response.ok().build();
@@ -583,6 +596,8 @@ public class ProcessingResources {
 			oResult.setIntValue(401);
 			return oResult;
 		}
+		
+		FileInputStream oFileInputStream = null;
 
 		try {
 			String sUserId = oUser.getUserId();
@@ -623,7 +638,7 @@ public class ProcessingResources {
 				sWorkflowPath = sDownloadedWorflowPath;
 			}
 
-			FileInputStream oFileInputStream = new FileInputStream(sWorkflowPath);
+			oFileInputStream = new FileInputStream(sWorkflowPath);
 
 			String sWorkFlowName = oWF.getName().replace(' ', '_');
 
@@ -652,6 +667,16 @@ public class ProcessingResources {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
+		}
+		finally {
+			if (oFileInputStream != null) {
+				try {
+					oFileInputStream.close();
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Error " + oEx.toString());
+				}				
+			}
 		}
 	}
 
@@ -1120,6 +1145,13 @@ public class ProcessingResources {
 
 			// Create Operator instance
 			OperatorParameter oParameter = getParameter(oOperation);
+			
+			if (oParameter == null) {
+				Utils.debugLog("ProsessingResources.ExecuteOperation: impossible to create the parameter from the operation");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;				
+			}
 
 			// Set common settings
 			oParameter.setSourceProductName(sSourceProductName);

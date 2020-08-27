@@ -407,7 +407,7 @@ public abstract class QueryExecutor {
 						sResult = oBytearrayOutputStream.toString();
 					}
 					
-					if(!Utils.isNullOrEmpty(sResult)) {
+					if(sResult!=null) {
 						if(sResult.length() > 201 ) {
 							sResponseExtract = sResult.substring(0, 200) + "...";
 						} else {
@@ -427,11 +427,11 @@ public abstract class QueryExecutor {
 					String sMessage = oBytearrayOutputStream.toString();
 					if(null!=sMessage) {
 						sResponseExtract = sMessage.substring(0,  Math.min(sMessage.length(), 200)) + "...";
-					}
-					Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
-							" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
-					if(iResponseSize <= 0) {
-						iResponseSize = sMessage.length();
+						Utils.debugLog("QueryExecutor.httpGetResults: provider did not return 200 but "+responseCode+
+								" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
+						if(iResponseSize <= 0) {
+							iResponseSize = sMessage.length();
+						}						
 					}
 				}
 			}catch (Exception oEint) {
@@ -501,7 +501,7 @@ public abstract class QueryExecutor {
 						sResult = oBytearrayOutputStream.toString();
 					}
 					
-					if(!Utils.isNullOrEmpty(sResult)) {
+					if(sResult != null) {
 						if(sResult.length() > 200 ) {
 							sResponseExtract = sResult.substring(0, 200) + "...";
 						} else {
@@ -521,11 +521,11 @@ public abstract class QueryExecutor {
 					String sMessage = oBytearrayOutputStream.toString();
 					if(null!=sMessage) {
 						sResponseExtract = sMessage.substring(0,  200) + "...";
-					}
-					Utils.debugLog("QueryExecutor.httpPostResults: provider did not return 200 but "+responseCode+
-							" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
-					if(iResponseSize <= 0) {
-						iResponseSize = sMessage.length();
+						Utils.debugLog("QueryExecutor.httpPostResults: provider did not return 200 but "+responseCode+
+								" (2/2) and this is the content of the error stream:\n" + sResponseExtract);
+						if(iResponseSize <= 0) {
+							iResponseSize = sMessage.length();
+						}						
 					}
 				}
 			}catch (Exception oEint) {

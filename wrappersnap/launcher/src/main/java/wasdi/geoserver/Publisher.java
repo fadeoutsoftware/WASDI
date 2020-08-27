@@ -113,6 +113,7 @@ public class Publisher {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
+                Thread.currentThread().interrupt();
 
                 return  false;
             }

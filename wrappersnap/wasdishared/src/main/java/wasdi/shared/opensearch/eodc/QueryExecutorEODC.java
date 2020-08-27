@@ -116,7 +116,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 				sQuery = sQuery.replace("offset=", "OFFSETAUTOMATICALLYREMOVED=");
 			}
 			if(sQuery.contains("limit=")) {
-				sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
+				sQuery = sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
 			}
 			//we do not need results now, just the count
 			sQuery += "&limit=0";

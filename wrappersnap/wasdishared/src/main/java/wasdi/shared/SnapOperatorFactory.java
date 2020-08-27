@@ -35,6 +35,10 @@ public class SnapOperatorFactory {
 
 		Class oOperatorClass = getOperatorClass(sOperation);
 		
+		if (oOperatorClass==null) {
+			return null;
+		}
+		
 		try {
 			Method oMethod = oOperatorClass.getMethod("Spi");
 			Object oObj = oMethod.invoke(oOperatorClass);

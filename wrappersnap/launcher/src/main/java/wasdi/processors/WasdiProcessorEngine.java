@@ -193,11 +193,13 @@ public abstract class WasdiProcessorEngine {
 			String sProcessorId = oProcessor.getProcessorId();
 			
 			if (sProcessorId == null) {
-				System.out.println("sFileName must not be null");
+				System.out.println("sProcessorId must not be null");
+				return "";
 			}
 
 			if (sProcessorId.equals("")) {
-				System.out.println("sFileName must not be empty");
+				System.out.println("sProcessorId must not be empty");
+				return "";
 			}
 			
 			
@@ -255,18 +257,19 @@ public abstract class WasdiProcessorEngine {
 					oTargetDir.mkdirs();
 
 					// opens an output stream to save into file
-					FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+					try (FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath)) {
+						InputStream oInputStream = oConnection.getInputStream();
 
-					InputStream oInputStream = oConnection.getInputStream();
+						Util.copyStream(oInputStream, oOutputStream);
 
-					Util.copyStream(oInputStream, oOutputStream);
-
-					if(null!=oOutputStream) {
-						oOutputStream.close();
+						if(null!=oOutputStream) {
+							oOutputStream.close();
+						}
+						if(null!=oInputStream) {
+							oInputStream.close();
+						}						
 					}
-					if(null!=oInputStream) {
-						oInputStream.close();
-					}
+
 					
 					return sOutputFilePath;
 				} else {

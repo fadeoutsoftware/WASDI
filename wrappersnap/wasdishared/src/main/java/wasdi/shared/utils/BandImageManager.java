@@ -144,6 +144,7 @@ public class BandImageManager {
 					try {
 						Thread.sleep(10000); //sleep for 10 seconds
 					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
 						break;
 					}
 				}

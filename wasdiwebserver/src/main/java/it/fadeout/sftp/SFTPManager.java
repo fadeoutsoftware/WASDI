@@ -22,6 +22,7 @@ public class SFTPManager {
 			Utils.debugLog("ERROR: " + oClient.getData());		
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+			Thread.currentThread().interrupt();
 		}				
 		return null;
 	}
@@ -69,8 +70,13 @@ public class SFTPManager {
 	 * @return
 	 */
 	public String[] list(String sUser) {
-		String s = sendCommand("list " + sUser);
-		return s.split("__WASDI_SEPARATOR__");
+		String sCommand = sendCommand("list " + sUser);
+		if (sCommand != null) {
+			return sCommand.split("__WASDI_SEPARATOR__");
+		}
+		else {
+			return null;
+		}
 	}
 
 	

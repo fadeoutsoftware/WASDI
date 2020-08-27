@@ -287,6 +287,8 @@ public class Mosaic {
 			}
 		}
 		
+		if (oReferenceProduct == null) return false;
+		
 		// Get the list of all the band names
 		String [] asBandNames = oReferenceProduct.getBandNames();
 				
