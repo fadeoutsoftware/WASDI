@@ -49,8 +49,8 @@ public class FileStreamingOutput implements StreamingOutput {
 			try {
 				oInputStream = new FileInputStream(m_oFile);
 				long lCopiedBytes = 0;
-				long lThreshold = 2L*1024*1024*1024;
-				long lSize = m_oFile.length();
+//				long lThreshold = 2L*1024*1024*1024;
+//				long lSize = m_oFile.length();
 				Utils.debugLog("FileStreamingOutput.write: using guava ByteStreams.copy to copy file");
 				lCopiedBytes = ByteStreams.copy(oInputStream,  oOutputStream);
 				/*

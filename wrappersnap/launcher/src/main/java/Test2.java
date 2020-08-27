@@ -1,8 +1,6 @@
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,10 +11,8 @@ import org.esa.snap.runtime.Engine;
 import wasdi.ConfigReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.utils.Utils;
 
 public class Test2 {

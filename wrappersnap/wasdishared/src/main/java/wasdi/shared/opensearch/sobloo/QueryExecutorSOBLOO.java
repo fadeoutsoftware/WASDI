@@ -42,6 +42,18 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		this.m_sPassword = null;
 	}
 
+	@Override
+	public void setParserConfigPath(String sParserConfigPath) {
+		super.setParserConfigPath(sParserConfigPath);
+		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
+	}
+
+	@Override
+	public void setAppconfigPath(String sAppconfigPath) {
+		super.setAppconfigPath(sAppconfigPath);
+		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
+	}
+	
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
 	 */
@@ -72,8 +84,8 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		Preconditions.checkNotNull(this.m_sAppConfigPath, "QueryExecutorSOBLOO.executeAndRetrieve: app config path is null");
 		Preconditions.checkNotNull(this.m_sParserConfigPath, "QueryExecutorSOBLOO.executeAndRetrieve: parser config path is null");
 		
-		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
-		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
+//		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
+//		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
 		
 		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
 		String sResult = null;
@@ -119,7 +131,7 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		Utils.debugLog("QueryExecutorSOBLOO.getSearchListUrl( " + oQuery.getQuery() + " )");
 		
 		Preconditions.checkNotNull(oQuery, s_sClassName + ".getSearchListUrl: query is null");
-		readyQueryTranslator();
+//		readyQueryTranslator();
 		
 		return s_sBaseUrl + m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) +
 				"&size=" + oQuery.getLimit()+ "&from=" + oQuery.getOffset() +
@@ -140,7 +152,7 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		Preconditions.checkNotNull(sQuery, "QueryExecutorSOBLOO.getCountUrl: sQuery is null");
 		String sUrl = "";
 		try {
-			readyQueryTranslator();
+//			readyQueryTranslator();
 			sUrl = "https://sobloo.eu/api/v1/services/explore/explore/catalog/_count?" + m_oQueryTranslator.translateAndEncode(sQuery);
 		} catch (Exception oE) {
 			Utils.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
@@ -165,8 +177,8 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		Preconditions.checkNotNull(m_sAppConfigPath, "QueryExecutorSOBLOO.readyQueryTranslator: app config path is null");
 		Preconditions.checkNotNull(m_sParserConfigPath, "QueryExecutorSOBLOO.readyQueryTranslator: parser config path is null");
 		
-		m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
-		m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
+//		m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
+//		m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
 	}
 
 	

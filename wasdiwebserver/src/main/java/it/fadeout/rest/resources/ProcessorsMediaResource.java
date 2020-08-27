@@ -67,7 +67,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.uploadProcessorLogo( Session: " + sSessionId + ", ProcId: " + sProcessorId + ")");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -175,7 +175,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.getProcessorLogo ( Session: " + sSessionId + ", ProcId: " + sProcessorId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -230,7 +230,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.getAppImage( Session: " + sSessionId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -282,7 +282,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", Image Name: " + sImageName + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -337,7 +337,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.uploadProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -784,7 +784,7 @@ public class ProcessorsMediaResource {
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return null;
 		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
 			return null;

@@ -35,13 +35,11 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CatalogRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
@@ -67,12 +65,20 @@ public class CatalogResources {
 	@Produces({"application/json"})
 	public ArrayList<String> getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("CatalogResources.GetCategories");
-
-		ArrayList<String> categories = new ArrayList<String>();
-		for ( DownloadedFileCategory c : DownloadedFileCategory.values()) {
-			categories.add(c.name());
+		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			Utils.debugLog("CatalogResources.GetCategories: session invalid");
+			return null;
 		}
-		return categories; 
+
+		ArrayList<String> aoCategories = new ArrayList<String>();
+		for ( DownloadedFileCategory oCategory : DownloadedFileCategory.values()) {
+			aoCategories.add(oCategory.name());
+		}
+		
+		return aoCategories; 
 	}
 
 
@@ -88,7 +94,7 @@ public class CatalogResources {
 
 		Utils.debugLog("CatalogResources.GetEntries");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		String sUserId = oUser.getUserId();
 
 		SimpleDateFormat oDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
@@ -110,7 +116,7 @@ public class CatalogResources {
 
 		Utils.debugLog("CatalogResources.DownloadEntry");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			Utils.debugLog("CatalogResources.DownloadEntry: user not authorized");
@@ -179,12 +185,8 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResources.DownloadEntryByName( Session: " + sSessionId + ", TokenSession: "+ sTokenSessionId + ", FileName: " + sFileName + ", Ws: " + sWorkspace);
 		
 		try {
-			
-			if( Utils.isNullOrEmpty(sSessionId) == false) {
-				sTokenSessionId = sSessionId;
-			}
 
-			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
 				Utils.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
@@ -423,7 +425,7 @@ public class CatalogResources {
 	{			
 		Utils.debugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			Utils.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
@@ -503,7 +505,7 @@ public class CatalogResources {
 
 		Utils.debugLog("CatalogResources.GetCatalogues");
 
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<CatalogViewModel> aoCatalogList = new ArrayList<CatalogViewModel>();
 
@@ -560,7 +562,7 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspace);
 
 		// Check user session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
 		String sUserId = oUser.getUserId();		
 
@@ -628,7 +630,7 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResource.IngestFileInWorkspace: file " + sFile + " workspace: " + sWorkspace);
 
 		// Check the user session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
@@ -718,7 +720,7 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspace);
 
 		// Check the user session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
@@ -800,38 +802,22 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResource.ftpTransferFile");
 
 		//input validation
-		if(null == sSessionId || null == oFtpTransferVM) {
+		if(null == oFtpTransferVM) {
 			// check appropriateness
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setStringValue("Null arguments");
 			return oResult;
 		}
-		if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setStringValue("sSessionId badly formatted");
-			return oResult;
-		}
-		SessionRepository oSessionRep = new SessionRepository();
-		UserSession oSession = oSessionRep.getSession(sSessionId);
-
-		if(null==oSession) {
+		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if(null==oUser) {
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setStringValue("Invalid Session");
 			return oResult;
 		}
-		String sUserId = oSession.getUserId();
-		if(null==sUserId) {
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setStringValue("Null User");
-			return oResult;
-		}
-
-		if (sWorkspace==null)  {
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setStringValue("Null Workspace");
-			return oResult;			
-		}
-
+		
+		String sUserId = oUser.getUserId();
 
 		try {
 			Utils.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
