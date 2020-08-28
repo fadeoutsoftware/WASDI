@@ -149,7 +149,7 @@ var HomeController = (function() {
                     if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
                     {
                         oController.m_oConstantsService.setUser(data);//set user
-                        oController.m_oState.go("root.workspaces");// go workspaces
+                        oController.m_oState.go("root.marketplace");// go workspaces
                     }
                 }
                 else

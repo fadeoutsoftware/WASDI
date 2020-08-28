@@ -165,15 +165,6 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
-    //APP STORE
-    $stateProvider.state('root.appui',{
-        url: '/appui',
-
-        views:{
-            'maincontent' : { templateUrl : 'partials/wasdiapplicationui.html', controller  : 'WasdiApplicationUIController'}
-        }
-    });
-
     //MARKET PLACE
     $stateProvider.state('root.marketplace',{
         url: '/marketplace',
@@ -185,10 +176,19 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
     //APP DETAILS
     $stateProvider.state('root.appdetails',{
-        url: '/appdetails',
+        url: '/{processorName}/appdetails',
 
         views:{
             'maincontent' : { templateUrl : 'partials/wasdiapplicationdetails.html', controller  : 'WasdiApplicationDetailsController'}
+        }
+    });
+
+    //APPLICATION AUTOMATIC USER INTERFACE
+    $stateProvider.state('root.appui',{
+        url: '/{processorName}/appui',
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/wasdiapplicationui.html', controller  : 'WasdiApplicationUIController'}
         }
     });
 

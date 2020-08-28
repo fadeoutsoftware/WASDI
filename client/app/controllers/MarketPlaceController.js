@@ -297,8 +297,8 @@ var MarketPlaceController = (function() {
     MarketPlaceController.prototype.openApplicationPage = function(sApplicationName) {
 
         this.m_oConstantsService.setSelectedApplication(sApplicationName);
-        //this.m_oState.go("root.appui", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        this.m_oState.go("root.appdetails");
+        this.m_oState.go("root.appdetails", { processorName : sApplicationName });
+        //this.m_oState.go("root.appdetails");
     }
 
     /**
@@ -340,7 +340,6 @@ var MarketPlaceController = (function() {
                 return  false;
             }
         }
-
     }
 
     MarketPlaceController.$inject = [

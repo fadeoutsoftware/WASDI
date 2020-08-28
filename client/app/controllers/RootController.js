@@ -434,7 +434,7 @@ var RootController = (function() {
         // (https://github.com/angular-ui/ui-router/issues/866)
         // Try to solve with jQuery workaround
 
-        if( sState == "root.workspaces" || sState == "root.marketplace")
+        if( sState == "root.workspaces" || sState == "root.marketplace"  || sState == "root.appui")
         {
             $("#main").removeClass("has-processes-bar");
             return false;
