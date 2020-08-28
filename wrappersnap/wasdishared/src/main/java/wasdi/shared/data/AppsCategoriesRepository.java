@@ -8,11 +8,16 @@ import org.bson.Document;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.utils.Utils;
 
 public class AppsCategoriesRepository extends MongoRepository {
+	
+	public AppsCategoriesRepository() {
+		m_sThisCollection = "appscategories";
+	}
 
     /**
      * Get List of Process Workspaces in a Workspace
@@ -24,7 +29,7 @@ public class AppsCategoriesRepository extends MongoRepository {
         final ArrayList<AppCategory> aoReturnList = new ArrayList<AppCategory>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("appscategories").find();
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
@@ -38,7 +43,7 @@ public class AppsCategoriesRepository extends MongoRepository {
 
         try {
 
-        	Document oWSDocument = getCollection("appscategories").find(new Document("id", sCategoryId)).first();
+        	Document oWSDocument = getCollection(m_sThisCollection).find(new Document("id", sCategoryId)).first();
         	String sJSON = oWSDocument.toJson();
         	
         	AppCategory oAppCategory = s_oMapper.readValue(sJSON, AppCategory.class);
@@ -67,4 +72,42 @@ public class AppsCategoriesRepository extends MongoRepository {
 		    }
 		});
 	}
+	
+    public boolean insertCategory(AppCategory oCategory) {
+
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oCategory);
+            getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+    
+    public boolean deleteCategory(String sCategoryId) {
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("id", sCategoryId));
+
+            if (oDeleteResult != null)
+            {
+                if (oDeleteResult.getDeletedCount() == 1 )
+                {
+                    return  true;
+                }
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
+
+
 }
