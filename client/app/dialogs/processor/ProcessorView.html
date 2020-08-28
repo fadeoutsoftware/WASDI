@@ -45,20 +45,20 @@
                     <!-------   STORE ------->
                     <div class="tab-pane fade in" id="Store"
                          ng-class="{'active':m_oController.m_sSelectedTab === 'Store'}"
-                         ng-hide="m_oController.m_sSelectedTab != 'Store'">
+                         ng-hide="m_oController.m_sSelectedTab != 'Store' || m_oController.m_bEditMode==false">
                         <ng-include src="'dialogs/processor/TabStoreProcessor.html'"></ng-include>
                     </div>
 
                     <!------- MEDIA ------->
                     <div class="tab-pane fade in" id="Media"
                          ng-class="{'active':m_oController.m_sSelectedTab === 'Media'}"
-                         ng-hide="m_oController.m_sSelectedTab != 'Media'">
+                         ng-hide="m_oController.m_sSelectedTab != 'Media' || m_oController.m_bEditMode==false">
                         <ng-include src="'dialogs/processor/TabMediaProcessor.html'"></ng-include>
                     </div>
 
                     <!------- SHARE ------->
                     <div class="tab-pane fade in" id="Share"
-                         ng-class="{'active':m_oController.m_sSelectedTab === 'Share'}"
+                         ng-class="{'active':m_oController.m_sSelectedTab === 'Share' || m_oController.m_bEditMode==false}"
                          ng-hide="m_oController.m_sSelectedTab != 'Share'">
                         <ng-include src="'dialogs/processor/TabShareProcessor.html'"></ng-include>
                     </div>

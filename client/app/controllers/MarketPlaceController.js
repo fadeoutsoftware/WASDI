@@ -95,6 +95,12 @@ var MarketPlaceController = (function() {
         }
 
         /**
+         * Flag to know if the page is waiting for applications data to come
+         * @type {boolean}
+         */
+        this.m_bWaiting = true;
+
+        /**
          * Local reference to the controller
          * @type {MarketPlaceController}
          */
@@ -131,8 +137,10 @@ var MarketPlaceController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             }
+            oController.m_bWaiting = false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            oController.m_bWaiting = false;
         });
 
         // Get the list of categories
@@ -177,6 +185,8 @@ var MarketPlaceController = (function() {
             this.m_oAppFilter.name = this.m_sNameFilter;
         }
 
+        oController.m_bWaiting = true;
+
         this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
@@ -201,8 +211,11 @@ var MarketPlaceController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             }
+
+            oController.m_bWaiting = false;
         }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST")
+            oController.m_bWaiting = false;
         });
 
     }

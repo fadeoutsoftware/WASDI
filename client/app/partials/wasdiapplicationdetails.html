@@ -10,12 +10,9 @@
                 <!--APPS IMG SLIDER-->
                 <div class="col-12 col-md-6">
                     <div class="appdetails-slider">
-                        <ul id="lightSlider">
-                            <li ng-repeat="sImage in m_oController.m_asImages" data-thumb="" >
+                        <ul>
+                            <li angularlightslider="{gallery: true, item: 1, loop:true, slideMargin: 0, thumbItem: 9}" ng-repeat="sImage in m_oController.m_asImages" data-thumb="{{m_oController.getThumbFileNameFromImageName(sImage)}}" >
                                 <img src="{{sImage}}" />
-                            </li>
-                            <li data-thumb="https://sachinchoolur.github.io/lightslider/img/thumb/cS-2.jpg">
-                                <img src="https://sachinchoolur.github.io/lightslider/img/cS-2.jpg" />
                             </li>
                         </ul>
                     </div>
@@ -39,7 +36,7 @@
                     <!--PUBLISHER-->
                     <div class="publisher mb-1">
                         <span  ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
-                        <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the master!</span>
+                        <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the master!&nbsp;<div ng-click="m_oController.editClick()"><span class="fa fa-edit mr-1"></span></div></span>
                     </div>
 
                     <!--TAGS LIST-->
@@ -349,13 +346,3 @@
     </div>
     </div>
 </div>
-
-    <script type="text/javascript">
-        $('#lightSlider').lightSlider({
-            gallery: true,
-            item: 1,
-            loop:true,
-            slideMargin: 0,
-            thumbItem: 9
-        });
-    </script>

@@ -207,7 +207,7 @@ var ProcessorController = (function() {
                 oController.postProcessor(oController, oController.m_oFile[0]);
             }
 
-            oClose(null, 300); // close, but give 500ms for bootstrap to animate
+            oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate
         };
 
         // Are we creating a new processor or editing an existing one?
@@ -326,9 +326,11 @@ var ProcessorController = (function() {
          oController.m_oInputProcessor.processorDescription = oController.m_sDescription;
          oController.m_oInputProcessor.paramsSample = encodeURI(oController.m_sJSONSample);
          oController.m_oInputProcessor.minuteTimeout = oController.m_iMinuteTimeout;
+         // Copy the brief description also in the detail view
+         oController.m_oProcessorDetails.processorDescription = oController.m_sDescription;
 
          // Update processor data
-         oController.m_oProcessorService.updateProcessor(oController.m_oActiveWorkspace.workspaceId, oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
+         oController.m_oProcessorService.updateProcessor(oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
 
              oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).success(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");

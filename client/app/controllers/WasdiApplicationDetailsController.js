@@ -15,7 +15,7 @@ var WasdiApplicationDetailsController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService) {
         /**
          * Angular Scope
          */
@@ -46,6 +46,11 @@ var WasdiApplicationDetailsController = (function() {
          * Processor Media Service
          */
         this.m_oProcessorMediaService = oProcessorMediaService;
+
+        /**
+         * Modal service
+         */
+        this.m_oModalService = oModalService;
 
         /**
          * Flat to decide to show or not more reviews link
@@ -80,6 +85,10 @@ var WasdiApplicationDetailsController = (function() {
             reviews: []
         }
 
+        /**
+         * View Model of the Review Modal Window
+         * @type {{processorId: string, comment: string, title: string, vote: number}}
+         */
         this.m_oUserReview = {
             vote: -1,
             title: "",
@@ -87,6 +96,10 @@ var WasdiApplicationDetailsController = (function() {
             processorId: ""
         }
 
+        /**
+         * Variable used to preview the selected rating in the new comment window
+         * @type {number}
+         */
         $scope.previewRating = 0;
 
         /**
@@ -107,6 +120,18 @@ var WasdiApplicationDetailsController = (function() {
          */
         this.m_iReviewItemsPerPage = 4;
 
+        /**
+         * Flog to know when the page is waiting for the application data to come
+         * @type {boolean}
+         */
+        this.m_bWaiting = true;
+
+        /**
+         * Flag to know when the page is waiting for reviews data to come
+         * @type {boolean}
+         */
+        this.m_bReviewsWaiting = false;
+
         // Local reference to the controller
         let oController = this;
 
@@ -126,15 +151,22 @@ var WasdiApplicationDetailsController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
             }
+            oController.m_bWaiting=false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+            oController.m_bWaiting=false;
         });
 
         // Get the reviews
         this.refreshReviews();
     }
 
+    /**
+     * Refresh the list of application reviews
+     */
     WasdiApplicationDetailsController.prototype.refreshReviews = function() {
+
+        this.m_bReviewsWaiting = true;
 
         var oController = this;
 
@@ -148,8 +180,11 @@ var WasdiApplicationDetailsController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
             }
+
+            oController.m_bReviewsWaiting = false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+            oController.m_bReviewsWaiting = false;
         });
 
     }
@@ -183,6 +218,7 @@ var WasdiApplicationDetailsController = (function() {
     WasdiApplicationDetailsController.prototype.loadMoreReviews = function () {
         var oController =this;
         this.m_iReviewsPage = this.m_iReviewsPage + 1;
+        this.m_bReviewsWaiting = true;
         // Get the reviews
         this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
@@ -199,8 +235,10 @@ var WasdiApplicationDetailsController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
             }
+            oController.m_bReviewsWaiting = false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+            oController.m_bReviewsWaiting = false;
         });
     }
 
@@ -273,6 +311,50 @@ var WasdiApplicationDetailsController = (function() {
         }
     }
 
+    /**
+     * Get the name of the thumb of an image. Hp is that the name "_thumb"
+     * @param sImageName
+     */
+    WasdiApplicationDetailsController.prototype.getThumbFileNameFromImageName = function (sImageName) {
+
+        try {
+            let asSplit = sImageName.split('.')
+            let sThumbFile = asSplit[0];
+            sThumbFile= sThumbFile + "_thumb." + asSplit[1];
+            return sThumbFile;
+        }
+        catch (error) {
+            return  sImageName;
+        }
+    }
+
+    WasdiApplicationDetailsController.prototype.editClick= function() {
+        var oController = this;
+
+        oController.m_oProcessorService.getDeployedProcessor(oController.m_oApplication.processorId).success(function (data) {
+            oController.m_oModalService.showModal({
+                templateUrl: "dialogs/processor/ProcessorView.html",
+                controller: "ProcessorController",
+                inputs: {
+                    extras: {
+                        processor:data
+                    }
+                }
+            }).then(function (modal) {
+                modal.element.modal();
+                modal.close.then(function (oResult) {
+                    if (utilsIsObjectNullOrUndefined(oResult) == false) {
+                        oController.m_oApplication = oResult;
+                    }
+                });
+            });
+        }).error(function () {
+
+        });
+
+    }
+
+
 
     WasdiApplicationDetailsController.$inject = [
         '$scope',
@@ -280,7 +362,8 @@ var WasdiApplicationDetailsController = (function() {
         'ConstantsService',
         'AuthService',
         'ProcessorService',
-        'ProcessorMediaService'
+        'ProcessorMediaService',
+        'ModalService'
     ];
 
     return WasdiApplicationDetailsController;

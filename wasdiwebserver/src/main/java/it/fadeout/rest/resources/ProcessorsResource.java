@@ -338,6 +338,56 @@ public class ProcessorsResource  {
 		return aoRet;
 	}
 	
+	@GET
+	@Path("/getprocessor")
+	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) throws Exception {
+
+		DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel(); 
+		Utils.debugLog("ProcessorsResource.getSingleDeployedProcessor( Session: " + sSessionId + " )");
+		
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) return oDeployedProcessorViewModel;
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.getSingleDeployedProcessor( Session: " + sSessionId + " ): invalid session");
+				return oDeployedProcessorViewModel;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return oDeployedProcessorViewModel;
+						
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+
+			if (oProcessor.getIsPublic() != 1) {
+				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
+					if (oSharing == null) return oDeployedProcessorViewModel;
+				}
+			}
+			
+			if (oSharing != null) oDeployedProcessorViewModel.setSharedWithMe(true);
+			
+			oDeployedProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
+			oDeployedProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
+			oDeployedProcessorViewModel.setProcessorName(oProcessor.getName());
+			oDeployedProcessorViewModel.setProcessorVersion(oProcessor.getVersion());
+			oDeployedProcessorViewModel.setPublisher(oProcessor.getUserId());
+			oDeployedProcessorViewModel.setParamsSample(oProcessor.getParameterSample());
+			oDeployedProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
+			oDeployedProcessorViewModel.setType(oProcessor.getType());
+			oDeployedProcessorViewModel.setMinuteTimeout((int) (oProcessor.getTimeoutMs()/60000l));
+			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.getSingleDeployedProcessor: " + oEx);
+			return oDeployedProcessorViewModel;
+		}		
+		return oDeployedProcessorViewModel;
+	}	
+	
 	
 	@POST
 	@Path("/getmarketlist")
@@ -1249,8 +1299,7 @@ public class ProcessorsResource  {
 	
 	@POST
 	@Path("/update")
-	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("processorId") String sProcessorId) {
+	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		
 		Utils.debugLog("ProcessorResources.updateProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + " )");
 		

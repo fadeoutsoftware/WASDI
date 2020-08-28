@@ -15,6 +15,11 @@ import org.apache.commons.io.FilenameUtils;
 
 public class ImageFile extends WrapperFile {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -643189587567960950L;
+
 	public ImageFile(String paramString) {
 		super(paramString);
 
@@ -31,8 +36,11 @@ public class ImageFile extends WrapperFile {
 		try{
 			String sExt = FilenameUtils.getExtension(this.getAbsolutePath());
 	        BufferedImage oImage = ImageIO.read(this);
-	        BufferedImage oResized = resize(oImage , iHeight, iWidth);
-	        ImageIO.write(oResized, sExt.toLowerCase(), this);
+	        
+	        if (oImage.getWidth() > iWidth || oImage.getHeight() > iHeight) {
+		        BufferedImage oResized = resize(oImage , iHeight, iWidth);
+		        ImageIO.write(oResized, sExt.toLowerCase(), this);	        	
+	        }
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return false;

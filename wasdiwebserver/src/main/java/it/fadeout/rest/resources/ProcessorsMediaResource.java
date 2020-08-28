@@ -27,6 +27,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import com.google.common.io.Files;
+
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.AppCategory;
@@ -55,7 +57,7 @@ public class ProcessorsMediaResource {
 	public static int MAX_IMAGE_MB_SIZE = 2;
 	public static String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
 	public static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
-	public static Integer LOGO_SIZE = 180;
+	public static Integer LOGO_SIZE = 540;
 	public static String[] IMAGE_NAMES = { "1", "2", "3", "4", "5", "6" };
 	
 	@POST
@@ -161,8 +163,37 @@ public class ProcessorsMediaResource {
 	    
 	    if(bIsResized == false){
 	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: error in resize");
-	    	return Response.status(400).build();
+	    }	    
+	    	    
+	    try {
+	    	
+		    // Create the thumb:
+		    String sThumbPath = sOutputFilePath;	    	
+	    	
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: creating thumb");
+	    	
+	    	String [] asSplit = sOutputFilePath.split("\\.");
+	    	
+	    	sThumbPath = asSplit[0] + "_thumb." + asSplit[1];
+	    	
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: thumb file path: " + sThumbPath);
+	    	
+	    	File oThumb = new File(sThumbPath);
+	    	
+	    	Files.copy(oOutputLogo, oThumb);
+	    	
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: thumb file created");
+	    	
+	    	ImageFile oImageThumb = new ImageFile(sThumbPath);
+	    	if (!oImageThumb.resizeImage(50, 44)) {
+	    		Utils.debugLog("ProcessorsResource.uploadProcessorLogo: error resizing the thumb");
+	    	}
+	    	
 	    }
+	    catch (Exception oEx) {
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo:  error creating the thumb " + oEx.toString());
+		}
+	    
 	    
 	    oProcessorRepository.updateProcessorDate(oProcessor);
 	    
@@ -431,6 +462,36 @@ public class ProcessorsMediaResource {
 			oNewImage.delete();
 	    	return Response.status(400).build();
 		}
+		
+	    try {
+	    	
+		    // Create the thumb:
+		    String sThumbPath = sAbsoluteImageFilePath;	    	
+	    	
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: creating thumb");
+	    	
+	    	String [] asSplit = sAbsoluteImageFilePath.split("\\.");
+	    	
+	    	sThumbPath = asSplit[0] + "_thumb." + asSplit[1];
+	    	
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: thumb file path: " + sThumbPath);
+	    	
+	    	File oThumb = new File(sThumbPath);
+	    	
+	    	Files.copy(oNewImage, oThumb);
+	    	
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: thumb file created");
+	    	
+	    	ImageFile oImageThumb = new ImageFile(sThumbPath);
+	    	if (!oImageThumb.resizeImage(50, 44)) {
+	    		Utils.debugLog("ProcessorsResource.uploadProcessorImage: error resizing the thumb");
+	    	}
+	    	
+	    }
+	    catch (Exception oEx) {
+	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo:  error creating the thumb " + oEx.toString());
+		}
+		
 		
 		Utils.debugLog("ProcessorsResource.uploadProcessorImage: image uploaded");
 		oProcessorRepository.updateProcessorDate(oProcessor);

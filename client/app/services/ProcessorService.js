@@ -19,6 +19,17 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     };
 
     /**
+     * Get the base info of a single processor
+     * (same view model as returned by getProcessorsList)
+     * @param sProcessorId
+     * @returns {*}
+     */
+    this.getDeployedProcessor = function (sProcessorId) {
+        return this.m_oHttp.get(this.APIURL + '/processors/getprocessor?processorId=' + sProcessorId);
+    }
+
+
+    /**
      * Get the list of applications to be shown in the marketplace
      * @param oFilter
      * @returns {*}
@@ -154,9 +165,9 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oBody
      * @returns {*}
      */
-    this.updateProcessor = function (sWorkspaceId, sProcessorId, oBody) {
+    this.updateProcessor = function (sProcessorId, oBody) {
 
-        return this.m_oHttp.post(this.APIURL + '/processors/update?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody);
+        return this.m_oHttp.post(this.APIURL + '/processors/update?processorId=' + encodeURI(sProcessorId),oBody);
     };
 
     /**
