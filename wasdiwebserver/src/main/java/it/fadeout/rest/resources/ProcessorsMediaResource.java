@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +57,6 @@ public class ProcessorsMediaResource {
 	public static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
 	public static Integer LOGO_SIZE = 180;
 	public static String[] IMAGE_NAMES = { "1", "2", "3", "4", "5", "6" };
-	public static String[] RANGE_OF_VOTES = { "1", "2", "3", "4", "5" };
 	
 	@POST
 	@Path("/logo/upload")
@@ -467,7 +468,19 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/delete")
 	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteReview( Session: " + sSessionId + " )");
+		try {
+		    sProcessorId = java.net.URLDecoder.decode(sProcessorId, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			Utils.debugLog("ProcessorsMediaResource.deleteReview excepion decoding processor Id");
+		}
+		
+		try {
+			sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			Utils.debugLog("ProcessorsMediaResource.deleteReview excepion decoding review Id");
+		}		
+		
+		Utils.debugLog("ProcessorsMediaResource.deleteReview( Session: " + sSessionId + " sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
 		
 		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
 		
@@ -528,7 +541,7 @@ public class ProcessorsMediaResource {
 			return Response.status(400).build();
 		}
 				
-		Review oReview = getReviewFromViewModel(oReviewViewModel, sUserId);
+		Review oReview = getReviewFromViewModel(oReviewViewModel, sUserId, oReviewViewModel.getId());
 		
 		boolean isUpdated = oReviewRepository.updateReview(oReview);
 		if(isUpdated == false){
@@ -565,7 +578,7 @@ public class ProcessorsMediaResource {
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
-		Review oReview = getReviewFromViewModel(oReviewViewModel,sUserId);
+		Review oReview = getReviewFromViewModel(oReviewViewModel,sUserId, Utils.GetRandomName());
 		
 		//LIMIT THE NUMBER OF COMMENTS
 		if(oReviewRepository.alreadyVoted(oReviewViewModel.getProcessorId(), sUserId) == true){
@@ -701,17 +714,30 @@ public class ProcessorsMediaResource {
 
 	}
 	
+	/**
+	 * Checks if a vote is valid or not
+	 * @param fVote
+	 * @return
+	 */
 	private boolean isValidVote(Float fVote){
 		if (fVote>=0.0 && fVote<=5.0) return true;
 		else return false;
 	}
 	
-	private Review getReviewFromViewModel(ReviewViewModel oReviewViewModel, String sUserId){
+	/**
+	 * Converts a Review View Model in a Review Entity
+	 * @param oReviewViewModel
+	 * @param sUserId
+	 * @param sId
+	 * @return
+	 */
+	private Review getReviewFromViewModel(ReviewViewModel oReviewViewModel, String sUserId, String sId){
 		if(oReviewViewModel != null){
 			Review oReview = new Review();
+			oReview.setTitle(oReviewViewModel.getTitle());
 			oReview.setComment(oReviewViewModel.getComment());
 			oReview.setDate((double)(new Date()).getTime());
-			oReview.setId(Utils.GetRandomName()); 
+			oReview.setId(sId); 
 			oReview.setProcessorId(oReviewViewModel.getProcessorId());
 			oReview.setUserId(sUserId);
 			oReview.setVote(oReviewViewModel.getVote());
@@ -720,6 +746,11 @@ public class ProcessorsMediaResource {
 		return null;
 	}
 	
+	/**
+	 * Fill the Review Wrappwer View Model result from a list of reviews
+	 * @param aoReviewRepository
+	 * @return
+	 */
 	private ListReviewsViewModel getListReviewsViewModel(List<Review> aoReviewRepository ){
 		ListReviewsViewModel oListReviews = new ListReviewsViewModel();
 		List<ReviewViewModel> aoReviews = new ArrayList<ReviewViewModel>();
@@ -738,7 +769,7 @@ public class ProcessorsMediaResource {
 			
 			oReviewViewModel.setId(oReview.getId());
 			oReviewViewModel.setUserId(oReview.getUserId());
-			oReviewViewModel.setProcessorId(oReview.getUserId());
+			oReviewViewModel.setProcessorId(oReview.getProcessorId());
 			oReviewViewModel.setVote(oReview.getVote());
 			oReviewViewModel.setTitle(oReview.getTitle());
 			fSumVotes = fSumVotes + oReview.getVote();
@@ -759,6 +790,12 @@ public class ProcessorsMediaResource {
 		return oListReviews;
 	}
 	
+	/**
+	 * Count the number of votes of a specified type in a list of references
+	 * @param aoReviews
+	 * @param iReferenceVote
+	 * @return
+	 */
 	private int getNumberOfVotes(List<ReviewViewModel> aoReviews, int iReferenceVote ){
 		int iNumberOfVotes = 0;
 		for(ReviewViewModel oReview : aoReviews){
@@ -770,6 +807,11 @@ public class ProcessorsMediaResource {
 		return iNumberOfVotes;
 	}
 	
+	/**
+	 * Converts a List of App Categories in the equivalent list of view models
+	 * @param aoAppCategories
+	 * @return
+	 */
 	private ArrayList<AppCategoryViewModel> getCategoriesViewModel(List<AppCategory> aoAppCategories ){
 		
 		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = new ArrayList<AppCategoryViewModel>();

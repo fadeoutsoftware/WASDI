@@ -90,4 +90,22 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
         return this.m_oHttp.post(this.APIURL + this.m_sResource + '/reviews/add', oReview);
     }
 
+    /**
+     * Update a Review
+     * @param oReview
+     * @returns {*}
+     */
+    this.updateProcessorReview = function (oReview) {
+        return this.m_oHttp.post(this.APIURL + this.m_sResource + '/reviews/update', oReview);
+    }
+
+    /**
+     * Delete a review
+     * @param oReview
+     * @returns {*}
+     */
+    this.deleteProcessorReview = function (sProcessorId, sReviewId) {
+        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/reviews/delete?processorId='+ encodeURI(sProcessorId)+'&reviewId='+ encodeURI(sReviewId));
+    }
+
 }]);

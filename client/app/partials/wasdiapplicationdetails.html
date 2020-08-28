@@ -189,11 +189,11 @@
                 <div class="col-12 col-md-3 py-4 bg-light">
                     <!--AVERAGE STARS-->
                     <div class="star-rating mb-2">
-                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>0.25&&m_oController.m_oApplication.AverageScore<0.75?'checked-half':m_oController.m_oApplication.AverageScore>=0.75?'checked':''"></span>
-                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>1.25&&m_oController.m_oApplication.AverageScore<1.75?'checked-half':m_oController.m_oApplication.AverageScore>=1.75?'checked':''"></span>
-                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>2.25&&m_oController.m_oApplication.AverageScore<2.75?'checked-half':m_oController.m_oApplication.AverageScore>=2.75?'checked':''"></span>
-                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>3.25&&m_oController.m_oApplication.AverageScore<3.75?'checked-half':m_oController.m_oApplication.AverageScore>=3.75?'checked':''"></span>
-                        <span class="fa fa-star" ng-class="m_oController.m_oApplication.AverageScore>4.25&&m_oController.m_oApplication.AverageScore<4.75?'checked-half':m_oController.m_oApplication.AverageScore>=4.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>0.25&&m_oController.m_oReviewsWrapper.avgVote<0.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=0.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>1.25&&m_oController.m_oReviewsWrapper.avgVote<1.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=1.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>2.25&&m_oController.m_oReviewsWrapper.avgVote<2.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=2.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>3.25&&m_oController.m_oReviewsWrapper.avgVote<3.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=3.75?'checked':''"></span>
+                        <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>4.25&&m_oController.m_oReviewsWrapper.avgVote<4.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=4.75?'checked':''"></span>
                         <span class="ml-2" ng-show="m_oController.m_oReviewsWrapper.avgVote>=0">{{m_oController.m_oReviewsWrapper.avgVote}} on 5</span>
                         <span class="" ng-show="m_oController.m_oReviewsWrapper.avgVote<0"><br/>Be the first to rate this app</span>
                     </div>
@@ -261,14 +261,15 @@
                         <div class="d-flex align-items-center">
                             <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
                             <span class="reviews-name">{{review.userId}}</span>
+                            <div ng-show="m_oController.isMineComment(review)" style="cursor: pointer" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"></span></div>
                         </div>
                         <!--RATE-->
                         <div class="my-2">
-                            <span class="fa fa-star" ng-class="review.rating>0.25&&review.vote<0.75?'checked-half':review.rating>=0.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>1.25&&review.vote<1.75?'checked-half':review.rating>=1.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>2.25&&review.vote<2.75?'checked-half':review.rating>=2.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>3.25&&review.vote<3.75?'checked-half':review.rating>=3.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.rating>4.25&&review.vote<4.75?'checked-half':review.rating>=4.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.vote>0.25&&review.vote<0.75?'checked-half':review.vote>=0.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.vote>1.25&&review.vote<1.75?'checked-half':review.vote>=1.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.vote>2.25&&review.vote<2.75?'checked-half':review.vote>=2.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.vote>3.25&&review.vote<3.75?'checked-half':review.vote>=3.75?'checked':''"></span>
+                            <span class="fa fa-star" ng-class="review.vote>4.25&&review.vote<4.75?'checked-half':review.vote>=4.75?'checked':''"></span>
                         </div>
                         <div class="reviews-title">
                             {{review.title}}
