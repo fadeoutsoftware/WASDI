@@ -177,6 +177,9 @@ var WasdiApplicationDetailsController = (function() {
         return oDate.toLocaleDateString();
     };
 
+    /**
+     * Loads more reviews for the current app
+     */
     WasdiApplicationDetailsController.prototype.loadMoreReviews = function () {
         var oController =this;
         this.m_iReviewsPage = this.m_iReviewsPage + 1;
@@ -201,6 +204,9 @@ var WasdiApplicationDetailsController = (function() {
         });
     }
 
+    /**
+     * Add a new review
+     */
     WasdiApplicationDetailsController.prototype.addNewReview = function () {
         var oController = this;
 
@@ -225,6 +231,48 @@ var WasdiApplicationDetailsController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SAVING THE REVIEW");
         });
     }
+
+    /**
+     * Deletes a review
+     */
+    WasdiApplicationDetailsController.prototype.deleteReview = function (sReviewId) {
+
+        var oController = this;
+
+        var oDeleteReviewCallback = function (value) {
+
+            if (value) {
+                oController.m_oProcessorMediaService.deleteProcessorReview(oController.m_oApplication.processorId,sReviewId);
+                oController.refreshReviews();
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        //ask user if he confirms to delete the review
+        utilsVexDialogConfirm("DELETE REVIEW:<br>ARE YOU SURE?", oDeleteReviewCallback);
+    }
+
+    /**
+     * Decide is the comment is of the actual user or not
+     * @param oReview
+     * @returns {boolean}
+     */
+    WasdiApplicationDetailsController.prototype.isMineComment = function (oReview) {
+
+        if (utilsIsObjectNullOrUndefined(oReview)) return  false;
+
+        let sActualUser = this.m_oConstantsService.getUserId();
+
+        if (sActualUser == oReview.userId) {
+            return true;
+        }
+        else {
+            return  false;
+        }
+    }
+
 
     WasdiApplicationDetailsController.$inject = [
         '$scope',
