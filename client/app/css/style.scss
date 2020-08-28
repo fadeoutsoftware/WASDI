@@ -23,6 +23,10 @@
 @import "validatenewuser";
 @import "status-bar";
 @import "paginator";
+@import "marketplace";
+@import "application_detail";
+@import "applicationUi";
+
 
 
 
@@ -92,8 +96,6 @@
 @import "../dialogs/edrift_checkimagestool/edrift_checkimagestool";
 @import "../dialogs/share_workspace/share_workspace";
 @import "../dialogs/eDrift_Flood_Event_Dialog/e_drift__flood__event__dialog";
-@import "marketplace";
-@import "application_detail";
 
 @import "buttons";
 

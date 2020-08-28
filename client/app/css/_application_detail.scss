@@ -4,6 +4,16 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
+.back-link {
+    cursor: pointer;
+    &:hover {
+        //text-decoration: underline;
+        color: $wasdigreen;
+    }
+}
+.pointer {
+    cursor: pointer;
+}
 .app-details {
     .appdetails-slider {
         ul {
@@ -31,13 +41,6 @@
         }
     }
 
-    .back-link {
-        cursor: pointer;
-        &:hover {
-            //text-decoration: underline;
-            color: $wasdigreen;
-        }
-    }
     .star-rating {
        font-size: 1.2em;
     }

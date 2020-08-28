@@ -59,8 +59,17 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_sSelectedTab = "";
 
+
+        //KASA FOR TEST
+        $scope.appTitle = 'Titolo della applicazione';
+        $scope.appDesc = 'Automatic Burned Area Detection using pre-fire and post-fire S2 data selected by user (that should belong to the same S2 tile). if "INCLUDESHRUB" is set to "YES", it means that not only Burned Forest Areas, but also Burned Shrubland Areas are searched for. Otherwise, only Burned Forest Areas are searched for. Reference: L. Pulvirenti et a.l, "An Automatic Processing Chain for Near Real-Time Mapping of Burned Forest Areas Using Sentinel-2 Data", Remote Sens. 2020, 12, 674; doi:10.3390/rs12040674';
+        $scope.appPublisher = 'Paolo Campanella';
+        $scope.appWebsite = 'http://www.wasdi.net';
+        $scope.appMail = 'paolo@fadeout.it';
+        $scope.appLastUpdate = '22/5/2020';
+
         // TODO: Temporary fo test
-        //this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
+        this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
 
         let oController = this;
 

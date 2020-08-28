@@ -1,0 +1,60 @@
+.applicationUI {
+    .app-title {
+        .app-logo {
+            width: 60px;
+            height: 60px;
+            background-position: center center;
+            background-size: cover;
+            border-radius: 50%;
+            background-color: lightgrey;
+        }
+        .title {
+            font-size: 1.4em;
+        }
+    }
+    .text-green-wasdi {
+        color: $wasdigreen;
+    }
+    .less {display: inline}
+    .more {display: none}
+    .collapsed {
+        .less {display: none}
+        .more {display: inline}
+    }
+    .bg-wasdi-green {
+        background-color: $wasdigreen;
+    }
+    .bg-wasdi-blue {
+        background-color: $wasdiblue;
+    }
+    .sidebar-nav{
+        border-radius: 0.25rem 0rem 0rem 0.25rem;
+        min-height: 65vh;
+        background-image: url("../assets/img/bg-sidebar.png");
+        background-position: bottom;
+        background-repeat: no-repeat;
+    }
+    .side-tab {
+        cursor: pointer;
+        &.active {
+            background-color: $wasdigreen;
+            &:after{
+                right: 0;
+                border: 9px solid transparent;
+                border-right-color: transparent;
+                content: " ";
+                height: 0;
+                width: 0;
+                position: absolute;
+                pointer-events: none;
+                border-right-color: #f8f9fa;
+            }
+        }
+        &:hover {
+            background-color: $darkwasdigreen;
+        }
+        a:hover {
+            text-decoration: none!important;
+        }
+    }
+}
