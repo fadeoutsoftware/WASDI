@@ -87,18 +87,35 @@
 
                         <!--CASE 2 - USER SUBCRIBED THE APP-->
                         <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==false && m_oController.m_oApplication.buyed == true">
-                            <div class="big-price-tag subscription premium" >
-                                <div class="text-center large">
-                                    BOUGHT
+                            <div class="big-price-tag premium">
+                                <div class="text-center">
+                                    <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
+                                </div>
+                                <div class="text-center small">
+                                    SUBSCRIBED!
                                 </div>
                             </div>
                         </div>
 
                         <!--CASE 3 USER'S APP-->
                         <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true">
-                            <div class="big-price-tag buyed" >
-                                <div class="text-center large">
-                                    YOUR APP
+                            <div class="big-price-tag one-shot premium">
+                                <div class="text-center">
+                                    <span>{{m_oController.m_oApplication.ondemandPrice}}</span><span> €</span>
+                                </div>
+                                <div class="text-center small">
+                                    RUN PRICE
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true">
+                            <div class="big-price-tag subscription premium">
+                                <div class="text-center">
+                                    <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
+                                </div>
+                                <div class="text-center small">
+                                    SUBSCRIBE PRICE
                                 </div>
                             </div>
                         </div>
@@ -131,7 +148,7 @@
 
                     </div>
 
-                    <!--LOUNCH APP-->
+                    <!--LAUNCH APP-->
                     <div class="launch-btn" ng-click="m_oController.openApplicationPage()">
                         <span>Start Application</span>
                         <div class="arrow">
@@ -151,7 +168,7 @@
         <div class="col-12 px-4 mb-3 mt-5">
             <div class="d-flex align-items-center">
                 <div>
-                    <span class="fa fa-sliders mr-2"></span>
+                    <span class="fa fa-rocket mr-2"></span>
                     <span>APPLICATION DETAILS</span>
                 </div>
                 <hr class="ml-3 flex-grow-1">
@@ -192,7 +209,7 @@
                         <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>3.25&&m_oController.m_oReviewsWrapper.avgVote<3.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=3.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>4.25&&m_oController.m_oReviewsWrapper.avgVote<4.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=4.75?'checked':''"></span>
                         <span class="ml-2" ng-show="m_oController.m_oReviewsWrapper.avgVote>=0">{{m_oController.m_oReviewsWrapper.avgVote}} on 5</span>
-                        <span class="" ng-show="m_oController.m_oReviewsWrapper.avgVote<0"><br/>Be the first to rate this app</span>
+                        <span class="" ng-show="m_oController.m_oReviewsWrapper.avgVote<0 && ! (m_oController.m_oApplication.publisher == m_oController.m_oConstantsService.getUserId())"><br/>Be the first to rate this app</span>
                     </div>
                     <!--TOTAL REVIEWS-->
                     <div><span class="">{{m_oController.m_oApplication.reviewsCount}} total reviews</span></div>
@@ -243,11 +260,14 @@
                         <span class="ml-2">{{m_oController.m_oReviewsWrapper.numberOfOneStarVotes}}</span>
                     </div>
                     <hr>
-                    <div class="green-big-btn" type="button" data-toggle="modal" ng-show="!m_oController.m_oReviewsWrapper.alreadyVoted" data-target="#writeReviewsModal">
+                    <div class="green-big-btn" type="button" data-toggle="modal" ng-show="!m_oController.m_oReviewsWrapper.alreadyVoted && ! (m_oController.m_oApplication.publisher == m_oController.m_oConstantsService.getUserId())" data-target="#writeReviewsModal">
                         WRITE A REVIEW
                     </div>
-                    <div class="green-big-btn" type="button" ng-show="m_oController.m_oReviewsWrapper.alreadyVoted">
+                    <div class="blue-big-btn" type="button" ng-show="m_oController.m_oReviewsWrapper.alreadyVoted">
                         ALREADY REVIEWED
+                    </div>
+                    <div class="blue-big-btn" type="button" ng-show="m_oController.m_oApplication.publisher == m_oController.m_oConstantsService.getUserId()">
+                        NOT FAIR TO AUTO REVIEW
                     </div>
 
 

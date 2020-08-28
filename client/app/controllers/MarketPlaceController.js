@@ -112,11 +112,11 @@ var MarketPlaceController = (function() {
          * @type {{options: {stepsArray: ({legend: string, value: number}|{value: number})[], ticksTooltip: MarketPlaceController.m_oSlider.options.ticksTooltip, ceil: number, floor: number, showTicksValues: boolean}, value: number}}
          */
         this.m_oSlider = {
-            value: 0,
+            value: 10000,
             options: {
                 showSelectionBar: true,
                 floor: 0,
-                ceil: 1000,
+                ceil: 10000,
                 showTicksValues: false,
                 onEnd: function (sliderId, modelValue, highValue, pointerType) {
                     oController.m_oAppFilter.maxPrice=modelValue;

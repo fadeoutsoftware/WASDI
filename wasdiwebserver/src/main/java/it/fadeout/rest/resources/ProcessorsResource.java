@@ -503,12 +503,12 @@ public class ProcessorsResource  {
 				}
 				
 				// Check and apply min price filter
-				if (oFilters.getMinPrice()>0) {
-					if (oProcessor.getOndemandPrice() < oFilters.getMinPrice()) continue;
-				}
+				//if (oFilters.getMinPrice()>0) {
+				//	if (oProcessor.getOndemandPrice() < oFilters.getMinPrice()) continue;
+				//}
 				
 				// Check and apply max price filter
-				if (oFilters.getMaxPrice()>0) {
+				if (oFilters.getMaxPrice()>=0) {
 					if (oProcessor.getOndemandPrice() > oFilters.getMaxPrice()) continue;
 				}
 				

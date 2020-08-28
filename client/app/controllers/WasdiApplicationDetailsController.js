@@ -354,8 +354,6 @@ var WasdiApplicationDetailsController = (function() {
 
     }
 
-
-
     WasdiApplicationDetailsController.$inject = [
         '$scope',
         '$state',
