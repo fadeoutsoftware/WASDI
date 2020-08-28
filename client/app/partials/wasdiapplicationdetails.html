@@ -98,7 +98,7 @@
                         </div>
 
                         <!--CASE 3 USER'S APP-->
-                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true">
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true && (m_oController.m_oApplication.ondemandPrice > 0 || m_oController.m_oApplication.subscriptionPrice > 0)">
                             <div class="big-price-tag one-shot premium">
                                 <div class="text-center">
                                     <span>{{m_oController.m_oApplication.ondemandPrice}}</span><span> €</span>
@@ -109,7 +109,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true">
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true && (m_oController.m_oApplication.ondemandPrice > 0 || m_oController.m_oApplication.subscriptionPrice > 0")>
                             <div class="big-price-tag subscription premium">
                                 <div class="text-center">
                                     <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
@@ -121,7 +121,7 @@
                         </div>
 
                         <!--CASE 4 - FREE APP-->
-                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==false && m_oController.m_oApplication.ondemandPrice == 0 && m_oController.m_oApplication.subscriptionPrice == 0">
+                        <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.ondemandPrice == 0 && m_oController.m_oApplication.subscriptionPrice == 0">
                             <div class="big-price-tag free" >
                                 <div class="text-center large">
                                     FREE
