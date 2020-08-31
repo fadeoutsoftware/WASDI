@@ -112,11 +112,11 @@ var MarketPlaceController = (function() {
          * @type {{options: {stepsArray: ({legend: string, value: number}|{value: number})[], ticksTooltip: MarketPlaceController.m_oSlider.options.ticksTooltip, ceil: number, floor: number, showTicksValues: boolean}, value: number}}
          */
         this.m_oSlider = {
-            value: 0,
+            value: 10000,
             options: {
                 showSelectionBar: true,
                 floor: 0,
-                ceil: 1000,
+                ceil: 10000,
                 showTicksValues: false,
                 onEnd: function (sliderId, modelValue, highValue, pointerType) {
                     oController.m_oAppFilter.maxPrice=modelValue;
@@ -297,8 +297,8 @@ var MarketPlaceController = (function() {
     MarketPlaceController.prototype.openApplicationPage = function(sApplicationName) {
 
         this.m_oConstantsService.setSelectedApplication(sApplicationName);
-        //this.m_oState.go("root.appui", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        this.m_oState.go("root.appdetails");
+        this.m_oState.go("root.appdetails", { processorName : sApplicationName });
+        //this.m_oState.go("root.appdetails");
     }
 
     /**
@@ -340,7 +340,6 @@ var MarketPlaceController = (function() {
                 return  false;
             }
         }
-
     }
 
     MarketPlaceController.$inject = [

@@ -14,6 +14,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.ConfigReader;
 import wasdi.processors.WasdiProcessorEngine;
+import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessWorkspace;
@@ -25,6 +26,7 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
+import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -95,16 +97,17 @@ public class dbUtils {
 	 * Tools to fix the downloaded products table
 	 */
 	public static void downloadedProducts() {
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with downloaded products?");
 	        
 	        System.out.println("\t1 - List products with broken files");
 	        System.out.println("\t2 - Delete products with broken files");
 	        System.out.println("\t3 - Clear S1 S2 published bands");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
 	        
 	        boolean bDelete = false;
 	        
@@ -172,6 +175,9 @@ public class dbUtils {
 	        	System.out.println("Clean S1 and S2 published bands");
 	        	cleanPublishedBands();
 	        }
+	        else if (sInputString.equals("x")) {
+	        	return;
+	        }
 		}
 		catch (Exception oEx) {
 			System.out.println("downloadedProducts: exception " + oEx.toString());
@@ -183,17 +189,22 @@ public class dbUtils {
 	 * Utils to fix product workspace table
 	 */
 	public static void productWorkspace() {
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with product Workspaces?");
 	        
 	        System.out.println("\t1 - Clean by not existing Workspace");
 	        System.out.println("\t2 - Clean by not existing Product Name");
+	        System.out.println("\tx - Back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
 	        
 	        boolean bWorkspace = false;
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }
 	        
 	        if (sInputString.equals("1")) {
 	        	bWorkspace = true;
@@ -202,59 +213,61 @@ public class dbUtils {
 	        	bWorkspace = false;
 	        }		        
 	        
-	        if (bWorkspace) {
-	        	System.out.println("Deleting all product workspace with not existing workspace");
-	        	
-	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-	        	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-	        	
-	        	List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getList();
-	        	
-	        	int iDeleted=0;
-	        	
-	        	System.out.println("productWorkspace: found " + aoAllProductWorkspace.size() + " Product Workspace");
-	        	
-	        	for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
-					
-	        		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProductWorkspace.getWorkspaceId());
-	        		
-	        		if (oWorkspace == null) {
-	        			System.out.println("productWorkspace: workspace " + oProductWorkspace.getWorkspaceId() + " does not exist, delete entry");
-	        			oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
-	        			iDeleted++;
-	        		}
-				}
-	        	
-	        	System.out.println("");
-	        	System.out.println("---------------------------------------------------");
-	        	System.out.println("productWorkspace: Deleted " + iDeleted + " Product Workspace");
-	        }
-	        else {
-	        	System.out.println("Deleting all product workspace with not existing product Name");
-	        	
-	        	DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-	        	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-	        	
-	        	List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getList();
-	        	
-	        	int iDeleted=0;
-	        	
-	        	System.out.println("productWorkspace: found " + aoAllProductWorkspace.size() + " Product Workspace");
-	        	
-	        	for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
-					
-	        		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oProductWorkspace.getProductName());
-	        		
-	        		if (oDownloadedFile == null) {
-	        			System.out.println("productWorkspace: Downloaded File " + oProductWorkspace.getProductName() + " does not exist, delete entry");
-	        			oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
-	        			iDeleted++;
-	        		}
-				}
-	        	
-	        	System.out.println("");
-	        	System.out.println("---------------------------------------------------");
-	        	System.out.println("productWorkspace: Deleted " + iDeleted + " Product Workspace");
+	        if (sInputString.equals("1") || sInputString.equals("2")) {
+		        if (bWorkspace) {
+		        	System.out.println("Deleting all product workspace with not existing workspace");
+		        	
+		        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		        	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+		        	
+		        	List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getList();
+		        	
+		        	int iDeleted=0;
+		        	
+		        	System.out.println("productWorkspace: found " + aoAllProductWorkspace.size() + " Product Workspace");
+		        	
+		        	for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
+						
+		        		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProductWorkspace.getWorkspaceId());
+		        		
+		        		if (oWorkspace == null) {
+		        			System.out.println("productWorkspace: workspace " + oProductWorkspace.getWorkspaceId() + " does not exist, delete entry");
+		        			oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
+		        			iDeleted++;
+		        		}
+					}
+		        	
+		        	System.out.println("");
+		        	System.out.println("---------------------------------------------------");
+		        	System.out.println("productWorkspace: Deleted " + iDeleted + " Product Workspace");
+		        }
+		        else {
+		        	System.out.println("Deleting all product workspace with not existing product Name");
+		        	
+		        	DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+		        	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+		        	
+		        	List<ProductWorkspace> aoAllProductWorkspace = oProductWorkspaceRepository.getList();
+		        	
+		        	int iDeleted=0;
+		        	
+		        	System.out.println("productWorkspace: found " + aoAllProductWorkspace.size() + " Product Workspace");
+		        	
+		        	for (ProductWorkspace oProductWorkspace : aoAllProductWorkspace) {
+						
+		        		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oProductWorkspace.getProductName());
+		        		
+		        		if (oDownloadedFile == null) {
+		        			System.out.println("productWorkspace: Downloaded File " + oProductWorkspace.getProductName() + " does not exist, delete entry");
+		        			oProductWorkspaceRepository.deleteByProductName(oProductWorkspace.getProductName());
+		        			iDeleted++;
+		        		}
+					}
+		        	
+		        	System.out.println("");
+		        	System.out.println("---------------------------------------------------");
+		        	System.out.println("productWorkspace: Deleted " + iDeleted + " Product Workspace");
+		        }
 	        }
 			
 			
@@ -268,7 +281,7 @@ public class dbUtils {
 	
 	public static void processors() {
 		
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with processors?");
 	        
@@ -276,17 +289,21 @@ public class dbUtils {
 	        System.out.println("\t2 - Clear Log");
 	        System.out.println("\t3 - Redeploy");
 	        System.out.println("\t4 - Fix Processor Creation/Update date");
+	        System.out.println("\tx - Back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
 
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
 	        
 	        ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 
 	        if (sInputString.equals("1")) {
 	        	
 		        System.out.println("Please input ProcessWorkspaceId");
-		        String sProcessWorkspaceId = oScanner.nextLine();
+		        String sProcessWorkspaceId = s_oScanner.nextLine();
 	        	
 	        	
 	        	String sOuptutFile = "./" + sProcessWorkspaceId + ".txt";
@@ -325,7 +342,7 @@ public class dbUtils {
 	        else if (sInputString.equals("2")) {
 	        	
 		        System.out.println("Please input ProcessWorkspaceId");
-		        String sProcessWorkspaceId = oScanner.nextLine();
+		        String sProcessWorkspaceId = s_oScanner.nextLine();
 	        	
 	        	System.out.println("Deleting logs of " + sProcessWorkspaceId);
 	        	oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcessWorkspaceId);
@@ -333,7 +350,7 @@ public class dbUtils {
 	        }
 	        else if (sInputString.equals("3")) {
 		        System.out.println("Please input Processor Name");
-		        String sProcessorName = oScanner.nextLine();
+		        String sProcessorName = s_oScanner.nextLine();
 		        
 		        ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		        Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
@@ -407,15 +424,19 @@ public class dbUtils {
 	
 	public static void metadata() {
 		
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with metadata?");
 	        
 	        System.out.println("\t1 - Clear Unlinked metadata");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
 
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }
 
 	        if (sInputString.equals("1")) {
 	        	
@@ -486,22 +507,27 @@ public class dbUtils {
 
 	
 	private static void password() {
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with Password?");
 	        
 	        System.out.println("\t1 - Encrypt Password");
 	        System.out.println("\t2 - Force Update User Password");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
 
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }
+	        
 	        PasswordAuthentication oAuth = new PasswordAuthentication();
 
 	        if (sInputString.equals("1")) {
 	        	
 	        	System.out.println("Insert the password to Encrypt:");
-	        	String sInputPw = oScanner.nextLine();
+	        	String sInputPw = s_oScanner.nextLine();
 	        	
 	    		String sToChanget = oAuth.hash(sInputPw.toCharArray());
 	    		System.out.println("Encrypted Password:");
@@ -511,10 +537,10 @@ public class dbUtils {
 	        else if (sInputString.equals("2")) {
 
 	        	System.out.println("Insert the user Id:");
-	        	String sUserId = oScanner.nextLine();
+	        	String sUserId = s_oScanner.nextLine();
 
 	        	System.out.println("Insert the password to Encrypt:");
-	        	String sInputPw = oScanner.nextLine();
+	        	String sInputPw = s_oScanner.nextLine();
 	        	
 	        	UserRepository oUserRepo = new UserRepository();
 	        	User oUser = oUserRepo.getUser(sUserId);
@@ -539,14 +565,19 @@ public class dbUtils {
 	}
 	
 	private static void workflows () {
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with workflows?");
 	        
 	        System.out.println("\t1 - Copy workflows from user folder to generic folder");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
 
 	        if (sInputString.equals("1")) {
 	        	
@@ -605,20 +636,24 @@ public class dbUtils {
 	}
 	
 	private static void users() {
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with Users?");
 	        
 	        System.out.println("\t1 - Delete User");
 	        System.out.println("\t2 - Print User Mails");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
 
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }
 	        if (sInputString.equals("1")) {
 	        	
 	        	System.out.println("Insert the userId to Delete:");
-	        	String sUserId = oScanner.nextLine();
+	        	String sUserId = s_oScanner.nextLine();
 	        	
 	        	if (Utils.isNullOrEmpty(sUserId)) {
 	        		System.out.println("User Id is null or empty");
@@ -903,14 +938,19 @@ public class dbUtils {
 	}
 	
 	private static void workspaces() {
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what we do with workspaces?");
 	        
 	        System.out.println("\t1 - Clean shared ws errors");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
 
 	        if (sInputString.equals("1")) {
 	        	
@@ -948,14 +988,19 @@ public class dbUtils {
 	 */
 	public static void migrateToLocal() {
 
-		try(Scanner oScanner = new Scanner( System.in)) {
+		try {
 			
 	        System.out.println("Ok, what do we migrate?");
 	        
 	        System.out.println("\t1 - Copy Process Workspace of this Node in the local Database");
+	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
-	        String sInputString = oScanner.nextLine();
+	        String sInputString = s_oScanner.nextLine();
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
 
 	        if (sInputString.equals("1")) {
 	        	
@@ -1002,12 +1047,101 @@ public class dbUtils {
 			System.out.println("Migrate Exception: " + oEx);
 			oEx.printStackTrace();
 		}			
-		
-
 	}
 	
-	public static String s_sMyNodeCode = "wasdi";
+	/*
+	 *
+	 */
+	public static void categories() {
+
+		try {
+			
+	        System.out.println("So, you want to work with categories?");
+	        
+	        System.out.println("\t1 - List Categories");
+	        System.out.println("\t2 - Add a new Category");
+	        System.out.println("\t3 - Delete Categories");
+	        System.out.println("\tx - back");
+	        System.out.println("");
+	        
+	        String sInputString = s_oScanner.nextLine();
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
+
+	        if (sInputString.equals("1")) {
+	        	
+	    		//connect to main DB
+	    		AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
+	    		
+	    		List<AppCategory> aoCategories = oAppsCategoriesRepository.getCategories();
+	    		
+	    		for (AppCategory oCategory : aoCategories) {
+					System.out.println("ID: ["+oCategory.getId()+"]: " + oCategory.getCategory());
+				}
+	    		
+	    		System.out.println("Printed " + aoCategories.size() + " Categories");
+	        }
+	        else if (sInputString.equals("2")) {
+	        	System.out.println("Insert Category Name:");
+	        	String sCategory = s_oScanner.nextLine();
+	        	AppCategory oAppCategory = new AppCategory();
+	        	oAppCategory.setCategory(sCategory);
+	        	oAppCategory.setId(Utils.GetRandomName());
+	        	
+	        	AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
+	        	oAppsCategoriesRepository.insertCategory(oAppCategory);
+	        	
+	        	System.out.println("Category Created with ID: " + oAppCategory.getId());
+	        }
+	        else if (sInputString.equals("3")) {
+	        	System.out.println("Insert Id Of the category to delete:");
+	        	String sCategoryId = s_oScanner.nextLine();
+	        	
+	        	AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
+	        	AppCategory oCategory = oAppsCategoriesRepository.getCategoryById(sCategoryId);
+	        	
+	        	if (oCategory == null) {
+	        		System.out.println("Category NOT FOUND with ID: " + sCategoryId);
+	        	}
+	        	else {
+	        		System.out.println("Category FOUND: " + oCategory.getCategory());
+	        		
+	        		oAppsCategoriesRepository.deleteCategory(sCategoryId);
+	        		
+	        		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+	        		List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+	        		
+	        		for (Processor oProcessor : aoProcessors) {
+						
+	        			if (oProcessor.getCategories() != null) {
+	        				if (oProcessor.getCategories().size()>0) {
+	        					if (oProcessor.getCategories().contains(sCategoryId)) {
+	        						oProcessor.getCategories().remove(sCategoryId);
+	        						oProcessorRepository.updateProcessor(oProcessor);
+	        						System.out.println("Category removed from processor " + oProcessor.getName() + " ID: " + oProcessor.getProcessorId());
+	        					}
+	        				}
+	        			}
+					}
+	        		
+	        		System.out.println("Category deleted: " + sCategoryId);
+	        	}
+	        	
+	        }	        
+
+		}
+		catch (Exception oEx) {
+			System.out.println("Categories Exception: " + oEx);
+			oEx.printStackTrace();
+		}			
+		
+
+	}	
 	
+	public static String s_sMyNodeCode = "wasdi";
+	private static Scanner s_oScanner;
 		
 	public static void main(String[] args) {
 		
@@ -1047,7 +1181,7 @@ public class dbUtils {
 			
 	        boolean bExit = false;
 	        
-	        Scanner oScanner = new Scanner( System.in);
+	        s_oScanner = new Scanner( System.in);
 	        
 	        while (!bExit) {
 		        System.out.println("---- WASDI db Utils ----");
@@ -1062,11 +1196,12 @@ public class dbUtils {
 		        System.out.println("\t7 - Workflows");
 		        System.out.println("\t8 - Workspaces");
 		        System.out.println("\t9 - Migrate DB to local");
+		        System.out.println("\t10 - Categories");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
 		        
-		        String sInputString = oScanner.nextLine();
+		        String sInputString = s_oScanner.nextLine();
 		        
 		        if (sInputString.equals("1")) {
 		        	downloadedProducts();
@@ -1095,6 +1230,9 @@ public class dbUtils {
 		        else if(sInputString.equals("9")) {
 		        	migrateToLocal();
 		        }
+		        else if(sInputString.equals("10")) {
+		        	categories();
+		        }		        
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;
 		        }		        
@@ -1108,7 +1246,7 @@ public class dbUtils {
 	        
 	        System.out.println("bye bye");
 	        
-	        oScanner.close();
+	        s_oScanner.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

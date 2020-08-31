@@ -135,6 +135,18 @@ var WasdiApplicationDetailsController = (function() {
         // Local reference to the controller
         let oController = this;
 
+        // Check if we have the selected application
+        if (utilsIsStrNullOrEmpty(this.m_sSelectedApplication)) {
+            // Check if we can get it from the state
+            if (!(utilsIsObjectNullOrUndefined(this.m_oState.params.processorName) && utilsIsStrNullOrEmpty(this.m_oState.params.processorName))) {
+                // Set the application name
+                this.m_sSelectedApplication = this.m_oState.params.processorName;
+            } else {
+                // No app, go back to the marketplace
+                this.m_oState.go("root.marketplace");
+            }
+        }
+
         /**
          * Ask the list of Applications to the WASDI server
          */
@@ -195,8 +207,8 @@ var WasdiApplicationDetailsController = (function() {
      */
     WasdiApplicationDetailsController.prototype.openApplicationPage = function() {
 
-        //this.m_oState.go("root.appui", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        this.m_oState.go("root.appui");
+        this.m_oState.go("root.appui", { processorName : this.m_sSelectedApplication });//use workSpace when reload editor page
+        //this.m_oState.go("root.appui");
     }
 
 
@@ -353,8 +365,6 @@ var WasdiApplicationDetailsController = (function() {
         });
 
     }
-
-
 
     WasdiApplicationDetailsController.$inject = [
         '$scope',

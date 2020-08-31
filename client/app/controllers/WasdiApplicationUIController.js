@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state) {
         /**
          * Angular Scope
          */
@@ -44,6 +44,10 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_oRabbitStompService = oRabbitStompService;
         /**
+         * Angular State Service
+         */
+        this.m_oState = $state;
+        /**
          * Contains one property for each tab. Each Property is an array of the Tab Controls
          * @type {*[]}
          */
@@ -69,14 +73,29 @@ var WasdiApplicationUIController = (function() {
         $scope.appLastUpdate = '22/5/2020';
 
         // TODO: Temporary fo test
-        this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
+        //this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
+
+        this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
 
         let oController = this;
+
+        // Check if we have the selected application
+        if (utilsIsStrNullOrEmpty(this.m_sSelectedApplication)) {
+            // Check if we can get it from the state
+            if (!(utilsIsObjectNullOrUndefined(this.m_oState.params.processorName) && utilsIsStrNullOrEmpty(this.m_oState.params.processorName))) {
+                // Set the application name
+                this.m_sSelectedApplication = this.m_oState.params.processorName;
+            } else {
+                // No app, go back to the marketplace
+                this.m_oState.go("root.marketplace");
+            }
+        }
+
 
         /**
          * Ask the Processor UI to the WASDI server
          */
-        this.m_oProcessorService.getProcessorUI(this.m_oConstantsService.getSelectedApplication())
+        this.m_oProcessorService.getProcessorUI(this.m_sSelectedApplication)
             .success(function(data,status){
                 // For each Tab
                 for (let iTabs=0; iTabs<data.tabs.length; iTabs++) {
@@ -269,7 +288,8 @@ var WasdiApplicationUIController = (function() {
         'AuthService',
         'ProcessorService',
         'WorkspaceService',
-        'RabbitStompService'
+        'RabbitStompService',
+        '$state'
     ];
 
     return WasdiApplicationUIController;

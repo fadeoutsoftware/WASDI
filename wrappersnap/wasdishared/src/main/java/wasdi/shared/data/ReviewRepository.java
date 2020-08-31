@@ -13,14 +13,16 @@ import wasdi.shared.utils.Utils;
 
 public class ReviewRepository extends MongoRepository {
 	
-	final String COLLECTION_NAME = "reviews";
+	public ReviewRepository() {
+		m_sThisCollection = "reviews";
+	}
 	
     public List<Review> getReviews(String sProcessorId) {
 
         final ArrayList<Review> aoReturnList = new ArrayList<Review>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection(COLLECTION_NAME).find(new Document("processorId", sProcessorId)).sort(new Document("date", -1));
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("processorId", sProcessorId)).sort(new Document("date", -1));
             fillList(aoReturnList, oWSDocuments, "ReviewRepository", Review.class);
 
         } catch (Exception oEx) {
@@ -33,7 +35,7 @@ public class ReviewRepository extends MongoRepository {
 	
     
 	public String addReview(Review oReview) {
-		return add(oReview,COLLECTION_NAME,"ReviewRepository.InsertReview");
+		return add(oReview,m_sThisCollection,"ReviewRepository.InsertReview");
 	}
 	
 	
@@ -44,23 +46,18 @@ public class ReviewRepository extends MongoRepository {
 		oCriteria.append("processorId", sProcessorId);
 		oCriteria.append("id", sReviewId);
 
-        return delete(oCriteria,COLLECTION_NAME);
+        return delete(oCriteria,m_sThisCollection);
     }
     
-    
-    
-    
-    //TODO REFACTORING
     public boolean updateReview(Review oReview) {
        
 		BasicDBObject oCriteria = new BasicDBObject();
 		oCriteria.append("processorId", oReview.getProcessorId());
 		oCriteria.append("id", oReview.getId());
 
-        return  update(oCriteria,oReview,COLLECTION_NAME);
+        return  update(oCriteria,oReview,m_sThisCollection);
     }
     
-    //TODO FIX THIS FUNCTION 
 	public boolean isTheOwnerOfTheReview(String sProcessorId, String sReviewId ,String sUserId) {
 		boolean bIsTheOwner = false;
 
@@ -71,7 +68,7 @@ public class ReviewRepository extends MongoRepository {
     		oCriteria.append("id", sReviewId);
     		oCriteria.append("userId", sUserId);
 
-            FindIterable<Document> oWSDocuments = getCollection(COLLECTION_NAME).find(oCriteria);
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oCriteria);
             fillList(aoReturnList, oWSDocuments, "ReviewRepository", Review.class);
 
         } catch (Exception oEx) {
@@ -92,7 +89,7 @@ public class ReviewRepository extends MongoRepository {
 			BasicDBObject oCriteria = new BasicDBObject();
 			oCriteria.append("processorId", sProcessorId);
 			oCriteria.append("userId", sUserId);
-			Document oWSDocument = getCollection(COLLECTION_NAME).find(oCriteria).first();
+			Document oWSDocument = getCollection(m_sThisCollection).find(oCriteria).first();
 			if(oWSDocument != null ){
 				bAlreadyVoted = true;
 			}
