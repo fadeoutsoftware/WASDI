@@ -19,7 +19,7 @@
                         </div>
 
                     </div>
-                    <div class="blue-big-btn">
+                    <div class="blue-big-btn"> <!--ng-click="m_oController.generateParamsAndRun()"-->
                         READ VALUES
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-9">
+                <div class="col-12 col-md-9 py-3">
                     <!-- TAB CONTENT -->
                     <div class="tab-content">
                         <!-------   TABLE WORKFLOWS + LIST OF PRODUCTS ------->
@@ -58,36 +58,57 @@
                              ng-class="{'active':m_oController.m_sSelectedTab === sTab}">
 
                             <div class="row" ng-repeat="viewElement in m_oController.getTabControls(sTab)">
-                                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                                    {{viewElement.label}}
-                                </div>
-                                <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                                    <waptextbox input-text="viewElement.m_sText" ng-if="viewElement.type === 'textbox'"></waptextbox>
 
+                                <!--input text-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2"  ng-if="viewElement.type === 'textbox'">
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <waptextbox input-text="viewElement.m_sText"></waptextbox>
+                                </div>
+
+                                <!--dropdown -->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'dropdown'" >
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
                                     <wapdropdown list-of-values="viewElement.asListValues"
                                                  selected-value="viewElement.sSelectedValues"
                                                  enable-search-filter="viewElement.bEnableSearchFilter"
                                                  dropdown-name="viewElement.sDropdownName"
                                                  on-click-function="viewElement.oOnClickFunction"
-                                                 ng-if="viewElement.type === 'dropdown'"
                                     ></wapdropdown>
-
-                                    <wapselectarea  ng-if="viewElement.type === 'bbox'" bounding-box="viewElement.oBoundingBox" height-map="'200'" width-map="'500'"></wapselectarea>
-
-                                    <wapdatetimepicker ng-if="viewElement.type === 'date'" date-time="viewElement.m_sDate"></wapdatetimepicker>
-
-                                    <wapproductlist  ng-if="viewElement.type === 'productlist'" products-list="viewElement.aoProducts"></wapproductlist>
-
-                                    <wapsearcheoimage  ng-if="viewElement.type === 'searcheoimage'" light-search-object="viewElement"></wapsearcheoimage>
-
-                                    <wapcheckbox ng-if="viewElement.type === 'boolean'" bool-value="viewElement.m_bValue" label-text="viewElement.label"></wapcheckbox>
-
                                 </div>
+
+                                <!--select-area-map-->
+                                <div class="col-xs-12 col-md-12 col-lg-12 py-2" ng-if="viewElement.type === 'bbox'" >
+                                    <div class="input-text-label pt-2 mb-3">{{viewElement.label}}</div>
+                                    <wapselectarea   bounding-box="viewElement.oBoundingBox"></wapselectarea>
+                                </div>
+
+                                <!--timepicker-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'date'" >
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <wapdatetimepicker  date-time="viewElement.m_sDate"></wapdatetimepicker>
+                                </div>
+
+                                <!--product list-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'productlist'" >
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <wapproductlist  products-list="viewElement.aoProducts"></wapproductlist>
+                                </div>
+
+                                <!--searcheoimages-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'searcheoimage'" >
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <wapsearcheoimage light-search-object="viewElement"></wapsearcheoimage>
+                                </div>
+
+                                <!--checkbox-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-4 d-flex align-items-center"  ng-if="viewElement.type === 'boolean'">
+                                    <wapcheckbox bool-value="viewElement.m_bValue" label-text="viewElement.label"></wapcheckbox>
+                                    <div class="input-text-label ml-3">{{viewElement.label}}</div>
+                                </div>
+
+
                             </div>
 
-                        </div>
-                        <div class="row">
-                            <button>Read Values</button> <!--ng-click="m_oController.generateParamsAndRun()"-->
                         </div>
 
                     </div>

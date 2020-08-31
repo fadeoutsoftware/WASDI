@@ -14,7 +14,7 @@ angular.module('wasdi.wapSelectArea', [])
                 widthMap: '=',
                 boundingBox: '='
             },
-            template: `<div ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
+            template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
 
             controller: function() {
 

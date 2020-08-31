@@ -8,7 +8,12 @@ angular.module('wasdi.wapCheckBox', [])
                 boolValue: '=',
                 labelText: '='
             },
-            template: `<input type="checkbox" class="form-control"  ng-model="$ctrl.boolValue" value="$ctrl.labelText">`,
+            template: `
+            <label class="switch">
+            <input type="checkbox"  ng-model="$ctrl.boolValue" value="$ctrl.labelText">
+            <span class="slider-checkbox round"></span>
+            </label>
+            `,
             controller: function() {
 
             },
