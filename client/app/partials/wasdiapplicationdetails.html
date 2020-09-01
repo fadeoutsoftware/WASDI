@@ -7,7 +7,17 @@
                 <div class="border-bottom py-3 mb-5 d-print-flex justify-content-between">
                     <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the Future</span>
                 </div>
-                <!--APPS IMG SLIDER-->
+            </div>
+
+            <!--LOADER-->
+            <div class="row loader d-print-flex justify-content-center" ng-show="m_oController.m_bWaiting==true">
+                <div class="loadIcon">
+                    <invader></invader>
+                </div>
+            </div>
+
+            <!--APPS IMG SLIDER-->
+            <div class="row" ng-show="m_oController.m_bWaiting==false">
                 <div class="col-12 col-md-6">
                     <div class="appdetails-slider">
                         <ul>
@@ -171,7 +181,7 @@
 
 
     <!--APP DETAILS-->
-    <div class="row">
+    <div class="row" ng-show="m_oController.m_bWaiting==false">
         <div class="col-12 px-4 mb-3 mt-5">
             <div class="d-flex align-items-center">
                 <div>
@@ -197,7 +207,7 @@
     </div>
 
     <!--REVIEWS-->
-    <div class="row">
+    <div class="row" ng-show="m_oController.m_bWaiting==false">
         <div class="col-12 px-4 mb-5 pb-5">
             <div class="d-flex align-items-center">
                 <div>
