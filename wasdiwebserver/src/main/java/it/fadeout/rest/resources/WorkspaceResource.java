@@ -382,7 +382,7 @@ public class WorkspaceResource {
 			oWorkspace.setWorkspaceId(oViewModel.getWorkspaceId());
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			if (oWorkspaceRepository.updateWorkspace(oWorkspace)) {
+			if (oWorkspaceRepository.updateWorkspaceName(oWorkspace)) {
 
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setStringValue(oWorkspace.getWorkspaceId());

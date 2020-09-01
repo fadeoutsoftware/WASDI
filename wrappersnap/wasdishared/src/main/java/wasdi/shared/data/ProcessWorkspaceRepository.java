@@ -1005,7 +1005,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     
     /**
      * Update a process Workspace. If there is a state change, the system will update also update lastStateChangeDate 
-     * @param oProcessWorkspace Process Workpsace to update
+     * @param oProcessWorkspace Process Workspace to update
      * @return
      */
     public boolean updateProcess(ProcessWorkspace oProcessWorkspace) {
@@ -1018,7 +1018,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         		oProcessWorkspace.setLastStateChangeDate(Utils.getFormatDate(new Date()));
         	}
         	
-        	Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	//Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document filter = new Document("processObjId", oProcessWorkspace.getProcessObjId());

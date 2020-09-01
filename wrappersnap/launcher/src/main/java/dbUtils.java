@@ -16,6 +16,7 @@ import wasdi.ConfigReader;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
@@ -29,6 +30,7 @@ import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -943,6 +945,7 @@ public class dbUtils {
 	        System.out.println("Ok, what we do with workspaces?");
 	        
 	        System.out.println("\t1 - Clean shared ws errors");
+	        System.out.println("\t2 - Move Workpsace to new node");
 	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
@@ -975,7 +978,58 @@ public class dbUtils {
 
 	        	System.out.println("All workspace sharings cleaned");
 	        }
+	        else if (sInputString.equals("2")) {
+	        	// Not easy to use...
+	        	System.out.println("NOTE: feature only updates the DB, you must before backup the tables from the old node and import in the new one");
+	        	
+	        	// Insert WS and destination node
+	        	System.out.println("Please Insert the WS ID");
+	        	String sWorkspaceId = s_oScanner.nextLine();
+	        	System.out.println("Please Insert the new node code");
+	        	String sNewNodeCode = s_oScanner.nextLine();
+	        	
+	        	// Find and open the workspace
+	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	        	Workspace oWorkpsace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+	        	
+	        	if (oWorkpsace == null) {
+	        		System.out.println("Impossible to find the WS: " + sWorkspaceId);
+	        		return;
+	        	}
+	        	
+	        	if (oWorkpsace.getNodeCode().equals(sNewNodeCode)) {
+	        		System.out.println("The WS: " + sWorkspaceId + " is already in the node " + sNewNodeCode);
+	        		return;
+	        	}
+	        	
+	        	NodeRepository oNodeRepository = new NodeRepository();
+	        	Node oNode = oNodeRepository.getNodeByCode(sNewNodeCode);
 
+	        	if (oNode == null) {
+	        		System.out.println("Impossible to find the Node: " + sNewNodeCode);
+	        		return;
+	        	}
+
+	        	// Get all the process workspace to migrate
+	        	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+	        	List<ProcessWorkspace> aoProcessesInOldNode = oProcessWorkspaceRepository.getProcessByWorkspace(oWorkpsace.getWorkspaceId());
+	        	
+	        	System.out.println("Found " + aoProcessesInOldNode.size() + " process workspace.");
+	        		        	
+	        	for (ProcessWorkspace oProcessWorkpsace : aoProcessesInOldNode) {
+	        		
+	        		if (oProcessWorkpsace.getNodeCode().equals(sNewNodeCode) == false) {
+		        		oProcessWorkpsace.setNodeCode(sNewNodeCode);
+		        		oProcessWorkspaceRepository.updateProcess(oProcessWorkpsace);	        			
+	        		}
+				}
+	        		        	
+	        	System.out.println("Updating Workpsace.");
+	        	oWorkpsace.setNodeCode(sNewNodeCode);
+	        	oWorkspaceRepository.updateWorkspace(oWorkpsace);
+	        	
+	        	System.out.println("Update done");	        	
+	        }
 		}
 		catch (Exception oEx) {
 			System.out.println("Workspace Sharing Exception: " + oEx);
@@ -1040,6 +1094,26 @@ public class dbUtils {
 	    		
 	    		//insert logs
 	    		oProcessorLogRepository.insertProcessLogList(aoLogsToBePorted);
+	    		
+	    		System.out.println("Do you want to delete entries from the central database? (1=YES, 2=NO)");
+	    		
+	    		String sDeleteEntries = s_oScanner.nextLine();
+	    		
+	    		if (sDeleteEntries.equals("1")) {
+	    			System.out.println("Setting Repositories to main db");
+		    		oProcessWorkspaceRepository.setRepoDb("wasdi");
+		    		oProcessorLogRepository.setRepoDb("wasdi");
+		    		System.out.println("Deleting logs");
+		    		
+		    		for (ProcessWorkspace oProcessWorkspace : aoProcessesToBePorted) {
+						
+		    			oProcessorLogRepository.deleteLogsByProcessWorkspaceId(oProcessWorkspace.getProcessObjId());
+		    			oProcessWorkspaceRepository.deleteProcessWorkspaceByProcessObjId(oProcessWorkspace.getProcessObjId());
+					}
+		    		
+		    		System.out.println("Deleting process workspaces");
+		    		
+	    		}
 	        }
 
 		}
@@ -1048,6 +1122,184 @@ public class dbUtils {
 			oEx.printStackTrace();
 		}			
 	}
+	
+	/**
+	 * Works with process workspaces
+	 */
+	public static void processWorkpsaces() {
+
+		try {
+			
+	        System.out.println("So you want to work with process workspaces?");
+	        
+	        System.out.println("\t1 - Delete ProcessWorkspace where Workspace does not exist");
+	        System.out.println("\tx - back");
+	        System.out.println("");
+	        
+	        String sInputString = s_oScanner.nextLine();
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Preparing Valid Workspace Id List");
+	        	
+	        	// Get the list of workspaces
+	        	WorkspaceRepository oWorkspaceRepo = new WorkspaceRepository();
+	        	
+	        	List<Workspace> aoWorkspaces = oWorkspaceRepo.getWorkspacesList();
+	        	ArrayList<String> asWorkspacesId = new ArrayList<String>();
+	        	
+	        	for (Workspace oWorkspace : aoWorkspaces) {
+					asWorkspacesId.add(oWorkspace.getWorkspaceId());
+				}
+	        	
+	        	System.out.println("Query ProcessWorkspaces");
+	        	
+	    		// Get the total list of process workspaces
+	    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();	    		
+	    		List<ProcessWorkspace> aoProcessWorkspaces = oProcessWorkspaceRepository.getList();
+	    		
+	    		System.out.println("Got " + aoProcessWorkspaces.size() + " to analyze");
+	    		
+	    		// Will be used later to clean logs
+	    		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+	    		
+	    		// For each one
+	    		for (ProcessWorkspace oProcessWS : aoProcessWorkspaces) {
+	    			
+	    			// Is there the workspace?
+	    			if (!asWorkspacesId.contains(oProcessWS.getWorkspaceId())) {
+	    				
+	    				// No, delete it
+	    				String sProcWSId = oProcessWS.getProcessObjId();
+	    				System.out.println("Deleting " + sProcWSId + " in not existing workspace " + oProcessWS.getWorkspaceId());
+	    				
+	    				oProcessWorkspaceRepository.deleteProcessWorkspaceByProcessObjId(sProcWSId);
+	    				
+	    				// It has logs?
+	    				if (oProcessWS.getOperationType().equals("RUNPROCESSOR") || oProcessWS.getOperationType().equals("RUNIDL") || oProcessWS.getOperationType().equals("RUNMATLAB")) {
+	    					// Maybe yes, delete logs
+	    					System.out.println("Deleting also logs of " + sProcWSId);
+	    					oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcWSId);
+	    				}
+	    			}
+	    		}
+	    		
+	    		System.out.println("Clean done!! Bye");
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("processWorkpsaces Exception: " + oEx);
+			oEx.printStackTrace();
+		}			
+	}
+	
+	/**
+	 * Works with process workspaces
+	 */
+	public static void logs() {
+
+		try {
+			
+	        System.out.println("What we do with our logs?");
+	        
+	        System.out.println("\t1 - Extract Logs");
+	        System.out.println("\t2 - Clean Logs with non existing Process Workspace");
+	        System.out.println("\t3 - Clean old logs");
+	        System.out.println("\tx - back");
+	        System.out.println("");
+	        
+	        String sInputString = s_oScanner.nextLine();
+	        
+	        if (sInputString.equals("x")) {
+	        	return;
+	        }	        
+
+	        if (sInputString.equals("1")) {
+	        	System.out.println("Well, ok, but this feature is Main Menu -> 3 Processors -> 1 - Extract Log. Go there!");
+	        }
+	        else if (sInputString.equals("2")) {
+	        	
+	        	System.out.println("This will take more than a while, let's start with a list of valid local process workspaces");
+	        	
+	    		// Get the total list of process workspaces
+	    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();	    		
+	    		List<ProcessWorkspace> aoProcessWorkspaces = oProcessWorkspaceRepository.getList();
+	    		
+	    		System.out.println("Got " + aoProcessWorkspaces.size() + " to analyze");
+	    		
+	        	ArrayList<String> asProcWorkspacesId = new ArrayList<String>();
+	        	
+	        	for (ProcessWorkspace oProcWorkspace : aoProcessWorkspaces) {
+					asProcWorkspacesId.add(oProcWorkspace.getProcessObjId());
+				}
+
+	        	ArrayList<String> asAlreadyCleanedProcessWorkspace = new ArrayList<String>();
+	    		
+	    		// Will be used later to clean logs
+	    		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+	    		
+	    		List<ProcessorLog> aoAllTheLogs = oProcessorLogRepository.getList();
+	    		
+	    		// For each one
+	    		for (ProcessorLog oLog : aoAllTheLogs) {
+	    			
+	    			// Is there the workspace?
+	    			if (!asProcWorkspacesId.contains(oLog.getProcessWorkspaceId())) {
+	    				
+	    				if (!asAlreadyCleanedProcessWorkspace.contains(oLog.getProcessWorkspaceId())) {
+		    				// No, delete it
+		    				System.out.println("Deleting all log rows of ProcessWorkspace " + oLog.getProcessWorkspaceId());
+		    				
+		    				oProcessorLogRepository.deleteLogsByProcessWorkspaceId(oLog.getProcessWorkspaceId());
+		    				
+		    				asAlreadyCleanedProcessWorkspace.add(oLog.getProcessWorkspaceId());
+	    				}
+	    				
+	    			}
+	    		}
+	    		
+	    		System.out.println("Clean done!! Bye");
+	        }
+	        else if (sInputString.equals("3")) {
+	        	System.out.println("Please insert upper bound date in format YYYY-MM-DD:");
+	        	
+	        	String sDate= s_oScanner.nextLine();
+	        	
+	        	if (Utils.isNullOrEmpty(sDate)) {
+	        		System.out.println("not valid date " + sDate);
+	        		return;
+	        	}
+	        	
+	        	String []asSplit = sDate.split("-");
+	        	
+	        	if (asSplit == null) {
+	        		System.out.println("not valid date " + sDate);
+	        		return;
+	        	}
+	        	
+	        	if (asSplit.length != 3) {
+	        		System.out.println("not valid date " + sDate);
+	        		return;
+	        	}
+	        	
+	        	//{"$lt":"2019-05-04 00:00:00"}})
+	        	ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+	        	oProcessorLogRepository.deleteLogsOlderThan(sDate);
+	        	
+	        	System.out.println("Logs cleaned!");
+	        }
+
+		}
+		catch (Exception oEx) {
+			System.out.println("logs Exception: " + oEx);
+			oEx.printStackTrace();
+		}			
+	}		
 	
 	/*
 	 *
@@ -1135,9 +1387,7 @@ public class dbUtils {
 		catch (Exception oEx) {
 			System.out.println("Categories Exception: " + oEx);
 			oEx.printStackTrace();
-		}			
-		
-
+		}
 	}	
 	
 	public static String s_sMyNodeCode = "wasdi";
@@ -1197,6 +1447,8 @@ public class dbUtils {
 		        System.out.println("\t8 - Workspaces");
 		        System.out.println("\t9 - Migrate DB to local");
 		        System.out.println("\t10 - Categories");
+		        System.out.println("\t11 - ProcessWorkspace");
+		        System.out.println("\t12 - Logs");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
@@ -1232,6 +1484,12 @@ public class dbUtils {
 		        }
 		        else if(sInputString.equals("10")) {
 		        	categories();
+		        }
+		        else if(sInputString.equals("11")) {
+		        	processWorkpsaces();
+		        }
+		        else if(sInputString.equals("12")) {
+		        	logs();
 		        }		        
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;

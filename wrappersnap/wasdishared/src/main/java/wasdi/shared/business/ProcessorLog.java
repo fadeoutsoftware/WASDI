@@ -1,11 +1,19 @@
 package wasdi.shared.business;
 
+import org.bson.types.ObjectId;
+
 /**
  * Represent a row of the log of a custom processor
  * @author p.campanella
  *
  */
 public class ProcessorLog {
+	
+	/**
+	 * Mongo object id. Logs did not have an id. We can use 
+	 * this but it has to be tested before
+	 */
+	//ObjectId _id;
 	
 	/**
 	 * Log Date
@@ -51,4 +59,11 @@ public class ProcessorLog {
 	public void setProcessWorkspaceId(String processWorkspaceId) {
 		this.processWorkspaceId = processWorkspaceId;
 	}
+	/*public ObjectId get_id() {
+		return _id;
+	}
+	public void set_id(ObjectId _id) {
+		this._id = _id;
+	}*/
+	
 }
