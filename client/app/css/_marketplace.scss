@@ -366,6 +366,10 @@ select {
 /*=========APPS LIST==============*/
 /*===============================*/
 
+.loader {
+    padding-left: 15%;
+}
+
 .apps-wrapper {
     height: calc(100vh - 155px);
     overflow: auto;

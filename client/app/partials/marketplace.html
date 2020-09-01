@@ -190,7 +190,15 @@
 
             <!--APPS LIST-->
             <div class="col-md-10 pb-3 apps-wrapper">
-                <div class="row">
+                <!--LOADER-->
+                <div class="row loader d-print-flex justify-content-center" ng-show="m_oController.m_bWaiting==true">
+                    <div class="loadIcon">
+                        <invader></invader>
+                    </div>
+                </div>
+
+                <!--LIST-->
+                <div class="row" ng-show="m_oController.m_bWaiting==false">
                     <div class="col-6 col-md-4 col-lg-3 pb-5"  ng-repeat="processor in m_oController.m_aoApplicationList">
                         <div class="apps-tile" ng-click="m_oController.openApplicationPage(processor.processorName)">
                             <!--APP FEATURED IMG-->
@@ -228,7 +236,7 @@
 
                     </div>
                 </div>
-                <div class="row d-flex justify-content-center">
+                <div class="row d-flex justify-content-center" ng-show="m_oController.m_bWaiting==false">
                     <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-class="!m_oController.m_bLoadMoreEnabled?'btn-disabled':''"><span class="fa fa-refresh mr-2"></span>LOAD MORE SPACE APPS</div>
                 </div>
 

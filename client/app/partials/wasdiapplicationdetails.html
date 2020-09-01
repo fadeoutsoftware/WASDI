@@ -280,31 +280,39 @@
 
                 </div>
                 <div class="col-12 col-md-9">
-                    <div ng-repeat="review in m_oController.m_oReviewsWrapper.reviews " class="reviews-list border shadow-sm p-3 mb-4">
-                        <!--REVIWER NAME-->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
-                                <span class="reviews-name">{{review.userId}}</span>
+                    <!--LOADER-->
+                    <div class="row loader d-print-flex justify-content-center" ng-show="m_oController.m_bReviewsWaiting==true">
+                        <div class="loadIcon">
+                            <invader></invader>
+                        </div>
+                    </div>
+                    <div ng-show="m_oController.m_bReviewsWaiting==false">
+                        <div ng-repeat="review in m_oController.m_oReviewsWrapper.reviews " class="reviews-list border shadow-sm p-3 mb-4">
+                            <!--REVIWER NAME-->
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
+                                    <span class="reviews-name">{{review.userId}}</span>
+                                </div>
+                                <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>Delete</div>
                             </div>
-                            <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>Delete</div>
-                        </div>
-                        <!--RATE-->
-                        <div class="my-2">
-                            <span class="fa fa-star" ng-class="review.vote>0.25&&review.vote<0.75?'checked-half':review.vote>=0.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.vote>1.25&&review.vote<1.75?'checked-half':review.vote>=1.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.vote>2.25&&review.vote<2.75?'checked-half':review.vote>=2.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.vote>3.25&&review.vote<3.75?'checked-half':review.vote>=3.75?'checked':''"></span>
-                            <span class="fa fa-star" ng-class="review.vote>4.25&&review.vote<4.75?'checked-half':review.vote>=4.75?'checked':''"></span>
-                        </div>
-                        <div class="reviews-title">
-                            {{review.title}}
-                        </div>
-                        <div class="reviews-comment mt-2">
-                            "{{review.comment}}"
-                        </div>
-                        <div class="text-green-wasdi mt-2">
-                            {{m_oController.formatDate(review.date)}}
+                            <!--RATE-->
+                            <div class="my-2">
+                                <span class="fa fa-star" ng-class="review.vote>0.25&&review.vote<0.75?'checked-half':review.vote>=0.75?'checked':''"></span>
+                                <span class="fa fa-star" ng-class="review.vote>1.25&&review.vote<1.75?'checked-half':review.vote>=1.75?'checked':''"></span>
+                                <span class="fa fa-star" ng-class="review.vote>2.25&&review.vote<2.75?'checked-half':review.vote>=2.75?'checked':''"></span>
+                                <span class="fa fa-star" ng-class="review.vote>3.25&&review.vote<3.75?'checked-half':review.vote>=3.75?'checked':''"></span>
+                                <span class="fa fa-star" ng-class="review.vote>4.25&&review.vote<4.75?'checked-half':review.vote>=4.75?'checked':''"></span>
+                            </div>
+                            <div class="reviews-title">
+                                {{review.title}}
+                            </div>
+                            <div class="reviews-comment mt-2">
+                                "{{review.comment}}"
+                            </div>
+                            <div class="text-green-wasdi mt-2">
+                                {{m_oController.formatDate(review.date)}}
+                            </div>
                         </div>
                     </div>
                     <div class="reviews-load-more text-center" ng-click="m_oController.loadMoreReviews()" ng-show="m_oController.m_bShowLoadMoreReviews">
