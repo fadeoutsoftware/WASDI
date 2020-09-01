@@ -1,4 +1,13 @@
 .applicationUI {
+    .sticky-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1001;
+        background-color: white;
+        margin-top: -1.5rem;
+        padding-top: 1.5rem;
+
+    }
     .app-title {
         .app-logo {
             width: 60px;
@@ -73,6 +82,9 @@
 }
 
 /*DATE PICKER*/
+.moment-picker-contents {
+    max-width: 200px;
+}
 .moment-picker .moment-picker-container {
     z-index: 500;
 }
