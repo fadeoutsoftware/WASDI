@@ -36,7 +36,14 @@
                     <!--PUBLISHER-->
                     <div class="publisher mb-1">
                         <span  ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
-                        <span ng-if="m_oController.m_oApplication.isMine"><span class="fa fa-flask mr-1"></span>You are the master!&nbsp;<div ng-click="m_oController.editClick()"><span class="fa fa-edit mr-1"></span></div></span>
+                        <span class="d-flex align-items-center" ng-if="m_oController.m_oApplication.isMine">
+                            <span class="fa fa-flask mr-1"></span>
+                            You are the master!&nbsp;
+                            <div class="edit-btn ml-3" ng-click="m_oController.editClick()">
+                                <span class="fa fa-edit mr-1"></span>
+                                Edit
+                            </div>
+                        </span>
                     </div>
 
                     <!--TAGS LIST-->
@@ -275,10 +282,12 @@
                 <div class="col-12 col-md-9">
                     <div ng-repeat="review in m_oController.m_oReviewsWrapper.reviews " class="reviews-list border shadow-sm p-3 mb-4">
                         <!--REVIWER NAME-->
-                        <div class="d-flex align-items-center">
-                            <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
-                            <span class="reviews-name">{{review.userId}}</span>
-                            <div ng-show="m_oController.isMineComment(review)" style="cursor: pointer" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"></span></div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
+                                <span class="reviews-name">{{review.userId}}</span>
+                            </div>
+                            <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>Delete</div>
                         </div>
                         <!--RATE-->
                         <div class="my-2">
@@ -351,7 +360,7 @@
                             </div>
                             <div class="modal-footer rounded-0">
                                 <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal"> <span class="fa fa-trash mr-2"></span>Cancel</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0"  data-dismiss="modal" ng-show="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>Save My Review</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0"  data-dismiss="modal" ng-class="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1?'':'disabled'" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>Save My Review</button>
                             </div>
                         </div>
                     </div>

@@ -51,6 +51,17 @@
         .fa-flask {
             color: $wasdigreen;
         }
+        .edit-btn {
+            background-color: $wasdigreen;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            &:hover {
+                background-color: $darkwasdigreen;
+            }
+        }
     }
     .big-price-tag {
         padding: 10px;
@@ -195,6 +206,17 @@
     .reviews-name {
         font-size: 1.1em;
     }
+    .delete-btn {
+        background-color: lightgrey;
+        color: black;
+        padding: 2px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8em;
+        &:hover {
+            background-color: #9c9c9c;
+        }
+    }
     .reviews-title {
         font-size: 1.2em;
     }
@@ -226,6 +248,11 @@
     align-items: center;
     margin-right: 25px;
 
+}
+.green-big-btn.disabled {
+    background-color: lightgray;
+    cursor: auto;
+    pointer-events: none;
 }
 .arrow span{
     display: block;
