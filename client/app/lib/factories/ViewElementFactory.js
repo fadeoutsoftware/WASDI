@@ -24,6 +24,23 @@ function ViewElementFactory() {
         else if (oControl.type === "dropdown") {
             // Drop Down
             oViewElement = new DropDown();
+
+            let iValues = 0;
+
+            oViewElement.asListValues = [];
+
+            for (iValues = 0; iValues < oControl.values.length; iValues ++) {
+                let oItem = {
+                    name: oControl.values[iValues],
+                    id: "" + iValues
+                };
+
+                oViewElement.asListValues.push(oItem);
+
+                if (oControl.default === oItem.name) {
+                    oViewElement.sSelectedValues = oItem;
+                }
+            }
         }
         else if (oControl.type === "bbox") {
             // Bounding Box from Map
