@@ -25,11 +25,14 @@ angular.module('wasdi.wapDropDown', [])
                 {
                     scope.dropdownName = "";
                 }
-                scope.isSelectedValue = false;
-                scope.selectedValue = {
-                    name:"",
-                    id:""
-                };
+
+                /*if (scope.selectedValue === "") {
+                    scope.isSelectedValue = false;
+                    scope.selectedValue = {
+                        name:"",
+                        id:""
+                    };
+                }*/
 
                 scope.onClickValue = function(oSelectedValue){
                     scope.isSelectedValue = true;
@@ -43,7 +46,10 @@ angular.module('wasdi.wapDropDown', [])
                     };
                 }
 
-                scope.setDefaultSelectedValue();
+                if (scope.selectedValue === "") {
+                    scope.isSelectedValue = false;
+                    scope.setDefaultSelectedValue();
+                }
             }
         };
     });

@@ -1019,6 +1019,7 @@ public class dbUtils {
 	        	for (ProcessWorkspace oProcessWorkpsace : aoProcessesInOldNode) {
 	        		
 	        		if (oProcessWorkpsace.getNodeCode().equals(sNewNodeCode) == false) {
+	        			System.out.println("Updating Process Workspace " + oProcessWorkpsace.getProcessObjId());
 		        		oProcessWorkpsace.setNodeCode(sNewNodeCode);
 		        		oProcessWorkspaceRepository.updateProcess(oProcessWorkpsace);	        			
 	        		}
