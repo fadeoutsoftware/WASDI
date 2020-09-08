@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -37,17 +36,16 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONObject;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -99,6 +97,10 @@ public class Wasdi extends ResourceConfig {
 	 * Credential Policy Utility class
 	 */
 	private static CredentialPolicy m_oCredentialPolicy;
+	
+	public static String s_sKeyCloakIntrospectionUrl = "";
+	public static String s_sClientId = "";
+	public static String s_sClientSecret = ""; 
 
 	static {
 		m_oCredentialPolicy = new CredentialPolicy();
@@ -152,6 +154,10 @@ public class Wasdi extends ResourceConfig {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token/introspect");
+		s_sClientId = getInitParameter("keycloak_confidentialClient", "wasdi_api");
+		s_sClientSecret = getInitParameter("keycloak_clientSecret", "1dd2e17c-3ce6-4851-891a-d689cf8bd107");
 		
 		try {
 			// If this is not the main node
@@ -333,25 +339,42 @@ public class Wasdi extends ResourceConfig {
 			return null;
 		}
 		
-		// Create Session Repository
-		SessionRepository oSessionRepo = new SessionRepository();
-		// Get The User Session
-		UserSession oSession = oSessionRepo.getSession(sSessionId);
-
-		if (Utils.isValidSession(oSession)) {
-			// Create User Repo
-			UserRepository oUserRepo = new UserRepository();
-			// Get the user from the session
-			User oUser = oUserRepo.getUser(oSession.getUserId());
-
-			oSessionRepo.touchSession(oSession);
-
-			return oUser;
+		/*
+		def introspect(self, client_id, client_secret, token):
+        params = {
+            'client_id': client_id, 
+            'client_secret': client_secret,
+            'token': token,
+        }
+        response = requests.post(
+                self._token_introspection_endpoint, data=params)
+        if response.status_code != 200:
+            raise Exception('Invalid introspection request')
+        return response.json()
+		 */
+		String sKeyCloakIntrospectionUrl = Wasdi.s_sKeyCloakIntrospectionUrl;
+		String sClientId = Wasdi.s_sClientId;
+		String sClientSecret = Wasdi.s_sClientSecret;
+		
+		String sPayload = "client_id=" + sClientId + 
+				"&client_secret=" + sClientSecret + 
+				"&token=" + sSessionId;
+		
+		Map<String,String> asHeaders = new HashMap<>();
+		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+		
+		
+		String sResponse = httpPost(sKeyCloakIntrospectionUrl, sPayload, asHeaders);
+		if(!Utils.isNullOrEmpty(sResponse)) {
+			JSONObject oJSON = new JSONObject(sResponse);
+			String sUserId = oJSON.optString("preferred_username", null);
+			if(!Utils.isNullOrEmpty(sUserId)) {
+				UserRepository oUserRepo = new UserRepository();
+				User oUser = oUserRepo.getUser(sUserId);
+				return oUser;
+			}
 		}
-
-		// Session not valid
-		oSessionRepo.deleteSession(oSession);
-
+		
 		// No Session, No User
 		return null;
 	}
