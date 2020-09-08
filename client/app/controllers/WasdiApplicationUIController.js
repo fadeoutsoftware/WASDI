@@ -71,7 +71,7 @@ var WasdiApplicationUIController = (function() {
         $scope.appWebsite = 'http://www.wasdi.net';
         $scope.appMail = 'paolo@fadeout.it';
         $scope.appLastUpdate = '22/5/2020';
-
+        $scope.workspaceChose = 'new';
         // TODO: Temporary fo test
         //this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
 

@@ -21,6 +21,48 @@
             font-size: 1.4em;
         }
     }
+    .select-workspace {
+        .blue-big-btn {
+            padding: 11px;
+        }
+        input[type='radio']:checked:before {
+            background:green;
+        }
+        label {
+            margin-bottom: -3px;
+        }
+        .radio-container {
+            min-width: 180px;
+        }
+        .dropdown-workspace {
+            background-color: #efeded;
+            border: solid 1px lightgray;
+            border-radius: 4px;
+            padding-right: 30px;
+            &:after {
+                content: "";
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 6px solid black;
+                position: absolute;
+                top: 8px;
+                right: 5px;
+            }
+        }
+        .dropdown-menu {
+            .dropdown-workspace-item {
+                padding: 3px 4px;
+                cursor: pointer;
+                &:hover {
+                    background-color: #efeded;
+                }
+            }
+        }
+
+    }
+
     .text-green-wasdi {
         color: $wasdigreen;
     }

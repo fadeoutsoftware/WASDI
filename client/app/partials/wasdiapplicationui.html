@@ -8,6 +8,7 @@
                 </div>
                 <!--APP TITLE-->
                 <div class="app-title d-flex justify-content-between align-items-center border-bottom pb-3">
+                    <!--LEFT SIDE-->
                     <div class="d-flex align-items-center">
                         <div class="app-logo mr-3"></div>
                         <div>
@@ -19,8 +20,42 @@
                         </div>
 
                     </div>
-                    <div class="blue-big-btn"> <!--ng-click="m_oController.generateParamsAndRun()"-->
-                        READ VALUES
+                    <!--RIGHT SIDE-->
+                    <div  class="d-flex select-workspace">
+                        <div class="radio-container mr-4">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="newWorkspace" value="new" checked>
+                                <label class="form-check-label" for="newWorkspace">
+                                    New Workspace
+                                </label>
+                            </div>
+                            <div class="form-check d-flex align-items-center mt-2">
+                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="openWorkspace" value="open">
+                                <!--MOSTRA SOLO SE NON SELEZIONATO-->
+                                <label class="form-check-label" for="openWorkspace"ng-show="workspaceChose == 'new'">
+                                    <span >Open Workspace</span>
+                                </label>
+
+                                <!--MOSTRA SOLO SE SELEZIONATO-->
+                                <div class="dropdown" ng-show="workspaceChose == 'open'">
+                                    <button class="dropdown-toggle dropdown-workspace" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <div class="open-workspace-label">Select Workspace</div>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <div class="dropdown-workspace-item">Workspace 1</div>
+                                        <div class="dropdown-workspace-item">Workspace 2</div>
+                                        <div class="dropdown-workspace-item">Workspace whit a long logn name</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="blue-big-btn d-flex align-items-center justify-content-center"> <!--ng-click="m_oController.generateParamsAndRun()"-->
+                            <span>READ VALUES</span>
+                        </div>
+
+
+
                     </div>
                 </div>
                 <!--DESCRIPTIONE AND CONTACT-->
