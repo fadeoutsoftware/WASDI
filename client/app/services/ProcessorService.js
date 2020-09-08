@@ -280,4 +280,14 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.getProcessorUI = function (sProcessorName) {
         return this.m_oHttp.get(this.APIURL + '/processors/ui?name='+sProcessorName);
     }
+
+    /**
+     * Save the Processor UI JSON Definition
+     * @param sProcessorName name of the processor
+     * @param sProcessorUI string with the json
+     * @returns {*}
+     */
+    this.saveProcessorUI = function (sProcessorName, sProcessorUI) {
+        return this.m_oHttp.post(this.APIURL + '/processors/saveui?name='+sProcessorName, sProcessorUI);
+    }
 }]);

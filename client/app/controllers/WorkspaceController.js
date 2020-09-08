@@ -97,13 +97,6 @@ var WorkspaceController = (function() {
 
 
     WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
-        // OLD VERSION COMMENTED
-        // if(this.m_oRabbitStompService.isReadyState() === false)
-        // {
-        //     var msgHlp = MessageHelper.getInstanceWithAnyScope(this.m_oScope);
-        //     msgHlp.notifyRabbitConnectionStateChange(RabbitConnectionState.Lost);
-        //     return false;
-        // }
         // Stop loading new workspaces.. we are leaving!
         this.m_bOpeningWorkspace = true;
         var oController = this;

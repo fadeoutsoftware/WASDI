@@ -10,10 +10,10 @@
                 <div class="app-title d-flex justify-content-between align-items-center border-bottom pb-3">
                     <!--LEFT SIDE-->
                     <div class="d-flex align-items-center">
-                        <div class="app-logo mr-3"></div>
+                        <div class="app-logo mr-3" style="background-image: url({{m_oController.m_oApplication.imgLink}})"></div>
                         <div>
-                            <span class="title">{{appTitle}}</span><br>
-                            <span>Publisher: <span class="text-green-wasdi">{{appPublisher}}</span></span><br>
+                            <span class="title">{{m_oController.m_oApplication.friendlyName}}</span><br>
+                            <span>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span><br>
                             <div class="back-link mt-1 collapsed" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                                 <span class="more">MORE</span><span class="less">LESS</span> DETAILS
                             </div>
@@ -24,50 +24,47 @@
                     <div  class="d-flex select-workspace">
                         <div class="radio-container mr-4">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="newWorkspace" value="new" checked>
+                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="newWorkspace" value="new" checked ng-click="m_oController.newWorkspaceClicked()">
                                 <label class="form-check-label" for="newWorkspace">
                                     New Workspace
                                 </label>
                             </div>
                             <div class="form-check d-flex align-items-center mt-2">
-                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="openWorkspace" value="open">
+                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="openWorkspace" value="open" ng-click="m_oController.openWorkspaceClicked()">
                                 <!--MOSTRA SOLO SE NON SELEZIONATO-->
                                 <label class="form-check-label" for="openWorkspace"ng-show="workspaceChose == 'new'">
-                                    <span >Open Workspace</span>
+                                    <span>Open Workspace</span>
                                 </label>
 
                                 <!--MOSTRA SOLO SE SELEZIONATO-->
                                 <div class="dropdown" ng-show="workspaceChose == 'open'">
                                     <button class="dropdown-toggle dropdown-workspace" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <div class="open-workspace-label">Select Workspace</div>
+                                        <div class="open-workspace-label">{{m_oController.m_oSelectedWorkspace === null ? "Select Workspace" : m_oController.m_oSelectedWorkspace.workspaceName}} </div>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <div class="dropdown-workspace-item">Workspace 1</div>
-                                        <div class="dropdown-workspace-item">Workspace 2</div>
-                                        <div class="dropdown-workspace-item">Workspace whit a long logn name</div>
+                                        <div class="dropdown-workspace-item" ng-repeat="oWorkspace in m_oController.m_aoWorkspaceList" ng-click="m_oController.selectedWorkspace(oWorkspace)">
+                                            {{oWorkspace.workspaceName}}</div>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
-                        <div class="blue-big-btn d-flex align-items-center justify-content-center"> <!--ng-click="m_oController.generateParamsAndRun()"-->
-                            <span>READ VALUES</span>
+                        <div class="blue-big-btn d-flex align-items-center justify-content-center" ng-click="m_oController.generateParamsAndRun()">
+                            <span>RUN</span>
                         </div>
-
-
 
                     </div>
                 </div>
-                <!--DESCRIPTIONE AND CONTACT-->
+                <!--DESCRIPTION AND CONTACTS-->
                 <div class="collapse border-bottom mb-3" id="collapseExample">
                     <div class="row pb-3">
                         <div class="col-12 col-md-8">
-                            <span>Description: </span><span class="text-green-wasdi">{{appDesc}}</span>
+                            <span>Description: </span><span class="text-green-wasdi">{{m_oController.m_oApplication.processorDescription}}</span>
                         </div>
                         <div class="col-12 col-md-4 border-left">
-                            <div>Contact: <span class="text-green-wasdi"><a ng-href="mailto:{{appMail}}">{{appMail}}</a></span></div>
-                            <div>WebSite: <span class="text-green-wasdi"><a ng-href="{{appWebsite}}" target="_blank">{{appWebsite}}</a></span></div>
-                            <div>Last Update: <span class="text-green-wasdi">{{appLastUpdate}}</span></div>
+                            <div>Contact: <span class="text-green-wasdi"><a ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span></div>
+                            <div>WebSite: <span class="text-green-wasdi"><a ng-href="{{m_oController.m_oApplication.link}}" target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
+                            <div>Last Update: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span></div>
                         </div>
                     </div>
                 </div>
@@ -110,6 +107,18 @@
                                                  on-click-function="viewElement.oOnClickFunction"
                                     ></wapdropdown>
                                 </div>
+
+                                <!--products combo -->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4" ng-if="viewElement.type === 'productscombo'" >
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <wapproductscombo list-of-values="viewElement.asListValues"
+                                                 selected-value="viewElement.sSelectedValues"
+                                                 enable-search-filter="viewElement.bEnableSearchFilter"
+                                                 dropdown-name="viewElement.sDropdownName"
+                                                 on-click-function="viewElement.oOnClickFunction"
+                                    ></wapproductscombo>
+                                </div>
+
 
                                 <!--select-area-map-->
                                 <div class="col-xs-12 col-md-12 col-lg-12 py-2" ng-if="viewElement.type === 'bbox'" >

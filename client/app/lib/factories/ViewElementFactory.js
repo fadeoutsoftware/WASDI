@@ -55,6 +55,9 @@ function ViewElementFactory() {
         else if (oControl.type === "searcheoimage"){
             oViewElement = new SearchEOImage();
         }
+        else if (oControl.type === "productscombo"){
+            oViewElement = new ProductsCombo();
+        }
         else if(oControl.type === "boolean"){
             oViewElement = new CheckBox();
 
@@ -240,6 +243,27 @@ let CheckBox = function () {
  * @constructor
  */
 let DropDown = function () {
+    this.asListValues = [];
+    this.sSelectedValues = "";
+    this.oOnClickFunction = null;
+    this.bEnableSearchFilter = true;
+    this.sDropdownName = "";
+
+    /**
+     * Get the selected value
+     * @returns {string}
+     */
+    this.getValue = function () {
+        return this.sSelectedValues;
+    }
+};
+
+
+/**
+ * Products Combo Control Class
+ * @constructor
+ */
+let ProductsCombo = function () {
     this.asListValues = [];
     this.sSelectedValues = "";
     this.oOnClickFunction = null;

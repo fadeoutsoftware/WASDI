@@ -30,6 +30,11 @@
                             {{"DIALOG_PROCESSOR_TAB_SHARE" | translate}}
                         </a>
                     </li>
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UI'}" ng-click="m_oController.m_sSelectedTab = 'UI'">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"DIALOG_PROCESSOR_TAB_UI" | translate}}
+                        </a>
+                    </li>
                 </ul>
 
 
@@ -61,6 +66,13 @@
                          ng-class="{'active':m_oController.m_sSelectedTab === 'Share' || m_oController.m_bEditMode==false}"
                          ng-hide="m_oController.m_sSelectedTab != 'Share'">
                         <ng-include src="'dialogs/processor/TabShareProcessor.html'"></ng-include>
+                    </div>
+
+                    <!------- UI ------->
+                    <div class="tab-pane fade in" id="Share"
+                         ng-class="{'active':m_oController.m_sSelectedTab === 'UI' || m_oController.m_bEditMode==false}"
+                         ng-hide="m_oController.m_sSelectedTab != 'UI'">
+                        <ng-include src="'dialogs/processor/TabUiProcessor.html'"></ng-include>
                     </div>
 
 

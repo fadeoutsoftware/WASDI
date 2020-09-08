@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService) {
         /**
          * Angular Scope
          */
@@ -48,6 +48,10 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_oState = $state;
         /**
+         * Product Service
+         */
+        this.m_oProductService = oProductService;
+        /**
          * Contains one property for each tab. Each Property is an array of the Tab Controls
          * @type {*[]}
          */
@@ -62,19 +66,39 @@ var WasdiApplicationUIController = (function() {
          * @type {string}
          */
         this.m_sSelectedTab = "";
+        /**
+         * Application Data
+         * @type {{}}
+         */
+        this.m_oApplication = {};
+        /**
+         * List of user's workspaces
+         * @type {*[]}
+         */
+        this.m_aoWorkspaceList = [];
 
-
-        //KASA FOR TEST
-        $scope.appTitle = 'Titolo della applicazione';
-        $scope.appDesc = 'Automatic Burned Area Detection using pre-fire and post-fire S2 data selected by user (that should belong to the same S2 tile). if "INCLUDESHRUB" is set to "YES", it means that not only Burned Forest Areas, but also Burned Shrubland Areas are searched for. Otherwise, only Burned Forest Areas are searched for. Reference: L. Pulvirenti et a.l, "An Automatic Processing Chain for Near Real-Time Mapping of Burned Forest Areas Using Sentinel-2 Data", Remote Sens. 2020, 12, 674; doi:10.3390/rs12040674';
-        $scope.appPublisher = 'Paolo Campanella';
-        $scope.appWebsite = 'http://www.wasdi.net';
-        $scope.appMail = 'paolo@fadeout.it';
-        $scope.appLastUpdate = '22/5/2020';
+        /**
+         * Utility variable for the workspace radio button
+         * @type {string}
+         */
         $scope.workspaceChose = 'new';
-        // TODO: Temporary fo test
-        //this.m_oConstantsService.setSelectedApplication("edrift_archive_generator");
 
+        /**
+         * User selected workspace
+         * @type {null}
+         */
+        this.m_oSelectedWorkspace = null;
+
+        /**
+         * List of products in the selected workspace
+         * @type {*[]}
+         */
+        this.m_aoProducts = [];
+
+        /**
+         * Get the selected application
+         * @type {string}
+         */
         this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
 
         let oController = this;
@@ -111,20 +135,25 @@ var WasdiApplicationUIController = (function() {
                 oController.m_aoViewElements = oController.generateViewElements(data);
             })
             .error(function(oError ){
-                // TODO: Temperary for debug with an hard coded UI
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
-                //let sSampleForm = "{\"tabs\":[{\"name\":\"Basic\",\"controls\":[{\"param\":\"ARCHIVE_START_DATE\",\"type\":\"date\",\"label\":\"Archive Start Date\"},{\"param\":\"ARCHIVE_END_DATE\",\"type\":\"date\",\"label\":\"Archive End Date\"},{\"param\":\"DELETE\",\"type\":\"boolean\",\"label\":\"Delete intermediate images\",\"default\":true},{\"param\":\"SIMULATE\",\"type\":\"boolean\",\"label\":\"Simulate Flood Detection\",\"default\":false},{\"param\":\"BBOX\",\"type\":\"bbox\",\"label\":\"Select Event Area\"}]},{\"name\":\"Advanced\",\"controls\":[{\"param\":\"ORBITS\",\"type\":\"textbox\",\"label\":\"Relative Orbit Numbers (comma separated)\"},{\"param\":\"GRIDSTEP\",\"type\":\"hidden\",\"label\":\"\",\"default\":\"1,1\"},{\"param\":\"PREPROCWORKFLOW\",\"type\":\"textbox\",\"label\":\"Preprocessing Workflow\",\"default\":\"LISTSinglePreproc2\"},{\"param\":\"MOSAICBASENAME\",\"type\":\"textbox\",\"label\":\"Event Code\",\"default\":\"LA\"}]}]}";
-                //let oFormToGenerate = JSON.parse(sSampleForm);
-
-                //for (let iTabs=0; iTabs<oFormToGenerate.tabs.length; iTabs++) {
-                //    let oTab = oFormToGenerate.tabs[iTabs];
-                //    oController.m_asTabs.push(oTab.name);
-                //    if (iTabs == 0) oController.m_sSelectedTab = oTab.name;
-                //}
-
-                // Create all the components
-                //oController.m_aoViewElements = oController.generateViewElements(oFormToGenerate);
             });
+
+        /**
+         * Ask the list of Applications to the WASDI server
+         */
+        this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_oApplication = data;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+        });
+
     }
 
     /**
@@ -207,6 +236,9 @@ var WasdiApplicationUIController = (function() {
                 // send the message to show the processor log dialog
                 let oPayload = { processId: data.processingIdentifier };
                 oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
+
+                // Move to the editor
+                oController.m_oState.go("root.editor", { workSpace : oWorkspace.workspaceId });
             }
             else
             {
@@ -246,7 +278,7 @@ var WasdiApplicationUIController = (function() {
         }
 
         // Log the parameters
-        console.log(oProcessorInput);
+        //console.log(oProcessorInput);
 
         // Reference to this controller
         let oController = this;
@@ -258,27 +290,130 @@ var WasdiApplicationUIController = (function() {
 
         let sWorkspaceName = sToday + "_" + sApplicationName;
 
-        // Create a new Workspace
-        this.m_oWorkspaceService.createWorkspace(sWorkspaceName).success( function (data,status) {
+        if (this.m_oSelectedWorkspace == null) {
+            // Create a new Workspace
+            this.m_oWorkspaceService.createWorkspace(sWorkspaceName).success( function (data,status) {
 
-                // Get the new workpsace Id
-                let sWorkspaceId = data.stringValue;
+                    // Get the new workpsace Id
+                    let sWorkspaceId = data.stringValue;
 
-                // Get the view model of this workspace
-                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
-                    if (utilsIsObjectNullOrUndefined(data) == false)
-                    {
-                        // Ok execute
-                        oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, data);
-                    }
-                }).error(function (data,status) {
-                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
-                });
+                    // Get the view model of this workspace
+                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
+                        if (utilsIsObjectNullOrUndefined(data) == false)
+                        {
+                            // Ok execute
+                            oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, data);
+                        }
+                    }).error(function (data,status) {
+                        utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
+                    });
 
+                }
+            ).error( function () {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
+            });
+        }
+        else {
+            this.executeProcessorInWorkspace(this, sApplicationName, oProcessorInput, this.m_oSelectedWorkspace);
+        }
+
+    }
+
+    /**
+     * Get the name of a category from the id
+     * @param sCategoryId
+     * @returns {*}
+     */
+    WasdiApplicationUIController.prototype.formatDate = function(iTimestamp)
+    {
+        // Create a new JavaScript Date object based on the timestamp
+        let oDate = new Date(iTimestamp);
+        return oDate.toLocaleDateString();
+    };
+
+    /**
+     * Click on the new workspace radio: clean existing ones
+     */
+    WasdiApplicationUIController.prototype.newWorkspaceClicked = function () {
+        this.m_oSelectedWorkspace = null;
+        this.m_aoWorkspaceList = [];
+
+        let asTabs = this.getTabs();
+
+        for (var iTab=0; iTab<asTabs.length; iTab++) {
+            let aoControls = this.m_aoViewElements[asTabs[iTab]];
+
+            for (var iControl=0; iControl<aoControls.length; iControl++) {
+                if (aoControls[iControl].type=="productscombo") {
+                    aoControls[iControl].listOfValues = oController.m_aoProducts;
+                }
             }
-        ).error( function () {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
+        }
+
+    }
+
+    /**
+     * Click on the open workspace radio: load the list of workspaces
+     */
+    WasdiApplicationUIController.prototype.openWorkspaceClicked = function()
+    {
+        var oController = this;
+        this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data,status) {
+            if (utilsIsObjectNullOrUndefined(data) == false) {
+                oController.m_aoWorkspaceList = data;
+            }
+            else {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING USER WORKSPACES");
+            }
+        }).error(function () {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING USER WORKSPACES");
+        })
+    };
+
+    /**
+     * Method called when the user selects an existing workspace
+     * @param oWorkspace
+     */
+    WasdiApplicationUIController.prototype.selectedWorkspace = function (oWorkspace) {
+        this.m_oSelectedWorkspace = oWorkspace;
+
+        let oController = this;
+
+        this.m_oProductService.getProductListByWorkspace(oWorkspace.workspaceId).success(function (data, status) {
+
+            oController.m_aoProducts = [];
+
+            if (utilsIsObjectNullOrUndefined(data) == false) {
+                //push all products
+                for (var iIndex = 0; iIndex < data.length; iIndex++) {
+
+                    let oProductItem = { value:"", id:""};
+
+                    oProductItem.name = data[iIndex].name;
+                    oProductItem.id = data[iIndex].name;
+
+                    // Add the product to the list
+                    oController.m_aoProducts.push(oProductItem);
+                }
+            }
+
+            let asTabs = oController.getTabs();
+
+            for (var iTab=0; iTab<asTabs.length; iTab++) {
+                let aoControls = oController.m_aoViewElements[asTabs[iTab]];
+
+                for (var iControl=0; iControl<aoControls.length; iControl++) {
+                    if (aoControls[iControl].type=="productscombo") {
+                        aoControls[iControl].asListValues = oController.m_aoProducts;
+                    }
+                }
+            }
+
+
+        }).error(function (data, status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         });
+
     }
 
 
@@ -289,7 +424,8 @@ var WasdiApplicationUIController = (function() {
         'ProcessorService',
         'WorkspaceService',
         'RabbitStompService',
-        '$state'
+        '$state',
+        'ProductService'
     ];
 
     return WasdiApplicationUIController;

@@ -169,22 +169,35 @@ var ProcessorController = (function() {
         this.m_oImageToUpload;
 
         /**
+         * Processor UI
+         * @type {string}
+         */
+        this.m_sProcessorUI = "{}";
+
+        /**
+         * Flag to know if the UI is changed or not
+          * @type {boolean}
+         */
+        this.m_bUIChanged = false;
+
+        /**
          * Application Categories
          * @type {*[]}
          */
         this.m_aoCategories = [];
 
         /**
-         * Local Reference to the controller
-         * @type {ProcessorController}
-         */
-        var oController = this;
-
-        /**
          * Processor Logo File
          * @type {null}
          */
-        var m_oProcessorLogo = null;
+        this.m_oProcessorLogo = null;
+
+        /**
+         * Local Reference to the controller
+         * @type {ProcessorController}
+         */
+        let oController = this;
+
 
         // Close this Dialog handler
         $scope.close = function() {
@@ -266,7 +279,19 @@ var ProcessorController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
             });
 
+            this.m_oProcessorService.getProcessorUI(this.m_oInputProcessor.processorName).success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) === false)
+                {
+                    oController.m_sProcessorUI = JSON.stringify(data, undefined, 4);
+                }
+                else
+                {
+                    oController.m_sProcessorUI = "{}";
+                }
 
+            }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP UI");
+            });
         }
     };
 
@@ -343,6 +368,14 @@ var ProcessorController = (function() {
              utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
          });
 
+         if (oController.m_bUIChanged) {
+             oController.m_oProcessorService.saveProcessorUI(oController.m_oInputProcessor.processorName, oController.m_sProcessorUI).success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UI UPDATED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR UI");
+             });
+         }
 
          // There was also a file?
          if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)

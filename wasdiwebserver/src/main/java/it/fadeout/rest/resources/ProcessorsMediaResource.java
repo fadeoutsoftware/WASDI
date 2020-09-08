@@ -775,6 +775,7 @@ public class ProcessorsMediaResource {
 
 	}
 	
+	
 	/**
 	 * Checks if a vote is valid or not
 	 * @param fVote

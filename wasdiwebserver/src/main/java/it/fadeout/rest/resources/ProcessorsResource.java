@@ -1,9 +1,11 @@
 package it.fadeout.rest.resources;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -2053,11 +2055,75 @@ public class ProcessorsResource  {
 			return Response.status(Status.OK).entity(sJsonUI).build();
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessorsResource.help: " + oEx);
+			Utils.debugLog("ProcessorsResource.getUI: " + oEx);
 			return Response.serverError().build();
 		}
 		
 	}
+	
+	@POST
+	@Path("/saveui")
+	public Response saveUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, String sUIJson) throws Exception {
+		Utils.debugLog("ProcessorsResource.getUI( Session: " + sSessionId + ", Name: " + sName + " )");
+		
+		try {
+			// Check User 
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.saveUI: session invalid");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			//String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.saveUI: read Processor " +sName);
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
+			
+			if (oProcessor == null) {
+				Utils.debugLog("ProcessorsResource.saveUI: processor invalid");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			if (Utils.isNullOrEmpty(sUIJson)==false) {				
+				try {
+					
+					String sDecodedJSON = java.net.URLDecoder.decode(sUIJson, StandardCharsets.UTF_8.name());
+					MongoRepository.s_oMapper.readTree(sDecodedJSON);
+				}
+				catch (Exception oJsonEx) {
+					
+					Utils.debugLog("ProcessorsResource.saveUI: JSON Exception: " + oJsonEx.toString());
+					//oResult.setStringValue("Parameter Sample is not a valid JSON");
+					return Response.status(422).build();
+				}
+			}			
+			
+			String sUIFilePath = m_oServletConfig.getInitParameter("DownloadRootPath");
+
+			if (!sUIFilePath.endsWith("/")) {
+				sUIFilePath = sUIFilePath + "/";
+			}			
+			sUIFilePath += "processors/" + sName + "/ui.json";
+			
+			File oUIFile = new File(sUIFilePath);
+			
+			try (BufferedWriter oWriter = new BufferedWriter(new FileWriter(oUIFile))) {
+				oWriter.write(sUIJson);
+			}
+			
+			Utils.debugLog("ProcessorsResource.saveUI: UI of " + sName + " updated");
+						
+			return Response.status(Status.OK).build();
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.saveUI: " + oEx);
+			return Response.serverError().build();
+		}
+		
+	}	
 		
 	
 }
