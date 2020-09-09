@@ -133,10 +133,18 @@ let SearchEOImage = function() {
     */
 
     /**
-     *
+     * This control does not really return a value
      * @returns {string}
      */
     this.getValue = function () {
+        return "";
+    }
+
+    /**
+     * This control does not really return a value
+     * @returns {string}
+     */
+    this.getStringValue = function () {
         return "";
     }
 };
@@ -152,12 +160,21 @@ let ProductList = function(){
     this.oSingleSelectionLayer = {};
 
     /**
-     *
+     * Return the selected product
      * @returns {{}}
      */
     this.getValue = function () {
         return this.oSingleSelectionLayer;
     }
+
+    /**
+     * Return the name of the selected product
+     * @returns {{}}
+     */
+    this.getStringValue = function () {
+        return this.oSingleSelectionLayer;
+    }
+
 };
 
 /**
@@ -179,6 +196,20 @@ let DateTimePicker = function(){
             return "";
         }
     }
+
+    /**
+     * Returns the selected Date
+     * @returns {string|null} Date as a string in format YYYY-MM-DD
+     */
+    this.getStringValue = function () {
+        if (this.m_sDate) {
+            return this.m_sDate;
+        }
+        else {
+            return "";
+        }
+    }
+
 };
 
 /**
@@ -194,10 +225,23 @@ let SelectArea = function () {
     this.iHeight = "";
 
     /**
+     * Return the bbox as a JSON Obkect
+     * @returns {{southWest: {lat: "", lon:""}, northEast: {lat: "", lon:""}}|string}
+     */
+    this.getValue = function () {
+        try {
+            return this.oBoundingBox;
+        }
+        catch (e) {
+            return "";
+        }
+    }
+
+    /**
      * Return the bounding box as a string.
      * @returns {string} BBox as string: LATN,LONW,LATS,LONE
      */
-    this.getValue = function () {
+    this.getStringValue = function () {
         try {
             if (this.oBoundingBox) {
                 return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2)+"," + this.oBoundingBox.southWest.lat.toFixed(2)+","+ + this.oBoundingBox.northEast.lng.toFixed(2);
@@ -209,10 +253,10 @@ let SelectArea = function () {
         catch (e) {
             return "";
         }
-
-
     }
 };
+
+
 
 /**
  * Text Box Control Class
@@ -226,6 +270,14 @@ let TextBox = function () {
      * @returns {string} String in the textbox
      */
     this.getValue = function () {
+        return this.m_sText;
+    }
+
+    /**
+     * Get the value of the textbox
+     * @returns {string} String in the textbox
+     */
+    this.getStringValue = function () {
         return this.m_sText;
     }
 };
@@ -243,13 +295,22 @@ let CheckBox = function () {
      */
     this.getValue = function () {
         return this.m_bValue;
-        /*if () {
+    }
+
+    /**
+     * Return the value of the checkbox as a string:
+     * 1 = true 0 = false
+     * @returns {string}
+     */
+    this.getStringValue = function () {
+        if (this.m_bValue) {
             return "1";
         }
         else {
             return "0";
-        }*/
+        }
     }
+
 };
 
 /**
@@ -268,7 +329,15 @@ let DropDown = function () {
      * @returns {string}
      */
     this.getValue = function () {
-        return this.sSelectedValues;
+        return this.sSelectedValues.name;
+    }
+
+    /**
+     * Get the selected value
+     * @returns {string}
+     */
+    this.getStringValue = function () {
+        return this.sSelectedValues.name;
     }
 };
 
@@ -289,7 +358,11 @@ let ProductsCombo = function () {
      * @returns {string}
      */
     this.getValue = function () {
-        return this.sSelectedValues;
+        return this.sSelectedValues.name;
+    }
+
+    this.getStringValue = function () {
+        return this.sSelectedValues.name;
     }
 };
 
@@ -308,6 +381,14 @@ let Slider = function () {
      */
     this.getValue = function () {
         return this.m_iValue;
+    }
+
+    /**
+     * Get the selected value as a string
+     * @returns {number}
+     */
+    this.getStringValue = function () {
+        return String(this.m_iValue);
     }
 
 }

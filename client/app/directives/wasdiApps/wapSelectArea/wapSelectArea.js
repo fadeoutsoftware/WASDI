@@ -1,5 +1,5 @@
 angular.module('wasdi.wapSelectArea', [])
-    .directive('wapselectarea', ['MapService',function ($MapService) {
+    .directive('wapselectarea', ['MapService', 'ModalService', function ($MapService, $ModalService) {
         "use strict";
         return {
             restrict: 'E',
@@ -87,6 +87,64 @@ angular.module('wasdi.wapSelectArea', [])
                     oMap.on(L.Draw.Event.DELETESTOP, function (event) {
                         var layer = event.layers;
                     });
+
+                    //
+                    let oModalService = $ModalService;
+
+                    L.control.custom({
+                        position: 'topright',
+                        content : '<div type="button" class="import-insert-bbox-button" title="Insert a bbox by text">'+
+                            '    <i class="import-insert-bbox-icon fa fa-edit" ></i>'+
+                            '</div>',
+                        classes : 'import-insert-bbox-wrapper-button btn-group-vertical btn-group-sm',
+                        style   :
+                            {
+                            },
+                        events:
+                            {
+                                click: function(data)
+                                {
+                                    oModalService.showModal({
+                                        templateUrl: "dialogs/manual_insert_bbox/ManualInsertBboxView.html",
+                                        controller: "ManualInsertBboxController",
+                                        inputs: {
+                                            extras: {}
+                                        }
+                                    }).then(function (modal) {
+                                        modal.element.modal();
+                                        modal.close.then(function (oResult) {
+
+                                            if (oResult==null) return;
+
+                                            let fNorth = parseFloat(oResult.north);
+                                            let fSouth = parseFloat(oResult.south);
+                                            let fEast = parseFloat(oResult.east);
+                                            let fWest = parseFloat(oResult.west);
+
+                                            if (isNaN(fNorth) || isNaN(fSouth) || isNaN(fEast) || isNaN(fWest)) {
+                                                return;
+                                            }
+
+                                            var aoBounds = [[fNorth, fWest], [fSouth, fEast]];
+                                            var oLayer = L.rectangle(aoBounds, {color: "#3388ff", weight: 1});
+
+
+                                            oController.boundingBox.northEast = oLayer._bounds._northEast;
+                                            oController.boundingBox.southWest = oLayer._bounds._southWest;
+
+                                            //remove old shape
+                                            if(oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length!==0){
+                                                oController.m_oDrawnItems.clearLayers();
+                                            }
+
+                                            //save new shape in map
+                                            oController.m_oDrawnItems.addLayer(oLayer);
+                                        });
+                                    });
+                                }
+                            }
+                    }).addTo(oMap);
+
                     return oMap;
                 }
 

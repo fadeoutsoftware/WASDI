@@ -21,7 +21,7 @@
                 <div class="col-12 col-md-6">
                     <div class="appdetails-slider">
                         <ul>
-                            <li angularlightslider="{gallery: true, item: 1, loop:true, slideMargin: 0, thumbItem: 9}" ng-repeat="sImage in m_oController.m_asImages" data-thumb="{{m_oController.getThumbFileNameFromImageName(sImage)}}" >
+                            <li angularlightslider="{gallery: true, item: 1, loop:false, slideMargin: 0, thumbItem: 9, enableTouch:false}" ng-repeat="sImage in m_oController.m_asImages" data-thumb="{{m_oController.getThumbFileNameFromImageName(sImage)}}" >
                                 <img src="{{sImage}}" />
                             </li>
                         </ul>

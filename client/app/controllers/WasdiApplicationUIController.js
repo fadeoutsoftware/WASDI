@@ -104,6 +104,11 @@ var WasdiApplicationUIController = (function() {
          * @type {string}
          */
         this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
+        /**
+         * Flag to know if all the inputs must be rendered as strings or as objects
+         * @type {boolean}
+         */
+        this.m_bRenderAsStrings = false;
 
         /**
          * Text of the Help tab
@@ -143,6 +148,12 @@ var WasdiApplicationUIController = (function() {
 
                 // Create all the components
                 oController.m_aoViewElements = oController.generateViewElements(data);
+
+                if (!utilsIsObjectNullOrUndefined(data.renderAsStrings)) {
+                    if (data.renderAsStrings === true) {
+                        oController.m_bRenderAsStrings = true;
+                    }
+                }
             })
             .error(function(oError ){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
@@ -322,12 +333,18 @@ var WasdiApplicationUIController = (function() {
                 //console.log(oElement.paramName + " ["+oElement.type+"]: " + oElement.getValue());
 
                 // Save the value to the output json
-                oProcessorInput[oElement.paramName] = oElement.getValue();
+                if (this.m_bRenderAsStrings) {
+                    oProcessorInput[oElement.paramName] = oElement.getStringValue();
+                }
+                else  {
+                    oProcessorInput[oElement.paramName] = oElement.getValue();
+                }
+
             }
         }
 
         // Log the parameters
-        //console.log(oProcessorInput);
+        console.log(oProcessorInput);
 
         // Reference to this controller
         let oController = this;
@@ -365,7 +382,6 @@ var WasdiApplicationUIController = (function() {
         else {
             this.executeProcessorInWorkspace(this, sApplicationName, oProcessorInput, this.m_oSelectedWorkspace);
         }
-
     }
 
     /**
@@ -386,6 +402,7 @@ var WasdiApplicationUIController = (function() {
     WasdiApplicationUIController.prototype.newWorkspaceClicked = function () {
         this.m_oSelectedWorkspace = null;
         this.m_aoWorkspaceList = [];
+        this.m_aoProducts = [];
 
         let asTabs = this.getTabs();
 
@@ -394,7 +411,7 @@ var WasdiApplicationUIController = (function() {
 
             for (var iControl=0; iControl<aoControls.length; iControl++) {
                 if (aoControls[iControl].type=="productscombo") {
-                    aoControls[iControl].listOfValues = oController.m_aoProducts;
+                    aoControls[iControl].asListValues = this.m_aoProducts;
                 }
             }
         }

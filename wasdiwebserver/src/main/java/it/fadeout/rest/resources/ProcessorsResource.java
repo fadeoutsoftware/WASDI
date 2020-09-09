@@ -853,14 +853,16 @@ public class ProcessorsResource  {
 
 			String sOutputResult;
 			String sOutputCumulativeResult = "";
-			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
+			Utils.debugLog("ProcessorsResource.help: Retrieving Output from Server .... \n");
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
+				//Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
 				
 				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
 			}
 
 			oConnection.disconnect();
+			
+			Utils.debugLog("ProcessorsResource.help: got help\n");
 			
 			oPrimitiveResult.setBoolValue(true);
 			oPrimitiveResult.setStringValue(sOutputCumulativeResult);
