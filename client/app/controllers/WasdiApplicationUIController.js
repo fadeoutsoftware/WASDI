@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, $sce) {
         /**
          * Angular Scope
          */
@@ -51,6 +51,10 @@ var WasdiApplicationUIController = (function() {
          * Product Service
          */
         this.m_oProductService = oProductService;
+        /**
+         * SCE Angular Service
+         */
+        this.m_oSceService = $sce;
         /**
          * Contains one property for each tab. Each Property is an array of the Tab Controls
          * @type {*[]}
@@ -100,6 +104,12 @@ var WasdiApplicationUIController = (function() {
          * @type {string}
          */
         this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
+
+        /**
+         * Text of the Help tab
+         * @type {string}
+         */
+        this.m_sHelpHtml = "No Help Avaiable";
 
         let oController = this;
 
@@ -154,6 +164,45 @@ var WasdiApplicationUIController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
         });
 
+        // Retrive also the help
+        this.m_oProcessorService.getHelpFromProcessor(this.m_sSelectedApplication).success(function (data) {
+
+            if(utilsIsObjectNullOrUndefined(data) === false)
+            {
+                var sHelpMessage = data.stringValue;
+                if(utilsIsObjectNullOrUndefined(sHelpMessage) === false )
+                {
+                    try {
+                        oHelp = JSON.parse(sHelpMessage);
+                        sHelpMessage = oHelp.help;
+                    }
+                    catch(err) {
+                        sHelpMessage = data.stringValue;
+                    }
+
+                }
+                else
+                {
+                    sHelpMessage = "";
+                }
+                //If the message is empty from the server or is null
+                if(sHelpMessage === "")
+                {
+                    sHelpMessage = "There isn't any help message."
+                }
+
+                var oConverter = new showdown.Converter();
+
+                oController.m_sHelpHtml = oController.m_oSceService.trustAsHtml(oConverter.makeHtml(sHelpMessage));
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP HELP");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP HELP");
+            oController.cleanAllExecuteWorkflowFields();
+        });
     }
 
     /**
@@ -425,7 +474,8 @@ var WasdiApplicationUIController = (function() {
         'WorkspaceService',
         'RabbitStompService',
         '$state',
-        'ProductService'
+        'ProductService',
+        '$sce'
     ];
 
     return WasdiApplicationUIController;

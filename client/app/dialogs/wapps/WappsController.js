@@ -223,7 +223,7 @@ var WappsController = (function() {
     }
 
     WappsController.prototype.getHelpFromProcessor = function() {
-        console.log("HELP - " + this._selectedProcessor.processorName);
+        //console.log("HELP - " + this._selectedProcessor.processorName);
 
         var oController = this;
 
