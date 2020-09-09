@@ -150,6 +150,12 @@
                                     <div class="input-text-label ml-3">{{viewElement.label}}</div>
                                 </div>
 
+                                <!--slider-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-4 d-flex align-items-center"  ng-if="viewElement.type === 'slider'">
+                                    <wapslider value="viewElement.m_iValue" min="viewElement.m_iMin" max="viewElement.m_iMax" label-text="viewElement.label"></wapslider>
+                                    <div class="input-text-label ml-3">{{viewElement.label}}</div>
+                                </div>
+
 
                             </div>
 

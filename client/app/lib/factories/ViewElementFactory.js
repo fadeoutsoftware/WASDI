@@ -65,6 +65,20 @@ function ViewElementFactory() {
                 oViewElement.m_bValue = oControl.default;
             }
         }
+        else if(oControl.type === "slider") {
+            oViewElement = new Slider();
+
+            if(utilsIsObjectNullOrUndefined(oControl.min) == false) {
+                oViewElement.m_iMin = oControl.min;
+            }
+            if(utilsIsObjectNullOrUndefined(oControl.max) == false) {
+                oViewElement.m_iMax = oControl.max;
+            }
+            if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
+                oViewElement.m_iValue = oControl.default;
+            }
+
+        }
         else {
             oViewElement = new TextBox();
         }
@@ -278,3 +292,22 @@ let ProductsCombo = function () {
         return this.sSelectedValues;
     }
 };
+
+/**
+ * Slider for a numeric input
+ * @constructor
+ */
+let Slider = function () {
+    this.m_iMin = 0;
+    this.m_iMax = 10;
+    this.m_iValue = 5;
+
+    /**
+     * Get the selected value
+     * @returns {number}
+     */
+    this.getValue = function () {
+        return this.m_iValue;
+    }
+
+}
