@@ -208,7 +208,7 @@
     max-width: 200px;
 }
 .moment-picker .moment-picker-container {
-    z-index: 500;
+    z-index: 500 !important;
 }
 
 /*DROPDOWN*/
@@ -224,7 +224,7 @@
     border: 1px solid #ccc !important;
     border-radius: 4px !important;
 }
-.dropdown {
+.dropdownUI {
     .dropdown-menu {
         width: 100%;
         max-height: 25vh;
