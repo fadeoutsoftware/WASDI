@@ -19,7 +19,7 @@ angular.module('wasdi.wapSlider', [])
                     showSelectionBar: true,
                     floor: scope.min,
                     ceil: scope.max,
-                    showTicksValues: true
+                    showTicks: true
                 }
             }
         };
