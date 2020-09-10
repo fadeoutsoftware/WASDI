@@ -134,25 +134,52 @@ var ProcessesLogsController = (function() {
 
     ProcessesLogsController.prototype.getProcessDuration = function (oProcess) {
         //time by server
-        var oStartTime = new Date(oProcess.operationStartDate);
+        let oStartTime = new Date(oProcess.operationStartDate);
+        let oEndTime = new Date(oProcess.operationEndDate);
 
-        var oEndTime = new Date(oProcess.operationEndDate);
         if( utilsIsValidDate(oEndTime) === false )
         {
             oEndTime = new Date();
         }
         //pick time
-        var result =  Math.abs(oEndTime-oStartTime);
+        let iMilliseconds =  Math.abs(oEndTime-oStartTime);
         //approximate result
-        var seconds = Math.ceil(result / 1000);
+        let iSecondsTimeSpan = Math.ceil(iMilliseconds / 1000);
 
-        if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+        if(utilsIsObjectNullOrUndefined(iSecondsTimeSpan) || iSecondsTimeSpan < 0) iSecondsTimeSpan = 0;
 
-        var oDate = new Date(1970, 0, 1);
-        oDate.setSeconds(0 + seconds);
+        // Calculate number of hours
+        let iHours = Math.trunc(iSecondsTimeSpan / (3600));
 
-        return oDate;
+        let iMinutesReminder = iSecondsTimeSpan - (iHours*3600);
+        let iMinutes = Math.trunc(iMinutesReminder/60);
+        let iSeconds = iMinutesReminder - (iMinutes*60);
+
+        let sTimeSpan = this.renderTwoDigitNumber(iHours) + ":" + this.renderTwoDigitNumber(iMinutes) + ":" + this.renderTwoDigitNumber(iSeconds);
+
+
+        //var oDate = new Date(1970, 0, 1);
+        //oDate.setSeconds(0 + iSecondsTimeSpan);
+
+        //return oDate;
+        return sTimeSpan;
     };
+
+    ProcessesLogsController.prototype.renderTwoDigitNumber = function (iNumber) {
+        // Render the number
+        let sNumber = "00";
+
+        if (iNumber>0) {
+            if (iNumber<10) {
+                sNumber = "0" + String(iNumber);
+            }
+            else {
+                sNumber = String(iNumber);
+            }
+        }
+
+        return sNumber;
+    }
 
     ProcessesLogsController.prototype.generateFile = function(sText)
     {
