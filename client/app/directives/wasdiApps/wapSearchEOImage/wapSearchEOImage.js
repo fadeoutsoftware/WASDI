@@ -7,6 +7,7 @@ angular.module('wasdi.wapSearchEOImage', [])
         "use strict";
         return {
             restrict: 'E',
+            templateUrl:"directives/wasdiApps/wapSearchEOImage/wapSearchEOImage.html",
             scope: {},
 
             // * Text binding ('@' or '@?') *
@@ -17,47 +18,6 @@ angular.module('wasdi.wapSearchEOImage', [])
                 lightSearchObject: '=',
                 // deleted: '&'
             },
-
-            template: `
-            <div ng-hide="$ctrl.m_bAreVisibleProducts">
-                <wapselectarea bounding-box="$ctrl.lightSearchObject.oSelectArea.oBoundingBox"
-                                height-map="$ctrl.lightSearchObject.oSelectArea.iHeight"
-                                width-map="$ctrl.lightSearchObject.oSelectArea.iWidth"></wapselectarea>
-
-                <wapdatetimepicker date-time="$ctrl.lightSearchObject.oStartDate.oDate"></wapdatetimepicker>
-
-                <wapdatetimepicker date-time="$ctrl.lightSearchObject.oEndDate.oDate"></wapdatetimepicker>
-
-                <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()" ng-disabled = "$ctrl.isAreaSelected() === false">
-                    Search
-                </button>
-            </div>
-
-
-            <div ng-if="$ctrl.m_bAreVisibleProducts" >
-                <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.backToLightSearch()">
-                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                    back
-                </button>
-
-                <wapproductlist height-table = "'400'"
-                                          parent-controller = "$ctrl"
-                                          products-list= "$ctrl.lightSearchObject.oTableOfProducts.aoProducts"
-                                          loading-data = "$ctrl.m_bLoadingData"
-                                          is-available-selection = "$ctrl.lightSearchObject.oTableOfProducts.isAvailableSelection"
-                                          is-single-selection = "$ctrl.lightSearchObject.oTableOfProducts.isSingleSelection"
-                                          single-selection-layer ="$ctrl.lightSearchObject.oTableOfProducts.oSingleSelectionLayer" >
-
-                </wapproductlist>
-
-                <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.selectedProducts()">
-                    <i class="fa fa-floppy-o" aria-hidden="true"></i>
-                    save selection
-                </button>
-            </div>
-
-
-            `,
             controller: function() {
                 //todo check the main object ?
                 this.m_aListOfProvider = [];
