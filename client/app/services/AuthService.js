@@ -27,12 +27,12 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
 
 
     //todo replace with appropriate client ID
-    var m_sAuthClientId = 'wasdi'
+    var m_sAuthClientId = 'wasdi-client'
 
     //todo fix endpoints
     var keycloackConfiguration = {
         //'token_endpoint': window.app.url.oidcIssuer + "protocol/openid-connect/token/",
-        'token_endpoint': oConstantsService.getAUTHURL() + "auth/realms/demo/protocol/openid-connect/token",
+        'token_endpoint': oConstantsService.getAUTHURL() + "auth/realms/wasdi/protocol/openid-connect/token",
         //'end_session_endpoint': window.app.url.oidcIssuer + "protocol/openid-connect/logout/"
         'end_session_endpoint': oConstantsService.getAUTHURL() + "protocol/openid-connect/logout/"
     }
@@ -178,7 +178,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         return $http.post(sAddress,
             sParams,
             {'headers': {'Content-Type': 'application/x-www-form-urlencoded'}}
-        )
+        );
 
 
         // return this.m_oHttp.post(this.AUTHURL + '/auth/login', oCredentials);
