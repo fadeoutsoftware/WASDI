@@ -75,12 +75,26 @@ service('ConstantsService', [function () {
 
         if (this.m_oUser != null)
         {
+            //get the token
+            // var oAccessToken = window.localStorage.access_token;
+            // try {
+            //     var oDecoded = jwt.verify(oAccessToken);
+            // } catch (err){
+            //     //the token is no longer valid
+            //     if(err[""]=="TokenExpiredError") {
+            //         //TODO refresh the token, update both tokens and return the access token
+            //     }
+            // }
+            //decode the token
+            //var oDecodedToken = jwt_decode(oAccessToken);
+
+            //TODO  then return the access token
             if (angular.isDefined(this.m_oUser.sessionId))
                 return this.m_oUser.sessionId;
         }
 
         return "";
-    }
+    };
 
     this.pad = function (number, length){
         var str = "" + number;

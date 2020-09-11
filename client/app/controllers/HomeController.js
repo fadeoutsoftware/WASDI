@@ -130,7 +130,7 @@ var HomeController = (function() {
         this.m_oAuthService.login(oLoginInfo).success(
             function (data,status) {
                 oController.callbackLogin(data, status,oController)
-            }).error(function (data,status) {
+            }).error(function (error) {
             //alert('error');
             utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
 

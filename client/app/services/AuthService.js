@@ -65,7 +65,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
             return {'access_token': window.localStorage.access_token, 'refresh_token':window.localStorage.refresh_token}
         delete window.localStorage.access_token
         delete window.localStorage.refresh_token
-        return null
+        return null;
     }
 
     function saveToken(token) {
