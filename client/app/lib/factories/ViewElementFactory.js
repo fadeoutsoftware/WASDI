@@ -116,6 +116,7 @@ let SearchEOImage = function() {
     this.oEndDate = new DateTimePicker();
     this.oSelectArea = new SelectArea();
     this.aoProviders = [];
+    this.aoProviders.push("ONDA");
     this.aoMissionsFilters = [];
 
 
