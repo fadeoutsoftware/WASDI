@@ -299,6 +299,25 @@ label.switch {
     }
 }
 
+/*SLIDER*/
+.wapslider-menu-container{
+    .rzslider .rz-selection {
+        background-color: $wasdiblue;
+    }
+    .rzslider .rz-pointer {
+        background-color: $wasdiblue;
+        &.rz-active:after {
+            background-color: $wasdigreen;
+        }
+    }
+    .rzslider .rz-tick.rz-selected {
+        background-color: $wasdiblue;
+    }
+
+
+
+}
+
 /*SEARCH EO*/
 .searchEO {
     .btn-success {
@@ -306,5 +325,8 @@ label.switch {
         &:hover {
             background-color: $darkwasdigreen !important;
         }
+    }
+    .btn-primary:hover {
+        background-color: $darkwasdiblue !important;
     }
 }
