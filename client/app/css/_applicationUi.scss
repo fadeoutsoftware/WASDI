@@ -328,5 +328,9 @@ label.switch {
     }
     .btn-primary:hover {
         background-color: $darkwasdiblue !important;
+        border-color:  $darkwasdiblue !important;
+    }
+    .image-cell .label {
+        display: none;
     }
 }
