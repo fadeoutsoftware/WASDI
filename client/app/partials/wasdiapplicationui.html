@@ -123,7 +123,7 @@
 
                                 <!--products combo -->
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4" ng-if="viewElement.type === 'productscombo'" >
-                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <div class="input-text-label pt-2 mb-2">{{viewElement.label}}</div>
                                     <wapproductscombo list-of-values="viewElement.asListValues"
                                                  selected-value="viewElement.sSelectedValues"
                                                  enable-search-filter="viewElement.bEnableSearchFilter"
@@ -152,8 +152,8 @@
                                 </div>
 
                                 <!--searcheoimages-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'searcheoimage'" >
-                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                <div class="col-xs-12 col-md-12 border-bottom py-2" ng-if="viewElement.type === 'searcheoimage'" >
+                                    <div class="input-text-label pt-2 mb-2">{{viewElement.label}}</div>
                                     <wapsearcheoimage light-search-object="viewElement"></wapsearcheoimage>
                                 </div>
 

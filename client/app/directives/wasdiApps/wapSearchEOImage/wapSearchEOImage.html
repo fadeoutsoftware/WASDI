@@ -1,23 +1,25 @@
-<div ng-hide="$ctrl.m_bAreVisibleProducts">
+<div class="searchEO" ng-hide="$ctrl.m_bAreVisibleProducts">
     <wapselectarea bounding-box="$ctrl.lightSearchObject.oSelectArea.oBoundingBox"
                    height-map="$ctrl.lightSearchObject.oSelectArea.iHeight"
                    width-map="$ctrl.lightSearchObject.oSelectArea.iWidth"></wapselectarea>
 
-    <div class="d-flex">
-        <wapdatetimepicker date-time="$ctrl.lightSearchObject.oStartDate.oDate" class="mr-2"></wapdatetimepicker>
-        <wapdatetimepicker date-time="$ctrl.lightSearchObject.oEndDate.oDate"></wapdatetimepicker>
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex">
+            <wapdatetimepicker date-time="$ctrl.lightSearchObject.oStartDate.oDate" class="mr-2"></wapdatetimepicker>
+            <wapdatetimepicker date-time="$ctrl.lightSearchObject.oEndDate.oDate"></wapdatetimepicker>
+        </div>
+        <div>
+            <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()" ng-disabled = "$ctrl.isAreaSelected() === false">
+                Search
+            </button>
+        </div>
     </div>
-    <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()" ng-disabled = "$ctrl.isAreaSelected() === false">
-        Search
-    </button>
+
 </div>
 
 
-<div ng-if="$ctrl.m_bAreVisibleProducts" >
-    <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.backToLightSearch()">
-        <i class="fa fa-arrow-left" aria-hidden="true"></i>
-        back
-    </button>
+<div ng-if="$ctrl.m_bAreVisibleProducts" class="searchEO" >
+
 
     <wapproductlist height-table = "'400'"
                     parent-controller = "$ctrl"
@@ -28,9 +30,16 @@
                     single-selection-layer ="$ctrl.lightSearchObject.oTableOfProducts.oSingleSelectionLayer" >
 
     </wapproductlist>
+    <div class="d-flex justify-content-between">
+        <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.backToLightSearch()">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            back
+        </button>
+        <button class="btn btn-success btn-wasdi search-button mb-2" ng-click="$ctrl.selectedProducts()">
+            <i class="fa fa-floppy-o" aria-hidden="true"></i>
+            save selection
+        </button>
+    </div>
 
-    <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.selectedProducts()">
-        <i class="fa fa-floppy-o" aria-hidden="true"></i>
-        save selection
-    </button>
+
 </div>

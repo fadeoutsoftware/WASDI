@@ -298,3 +298,13 @@ label.switch {
         border-radius: 20px;
     }
 }
+
+/*SEARCH EO*/
+.searchEO {
+    .btn-success {
+        background-color: $wasdigreen !important;
+        &:hover {
+            background-color: $darkwasdigreen !important;
+        }
+    }
+}
