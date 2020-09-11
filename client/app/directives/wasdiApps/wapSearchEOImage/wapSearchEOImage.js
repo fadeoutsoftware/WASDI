@@ -116,10 +116,6 @@ angular.module('wasdi.wapSearchEOImage', [])
 
                     $LightSearchService.lightSearch(sOpenSearchGeoselection,oOpenSearchDates,oProvider, aoOpenSearchMissions,
                                                     oCallback, oCallbackError);
-
-
-
-
                 };
 
                 this.loadConfiguration = function(){
@@ -135,7 +131,7 @@ angular.module('wasdi.wapSearchEOImage', [])
                 // initSelectedProvider It's a kid of adapter
                 this.initSelectedProvider = function(){
                     if(this.m_aListOfProvider === null || this.m_aListOfProvider === undefined){
-                        return null;//TODO THROW EXCEPTION?
+                        return null;
                     }
                     let iNumberOfProviders = this.m_aListOfProvider.length;
 
