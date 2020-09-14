@@ -81,15 +81,20 @@
                 <div class="sidebar-nav col-12 col-md-3 bg-wasdi-blue py-3 px-0">
                     <!-- TAB NAVIGATION -->
                     <div>
-                        <div class="side-tab px-4 py-2" ng-repeat="sTab in m_oController.getTabs()" ng-class="{'active':m_oController.m_sSelectedTab === sTab}" ng-click="m_oController.m_sSelectedTab = sTab" >
+                        <div class="side-tab px-4 py-2" ng-repeat="sTab in m_oController.getTabs()" ng-class="{'active':m_oController.m_sSelectedTab === sTab}" ng-click="m_oController.activeTabChanged(sTab)" >
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 {{sTab}}
                             </a>
                         </div>
 
-                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}" ng-click="m_oController.m_sSelectedTab = 'help'" >
+                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}" ng-click="m_oController.activeTabChanged('help')" >
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 Help
+                            </a>
+                        </div>
+                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}" ng-click="m_oController.activeTabChanged('json_prms')" >
+                            <a class="text-white" href="" role="tab" data-toggle="tab">
+                                JSON
                             </a>
                         </div>
 
@@ -177,6 +182,11 @@
 
                         <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}">
                             <div ng-bind-html="m_oController.m_sHelpHtml"></div>
+                        </div>
+
+                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}">
+                            <!--div ng-bind-html="m_oController.m_sJSONParam"></div-->
+                            <textarea  readonly style="font-family:'Courier New';font-size: 16px;width: 100%;" rows="40" ng-model="m_oController.m_sJSONParam"></textarea>
                         </div>
 
                     </div>

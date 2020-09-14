@@ -47,14 +47,14 @@
                 <div class="row">
                     <div class="col-md-6"> <!-- TODO PAOLO DA PRENDERE SOLO QUELLI CON INDEX DISPARI-->
                         <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
-                            <input class="mr-2" id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox" ng-checked="checked=m_oController.isCategoryChecked(oCategory.id)" ng-click="m_oController.categoryClicked(oCategory.id)">
-                            <label for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
+                            <input ng-if="$even" class="mr-2" id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox" ng-checked="checked=m_oController.isCategoryChecked(oCategory.id)" ng-click="m_oController.categoryClicked(oCategory.id)">
+                            <label ng-if="$even" for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
                         </div>
                     </div>
                     <div class="col-md-6"> <!-- TODO PAOLO DA PRENDERE SOLO QUELLI CON INDEX PARI-->
                         <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
-                            <input class="mr-2" id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox" ng-checked="checked=m_oController.isCategoryChecked(oCategory.id)" ng-click="m_oController.categoryClicked(oCategory.id)">
-                            <label for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
+                            <input ng-if="$odd" class="mr-2" id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox" ng-checked="checked=m_oController.isCategoryChecked(oCategory.id)" ng-click="m_oController.categoryClicked(oCategory.id)">
+                            <label ng-if="$odd" for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
                         </div>
                     </div>
                 </div>

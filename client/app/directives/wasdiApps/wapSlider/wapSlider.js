@@ -1,5 +1,5 @@
 angular.module('wasdi.wapSlider', [])
-    .directive('wapslider', function () {
+    .directive('wapslider', [ '$rootScope','$timeout' , function ($rootScope, $timeout) {
         "use strict";
         return{
             restrict : 'EAC',
@@ -21,6 +21,31 @@ angular.module('wasdi.wapSlider', [])
                     ceil: scope.max,
                     showTicks: true
                 }
+
+                let oThisScope = scope;
+                let oTimeout = $timeout;
+
+                $rootScope.$on("ActiveTabChanged", function (evt, data) {
+                    console.log("Active Tab Changed")
+
+                    oTimeout(function () {
+                        oThisScope.$$childTail.slider.init();
+                    }, 1000)
+                })
+/*
+
+
+
+                let test = angular.element('wapslider-menu-container');
+                /*
+
+                scope.$watch(function() { return angular.element('wapslider-menu-container'); }, function(newValue) {
+                    if (newValue.match(/ng-hide/) === null) {
+                        // Element is show.
+
+                    }
+                });
+*/
             }
         };
-    });
+    }]);

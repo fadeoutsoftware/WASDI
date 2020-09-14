@@ -13,11 +13,15 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, $sce) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, $sce, $rootScope) {
         /**
          * Angular Scope
          */
         this.m_oScope = $scope;
+        /**
+         * Root scope
+         */
+        this.m_oRootScope = $rootScope;
         /**
          * Reference to the controller
          * @type {WasdiApplicationUIController}
@@ -116,6 +120,12 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_sHelpHtml = "No Help Avaiable";
 
+        /**
+         * JSON Representation of the actual parameters
+         * @type {string}
+         */
+        this.m_sJSONParam = "{}";
+
         let oController = this;
 
         // Check if we have the selected application
@@ -134,8 +144,7 @@ var WasdiApplicationUIController = (function() {
         /**
          * Ask the Processor UI to the WASDI server
          */
-        this.m_oProcessorService.getProcessorUI(this.m_sSelectedApplication)
-            .success(function(data,status){
+        this.m_oProcessorService.getProcessorUI(this.m_sSelectedApplication).success(function(data,status){
                 // For each Tab
                 for (let iTabs=0; iTabs<data.tabs.length; iTabs++) {
                     // Get the tab
@@ -307,15 +316,9 @@ var WasdiApplicationUIController = (function() {
         }).error(function () {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
         });
-
-
     }
 
-    /**
-     * Generate the JSON that has to be sent to the Procesor
-     */
-    WasdiApplicationUIController.prototype.generateParamsAndRun = function() {
-
+    WasdiApplicationUIController.prototype.createParams = function() {
         // Output initialization
         let oProcessorInput = {};
 
@@ -342,6 +345,17 @@ var WasdiApplicationUIController = (function() {
 
             }
         }
+
+        return oProcessorInput;
+    }
+
+    /**
+     * Generate the JSON that has to be sent to the Procesor
+     */
+    WasdiApplicationUIController.prototype.generateParamsAndRun = function() {
+
+        // Output initialization
+        let oProcessorInput = this.createParams();
 
         // Log the parameters
         console.log(oProcessorInput);
@@ -382,6 +396,32 @@ var WasdiApplicationUIController = (function() {
         else {
             this.executeProcessorInWorkspace(this, sApplicationName, oProcessorInput, this.m_oSelectedWorkspace);
         }
+    }
+
+    /**
+     * Active Tab Changed
+     * @param sTab
+     */
+    WasdiApplicationUIController.prototype.activeTabChanged = function (sTab) {
+
+        if (sTab != this.m_sSelectedTab) {
+            // Save the new tab
+            this.m_sSelectedTab = sTab
+
+            if (sTab != "help" && sTab != "json_prms") {
+                // Notify the change
+                this.m_oRootScope.$broadcast("ActiveTabChanged")
+            }
+
+            if (sTab == "json_prms") {
+                this.showParamsJSON();
+            }
+        }
+    }
+
+    WasdiApplicationUIController.prototype.showParamsJSON = function () {
+        let oProcessorInput = this.createParams();
+        this.m_sJSONParam =  this.m_oSceService.trustAsHtml(JSON.stringify(oProcessorInput, undefined, 4));
     }
 
     /**
@@ -492,7 +532,8 @@ var WasdiApplicationUIController = (function() {
         'RabbitStompService',
         '$state',
         'ProductService',
-        '$sce'
+        '$sce',
+        '$rootScope'
     ];
 
     return WasdiApplicationUIController;
