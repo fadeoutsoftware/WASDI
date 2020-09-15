@@ -6,6 +6,9 @@
 ; Last Update: 2020-05-15
 ;
 ; History
+; 3.1.2 - 2020-09-15
+;   Fixed local save file Bug with workspace of another user
+;
 ; 3.1.1 - 2020-05-24
 ;   Fixed local save file Bug
 ;
@@ -942,7 +945,7 @@ FUNCTION WASDIGETFULLPRODUCTPATH, sProductName
 		result = FILE_TEST(sFullPath)
 		
 		IF (result NE '1') THEN BEGIN
-			sOnlyPath = basepath + user +'/' + activeworkspace
+			sOnlyPath = basepath + workspaceowner +'/' + activeworkspace
 			FILE_MKDIR, sOnlyPath
 			print, 'WASDI File not present in local PC. Starting Autodownload'
 			WASDIDOWNLOADFILE, sProductName, sFullPath
