@@ -155,9 +155,9 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
-		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token/introspect");
-		s_sClientId = getInitParameter("keycloak_confidentialClient", "wasdi_api");
-		s_sClientSecret = getInitParameter("keycloak_clientSecret", "1dd2e17c-3ce6-4851-891a-d689cf8bd107");
+		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", null);
+		s_sClientId = getInitParameter("keycloak_confidentialClient", null);
+		s_sClientSecret = getInitParameter("keycloak_clientSecret", null);
 		
 		try {
 			// If this is not the main node
