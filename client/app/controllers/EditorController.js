@@ -662,8 +662,11 @@ var EditorController = (function () {
     EditorController.prototype.productIsNotGeoreferencedRectangle2DMap = function (sColor, sGeoserverBBox, asBbox, sLayerId) {
         if (this.m_oMapService.isProductGeoreferenced(asBbox, sGeoserverBBox) === false) {
             var oRectangleBoundingBoxMap = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox, sColor);
-            //the options.layers property is used for remove the rectangle to the map
-            oRectangleBoundingBoxMap.options.layers = "wasdi:" + sLayerId;
+
+            if (utilsIsObjectNullOrUndefined(oRectangleBoundingBoxMap) == false) {
+                //the options.layers property is used for remove the rectangle to the map
+                oRectangleBoundingBoxMap.options.layers = "wasdi:" + sLayerId;
+            }
         }
     };
 
