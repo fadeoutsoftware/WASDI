@@ -30,8 +30,14 @@ angular.module('wasdi.wapSlider', [])
 
                     oTimeout(function () {
                         oThisScope.$$childTail.slider.init();
-                    }, 1000)
+                    }, 500)
                 })
+
+
+                oTimeout(function () {
+                    oThisScope.$$childTail.slider.init();
+                }, 500)
+
 /*
 
 
