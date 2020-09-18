@@ -49,14 +49,10 @@ var EditorController = (function () {
         //Url of the Preview Band Image (2D - Editor Mode)
         this.m_sPreviewUrlSelectedBand = "";
         // this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
-        //Url of the Band Image (2D - Editor Mode)
+        // Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
 
-        // var oThat = this;
-        // this.resizeMapOnBrowserResizeEvent = function(){
-        //     oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
-        // }
         this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
         // Object used to exchange information with the image preview directive
         this.m_oImagePreviewDirectivePayload = {
@@ -121,7 +117,6 @@ var EditorController = (function () {
         oMapService.removeLayersFromMap();
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
-        // this.m_oGlobeService.initGlobeWithLayersPicker('cesiumContainer2');
 
         //if there isn't workspace
         if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty(this.m_oActiveWorkspace)) {
@@ -365,88 +360,6 @@ var EditorController = (function () {
         }
     }
 
-
-    //
-    // EditorController.prototype.navbarMenuTranslation = function()
-    // {
-    //     // var oController = this;
-    //     //
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_SFTP').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[0].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_TOOLTIP_ICON_RADAR').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[1].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_TOOLTIP_ICON_EYE').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[2].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].name  = text;
-    //     // });
-    //     //
-    //     //
-    //     //
-    //     // //RADAR MENU
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_ORBIT').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[1].subMenu[0].name = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[1].subMenu[1].name = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[1].subMenu[2].name = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[1].subMenu[3].name = text;
-    //     // });
-    //     // //OPTICAL MENU
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[2].subMenu[0].name  = text;
-    //     // });
-    //     // //PROCESSOR MENU
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_MIDA').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[6].name  = text;
-    //     // });
-    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_JRC_PROCESSOR').then(function(text)
-    //     // {
-    //     //     oController.m_aoNavBarMenu[3].subMenu[7].name  = text;
-    //     // });
-    // };
-
     /*********************************************************** VIEW METHODS**********************************************************/
 
     EditorController.prototype.onEditBtnClick = function () {
@@ -468,15 +381,6 @@ var EditorController = (function () {
                 keyboard: false
             });
             modal.close.then(function (result) {
-                // if(utilsIsObjectNullOrUndefined(result) === true || result.length === 0)
-                // {
-                //     //oController.m_sTypeOfFilterSelected = 'Time period';
-                //     oController.setFilterTypeAsTimePeriod();
-                //     return false;
-                // }
-                //
-                // oController.m_oAdvanceFilter.savedData = result;
-                // return true;
             })
         });
 

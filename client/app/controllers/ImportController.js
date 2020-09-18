@@ -1,4 +1,4 @@
-/**
+3/**
  * Created by a.corrado on 30/11/2016.
  */
 
@@ -157,6 +157,7 @@ var ImportController = (function() {
                 this.openWorkspace(this.m_oState.params.workSpace);
                 this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
+
         }
         else
         {
@@ -508,6 +509,7 @@ var ImportController = (function() {
     };
 
     ImportController.prototype.setFilter = function() {
+
         this.m_oAdvancedFilterService.setAdvancedFilter(this.m_aoMissions);
         this.m_oModel.missionFilter = this.m_oAdvancedFilterService.getAdvancedFilter();
         this.m_oSearchService.setMissionFilter(this.m_oModel.missionFilter);
@@ -530,6 +532,7 @@ var ImportController = (function() {
         {
             if(this.m_aListOfProvider[iIndexProvider].selected === true)
             {
+
                 this.searchAndCount(this.m_aListOfProvider[iIndexProvider]);
             }
         }
@@ -1212,70 +1215,6 @@ var ImportController = (function() {
         }
         return null;
     }
-
-    /* Get bounds */
-
-    ImportController.prototype.getBoundsByLayerFootPrint=function(oLayer)
-    {
-        var sKeyWord = "footprint"; //inside name property, if there is write footprint there are the BOUNDS
-        if(utilsIsObjectNullOrUndefined(oLayer))
-            return null;
-        var aoStr = oLayer.str;
-        var iStrLength = 0;
-        if(!utilsIsObjectNullOrUndefined(aoStr))
-        {
-            if(!utilsIsObjectNullOrUndefined(aoStr.length)) iStrLength = aoStr.length;
-        }
-
-        var sSourceProjection = "WGS84";
-        var sDestinationProjection = "GOOGLE";
-
-        //look for content with substring POLYGON
-        var aasNewContent = [];
-        for(var iIndexStr = 0; iIndexStr < iStrLength; iIndexStr++)
-        {
-            if(aoStr[iIndexStr].name == sKeyWord)//we find bounds
-            {
-                var sContent;
-                if(this.m_oConstantsService.testMode() == true)
-                    sContent = aoStr[iIndexStr].text;
-                else
-                    sContent = aoStr[iIndexStr].content;
-
-                if(utilsIsObjectNullOrUndefined(sContent))
-                    return null;
-                sContent = sContent.replace("POLYGON ","");
-                sContent = sContent.replace("((","");
-                sContent = sContent.replace("))","");
-                sContent = sContent.split(",");
-
-                for (var iIndexBounds = 0; iIndexBounds < sContent.length; iIndexBounds++)
-                {
-                    var aBounds = sContent[iIndexBounds];
-                    var aNewBounds = aBounds.split(" ");
-
-                    //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
-
-                    //var aBounds = sContent[iIndexBounds];
-                    //var aNewBounds = aBounds.split(" ");
-
-                    var oLatLonArray = [];
-
-                    oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
-                    oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
-
-
-                    //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
-
-                    aasNewContent.push(oLatLonArray);
-                }
-
-            }
-        }
-
-        return aasNewContent;
-    };
-
 
     /* CONVERT POLYGON FORMAT TO BOUND FORMAT */
     ImportController.prototype.polygonToBounds=function (sContent) {

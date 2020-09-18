@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import java.util.ArrayList;
+
 /**
  * Processor Entity
  * Represents a User Processor uploaded to WASDI 
@@ -12,6 +14,7 @@ public class Processor {
 	 * Identifier of the processor
 	 */
 	private String processorId;
+
 	/**
 	 * User owner of the processor
 	 */
@@ -20,6 +23,10 @@ public class Processor {
 	 * Processor Name
 	 */
 	private String name;
+	/**
+	 * Processor Friendly Name
+	 */
+	private String friendlyName;
 	/**
 	 * Processor Version
 	 */
@@ -39,7 +46,8 @@ public class Processor {
 	/**
 	 * Processor first deploy nodeCode
 	 */
-	private String nodeCode;	
+	private String nodeCode;
+	
 	/**
 	 * Processor first deploy nodeUrl
 	 */
@@ -51,6 +59,36 @@ public class Processor {
 	private long timeoutMs = 1000l*60l*60l*3l;
 	
 	/**
+	 * Price for on-demand execution
+	 */
+	private Float ondemandPrice = 0.0f;
+	
+	/**
+	 * Price for a subscription
+	 */
+	private Float subscriptionPrice = 0.0f; 
+	
+	/**
+	 * Application external link
+	 */
+	private String link = "";
+	
+	/**
+	 * Application reference email
+	 */
+	private String email = "";
+	
+	/**
+	 * Upload Date
+	 */
+	private Double uploadDate;
+	
+	/**
+	 * Last Update Date
+	 */
+	private Double updateDate;
+	
+	/**
 	 * Flag to know if it is public or not
 	 */
 	private int isPublic = 1;
@@ -60,11 +98,52 @@ public class Processor {
 	 */
 	private String parameterSample="";
 	
+	/**
+	 * Flag to know if the application must be shown in the store or not
+	 */
+	private boolean showInStore = false;
+	
+	/**
+	 * Long description
+	 */
+	private String longDescription = "";
+	
+	/**
+	 * If the application has no logo it has a placeholder image. Here there is stored 
+	 * the random placeholder image index assigned once for each processor
+	 */
+	private int noLogoPlaceholderIndex = -1;
+	
+	
+	/**
+	 * List of associated categories
+	 */
+	private ArrayList<String> categories = new ArrayList<String>();
+	
+	public ArrayList<String> getCategories() {
+		return categories;
+	}
+	public void setCategories(ArrayList<String> categories) {
+		this.categories = categories;
+	}
 	public String getParameterSample() {
 		return parameterSample;
 	}
 	public void setParameterSample(String parameterSample) {
 		this.parameterSample = parameterSample;
+	}
+			
+	public String getLink() {
+		return link;
+	}
+	public void setLink(String link) {
+		this.link = link;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	public String getType() {
 		return type;
@@ -121,7 +200,20 @@ public class Processor {
 	public void setIsPublic(int isPublic) {
 		this.isPublic = isPublic;
 	}
-
+	
+	public Double getUploadDate() {
+		return uploadDate;
+	}
+	public void setUploadDate(Double uploadDate) {
+		this.uploadDate = uploadDate;
+	}
+	public Double getUpdateDate() {
+		return updateDate;
+	}
+	public void setUpdateDate(Double updateDate) {
+		this.updateDate = updateDate;
+	}	
+	
 	public String getNodeCode() {
 		return nodeCode;
 	}
@@ -134,4 +226,41 @@ public class Processor {
 	public void setNodeUrl(String nodeUrl) {
 		this.nodeUrl = nodeUrl;
 	}
+	public String getFriendlyName() {
+		return friendlyName;
+	}
+	public void setFriendlyName(String friendlyName) {
+		this.friendlyName = friendlyName;
+	}
+	public Float getOndemandPrice() {
+		return ondemandPrice;
+	}
+	public void setOndemandPrice(Float ondemandPrice) {
+		this.ondemandPrice = ondemandPrice;
+	}
+	public Float getSubscriptionPrice() {
+		return subscriptionPrice;
+	}
+	public void setSubscriptionPrice(Float subscriptionPrice) {
+		this.subscriptionPrice = subscriptionPrice;
+	}
+	public boolean getShowInStore() {
+		return showInStore;
+	}
+	public void setShowInStore(boolean showInStore) {
+		this.showInStore = showInStore;
+	}
+	public String getLongDescription() {
+		return longDescription;
+	}
+	public void setLongDescription(String longDescription) {
+		this.longDescription = longDescription;
+	}
+	public int getNoLogoPlaceholderIndex() {
+		return noLogoPlaceholderIndex;
+	}
+	public void setNoLogoPlaceholderIndex(int noLogoPlaceholderIndex) {
+		this.noLogoPlaceholderIndex = noLogoPlaceholderIndex;
+	}
+	
 }

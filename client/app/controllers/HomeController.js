@@ -39,7 +39,7 @@ var HomeController = (function() {
         this.m_bRegistering = false;
 
         if(this.m_oConstantsService.isUserLogged())
-            this.m_oState.go("root.workspaces");// go workspaces
+            this.m_oState.go("root.marketplace");// go workspaces
         if(this.m_bBrowserIsIE === true)
         {
             this.m_bVisualizeLink = false;
@@ -149,7 +149,7 @@ var HomeController = (function() {
                     if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
                     {
                         oController.m_oConstantsService.setUser(data);//set user
-                        oController.m_oState.go("root.workspaces");// go workspaces
+                        oController.m_oState.go("root.marketplace");// go workspaces
                     }
                 }
                 else

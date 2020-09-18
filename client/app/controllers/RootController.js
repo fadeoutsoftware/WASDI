@@ -434,7 +434,7 @@ var RootController = (function() {
         // (https://github.com/angular-ui/ui-router/issues/866)
         // Try to solve with jQuery workaround
 
-        if( sState == "root.workspaces" )
+        if( sState == "root.workspaces" || sState == "root.marketplace"  || sState == "root.appdetails" || sState == "root.appui")
         {
             $("#main").removeClass("has-processes-bar");
             return false;
@@ -503,6 +503,11 @@ var RootController = (function() {
     RootController.prototype.openSearchorbit = function()
     {
         this.m_oState.go("root.searchorbit", { });
+    };
+
+    RootController.prototype.openMarketPlace = function()
+    {
+        this.m_oState.go("root.marketplace", { });
     };
 
     RootController.prototype.openImportPage = function () {

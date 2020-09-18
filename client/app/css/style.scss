@@ -23,6 +23,11 @@
 @import "validatenewuser";
 @import "status-bar";
 @import "paginator";
+@import "marketplace";
+@import "application_detail";
+@import "applicationUi";
+
+
 
 
 
@@ -42,6 +47,10 @@
 @import "../directives/image_editor/image_editor_directive";
 @import "../directives/DropDownMenu/dropdown_menu";
 @import "../directives/to_do_list/to_do_list";
+@import "../directives/wasdiApps/wapDateTimePicker/wapDateTimePicker";
+@import "../directives/wasdiApps/wapProductList/wapProductList";
+@import "../directives/wasdiApps/wapProductsCombo/wapProductsCombo";
+@import "./wap_store";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -89,7 +98,6 @@
 @import "../dialogs/edrift_checkimagestool/edrift_checkimagestool";
 @import "../dialogs/share_workspace/share_workspace";
 @import "../dialogs/eDrift_Flood_Event_Dialog/e_drift__flood__event__dialog";
-@import "../dialogs/manual_insert_bbox/manual_insert_bbox";
 
 @import "buttons";
 

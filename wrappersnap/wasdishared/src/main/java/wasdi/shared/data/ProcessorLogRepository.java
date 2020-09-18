@@ -154,7 +154,30 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    //
+    /**
+     * Deletes logs older than a specified date
+     * makes a query like: {logDate: {"$lt":"2019-05-04 00:00:00"}}
+     * @param sDate Date in format YYYY-MM-DD
+     * @return
+     */
+    public boolean deleteLogsOlderThan(String sDate) {
+    	
+    	sDate = sDate + " 00:00:00";
+    	
+        BasicDBObject oLessThanQuery = new BasicDBObject("$lt", sDate);
+        BasicDBObject oQuery = new BasicDBObject("logDate", oLessThanQuery);
 
+        
+        try {
+            getCollection(m_sThisCollection).deleteMany(oQuery);
+            return true;
+            
+        } catch (Exception oEx) {
+        	Utils.debugLog("ProcessorLogRepository.deleteLogsOlderThan" +oEx);
+        }
+        return false;
+    }
     
     /**
      * Delete all the logs of a Process Workspace
@@ -298,5 +321,24 @@ public class ProcessorLogRepository extends MongoRepository {
 		    }
 		});
 	}
+	
+    /**
+     * Get the list of all processes
+     * @return
+     */
+    public List<ProcessorLog> getList() {
+
+        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
+        try {
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+	
 
 }

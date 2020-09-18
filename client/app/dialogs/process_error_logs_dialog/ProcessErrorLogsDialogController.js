@@ -31,7 +31,7 @@
         };
 
         // Get the log count
-        this.getCountLogs(this.m_oProcess.processObjId,this.getCountLogsANDLogsCallback);
+        this.getLogsCount(this.m_oProcess.processObjId,this.getCountLogsANDLogsCallback);
 
         // Start the refresh timer
         this.m_oTick = this.startTick(this.m_oProcess.status);
@@ -46,7 +46,7 @@
 
             if(utilsIsObjectNullOrUndefined(newValue) === false && newValue >= 0)
             {
-                oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
+                oController.getLogsCount(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
             }
         });
     }
@@ -145,7 +145,7 @@
 
         var oTick = this.m_oInterval(function () {
             console.log("Update WAPPS logs");
-            oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
+            oController.getLogsCount(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
 
             sStatus = oController.m_oProcess.status;
 
@@ -215,12 +215,12 @@
                      iFirstRow = 0;
                  }
 
-                 oController.getLogs(oController.m_oProcess.processObjId,iFirstRow,iLastRow);
+                 oController.getPaginatedLogs(oController.m_oProcess.processObjId,iFirstRow,iLastRow);
              }
          }
      }
 
-     ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId, oCallback)
+     ProcessErrorLogsDialogController.prototype.getLogsCount = function(oProcessObjId, oCallback)
      {
          if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
          {
@@ -233,7 +233,7 @@
 
          var oController = this;
 
-         this.m_oProcessorService.getCountLogs(oProcessObjId).success(function (data, status) {
+         this.m_oProcessorService.getLogsCount(oProcessObjId).success(function (data, status) {
              oCallback(data, status,oController);
          }).error(function (data,status) {
              utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PROCESSOR LOGS');
@@ -249,7 +249,7 @@
      };
 
 
-     ProcessErrorLogsDialogController.prototype.getLogs = function(oProcessObjId,iStartRow,iEndRow)
+     ProcessErrorLogsDialogController.prototype.getPaginatedLogs = function(oProcessObjId, iStartRow, iEndRow)
      {
          if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
          {
@@ -266,7 +266,7 @@
 
          // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";
          var oController = this;
-         this.m_oProcessorService.getLogs(oProcessObjId,iStartRow,iEndRow).success(function (data, status) {
+         this.m_oProcessorService.getPaginatedLogs(oProcessObjId,iStartRow,iEndRow).success(function (data, status) {
              if (data != null)
              {
                  if (data != undefined)

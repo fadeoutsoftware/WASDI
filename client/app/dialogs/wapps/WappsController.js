@@ -89,6 +89,19 @@ var WappsController = (function() {
         }
     }
 
+    WappsController.prototype.tryParseJSON =function(sJsonString){
+        try {
+            var oJsonParsedObject = JSON.parse(sJsonString);
+
+            if (oJsonParsedObject && typeof oJsonParsedObject === "object") {
+                return oJsonParsedObject;
+            }
+        }
+        catch (e) { }
+
+        return false;
+    };
+
     WappsController.prototype.runProcessor = function()
     {
         console.log("RUN - " + this._selectedProcessor.processorName);
@@ -102,8 +115,7 @@ var WappsController = (function() {
             sJSON = this.m_sMyJsonString;
         }
 
-        var sStringJSON = "";
-        //CHECK: IF OBJECT AS STRING
+        let sStringJSON = "";
 
         if(utilsIsString(sJSON) === false)  {
             sStringJSON = JSON.stringify(sJSON);
@@ -211,7 +223,7 @@ var WappsController = (function() {
     }
 
     WappsController.prototype.getHelpFromProcessor = function() {
-        console.log("HELP - " + this._selectedProcessor.processorName);
+        //console.log("HELP - " + this._selectedProcessor.processorName);
 
         var oController = this;
 
