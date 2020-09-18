@@ -1014,14 +1014,25 @@ public class ProcessorsResource {
 			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToUpdate == null) {
-				Utils.debugLog("ProcessorsResource.updateProcessor: unable to find processor " + sProcessorId);
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unable to find processor " + sProcessorId);
 				return Response.serverError().build();
 			}
 			
+			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oProcessorToUpdate.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
+				
+				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+				
+				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor not of user " + oUser.getUserId());
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor of user " + oProcessorToUpdate.getUserId() + " is shared with " + oUser.getUserId());
+				}
+			}			
 			
 			// Set the processor path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
