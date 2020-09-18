@@ -132,11 +132,7 @@ public class GeoServerManager {
     	if (oLayer != null) removeLayer(sStoreName);
 
     	if (sStyle == null || sStyle.isEmpty()) sStyle = "raster";
-    	
-    	if (m_sWorkspace == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: Workspace is null");
-    	}
-    	
+    	    	
     	if (sStoreName == null) {
     		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: Store Name is null");
     	}

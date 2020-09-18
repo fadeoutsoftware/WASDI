@@ -9,7 +9,7 @@ public class DeployedProcessorViewModel {
 	private String publisher;
 	private String paramsSample = "";
 	private int isPublic = 0;
-	private long timeoutMs = 1000*60*60*3;
+	private long timeoutMs = 1000l*60l*60l*3l;
 	private String type = "";
 	private Boolean sharedWithMe = false;
 	

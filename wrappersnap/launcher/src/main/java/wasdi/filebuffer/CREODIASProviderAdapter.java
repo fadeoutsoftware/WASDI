@@ -14,11 +14,10 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.io.Util;
 import org.json.JSONArray;
@@ -279,7 +278,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 			//order_name
 			//255 is the maximum length
-			m_sOrderName = Utils.getRandomName(255);
+			m_sOrderName = Utils.getCappedRandomName(255);
 			oJsonRequest.put("order_name", m_sOrderName);
 
 			//priority
@@ -346,7 +345,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 					int iStart = sResponse.lastIndexOf('{', iStatusPosition);
 					int iEnd = Math.min(sResponse.indexOf('}', iStart)+1, sResponse.length());
 					sResponse = sResponse.substring(iStart, iEnd);
-					sResponse.trim();
+					sResponse = sResponse.trim();
 					if(!sResponse.endsWith("}")) {
 						sResponse += "}";
 					}
@@ -384,6 +383,9 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		Preconditions.checkNotNull(sDownloadPassword, "Password is null");
 		try {
 			String sStatus = extractStatusFromURL(sFileURL);
+			
+			if (sStatus == null) sStatus = "";
+			
 			switch(sStatus.toLowerCase()) {
 			//order if...
 			//31 means that product is orderable and waiting for download to our cache,

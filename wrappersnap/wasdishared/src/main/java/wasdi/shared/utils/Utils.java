@@ -49,6 +49,7 @@ import wasdi.shared.business.UserSession;
 public class Utils {
 
 	public static int m_iSessionValidityMinutes = 24 * 60;
+	private static Random s_oUtilsRandom = new Random();
 
 	public static boolean isNullOrEmpty(String sString) {
 		if (sString == null)
@@ -62,16 +63,15 @@ public class Utils {
 	//adapted from:
 	//4. Generate Random Alphanumeric String With Java 8 
 	//https://www.baeldung.com/java-random-string
-	public static String getRandomName(int iLen) {
+	public static String getCappedRandomName(int iLen) {
 		if(iLen < 0) {
 			iLen = - iLen;
 		}
 		
 		int iLeftLimit = 48; // numeral '0'
 	    int iRightLimit = 122; // letter 'z'
-	    Random random = new Random();
 	 
-	    String sGeneratedString = random.ints(iLeftLimit, iRightLimit + 1)
+	    String sGeneratedString = s_oUtilsRandom.ints(iLeftLimit, iRightLimit + 1)
     		//filter method above to leave out Unicode characters between 65 and 90
 	    	//to avoid out of range characters.
     		.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
@@ -205,12 +205,15 @@ public class Utils {
 			Date oStart = Utils.getWasdiDate(oProcessWorkspace.getOperationStartDate());
 			Date oEnd = Utils.getWasdiDate(oProcessWorkspace.getOperationEndDate());
 			
+			if (oStart==null) return 0l;
+			if (oEnd==null) return 0l;
+			
 			long lDiff = oEnd.getTime() - oStart.getTime();
-			lDiff /= 1000;
+			lDiff /= 1000l;
 			return lDiff;
 		}
 		catch (Exception e) {
-			return 0;
+			return 0l;
 		}
 	}
 	
@@ -289,10 +292,10 @@ public class Utils {
 	    }
 	}
 
-
+	
 	private static char randomChar() {
-		Random r = new Random();
-		char c = (char) (r.nextInt(26) + 'a');
+		
+		char c = (char) (s_oUtilsRandom.nextInt(26) + 'a');
 		return c;
 	}
 
@@ -587,11 +590,12 @@ public class Utils {
 					String sFileName = sPath+oZipEntry.getName();
 					File oFile = new File(sFileName);
 					//oFile.createNewFile();
-					FileOutputStream oFileOutputStream = new FileOutputStream(oFile);
-					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
-					Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
-					oBufferedOutputStream.close();
-					oBufferedInputStream.close();
+					try (FileOutputStream oFileOutputStream = new FileOutputStream(oFile)) {
+						BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
+						Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
+						oBufferedOutputStream.close();
+						oBufferedInputStream.close();						
+					}
 				}
 			}
 		} catch (Exception e) {

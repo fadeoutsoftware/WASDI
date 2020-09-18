@@ -439,7 +439,7 @@ public class WorkspaceResource {
 			// get workspace path
 			String sWorkspacePath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
 
-			Utils.debugLog("ProductResource.DeleteProduct: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
 			// Delete Workspace Db Entry
 			if (oWorkspaceRepository.deleteWorkspace(sWorkspaceId)) {
@@ -469,7 +469,7 @@ public class WorkspaceResource {
 
 							if (aoDownloadedFileList.size() > 1) {
 								// Yes, it is in other Ws, jump
-								Utils.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
+								Utils.debugLog("WorkspaceResource.DeleteWorkspace: The file is also in other workspaces, leave the bands as they are");
 								continue;
 							}
 
@@ -490,7 +490,7 @@ public class WorkspaceResource {
 								try {
 									// Remove Geoserver layer (and file)
 									if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-										Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+										Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
 									}
 
 									try {

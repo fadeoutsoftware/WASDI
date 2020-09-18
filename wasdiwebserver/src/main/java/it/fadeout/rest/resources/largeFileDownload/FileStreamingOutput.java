@@ -45,44 +45,35 @@ public class FileStreamingOutput implements StreamingOutput {
 			if(null == oOutputStream) {
 				throw new NullPointerException("FileStreamingOutput.write: passed a null OutputStream");
 			}
-			InputStream oInputStream = null;
 			try {
-				oInputStream = new FileInputStream(m_oFile);
-				long lCopiedBytes = 0;
-//				long lThreshold = 2L*1024*1024*1024;
-//				long lSize = m_oFile.length();
-				Utils.debugLog("FileStreamingOutput.write: using guava ByteStreams.copy to copy file");
-				lCopiedBytes = ByteStreams.copy(oInputStream,  oOutputStream);
-				/*
-				if(lSize > lThreshold) {
-					Utils.debugLog("FileStreamingOutput.write: large file, using IOUtils.copyLarge");
-					lCopiedBytes = IOUtils.copyLarge(oInputStream, oOutputStream);
-				} else {
-					Utils.debugLog("FileStreamingOutput.write: small enough file, using IOUtils.copy");
-					lCopiedBytes = IOUtils.copy(oInputStream, oOutputStream);
+				try (InputStream oInputStream = new FileInputStream(m_oFile)) {
+					long lCopiedBytes = 0;
+					Utils.debugLog("FileStreamingOutput.write: using guava ByteStreams.copy to copy file");
+					lCopiedBytes = ByteStreams.copy(oInputStream,  oOutputStream);
+					
+					if( oOutputStream!=null ) {
+						oOutputStream.flush();
+					}
+					
+					Utils.debugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );					
 				}
-				*/
-				if( oOutputStream!=null ) {
-					Utils.debugLog("FileStreamingOutput.write: about to flush output stream");
-					oOutputStream.flush();
-					Utils.debugLog("FileStreamingOutput.write: output flushed");
-				}
-				Utils.debugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );
-			} catch (Exception oE) {
+				
+			} 
+			catch (Exception oE) {
 				Utils.debugLog("FileStreamingOutput.write: " + oE);
 			} finally {
+				
 				// Flush output
 				if( oOutputStream!=null ) {
-					Utils.debugLog("FileStreamingOutput.write: about to close output");
-					oOutputStream.close();
-					Utils.debugLog("FileStreamingOutput.write: OutputStream closed");
+					try {
+						oOutputStream.close();
+						Utils.debugLog("FileStreamingOutput.write: OutputStream closed");						
+					}
+					catch (Exception oEx) {
+						Utils.debugLog("FileStreamingOutput.write: OutputStream close exception: " + oEx.toString());
+					}
 				}
-				// Close input
-				if( oInputStream !=null ) {
-					Utils.debugLog("FileStreamingOutput.write: about to close input");
-					oInputStream.close();
-					Utils.debugLog("FileStreamingOutput.write: InputStream closed");
-				}
+				
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("FileStreamingOutput.write: uncaught error: " + oE);

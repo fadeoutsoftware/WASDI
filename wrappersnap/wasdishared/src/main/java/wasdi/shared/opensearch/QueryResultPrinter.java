@@ -31,11 +31,12 @@ public class QueryResultPrinter {
 	public void writeToFile(QueryResultViewModel oVm, String sFileName) {
 		try {
 			List<String> sListedVm = list(oVm);
-			FileWriter oFileWeriter = new FileWriter(sFileName);
-			for (String sLine : sListedVm) {
-				oFileWeriter.write(sLine);
+			try (FileWriter oFileWeriter = new FileWriter(sFileName)) {
+				for (String sLine : sListedVm) {
+					oFileWeriter.write(sLine);
+				}
+				oFileWeriter.close();				
 			}
-			oFileWeriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

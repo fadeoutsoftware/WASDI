@@ -61,7 +61,9 @@ public class UpdateProcessorFilesWorker extends Thread {
 		if (oZipFile.exists()) {
 			try {
 				Utils.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
-				oZipFile.delete();
+				if (!oZipFile.delete()) {
+					Utils.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
+				}
 			}
 			catch (Exception oEx) {
 				Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());

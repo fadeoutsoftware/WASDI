@@ -124,7 +124,7 @@ public class ProcessorsResource {
 			// Force the name to lower case
 			sName = sName.toLowerCase();
 			// Remove spaces at beginning or end
-			sName.trim();
+			sName = sName.trim();
 			
 			// There are still spaces?
 			if (sName.contains(" ")) {
@@ -158,12 +158,14 @@ public class ProcessorsResource {
 			//save uploaded file
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
-			OutputStream oOutputStream = new FileOutputStream(oProcessorFile);
-			while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
-				oOutputStream.write(ayBytes, 0, iRead);
+			
+			try (OutputStream oOutputStream = new FileOutputStream(oProcessorFile)) {
+				while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
+					oOutputStream.write(ayBytes, 0, iRead);
+				}
+				oOutputStream.flush();
+				oOutputStream.close();				
 			}
-			oOutputStream.flush();
-			oOutputStream.close();
 			
 			// TODO: check it is a zip file
 			// TODO: check it contains at least myProcessor.py
@@ -1012,14 +1014,25 @@ public class ProcessorsResource {
 			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToUpdate == null) {
-				Utils.debugLog("ProcessorsResource.updateProcessor: unable to find processor " + sProcessorId);
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unable to find processor " + sProcessorId);
 				return Response.serverError().build();
 			}
 			
+			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oProcessorToUpdate.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
+				
+				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+				
+				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor not of user " + oUser.getUserId());
+					return Response.status(Status.UNAUTHORIZED).build();					
+				}
+				else {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor of user " + oProcessorToUpdate.getUserId() + " is shared with " + oUser.getUserId());
+				}
+			}			
 			
 			// Set the processor path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
@@ -1038,12 +1051,15 @@ public class ProcessorsResource {
 			//save uploaded file
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
-			OutputStream oOutputStream = new FileOutputStream(oProcessorFile);
-			while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
-				oOutputStream.write(ayBytes, 0, iRead);
+			
+			
+			try (OutputStream oOutputStream = new FileOutputStream(oProcessorFile)) {
+				while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
+					oOutputStream.write(ayBytes, 0, iRead);
+				}
+				oOutputStream.flush();
+				oOutputStream.close();				
 			}
-			oOutputStream.flush();
-			oOutputStream.close();
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
@@ -1292,42 +1308,45 @@ public class ProcessorsResource {
 			sProcessorFolder += "/";
 			
 			byte[] ayBuffer = new byte[1024];
-		    ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile));
-		    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
-		    while(oZipEntry != null){
-		    	
-		    	String sZippedFileName = oZipEntry.getName();
-		    	
-		    	if (sZippedFileName.toUpperCase().endsWith(".PRO")) {
-		    		
-		    		// Force extension case
-		    	
-		    		sZippedFileName = sZippedFileName.replace(".Pro", ".pro");
-		    		sZippedFileName = sZippedFileName.replace(".PRO", ".pro");
-		    		sZippedFileName = sZippedFileName.replace(".PRo", ".pro");
-		    	}
-		    	
-		    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-		    	
-		    	if (oZipEntry.isDirectory()) {
-		    		File oUnzippedDir = new File(sUnzipFilePath);
-	                oUnzippedDir.mkdir();
-		    	}
-		    	else {
+			
+			
+		    try (ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile))) {
+			    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
+			    while(oZipEntry != null){
 			    	
-			        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-			        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
-			        int iLen;
-			        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-			        	oOutputStream.write(ayBuffer, 0, iLen);
-			        }
-			        oOutputStream.close();		    		
-		    	}
-		        oZipEntry = oZipInputStream.getNextEntry();
-	        }
-		    oZipInputStream.closeEntry();
-		    oZipInputStream.close();
-		    
+			    	String sZippedFileName = oZipEntry.getName();
+			    	
+			    	if (sZippedFileName.toUpperCase().endsWith(".PRO")) {
+			    		
+			    		// Force extension case
+			    	
+			    		sZippedFileName = sZippedFileName.replace(".Pro", ".pro");
+			    		sZippedFileName = sZippedFileName.replace(".PRO", ".pro");
+			    		sZippedFileName = sZippedFileName.replace(".PRo", ".pro");
+			    	}
+			    	
+			    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+			    	
+			    	if (oZipEntry.isDirectory()) {
+			    		File oUnzippedDir = new File(sUnzipFilePath);
+		                oUnzippedDir.mkdir();
+			    	}
+			    	else {
+				    	
+				        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
+				        try (FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile)) {
+					        int iLen;
+					        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
+					        	oOutputStream.write(ayBuffer, 0, iLen);
+					        }
+					        oOutputStream.close();				        	
+				        }
+			    	}
+			        oZipEntry = oZipInputStream.getNextEntry();
+		        }
+			    oZipInputStream.closeEntry();
+			    oZipInputStream.close();		    	
+		    }
 		    
 		    try {
 			    // Remove the zip?

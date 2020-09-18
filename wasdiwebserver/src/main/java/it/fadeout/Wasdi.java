@@ -356,30 +356,6 @@ public class Wasdi extends ResourceConfig {
 		return null;
 	}
 
-	/**
-	 * Get the OS PID of a process
-	 * 
-	 * @param oProc
-	 * @return
-	 */
-	public static Integer getPIDProcess(Process oProc) {
-		Integer oPID = null;
-
-		if (oProc.getClass().getName().equals("java.lang.UNIXProcess")) {
-			// get the PID on unix/linux systems
-			try {
-				Field oField = oProc.getClass().getDeclaredField("pid");
-				oField.setAccessible(true);
-				oPID = oField.getInt(oProc);
-				Utils.debugLog("WASDI.getPIDProcess: found PID " + oPID);
-			} catch (Throwable e) {
-				Utils.debugLog("WASDI.getPIDProcess: Error getting PID " + e.getMessage());
-			}
-		}
-
-		return oPID;
-	}
-
 	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
 		// Take path
 		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
@@ -626,6 +602,9 @@ public class Wasdi extends ResourceConfig {
 		if(sFileName==null || sFileName.isEmpty()){
 			throw new NullPointerException("Wasdi.httpPostFile: file name is null");
 		}
+		
+		InputStream oInputStream = null;
+		
 		try {
 			//local file
 			File oFile = new File(sFileName);
@@ -634,7 +613,7 @@ public class Wasdi extends ResourceConfig {
 				throw new IOException("Wasdi.httpPostFile: file not found");
 			}
 			
-			InputStream oInputStream = new FileInputStream(oFile);
+			oInputStream = new FileInputStream(oFile);
 			
 		    //request
 			URL oURL = new URL(sUrl);
@@ -705,6 +684,16 @@ public class Wasdi extends ResourceConfig {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		finally {
+			if (oInputStream != null) {
+				try {
+					oInputStream.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -715,12 +704,9 @@ public class Wasdi extends ResourceConfig {
 	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId, ServletConfig oServletConfig) {
 		try {
 			
-			if (sWorkflowId == null) {
-				System.out.println("sFileName must not be null");
-			}
-
-			if (sWorkflowId.equals("")) {
-				System.out.println("sFileName must not be empty");
+			if (Utils.isNullOrEmpty(sWorkflowId)) {
+				System.out.println("sWorkflowId is null or empty");
+				return "";
 			}
 			
 			String sBaseUrl = sNodeUrl;
@@ -732,6 +718,8 @@ public class Wasdi extends ResourceConfig {
 		    String sOutputFilePath = "";
 		    
 		    HashMap<String, String> asHeaders = getStandardHeaders(sSessionId);
+		    
+		    FileOutputStream oOutputStream = null;
 			
 			try {
 				URL oURL = new URL(sUrl);
@@ -777,15 +765,12 @@ public class Wasdi extends ResourceConfig {
 					oTargetDir.mkdirs();
 
 					// opens an output stream to save into file
-					FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+					oOutputStream = new FileOutputStream(sOutputFilePath);
 
 					InputStream oInputStream = oConnection.getInputStream();
 
 					Util.copyStream(oInputStream, oOutputStream);
-
-					if(null!=oOutputStream) {
-						oOutputStream.close();
-					}
+					
 					if(null!=oInputStream) {
 						oInputStream.close();
 					}
@@ -800,6 +785,11 @@ public class Wasdi extends ResourceConfig {
 			} catch (Exception oEx) {
 				oEx.printStackTrace();
 				return "";
+			}
+			finally {
+				if(null!=oOutputStream) {
+					oOutputStream.close();
+				}				
 			}
 			
 		}

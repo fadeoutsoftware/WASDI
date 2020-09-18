@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Authenticator;
@@ -127,6 +128,9 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
 			
 			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: destination file: " + sDestinationFileName);
+			
+			InputStream oInputStream = null;
+			OutputStream oOutputStream = null;
 
 			// copy the product from file system
 			try {
@@ -138,8 +142,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					}
 				}
 				
-				InputStream oInputStream = new FileInputStream(oSourceFile);
-				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
+				oInputStream = new FileInputStream(oSourceFile);
+				oOutputStream = new FileOutputStream(oDestionationFile);
 				
 				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start copy stream");
 				
@@ -150,6 +154,22 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			} catch (Exception e) {
 				m_oLogger.info("ONDAProviderAdapter.ExecuteDownloadFile: " + e);
 			}
+			finally {
+				try {
+					if (oOutputStream != null) {
+						oOutputStream.close();
+					}
+				} catch (IOException e) {
+					
+				}
+				try {
+					if (oInputStream!= null) {
+						oInputStream.close();
+					}
+				} catch (IOException e) {
+					
+				}
+			}			
 			//TODO else - i.e., if it fails - try get the file from https instead
 			//	- in this case the sUrl must be modified in order to include http, so that it can be retrieved  
 			return sDestinationFileName;
@@ -248,7 +268,9 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 							
 							try {
 								m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: delete corrupted file");
-								oProductFile.delete();
+								if (oProductFile.delete()==false) {
+									m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: error deleting corrupted file");
+								}
 							}
 							catch (Exception oDeleteEx) {
 								m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: exception deleting not valid file ");
@@ -330,7 +352,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				}
 				else {
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: since it was impossible to check availability, sleep for 5 min before retry");
-					TimeUnit.SECONDS.sleep(5*60);
+					TimeUnit.SECONDS.sleep(5l*60l);
 				}
 			}
 			

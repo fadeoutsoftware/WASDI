@@ -358,7 +358,7 @@ public class OpportunitySearchResource {
 				Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
 			}
 
-			String sSatres = InstanceFinder.s_asOrbitSatsMap.get(sSatname);
+			String sSatres = InstanceFinder.getOrbitSatsMap().get(sSatname);
 
 			try {
 
@@ -501,7 +501,7 @@ public class OpportunitySearchResource {
 				// Create the View Mode
 				SatelliteOrbitResultViewModel oPositionViewModel = new SatelliteOrbitResultViewModel();
 
-				String oSatelliteResource = InstanceFinder.s_asOrbitSatsMap.get(sSat);
+				String oSatelliteResource = InstanceFinder.getOrbitSatsMap().get(sSat);
 
 				try {
 
@@ -556,10 +556,14 @@ public class OpportunitySearchResource {
 			if (sSatellites != null && sSatellites.length() > 0) {
 				asSatellites = sSatellites.split(",|;");
 			}
+			
+			if (asSatellites == null) {
+				return aaoReturnValue;
+			}
 
 			for (Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length; iIndexSarellite++) {
 				try {
-					String satres = InstanceFinder.s_asOrbitSatsMap.get(asSatellites[iIndexSarellite]);
+					String satres = InstanceFinder.getOrbitSatsMap().get(asSatellites[iIndexSarellite]);
 					Satellite oSatellite = SatFactory.buildSat(satres);
 					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
 
@@ -569,7 +573,7 @@ public class OpportunitySearchResource {
 					aaoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
 					Utils.debugLog("getSatellitesResources Exception: " + oE);
-					return null;
+					return aaoReturnValue;
 				}
 			}
 		} catch (Exception oE) {

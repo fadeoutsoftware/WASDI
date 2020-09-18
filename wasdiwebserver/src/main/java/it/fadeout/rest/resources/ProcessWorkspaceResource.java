@@ -616,9 +616,12 @@ public class ProcessWorkspaceResource {
 		Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " )" );
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
 			if(null == oUser) {
 				Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById( " + sSessionId + ", " + sProcessObjId + " ): invalid session" );
+				return null;
 			}
+			
 			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);

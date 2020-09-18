@@ -47,15 +47,16 @@ public class WasdiFileUtils {
 				}
 				return;
 			}
-			FileInputStream oFis = new FileInputStream(oFileToZip);
-			ZipEntry oZipEntry = new ZipEntry(sFileName);
-			oZipOut.putNextEntry(oZipEntry);
-			byte[] bytes = new byte[1024];
-			int iLength;
-			while ((iLength = oFis.read(bytes)) >= 0) {
-				oZipOut.write(bytes, 0, iLength);
+			try (FileInputStream oFis = new FileInputStream(oFileToZip)) {
+				ZipEntry oZipEntry = new ZipEntry(sFileName);
+				oZipOut.putNextEntry(oZipEntry);
+				byte[] bytes = new byte[1024];
+				int iLength;
+				while ((iLength = oFis.read(bytes)) >= 0) {
+					oZipOut.write(bytes, 0, iLength);
+				}
+				oFis.close();				
 			}
-			oFis.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,9 +80,4 @@ public class WasdiFileUtils {
 		return oJson;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		JSONObject oJson = loadJsonFromFile("ciccia");
-		System.out.println(oJson.length());
-	}
-
 }
