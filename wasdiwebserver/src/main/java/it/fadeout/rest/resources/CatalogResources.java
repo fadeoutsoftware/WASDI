@@ -185,6 +185,10 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResources.DownloadEntryByName( Session: " + sSessionId + ", TokenSession: "+ sTokenSessionId + ", FileName: " + sFileName + ", Ws: " + sWorkspace);
 		
 		try {
+			
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
 
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
