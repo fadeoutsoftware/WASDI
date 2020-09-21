@@ -271,7 +271,9 @@ public class ProcessScheduler extends Thread {
 					
 					iSometimes = 0;
 					
-					WasdiScheduler.log(m_sLogPrefix + ".run: Launched Processes Size: " + m_aoLaunchedProcesses.size());
+					if (m_aoLaunchedProcesses.size()!=0) {
+						WasdiScheduler.log(m_sLogPrefix + ".run: Launched Processes Size: " + m_aoLaunchedProcesses.size());
+					}
 					
 					// Check Launched Proc list
 					ArrayList<String> asLaunchedToDelete = new ArrayList<String>();
