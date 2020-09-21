@@ -1,6 +1,5 @@
 package it.fadeout;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -31,6 +29,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
@@ -42,10 +41,12 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -338,45 +339,50 @@ public class Wasdi extends ResourceConfig {
 		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 			return null;
 		}
-		
-		/*
-		def introspect(self, client_id, client_secret, token):
-        params = {
-            'client_id': client_id, 
-            'client_secret': client_secret,
-            'token': token,
-        }
-        response = requests.post(
-                self._token_introspection_endpoint, data=params)
-        if response.status_code != 200:
-            raise Exception('Invalid introspection request')
-        return response.json()
-		 */
-		String sKeyCloakIntrospectionUrl = Wasdi.s_sKeyCloakIntrospectionUrl;
+
+
+
 		String sClientId = Wasdi.s_sClientId;
 		String sClientSecret = Wasdi.s_sClientSecret;
-		
+
+		String sUserId = null;
+		//todo validate token with JWT
+
+		Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): Trying introspect...");
+
+		String sKeyCloakIntrospectionUrl = Wasdi.s_sKeyCloakIntrospectionUrl;
 		String sPayload = "client_id=" + sClientId + 
 				"&client_secret=" + sClientSecret + 
 				"&token=" + sSessionId;
-		
 		Map<String,String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-		
-		
 		String sResponse = httpPost(sKeyCloakIntrospectionUrl, sPayload, asHeaders);
 		if(!Utils.isNullOrEmpty(sResponse)) {
 			JSONObject oJSON = new JSONObject(sResponse);
-			String sUserId = oJSON.optString("preferred_username", null);
-			if(!Utils.isNullOrEmpty(sUserId)) {
-				UserRepository oUserRepo = new UserRepository();
-				User oUser = oUserRepo.getUser(sUserId);
-				return oUser;
-			}
+			sUserId = oJSON.optString("preferred_username", null);
 		}
-		
+
+		if(!Utils.isNullOrEmpty(sUserId)) {
+			UserRepository oUserRepo = new UserRepository();
+			User oUser = oUserRepo.getUser(sUserId);
+			return oUser;
+		} else {
+			//check session against DB
+			Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): introspect failed, checking against DB..."); 
+			SessionRepository oSessionRepository = new SessionRepository();
+			UserSession oUserSession = oSessionRepository.getSession(sSessionId);
+			User oUser = null;
+			if(null!=oUserSession) {
+				sUserId = oUserSession.getUserId();
+			}
+			if(!Utils.isNullOrEmpty(sUserId)){
+				UserRepository oUserRepository = new UserRepository();
+				oUser = oUserRepository.getUser(sUserId);
+			}
+			return oUser;
+		}
+
 		// No Session, No User
-		return null;
 	}
 
 	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
@@ -569,7 +575,6 @@ public class Wasdi extends ResourceConfig {
 		
 		return aoHeaders;
 	}
-
 	
 	/**
 	 * Standard http post utility function
@@ -603,16 +608,10 @@ public class Wasdi extends ResourceConfig {
 			
 			oConnection.connect();
 
-			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String sInputLine;
-			StringBuffer sResponse = new StringBuffer();
-	
-			while ((sInputLine = oInputBuffer.readLine()) != null) {
-				sResponse.append(sInputLine);
-			}
-			oInputBuffer.close();
+			String sMessage = readHttpResponse(oConnection);
+			oConnection.disconnect();
 			
-			return sResponse.toString();
+			return sMessage;
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -680,26 +679,8 @@ public class Wasdi extends ResourceConfig {
 			oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
 			oOutputStream.close();
 
-			// response
-			int iResponse = oConnection.getResponseCode();
-			Utils.debugLog("Wasdi.httpPostFile: server returned " + iResponse);
-			
-			InputStream oResponseInputStream = null;
-			
-			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
-			
-			if( 200 <= iResponse && 299 >= iResponse ) {
-				oResponseInputStream = oConnection.getInputStream();
-			} else {
-				oResponseInputStream = oConnection.getErrorStream();
-			}
-			if(null!=oResponseInputStream) {
-				Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-				String sMessage = oByteArrayOutputStream.toString();
-				System.out.println(sMessage);
-			} else {
-				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
-			}
+			String sMessage = readHttpResponse(oConnection);
+			Utils.debugLog("Wasdi.httpPostFile: response is: " + sMessage);
 
 			oOutputStream.close();
 			oConnection.disconnect();
@@ -717,6 +698,45 @@ public class Wasdi extends ResourceConfig {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param oConnection
+	 * @throws IOException
+	 * @throws CopyStreamException
+	 */
+	private static String readHttpResponse(HttpURLConnection oConnection) {
+		try {
+			// response
+			int iResponseCode = oConnection.getResponseCode();
+			Utils.debugLog("Wasdi.httpPostFile: server returned " + iResponseCode);
+
+			InputStream oResponseInputStream = null;
+
+			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+
+			if( 200 <= iResponseCode && 299 >= iResponseCode ) {
+				oResponseInputStream = oConnection.getInputStream();
+			} else {
+				Utils.debugLog("Wasdi.readHttpResponse: failed with error " + iResponseCode);
+				oResponseInputStream = oConnection.getErrorStream();
+			}
+			if(null!=oResponseInputStream) {
+				Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+				String sMessage = oByteArrayOutputStream.toString();
+				if( 200 <= iResponseCode && 299 >= iResponseCode ) {
+					return sMessage;
+				} else {
+					Utils.debugLog("Wasdi.readHttpResponse: error message: " + sMessage);
+					return "";
+				}
+			} else {
+				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("Wasdi.readHttpResponse: " + oE );
+		}
+		return "";
 	}
 	
 	/**
