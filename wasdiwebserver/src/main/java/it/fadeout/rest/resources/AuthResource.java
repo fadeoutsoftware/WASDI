@@ -2,7 +2,9 @@ package it.fadeout.rest.resources;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
@@ -16,6 +18,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
@@ -33,13 +42,6 @@ import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 
 
 @Path("/auth")
@@ -95,15 +97,31 @@ public class AuthResource {
 				return UserViewModel.getInvalid();
 			}
 			
-			
 			if(null != oWasdiUser.getValidAfterFirstAccess()) {
 				
 				if(oWasdiUser.getValidAfterFirstAccess() ) {
 					
-					Boolean bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oWasdiUser.getPassword() );
-					
-					if ( bLoginSuccess ) {
+					//authenticate against keycloak
+					String sUrl = m_oServletConfig.getInitParameter("keycloak_auth"); 
+					String sPayload = "client_id=";
+					sPayload += m_oServletConfig.getInitParameter("keycloak_client");
+					sPayload += "&grant_type=password&username=" + oLoginInfo.getUserId();
+					sPayload += "&password=" + oLoginInfo.getUserPassword();
+					Map<String, String> asHeaders = new HashMap<>();
+					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+					String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
+					String sSessionId = null;
+					//DecodedJWT oJwt = null;
+					if(!Utils.isNullOrEmpty(sAuthResult)) {
+						//for now, generate a session UUID as usual 
+						sSessionId = UUID.randomUUID().toString();
 						
+						//MAYBE, in the future, we could use a (modified?) JWT. Not as it is, since it would invalidate the expiration check mechanism.
+						//JSONObject oJson = new JSONObject(sAuthResult);
+						//sSessionId = oJson.optString("access_token", null);
+						//oJwt = JWT.decode(sSessionId);
+					}
+					if(!Utils.isNullOrEmpty(sSessionId)) {
 						//get all expired sessions
 						clearUserExpiredSessions(oWasdiUser);
 						oUserVM = new UserViewModel();
@@ -115,7 +133,7 @@ public class AuthResource {
 						UserSession oSession = new UserSession();
 						oSession.setUserId(oWasdiUser.getUserId());
 						
-						String sSessionId = UUID.randomUUID().toString();
+						//store the keycloak access token instead, so we can retrieve the user and perform a further check
 						oSession.setSessionId(sSessionId);
 						oSession.setLoginDate((double) new Date().getTime());
 						oSession.setLastTouch((double) new Date().getTime());
@@ -176,7 +194,7 @@ public class AuthResource {
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("AuthResource.CheckSession SessioId: " + sSessionId);
+		Utils.debugLog("AuthResource.CheckSession SessionId: " + sSessionId);
 		
 		if(null == sSessionId) {
 			Utils.debugLog("AuthResource.CheckSession: null sSessionId");
