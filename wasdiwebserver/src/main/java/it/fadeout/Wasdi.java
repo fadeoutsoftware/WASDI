@@ -437,10 +437,18 @@ public class Wasdi extends ResourceConfig {
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
 		
+		//filter out invalid sessions
+		if(null==getUserFromSession(sSessionId)) {
+			Utils.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationId + ", " + sProductName + ", ... ): session not valid, aborting");
+			return PrimitiveResult.getInvalid();
+		}
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		
 		// Get the Ob Id
 		String sProcessObjId = oParameter.getProcessObjId();
 		
-		PrimitiveResult oResult = new PrimitiveResult();
+		
 
 		try {
 			
