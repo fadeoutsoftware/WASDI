@@ -16,6 +16,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,9 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.SnapOperatorFactory;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserSession;
 import wasdi.shared.business.WpsProvider;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
@@ -1192,7 +1195,7 @@ public class ProcessingResources {
 
 
 		// Log intro
-		Utils.debugLog("ProsessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + ")");
+		Utils.debugLog("ProcessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		try {
@@ -1223,11 +1226,27 @@ public class ProcessingResources {
 			oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+
+			//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
+			UserSession oSession = new UserSession();
+			oSession.setUserId(sUserId);
+			
+			//store the keycloak access token instead, so we can retrieve the user and perform a further check
+			oSession.setSessionId(sSessionId);
+			oSession.setLoginDate((double) new Date().getTime());
+			oSession.setLastTouch((double) new Date().getTime());
+			SessionRepository oSessionRepo = new SessionRepository();
+			Boolean bRet = oSessionRepo.insertSession(oSession);
+			if (bRet) {
+				return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			} else {
+				throw new IllegalArgumentException("could not insert session in DB, aborting");
+			}
 		} 
-		catch (Exception e) {
-			e.printStackTrace();
-			oResult.setStringValue(e.toString());
+		catch (Exception oE) {
+			Utils.debugLog("ProcessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + "): " + oE);
+			oE.printStackTrace();
+			oResult.setStringValue(oE.toString());
 			oResult.setIntValue(500);
 			oResult.setBoolValue(false);
 
