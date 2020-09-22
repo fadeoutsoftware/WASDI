@@ -206,6 +206,8 @@ public class ProcessorsResource  {
 			// Create processor entity
 			Processor oProcessor = new Processor();
 			oProcessor.setName(sName);
+			// Initialize Friendly Name as the name
+			oProcessor.setFriendlyName(sName);
 			oProcessor.setDescription(sDescription);
 			oProcessor.setUserId(sUserId);
 			oProcessor.setProcessorId(sProcessorId);
@@ -409,14 +411,14 @@ public class ProcessorsResource  {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
 			
-			String sOrderBy = "name";
+			String sOrderBy = "friendlyName";
 			
 			if (!Utils.isNullOrEmpty(oFilters.getOrderBy())) {
 				if (oFilters.getOrderBy().toLowerCase().equals("date")) {
 					sOrderBy = "updateDate";
 				}
 				else if  (oFilters.getOrderBy().toLowerCase().equals("name")) {
-					sOrderBy = "name";
+					sOrderBy = "friendlyName";
 				}
 				else if  (oFilters.getOrderBy().toLowerCase().equals("price")) {
 					sOrderBy = "ondemandPrice";
