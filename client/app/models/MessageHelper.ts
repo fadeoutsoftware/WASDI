@@ -2,7 +2,7 @@
 
 class MessageHelper
 {
-    public static
+    //public static
 
     private static _instance;
 

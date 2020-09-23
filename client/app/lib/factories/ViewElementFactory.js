@@ -79,6 +79,10 @@ function ViewElementFactory() {
             }
 
         }
+        else if (oControl.type === "hidden") {
+            oViewElement = new Hidden();
+            oViewElement.m_oValue = oControl.default;
+        }
         else {
             oViewElement = new TextBox();
         }
@@ -280,6 +284,30 @@ let TextBox = function () {
      */
     this.getStringValue = function () {
         return this.m_sText;
+    }
+};
+
+/**
+ * Hidden Control Class
+ * @constructor
+ */
+let Hidden = function () {
+    this.m_oValue = "";
+
+    /**
+     * Get the value of the control
+     * @returns {string} String in the control
+     */
+    this.getValue = function () {
+        return this.m_oValue;
+    }
+
+    /**
+     * Get the value of the control
+     * @returns {string} String in the control
+     */
+    this.getStringValue = function () {
+        return String(this.m_oValue);
     }
 };
 

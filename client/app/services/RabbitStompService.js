@@ -25,8 +25,6 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
             this.m_oWebSocket = null;
             this.m_oReconnectTimerPromise = null;
-            this.m_oRabbitReconnect = null;
-
             this.m_oRabbitReconnectAttemptCount = 0;
 
             // STOMP Client
@@ -98,49 +96,56 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 console.log("RabbitStompService: subscribing to " + subscriptionString);
                 var oThisService = this;
 
-                this.m_oSubscription = this.m_oClient.subscribe(subscriptionString, function (message) {
+                try {
+                    this.m_oSubscription = this.m_oClient.subscribe(subscriptionString, function (message) {
 
-                    // Check message Body
-                    if (message.body)
-                    {
-                        console.log("RabbitStompService: got message with body " + message.body)
-
-                        // Get The Message View Model
-                        var oMessageResult = JSON.parse(message.body);
-
-                        // Check parsed object
-                        if (oMessageResult == null)
+                        // Check message Body
+                        if (message.body)
                         {
-                            console.log("RabbitStompService: there was an error parsing result in JSON. Message lost")
-                            return;
+                            console.log("RabbitStompService: got message with body " + message.body)
+
+                            // Get The Message View Model
+                            var oMessageResult = JSON.parse(message.body);
+
+                            // Check parsed object
+                            if (oMessageResult == null)
+                            {
+                                console.log("RabbitStompService: there was an error parsing result in JSON. Message lost")
+                                return;
+                            }
+
+                            // Get the Active Workspace Id
+                            var sActiveWorkspaceId = "";
+
+                            if (!utilsIsObjectNullOrUndefined(oThisService.m_oConstantsService.getActiveWorkspace()))
+                            {
+                                sActiveWorkspaceId = oThisService.m_oConstantsService.getActiveWorkspace().workspaceId;
+                            }
+                            else
+                            {
+                                console.log("RabbitStompService: Active Workspace is null.")
+                            }
+
+                            //Reject the message if it is for another workspace
+                            if (oMessageResult.workspaceId != sActiveWorkspaceId) return false;
+
+                            // Check if the callback is hooked
+                            if (!utilsIsObjectNullOrUndefined(oThisService.m_fMessageCallBack))
+                            {
+                                // Call the Message Callback
+                                oThisService.m_fMessageCallBack(oMessageResult, oThisService.m_oActiveController);
+                            }
+
+                            // Update the process List
+                            oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
                         }
+                    });
+                }
+                catch (e) {
+                    console.log("RabbitStompService: Exception subscribing to " + workspaceId);
+                }
 
-                        // Get the Active Workspace Id
-                        var sActiveWorkspaceId = "";
 
-                        if (!utilsIsObjectNullOrUndefined(oThisService.m_oConstantsService.getActiveWorkspace()))
-                        {
-                            sActiveWorkspaceId = oThisService.m_oConstantsService.getActiveWorkspace().workspaceId;
-                        }
-                        else
-                        {
-                            console.log("RabbitStompService: Active Workspace is null.")
-                        }
-
-                        //Reject the message if it is for another workspace
-                        if (oMessageResult.workspaceId != sActiveWorkspaceId) return false;
-
-                        // Check if the callback is hooked
-                        if (!utilsIsObjectNullOrUndefined(oThisService.m_fMessageCallBack))
-                        {
-                            // Call the Message Callback
-                            oThisService.m_fMessageCallBack(oMessageResult, oThisService.m_oActiveController);
-                        }
-
-                        // Update the process List
-                        oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
-                    }
-                });
             };
 
             this.unsubscribe = function () {

@@ -25,7 +25,6 @@
               overflow: hidden;
               text-overflow: ellipsis;
           }
-
       }
       //FOOTER
       .modal-footer
@@ -34,6 +33,11 @@
       }
     }
   }
+}
+
+.addUIElementCommand {
+    display: inline;
+    cursor: pointer;
 }
 
 /*CUSTOMIZE ELEMENT*/
