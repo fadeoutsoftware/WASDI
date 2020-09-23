@@ -256,10 +256,13 @@ public class WorkspaceResource {
 			if (oWorkspace.getNodeCode().equals(Wasdi.s_sMyNodeCode) == false) {
 				// Get the Node
 				wasdi.shared.data.NodeRepository oNodeRepository = new wasdi.shared.data.NodeRepository();
-				//FIXME: NullPointerException after this
 				String sNodeCode = oWorkspace.getNodeCode();
 				wasdi.shared.business.Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
-				oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+				
+				if (oWorkspaceNode != null) {
+					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+				}
+				
 			}
 
 			// Get Sharings
