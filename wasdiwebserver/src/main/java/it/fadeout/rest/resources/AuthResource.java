@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -16,8 +19,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.io.FilenameUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -27,6 +35,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
@@ -36,6 +45,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.LoginInfo;
@@ -47,6 +57,10 @@ import wasdi.shared.viewmodels.UserViewModel;
 @Path("/auth")
 public class AuthResource {
 	
+	
+	@Context
+	ServletConfig m_oServletConfig;
+	
 	/**
 	 * Authentication Helper
 	 */
@@ -57,8 +71,13 @@ public class AuthResource {
 	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	
-	@Context
-	ServletConfig m_oServletConfig;
+	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
+	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
+//	String m_oServletConfig.getInitParameter("DownloadRootPath") = m_oServletConfig.getInitParameter("DownloadRootPath"); //TODO TEST IT 
+	final String USER_IMAGE_FOLDER_NAME = "userImage";			
+	final String DEFAULT_USER_IMAGE_NAME = "userimage";
+	final UserRepository m_oUserRepository = new UserRepository();
+
 	
 	@POST
 	@Path("/login")
@@ -415,7 +434,93 @@ public class AuthResource {
 
 		return Response.ok().build();
 	}
-	 
+	
+	
+	@POST
+	@Path("/upload/userimage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadUserImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
+										@HeaderParam("x-session-token") String sSessionId ) {
+	
+		String sExt;
+		String sFileName;
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		//get filename and extension 
+		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
+			sFileName = fileMetaData.getFileName();
+			sExt = FilenameUtils.getExtension(sFileName);
+		} else {
+			return Response.status(400).build();
+		}
+		
+		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS) == false) {
+			return Response.status(400).build();
+		}
+		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		oImageResourceUtils.createDirectory(sPath);
+	    String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
+	    if(bIsSaved == false ){
+	    	return Response.status(400).build();
+	    }
+		return Response.status(200).build();
+	}
+	
+	@GET
+	@Path("/get/userimage")
+	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
+
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
+		ImageFile oUserImage = oImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		String sImageExtension = oImageResourceUtils.getExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		
+		//Check the image and extension
+		if(oUserImage == null || sImageExtension.isEmpty() ){
+			return Response.status(204).build();
+		}
+		//prepare buffer and send the logo to the client 
+		ByteArrayInputStream abImageLogo = oUserImage.getByteArrayImage();
+		
+	    return Response.ok(abImageLogo).build();
+
+	}
+	
+	@DELETE
+	@Path("/delete/userimage")
+	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if(oUser == null){
+			return Response.status(401).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+
+//		final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
+//		final String USER_IMAGE_FOLDER_NAME = "userImage";
+//		final String DEFAULT_USER_IMAGE_NAME = "userimage";
+		
+		String sPathFolder = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		oImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
+		
+		return Response.status(200).build();
+	}
+	
+	
 	@POST
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -674,6 +779,7 @@ public class AuthResource {
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
+		
 		Utils.debugLog("AuthService.editUserDetails");
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
@@ -699,6 +805,8 @@ public class AuthResource {
 			//update
 			oUserId.setName(oInputUserVM.getName());
 			oUserId.setSurname(oInputUserVM.getSurname());
+			oUserId.setLink(oInputUserVM.getLink());
+			oUserId.setDescription(oInputUserVM.getDescription());
 			UserRepository oUR = new UserRepository();
 			oUR.updateUser(oUserId);
 			
@@ -1062,5 +1170,20 @@ public class AuthResource {
 			return false;
 		}
 		return true;
+	}
+	
+	protected User getUser(String sSessionId){
+		
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			return null;
+		}
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if (oUser == null) {
+			return null;
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return null;
+		}
+		return oUser;	
 	}
 }

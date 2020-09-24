@@ -25,7 +25,6 @@
               overflow: hidden;
               text-overflow: ellipsis;
           }
-
       }
       //FOOTER
       .modal-footer
@@ -34,4 +33,32 @@
       }
     }
   }
+}
+
+.addUIElementCommand {
+    display: inline;
+    cursor: pointer;
+}
+
+/*CUSTOMIZE ELEMENT*/
+.processor-dialog {
+    .drop-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 35px !important;
+        cursor: pointer;
+        flex-direction: column;
+        height: auto !important;
+        width: auto !important;
+        margin: 16px;
+        color: darkgrey;
+        &:hover {
+            color: #929292;
+        }
+
+    }
+    .checkbox-after-input {
+        padding-top: 44px;
+    }
 }

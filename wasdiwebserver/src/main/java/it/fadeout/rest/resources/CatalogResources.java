@@ -190,7 +190,11 @@ public class CatalogResources {
 				sTokenSessionId = sSessionId;
 			}
 
-			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
+			
+			
+			Utils.debugLog("CatalogResources.DownloadEntryByName: call get user from session: " + sSessionId);
+
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
 				Utils.debugLog("CatalogResources.DownloadEntryByName: user not authorized");

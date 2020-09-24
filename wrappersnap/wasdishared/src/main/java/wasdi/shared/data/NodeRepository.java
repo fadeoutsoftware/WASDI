@@ -59,7 +59,7 @@ public class NodeRepository extends MongoRepository {
 			return true;
 
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeRepository.InsertNode( "+sId+" )" +oEx);
+			Utils.debugLog("NodeRepository.deleteNode( "+sId+" )" +oEx);
 		}
 
 		return false;
@@ -74,14 +74,17 @@ public class NodeRepository extends MongoRepository {
 
 		try {
 			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("nodeCode", sCode)).first();
+			
+			if (oWSDocument!=null) {
+				String sJSON = oWSDocument.toJson();
 
-			String sJSON = oWSDocument.toJson();
+				Node oNode = s_oMapper.readValue(sJSON,Node.class);
 
-			Node oNode = s_oMapper.readValue(sJSON,Node.class);
+				return oNode;				
+			}
 
-			return oNode;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			Utils.debugLog("NodeRepository.getNodeByCode( "+sCode+" )" +oEx.toString());
 		}
 
 		return  null;
@@ -106,14 +109,14 @@ public class NodeRepository extends MongoRepository {
 						oNode = s_oMapper.readValue(sJSON,Node.class);
 						aoReturnList.add(oNode);
 					} catch (IOException e) {
-						e.printStackTrace();
+						Utils.debugLog("NodeRepository.getNodesList(): " + e.toString());
 					}
 
 				}
 			});
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			Utils.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
 		}
 
 		return aoReturnList;

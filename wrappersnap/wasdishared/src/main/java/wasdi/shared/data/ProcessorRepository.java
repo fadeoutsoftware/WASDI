@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
@@ -217,12 +218,20 @@ public class ProcessorRepository extends  MongoRepository {
      * @return List of all the processors
      */
     public List<Processor> getDeployedProcessors() {
+        return getDeployedProcessors("_id");
+    }
+    
+    public List<Processor> getDeployedProcessors(String sOrderBy) {
+    	return getDeployedProcessors(sOrderBy, 1);
+    }
+    
+    public List<Processor> getDeployedProcessors(String sOrderBy, int iDirection) {
 
         final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
         try {
 
             //FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("port", new Document("$gt", 4999)));
-        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find().sort(new Document(sOrderBy, iDirection));
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -243,6 +252,12 @@ public class ProcessorRepository extends  MongoRepository {
         }
 
         return aoReturnList;
-    }
+    }    
 
+	public void updateProcessorDate(Processor oProcessor){
+		Date oDate = new Date();
+		oProcessor.setUpdateDate( (double) oDate.getTime());
+		updateProcessor(oProcessor);
+	}
+	
 }

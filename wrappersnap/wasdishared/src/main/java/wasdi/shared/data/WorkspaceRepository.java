@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
@@ -46,16 +48,41 @@ public class WorkspaceRepository extends  MongoRepository {
     }
     
     /**
-     * Update a workpsace
+     * Update the name of a workpsace
+     * @param oWorkspace
+     * @return
+     */
+    public boolean updateWorkspaceName(Workspace oWorkspace) {
+
+        try {
+            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("name",oWorkspace.getName())));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * 
      * @param oWorkspace
      * @return
      */
     public boolean updateWorkspace(Workspace oWorkspace) {
 
         try {
-            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("name",oWorkspace.getName())));
+        	
+            String sJSON = s_oMapper.writeValueAsString(oWorkspace);
+            
+            Bson oFilter = new Document("workspaceId", oWorkspace.getWorkspaceId());
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
 
-            return true;
+            if (oResult.getModifiedCount()==1) return  true;        	
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -224,7 +251,7 @@ public class WorkspaceRepository extends  MongoRepository {
     }
     
     /**
-     * Get all the workspaces of a user
+     * Get all the workspaces
      * @param sUserId
      * @return
      */

@@ -1,20 +1,28 @@
 package wasdi.shared.data;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import wasdi.shared.utils.Utils;
-
-import org.bson.Document;
-
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
+
+import wasdi.shared.utils.Utils;
 
 /**
  * Base Repository Class
@@ -66,6 +74,8 @@ public class MongoRepository {
      */
     protected String m_sRepoDb = "wasdi";
     
+    private static boolean s_bDbSwitchLogged = false;
+    
 	/**
      * Add a new Mongo Connection
      * @param sDbCode Code of the connection
@@ -101,8 +111,6 @@ public class MongoRepository {
 			e.printStackTrace();
     	}    	
     }
-    
-    private static boolean s_bDbSwitchLogged = false;
     
     /**
      * Get The database Object
@@ -191,20 +199,96 @@ public class MongoRepository {
 		}    	
     }
     
-    /**
-     * Get the repo db of this Repository
-     * @return
-     */
-    public String getRepoDb() {
-		return m_sRepoDb;
+    public <T> void fillList(final ArrayList<T> aoReturnList, FindIterable<Document> oWSDocuments, String sRepositoryName,Class<T> oClass) {
+		oWSDocuments.forEach(new Block<Document>() {
+		    public void apply(Document document) {
+		        String sJSON = document.toJson();
+		        T oAppCategory= null;
+		        try {
+		        	oAppCategory = s_oMapper.readValue(sJSON, oClass);
+		            aoReturnList.add(oAppCategory);
+		        } catch (IOException oEx) {
+		        	Utils.debugLog(sRepositoryName + ".fillList: " + oEx);
+		        }
+		    }
+		});
 	}
+	public <T> String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
+		String sResult = "";
+		if(oNewDocument != null) {
+			try {
+				String sJSON = s_oMapper.writeValueAsString(oNewDocument);
+				Document oDocument = Document.parse(sJSON);
+				getCollection(sCollection).insertOne(oDocument);
+				sResult = oDocument.getObjectId("_id").toHexString();
+	
+			} catch (Exception oEx) {
+				Utils.debugLog(sRepositoryCommand + ": " + oEx);
+			}
+		}
+		return sResult;
+	}
+	
+	public int delete(BasicDBObject oCriteria, String sCollectionName ){
+        try {
+            DeleteResult oDeleteResult = getCollection(sCollectionName).deleteOne(oCriteria);
+            if (oDeleteResult != null)
+            {
+                return (int) oDeleteResult.getDeletedCount();
+            }
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
 
-    /**
-     * Set the repo db of this Repository
-     * @param sRepoDb
-     */
-	public void setRepoDb(String sRepoDb) {
-		this.m_sRepoDb = sRepoDb;
+        return 0;
 	}
-    
+	
+	public void setRepoDb(String sRepoDb) {	
+			this.m_sRepoDb = sRepoDb;
+	}
+	
+	public boolean update(BasicDBObject oCriteria, Object oNewDocument, String sCollectionName) {
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oNewDocument);
+            
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            UpdateResult oResult = getCollection(sCollectionName).updateOne(oCriteria, oUpdateOperationDocument);
+            
+            if (oResult.getModifiedCount()==1) return true;
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
+//	public void uploadImage (File oImageFile){
+//		
+//		GridFS gfsPhoto = new GridFS( s_oMongoClient.getDB(dbName), "userphotos");
+//
+//		String newFileName = "userimage";
+//		try {
+//			GridFSInputFile gfsFile = gfsPhoto.createFile(oImageFile);
+//			gfsFile.setFilename(newFileName);
+//			gfsFile.save();
+//
+//		} catch (IOException e) {
+//			Utils.debugLog("MongoRepository.uploadImage:" + e);
+//			e.printStackTrace();
+//		}
+//	}
+//	public void getImage (){
+//		GridFS gfsPhoto = new GridFS((DB) s_oMongoDatabase, "photo");
+//		String newFileName = "userimage";
+//		GridFSDBFile imageForOutput = gfsPhoto.findOne(newFileName);
+//		// save it into a new image file
+//		try {
+//			imageForOutput.writeTo("C:\\temp\\wasdi\\data\\alessio");
+//		} catch (IOException e) {
+//			Utils.debugLog("MongoRepository.getImage:" + e);
+//			e.printStackTrace();
+//		}
+//	}
+	
 }

@@ -5,47 +5,211 @@
 
 var ProcessorController = (function() {
 
-    function ProcessorController($scope, oClose,oExtras,oWorkspaceService,oProductService,oConstantsService,oHttp, oProcessorService) {
-        //MEMBERS
+    function ProcessorController($scope, oClose,oExtras,oWorkspaceService,oProductService,oConstantsService,oHttp, oRootScope, oProcessorService, oProcessorMediaService) {
+
+        /**
+         * Angular Scope
+         */
         this.m_oScope = $scope;
+        /**
+         * Reference to the controller
+         */
         this.m_oScope.m_oController = this;
+        /**
+         * Extra params received in input
+         */
         this.m_oExtras = oExtras;
+        /**
+         * Input processor base data
+         * @type {null}
+         */
         this.m_oInputProcessor = this.m_oExtras.processor;
+        /**
+         * Workpsace service
+         */
         this.m_oWorkspaceService = oWorkspaceService;
+        /**
+         * Product service
+         */
         this.m_oProductService = oProductService;
-        this.m_aoWorkspaceList = [];
-        this.m_aWorkspacesName = [];
-        this.m_aoSelectedWorkspaces = [];
-        this.m_sFileName = "";
+        /**
+         * Product Media Service
+         */
+        this.m_oProcessorMediaService = oProcessorMediaService;
+        /**
+         * Constants service
+         */
         this.m_oConstantsService = oConstantsService;
+        /**
+         * Active Workspace
+         */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        /**
+         * Http Service
+         */
         this.m_oHttp =  oHttp;
-        //file .zip
-        this.m_oFile = null;
-        this.m_sName = "";
-        this.m_sDescription = "";
-        this.m_sVersion = "1";
-        this.m_sJSONSample = "";
-        this.m_aoProcessorTypes = [{'name':'Python 2.7','id':'ubuntu_python_snap'},{'name':'Python 3.7','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'}];
-        this.m_sSelectedType = "";
-        // Used only in Edit Mode
-        this.m_sTypeNameOnly = "";
-        this.m_sTypeIdOnly = "";
-        this.m_oPublic = true;
+        /**
+         * Root Scope
+         */
+        this.m_oRootScope = oRootScope;
+        /**
+         * Processors Service
+         */
         this.m_oProcessorService = oProcessorService;
+        /**
+         * User Uploaded Zip file
+         * @type {null}
+         */
+        this.m_oFile = null;
+        /**
+         * Processor Name
+         * @type {string}
+         */
+        this.m_sName = "";
+        /**
+         * Processor Description
+         * @type {string}
+         */
+        this.m_sDescription = "";
+        /**
+         * Processor Version
+         */
+        this.m_sVersion = "1";
+        /**
+         * JSON Input Paramters Sample
+         * @type {string}
+         */
+        this.m_sJSONSample = "";
+        /**
+         * Types of available processors
+         * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
+         */
+        this.m_aoProcessorTypes = [{'name':'Python 2.7','id':'ubuntu_python_snap'},{'name':'Python 3.7','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'}];
+        /**
+         * Selected Processor Type
+         * @type {string}
+         */
+        this.m_sSelectedType = "";
+
+        /**
+         * Name of the Type  of a processor in edit mode
+         * @type {string}
+         */
+        this.m_sTypeNameOnly = "";
+        /**
+         * Id of the Type  of a processor in edit mode
+         * @type {string}
+         */
+        this.m_sTypeIdOnly = "";
+        /**
+         * Public flag
+         * @type {boolean}
+         */
+        this.m_oPublic = true;
+        /**
+         * Time Out in Minutes
+         * @type {number}
+         */
+        this.m_iMinuteTimeout = 180;
+        /**
+         * Flag to know if we are in Edit Mode
+         * @type {boolean}
+         */
         this.m_bEditMode = false;
 
-        // Used for sharing
+        /**
+         * Share user mail
+         * @type {string}
+         */
         this.m_sUserEmail = "";
+        /**
+         * List of user id that has access to the processor
+         * @type {*[]}
+         */
         this.m_aoEnableUsers=[];
+        /**
+         * Processor Id
+         * @type {string}
+         */
         this.m_sProcessorId = "";
 
+        /**
+         * Selected Tab
+         * @type {string}
+         */
+        this.m_sSelectedTab = "Base";
 
-        var oController = this;
+        /**
+         * View Model with the Processor Detailed Info.
+         * Is fetched and saved with different APIs
+         * @type {{processorDescription: string, updateDate: number, images: [], imgLink: string, ondemandPrice: number, link: string, score: number, processorId: string, publisher: string, buyed: boolean, processorName: string, categories: [], isMine: boolean, friendlyName: string, email: string, subscriptionPrice: number}}
+         */
+        this.m_oProcessorDetails = {
+            processorId: "",
+            processorName: "",
+            processorDescription: "",
+            imgLink: "",
+            publisher: "",
+            score: 0.0,
+            friendlyName: "",
+            link: "",
+            email: "",
+            ondemandPrice: 0.0,
+            subscriptionPrice: 0.0,
+            updateDate: 0,
+            categories: [],
+            images: [],
+            isMine: true,
+            buyed: false,
+            longDescription: "",
+            showInStore: false,
+            maxImages: 6,
+            reviewsCount: 0,
+            purchased: 0, // NOTE: at the moment here is the count of run on the main server
+            totalRuns: 0, // NOTE: not set at the moment
+            userRuns: 0   // NOTE: not set at the moment
+        }
+
+        this.m_oImageToUpload;
+
+        /**
+         * Processor UI
+         * @type {string}
+         */
+        this.m_sProcessorUI = "{}";
+
+        /**
+         * Flag to know if the UI is changed or not
+          * @type {boolean}
+         */
+        this.m_bUIChanged = false;
+
+        /**
+         * Application Categories
+         * @type {*[]}
+         */
+        this.m_aoCategories = [];
+
+        /**
+         * Processor Logo File
+         * @type {null}
+         */
+        this.m_oProcessorLogo = null;
+
+        /**
+         * Local Reference to the controller
+         * @type {ProcessorController}
+         */
+        let oController = this;
+
+
+        // Close this Dialog handler
         $scope.close = function() {
-            oClose(null, 300); // close, but give 500ms for bootstrap to animate
+            // close, but give 500ms for bootstrap to animate
+            oClose(null, 300);
         };
 
+        // Apply the user actions handler
         $scope.add = function() {
 
             if (oController.m_bEditMode == true) {
@@ -60,18 +224,26 @@ var ProcessorController = (function() {
                 oController.postProcessor(oController, oController.m_oFile[0]);
             }
 
-            oClose(null, 300); // close, but give 500ms for bootstrap to animate
+            oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate
         };
 
+        // Are we creating a new processor or editing an existing one?
         if (this.m_oInputProcessor !== null) {
+
+            // We are in edit mode:
             this.m_bEditMode = true;
+
+            // Copy the input data to the model
             this.m_sName = this.m_oInputProcessor.processorName;
             this.m_sDescription = this.m_oInputProcessor.processorDescription;
             this.m_sJSONSample = decodeURIComponent(this.m_oInputProcessor.paramsSample);
             this.m_sProcessorId = this.m_oInputProcessor.processorId;
+            this.m_iMinuteTimeout = this.m_oInputProcessor.minuteTimeout;
 
+            // Get the list of Enabled users for sharing
             this.getListOfEnableUsers(this.m_sProcessorId)
 
+            // Select the right processor type
             var i=0;
 
             for (i=0; i<this.m_aoProcessorTypes.length; i++) {
@@ -89,9 +261,48 @@ var ProcessorController = (function() {
                 this.m_oPublic = false;
             }
 
+            // Read also the details
+            this.m_oProcessorService.getMarketplaceDetail(this.m_oInputProcessor.processorName).success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) === false)
+                {
+                    oController.m_oProcessorDetails = data;
+
+                    oController.m_oProcessorMediaService.getCategories().success(function (data) {
+                        oController.m_aoCategories = data;
+
+                    }).error(function (error) {
+
+                    });
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
+                }
+
+            }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
+            });
+
+            this.m_oProcessorService.getProcessorUI(this.m_oInputProcessor.processorName).success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) === false)
+                {
+                    oController.m_sProcessorUI = JSON.stringify(data, undefined, 4);
+                }
+                else
+                {
+                    oController.m_sProcessorUI = "{}";
+                }
+
+            }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP UI");
+            });
         }
     };
 
+     /**
+      * Utility method to define if the drag and drop box can be shown or not
+      * @returns {boolean}
+      */
     ProcessorController.prototype.showDragAndDrop = function() {
         if (this.m_bEditMode == false) {
             return true;
@@ -103,7 +314,37 @@ var ProcessorController = (function() {
         return false;
     };
 
+     /**
+      * Utility method to test JSON Validity
+      * @param sJsonString
+      * @returns {boolean|any}
+      */
+    ProcessorController.prototype.tryParseJSON =function(sJsonString){
+         try {
+             var oJsonParsedObject = JSON.parse(sJsonString);
+
+             if (oJsonParsedObject && typeof oJsonParsedObject === "object") {
+                 return oJsonParsedObject;
+             }
+         }
+         catch (e) { }
+
+         return false;
+     };
+
+     /**
+      * Internal method to update en existing processor in edit mode
+      * @param oController
+      * @param oSelectedFile
+      * @returns {boolean}
+      */
      ProcessorController.prototype.updateProcessor = function (oController,oSelectedFile) {
+
+         if (!this.tryParseJSON(oController.m_sJSONSample)) {
+             var oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
+             utilsVexCloseDialogAfter(4000,oDialog);
+             return;
+         }
 
          // Update User Values
          oController.m_oInputProcessor.isPublic = 1;
@@ -113,14 +354,32 @@ var ProcessorController = (function() {
          //oController.m_oInputProcessor.processorVersion = oController.m_sVersion;
          oController.m_oInputProcessor.processorDescription = oController.m_sDescription;
          oController.m_oInputProcessor.paramsSample = encodeURI(oController.m_sJSONSample);
+         oController.m_oInputProcessor.minuteTimeout = oController.m_iMinuteTimeout;
+         // Copy the brief description also in the detail view
+         oController.m_oProcessorDetails.processorDescription = oController.m_sDescription;
 
          // Update processor data
-         this.m_oProcessorService.updateProcessor(oController.m_oActiveWorkspace.workspaceId, oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
-             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");
-             utilsVexCloseDialogAfter(4000,oDialog);
+         oController.m_oProcessorService.updateProcessor(oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
+
+             oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
+             });
+
          }).error(function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
          });
+
+         if (oController.m_bUIChanged) {
+             oController.m_oProcessorService.saveProcessorUI(oController.m_oInputProcessor.processorName, oController.m_sProcessorUI).success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UI UPDATED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR UI");
+             });
+         }
 
          // There was also a file?
          if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)
@@ -140,6 +399,12 @@ var ProcessorController = (function() {
          return true;
      }
 
+     /**
+      * Utility method to Create a new processor
+      * @param oController
+      * @param oSelectedFile
+      * @returns {boolean}
+      */
     ProcessorController.prototype.postProcessor = function (oController,oSelectedFile)
     {
         if(utilsIsObjectNullOrUndefined(oSelectedFile) === true)
@@ -181,18 +446,6 @@ var ProcessorController = (function() {
         return true;
     };
 
-    /**
-     *
-     * @param sName
-     * @returns {*}
-     */
-    ProcessorController.prototype.changeProductName = function(sName){
-        if(utilsIsStrNullOrEmpty(sName) === true)
-            return "";
-
-        return sName + "_workflow";
-    };
-
      /**
       * Get the list of users that has this processor shared
       * @param sProcessorId
@@ -213,15 +466,21 @@ var ProcessorController = (function() {
                  }
                  else
                  {
-                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
+                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
                  }
 
              }).error(function (error) {
-             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
+             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
          });
          return true;
      };
 
+     /**
+      * Add a user to the sharing list
+      * @param sProcessorId
+      * @param sEmail
+      * @returns {boolean}
+      */
      ProcessorController.prototype.shareProcessorByUserEmail = function(sProcessorId, sEmail) {
 
          if( (utilsIsObjectNullOrUndefined(sProcessorId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
@@ -253,7 +512,13 @@ var ProcessorController = (function() {
          return true;
      };
 
-     ProcessorController.prototype.disablePermissionsUsersByWorkspace = function(sProcessorId,sEmail){
+     /**
+      * Removes a user from the sharing list
+      * @param sProcessorId
+      * @param sEmail
+      * @returns {boolean}
+      */
+     ProcessorController.prototype.removeUserSharing = function(sProcessorId,sEmail){
 
          if( (utilsIsObjectNullOrUndefined(sProcessorId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
          {
@@ -284,9 +549,11 @@ var ProcessorController = (function() {
          return true;
      };
 
-
-
-
+     /**
+      * Force the redeploy of the processor on the server
+      * @param sProcessorId
+      * @returns {boolean}
+      */
      ProcessorController.prototype.forceProcessorRefresh = function(sProcessorId) {
 
          if (utilsIsObjectNullOrUndefined(sProcessorId) === true)
@@ -306,8 +573,157 @@ var ProcessorController = (function() {
          return true;
      };
 
+     /**
+      * Handle a click on a category
+      * @param sCategoryId
+      */
+     ProcessorController.prototype.categoryClicked = function (sCategoryId) {
+         if (this.m_oProcessorDetails.categories.includes(sCategoryId)) {
+             this.m_oProcessorDetails.categories = this.m_oProcessorDetails.categories.filter(function(e) { return e !== sCategoryId })
+         }
+         else {
+             this.m_oProcessorDetails.categories.push(sCategoryId);
+         }
+     }
 
-    ProcessorController.$inject = [
+     /**
+      * Utility method to decide if a category checkbox is checked or not
+      * @param sCategoryId
+      * @returns {boolean}
+      */
+     ProcessorController.prototype.isCategoryChecked = function (sCategoryId) {
+         if (this.m_oProcessorDetails.categories.includes(sCategoryId)) {
+            return true;
+         }
+         else {
+             return false;
+         }
+     }
+
+     /**
+      * Uploads or updates the application logo
+      */
+     ProcessorController.prototype.updateLogo = function () {
+
+         var oSelectedFile = null;
+
+         if (this.m_oProcessorLogo!=null) {
+             oSelectedFile = this.m_oProcessorLogo[0];
+         }
+
+         // The user uploaded a logo?
+         if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)
+         {
+             // Update the file
+             var oBody = new FormData();
+             oBody.append('image', oSelectedFile);
+
+             this.m_oProcessorMediaService.uploadProcessorLogo(this.m_oInputProcessor.processorId, oBody).success(function (data) {
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR LOGO UPDATED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR LOGO");
+             });
+         }
+
+     }
+
+     /**
+      * Add an image to the processor
+      */
+     ProcessorController.prototype.addApplicationImage = function () {
+
+         var oSelectedFile = null;
+
+         if (this.m_oImageToUpload!=null) {
+             oSelectedFile = this.m_oImageToUpload[0];
+         }
+
+         // The user uploaded a logo?
+         if(!utilsIsObjectNullOrUndefined(oSelectedFile) === true)
+         {
+             var oController = this;
+
+             // Update the file
+             var oBody = new FormData();
+             oBody.append('image', oSelectedFile);
+
+             this.m_oProcessorMediaService.uploadProcessorImage(this.m_oInputProcessor.processorId, oBody).success(function (data) {
+
+                 oController.m_oProcessorDetails.images.push(data.stringValue);
+
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE ADDED");
+                 utilsVexCloseDialogAfter(4000,oDialog);
+             }).error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPLOADING IMAGE");
+             });
+         }
+     }
+
+     /**
+      * Remove an image of the processor
+      * @param sImage
+      */
+     ProcessorController.prototype.removeProcessorImage = function (sImage) {
+
+         let oController = this;
+
+         let asSplit = sImage.split('/');
+         if (asSplit == null) return;
+         if (asSplit.length == 0) return;
+         let sImageIndex = asSplit[asSplit.length-1];
+
+         this.m_oProcessorMediaService.removeProcessorImage(this.m_oInputProcessor.processorId, sImageIndex).success(function (data) {
+
+             oController.m_oProcessorDetails.images = oController.m_oProcessorDetails.images.filter(function(e) { return e !== sImage });
+
+             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE REMOVED");
+             utilsVexCloseDialogAfter(4000,oDialog);
+         }).error(function (error) {
+             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DELETING THE IMAGE");
+         });
+     }
+
+     ProcessorController.prototype.addUIElement = function (sElementType) {
+         //console.log("Adding element " + sElementType)
+
+         let sTextToInsert = "";
+
+         if (sElementType === "tab") {
+             sTextToInsert = '\n\t{\n\t\t"name": "Tab Name",\n\t\t"controls": [\n\t\t]\n\t},';
+         }
+         else if (sElementType === "textbox") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": ""\n\t},';
+         }
+         else if (sElementType === "dropdown") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": []\n\t},';
+         }
+         else if (sElementType === "bbox") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box"\n\t},';
+         }
+         else if (sElementType === "slider") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "slider",\n\t\t"label": "description",\n\t\t"default": 0,\n\t\t"min": 0,\n\t\t"max": 100\n\t},';
+         }
+         else if (sElementType === "date") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "date",\n\t\t"label": "Date"\n\t},';
+         }
+         else if (sElementType === "boolean") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "boolean",\n\t\t"label": "description",\n\t\t"default": false\n\t},';
+         }
+         else if (sElementType === "productscombo") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product"\n\t},';
+         }
+         else if (sElementType === "searcheoimage") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "searcheoimage",\n\t\t"label": "Description"\n\t},';
+         }
+         else if (sElementType === "hidden") {
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "hidden"\n\t},';
+         }
+
+         this.m_oRootScope.$broadcast('add', sTextToInsert);
+     }
+
+     ProcessorController.$inject = [
         '$scope',
         'close',
         'extras',
@@ -315,8 +731,9 @@ var ProcessorController = (function() {
         'ProductService',
         'ConstantsService',
         '$http',
-        'ProcessorService'
-
+        '$rootScope',
+        'ProcessorService',
+        'ProcessorMediaService'
     ];
     return ProcessorController;
 })();

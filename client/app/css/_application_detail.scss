@@ -1,0 +1,285 @@
+@import "color-scheme";
+.scroll-wrapper {
+    height: calc(100vh - 155px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.back-link {
+    cursor: pointer;
+    &:hover {
+        //text-decoration: underline;
+        color: $wasdigreen;
+    }
+}
+.pointer {
+    cursor: pointer;
+}
+.app-details {
+    .appdetails-slider {
+        ul {
+            list-style: none outside none;
+            padding-left: 0;
+            margin-bottom:0;
+        }
+        li {
+            display: block;
+            float: left;
+            margin-right: 6px;
+            cursor:pointer;
+        }
+        img {
+            display: block;
+            height: auto;
+            max-width: 100%;
+            width: 100% !important;
+        }
+    }
+
+    .application-title {
+        h2 {
+            margin-top: 0px;
+        }
+    }
+
+    .star-rating {
+       font-size: 1.2em;
+    }
+    .publisher {
+        .pub-name {
+            color: $wasdigreen;
+        }
+        .fa-flask {
+            color: $wasdigreen;
+        }
+        .edit-btn {
+            background-color: $wasdigreen;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            &:hover {
+                background-color: $darkwasdigreen;
+            }
+        }
+    }
+    .big-price-tag {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        font-size: 1.4em;
+        cursor: pointer;
+        &.subscription {
+        background-color: $wasdigreen;
+            &:hover {
+                background-color: $darkwasdigreen;
+            }
+        }
+        &.one-shot {
+        background-color: $wasdiblue;
+            &:hover {
+                background-color: $darkwasdiblue;
+            }
+        }
+        &.buyed, &.free {
+            cursor: unset;
+            background-color: $wasdigreen;
+            &:hover {
+                background-color: $darkwasdigreen;
+            }
+        }
+
+        &.premium {
+            cursor: unset;
+            span {
+                text-decoration: line-through;
+            }
+        }
+    }
+    .tag-container {
+        .pre-tag{
+            width: 0px;
+            height: 0px;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid $wasdiblue;
+            display: grid;
+            place-items: center;
+                .white-circle {
+                    margin-top: -2px;
+                    background-color: white;
+                    border-radius: 50%;
+                    width: 4px;
+                    height: 4px;
+                    margin-left: 6px;
+                }
+        }
+        .tag {
+            background-color: $wasdiblue;
+            text-transform: uppercase;
+            color: white;
+            font-size: 0.9em;
+            border-radius: 0px 4px 4px 0px;
+            padding-left: 8px;
+            padding-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        cursor: pointer;
+        &:hover {
+            .pre-tag {
+                border-right: 10px solid $wasdigreen;
+            }
+            .tag{
+                background-color: $wasdigreen;
+            }
+        }
+    }
+    .app-details-description {
+
+    }
+    .launch-btn {
+        background-color: $wasdiblue;
+        padding: 10px 25px;
+        cursor: pointer;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        color: white;
+        font-size: 30px;
+        font-weight: 600;
+        &:hover {
+            background-color: $darkwasdiblue;
+        }
+
+    }
+    .text-green-wasdi {
+        color: $wasdigreen;
+    }
+}
+
+.green-big-btn {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: $wasdigreen;
+
+        &:hover {
+            background-color: $darkwasdigreen;
+        }
+
+}
+
+.blue-big-btn {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: $wasdiblue;
+
+    &:hover {
+        background-color: $darkwasdiblue;
+    }
+
+}
+
+/*REVIEWS*/
+.reviews-list {
+    border-radius: 0px 8px 8px 8px;
+    .userImage {
+        width: 30px;
+        height: 30px;
+        background-position: center center;
+        background-size: cover;
+        border-radius: 50%;
+        border: 1px solid #e8e7e7;
+    }
+    .reviews-name {
+        font-size: 1.1em;
+    }
+    .delete-btn {
+        background-color: lightgrey;
+        color: black;
+        padding: 2px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8em;
+        &:hover {
+            background-color: #9c9c9c;
+        }
+    }
+    .reviews-title {
+        font-size: 1.2em;
+    }
+    .reviews-comment {
+        font-style: italic;
+    }
+}
+.reviews-load-more {
+    cursor: pointer;
+    &:hover{
+        text-decoration: underline;
+    }
+}
+
+/*MODAL REVIEWS*/
+.writeReviewsModal{
+    .fa-star {
+        cursor: pointer;
+    }
+    .star-rating {
+        font-size: 1.5em;
+    }
+
+}
+
+/*ANIMATION*/
+.arrow{
+    display: flex;
+    align-items: center;
+    margin-right: 25px;
+
+}
+.green-big-btn.disabled {
+    background-color: lightgray;
+    cursor: auto;
+    pointer-events: none;
+}
+.arrow span{
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-bottom: 5px solid #ffffff;
+    border-right: 5px solid #ffffff;
+    transform: rotate(-45deg);
+    margin: -5px;
+    animation: animate 2s infinite;
+}
+.arrow span:nth-child(2){
+    animation-delay: -0.2s;
+}
+.arrow span:nth-child(3){
+    animation-delay: -0.4s;
+}
+@keyframes animate {
+    0%{
+        opacity: 0;
+        transform: rotate(-45deg) translate(-20px,-20px);
+    }
+    50%{
+        opacity: 1;
+    }
+    100%{
+        opacity: 0;
+        transform: rotate(-45deg) translate(20px,20px);
+    }
+}

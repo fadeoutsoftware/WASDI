@@ -1,0 +1,251 @@
+<div class="editor-view">
+
+    <div class="container-fluid">
+        <div class="row market-toolbar-wrapper">
+            <div class="col-12 market-toolbar d-flex justify-content-between">
+                <!--LEFT-->
+                <div class="item-wrapper d-flex align-items-center px-3">
+                    <span class="d-none d-md-block img-title">
+                        <img src="assets/img/space-market-logo.png">
+                    </span>
+                </div>
+
+                <!-- RIGHT -->
+                <div class="right-side d-flex">
+                    <!--SEARCH-->
+                    <div class="search-wrapper mr-2 d-flex">
+                        <input type="text" name="search" placeholder="SEARCH APP" class="search-field" ng-model="m_oController.m_sNameFilter">
+                        <div class="search-icon-wrapper px-4 d-flex align-items-center" ng-click="m_oController.refreshAppList()">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </div>
+                    </div>
+                    <!--ORDER BY-->
+                    <!--NAME-->
+                    <button
+                        class="btnwasdis order-btn btn-primary"
+                        type="button"
+                        ng-class="m_oController.m_oAppFilter.orderBy=='name'?'filter-active':''"
+                        ng-click="m_oController.orderByClicked('name')">
+                        NAME
+                        <span class="fa fa-filter"></span>
+                        <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
+                    </button>
+                    <button
+                        class="btnwasdis order-btn btn-primary"
+                        type="button"
+                        ng-class="m_oController.m_oAppFilter.orderBy=='date'?'filter-active':''"
+                        ng-click="m_oController.orderByClicked('date')">
+                        DATE
+                        <span class="fa fa-filter"></span>
+                        <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
+                    </button>
+                    <button
+                        class="btnwasdis order-btn btn-primary"
+                        type="button"
+                        ng-class="m_oController.m_oAppFilter.orderBy=='price'?'filter-active':''"
+                        ng-click="m_oController.orderByClicked('price')">
+                        PRICE
+                        <span class="fa fa-filter"></span>
+                        <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
+                    </button>
+                    <!--<div class="order-btn dropdown">
+                        <button class="btnwasdis btn-primary dropdown-toggle" type="button" id="dropdownOrder" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            ORDER BY
+                            <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownOrder">
+                            <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('name')" ng-disabled="m_oController.m_oAppFilter.orderBy;m_oController.m_oAppFilter.orderDirection">NAME</div>
+                            <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('date')">DATE</div>
+                            <div class="dropdown-item p-2 px-3" href="#" ng-click="m_oController.orderByClicked('price')">PRICE</div>
+                        </div>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="container-fluid">
+        <div class="row mt-3">
+            <!--green divider-->
+            <div class="marketplace-divider">
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <!--SIDEBAR------------------------------------------------------------>
+            <div class="col-12 col-md-2 filter-side-bar">
+                <!--title large screen-->
+                <div class="d-none d-md-block title p-2 px-3 mb-2">
+                    <span class="fa fa-filter mr-2" style="cursor: pointer" aria-hidden="true"></span>FILTERS
+                </div>
+                <!--title mobile screen-->
+                <div class="d-block d-md-none title p-2 px-3 mb-4 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsebleFilter" aria-expanded="false" aria-controls="collapsebleFilter">
+                    <div><span class="fa fa-bath mr-2" aria-hidden="true"></span>FILTERS</div>
+                    <div><span class="fa fa-chevron-down"></span>
+                        <span class="fa fa-times"></span>
+                    </div>
+                </div>
+
+
+                <div class="filter collapse" id="collapsebleFilter">
+                    <!--category-->
+                    <div class="category mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">CATEGORY</div>
+
+                        <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
+                            <input id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.categoryClicked(oCategory.id)">
+                            <label for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
+                        </div>
+
+                    </div>
+
+                    <!--developer-->
+                    <div class="developer mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">
+                            <span>DEVELOPER</span>
+                            <span class="fas fa-meteor"></span>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oPublisher in m_oController.m_aoPublishers">
+                            <input id="{{oPublisher.publisher}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.publisherClicked(oPublisher.publisher)">
+                            <label title="{{oPublisher.publisher}} - {{oPublisher.appCount}}" for="{{oPublisher.publisher}}">{{oPublisher.publisher}}<span class="italic">({{oPublisher.appCount}})</span></label>
+                        </div>
+                    </div>
+
+                    <!--ratings-->
+                    <div class="ratings mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">RATINGS</div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked" ng-click="m_oController.rankingClicked(0)">
+                            <label for="allstar">
+                                <span>all ratings</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="onestar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(1)">
+                            <label for="onestar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">and more</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="twostar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(2)">
+                            <label for="twostar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">and more</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="threestar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(3)">
+                            <label for="threestar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">and more</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="fourstar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(4)">
+                            <label for="fourstar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="ml-2">and more</span>
+                            </label>
+                        </div>
+                        <div class="input-group-text d-flex align-items-center pb-1">
+                            <input id="fivestar" type="radio" name="rating" aria-label="Checkbox for following text input" ng-click="m_oController.rankingClicked(5)">
+                            <label for="fivestar">
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                                <span class="fa fa-star checked"></span>
+                            </label>
+                        </div>
+
+
+                    </div>
+
+                    <!--price-->
+                    <div class="price mt-1 mb-3">
+                        <div class="border-bottom py-1 mb-2 subtitle">PRICE</div>
+
+                        <rzslider rz-slider-model="m_oController.m_oSlider.value" rz-slider-options="m_oController.m_oSlider.options"></rzslider>
+                    </div>
+                </div>
+            </div>
+            <!--end filter bar-->
+
+
+            <!--APPS LIST-->
+            <div class="col-md-10 pb-3 apps-wrapper">
+                <!--LOADER-->
+                <div class="row loader d-print-flex justify-content-center" ng-show="m_oController.m_bWaiting==true">
+                    <div class="loadIcon">
+                        <invader></invader>
+                    </div>
+                </div>
+
+                <!--LIST-->
+                <div class="row" ng-show="m_oController.m_bWaiting==false">
+                    <div class="col-6 col-md-4 col-lg-3 pb-5"  ng-repeat="processor in m_oController.m_aoApplicationList">
+                        <div class="apps-tile" ng-click="m_oController.openApplicationPage(processor.processorName)">
+                            <!--APP FEATURED IMG-->
+                            <div class="featured-img" style="background-image: url({{processor.imgLink}})">
+                                <div class="overlay">
+                                    <img src="assets/img/tie-f.svg" class="scalein">
+                                </div>
+                            </div>
+                            <div class="buyed-tag" ng-if="processor.buyed">
+                                <span class="fa fa-check mr-1"></span>Already Buyed!
+                            </div>
+                            <!--APP DETAILS-->
+                            <h5 class="application_title mt-4">{{processor.friendlyName}}</h5>
+                            <p class="application_description" title="{{processor.processorDescription}}">{{processor.processorDescription}}</p>
+                            <div class="publisher mb-1">
+                                <span ng-if="!m_oController.isMine(processor)">Published by <span class="pub-name">{{processor.publisher}}</span></span>
+                                <span ng-if="m_oController.isMine(processor)"><span class="fa fa-flask mr-1"></span>You are the Master!</span>
+                            </div>
+                            <div class="tile-footer d-flex justify-content-between align-items-center border-top pt-3">
+                                <div class="star-rating">
+                                    <span class="fa fa-star" ng-class="processor.score>0.25&&processor.score<0.75?'checked-half':processor.score>=0.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>1.25&&processor.score<1.75?'checked-half':processor.score>=1.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>2.25&&processor.score<2.75?'checked-half':processor.score>=2.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>3.25&&processor.score<3.75?'checked-half':processor.score>=3.75?'checked':''"></span>
+                                    <span class="fa fa-star" ng-class="processor.score>4.25&&processor.score<4.75?'checked-half':processor.score>=4.75?'checked':''"></span>
+
+
+                                </div>
+                                <div  class="price-tag shadow-sm">
+                                    <span ng-if="processor.price>0">from € {{processor.price}}</span>
+                                    <span ng-if="processor.price==0">Free</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-center" ng-show="m_oController.m_bWaiting==false">
+                    <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-class="!m_oController.m_bLoadMoreEnabled?'btn-disabled':''"><span class="fa fa-refresh mr-2"></span>LOAD MORE SPACE APPS</div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+

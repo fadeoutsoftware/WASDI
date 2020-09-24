@@ -39,7 +39,7 @@ var HomeController = (function() {
         this.m_bRegistering = false;
 
         if(this.m_oConstantsService.isUserLogged())
-            this.m_oState.go("root.workspaces");// go workspaces
+            this.m_oState.go("root.marketplace");// go workspaces
         if(this.m_bBrowserIsIE === true)
         {
             this.m_bVisualizeLink = false;

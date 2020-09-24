@@ -9,8 +9,42 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
     this.m_sResource = "/processors";
+
+    /**
+     * Get the full light list of deployed processors
+     * @returns {*}
+     */
     this.getProcessorsList = function() {
         return this.m_oHttp.get(this.APIURL + '/processors/getdeployed');
+    };
+
+    /**
+     * Get the base info of a single processor
+     * (same view model as returned by getProcessorsList)
+     * @param sProcessorId
+     * @returns {*}
+     */
+    this.getDeployedProcessor = function (sProcessorId) {
+        return this.m_oHttp.get(this.APIURL + '/processors/getprocessor?processorId=' + sProcessorId);
+    }
+
+
+    /**
+     * Get the list of applications to be shown in the marketplace
+     * @param oFilter
+     * @returns {*}
+     */
+    this.getMarketplaceList = function(oFilter) {
+        return this.m_oHttp.post(this.APIURL + '/processors/getmarketlist',oFilter);
+    };
+
+    /**
+     * Get the details of an application for the marketplace
+     * @param sApplication
+     * @returns {*}
+     */
+    this.getMarketplaceDetail = function(sApplication) {
+        return this.m_oHttp.get(this.APIURL + '/processors/getmarketdetail?processorname=' + sApplication);
     };
 
     /**
@@ -86,7 +120,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oProcessId
      * @returns {*}
      */
-    this.getAllErrorLogs = function(oProcessId){
+    this.getProcessorLogs = function(oProcessId){
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
         if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
@@ -99,7 +133,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oProcessId
      * @returns {*}
      */
-    this.getCountLogs = function(oProcessId)
+    this.getLogsCount = function(oProcessId)
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
@@ -115,7 +149,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param iEndRow
      * @returns {*}
      */
-    this.getLogs = function(oProcessId,iStartRow,iEndRow)
+    this.getPaginatedLogs = function(oProcessId, iStartRow, iEndRow)
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
@@ -131,9 +165,20 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oBody
      * @returns {*}
      */
-    this.updateProcessor = function (sWorkspaceId, sProcessorId, oBody) {
+    this.updateProcessor = function (sProcessorId, oBody) {
 
-        return this.m_oHttp.post(this.APIURL + '/processors/update?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody);
+        return this.m_oHttp.post(this.APIURL + '/processors/update?processorId=' + encodeURI(sProcessorId),oBody);
+    };
+
+    /**
+     * Update the details of a processor
+     * @param sWorkspaceId
+     * @param sProcessorId
+     * @param oBody
+     * @returns {*}
+     */
+    this.updateProcessorDetails = function (sProcessorId, oBody) {
+        return this.m_oHttp.post(this.APIURL + '/processors/updatedetails?processorId=' + encodeURI(sProcessorId),oBody);
     };
 
     /**
@@ -227,4 +272,22 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         window.location.href = sAPIUrl + "/processors/downloadprocessor" + urlParams;
     };
 
+    /**
+     * Get the representation of the Processor UI
+     * @param sProcessorName
+     * @returns {*}
+     */
+    this.getProcessorUI = function (sProcessorName) {
+        return this.m_oHttp.get(this.APIURL + '/processors/ui?name='+sProcessorName);
+    }
+
+    /**
+     * Save the Processor UI JSON Definition
+     * @param sProcessorName name of the processor
+     * @param sProcessorUI string with the json
+     * @returns {*}
+     */
+    this.saveProcessorUI = function (sProcessorName, sProcessorUI) {
+        return this.m_oHttp.post(this.APIURL + '/processors/saveui?name='+sProcessorName, sProcessorUI);
+    }
 }]);

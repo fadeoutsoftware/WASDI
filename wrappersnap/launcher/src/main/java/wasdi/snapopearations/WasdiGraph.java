@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;

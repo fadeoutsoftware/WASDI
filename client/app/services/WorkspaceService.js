@@ -16,8 +16,15 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return this.m_oHttp.get(this.APIURL + '/ws?sWorkspaceId='+sWorkspaceId);
     };
 
-    this.createWorkspace = function () {
-        return this.m_oHttp.get(this.APIURL + '/ws/create');
+    this.createWorkspace = function (sName = null) {
+
+        let sRestPath = '/ws/create';
+
+        if (sName != null) {
+            sRestPath = sRestPath + "?name=" + sName;
+        }
+
+        return this.m_oHttp.get(this.APIURL + sRestPath);
     };
 
     this.UpdateWorkspace = function (oWorkspace) {
