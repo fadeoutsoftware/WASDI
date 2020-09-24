@@ -35,6 +35,7 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -668,10 +669,10 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile,
-			@QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
 		
 		Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
-				+ sWorkspace + ", DeleteLayer: " + bDeleteLayer + " )");
+				+ sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " )");
 
 		PrimitiveResult oReturn = new PrimitiveResult();
 		oReturn.setBoolValue(false);
@@ -682,7 +683,7 @@ public class ProductResource {
 			// Domain Check
 			if (oUser == null) {
 				Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
-						+ sWorkspace + ", DeleteLayer: " + bDeleteLayer + " ): invalid session");
+						+ sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " ): invalid session");
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
@@ -693,7 +694,7 @@ public class ProductResource {
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
-			if (Utils.isNullOrEmpty(sWorkspace)) {
+			if (Utils.isNullOrEmpty(sWorkspaceId)) {
 				String sMessage = "workspace null or empty";
 				Utils.debugLog("ProductResource.DeleteProduct: " + sMessage);
 				oReturn.setStringValue(sMessage);
@@ -702,7 +703,7 @@ public class ProductResource {
 			}
 			
 			// Get the file path
-			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			String sFilePath = sDownloadPath + sProductName;
 			
 			Utils.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);
@@ -811,7 +812,7 @@ public class ProductResource {
 			// delete the product-workspace related records on db and the Downloaded File Entry
 			try {
 				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-				oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
+				oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspaceId);
 				oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
 			} catch (Exception oEx) {
 				Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
@@ -848,10 +849,24 @@ public class ProductResource {
 				Utils.debugLog("ProductResource.DeleteProduct: product also in other WS, do not delete metadata");
 			}
 
-			
-			// Delete the database entry
-			//oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
-			
+			try {
+				// Search for exchange name
+				String sExchange = m_oServletConfig.getInitParameter("RABBIT_EXCHANGE");
+				
+				// Set default if is empty
+				if (Utils.isNullOrEmpty(sExchange)) {
+					sExchange = "amq.topic";
+				}
+				
+				// Send the Asynch Message to the clients
+				Send oSendToRabbit = new Send(sExchange);
+				oSendToRabbit.SendRabbitMessage(true, "DELETE", sWorkspaceId, null, sWorkspaceId);
+				oSendToRabbit.Free();				
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("ProductResource.DeleteProduct: exception sending asynch notification");
+			}
+
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
