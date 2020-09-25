@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.5.1
-Last Update: 27/05/2020
+Version 0.6.0
+Last Update: 25/09/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -55,6 +55,7 @@ import requests
 import getpass
 import sys
 import os.path
+import inspect
 
 # Initialize "Members"
 m_sUser = None
@@ -900,6 +901,19 @@ def getFullProductPath(sProductName):
                     print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
                     _downloadFile(sProductName)
                     print('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
+    else:
+        try:
+            # We are in the server and there is no local file
+            if os.path.isfile(sFullPath) is False:
+                # If the file exists on server
+                if fileExistsOnWasdi(sProductName) is True:
+                    # Download The File from WASDI
+                    wasdiLog('[WARNING] waspy.getFullProductPath: WASDI FILE ON ANOTHER NODE: START DOWNLOAD... PLEASE WAIT')
+                    _downloadFile(sProductName)
+                    wasdiLog('[WARNING] waspy.getFullProductPath: DONWLOAD COMPLETED')
+        except:
+            wasdiLog('[ERROR] waspy.getFullProductPath: error downloading the file from the workspace node')
+        
 
     return sFullPath
 
@@ -1639,14 +1653,14 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
-        wasdiLog("searchEOImages: Start Provider Query")
+        _log("[INFO] searchEOImages: Start Provider Query")
         asHeaders = _getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
-        wasdiLog("searchEOImages: Query Done, starting conversion")
+        _log("[INFO] searchEOImages: Query Done, starting conversion")
         try:
             # populate list from response
             oJsonResponse = oResponse.json()
-            wasdiLog("searchEOImages: Conversion done")
+            _log("[INFO] searchEOImages: Conversion done")
             aoReturnList = oJsonResponse
         except Exception as oEx:
             wasdiLog('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object' +
@@ -2018,7 +2032,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
 
         # Get the file name
         sFile = oImage["title"] + ".zip"
-        wasdiLog("Importing Image " + sFile)
+        _log("[INFO] Importing Image " + sFile)
 
         # Import in WASDI
         sImportProcId = asynchImportProduct(oImage, sProvider)
@@ -2053,7 +2067,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
                 # Generate the output name
                 sOutputFile = sFile.replace(".zip", sPreProcSuffix)            
 
-                wasdiLog(sFile + " imported, starting workflow to get " + sOutputFile)
+                _log("[INFO] " + sFile + " imported, starting workflow to get " + sOutputFile)
     
                 # Is already there for any reason?
                 if not fileExistsOnWasdi(sOutputFile):
@@ -2073,7 +2087,7 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
             time.sleep(5)                
 
     # Checkpoint: wait for all asynch workflows to finish
-    wasdiLog("All image imported, waiting for all workflows to finish")
+    _log("[INFO] All image imported, waiting for all workflows to finish")
     waitProcesses(asRunningProcList)
 
 def asynchExecuteProcessor(sProcessorName, aoParams={}):
@@ -2170,7 +2184,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
     
     for iAttempt in range(iMaxRetry):
         
-        wasdiLog("[INFO]: execute Processor Attempt # " + str(iAttempt+1))
+        _log("[INFO] waspy.executeProcessor: execute Processor Attempt # " + str(iAttempt+1))
         
         oResult = requests.post(sUrl, data=sEncodedParams, headers=asHeaders)
         
@@ -2212,7 +2226,7 @@ def _uploadFile(sFileName):
     bResult = False
     try:
         if sFileName is None:
-            wasdiLog('upload: the given file name is None, cannot upload')
+            wasdiLog('[ERROR] upload: the given file name is None, cannot upload')
             return False
 
         sFileProperName = os.path.basename(sFileName)
@@ -2233,10 +2247,10 @@ def _uploadFile(sFileName):
             _log('uploadFile: upload complete :-)')
             bResult = True
         else:
-            wasdiLog('uploadFile: upload failed with code {oResponse.status_code}: {oResponse.text}')
+            wasdiLog('[ERROR] uploadFile: upload failed with code {oResponse.status_code}: {oResponse.text}')
 
     except Exception as oE:
-        wasdiLog('uploadFile: ' +str(oE))
+        wasdiLog('[ERROR] uploadFile: ' +str(oE))
     # finally:
     # os.chdir(getScriptPath())
     return bResult
@@ -2663,6 +2677,26 @@ def copyFileToSftp(sFileName, bAsynch=None):
     return sResult
 
 
+def getProcessorPath():
+    """
+    Get the local path of the processor (where myProcessor.py is located)
+    """
+    
+    try:        
+        # get the caller's stack frame and extract its file path
+        oFrameInfo = inspect.stack()[1]
+        sCallerFilePath = oFrameInfo[1]
+        # drop the reference to the stack frame to avoid reference cycles
+        del oFrameInfo  
+    
+        # make the path absolute
+        sCallerFilePath = os.path.dirname(os.path.abspath(sCallerFilePath))
+        sCallerFilePath = sCallerFilePath + "/"
+        
+        return sCallerFilePath
+    except:
+        return ""
+
 def _log(sLog):
     """
     Internal Log function
@@ -2871,15 +2905,32 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
 
     sResult = ''
     try:
-        if getUploadActive() is True:
-            if fileExistsOnWasdi(sFileName) is False:
-                _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
-                try:
-                    _uploadFile(sFileName)
-                    _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
-                except:
-                    wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
-                          '  ******************************************************************************')
+        if m_bIsOnServer is False:
+            if getUploadActive() is True:
+                if fileExistsOnWasdi(sFileName) is False:
+                    _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
+                    try:
+                        _uploadFile(sFileName)
+                        _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
+                    except:
+                        wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
+                              '  ******************************************************************************')
+        else:
+            try:
+                # We are on the server: do I have the file?
+                if os.path.exists(getPath(sFileName)) is True:
+                    # Does it exists on the target node?
+                    if _fileOnNode(sFileName) is False:
+                        wasdiLog('[WARNING] waspy._internalAddFileToWASDI: uploading the file to the workspace node')
+                        try:
+                            _uploadFile(sFileName)
+                            wasdiLog('[WARNING] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
+                        except:
+                            wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload' +
+                                  '  ******************************************************************************')
+            except:
+                wasdiLog('[ERROR] waspy._internalAddFileToWASDI: could not send the file the workspace node')
+            
 
         sUrl = getWorkspaceBaseUrl() + "/catalog/upload/ingestinws?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
 
@@ -3032,6 +3083,55 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         wasdiLog(oResponse.content)
     return ''
 
+
+def _fileOnNode(sFileName):
+    """
+    checks if a file already exists on the node of the workspace or not
+    :param sFileName: file name with extension
+    :return: True if the file exists, False otherwise
+    """
+
+    if sFileName is None:
+        wasdiLog('[ERROR] waspy._fileOnNode: file name must not be None' +
+              '  ******************************************************************************')
+        return False
+    if len(sFileName) < 1:
+        wasdiLog('[ERROR] waspy._fileOnNode: File name too short' +
+              '  ******************************************************************************')
+        return False
+
+    sSessionId = getSessionId()
+    sActiveWorkspace = getActiveWorkspaceId()
+
+    sUrl = getWorkspaceBaseUrl()
+    sUrl += "/catalog/fileOnNode?token="
+    sUrl += sSessionId
+    sUrl += "&filename="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += sActiveWorkspace
+
+    asHeaders = _getStandardHeaders()
+    oResult = requests.get(sUrl, headers=asHeaders)
+
+    if oResult is None:
+        wasdiLog('[ERROR] waspy._fileOnNode: failed contacting the server' +
+              '  ******************************************************************************')
+        return False
+    elif not oResult.ok and not 500 == oResult.status_code:
+        wasdiLog('[ERROR] waspy._fileOnNode: unexpected failure, server returned: ' + str(oResult.status_code) +
+              '  ******************************************************************************')
+        return False
+    else:
+        try:
+            oJsonResponse = oResult.json()
+            
+            if oJsonResponse.BoolValue is not None:
+                return oJsonResponse.BoolValue
+            else:
+                return False
+        except:
+            return False
 
 def _getDefaultCRS():
     return (

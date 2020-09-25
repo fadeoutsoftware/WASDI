@@ -1,8 +1,19 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.6.0] - 2020-09-25
+
+### Added
+
+- support to the auto upload and download by nodes
+- getProcessorPath method to have the absolute path of the running processor
+
+### Fixed
+
+- Removed internal libraries logs
+
 ## [0.5.1] - 2020-05-27
 
-## Fixed
+### Fixed
 
 - add File to WASDI did a double file Ingest
 - Auto upload was active also on server
@@ -10,30 +21,30 @@
 
 ## [0.5.0] - 2020-05-15
 
-## Added
+### Added
 
 - support to the optmized Distributed Architecture
 
 ## [0.4.2] - 2020-04-30
 
-## Added
+### Added
 
 - added deleteWorkspace method
 
 ## [0.4.1] - 2020-04-22
 
-## Added
+### Added
 
 - added log in searchEOImages
 
 ## [0.4.0] - 2020-04-22
 
-## Added
+### Added
 
 - check for availability of params file
 - executeProcessor supporting POST other than GET
 
-## Fixed
+### Fixed
 
 - bug in getProcessorPayload due to string concatenation with non string
 
