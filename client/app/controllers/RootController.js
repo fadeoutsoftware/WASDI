@@ -756,7 +756,7 @@ var RootController = (function() {
         }
     };
 
-    RootController.prototype.openDocumentatonCenter = function () {
+    RootController.prototype.openDocumentationCenter = function () {
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
     }
 
