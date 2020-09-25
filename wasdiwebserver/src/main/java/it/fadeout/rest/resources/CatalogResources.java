@@ -424,10 +424,44 @@ public class CatalogResources {
 
 
 	@GET
+	@Path("fileOnNode")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspace)
+	{	
+		
+		Utils.debugLog("CatalogResources.checkFileByNode");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("CatalogResources.checkFileByNode: user not authorized");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		try {
+			String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+
+			File oFile = new File(sTargetFilePath);
+			
+			boolean bExists = oFile.exists();
+			
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(bExists);
+			Utils.debugLog("CatalogResources.checkFileByNode " + sFileName + ": " + bExists);
+			
+			return Response.ok(oResult).build();					
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("CatalogResources.checkFileByNode: exception " + oEx.toString());
+			return Response.serverError().build();
+		}		
+	}
+	
+	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspace)
-	{			
+	{
 		Utils.debugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -446,6 +480,7 @@ public class CatalogResources {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(oFile != null);
 		return Response.ok(oResult).build();		
+
 	}
 
 	/**
