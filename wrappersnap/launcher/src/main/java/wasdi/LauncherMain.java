@@ -1743,6 +1743,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sFile.toUpperCase().contains("BURNEDAREA")) {
 				sStyle = "burned_areas";
 			}
+			// Hard Coded set Flood Risk Style - STYLES HAS TO BE MANAGED
+			if (sFile.toUpperCase().contains("FRISK")) {
+				sStyle = "frisk";
+			}
 
 			if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
 				sStyle = oParameter.getStyle();
