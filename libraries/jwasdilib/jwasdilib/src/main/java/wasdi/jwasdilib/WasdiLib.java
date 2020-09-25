@@ -792,7 +792,21 @@ public class WasdiLib {
 			oEx.printStackTrace();
 			return asProducts;
 		}
-	}	
+	}
+	
+	/**
+	 * Get the local path of a file
+	 * @param sProductName Name of the file
+	 * @return Full local path
+	 */
+	public String getPath(String sProductName) {
+		if (fileExistsOnWasdi(sProductName)) {
+			return getFullProductPath(sProductName);
+		}
+		else {
+			return getSavePath() + sProductName;
+		}
+	}
 	
 	/**
 	 * Get the full local path of a product given the product name. Use the output of this API to open the file
@@ -808,15 +822,25 @@ public class WasdiLib {
 			}
 			
 			sFullPath = sFullPath +m_sWorkspaceOwner + "/" + m_sActiveWorkspace + "/" + sProductName;
+			File oFile = new File(sFullPath);
+			Boolean bFileExists = oFile.exists();
 			
 			if (m_bIsOnServer==false) {
-				File oFile = new File(sFullPath);
-				Boolean bFileExists = oFile.exists();
 				if (m_bDownloadActive && !bFileExists) {
 					System.out.println("Local file Missing. Start WASDI download. Please wait");
 					downloadFile(sProductName);
 					System.out.println("File Downloaded on Local PC, keep on working!");
 				}
+			}
+			else {
+				if (!bFileExists) {
+					if (fileExistsOnWasdi(sProductName)) {
+						System.out.println("Local file Missing. Start WASDI download. Please wait");
+						downloadFile(sProductName);
+						System.out.println("File Downloaded on Local Node, keep on working!");						
+					}
+				}
+				
 			}
 			
 			return sFullPath;
@@ -863,6 +887,74 @@ public class WasdiLib {
 			
 			if(200 == iResult) {
 				return true;
+			}
+			
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+		} catch (ProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		//false, because in general no upload is desirable 
+		return false; 
+
+	}
+	
+	/**
+	 * Check if a file exists on a node
+	 * NOTE: TO BE TESTED YET
+	 * @param sFileName
+	 * @return
+	 */
+	private boolean fileExistsOnNode(String sFileName) {
+		if(null==sFileName) {
+			throw new NullPointerException("WasdiLib.fileExistsOnNode: passed a null file name");
+		}
+		int iResult = 200;
+		try{
+			String sMessage = "";
+			String sUrl = getWorkspaceBaseUrl() + "/catalog/fileOnNode?token=";
+			sUrl += m_sSessionId;
+			sUrl += "&filename=";
+			sUrl += sFileName;
+			sUrl += "&workspace=";
+			sUrl += m_sActiveWorkspace;
+			
+			URL oURL;
+			oURL = new URL(sUrl);
+			HttpURLConnection oConnection;
+			oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setRequestMethod("GET");
+			oConnection.connect();
+			iResult =  oConnection.getResponseCode();
+
+			InputStream oInputStream = null;
+			if(200 <= iResult && 299 >= iResult) {
+				oInputStream = oConnection.getInputStream();
+			} else {
+				oInputStream = oConnection.getErrorStream();
+			}
+			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+			if(null!=oInputStream) {
+				Util.copyStream(oInputStream, oBytearrayOutputStream);
+				sMessage = oBytearrayOutputStream.toString();
+				System.out.println(sMessage);				
+			}
+			
+			if(200 == iResult) {
+				
+			    Map<String, Object> oJSONMap = s_oMapper.readValue(sMessage, new TypeReference<Map<String,Object>>(){});
+			    
+			    if (oJSONMap != null) {
+			    	if (oJSONMap.containsKey("BooleanValue")) {
+			    		return (boolean) oJSONMap.get("BooleanValue");
+			    	}
+			    }
+				
+				return false;
 			}
 			
 		} catch(MalformedURLException e) {
@@ -1247,16 +1339,28 @@ public class WasdiLib {
 			if (sFileName.equals("")) {
 				System.out.println("sFileName must not be empty");
 			}
+			
+			String sFilePath = getSavePath() + sFileName;
+			File oFile = new File(sFilePath);
+			Boolean bFileExists = oFile.exists();			
 
-			if(m_bUploadActive) {
-				String sFilePath = getSavePath() + sFileName;
-				File oFile = new File(sFilePath);
-				Boolean bFileExists = oFile.exists();
-				if(bFileExists) {
-					if(!fileExistsOnWasdi(sFileName)) {
+			if (m_bIsOnServer == false) {
+				if(m_bUploadActive) {
+					if(bFileExists) {
+						if(!fileExistsOnWasdi(sFileName)) {
+							System.out.println("Remote file Missing. Start WASDI upload. Please wait");
+							uploadFile(sFileName);
+							System.out.println("File Uploaded on WASDI cloud, keep on working!");
+						}
+					}
+				}				
+			}
+			else {
+				if (bFileExists) {
+					if (fileExistsOnNode(sFileName)==false) {
 						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
 						uploadFile(sFileName);
-						System.out.println("File Uploaded on WASDI cloud, keep on working!");
+						System.out.println("File Uploaded on WASDI cloud, keep on working!");						
 					}
 				}
 			}
@@ -2089,6 +2193,23 @@ public class WasdiLib {
 			oEx.printStackTrace();
 			return "ERROR";
 		}		
+	}
+	
+	/**
+	 * Get the processor Path
+	 * @return
+	 */
+	public String getProcessorPath() {
+		try {
+			StackTraceElement[] aoStackTrace = new Throwable().getStackTrace();
+			File oFile = new File(getClass().getClassLoader().getResource(aoStackTrace[1].getClassName().replace('.', '/') + ".class").toURI());
+			
+			return oFile.getParent()+ "/";
+		}
+		catch (Exception oEx) {
+			System.out.println("Exception in get Processor Path " + oEx.toString());
+			return "";
+		}
 	}
 	
 	/**

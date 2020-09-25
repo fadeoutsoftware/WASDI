@@ -64,7 +64,7 @@ service('AuthServiceFacebook', ['$rootScope', function ($rootScope) {
         if ((angular.isUndefined($rootScope.user)) || ($rootScope.user === null))
             return "";
 
-        return 'http://graph.facebook.com/' + $rootScope.user.id + '/picture?type=normal'
+        return 'https://graph.facebook.com/' + $rootScope.user.id + '/picture?type=normal'
     }
 
     this.logoutFACEBOOK = function () {

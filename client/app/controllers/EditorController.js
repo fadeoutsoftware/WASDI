@@ -902,6 +902,9 @@ var EditorController = (function () {
             case "REGRID":
                 oController.receivedNewProductMessage(oMessage);
                 break;
+            case "DELETE":
+                oController.getProductListByWorkspace();
+                break;
         }
 
         utilsProjectShowRabbitMessageUserFeedBack(oMessage);
