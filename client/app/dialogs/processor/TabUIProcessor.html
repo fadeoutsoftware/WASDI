@@ -1,9 +1,11 @@
 <!-- APPLICATION DATA -->
 <div class="container-fluid">
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <label for="appui">App UI</label> <label> - Add elements (take care of commas!):&nbsp;&nbsp;&nbsp;</label>
-                <div class="addUIElementCommand" ng-click="m_oController.addUIElement('tab')">Tab&nbsp;&nbsp;</div>
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 mb-3">
+        <label for="appui">App UI</label> <label> - Add elements (take care of commas!):&nbsp;&nbsp;&nbsp;</label>
+        </div>
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex flex-column">
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('tab')">Tab&nbsp;&nbsp;</div>
             <div class="addUIElementCommand" ng-click="m_oController.addUIElement('textbox')">Textbox&nbsp;&nbsp;</div>
             <div class="addUIElementCommand" ng-click="m_oController.addUIElement('dropdown')">Dropdown&nbsp;&nbsp;</div>
             <div class="addUIElementCommand" ng-click="m_oController.addUIElement('bbox')">BBox&nbsp;&nbsp;</div>
@@ -13,6 +15,8 @@
             <div class="addUIElementCommand" ng-click="m_oController.addUIElement('productscombo')">Product&nbsp;&nbsp;</div>
             <div class="addUIElementCommand" ng-click="m_oController.addUIElement('searcheoimage')">Search&nbsp;&nbsp;</div>
             <div class="addUIElementCommand" ng-click="m_oController.addUIElement('hidden')">Hidden</div>
+        </div>
+        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
             <textarea insertable-text-area="" class="form-control h-100"  style="font-family:'Courier New';font-size: 16px;" rows="20" id="appui" ng-model="m_oController.m_sProcessorUI" ng-change="m_oController.m_bUIChanged = true"></textarea>
         </div>
 

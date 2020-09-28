@@ -36,8 +36,21 @@
 }
 
 .addUIElementCommand {
-    display: inline;
+    //display: inline;
     cursor: pointer;
+    background-color: $wasdiblue;
+    margin: 3px;
+    padding: 3px 5px;
+    color: white;
+    border-radius: 2px;
+    &:hover {
+        background-color: $darkwasdiblue;
+        &:after {
+            content: '>';
+            position: absolute;
+            right: 28px;
+        }
+    }
 }
 
 /*CUSTOMIZE ELEMENT*/
