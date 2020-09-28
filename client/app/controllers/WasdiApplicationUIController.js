@@ -296,15 +296,15 @@ var WasdiApplicationUIController = (function() {
                 utilsVexCloseDialogAfter(4000,oDialog);
 
                 // Get the root scope
-                let oRootScope = oController.m_oScope.$parent;
-                while(oRootScope.$parent != null || oRootScope.$parent != undefined)
-                {
-                    oRootScope = oRootScope.$parent;
-                }
+                //let oRootScope = oController.m_oScope.$parent;
+                //while(oRootScope.$parent != null || oRootScope.$parent != undefined)
+                //{
+                //    oRootScope = oRootScope.$parent;
+                //}
 
                 // send the message to show the processor log dialog
-                let oPayload = { processId: data.processingIdentifier };
-                oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
+                //let oPayload = { processId: data.processingIdentifier };
+                //oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
 
                 // Move to the editor
                 oController.m_oState.go("root.editor", { workSpace : oWorkspace.workspaceId });
