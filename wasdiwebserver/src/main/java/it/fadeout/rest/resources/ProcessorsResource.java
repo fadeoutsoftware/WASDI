@@ -83,6 +83,7 @@ import wasdi.shared.viewmodels.AppListViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessorLogViewModel;
+import wasdi.shared.viewmodels.ProcessorSharingViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
@@ -1928,7 +1929,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("share/byprocessor")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<ProcessorSharing> getEnableUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	public List<ProcessorSharingViewModel> getEnableUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 
 		Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + " )");
 
@@ -1953,18 +1954,26 @@ public class ProcessorsResource  {
 			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: Unable to find processor return");
 			return null;
 		}
+		
+		ArrayList<ProcessorSharingViewModel> aoReturnList = new ArrayList<ProcessorSharingViewModel>();
 
 		try {
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
 			
 			List<ProcessorSharing> aoProcessorSharing = oProcessorSharingRepository.getProcessorSharingByProcessorId(sProcessorId);
 			
+			for (ProcessorSharing oSharing : aoProcessorSharing) {
+				ProcessorSharingViewModel oVM = new ProcessorSharingViewModel();
+				oVM.setUserId(oSharing.getUserId());
+				aoReturnList.add(oVM);
+			}
+			
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: " + oEx);
-			return null;
+			return aoReturnList;
 		}
 
-		return null;
+		return aoReturnList;
 
 	}
 
