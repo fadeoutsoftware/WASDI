@@ -1,6 +1,6 @@
 @import "color-scheme";
 
-.appstore-btn {
+/*.appstore-btn {
     display: inline-block;
     float: left;
     height: 46px;
@@ -44,6 +44,10 @@
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(0, 143, 55, 0);
     }
+}*/
+
+.badge-success {
+    background-color: $wasdigreen;
 }
 
 
