@@ -1533,7 +1533,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     :param sSensorOperationalMode: sensor operational mode
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
     :param sProvider: WASDI Data Provider to query. Null means default node provider
-    :return: a list of results represented as a Dictionary with many properties. 
+    :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
     aoReturnList = []
 
@@ -1667,7 +1667,23 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
                   '  ******************************************************************************')
             return aoReturnList
 
-        _log("[INFO] waspy.searchEOImages: search results:\n" + repr(aoReturnList))
+        # For each got result
+        for oSearchResult in aoReturnList:
+            
+            oSearchResult["fileName"] = ""
+            oSearchResult["relativeOrbit"] = -1
+            
+            # Initialize the fileName property
+            if oSearchResult["title"] is not None:
+                # Se the file name
+                oSearchResult["fileName"] = oSearchResult["title"] + ".zip"
+                        
+            # Initialized the relative orbit
+            if oSearchResult["properties"] is not None:
+                if oSearchResult["properties"]["relativeorbitnumber"] is not None:
+                    # Set the relative Orbit
+                    oSearchResult["relativeOrbit"] = oSearchResult["properties"]["relativeorbitnumber"]
+        
         return aoReturnList
     except Exception as oEx:
         wasdiLog('[ERROR] waspy.searchEOImages: an error occured' +
