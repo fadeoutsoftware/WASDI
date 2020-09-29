@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -19,12 +20,15 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 
@@ -181,6 +185,86 @@ public class ProcessWorkspaceResource {
 
 		return aoProcessList;
 	}
+	
+	@GET
+	@Path("/byapp")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
+		
+		Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " )");
+
+		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
+			
+
+		try {
+			// Domain Check
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null == oUser) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): invalid session");
+				return aoProcessList;
+			}
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProcessList;
+			}
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			List<ProcessWorkspace> aoProcess = oRepository.getProcessByProductNameAndUserId(sProcessorName, oUser.getUserId());
+			
+			HashMap<String, String> aoWorkspaceNames = new HashMap<String, String>();
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			
+
+			// For each
+			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				ProcessHistoryViewModel oRun = new ProcessHistoryViewModel();
+				
+				try {
+					oRun.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					
+					// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
+					if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
+						oRun.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
+					}
+					else {
+						oRun.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					}
+					
+					
+					oRun.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					
+					oRun.setProcessorName(sProcessorName);
+					oRun.setStatus(oProcess.getStatus());
+					oRun.setWorkspaceId(oProcess.getWorkspaceId());
+					
+					if (!aoWorkspaceNames.containsKey(oProcess.getWorkspaceId())) {
+						Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProcess.getWorkspaceId());
+						aoWorkspaceNames.put(oProcess.getWorkspaceId(), oWorkspace.getName());
+					}
+					
+					oRun.setWorkspaceName(aoWorkspaceNames.get(oProcess.getWorkspaceId()));					
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception generating History View Model " + oEx.toString());
+				}
+				
+				if (oRun.getWorkspaceName().equals("wasdi_specific_node_ws_code")) continue;
+				
+				aoProcessList.add( oRun);
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: error retrieving process " + oEx);
+		}
+
+		return aoProcessList;
+	}
+	
 
 
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {

@@ -92,6 +92,11 @@
                                 Help
                             </a>
                         </div>
+                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}" ng-click="m_oController.activeTabChanged('history')" >
+                            <a class="text-white" href="" role="tab" data-toggle="tab">
+                                History
+                            </a>
+                        </div>
                         <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}" ng-click="m_oController.activeTabChanged('json_prms')" >
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 JSON
@@ -185,8 +190,32 @@
                         </div>
 
                         <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}">
-                            <!--div ng-bind-html="m_oController.m_sJSONParam"></div-->
                             <textarea  readonly style="font-family:'Courier New';font-size: 16px;width: 100%;" rows="40" ng-model="m_oController.m_sJSONParam"></textarea>
+                        </div>
+
+                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    Date
+                                </div>
+                                <div class="col-lg-3">
+                                    Status
+                                </div>
+                                <div class="col-lg-3">
+                                    Workspace
+                                </div>
+                            </div>
+                            <div class="row" ng-repeat="oRun in m_oController.m_aoProcHistory">
+                                <div class="col-lg-3">
+                                    {{oRun.operationDate}}
+                                </div>
+                                <div class="col-lg-3">
+                                    {{oRun.status}}
+                                </div>
+                                <div class="col-lg-3" ng-click="m_oController.historyClicked(oRun.workspaceId)">
+                                    {{oRun.workspaceName}}
+                                </div>
+                            </div>
                         </div>
 
                     </div>

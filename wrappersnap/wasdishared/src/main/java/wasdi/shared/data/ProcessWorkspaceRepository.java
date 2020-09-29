@@ -947,6 +947,34 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
     
     /**
+     * Get a list of Process Workpsace by Product name and User Id
+     * @param sProductName Product Name to search
+     * @param sUserId User Id
+     * @return List of found proc ws
+     */
+    public List<ProcessWorkspace> getProcessByProductNameAndUserId(String sProductName, String sUserId) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+            		Filters.and(
+            				Filters.eq("productName", sProductName),
+            				Filters.eq("userId", sUserId)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    
+    /**
      * Get a Process Workpsace by the WASDI Id
      * @param sProcessObjId Process Workspace Id
      * @return Entity found or null

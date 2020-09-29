@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, $sce, $rootScope) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessesLaunchedService, $sce, $rootScope) {
         /**
          * Angular Scope
          */
@@ -43,6 +43,10 @@ var WasdiApplicationUIController = (function() {
          * Workspace Service
          */
         this.m_oWorkspaceService = oWorkspaceService;
+        /**
+         * Processes Launched Service
+         */
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         /**
          * Rabbit Service
          */
@@ -125,6 +129,12 @@ var WasdiApplicationUIController = (function() {
          * @type {string}
          */
         this.m_sJSONParam = "{}";
+
+        /**
+         * List of historical processor run
+         * @type {*[]}
+         */
+        this.m_aoProcHistory = [];
 
         let oController = this;
 
@@ -456,14 +466,46 @@ var WasdiApplicationUIController = (function() {
             if (sTab == "json_prms") {
                 this.showParamsJSON();
             }
+
+            if (sTab == "history") {
+                this.showHistory();
+            }
         }
     }
 
+    /**
+     * Generates and shows the JSON parameter obtained from the UI
+     */
     WasdiApplicationUIController.prototype.showParamsJSON = function () {
         let oProcessorInput = this.createParams();
         this.m_sJSONParam =  this.m_oSceService.trustAsHtml(JSON.stringify(oProcessorInput, undefined, 4));
     }
 
+    /**
+     * Load the history of this user with this application
+     */
+    WasdiApplicationUIController.prototype.showHistory = function () {
+
+        var oController = this;
+
+        this.m_oProcessesLaunchedService.getProcessesByProcessor(this.m_sSelectedApplication).success(function (data, status) {
+            if (utilsIsObjectNullOrUndefined(data) == false)
+            {
+                // Ok execute
+                oController.m_aoProcHistory = data;
+            }
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING HISTORY');
+        });
+    }
+
+    /**
+     * User clicked on a hystorical run: open the workspace
+     */
+    WasdiApplicationUIController.prototype.historyClicked = function (sWorkspaceId) {
+
+        this.m_oState.go("root.editor", { workSpace : sWorkspaceId });
+    }
     /**
      * Get the name of a category from the id
      * @param sCategoryId
@@ -572,6 +614,7 @@ var WasdiApplicationUIController = (function() {
         'RabbitStompService',
         '$state',
         'ProductService',
+        'ProcessesLaunchedService',
         '$sce',
         '$rootScope'
     ];
