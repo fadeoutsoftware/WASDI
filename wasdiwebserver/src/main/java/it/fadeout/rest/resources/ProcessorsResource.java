@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -57,6 +59,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
@@ -68,6 +71,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorSharingRepository;
+import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -79,6 +83,7 @@ import wasdi.shared.viewmodels.AppListViewModel;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessorLogViewModel;
+import wasdi.shared.viewmodels.ProcessorSharingViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
@@ -1924,7 +1929,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("share/byprocessor")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<ProcessorSharing> getEnableUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+	public List<ProcessorSharingViewModel> getEnableUsersSharedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 
 		Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + " )");
 
@@ -1949,18 +1954,26 @@ public class ProcessorsResource  {
 			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: Unable to find processor return");
 			return null;
 		}
+		
+		ArrayList<ProcessorSharingViewModel> aoReturnList = new ArrayList<ProcessorSharingViewModel>();
 
 		try {
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
 			
 			List<ProcessorSharing> aoProcessorSharing = oProcessorSharingRepository.getProcessorSharingByProcessorId(sProcessorId);
 			
+			for (ProcessorSharing oSharing : aoProcessorSharing) {
+				ProcessorSharingViewModel oVM = new ProcessorSharingViewModel();
+				oVM.setUserId(oSharing.getUserId());
+				aoReturnList.add(oVM);
+			}
+			
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.getEnableUsersSharedProcessor: " + oEx);
-			return null;
+			return aoReturnList;
 		}
 
-		return null;
+		return aoReturnList;
 
 	}
 
@@ -2043,28 +2056,22 @@ public class ProcessorsResource  {
 			//String sUserId = oUser.getUserId();
 			
 			Utils.debugLog("ProcessorsResource.getUI: read Processor " +sName);
-			
+						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
-			
+
 			if (oProcessor == null) {
 				Utils.debugLog("ProcessorsResource.getUI: processor invalid");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
-			
-			String sUIFilePath = m_oServletConfig.getInitParameter("DownloadRootPath");
 
-			if (!sUIFilePath.endsWith("/")) {
-				sUIFilePath = sUIFilePath + "/";
-			}			
-			sUIFilePath += "processors/" + sName + "/ui.json";
+			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
+			ProcessorUI oUI = oProcessorUIRepository.getProcessorUI(oProcessor.getProcessorId());
 			
-			File oUIFile = new File(sUIFilePath);
 			String sJsonUI = "{\"tabs\":[]}";
 			
-			if (oUIFile.exists()) {
-				Utils.debugLog("ProcessorsResource.getUI: ui.json File found for processor " +sName);
-				sJsonUI = new String(Files.readAllBytes(Paths.get(sUIFilePath)), StandardCharsets.UTF_8);
+			if (oUI != null) {
+				sJsonUI = URLDecoder.decode(oUI.getUi(), StandardCharsets.UTF_8.toString());
 			}
 			
 			return Response.status(Status.OK).entity(sJsonUI).build();
@@ -2116,20 +2123,25 @@ public class ProcessorsResource  {
 				}
 			}			
 			
-			String sUIFilePath = m_oServletConfig.getInitParameter("DownloadRootPath");
-
-			if (!sUIFilePath.endsWith("/")) {
-				sUIFilePath = sUIFilePath + "/";
-			}			
-			sUIFilePath += "processors/" + sName + "/ui.json";
+			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
+			ProcessorUI oUI = oProcessorUIRepository.getProcessorUI(oProcessor.getProcessorId());
 			
-			File oUIFile = new File(sUIFilePath);
+			String sEncodedUI = URLEncoder.encode(sUIJson, StandardCharsets.UTF_8.toString());
 			
-			try (BufferedWriter oWriter = new BufferedWriter(new FileWriter(oUIFile))) {
-				oWriter.write(sUIJson);
+			if (oUI == null) {
+				oUI = new ProcessorUI();
+				oUI.setProcessorId(oProcessor.getProcessorId());
+				oUI.setUi(sEncodedUI);
+				oProcessorUIRepository.insertProcessorUI(oUI);
+				Utils.debugLog("ProcessorsResource.saveUI: UI of " + sName + " created");
+			}
+			else {
+				oUI.setUi(sEncodedUI);
+				oProcessorUIRepository.updateProcessorUI(oUI);
+				Utils.debugLog("ProcessorsResource.saveUI: UI of " + sName + " updated");
 			}
 			
-			Utils.debugLog("ProcessorsResource.saveUI: UI of " + sName + " updated");
+			
 						
 			return Response.status(Status.OK).build();
 		}

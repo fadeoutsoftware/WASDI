@@ -130,7 +130,7 @@ var SearchOrbitController = (function() {
         });
 
         this.m_oMapService.initMapWithDrawSearch('orbitMap');
-
+        this.m_oMapService.initGeoSearchPluginForOpenStreetMap();
 
         $scope.$on('rectangle-created-for-opensearch', function(event, args) {
 

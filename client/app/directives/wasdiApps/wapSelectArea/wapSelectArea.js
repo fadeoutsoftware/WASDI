@@ -145,6 +145,14 @@ angular.module('wasdi.wapSelectArea', [])
                             }
                     }).addTo(oMap);
 
+
+                    var oGeocoder = L.Control.Geocoder.nominatim();
+
+                    var oSearchControl = L.Control.geocoder({
+                        geocoder: oGeocoder,
+                        position:'topleft'
+                    }).addTo(oMap);
+
                     return oMap;
                 }
 
