@@ -213,6 +213,22 @@ var ProcessorController = (function() {
         $scope.add = function() {
 
             if (oController.m_bEditMode == true) {
+
+                if (!oController.tryParseJSON(oController.m_sJSONSample)) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
+                    utilsVexCloseDialogAfter(4000,oDialog);
+                    return;
+                }
+
+                if (oController.m_bUIChanged) {
+                    if (!oController.tryParseJSON(oController.m_sProcessorUI)) {
+                        let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR UI<br>JSON NOT VALID");
+                        utilsVexCloseDialogAfter(4000,oDialog);
+
+                        return;
+                    }
+                }
+
                 var oFile = null;
 
                 if (oController.m_oFile!=null) {
@@ -339,12 +355,6 @@ var ProcessorController = (function() {
       * @returns {boolean}
       */
      ProcessorController.prototype.updateProcessor = function (oController,oSelectedFile) {
-
-         if (!this.tryParseJSON(oController.m_sJSONSample)) {
-             var oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
-             utilsVexCloseDialogAfter(4000,oDialog);
-             return;
-         }
 
          // Update User Values
          oController.m_oInputProcessor.isPublic = 1;
@@ -720,8 +730,10 @@ var ProcessorController = (function() {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "hidden",\n\t\t"default": ""\n\t},';
          }
          else if (sElementType === "renderAsStrings") {
-             sTextToInsert = '\n\t"renderAsStrings": true,';
+             sTextToInsert = '\n\t"renderAsStrings": true,\n\t';
          }
+
+         this.m_bUIChanged = true;
 
          this.m_oRootScope.$broadcast('add', sTextToInsert);
      }
