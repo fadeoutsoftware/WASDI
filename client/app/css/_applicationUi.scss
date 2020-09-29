@@ -334,3 +334,31 @@ label.switch {
         display: none;
     }
 }
+
+/*HISTORY*/
+.history {
+    .table-header {
+        background-color: $wasdigreen;
+        color: white;
+        .col:not(:last-child) {
+            //border-right: 2px solid #f8f9fa;
+        }
+    }
+    .table-row {
+        .col:not(:last-child) {
+            //border-right: 2px solid transparent;
+        }
+    }
+    .table-row:nth-child(odd) {
+        background-color: #e4e4e4;
+    }
+    .workspace-name {
+        cursor: pointer;
+        color: $wasdigreen;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+
