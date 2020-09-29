@@ -426,7 +426,10 @@ select {
                 background-color: $wasdigreen;
             }
         }
-        input[type="checkbox"]:checked+label{
+        input[type=checkbox] {
+            display: none;
+        }
+        input[type=checkbox]:checked+label{
             .tag {
                 background-color: $wasdigreen;
             }
