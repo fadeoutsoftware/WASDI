@@ -5,16 +5,17 @@
         <label for="appui">App UI</label> <label> - Add elements (take care of commas!):&nbsp;&nbsp;&nbsp;</label>
         </div>
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex flex-column">
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('tab')">Tab&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('textbox')">Textbox&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('dropdown')">Dropdown&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('bbox')">BBox&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('slider')">Slider&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('date')">Date&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('boolean')">Bool&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('productscombo')">Product&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('searcheoimage')">Search&nbsp;&nbsp;</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('hidden')">Hidden</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('tab')">Tab</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('renderAsStrings')">Render As Strings</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('textbox')">Textbox</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('dropdown')">Dropdown</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('bbox')">Select Area</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('slider')">Number Slider</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('date')">Date</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('boolean')">Bool</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('productscombo')">Product Combo Box</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('searcheoimage')">Search&nbsp;EO Image</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('hidden')">Hidden Field</div>
         </div>
         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
             <textarea insertable-text-area="" class="form-control h-100"  style="font-family:'Courier New';font-size: 16px;" rows="20" id="appui" ng-model="m_oController.m_sProcessorUI" ng-change="m_oController.m_bUIChanged = true"></textarea>

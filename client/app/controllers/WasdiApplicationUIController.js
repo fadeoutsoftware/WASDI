@@ -318,6 +318,38 @@ var WasdiApplicationUIController = (function() {
         });
     }
 
+    WasdiApplicationUIController.prototype.checkParams = function() {
+
+        // For each tab
+        for (let iTabs = 0; iTabs<this.m_asTabs.length; iTabs++) {
+            // Get the name of the tab
+            let sTab = this.m_asTabs[iTabs];
+
+            // For all the view elements of the tab
+            for (let iControls=0; iControls<this.m_aoViewElements[sTab].length; iControls++) {
+                // Take the element
+                let oElement = this.m_aoViewElements[sTab][iControls];
+
+                if (oElement.required) {
+                    // Save the value to the output json
+                    if (this.m_bRenderAsStrings) {
+                        let sStringValue = oElement.getStringValue();
+
+                        if (utilsIsStrNullOrEmpty(sStringValue)) return false;
+                    }
+                    else  {
+                        let oValue = oElement.getValue();
+                        if (utilsIsObjectNullOrUndefined(oValue)) return false;
+                    }
+                }
+
+
+            }
+        }
+
+        return true;
+    }
+
     WasdiApplicationUIController.prototype.createParams = function() {
         // Output initialization
         let oProcessorInput = {};
@@ -354,6 +386,14 @@ var WasdiApplicationUIController = (function() {
      */
     WasdiApplicationUIController.prototype.generateParamsAndRun = function() {
 
+        let bCheck = this.checkParams();
+
+        if (!bCheck) {
+            var oVexWindow = utilsVexDialogAlertBottomRightCorner("PLEASE INSERT REQUIRED FIELDS");
+            utilsVexCloseDialogAfter(4000,oVexWindow);
+            return;
+        }
+
         // Output initialization
         let oProcessorInput = this.createParams();
 
@@ -366,7 +406,7 @@ var WasdiApplicationUIController = (function() {
         let sApplicationName = this.m_oConstantsService.getSelectedApplication();
 
         let oToday = new Date();
-        let sToday = oToday.toISOString().substring(0, 10);
+        let sToday = oToday.toISOString()
 
         let sWorkspaceName = sToday + "_" + sApplicationName;
 
