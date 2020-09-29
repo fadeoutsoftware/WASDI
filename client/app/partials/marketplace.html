@@ -91,9 +91,16 @@
                     <div class="category mt-1 mb-3">
                         <div class="border-bottom py-1 mb-2 subtitle">CATEGORY</div>
 
-                        <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
+                        <div class="tag-container input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
                             <input id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.categoryClicked(oCategory.id)">
-                            <label for="{{oCategory.id}}">{{oCategory.category}} <span class="italic"></span></label>
+                            <label for="{{oCategory.id}}">
+                                <div class="pre-tag">
+                                    <div class="white-circle"></div>
+                                </div>
+                                <div class="tag">
+                                    <span>{{oCategory.category}}</span>
+                                </div>
+                            </label>
                         </div>
 
                     </div>

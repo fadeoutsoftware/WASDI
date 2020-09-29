@@ -385,6 +385,64 @@ select {
             background-color: $wasdiblue;
         }
     }
+    .tag-container {
+        label {
+            display: flex;
+        }
+        .pre-tag{
+            width: 0px;
+            height: 0px;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid $wasdiblue;
+            display: grid;
+            place-items: center;
+            .white-circle {
+                margin-top: -2px;
+                background-color: white;
+                border-radius: 50%;
+                width: 4px;
+                height: 4px;
+                margin-left: 6px;
+            }
+        }
+        .tag {
+            background-color: $wasdiblue;
+            text-transform: uppercase;
+            color: white;
+            font-size: 0.9em;
+            border-radius: 0px 4px 4px 0px;
+            padding-left: 8px;
+            padding-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        cursor: pointer;
+        &:hover {
+            .pre-tag {
+                border-right: 10px solid $wasdigreen;
+            }
+            .tag{
+                background-color: $wasdigreen;
+            }
+        }
+        input[type="checkbox"]:checked+label{
+            .tag {
+                background-color: $wasdigreen;
+            }
+            .pre-tag {
+                border-right: 10px solid $wasdigreen;
+            }
+            &:hover {
+                .pre-tag {
+                    border-right: 10px solid $darkwasdigreen;
+                }
+                .tag{
+                    background-color: $darkwasdigreen;
+                }
+            }
+        }
+    }
 
 
 }
