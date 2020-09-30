@@ -214,50 +214,17 @@
                                     {{oRun.operationDate}}
                                 </div>
                                 <div class="col col-lg-2">
-                                    {{oRun.status}}
+                                    <span class="status-badge"
+                                          ng-class="oRun.status=='DONE'?'done':
+                                          oRun.status=='WAITING'?'waiting':
+                                          oRun.status=='STOPPED'?'stopped':
+                                          oRun.status=='ERROR'?'error':''
+                                          ">{{oRun.status}}</span>
                                 </div>
                                 <div class="col col-lg-7">
                                     <span class="workspace-name" title="Open Workspace" ng-click="m_oController.historyClicked(oRun.workspaceId)">{{oRun.workspaceName}}</span>
                                 </div>
                             </div>
-                            <!--TEST-->
-                            <div class="row table-row py-2" ng-repeat="oRun in m_oController.m_aoProcHistory">
-                                <div class="col col-lg-3">
-                                    {{oRun.operationDate}}
-                                </div>
-                                <div class="col col-lg-2">
-                                    {{oRun.status}}
-                                </div>
-                                <div class="col col-lg-7" ng-click="m_oController.historyClicked(oRun.workspaceId)">
-                                    {{oRun.workspaceName}}
-                                </div>
-                            </div>
-                            <!--TEST-->
-                            <div class="row table-row py-2" ng-repeat="oRun in m_oController.m_aoProcHistory">
-                                <div class="col col-lg-3">
-                                    {{oRun.operationDate}}
-                                </div>
-                                <div class="col col-lg-2">
-                                    {{oRun.status}}
-                                </div>
-                                <div class="col col-lg-7" ng-click="m_oController.historyClicked(oRun.workspaceId)">
-                                    {{oRun.workspaceName}}
-                                </div>
-                            </div>
-                            <!--TEST-->
-                            <div class="row table-row py-2" ng-repeat="oRun in m_oController.m_aoProcHistory">
-                                <div class="col col-lg-3">
-                                    {{oRun.operationDate}}
-                                </div>
-                                <div class="col col-lg-2">
-                                    {{oRun.status}}
-                                </div>
-                                <div class="col col-lg-7" ng-click="m_oController.historyClicked(oRun.workspaceId)">
-                                    {{oRun.workspaceName}}
-                                </div>
-                            </div>
-
-
                         </div>
 
                     </div>

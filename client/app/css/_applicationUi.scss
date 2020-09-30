@@ -359,6 +359,30 @@ label.switch {
             text-decoration: underline;
         }
     }
+
+    $done-color:#5cb85c;
+    $waiting-color: #5bc0de;
+    $stopped-color:#f0ad4e;
+    $error-color: #d9534f;
+    .status-badge {
+        font-size: 0.8em;
+        padding: 2px 9px;
+        border-radius: 3px;
+        &.done {
+            background-color: $done-color;
+        }
+        &.error {
+            background-color: $error-color;
+        }
+        &.stopped {
+            background-color: $stopped-color;
+        }
+        &.waiting {
+            background-color: $waiting-color;
+        }
+
+    }
 }
+
 
 
