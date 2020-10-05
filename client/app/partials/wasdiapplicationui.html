@@ -13,10 +13,17 @@
                         <div class="app-logo mr-3" style="background-image: url({{m_oController.m_oApplication.imgLink}})"></div>
                         <div>
                             <span class="title">{{m_oController.m_oApplication.friendlyName}}</span><br>
-                            <span>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span><br>
+                            <span>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span>
+                            <div class="edit-btn ml-3" ng-if="m_oController.m_oApplication.isMine" ng-click="m_oController.editClick()">
+                                <span class="fa fa-edit mr-1"></span>
+                                Edit
+                            </div>
+                            <br>
+
                             <div class="back-link mt-1 collapsed" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                                 <span class="more">MORE</span><span class="less">LESS</span> DETAILS
                             </div>
+
                         </div>
 
                     </div>
