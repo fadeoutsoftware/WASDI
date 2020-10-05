@@ -209,6 +209,9 @@
                                     Workspace
                                 </div>
                             </div>
+                            <div class="loadIcon" ng-show="m_oController.m_bHistoryLoading">
+                                    <invader></invader>
+                            </div>
                             <div class="row table-row py-2" ng-repeat="oRun in m_oController.m_aoProcHistory">
                                 <div class="col col-lg-3">
                                     {{oRun.operationDate}}

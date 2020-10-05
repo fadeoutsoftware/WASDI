@@ -136,6 +136,12 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_aoProcHistory = [];
 
+        /**
+         * Flag to know if the History is loading or not
+         * @type {boolean}
+         */
+        this.m_bHistoryLoading = false;
+
         let oController = this;
 
         // Check if we have the selected application
@@ -418,7 +424,7 @@ var WasdiApplicationUIController = (function() {
         let oToday = new Date();
         let sToday = oToday.toISOString()
 
-        let sWorkspaceName = sToday + "_" + sApplicationName;
+        let sWorkspaceName = sApplicationName + "_" + sToday;
 
         if (this.m_oSelectedWorkspace == null) {
             // Create a new Workspace
@@ -488,13 +494,18 @@ var WasdiApplicationUIController = (function() {
 
         var oController = this;
 
+        this.m_bHistoryLoading = true;
+
         this.m_oProcessesLaunchedService.getProcessesByProcessor(this.m_sSelectedApplication).success(function (data, status) {
             if (utilsIsObjectNullOrUndefined(data) == false)
             {
                 // Ok execute
                 oController.m_aoProcHistory = data;
             }
+
+            oController.m_bHistoryLoading = false;
         }).error(function (data,status) {
+            oController.m_bHistoryLoading = false;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING HISTORY');
         });
     }
