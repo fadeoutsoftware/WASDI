@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,12 +17,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.KillProcessTreeParameter;
@@ -244,7 +251,13 @@ public class ProcessWorkspaceResource {
 					
 					if (!aoWorkspaceNames.containsKey(oProcess.getWorkspaceId())) {
 						Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oProcess.getWorkspaceId());
-						aoWorkspaceNames.put(oProcess.getWorkspaceId(), oWorkspace.getName());
+						
+						if (oWorkspace != null) {
+							aoWorkspaceNames.put(oProcess.getWorkspaceId(), oWorkspace.getName());
+						}
+						else {
+							continue;
+						}
 					}
 					
 					oRun.setWorkspaceName(aoWorkspaceNames.get(oProcess.getWorkspaceId()));					
@@ -257,6 +270,48 @@ public class ProcessWorkspaceResource {
 				
 				aoProcessList.add( oRun);
 			}
+			
+			// The main node needs to query also the others
+			if (Wasdi.s_sMyNodeCode == "wasdi") {
+				
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+				
+				for (Node oNode : aoNodes) {
+					
+					if (oNode.getNodeCode().equals("wasdi")) continue;					
+					if (oNode.getActive() == false) continue;
+					
+					try {
+						String sUrl = oNode.getNodeBaseAddress();
+						
+						if (!sUrl.endsWith("/")) sUrl += "/";
+						
+						sUrl += "process/byapp?processorName="+sProcessorName;
+						
+						Map<String, String> asHeaders = new HashMap<String, String>();
+						asHeaders.put("x-session-token", sSessionId);
+						
+						Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
+						
+						
+						String sResponse = Wasdi.httpGet(sUrl, asHeaders);
+						
+						if (Utils.isNullOrEmpty(sResponse)==false) {
+							ArrayList<ProcessHistoryViewModel> aoNodeHistory = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessHistoryViewModel>>(){});
+							if (aoNodeHistory != null) {
+								aoProcessList.addAll(aoNodeHistory);
+							}
+						}
+						
+					}
+					catch (Exception e) {
+						Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception contacting computing node: " + e.toString());
+					}
+				}
+				
+			}
+			
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: error retrieving process " + oEx);

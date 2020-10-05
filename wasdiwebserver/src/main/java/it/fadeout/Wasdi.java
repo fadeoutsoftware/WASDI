@@ -599,6 +599,52 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 	
+	
+	/**
+	 * Standard http post utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post 
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
+		
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setConnectTimeout(2000);
+			oConnection.setReadTimeout(2000);
+
+			oConnection.setDoOutput(true);
+			// Set POST
+			oConnection.setRequestMethod("GET");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+						
+			oConnection.connect();
+
+			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+			String sInputLine;
+			StringBuffer sResponse = new StringBuffer();
+	
+			while ((sInputLine = oInputBuffer.readLine()) != null) {
+				sResponse.append(sInputLine);
+			}
+			oInputBuffer.close();
+			
+			return sResponse.toString();
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+		
+	
 	public static void httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) 
 	{
 		if(sFileName==null || sFileName.isEmpty()){
