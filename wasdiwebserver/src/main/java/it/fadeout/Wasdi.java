@@ -373,8 +373,11 @@ public class Wasdi extends ResourceConfig {
 			UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 			User oUser = null;
 			if(null!=oUserSession) {
-				sUserId = oUserSession.getUserId();
+				Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): checking against DB failed: session is not valid");
 			}
+			if(null!=oUserSession) {
+				sUserId = oUserSession.getUserId();
+			} 
 			if(!Utils.isNullOrEmpty(sUserId)){
 				UserRepository oUserRepository = new UserRepository();
 				oUser = oUserRepository.getUser(sUserId);
