@@ -21,7 +21,12 @@ public class Node {
 	/**
 	 * Default provider for the node
 	 */
-	private String m_sDefaultProvider;
+	private String defaultProvider;
+	
+	/**
+	 * Flag to know if the node is active or not
+	 */
+	private boolean active = true;
 	
 	
 	public String getNodeGeoserverAddress() {
@@ -51,10 +56,22 @@ public class Node {
 	}
 
 	public String getDefaultProvider() {
-		return m_sDefaultProvider;
+		return defaultProvider;
 	}
 
 	public void setDefaultProvider(String sValue) {
-		this.m_sDefaultProvider = sValue;
+		this.defaultProvider = sValue;
+	}
+	public String getM_sDefaultProvider() {
+		return defaultProvider;
+	}
+	public void setM_sDefaultProvider(String m_sDefaultProvider) {
+		this.defaultProvider = m_sDefaultProvider;
+	}
+	public boolean getActive() {
+		return active;
+	}
+	public void setActive(boolean bActive) {
+		this.active = bActive;
 	}
 }

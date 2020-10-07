@@ -178,14 +178,34 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 		    	]
 		    ]
 		},
+		
+		OR:
+		
+		{
+			"type": "Polygon",
+			"coordinates": 
+				[ // 0
+					[ // 1
+						[ 9.73751701, 17.094709176], [ 9.747688582, 17.139499888 ], [ 9.781478322, 17.288069434 ], [ 9.815301123, 17.436606421], [ 9.73751701,17.094709176]
+					]
+				]
+			}
 		 */
 		JSONArray aoCoordinates = oGeometry.optJSONArray("coordinates"); //0
 		if(null!=aoCoordinates) {
 			aoCoordinates = aoCoordinates.optJSONArray(0); //1
 			if(null!=aoCoordinates) {
-				aoCoordinates = aoCoordinates.optJSONArray(0); //2
-				if(null!=aoCoordinates) {
-					loadCoordinates(oFootPrint, aoCoordinates);
+				
+				String sType = oGeometry.getString("type");
+				
+				if (sType.toUpperCase().equals("MULTIPOLYGON")) {
+					aoCoordinates = aoCoordinates.optJSONArray(0); //2
+					if(null!=aoCoordinates) {
+						loadCoordinates(oFootPrint, aoCoordinates);
+					}					
+				}
+				else {
+					loadCoordinates(oFootPrint, aoCoordinates);// Execute with the 1-array
 				}
 			}
 		}
@@ -314,7 +334,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 					for (Object oObject : oLinksArray) {
 						try {
 							JSONObject oItem = (JSONObject) oObject;
-							if(!oItem.has("rel") || !oItem.isNull("rel")) {
+							if(!oItem.has("rel") || oItem.isNull("rel")) {
 								continue;
 							}
 							String sRel = oItem.optString("rel", null);
@@ -328,13 +348,12 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 									oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SSELF, sHref);
 								}
 							}
-							
-							if (oLinks != null) {
-								//just store the "self" link
-								if(oLinks.has(DiasResponseTranslatorCREODIAS.SHREF) && !oLinks.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
-									oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oLinks.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
-								}								
-							}
+
+							//just store the "self" link
+							if(oItem.has(DiasResponseTranslatorCREODIAS.SHREF) && !oItem.isNull(DiasResponseTranslatorCREODIAS.SHREF)) {
+								oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SHREF, oItem.optString(DiasResponseTranslatorCREODIAS.SHREF, null));
+							}								
+
 						} catch (Exception oE) {
 							Utils.debugLog("DiasResponseTranslatorCREODIAS.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
 						}

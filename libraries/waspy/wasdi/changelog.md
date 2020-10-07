@@ -6,6 +6,7 @@
 
 - support to the auto upload and download by nodes
 - getProcessorPath method to have the absolute path of the running processor
+- fileName and relativeOrbit properties to the search EO Images results
 
 ### Fixed
 

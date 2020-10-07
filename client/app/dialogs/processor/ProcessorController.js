@@ -213,6 +213,22 @@ var ProcessorController = (function() {
         $scope.add = function() {
 
             if (oController.m_bEditMode == true) {
+
+                if (!oController.tryParseJSON(oController.m_sJSONSample)) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
+                    utilsVexCloseDialogAfter(4000,oDialog);
+                    return;
+                }
+
+                if (oController.m_bUIChanged) {
+                    if (!oController.tryParseJSON(oController.m_sProcessorUI)) {
+                        let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR UI<br>JSON NOT VALID");
+                        utilsVexCloseDialogAfter(4000,oDialog);
+
+                        return;
+                    }
+                }
+
                 var oFile = null;
 
                 if (oController.m_oFile!=null) {
@@ -340,12 +356,6 @@ var ProcessorController = (function() {
       */
      ProcessorController.prototype.updateProcessor = function (oController,oSelectedFile) {
 
-         if (!this.tryParseJSON(oController.m_sJSONSample)) {
-             var oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
-             utilsVexCloseDialogAfter(4000,oDialog);
-             return;
-         }
-
          // Update User Values
          oController.m_oInputProcessor.isPublic = 1;
          if (oController.m_oPublic === false) oController.m_oInputProcessor.isPublic = 0;
@@ -388,7 +398,7 @@ var ProcessorController = (function() {
              var oBody = new FormData();
              oBody.append('file', this.m_oFile[0]);
 
-             this.m_oProcessorService.updateProcessorFiles(oController.m_oActiveWorkspace.workspaceId, oController.m_oInputProcessor.processorId, oBody).success(function (data) {
+             this.m_oProcessorService.updateProcessorFiles("", oController.m_oInputProcessor.processorId, oBody).success(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR FILES UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
              }).error(function (error) {
@@ -693,32 +703,37 @@ var ProcessorController = (function() {
              sTextToInsert = '\n\t{\n\t\t"name": "Tab Name",\n\t\t"controls": [\n\t\t]\n\t},';
          }
          else if (sElementType === "textbox") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": ""\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "dropdown") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": []\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": [],\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "bbox") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box"\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box",\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "slider") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "slider",\n\t\t"label": "description",\n\t\t"default": 0,\n\t\t"min": 0,\n\t\t"max": 100\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "slider",\n\t\t"label": "description",\n\t\t"default": 0,\n\t\t"min": 0,\n\t\t"max": 100,\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "date") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "date",\n\t\t"label": "Date"\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "date",\n\t\t"label": "Date",\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "boolean") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "boolean",\n\t\t"label": "description",\n\t\t"default": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "boolean",\n\t\t"label": "description",\n\t\t"default": false,\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "productscombo") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product"\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product",\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "searcheoimage") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "searcheoimage",\n\t\t"label": "Description"\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "searcheoimage",\n\t\t"label": "Description",\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "hidden") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "hidden"\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "hidden",\n\t\t"default": ""\n\t},';
          }
+         else if (sElementType === "renderAsStrings") {
+             sTextToInsert = '\n\t"renderAsStrings": true,\n\t';
+         }
+
+         this.m_bUIChanged = true;
 
          this.m_oRootScope.$broadcast('add', sTextToInsert);
      }

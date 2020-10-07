@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function() {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, $sce, $rootScope) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessesLaunchedService, oModalService, $sce, $rootScope) {
         /**
          * Angular Scope
          */
@@ -44,6 +44,10 @@ var WasdiApplicationUIController = (function() {
          */
         this.m_oWorkspaceService = oWorkspaceService;
         /**
+         * Processes Launched Service
+         */
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        /**
          * Rabbit Service
          */
         this.m_oRabbitStompService = oRabbitStompService;
@@ -55,6 +59,10 @@ var WasdiApplicationUIController = (function() {
          * Product Service
          */
         this.m_oProductService = oProductService;
+        /**
+         * Modal Service
+         */
+        this.m_oModalService = oModalService;
         /**
          * SCE Angular Service
          */
@@ -125,6 +133,18 @@ var WasdiApplicationUIController = (function() {
          * @type {string}
          */
         this.m_sJSONParam = "{}";
+
+        /**
+         * List of historical processor run
+         * @type {*[]}
+         */
+        this.m_aoProcHistory = [];
+
+        /**
+         * Flag to know if the History is loading or not
+         * @type {boolean}
+         */
+        this.m_bHistoryLoading = false;
 
         let oController = this;
 
@@ -296,15 +316,15 @@ var WasdiApplicationUIController = (function() {
                 utilsVexCloseDialogAfter(4000,oDialog);
 
                 // Get the root scope
-                let oRootScope = oController.m_oScope.$parent;
-                while(oRootScope.$parent != null || oRootScope.$parent != undefined)
-                {
-                    oRootScope = oRootScope.$parent;
-                }
+                //let oRootScope = oController.m_oScope.$parent;
+                //while(oRootScope.$parent != null || oRootScope.$parent != undefined)
+                //{
+                //    oRootScope = oRootScope.$parent;
+                //}
 
                 // send the message to show the processor log dialog
-                let oPayload = { processId: data.processingIdentifier };
-                oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
+                //let oPayload = { processId: data.processingIdentifier };
+                //oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
 
                 // Move to the editor
                 oController.m_oState.go("root.editor", { workSpace : oWorkspace.workspaceId });
@@ -316,6 +336,38 @@ var WasdiApplicationUIController = (function() {
         }).error(function () {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
         });
+    }
+
+    WasdiApplicationUIController.prototype.checkParams = function() {
+
+        // For each tab
+        for (let iTabs = 0; iTabs<this.m_asTabs.length; iTabs++) {
+            // Get the name of the tab
+            let sTab = this.m_asTabs[iTabs];
+
+            // For all the view elements of the tab
+            for (let iControls=0; iControls<this.m_aoViewElements[sTab].length; iControls++) {
+                // Take the element
+                let oElement = this.m_aoViewElements[sTab][iControls];
+
+                if (oElement.required) {
+                    // Save the value to the output json
+                    if (this.m_bRenderAsStrings) {
+                        let sStringValue = oElement.getStringValue();
+
+                        if (utilsIsStrNullOrEmpty(sStringValue)) return false;
+                    }
+                    else  {
+                        let oValue = oElement.getValue();
+                        if (utilsIsObjectNullOrUndefined(oValue)) return false;
+                    }
+                }
+
+
+            }
+        }
+
+        return true;
     }
 
     WasdiApplicationUIController.prototype.createParams = function() {
@@ -354,6 +406,14 @@ var WasdiApplicationUIController = (function() {
      */
     WasdiApplicationUIController.prototype.generateParamsAndRun = function() {
 
+        let bCheck = this.checkParams();
+
+        if (!bCheck) {
+            var oVexWindow = utilsVexDialogAlertBottomRightCorner("PLEASE INSERT REQUIRED FIELDS");
+            utilsVexCloseDialogAfter(4000,oVexWindow);
+            return;
+        }
+
         // Output initialization
         let oProcessorInput = this.createParams();
 
@@ -366,9 +426,9 @@ var WasdiApplicationUIController = (function() {
         let sApplicationName = this.m_oConstantsService.getSelectedApplication();
 
         let oToday = new Date();
-        let sToday = oToday.toISOString().substring(0, 10);
+        let sToday = oToday.toISOString()
 
-        let sWorkspaceName = sToday + "_" + sApplicationName;
+        let sWorkspaceName = sApplicationName + "_" + sToday;
 
         if (this.m_oSelectedWorkspace == null) {
             // Create a new Workspace
@@ -416,14 +476,51 @@ var WasdiApplicationUIController = (function() {
             if (sTab == "json_prms") {
                 this.showParamsJSON();
             }
+
+            if (sTab == "history") {
+                this.showHistory();
+            }
         }
     }
 
+    /**
+     * Generates and shows the JSON parameter obtained from the UI
+     */
     WasdiApplicationUIController.prototype.showParamsJSON = function () {
         let oProcessorInput = this.createParams();
         this.m_sJSONParam =  this.m_oSceService.trustAsHtml(JSON.stringify(oProcessorInput, undefined, 4));
     }
 
+    /**
+     * Load the history of this user with this application
+     */
+    WasdiApplicationUIController.prototype.showHistory = function () {
+
+        var oController = this;
+
+        this.m_bHistoryLoading = true;
+
+        this.m_oProcessesLaunchedService.getProcessesByProcessor(this.m_sSelectedApplication).success(function (data, status) {
+            if (utilsIsObjectNullOrUndefined(data) == false)
+            {
+                // Ok execute
+                oController.m_aoProcHistory = data;
+            }
+
+            oController.m_bHistoryLoading = false;
+        }).error(function (data,status) {
+            oController.m_bHistoryLoading = false;
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING HISTORY');
+        });
+    }
+
+    /**
+     * User clicked on a hystorical run: open the workspace
+     */
+    WasdiApplicationUIController.prototype.historyClicked = function (sWorkspaceId) {
+
+        this.m_oState.go("root.editor", { workSpace : sWorkspaceId });
+    }
     /**
      * Get the name of a category from the id
      * @param sCategoryId
@@ -519,8 +616,34 @@ var WasdiApplicationUIController = (function() {
         }).error(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         });
+    }
+
+    WasdiApplicationUIController.prototype.editClick= function() {
+        var oController = this;
+
+        oController.m_oProcessorService.getDeployedProcessor(oController.m_oApplication.processorId).success(function (data) {
+            oController.m_oModalService.showModal({
+                templateUrl: "dialogs/processor/ProcessorView.html",
+                controller: "ProcessorController",
+                inputs: {
+                    extras: {
+                        processor:data
+                    }
+                }
+            }).then(function (modal) {
+                modal.element.modal();
+                modal.close.then(function (oResult) {
+                    if (utilsIsObjectNullOrUndefined(oResult) == false) {
+                        oController.m_oApplication = oResult;
+                    }
+                });
+            });
+        }).error(function () {
+
+        });
 
     }
+
 
 
     WasdiApplicationUIController.$inject = [
@@ -532,6 +655,8 @@ var WasdiApplicationUIController = (function() {
         'RabbitStompService',
         '$state',
         'ProductService',
+        'ProcessesLaunchedService',
+        'ModalService',
         '$sce',
         '$rootScope'
     ];

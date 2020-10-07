@@ -111,6 +111,20 @@
             text-decoration: none!important;
         }
     }
+
+    .edit-btn {
+        background-color: $wasdigreen;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8em;
+        display: inline;
+        &:hover {
+            background-color: $darkwasdigreen;
+        }
+    }
+
 }
 
 /*================ ROCKET ANIMATION ==============*/
@@ -208,7 +222,7 @@
     max-width: 200px;
 }
 .moment-picker .moment-picker-container {
-    z-index: 500 !important;
+    z-index: 1200 !important;
 }
 
 /*DROPDOWN*/
@@ -334,3 +348,55 @@ label.switch {
         display: none;
     }
 }
+
+/*HISTORY*/
+.history {
+    .table-header {
+        background-color: $wasdigreen;
+        color: white;
+        .col:not(:last-child) {
+            //border-right: 2px solid #f8f9fa;
+        }
+    }
+    .table-row {
+        .col:not(:last-child) {
+            //border-right: 2px solid transparent;
+        }
+    }
+    .table-row:nth-child(odd) {
+        background-color: #e4e4e4;
+    }
+    .workspace-name {
+        cursor: pointer;
+        color: $wasdigreen;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    $done-color:#5cb85c;
+    $waiting-color: #5bc0de;
+    $stopped-color:#f0ad4e;
+    $error-color: #d9534f;
+    .status-badge {
+        font-size: 0.8em;
+        padding: 2px 9px;
+        border-radius: 3px;
+        &.done {
+            background-color: $done-color;
+        }
+        &.error {
+            background-color: $error-color;
+        }
+        &.stopped {
+            background-color: $stopped-color;
+        }
+        &.waiting {
+            background-color: $waiting-color;
+        }
+
+    }
+}
+
+
+

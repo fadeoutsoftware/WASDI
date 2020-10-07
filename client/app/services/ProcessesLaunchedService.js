@@ -70,6 +70,24 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
         };
 
         /**
+         * Get the list of process workspace of this user for this application
+         * @param sProcessorName Name of the processor to search for
+         * @returns {*} List of Process Workpsace View Models
+         */
+        this.getProcessesByProcessor = function(sProcessorName)
+        {
+            let oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            let sUrl = this.APIURL;
+
+            if (oWorkspace != null) {
+                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            }
+
+            return this.m_oHttp.get(sUrl + '/process/byapp?processorName='+sProcessorName);
+        };
+
+
+        /**
          * Get the filtered and paginated list of processes of a workspace
          * @param sWorkSpaceId
          * @param iStartIndex

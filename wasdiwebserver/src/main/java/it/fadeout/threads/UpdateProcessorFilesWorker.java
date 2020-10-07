@@ -34,6 +34,8 @@ public class UpdateProcessorFilesWorker extends Thread {
 			
 			if (oNode.getNodeCode().equals("wasdi")) continue;
 			
+			if (oNode.getActive() == false) continue;
+			
 			try {
 				String sUrl = oNode.getNodeBaseAddress();
 				

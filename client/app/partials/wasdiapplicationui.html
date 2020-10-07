@@ -13,10 +13,17 @@
                         <div class="app-logo mr-3" style="background-image: url({{m_oController.m_oApplication.imgLink}})"></div>
                         <div>
                             <span class="title">{{m_oController.m_oApplication.friendlyName}}</span><br>
-                            <span>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span><br>
+                            <span>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span>
+                            <div class="edit-btn ml-3" ng-if="m_oController.m_oApplication.isMine" ng-click="m_oController.editClick()">
+                                <span class="fa fa-edit mr-1"></span>
+                                Edit
+                            </div>
+                            <br>
+
                             <div class="back-link mt-1 collapsed" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                                 <span class="more">MORE</span><span class="less">LESS</span> DETAILS
                             </div>
+
                         </div>
 
                     </div>
@@ -90,6 +97,11 @@
                         <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}" ng-click="m_oController.activeTabChanged('help')" >
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 Help
+                            </a>
+                        </div>
+                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}" ng-click="m_oController.activeTabChanged('history')" >
+                            <a class="text-white" href="" role="tab" data-toggle="tab">
+                                History
                             </a>
                         </div>
                         <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}" ng-click="m_oController.activeTabChanged('json_prms')" >
@@ -180,13 +192,49 @@
 
                         </div>
 
+                        <!--HELP-->
                         <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}">
                             <div ng-bind-html="m_oController.m_sHelpHtml"></div>
                         </div>
 
+                        <!--JSON-->
                         <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}">
-                            <!--div ng-bind-html="m_oController.m_sJSONParam"></div-->
                             <textarea  readonly style="font-family:'Courier New';font-size: 16px;width: 100%;" rows="40" ng-model="m_oController.m_sJSONParam"></textarea>
+                        </div>
+
+
+                        <!--HISTORY-->
+                        <div class="tab-pane fade in history px-3" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}">
+                            <div class="row table-header py-2">
+                                <div class="col col-lg-3">
+                                    Date
+                                </div>
+                                <div class="col col-lg-2">
+                                    Status
+                                </div>
+                                <div class="col col-lg-7">
+                                    Workspace
+                                </div>
+                            </div>
+                            <div class="loadIcon" ng-show="m_oController.m_bHistoryLoading">
+                                    <invader></invader>
+                            </div>
+                            <div class="row table-row py-2" ng-repeat="oRun in m_oController.m_aoProcHistory">
+                                <div class="col col-lg-3">
+                                    {{oRun.operationDate}}
+                                </div>
+                                <div class="col col-lg-2">
+                                    <span class="status-badge"
+                                          ng-class="oRun.status=='DONE'?'done':
+                                          oRun.status=='WAITING'?'waiting':
+                                          oRun.status=='STOPPED'?'stopped':
+                                          oRun.status=='ERROR'?'error':''
+                                          ">{{oRun.status}}</span>
+                                </div>
+                                <div class="col col-lg-7">
+                                    <span class="workspace-name" title="Open Workspace" ng-click="m_oController.historyClicked(oRun.workspaceId)">{{oRun.workspaceName}}</span>
+                                </div>
+                            </div>
                         </div>
 
                     </div>

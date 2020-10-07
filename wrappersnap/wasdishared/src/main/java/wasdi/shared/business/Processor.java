@@ -114,7 +114,6 @@ public class Processor {
 	 */
 	private int noLogoPlaceholderIndex = -1;
 	
-	
 	/**
 	 * List of associated categories
 	 */

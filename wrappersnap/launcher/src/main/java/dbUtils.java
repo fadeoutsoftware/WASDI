@@ -3,6 +3,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +24,7 @@ import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
+import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
@@ -33,6 +38,7 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
@@ -290,6 +296,7 @@ public class dbUtils {
 	        System.out.println("\t2 - Clear Log");
 	        System.out.println("\t3 - Redeploy");
 	        System.out.println("\t4 - Fix Processor Creation/Update date");
+	        System.out.println("\t5 - Update db UI from local ui.json files");
 	        System.out.println("\tx - Back");
 	        System.out.println("");
 	        
@@ -414,6 +421,40 @@ public class dbUtils {
 				}
 	        	
 	        	System.out.println("Processors Update Done");
+	        }
+	        else if (sInputString.equals("5")) {
+	        	ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();
+	        	ProcessorRepository oProcessorRepository = new ProcessorRepository();
+	        	List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+	        	
+	        	System.out.println("Found " + aoProcessors.size() + " Processors");
+	        	
+	        	Date oNow = new Date();
+	        	
+	        	for (Processor oProcessor : aoProcessors) {
+	        		
+	        		String sProcessorName = oProcessor.getName();
+	        		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+	        		String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+	        		File oUiFile = new File(sProcessorPath+"/ui.json");
+	        		
+	        		if (oUiFile.exists()) {
+	        			String sJsonUI = new String(Files.readAllBytes(Paths.get(oUiFile.getAbsolutePath())), StandardCharsets.UTF_8);
+	        			String sEncodedJSON = URLEncoder.encode(sJsonUI, StandardCharsets.UTF_8.toString());
+	        			ProcessorUI oProcessorUI = new ProcessorUI();
+	        			oProcessorUI.setProcessorId(oProcessor.getProcessorId());
+	        			oProcessorUI.setUi(sEncodedJSON);
+	        			ProcessorUI oOldOne = oProcessorUIRepository.getProcessorUI(oProcessorUI.getProcessorId());
+	        			if (oOldOne != null) {
+	        				System.out.println("Updating " + oProcessor.getName());
+	        				oProcessorUIRepository.updateProcessorUI(oProcessorUI);
+	        			}
+	        			else {
+	        				System.out.println("Inserting " + oProcessor.getName());
+	        				oProcessorUIRepository.insertProcessorUI(oProcessorUI);
+	        			}
+	        		}
+	        	}
 	        }
 		}
 		catch (Exception oEx) {

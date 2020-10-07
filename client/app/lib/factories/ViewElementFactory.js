@@ -10,6 +10,11 @@ function ViewElementFactory() {
         // Return variable
         let oViewElement;
 
+        // Check if we have a valid input
+        if (utilsIsObjectNullOrUndefined(oControl)) return oViewElement;
+        // If mandatory is not set, assume false
+        if (utilsIsObjectNullOrUndefined(oControl.required)) oControl.required = false;
+
         // Find the right type and create the element
         if (oControl.type === "textbox") {
 
@@ -90,6 +95,7 @@ function ViewElementFactory() {
         oViewElement.type = oControl.type;
         oViewElement.label = oControl.label;
         oViewElement.paramName = oControl.param;
+        oViewElement.required = oControl.required
 
         return oViewElement;
     }
