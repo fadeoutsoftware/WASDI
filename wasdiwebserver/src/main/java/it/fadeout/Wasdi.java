@@ -1,5 +1,6 @@
 package it.fadeout;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -64,10 +66,6 @@ public class Wasdi extends ResourceConfig {
 	@Context
 	ServletContext m_oContext;
 
-	/**
-	 * Flag for Debug Log: if true Authentication is disabled
-	 */
-	private static boolean s_bDebug = false;
 
 	/**
 	 * User for debug mode auto login
