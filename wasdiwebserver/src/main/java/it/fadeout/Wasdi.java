@@ -11,12 +11,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -332,58 +336,55 @@ public class Wasdi extends ResourceConfig {
 	 * @return
 	 */
 	public static User getUserFromSession(String sSessionId) {
-
-		// validate sSessionId
-		if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
-			return null;
-		}
-
-
-
-		String sClientId = Wasdi.s_sClientId;
-		String sClientSecret = Wasdi.s_sClientSecret;
-
-		String sUserId = null;
-		//todo validate token with JWT
-
-		Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): Trying introspect...");
-
-		String sKeyCloakIntrospectionUrl = Wasdi.s_sKeyCloakIntrospectionUrl;
-		String sPayload = "client_id=" + sClientId + 
-				"&client_secret=" + sClientSecret + 
-				"&token=" + sSessionId;
-		Map<String,String> asHeaders = new HashMap<>();
-		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-		String sResponse = httpPost(sKeyCloakIntrospectionUrl, sPayload, asHeaders);
-		if(!Utils.isNullOrEmpty(sResponse)) {
-			JSONObject oJSON = new JSONObject(sResponse);
-			sUserId = oJSON.optString("preferred_username", null);
-		}
-
-		if(!Utils.isNullOrEmpty(sUserId)) {
-			UserRepository oUserRepo = new UserRepository();
-			User oUser = oUserRepo.getUser(sUserId);
-			return oUser;
-		} else {
-			//check session against DB
-			Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): introspect failed, checking against DB..."); 
-			SessionRepository oSessionRepository = new SessionRepository();
-			UserSession oUserSession = oSessionRepository.getSession(sSessionId);
-			User oUser = null;
-			if(null!=oUserSession) {
-				Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): checking against DB failed: session is not valid");
+		try {
+			// validate sSessionId
+			if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
+				return null;
 			}
-			if(null!=oUserSession) {
-				sUserId = oUserSession.getUserId();
-			} 
-			if(!Utils.isNullOrEmpty(sUserId)){
-				UserRepository oUserRepository = new UserRepository();
-				oUser = oUserRepository.getUser(sUserId);
+	
+			String sUserId = null;
+			//todo validate token with JWT
+	
+			Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): Trying introspect...");
+	
+			
+			String sPayload = "token=" + sSessionId;
+			Map<String,String> asHeaders = new HashMap<>();
+			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+			String sResponse = httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
+			if(!Utils.isNullOrEmpty(sResponse)) {
+				JSONObject oJSON = new JSONObject(sResponse);
+				sUserId = oJSON.optString("preferred_username", null);
 			}
-			return oUser;
+	
+			if(!Utils.isNullOrEmpty(sUserId)) {
+				UserRepository oUserRepo = new UserRepository();
+				User oUser = oUserRepo.getUser(sUserId);
+				return oUser;
+			} else {
+				//check session against DB
+				Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): introspect failed, checking against DB..."); 
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
+				User oUser = null;
+				if(null!=oUserSession) {
+					Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): checking against DB failed: session is not valid");
+				}
+				if(null!=oUserSession) {
+					sUserId = oUserSession.getUserId();
+				} 
+				if(!Utils.isNullOrEmpty(sUserId)){
+					UserRepository oUserRepository = new UserRepository();
+					oUser = oUserRepository.getUser(sUserId);
+				}
+				return oUser;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WAsdi.getUserFromSession: something bad happened: " + oE);
 		}
 
 		// No Session, No User
+		return null;
 	}
 
 	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
@@ -595,13 +596,32 @@ public class Wasdi extends ResourceConfig {
 	 * @return server response
 	 */
 	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders) {
+		return httpPost(sUrl, sPayload, asHeaders, null);
+	}
+	
+	/**
+	 * Standard http post utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post 
+	 * @param asHeaders headers dictionary
+	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
+	 * @return server response
+	 */
+	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
 		
 		try {
+			
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			
+			if(!Utils.isNullOrEmpty(sAuth)) {
+				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
+				String sAuthHeaderValue = "Basic " + sEncodedAuth;
+				oConnection.setRequestProperty("Authorization", sAuthHeaderValue);
+
+			}
 
 			oConnection.setDoOutput(true);
-			// Set POST
 			oConnection.setRequestMethod("POST");
 			
 			if (asHeaders != null) {
