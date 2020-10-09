@@ -26,15 +26,14 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     }
 
 
-    //todo replace with appropriate client ID
-    var m_sAuthClientId = 'wasdi-client'
+    var m_sAuthClientId = 'wasdi_client'
 
     //todo fix endpoints
-    var keycloackConfiguration = {
+    var keycloakConfiguration = {
         //'token_endpoint': window.app.url.oidcIssuer + "protocol/openid-connect/token/",
-        'token_endpoint': oConstantsService.getAUTHURL() + "auth/realms/wasdi/protocol/openid-connect/token",
+        'token_endpoint': oConstantsService.getAUTHURL() + "/protocol/openid-connect/token",
         //'end_session_endpoint': window.app.url.oidcIssuer + "protocol/openid-connect/logout/"
-        'end_session_endpoint': oConstantsService.getAUTHURL() + "protocol/openid-connect/logout/"
+        'end_session_endpoint': oConstantsService.getAUTHURL() + "/protocol/openid-connect/logout"
     }
 
     //TODO check
@@ -147,7 +146,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         //     }
         //
         //     params = 'client_id=' + m_sAuthClientId + '&grant_type=password&username=' + user + '&password=' + pass
-        //     $http.post(keycloackConfiguration['token_endpoint'],
+        //     $http.post(keycloakConfiguration['token_endpoint'],
         //         params,
         //         {'headers': {'Content-Type': 'application/x-www-form-urlencoded'}}
         //     ).then(
@@ -173,7 +172,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         // }
 
         let sParams = 'client_id=' + m_sAuthClientId + '&grant_type=password&username=' + oCredentials.userId + '&password=' + oCredentials.userPassword
-        let sAddress = keycloackConfiguration['token_endpoint'];
+        let sAddress = keycloakConfiguration['token_endpoint'];
         console.log(sAddress)
         return $http.post(sAddress,
             sParams,
