@@ -161,6 +161,7 @@ var HomeController = (function() {
         oUser.link;
         oUser.description;
         oUser.sessionId = data['access_token'];
+        oUser.refreshToken = data['refresh_token'];
 
         oController.m_oConstantsService.setUser(oUser);//set user
         oController.m_oState.go("root.workspaces");// go workspaces

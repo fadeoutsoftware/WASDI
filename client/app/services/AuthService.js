@@ -9,6 +9,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     this.AUTHURL = oConstantsService.getAUTHURL();
     this.m_oHttp = $http;
 
+
     var acSessionChangedEvent = 'ac-session-changed';
 
     /**
@@ -71,7 +72,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         window.localStorage.access_token = token['access_token']
         window.localStorage.refresh_token = token['refresh_token']
     }
-
+//todo remove
+/*
     function getUser() {
         var token = getTokenObj()
 
@@ -79,8 +81,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
 
             var data = jwt_decode(token['access_token']);
 
-            hats = []
-            backendApplicationName = applicationName + '_api'
+            var hats = []
+            var backendApplicationName = applicationName + '_api'
             if (backendApplicationName in data['resource_access']) {
                 var roles = data['resource_access'][backendApplicationName]['roles'];
                 console.log(roles)
@@ -122,7 +124,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
             resetSession();
         }
     }
-
+*/
     this.login = function(oCredentials) {
         /**
          * login

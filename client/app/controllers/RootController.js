@@ -80,7 +80,6 @@ var RootController = (function() {
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data === null || data === undefined || data === '' || data.userId === ''  )
             {
-
                 oController.m_oConstantsService.logOut();
                 oController.m_oState.go("home");
             }
