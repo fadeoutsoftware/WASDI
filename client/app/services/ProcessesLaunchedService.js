@@ -76,13 +76,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
          */
         this.getProcessesByProcessor = function(sProcessorName)
         {
-            let oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             let sUrl = this.APIURL;
-
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
-            }
-
             return this.m_oHttp.get(sUrl + '/process/byapp?processorName='+sProcessorName);
         };
 
