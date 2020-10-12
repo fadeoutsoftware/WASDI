@@ -1232,6 +1232,7 @@ public class ProcessingResources {
 			oSession.setUserId(sUserId);
 			
 			//store the keycloak access token instead, so we can retrieve the user and perform a further check
+			if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sSessionId = UUID.randomUUID().toString();
 			oSession.setSessionId(sSessionId);
 			oSession.setLoginDate((double) new Date().getTime());
 			oSession.setLastTouch((double) new Date().getTime());

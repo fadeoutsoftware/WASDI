@@ -121,14 +121,7 @@ public class AuthResource {
 				if(oWasdiUser.getValidAfterFirstAccess() ) {
 					
 					//authenticate against keycloak
-					String sUrl = m_oServletConfig.getInitParameter("keycloak_auth"); 
-					String sPayload = "client_id=";
-					sPayload += m_oServletConfig.getInitParameter("keycloak_client");
-					sPayload += "&grant_type=password&username=" + oLoginInfo.getUserId();
-					sPayload += "&password=" + oLoginInfo.getUserPassword();
-					Map<String, String> asHeaders = new HashMap<>();
-					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-					String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
+					String sAuthResult = keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 					String sSessionId = null;
 					//DecodedJWT oJwt = null;
 					if(!Utils.isNullOrEmpty(sAuthResult)) {
@@ -670,6 +663,41 @@ public class AuthResource {
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
 					
+					// TODO: Add the user to Keycloak
+					String sMyTokenId = "";
+					
+					String sAdminUser = Wasdi.s_KeyCloakUser;
+					String sAdminPw = Wasdi.s_KeyCloakPw;
+					
+					//authenticate Admin against keycloak
+					
+					String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
+					
+					String sPayload = "client_id=wasdi_api";
+					sPayload += "&grant_type=password&username=" + sAdminUser;
+					sPayload += "&password=" + sAdminPw;
+					
+					// TODO Set from config
+					String sBasicAuth = "";
+					
+					Map<String, String> asHeaders = new HashMap<>();
+					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+					String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders, sBasicAuth);
+					
+					// TODO: Non è vero: qui otteniamo un risultato, da vedere, che avrà dentro questo token
+					sMyTokenId = sAuthResult;
+					
+					// http://localhost:8080/auth/admin/realms/apiv2/users -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"   --data '{"firstName":"xyz","lastName":"xyz", "username":"xyz123","email":"demo2@gmail.com", "enabled":"true","credentials":[{"type":"password","value":"test123","temporary":false}]}'
+					// Add the user to the keycloak db
+					sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
+					
+					sPayload = "{\"firstName\":\"\",\"lastName\":\"\", \"username\":\"" + oNewUser.getUserId()+ "\",\"email\":\""  + oNewUser.getUserId()+ "\", \"enabled\":\"true\",\"credentials\":[{\"type\":\"password\",\"value\":\"" + oRegistrationInfoViewModel.getPassword() + "\",\"temporary\":false}]}";
+					
+					asHeaders = new HashMap<>();
+					asHeaders.put("Content-Type", "application/json");
+					asHeaders.put("Authorization", "bearer " + sMyTokenId);
+					sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
+					
 					PrimitiveResult oResult = null;
 					if(oUserRepository.insertUser(oNewUser)) {
 						//the user is stored in DB
@@ -1186,4 +1214,20 @@ public class AuthResource {
 		}
 		return oUser;	
 	}
+	
+	private String keyCloakLogin(String sUser, String sPassword) {
+		//authenticate against keycloak
+		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
+		
+		String sPayload = "client_id=";
+		sPayload += m_oServletConfig.getInitParameter("keycloak_client");
+		sPayload += "&grant_type=password&username=" + sUser;
+		sPayload += "&password=" + sPassword;
+		Map<String, String> asHeaders = new HashMap<>();
+		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+		String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
+		
+		return sAuthResult;
+	}
+	
 }

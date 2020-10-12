@@ -104,6 +104,9 @@ public class Wasdi extends ResourceConfig {
 	public static String s_sKeyCloakIntrospectionUrl = "";
 	public static String s_sClientId = "";
 	public static String s_sClientSecret = ""; 
+	public static String s_KeyCloakUser = "";
+	public static String s_KeyCloakPw = "";
+	public static String s_KeyBearerSecret = "";
 
 	static {
 		m_oCredentialPolicy = new CredentialPolicy();
@@ -161,6 +164,9 @@ public class Wasdi extends ResourceConfig {
 		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", null);
 		s_sClientId = getInitParameter("keycloak_confidentialClient", null);
 		s_sClientSecret = getInitParameter("keycloak_clientSecret", null);
+		s_KeyCloakUser = getInitParameter("keycloak_admin", null);
+		s_KeyCloakPw = getInitParameter("keycloak_pw", null); // keycloak_brrrSecret
+		s_KeyBearerSecret = getInitParameter("keycloak_brrrSecret", null); // 
 		
 		try {
 			// If this is not the main node
@@ -938,5 +944,6 @@ public class Wasdi extends ResourceConfig {
 		
 		return null;
 	}
+	
 		
 }
