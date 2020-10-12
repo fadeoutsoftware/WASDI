@@ -95,6 +95,10 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			sResult += parseFootPrint(sQuery);
 			sResult += parseTimeFrame(sQuery);
 			sResult += "&status=all";
+			
+			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
+				sResult += "&timeliness=Fast-24h";
+			}
 
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);

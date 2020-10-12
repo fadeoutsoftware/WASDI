@@ -247,8 +247,16 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			//title
 			oResult.setTitle("");
 			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.STITLE)) {
-				oResult.setTitle(oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
-				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
+				
+				String sTitle = oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null);
+				
+				// Remove .SAFE from the name returned by EODC
+				if (sTitle.endsWith(".SAFE")) {
+					sTitle = sTitle.replace(".SAFE", "");
+				}
+				
+				oResult.setTitle(sTitle);
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, sTitle);
 			}
 
 			//preview
@@ -444,7 +452,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			
 			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL);
 			if(null==sItem) {
-				sItem = "";
+				sItem = "http://";
 			} 
 			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //0
 		

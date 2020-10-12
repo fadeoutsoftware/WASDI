@@ -409,8 +409,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			Engine.start(false);
 
-		} catch (Throwable e) {
-			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+		} catch (Throwable oEx) {
+			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 

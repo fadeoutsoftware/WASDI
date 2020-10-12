@@ -561,8 +561,11 @@ public class ProductResource {
 		String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 
 		File oOutputFilePath = new File(sPath + sName);
+		
+		Utils.debugLog("ProductResource.uploadfile: destination " + oOutputFilePath.getAbsolutePath());
 
 		if (oOutputFilePath.getParentFile().exists() == false) {
+			Utils.debugLog("ProductResource.uploadfile: Creating dirs" + oOutputFilePath.getParentFile().getAbsolutePath());
 			oOutputFilePath.getParentFile().mkdirs();
 		}
 
