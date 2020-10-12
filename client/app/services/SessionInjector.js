@@ -4,7 +4,7 @@
 
 angular.module('wasdi.sessionInjector', ['wasdi.ConstantsService']).factory('sessionInjector', ['ConstantsService', '$http', function (oConstantsService, $http) {
     this.m_oConstantservice = oConstantsService;
-    this.m_oHttp = $http;
+    //this.m_oHttp = $http;
     var oController = this;
     var sessionInjector = {
         request: function (config) {
@@ -41,22 +41,41 @@ angular.module('wasdi.sessionInjector', ['wasdi.ConstantsService']).factory('ses
             let sParams = 'client_id=' + m_sAuthClientId +
                 '&grant_type=refresh_token' +
                 '&refresh_token=' + oConstantsService.getUser().refreshToken;
-            //todo blocking call to refresh
-            oController.m_oHttp.post(
-                oController.m_oConstantservice.getAUTHURL() + '/protocol/openid-connect/token',
-                sParams,
-                {'headers': {'Content-Type': 'application/x-www-form-urlencoded'}}
-            ).success(function (data) {
-                //update access token in constantsService
-                window.localStorage.access_token = data['access_token'];
-                window.localStorage.refresh_token = data['refresh_token'];
+            // blocking call to refresh
+            var bAsync = false;
+            var oRequest = new XMLHttpRequest();
+            request.onload = function () {
+                var status = request.status; // HTTP response status, e.g., 200 for "200 OK"
+                var data = request.responseText; // Returned data, e.g., an HTML document.
 
+                if(200===status){
+                    window.localStorage.access_token = data['access_token'];
+                    window.localStorage.refresh_token = data['refresh_token'];
+                    oController.m_oConstantService.getUser().sessionId = data['access_token'];
+                    oController.m_oConstantService.getUser().refreshToken = data['refresh_token'];
+                } else {
+                    console.log('SessionInjector: token refresh failed :(')
+                }
+            };
+            oRequest.open("POST", oController.m_oConstantservice.getAUTHURL() + '/protocol/openid-connect/token', bAsync);
+            oRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            oRequest.send(sParams);
 
-                oController.m_oConstantService.getUser().sessionId = data['access_token'];
-                oController.m_oConstantService.getUser().refreshToken = data['refresh_token'];
-            }).error(function (err) {
-                console.log('SessionInjector: token refresh failed :(')
-            });
+            // oController.m_oHttp.post(
+            //     oController.m_oConstantservice.getAUTHURL() + '/protocol/openid-connect/token',
+            //     sParams,
+            //     {'headers': {'Content-Type': 'application/x-www-form-urlencoded'}}
+            // ).success(function (data) {
+            //     //update access token in constantsService
+            //     window.localStorage.access_token = data['access_token'];
+            //     window.localStorage.refresh_token = data['refresh_token'];
+            //
+            //
+            //     oController.m_oConstantService.getUser().sessionId = data['access_token'];
+            //     oController.m_oConstantService.getUser().refreshToken = data['refresh_token'];
+            // }).error(function (err) {
+            //     console.log('SessionInjector: token refresh failed :(')
+            // });
 
             config.headers['x-session-token'] = oConstantsService.getSessionId();
             return config;
