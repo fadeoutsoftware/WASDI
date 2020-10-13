@@ -2,6 +2,8 @@ package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.JSONObject;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -56,70 +59,70 @@ import wasdi.shared.viewmodels.UserViewModel;
 
 @Path("/auth")
 public class AuthResource {
-	
-	
+
+
 	@Context
 	ServletConfig m_oServletConfig;
-	
+
 	/**
 	 * Authentication Helper
 	 */
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
-	
+
 	/**
 	 * Credential Policy
 	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-	
+
 	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
 	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
-//	String m_oServletConfig.getInitParameter("DownloadRootPath") = m_oServletConfig.getInitParameter("DownloadRootPath"); //TODO TEST IT 
+	//	String m_oServletConfig.getInitParameter("DownloadRootPath") = m_oServletConfig.getInitParameter("DownloadRootPath"); //TODO TEST IT 
 	final String USER_IMAGE_FOLDER_NAME = "userImage";			
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
 	final UserRepository m_oUserRepository = new UserRepository();
 
-	
+
 	@POST
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel login(LoginInfo oLoginInfo) {
 		Utils.debugLog("AuthResource.Login");
-		
+
 		if (oLoginInfo == null) {
 			Utils.debugLog("Auth.Login: login info null, user not authenticated");
 			return UserViewModel.getInvalid();
 		}
-		
+
 		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
 			Utils.debugLog("Auth.Login: Login Info does not support Credential Policy, user " + oLoginInfo.getUserId() + " not authenticated" );
 			return UserViewModel.getInvalid();
 		}
 
 		UserViewModel oUserVM = UserViewModel.getInvalid();
-		
+
 		try {
-			
+
 			Utils.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
-			
+
 			UserRepository oUserRepository = new UserRepository();
 
 			User oWasdiUser = oUserRepository.getUser(oLoginInfo.getUserId());
-			
+
 			if( oWasdiUser == null ) {
 				Utils.debugLog("AuthResource.Login: User Id Not availalbe " + oLoginInfo.getUserId());
 				return UserViewModel.getInvalid();
 			}
-			
-			
+
+
 			if(!m_oCredentialPolicy.satisfies(oWasdiUser)) {
 				Utils.debugLog("AuthResource.Login: Wasdi user does not satisfy Credential Policy " + oLoginInfo.getUserId());
 				return UserViewModel.getInvalid();
 			}
-			
+
 			if(null != oWasdiUser.getValidAfterFirstAccess()) {
-				
+
 				if(oWasdiUser.getValidAfterFirstAccess() ) {
-					
+
 					//authenticate against keycloak
 					String sAuthResult = keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 					String sSessionId = null;
@@ -127,7 +130,7 @@ public class AuthResource {
 					if(!Utils.isNullOrEmpty(sAuthResult)) {
 						//for now, generate a session UUID as usual 
 						sSessionId = UUID.randomUUID().toString();
-						
+
 						//MAYBE, in the future, we could use a (modified?) JWT. Not as it is, since it would invalidate the expiration check mechanism.
 						//JSONObject oJson = new JSONObject(sAuthResult);
 						//sSessionId = oJson.optString("access_token", null);
@@ -141,47 +144,47 @@ public class AuthResource {
 						oUserVM.setSurname(oWasdiUser.getSurname());
 						oUserVM.setUserId(oWasdiUser.getUserId());
 						oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
-						
+
 						UserSession oSession = new UserSession();
 						oSession.setUserId(oWasdiUser.getUserId());
-						
+
 						//store the keycloak access token instead, so we can retrieve the user and perform a further check
 						oSession.setSessionId(sSessionId);
 						oSession.setLoginDate((double) new Date().getTime());
 						oSession.setLastTouch((double) new Date().getTime());
-						
+
 						oWasdiUser.setLastLogin((new Date()).toString());
 						oUserRepository.updateUser(oWasdiUser);
-						
+
 						SessionRepository oSessionRepo = new SessionRepository();
 						Boolean bRet = oSessionRepo.insertSession(oSession);
 						if (!bRet) {
 							return oUserVM;
 						}
 						oUserVM.setSessionId(sSessionId);
-						
+
 						Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
 					} else {
-						
+
 						Utils.debugLog("AuthService.Login: access failed");
 					}	
 				} else {
-					
+
 					Utils.debugLog("AuthService.Login: registration not validated yet");
 				}
 			} else {
-				
+
 				Utils.debugLog("AuthService.Login: registration flag is null");
 			}
-				
+
 		}
 		catch (Exception oEx) {
-			
+
 			Utils.debugLog("AuthService.Login: Error");
 			oEx.printStackTrace();
-			
+
 		}
-		
+
 		return oUserVM;
 	}
 
@@ -196,18 +199,18 @@ public class AuthResource {
 		for (UserSession oUserSession : aoEspiredSessions) {
 			//delete data base session
 			if (!oSessionRepository.deleteSession(oUserSession)) {
-				
+
 				Utils.debugLog("AuthService.Login: Error deleting session.");
 			}
 		}
 	}
-	
+
 	@GET
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthResource.CheckSession SessionId: " + sSessionId);
-		
+
 		if(null == sSessionId) {
 			Utils.debugLog("AuthResource.CheckSession: null sSessionId");
 			return UserViewModel.getInvalid();
@@ -217,33 +220,33 @@ public class AuthResource {
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return UserViewModel.getInvalid();
 		}
-		
+
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setName(oUser.getName());
 		oUserVM.setSurname(oUser.getSurname());
 		oUserVM.setUserId(oUser.getUserId());
-		
+
 		return oUserVM;
 	}	
-	
+
 
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthResource.Logout");
-		
+
 		if(null == sSessionId) {
 			Utils.debugLog("AuthResource.CheckSession: null sSessionId");
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
+
 		if (oUser == null) {
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		PrimitiveResult oResult = null;
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.getSession(sSessionId);
@@ -251,79 +254,79 @@ public class AuthResource {
 			oResult = new PrimitiveResult();
 			oResult.setStringValue(sSessionId);
 			if(oSessionRepository.deleteSession(oSession)) {
-				
+
 				Utils.debugLog("AuthService.Logout: Session data base deleted.");
 				oResult.setBoolValue(true);
 			} else {
-				
+
 				Utils.debugLog("AuthService.Logout: Error deleting session data base.");
 				oResult.setBoolValue(false);
 			}
-			
+
 		} else {
 			return PrimitiveResult.getInvalid();
 		}
 		return oResult;
 	}	
 
-	
-	
+
+
 	@POST
 	@Path("/upload/createaccount")
 	@Produces({"application/json", "text/xml"})
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Utils.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
-		
+
 		if(!m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		
+
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
-		
+
 		// Get the User Id
 		String sAccount = oUser.getUserId();
-		
+
 		// Search for the sftp service
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) {
 			wsAddress = "ws://localhost:6703";
 		}
-		
+
 		// Manager instance
 		SFTPManager oManager = new SFTPManager(wsAddress);
 		String sPassword = Utils.generateRandomPassword();
-		
+
 		// Try to create the account
 		if (!oManager.createAccount(sAccount, sPassword)) {
-			
+
 			Utils.debugLog("AuthService.CreateSftpAccount: error creating sftp account");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-		
+
 		// Sent the credentials to the user
 		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-	    
+
 		// All is done
 		return Response.ok().build();
 	}
-	
+
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
 	public Boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthService.ExistsSftpAccount");
-		
+
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return null;
 		}
 		String sAccount = oUser.getUserId();		
-		
+
 		// Get the service address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
@@ -344,40 +347,40 @@ public class AuthResource {
 	@Path("/upload/list")
 	@Produces({"application/json", "text/xml"})
 	public String[] listSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		
+
 		Utils.debugLog("AuthService.ListSftpAccount");
-		
+
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return null;
 		}	
 		String sAccount = oUser.getUserId();		
-		
+
 		// Get Service Address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
-		
+
 		// Return the list
 		return oManager.list(sAccount);
 	}
-	
+
 
 	@DELETE
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
 	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		
+
 		Utils.debugLog("AuthService.RemoveSftpAccount");
-		
+
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
+
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
-		
+
 		String sAccount = oUser.getUserId();
-		
+
 		// Get service address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
@@ -392,34 +395,34 @@ public class AuthResource {
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
 	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
-		
+
 		Utils.debugLog("AuthService.UpdateSftpPassword Mail: " + sEmail);
-		
+
 		if(!m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		
+
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
+
 		if(null == oUser || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build(); 
 		}
-		
+
 		String sAccount = oUser.getUserId();
-		
+
 		// Get the service address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
-		
+
 		// New Password
 		String sPassword = Utils.generateRandomPassword();
-		
+
 		// Try to update
 		if (!oManager.updatePassword(sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-		
+
 		// Send password to the user
 		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -427,14 +430,14 @@ public class AuthResource {
 
 		return Response.ok().build();
 	}
-	
-	
+
+
 	@POST
 	@Path("/upload/userimage")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadUserImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
-										@HeaderParam("x-session-token") String sSessionId ) {
-	
+			@HeaderParam("x-session-token") String sSessionId ) {
+
 		String sExt;
 		String sFileName;
 
@@ -443,7 +446,7 @@ public class AuthResource {
 		if(oUser == null){
 			return Response.status(401).build();
 		}
-		
+
 		//get filename and extension 
 		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
 			sFileName = fileMetaData.getFileName();
@@ -451,21 +454,21 @@ public class AuthResource {
 		} else {
 			return Response.status(400).build();
 		}
-		
+
 		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS) == false) {
 			return Response.status(400).build();
 		}
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
 		oImageResourceUtils.createDirectory(sPath);
-	    String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
-	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
-	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
-	    if(bIsSaved == false ){
-	    	return Response.status(400).build();
-	    }
+		String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+		ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+		boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
+		if(bIsSaved == false ){
+			return Response.status(400).build();
+		}
 		return Response.status(200).build();
 	}
-	
+
 	@GET
 	@Path("/get/userimage")
 	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
@@ -476,22 +479,22 @@ public class AuthResource {
 		if(oUser == null){
 			return Response.status(401).build();
 		}
-		
+
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
 		ImageFile oUserImage = oImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
 		String sImageExtension = oImageResourceUtils.getExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
-		
+
 		//Check the image and extension
 		if(oUserImage == null || sImageExtension.isEmpty() ){
 			return Response.status(204).build();
 		}
 		//prepare buffer and send the logo to the client 
 		ByteArrayInputStream abImageLogo = oUserImage.getByteArrayImage();
-		
-	    return Response.ok(abImageLogo).build();
+
+		return Response.ok(abImageLogo).build();
 
 	}
-	
+
 	@DELETE
 	@Path("/delete/userimage")
 	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
@@ -500,136 +503,136 @@ public class AuthResource {
 		if(oUser == null){
 			return Response.status(401).build();
 		}
-		
+
 		String sUserId = oUser.getUserId();
 
-//		final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
-//		final String USER_IMAGE_FOLDER_NAME = "userImage";
-//		final String DEFAULT_USER_IMAGE_NAME = "userimage";
-		
+		//		final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
+		//		final String USER_IMAGE_FOLDER_NAME = "userImage";
+		//		final String DEFAULT_USER_IMAGE_NAME = "userimage";
+
 		String sPathFolder = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
 		oImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
-		
+
 		return Response.status(200).build();
 	}
-	
-	
+
+
 	@POST
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel loginGoogleUser(LoginInfo oLoginInfo) {
 		Utils.debugLog("AuthResource.CheckGoogleUserId");
 		//TODO captcha
-		
+
 		if (oLoginInfo == null) {
 			return UserViewModel.getInvalid();
 		}
 		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
 			return UserViewModel.getInvalid();
 		}
-		
+
 		try {	
 			final NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
 			final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-				    // Specify the CLIENT_ID of the app that accesses the backend:
-				    .setAudience(Collections.singletonList(oLoginInfo.getUserId()))
-				    // Or, if multiple clients access the backend:
-				    //.setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
-				    .build();
-			
+					// Specify the CLIENT_ID of the app that accesses the backend:
+					.setAudience(Collections.singletonList(oLoginInfo.getUserId()))
+					// Or, if multiple clients access the backend:
+					//.setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
+					.build();
+
 			// (Receive idTokenString by HTTPS POST)
 			GoogleIdToken oIdToken = verifier.verify(oLoginInfo.getGoogleIdToken());
-			
+
 			//check id token
 			if (oIdToken != null) {
-			  Payload oPayload = oIdToken.getPayload();
+				Payload oPayload = oIdToken.getPayload();
 
-			  // Print user identifier
-			  String sGoogleIdToken = oPayload.getSubject();
-			 
-			  // Get profile information from payload
-			  String sEmail = oPayload.getEmail();
+				// Print user identifier
+				String sGoogleIdToken = oPayload.getSubject();
 
-			  
-			  // store profile information and create session
-			  Utils.debugLog("AuthResource.LoginGoogleUser: requested access from " + sGoogleIdToken);
-			
+				// Get profile information from payload
+				String sEmail = oPayload.getEmail();
 
-			  UserRepository oUserRepository = new UserRepository();
-			  String sAuthProvider = "google";
-			  User oWasdiUser = oUserRepository.getUser(sEmail);
-			  //save new user 
-			  if(oWasdiUser == null) {
-				  User oUser = new User();
-				  oUser.setAuthServiceProvider(sAuthProvider);
-				  oUser.setUserId(sEmail);
-				  oUser.setGoogleIdToken(sGoogleIdToken);
-				  if(oUserRepository.insertUser(oUser) == true) {
-					  //the user is stored in DB
-					  //get user from database (i do it only for consistency)
-					  oWasdiUser = oUserRepository.googleLogin(sGoogleIdToken , sEmail, sAuthProvider);
-					  
-					  notifyNewUserInWasdi(oWasdiUser, true, true);
-				  }
-			  }
-			  
-			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google")) {
-				  //get all expired sessions
-				  SessionRepository oSessionRepository = new SessionRepository();
-				  List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oWasdiUser.getUserId());
-				  for (UserSession oUserSession : aoEspiredSessions) {
-					  //delete data base session
-					  if (!oSessionRepository.deleteSession(oUserSession)) {
-						  //XXX log instead
-						  Utils.debugLog("AuthService.LoginGoogleUser: Error deleting session.");
-					  }
-				  }
 
-				  UserViewModel oUserVM = new UserViewModel();
-				  oUserVM.setName(oWasdiUser.getName());
-				  oUserVM.setSurname(oWasdiUser.getSurname());
-				  oUserVM.setUserId(oWasdiUser.getUserId());
-				  oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
-				  
-				  UserSession oSession = new UserSession();
-				  oSession.setUserId(oWasdiUser.getUserId());
-				  String sSessionId = UUID.randomUUID().toString();
-				  oSession.setSessionId(sSessionId);
-				  oSession.setLoginDate((double) new Date().getTime());
-				  oSession.setLastTouch((double) new Date().getTime());
+				// store profile information and create session
+				Utils.debugLog("AuthResource.LoginGoogleUser: requested access from " + sGoogleIdToken);
 
-				  Boolean bRet = oSessionRepository.insertSession(oSession);
-				  if (!bRet) {
-					  return UserViewModel.getInvalid();
-				  }
-				  oUserVM.setSessionId(sSessionId);
 
-				  Utils.debugLog("AuthService.LoginGoogleUser: access succeeded");
-				  return oUserVM;
-			  } else {
-				  Utils.debugLog("AuthService.LoginGoogleUser: access failed");
-			  }
+				UserRepository oUserRepository = new UserRepository();
+				String sAuthProvider = "google";
+				User oWasdiUser = oUserRepository.getUser(sEmail);
+				//save new user 
+				if(oWasdiUser == null) {
+					User oUser = new User();
+					oUser.setAuthServiceProvider(sAuthProvider);
+					oUser.setUserId(sEmail);
+					oUser.setGoogleIdToken(sGoogleIdToken);
+					if(oUserRepository.insertUser(oUser) == true) {
+						//the user is stored in DB
+						//get user from database (i do it only for consistency)
+						oWasdiUser = oUserRepository.googleLogin(sGoogleIdToken , sEmail, sAuthProvider);
+
+						notifyNewUserInWasdi(oWasdiUser, true, true);
+					}
+				}
+
+				if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google")) {
+					//get all expired sessions
+					SessionRepository oSessionRepository = new SessionRepository();
+					List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oWasdiUser.getUserId());
+					for (UserSession oUserSession : aoEspiredSessions) {
+						//delete data base session
+						if (!oSessionRepository.deleteSession(oUserSession)) {
+							//XXX log instead
+							Utils.debugLog("AuthService.LoginGoogleUser: Error deleting session.");
+						}
+					}
+
+					UserViewModel oUserVM = new UserViewModel();
+					oUserVM.setName(oWasdiUser.getName());
+					oUserVM.setSurname(oWasdiUser.getSurname());
+					oUserVM.setUserId(oWasdiUser.getUserId());
+					oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
+
+					UserSession oSession = new UserSession();
+					oSession.setUserId(oWasdiUser.getUserId());
+					String sSessionId = UUID.randomUUID().toString();
+					oSession.setSessionId(sSessionId);
+					oSession.setLoginDate((double) new Date().getTime());
+					oSession.setLastTouch((double) new Date().getTime());
+
+					Boolean bRet = oSessionRepository.insertSession(oSession);
+					if (!bRet) {
+						return UserViewModel.getInvalid();
+					}
+					oUserVM.setSessionId(sSessionId);
+
+					Utils.debugLog("AuthService.LoginGoogleUser: access succeeded");
+					return oUserVM;
+				} else {
+					Utils.debugLog("AuthService.LoginGoogleUser: access failed");
+				}
 
 			} else {
 
 				Utils.debugLog("Invalid ID token.");
 				UserViewModel.getInvalid();
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return UserViewModel.getInvalid();
 	}
-		
+
 	@POST
 	@Path("/register")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{	
 		Utils.debugLog("AuthService.UserRegistration");		 
-		
+
 		if(null == oRegistrationInfoViewModel) {
 			return PrimitiveResult.getInvalid();
 		} 
@@ -637,19 +640,20 @@ public class AuthResource {
 			try
 			{
 				if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
-					
+
 					PrimitiveResult oInvalid = PrimitiveResult.getInvalid();
-					
+
 					oInvalid.setStringValue("Input data not valid. Please use a valid mail and at least 8 char for password");
 					return oInvalid;
 				}
-				
+
 				UserRepository oUserRepository = new UserRepository();
 				User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
-				
+
 				//if oWasdiUser is a new user -> oWasdiUser == null
 				if(oWasdiUser == null) {
-					//save new user 
+
+					//create new user
 					String sAuthProvider = "wasdi";
 					User oNewUser = new User();
 					oNewUser.setAuthServiceProvider(sAuthProvider);
@@ -662,42 +666,68 @@ public class AuthResource {
 					oNewUser.setDefaultNode("wasdi");
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
-					
-					// TODO: Add the user to Keycloak
+
+					//next, add user to keycloak
 					String sMyTokenId = "";
-					
-					String sAdminUser = Wasdi.s_KeyCloakUser;
-					String sAdminPw = Wasdi.s_KeyCloakPw;
-					
+
 					//authenticate Admin against keycloak
-					
-					String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
-					
-					String sPayload = "client_id=wasdi_api";
-					sPayload += "&grant_type=password&username=" + sAdminUser;
-					sPayload += "&password=" + sAdminPw;
-					
-					// TODO Set from config
-					String sBasicAuth = "";
-					
+
+					String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
+					if(!sAuthUrl.endsWith("/")) {
+						sAuthUrl += "/";
+					}
+					sAuthUrl += "realms/master/protocol/openid-connect/token";
+
+					String sPayload = "client_id=admin-cli" +
+							"&grant_type=client_credentials" +
+							"&client_secret=" + m_oServletConfig.getInitParameter("keycloak_cliSecret");
+
 					Map<String, String> asHeaders = new HashMap<>();
 					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-					String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders, sBasicAuth);
-					
-					// TODO: Non è vero: qui otteniamo un risultato, da vedere, che avrà dentro questo token
-					sMyTokenId = sAuthResult;
-					
-					// http://localhost:8080/auth/admin/realms/apiv2/users -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"   --data '{"firstName":"xyz","lastName":"xyz", "username":"xyz123","email":"demo2@gmail.com", "enabled":"true","credentials":[{"type":"password","value":"test123","temporary":false}]}'
-					// Add the user to the keycloak db
-					sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
-					
-					sPayload = "{\"firstName\":\"\",\"lastName\":\"\", \"username\":\"" + oNewUser.getUserId()+ "\",\"email\":\""  + oNewUser.getUserId()+ "\", \"enabled\":\"true\",\"credentials\":[{\"type\":\"password\",\"value\":\"" + oRegistrationInfoViewModel.getPassword() + "\",\"temporary\":false}]}";
-					
+					String sAuthResult = Wasdi.httpPost(sAuthUrl, sPayload, asHeaders);
+					if(Utils.isNullOrEmpty(sAuthResult)) {
+						Utils.debugLog("AuthResource.userRegistration: could not login into keycloak, aborting");
+						return PrimitiveResult.getInvalid();
+					}
+
+					JSONObject oJson = new JSONObject(sAuthResult);
+					if( null == oJson||
+							!oJson.has("access_token") ||							
+							Utils.isNullOrEmpty(oJson.optString("access_token", null))
+							) {
+						Utils.debugLog("AuthResource.userRegistration: could parse login result, aborting");
+						return PrimitiveResult.getInvalid();
+					}
+
+					sMyTokenId = oJson.optString("access_token", null);
+
+					// Create new keycloak user for the realm
+					String sCreateUserUrl = m_oServletConfig.getInitParameter("keycloak_server");
+					if(!sCreateUserUrl.endsWith("/")) {
+						sCreateUserUrl += "/";
+					}
+					sCreateUserUrl += "admin/realms/";
+					sCreateUserUrl += m_oServletConfig.getInitParameter("keycloak_realm");
+					sCreateUserUrl += "/users";
+
+					sPayload = "{"
+							+ "\"firstName\":\"" + oRegistrationInfoViewModel.getName() + "\","+
+							"\"lastName\":\"\", "+ oRegistrationInfoViewModel.getSurname() + "\","+
+							"\"username\":\"" + oNewUser.getUserId() + "\","+
+							"\"email\":\""  + oNewUser.getUserId()+ "\"," +
+							" \"enabled\":\"true\","+
+							"\"credentials\":[{\"type\":\"password\",\"value\":\"" + oRegistrationInfoViewModel.getPassword() + "\",\"temporary\":false}]}";
+
 					asHeaders = new HashMap<>();
 					asHeaders.put("Content-Type", "application/json");
-					asHeaders.put("Authorization", "bearer " + sMyTokenId);
-					sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
+					String sEncodedAuth = Base64.getEncoder().encodeToString(sMyTokenId.getBytes(StandardCharsets.UTF_8));
+					String sAuth = "Bearer " + sEncodedAuth;
+					asHeaders.put("Authorization", sAuth);
+					sAuthResult = Wasdi.httpPost(sCreateUserUrl, sPayload, asHeaders);
+					//we expect the result to be empty
 					
+					//todo try to login to check if the user exists
+
 					PrimitiveResult oResult = null;
 					if(oUserRepository.insertUser(oNewUser)) {
 						//the user is stored in DB
@@ -710,15 +740,15 @@ public class AuthResource {
 					}
 					//build confirmation link
 					String sLink = buildRegistrationLink(oNewUser);
-					
+
 					Utils.debugLog(sLink);
 					//send it via email to the user
 					Boolean bMailSuccess = sendRegistrationEmail(oNewUser, sLink);
-					
+
 					if(bMailSuccess){
-						
+
 						notifyNewUserInWasdi(oNewUser, false);
-						
+
 						return oResult;
 					} else {
 						//problem sending the email: either the given address is invalid
@@ -733,7 +763,7 @@ public class AuthResource {
 						oResult.setStringValue("cannot send email");
 						return oResult;
 					} 
-					
+
 					//uncomment only if email sending service does not work
 					//oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
 				}
@@ -751,22 +781,22 @@ public class AuthResource {
 		}
 		return PrimitiveResult.getInvalid();
 	}
-	
-	
+
+
 	@GET
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		Utils.debugLog("AuthService.validateNewUser UserId: " + sUserId + " Token: " + sToken);
-	
-		
+
+
 		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
 			return PrimitiveResult.getInvalid();
 		}
 		if(!m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		UserRepository oUserRepo = new UserRepository();
 		User oUser = oUserRepo.getUser(sUserId);
 		if( null == oUser.getValidAfterFirstAccess()) {
@@ -778,9 +808,9 @@ public class AuthResource {
 			return PrimitiveResult.getInvalid();
 		} 
 		else if( !oUser.getValidAfterFirstAccess() ) {
-			
+
 			String sDBToken = oUser.getFirstAccessUUID();
-			
+
 			if(m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
@@ -789,9 +819,9 @@ public class AuthResource {
 					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oUser.getUserId());
-					
+
 					notifyNewUserInWasdi(oUser, true);
-					
+
 					return oResult;
 				} else {
 					Utils.debugLog("AuthResources.validateNewUser: registration token mismatch");
@@ -801,17 +831,17 @@ public class AuthResource {
 		}
 		return PrimitiveResult.getInvalid();
 	}
-	
+
 
 	@POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
-		
+
 		Utils.debugLog("AuthService.editUserDetails");
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
-		
+
 		if(null == oInputUserVM ) {
 			return UserViewModel.getInvalid();
 		}
@@ -820,7 +850,7 @@ public class AuthResource {
 		if(!m_oCredentialPolicy.validName(oInputUserVM.getName()) || !m_oCredentialPolicy.validSurname(oInputUserVM.getSurname())) {
 			return UserViewModel.getInvalid();
 		}
-		
+
 		try {
 			//note: session validity is automatically checked		
 			User oUserId = Wasdi.getUserFromSession(sSessionId);
@@ -829,7 +859,7 @@ public class AuthResource {
 				Utils.debugLog("Null user from session id (does the user exist?)");
 				return UserViewModel.getInvalid();
 			}
-	
+
 			//update
 			oUserId.setName(oInputUserVM.getName());
 			oUserId.setSurname(oInputUserVM.getSurname());
@@ -837,7 +867,7 @@ public class AuthResource {
 			oUserId.setDescription(oInputUserVM.getDescription());
 			UserRepository oUR = new UserRepository();
 			oUR.updateUser(oUserId);
-			
+
 			//respond
 			UserViewModel oOutputUserVM = new UserViewModel();
 			oOutputUserVM.setUserId(oUserId.getUserId());
@@ -845,7 +875,7 @@ public class AuthResource {
 			oOutputUserVM.setSurname(oUserId.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
 			return oOutputUserVM;
-			
+
 		} catch(Exception e) {
 			Utils.debugLog("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
@@ -854,26 +884,26 @@ public class AuthResource {
 		return UserViewModel.getInvalid();
 	}
 
-	
-	
+
+
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult changeUserPassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChPasswViewModel) {
-		
+
 		Utils.debugLog("AuthService.ChangeUserPassword"  );
-		
+
 		//input validation
 		if(null == oChPasswViewModel) {
 			Utils.debugLog("AuthService.ChangeUserPassword: invalid input");
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		if(!m_oCredentialPolicy.satisfies(oChPasswViewModel)) {
 			Utils.debugLog("AuthService.ChangeUserPassword: invalid input\n");
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		try {
 			//validity is automatically checked		
@@ -883,10 +913,10 @@ public class AuthResource {
 				Utils.debugLog("Null user from session id (does the user exist?)");
 				return oResult;
 			}
-	
+
 			String sOldPassword = oUserId.getPassword();
 			Boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChPasswViewModel.getCurrentPassword().toCharArray(), sOldPassword);
-			
+
 			if( !bPasswordCorrect ) {
 				Utils.debugLog("Wrong current password for user " + oUserId);
 				return oResult;
@@ -901,32 +931,32 @@ public class AuthResource {
 			Utils.debugLog("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
 		}
-		
+
 		return oResult;
-		
+
 	} 	
-	
-	
+
+
 	@GET
 	@Path("/lostPassword")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
-		
+
 		Utils.debugLog("AuthService.lostPassword: sUserId: " + sUserId);
-		
+
 		if(null == sUserId ) {
 			Utils.debugLog("User id is null");
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		if(!m_oCredentialPolicy.validUserId(sUserId)) {
 			Utils.debugLog("User id not valid");
 			return PrimitiveResult.getInvalid();
 		}
-		
+
 		UserRepository oUserRepository = new UserRepository();
 		User oUser = oUserRepository.getUser(sUserId);
-		
+
 		if(null == oUser) {
 			Utils.debugLog("User not found");
 			PrimitiveResult oResult = PrimitiveResult.getInvalid();
@@ -937,19 +967,19 @@ public class AuthResource {
 		else {
 			if(null != oUser.getAuthServiceProvider()){
 				if( m_oCredentialPolicy.authenticatedByWasdi(oUser.getAuthServiceProvider()) ){
-					
+
 					if(m_oCredentialPolicy.validEmail(oUser.getUserId()) ) {
-						
+
 						String sPassword = Utils.generateRandomPassword();
 						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
 						oUser.setPassword(sHashedPassword);
-						
+
 						if(oUserRepository.updateUser(oUser)) {
-							
+
 							if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
 								return PrimitiveResult.getInvalid(); 
 							}
-							
+
 							PrimitiveResult oResult = new PrimitiveResult();
 							oResult.setBoolValue(true);
 							oResult.setIntValue(0);
@@ -972,13 +1002,13 @@ public class AuthResource {
 			}
 		}
 	}
-	
+
 	private Boolean sendRegistrationEmail(User oUser, String sLink) {
 		Utils.debugLog("AuthResource.sendRegistrationEmail");
 		//MAYBE validate input
 		//MAYBE check w/ CredentialPolicy
 		try {
-			
+
 			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				Utils.debugLog("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
@@ -986,26 +1016,26 @@ public class AuthResource {
 			}
 			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 			Message oMessage = new Message();
-			
+
 			String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
-			
+
 			if (Utils.isNullOrEmpty(sTitle)) {
 				sTitle = "Welcome to WASDI";
 			}
 			oMessage.setTilte(sTitle);
-			
+
 			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 			if (sSender==null) {
 				sSender = "wasdi@wasdi.net";
 			}
 			oMessage.setSender(sSender);
-			
+
 			//TODO read the message from the servlet config file
 			String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
 					"Please click on the link below to activate your account:\n\n" + 
 					sLink;
 			oMessage.setMessage(sMessage);
-	
+
 			Integer iPositiveSucceded = 0;
 			iPositiveSucceded = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
 			Utils.debugLog("AuthResource.sendRegistrationEmail: "+iPositiveSucceded.toString());
@@ -1019,17 +1049,17 @@ public class AuthResource {
 		}
 		return true;
 	}
-	
-	
+
+
 	private String buildRegistrationLink(User oUser) {
 		Utils.debugLog("AuthResource.buildRegistrationLink");
 		String sResult = "";
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
 		String sUserId = "email=" + oUser.getUserId();
 		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
-		
+
 		sResult = sAPIUrl + sUserId + "&" + sToken;
-		
+
 		return sResult;
 	}
 
@@ -1042,27 +1072,27 @@ public class AuthResource {
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
-		
-		
+
+
 		Message oMessage = new Message();
 		String sTitle = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_TITLE");
-		
+
 		if (Utils.isNullOrEmpty(sTitle)) {
 			sTitle = "WASDI Password Recovery";
 		}
 		oMessage.setTilte(sTitle);
-		
-		
+
+
 		String sSender = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_SENDER");
 		if (sSender==null) sSender = "wasdi@wasdi.net";
 		oMessage.setSender(sSender);
-		
+
 		String sMessage = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_TEXT");
-		
+
 		if (Utils.isNullOrEmpty(sMessage)) {
 			sMessage = "Your password has been regenerated. Please find here your new credentials:";
 		}
-		
+
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
 		try {
@@ -1075,8 +1105,8 @@ public class AuthResource {
 		}
 		return false;
 	}
-	
-	
+
+
 	private Boolean sendSftpPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Utils.debugLog("AuthResource.sendSFTPPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
@@ -1086,27 +1116,27 @@ public class AuthResource {
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
-		
-		
+
+
 		Message oMessage = new Message();
 		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
-		
+
 		if (Utils.isNullOrEmpty(sTitle)) {
 			sTitle = "WASDI SFTP Account";
 		}
 		oMessage.setTilte(sTitle);
-		
-		
+
+
 		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 		if (sSender==null) sSender = "wasdi@wasdi.net";
 		oMessage.setSender(sSender);
-		
+
 		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
-		
+
 		if (Utils.isNullOrEmpty(sMessage)) {
 			sMessage = "Your password has been regenerated. Please find here your new credentials:";
 		}
-		
+
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
 		try {
@@ -1120,76 +1150,76 @@ public class AuthResource {
 		return false;
 	}
 
-	
+
 	/**
 	 * Send a notification email to the administrators
 	 * @param oUser
 	 * @return
 	 */
 	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed) {
-		 return notifyNewUserInWasdi(oUser,bConfirmed,false);
+		return notifyNewUserInWasdi(oUser,bConfirmed,false);
 	}
-	
+
 	/**
 	 * Send a notification email to the administrators
 	 * @param oUser
 	 * @return
 	 */
 	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed, boolean bGoogle) {
-		
+
 		Utils.debugLog("AuthResource.notifyNewUserInWasdi");
-		 
+
 		if (oUser == null) {
 			Utils.debugLog("AuthResource.notifyNewUserInWasdi: user null, return false");
 			return false;
 		}
 
 		try {
-			
+
 			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
-			
+
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				Utils.debugLog("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
 				return false;
 			}
-			
+
 			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 			Message oMessage = new Message();
-			
+
 			String sTitle = "New WASDI User";
-			
+
 			if (bGoogle) sTitle = "New Google WASDI User";
-			
+
 			oMessage.setTilte(sTitle);
-			
+
 			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 			if (sSender==null) {
 				sSender = "wasdi@wasdi.net";
 			}
 			oMessage.setSender(sSender);
-			
+
 			String sMessage = "A new user registered in WASDI. User Name: " + oUser.getUserId();
-			
+
 			if (bConfirmed) {
 				sMessage = "The new User " + oUser.getUserId() + " confirmed the access and validated the account"; 
 			}
-			
+
 			oMessage.setMessage(sMessage);
-	
+
 			Integer iPositiveSucceded = 0;
-			
+
 			String sWasdiAdminMail = m_oServletConfig.getInitParameter("WasdiAdminMail");
-			
+
 			if (Utils.isNullOrEmpty(sWasdiAdminMail)) {
 				sWasdiAdminMail = "info@fadeout.biz";
 			}
-			
+
 			iPositiveSucceded = oAPI.sendMailDirect(sWasdiAdminMail, oMessage);
-			
+
 			Utils.debugLog("AuthResource.notifyNewUserInWasdi: "+iPositiveSucceded.toString());
-			
+
 			if(iPositiveSucceded < 0 ) {
-				
+
 				Utils.debugLog("AuthResource.notifyNewUserInWasdi: error sending notification email to admin");
 				return false;
 			}
@@ -1199,9 +1229,9 @@ public class AuthResource {
 		}
 		return true;
 	}
-	
+
 	protected User getUser(String sSessionId){
-		
+
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return null;
 		}
@@ -1214,11 +1244,11 @@ public class AuthResource {
 		}
 		return oUser;	
 	}
-	
+
 	private String keyCloakLogin(String sUser, String sPassword) {
 		//authenticate against keycloak
 		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
-		
+
 		String sPayload = "client_id=";
 		sPayload += m_oServletConfig.getInitParameter("keycloak_client");
 		sPayload += "&grant_type=password&username=" + sUser;
@@ -1226,8 +1256,8 @@ public class AuthResource {
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 		String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
-		
+
 		return sAuthResult;
 	}
-	
+
 }
