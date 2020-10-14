@@ -788,7 +788,7 @@ public class Wasdi extends ResourceConfig {
 	 * @throws IOException
 	 * @throws CopyStreamException
 	 */
-	private static String readHttpResponse(HttpURLConnection oConnection) {
+	public static String readHttpResponse(HttpURLConnection oConnection) {
 		try {
 			// response
 			int iResponseCode = oConnection.getResponseCode();

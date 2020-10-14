@@ -2,6 +2,10 @@ package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
@@ -28,6 +32,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -702,32 +707,89 @@ public class AuthResource {
 					sMyTokenId = oJson.optString("access_token", null);
 
 					// Create new keycloak user for the realm
-					String sCreateUserUrl = m_oServletConfig.getInitParameter("keycloak_server");
-					if(!sCreateUserUrl.endsWith("/")) {
-						sCreateUserUrl += "/";
+					try {
+						String sCreateUserUrl = m_oServletConfig.getInitParameter("keycloak_server");
+						if(!sCreateUserUrl.endsWith("/")) {
+							sCreateUserUrl += "/";
+						}
+						sCreateUserUrl += "admin/realms/";
+						sCreateUserUrl += m_oServletConfig.getInitParameter("keycloak_realm");
+						sCreateUserUrl += "/users";
+						
+						JSONObject oPayload = new JSONObject();
+						oPayload.put("firstName", oRegistrationInfoViewModel.getName());
+						oPayload.put("lastName", oRegistrationInfoViewModel.getSurname());
+						oPayload.put("username", oRegistrationInfoViewModel.getUserId());
+						oPayload.put("email", oRegistrationInfoViewModel.getUserId());
+						oPayload.put("enabled", true);
+						JSONObject oCredentials = new JSONObject();
+						oCredentials.put("type", "password");
+						oCredentials.put("value", oRegistrationInfoViewModel.getPassword());
+						oCredentials.put("temporary", false);
+						JSONArray oCredentialsArray = new JSONArray();
+						oCredentialsArray.put(oCredentials);
+						oPayload.put("credentials", oCredentialsArray);
+						
+						sPayload = oPayload.toString();
+	
+//						sPayload = "{"
+//								+ "\"firstName\":\"" + oRegistrationInfoViewModel.getName() + "\","+
+//								"\"lastName\":\"\", "+ oRegistrationInfoViewModel.getSurname() + "\","+
+//								"\"username\":\"" + oNewUser.getUserId() + "\","+
+//								"\"email\":\""  + oNewUser.getUserId()+ "\"," +
+//								" \"enabled\":\"true\"";
+//						//sPayload += ",\"credentials\":[{\"type\":\"password\",\"value\":\"" + oRegistrationInfoViewModel.getPassword() + "\",\"temporary\":false}]}";
+	
+						
+						URL oUrl = new URL(sCreateUserUrl);
+						HttpURLConnection oConn = (HttpURLConnection) oUrl.openConnection();
+						oConn.setDoOutput(true);
+						oConn.setRequestMethod("POST");
+						oConn.setRequestProperty("Authorization","Bearer " + sMyTokenId);
+						oConn.setRequestProperty("Content-Type", "application/json");
+
+						OutputStream oPostOutputStream = oConn.getOutputStream();
+						OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
+						if (sPayload!= null) oStreamWriter.write(sPayload);
+						oStreamWriter.flush();
+						oStreamWriter.close();
+						oPostOutputStream.close(); 
+						
+						oConn.connect();
+						int iStatus = oConn.getResponseCode();
+						String sMessage = Wasdi.readHttpResponse(oConn);
+						if((200 == iStatus || 202 <= iStatus)&&(300>iStatus)) {
+							//not what we expected. Read the message
+							Utils.debugLog("AuthResource.userRegistration: keycloak returned " + iStatus + " but 201 was expected. Message: <" + sMessage + ">. Could not register new user. Aborting");
+							return PrimitiveResult.getInvalid();
+						} else if (300 <= iStatus) {
+							//read the error
+							sMessage = Wasdi.readHttpResponse(oConn);
+							Utils.debugLog("AuthResource.userRegistration: keycloak returned " + iStatus + " but 201 was expected. Message: <" + sMessage + ">. Could not register new user. Aborting");
+							return PrimitiveResult.getInvalid();
+						} else if (201 != iStatus) {
+							Utils.debugLog("AuthResource.userRegistration: keycloak returned " + iStatus + " but 201 was expected. Message: <" + sMessage + ">. Could not register new user. Aborting");
+							return PrimitiveResult.getInvalid();
+						}
+						assert(201 == iStatus);
+						Utils.debugLog("AuthResource.userRegistration: keycloak registration completed. Message: <" + sMessage + ">");
+						
+						
+//						asHeaders = new HashMap<>();
+//						asHeaders.put("Content-Type", "application/json");
+//						String sEncodedAuth = Base64.getEncoder().encodeToString(sMyTokenId.getBytes(StandardCharsets.UTF_8));
+//						String sAuth = "Bearer " + sEncodedAuth;
+//						asHeaders.put("Authorization", sAuth);
+//						sAuthResult = Wasdi.httpPost(sCreateUserUrl, sPayload, asHeaders);
+						//we expect the result to be empty
+						
+						//todo try to login to check if the user exists
+					} catch (Exception oE) {
+						Utils.debugLog("AuthResource.userRegistration: could not add user to keycloak due to: " + oE + ", aborting");
+						return PrimitiveResult.getInvalid();
 					}
-					sCreateUserUrl += "admin/realms/";
-					sCreateUserUrl += m_oServletConfig.getInitParameter("keycloak_realm");
-					sCreateUserUrl += "/users";
-
-					sPayload = "{"
-							+ "\"firstName\":\"" + oRegistrationInfoViewModel.getName() + "\","+
-							"\"lastName\":\"\", "+ oRegistrationInfoViewModel.getSurname() + "\","+
-							"\"username\":\"" + oNewUser.getUserId() + "\","+
-							"\"email\":\""  + oNewUser.getUserId()+ "\"," +
-							" \"enabled\":\"true\","+
-							"\"credentials\":[{\"type\":\"password\",\"value\":\"" + oRegistrationInfoViewModel.getPassword() + "\",\"temporary\":false}]}";
-
-					asHeaders = new HashMap<>();
-					asHeaders.put("Content-Type", "application/json");
-					String sEncodedAuth = Base64.getEncoder().encodeToString(sMyTokenId.getBytes(StandardCharsets.UTF_8));
-					String sAuth = "Bearer " + sEncodedAuth;
-					asHeaders.put("Authorization", sAuth);
-					sAuthResult = Wasdi.httpPost(sCreateUserUrl, sPayload, asHeaders);
-					//we expect the result to be empty
 					
-					//todo try to login to check if the user exists
-
+					//store user in DB
 					PrimitiveResult oResult = null;
 					if(oUserRepository.insertUser(oNewUser)) {
 						//the user is stored in DB
