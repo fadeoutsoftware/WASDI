@@ -824,7 +824,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
     asHeaders = _getStandardHeaders()
     payload = {'sWorkspaceId': sWorkspaceId}
 
-    sUrl = m_sBaseUrl + '/product/byws'
+    sUrl = m_sBaseUrl + '/product/namesbyws'
 
     asProducts = []
 
@@ -833,14 +833,13 @@ def getProductsByWorkspaceId(sWorkspaceId):
     if oResult.ok is True:
         oJsonResults = oResult.json()
 
-        for oProduct in oJsonResults:
+        for sProduct in oJsonResults:
             try:
-                asProducts.append(oProduct['fileName'])
+                asProducts.append(sProduct)
             except:
                 continue
 
     return asProducts
-
 
 def getProductsByActiveWorkspace():
     """
@@ -2711,7 +2710,7 @@ def getProcessorPath():
         
         return sCallerFilePath
     except:
-        return ""
+        return "./"
 
 def _log(sLog):
     """
@@ -3142,8 +3141,8 @@ def _fileOnNode(sFileName):
         try:
             oJsonResponse = oResult.json()
             
-            if oJsonResponse.BoolValue is not None:
-                return oJsonResponse.BoolValue
+            if oJsonResponse['boolValue'] is not None:
+                return oJsonResponse['boolValue']
             else:
                 return False
         except:
