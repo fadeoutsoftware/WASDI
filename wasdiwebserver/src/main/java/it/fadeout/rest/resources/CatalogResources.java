@@ -443,6 +443,8 @@ public class CatalogResources {
 
 			File oFile = new File(sTargetFilePath);
 			
+			Utils.debugLog("CatalogResources.checkFileByNode: path " + sTargetFilePath);
+			
 			boolean bExists = oFile.exists();
 			
 			PrimitiveResult oResult = new PrimitiveResult();

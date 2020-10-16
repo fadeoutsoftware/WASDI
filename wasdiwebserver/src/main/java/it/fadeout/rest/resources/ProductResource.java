@@ -410,13 +410,14 @@ public class ProductResource {
 
 		return aoProductList;
 	}
+	
 	@GET
 	@Path("/namesbyws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.getNamesByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -426,7 +427,7 @@ public class ProductResource {
 
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				Utils.debugLog("ProductResource.getNamesByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
