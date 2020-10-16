@@ -137,8 +137,14 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 				sBuffer = oGeometry.optString(DiasResponseTranslatorCREODIAS.STYPE, null);
 				if(null != sBuffer) {
 					StringBuilder oFootPrint = new StringBuilder(sBuffer.toUpperCase());
-					oFootPrint.append(" (((");
-
+					
+					if (sBuffer.equalsIgnoreCase("POLYGON")) {
+						oFootPrint.append(" ((");
+					}
+					else if (sBuffer.equalsIgnoreCase("MULTIPOLYGON")) {
+						oFootPrint.append(" (((");
+					}
+					
 					parseCoordinates(oGeometry, oFootPrint);
 
 					//remove ending spaces and commas in excess
@@ -148,7 +154,15 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 						sFootPrint = sFootPrint.substring(0,  sFootPrint.length() - 1 );
 						sFootPrint = sFootPrint.trim();
 					}
-					sFootPrint += ")))";
+					
+					if (sBuffer.equalsIgnoreCase("POLYGON")) {
+						sFootPrint += "))";
+					}
+					else if (sBuffer.equalsIgnoreCase("MULTIPOLYGON")) {
+						sFootPrint += ")))";
+					}
+					
+					
 					oResult.setFootprint(sFootPrint);
 				}
 			}
