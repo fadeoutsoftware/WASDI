@@ -812,63 +812,15 @@ var ImportController = (function() {
 
     };
 
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-    /* us server Download the product in geoserver, the parameter oLayer = product*/
-    // ImportController.prototype.downloadProduct = function(oLayer)
-    // {
-    //
-    //     if(utilsIsObjectNullOrUndefined(oLayer))
-    //         return false;
-    //
-    //     var oThat = this;
-    //     this.m_oModalService.showModal({
-    //         templateUrl: "dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceView.html",
-    //         controller: "DownloadProductInWorkspaceController",
-    //         inputs: {
-    //             extras: oLayer
-    //         }
-    //     }).then(function(modal) {
-    //         modal.element.modal();
-    //
-    //         modal.close.then(function(result) {
-    //
-    //             if(utilsIsObjectNullOrUndefined(result))
-    //                 return false;
-    //             oLayer.isDisabledToDoDownload = true;
-    //             var oWorkSpace = result;
-    //             var oController = this;
-    //             if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
-    //             {
-    //                 //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
-    //                 console.log("Error there isn't workspaceID or layer");
-    //                 return false;
-    //             }
-    //             var url = oLayer.link;
-    //             if(utilsIsObjectNullOrUndefined(url))
-    //             {
-    //                 //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
-    //                 console.log("Error there isn't workspaceID or layer")
-    //                 return false;
-    //             }
-    //
-    //             oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
-    //                 var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-    //                 utilsVexCloseDialogAfter("3000",oDialog);
-    //
-    //
-    //             }).error(function (data,status) {
-    //                 utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
-    //                 oLayer.isDisabledToDoDownload = false;
-    //             });
-    //             return true;
-    //         });
-    //     });
-    //
-    //     return true;
-    // };
+        /**
+         * Download a product
+         * @param sUrl
+         * @param sWorkspaceId
+         * @param sBounds
+         * @param oProvider
+         * @param oCallback
+         * @param oError
+         */
     ImportController.prototype.downloadProduct = function(sUrl,sWorkspaceId,sBounds,oProvider,oCallback,oError)
     {
         if(utilsIsObjectNullOrUndefined(oCallback) === true)
