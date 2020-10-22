@@ -464,11 +464,15 @@ public class OpenSearchResource {
 							continue;
 						}
 						
+						int iActualPage = 0;
+						
 						// Until we do not get all the results
 						while (iObtainedResults < iTotalResultsForProviders) {
 							
 							// Actual Offset
 							String sCurrentOffset = "" + iObtainedResults;
+							
+							String sOriginalLimit = "" + iLimit;
 	
 							// How many elements do we need yet?
 							if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
@@ -478,7 +482,7 @@ public class OpenSearchResource {
 							String sCurrentLimit = "" + iLimit;
 							
 							// Create the paginated Query
-							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
+							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder, sOriginalLimit);
 							// Log the query
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							

@@ -11,55 +11,73 @@ package wasdi.shared.opensearch;
  *
  */
 public class PaginatedQuery {
-	String sQuery;
-	String sOffset;
-	String sLimit;
-	String sSortedBy;
-	String sOrder;
-	
+	String m_sQuery;
+	String m_sOffset;
+	String m_sLimit;
+	String m_sSortedBy;
+	String m_sOrder;
+	String m_sOriginalLimit;
 	
 	public PaginatedQuery(String sQuery, String sOffset, String sLimit, String sSortedBy, String sOrder) {
+		this.internalInit(sQuery, sOffset, sLimit, sSortedBy, sOrder, sLimit);
+	}
+	
+	public PaginatedQuery(String sQuery, String sOffset, String sLimit, String sSortedBy, String sOrder, String sOriginalLimit) {
+		this.internalInit(sQuery, sOffset, sLimit, sSortedBy, sOrder, sOriginalLimit);
+	}
+	
+	private void internalInit(String sQuery, String sOffset, String sLimit, String sSortedBy, String sOrder, String sOriginalLimit) {
 		if (sSortedBy == null) {
 			sSortedBy = "ingestiondate";
 		}
 		if (sOrder == null) {
 			sOrder = "asc";
 		}
-		this.sQuery = sQuery;
-		this.sOffset = sOffset;
-		this.sLimit = sLimit;
-		this.sSortedBy = sSortedBy;
-		this.sOrder = sOrder;
+		this.m_sQuery = sQuery;
+		this.m_sOffset = sOffset;
+		this.m_sLimit = sLimit;
+		this.m_sSortedBy = sSortedBy;
+		this.m_sOrder = sOrder;
+		this.m_sOriginalLimit = sOriginalLimit;
 	}
 	
 	public String getQuery() {
-		return sQuery;
+		return m_sQuery;
 	}
 	public void setQuery(String sQuery) {
-		this.sQuery = sQuery;
+		this.m_sQuery = sQuery;
 	}
 	public String getOffset() {
-		return sOffset;
+		return m_sOffset;
 	}
 	public void setOffset(String sOffset) {
-		this.sOffset = sOffset;
+		this.m_sOffset = sOffset;
 	}
 	public String getLimit() {
-		return sLimit;
+		return m_sLimit;
 	}
 	public void setLimit(String sLimit) {
-		this.sLimit = sLimit;
+		this.m_sLimit = sLimit;
 	}
 	public String getSortedBy() {
-		return sSortedBy;
+		return m_sSortedBy;
 	}
 	public void setSortedBy(String sSortedBy) {
-		this.sSortedBy = sSortedBy;
+		this.m_sSortedBy = sSortedBy;
 	}
 	public String getOrder() {
-		return sOrder;
+		return m_sOrder;
 	}
 	public void setOrder(String sOrder) {
-		this.sOrder = sOrder;
+		this.m_sOrder = sOrder;
 	}
+	
+	public String getOriginalLimit() {
+		return m_sOriginalLimit;
+	}
+
+	public void setOriginalLimit(String sOriginalLimit) {
+		this.m_sOriginalLimit = sOriginalLimit;
+	}
+
 }
