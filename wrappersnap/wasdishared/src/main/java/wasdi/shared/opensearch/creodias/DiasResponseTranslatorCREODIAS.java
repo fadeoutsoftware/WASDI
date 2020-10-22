@@ -94,7 +94,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 
 			buildLink(oResult);
 			buildSummary(oResult);
-			System.out.println(oResult);
+			
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorCREODIAS.translate( " +
 					oInJson.toString() + ", " +
@@ -449,8 +449,6 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 							oProperties.toString() + 
 							"JSON DUMP END" );
 				}
-			} else {
-				Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices: \"services\" field not found, aborting");
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices( ..., " + oProperties.toString() + " ):" + oE );

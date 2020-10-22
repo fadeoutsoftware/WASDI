@@ -259,16 +259,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		String sOrderUrl = "https://finder.creodias.eu/api/order/";
 
 		try {
-			URL oUrl = new URL(sOrderUrl);
-
-			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-			oHttpConn.setRequestMethod("POST");
-			oHttpConn.addRequestProperty("Content-Type","application/json");
-			//oHttpConn.setRequestProperty("Accept", "*/*");
-			//oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
-
-			oHttpConn.addRequestProperty("Keycloak-Token", obtainKeycloakToken(sDownloadUser, sDownloadPassword));
-
+			
 			JSONObject oJsonRequest = new JSONObject();
 
 
@@ -307,10 +298,21 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oJsonRequest.put("identifier_list", oJsonProductsToOrder);
 
 			//processor
-			oJsonRequest.put("processor", getRequiredProcessor(sFileURL));
+			oJsonRequest.put("processor", getRequiredProcessor(sFileURL));			
+			
+			URL oUrl = new URL(sOrderUrl);
 
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			oHttpConn.setDoOutput(true);
-			oHttpConn.connect();
+			oHttpConn.setRequestMethod("POST");
+			oHttpConn.addRequestProperty("Content-Type","application/json");
+			//oHttpConn.setRequestProperty("Accept", "*/*");
+			//oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+
+			oHttpConn.addRequestProperty("Keycloak-Token", obtainKeycloakToken(sDownloadUser, sDownloadPassword));
+
+			
+			//oHttpConn.connect();
 			OutputStream oOutputStream = oHttpConn.getOutputStream();
 			oOutputStream.write(oJsonRequest.toString().getBytes());
 			
@@ -328,7 +330,12 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 			String sProduct = getFileName(sFileURL);
 			if(sProduct.startsWith("S1")) {
-				return "";
+				if (sProduct.contains("_SLC_") || sProduct.contains("_RAW_")) {
+					return "download";
+				}
+				else {
+					return "";
+				}
 			}
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASPRoviderAdapter.getRequiredProcessor: " + oE);
