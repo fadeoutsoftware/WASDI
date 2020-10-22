@@ -43,6 +43,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
+import it.fadeout.mercurius.business.Message;
+import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
@@ -1903,7 +1905,44 @@ public class ProcessorsResource  {
 			oProcessorSharing.setShareDate((double) oTimestamp.getTime());
 			oProcessorSharingRepository.insertProcessorSharing(oProcessorSharing);
 			
-			Utils.debugLog("Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			
+			try {
+				String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+				
+				if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+					Utils.debugLog("ProcessorsResource.shareProcessor: sMercuriusAPIAddress is null");
+				}
+				else {
+					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+					Message oMessage = new Message();
+					
+					String sTitle = "Processor " + oValidateProcessor.getName() + " Shared";
+					
+					oMessage.setTilte(sTitle);
+					
+					String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+					if (sSender==null) {
+						sSender = "wasdi@wasdi.net";
+					}
+					
+					oMessage.setSender(sSender);
+					
+					String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
+									
+					oMessage.setMessage(sMessage);
+			
+					Integer iPositiveSucceded = 0;
+									
+					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
+					
+					Utils.debugLog("ProcessorsResource.shareProcessor: notification sent with result " + iPositiveSucceded);
+				}
+					
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("ProcessorsResource.shareProcessor: notification exception " + oEx.toString());
+			}				
 			
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.shareProcessor: " + oEx);
@@ -1912,7 +1951,7 @@ public class ProcessorsResource  {
 			oResult.setBoolValue(false);
 
 			return oResult;
-		}
+		}	
 
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);
