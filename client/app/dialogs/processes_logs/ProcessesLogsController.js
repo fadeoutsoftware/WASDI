@@ -139,8 +139,14 @@ var ProcessesLogsController = (function() {
 
         if( utilsIsValidDate(oEndTime) === false )
         {
+            oEndTime = new Date(oProcess.lastChangeDate);
+        }
+
+        if( utilsIsValidDate(oEndTime) === false )
+        {
             oEndTime = new Date();
         }
+
         //pick time
         let iMilliseconds =  Math.abs(oEndTime-oStartTime);
         //approximate result
