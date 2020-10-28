@@ -3,7 +3,6 @@ import wasdi
 
 def run():
     wasdi.setVerbose(True)
-    bVerbosity = wasdi.getVerbose()
         
     wasdi.hello()
 

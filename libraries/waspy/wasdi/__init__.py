@@ -42,6 +42,7 @@ Created on 11 Jun 2018
 @author: p.campanella
 """
 from time import sleep
+from __builtin__ import str
 
 name = "wasdi"
 
@@ -1516,7 +1517,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
                    fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
                    sProductType=None, iOrbitNumber=None,
                    sSensorOperationalMode=None, sCloudCoverage=None,
-                   sProvider=None):
+                   sProvider=None, oBoundingBox=None):
     """
     Search EO images
 
@@ -1585,6 +1586,41 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         wasdiLog("[ERROR] waspy.searchEOImages: sDateTo must be in format YYYY-MM-DD" +
               '  ******************************************************************************')
         return aoReturnList
+    
+    
+    if oBoundingBox is not None:
+        if isinstance(oBoundingBox, str):
+            asBBox = oBoundingBox.split(",")
+        
+            if len(asBBox) != 4:
+                wasdiLog("[WARNING] waspy.searchEOImages: BoundingBox is a string but in bad format. Must be LATN;LONW;LATS;LONE")
+            else:
+                try:
+                    fTempLatN = float(asBBox[0])
+                    fTempLonW = float(asBBox[1])
+                    fTempLatS = float(asBBox[2])
+                    fTempLonE = float(asBBox[3])
+                    
+                    fULLat = fTempLatN
+                    fULLon = fTempLonW
+                    fLRLat = fTempLatS
+                    fLRLon = fTempLonE
+                except: 
+                    wasdiLog("[WARNING] waspy.searchEOImages: BoundingBox is a string but in bad format, not all are floats")
+        else:
+            try:
+                fTempLatN = oBoundingBox["northEast"]["lat"]
+                fTempLonW = oBoundingBox["southWest"]["lng"]
+                fTempLatS = oBoundingBox["southWest"]["lat"]
+                fTempLonE = oBoundingBox["northEast"]["lng"]
+                
+                fULLat = fTempLatN
+                fULLon = fTempLonW
+                fLRLat = fTempLatS
+                fLRLon = fTempLonE
+            except:
+                wasdiLog("[WARNING] waspy.searchEOImages: exception decoding BoundingBox")
+            
 
     if sCloudCoverage is not None:
         # Force to be a String
@@ -1671,6 +1707,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             
             oSearchResult["fileName"] = ""
             oSearchResult["relativeOrbit"] = -1
+            oSearchResult["provider"] = sProvider
             
             # Initialize the fileName property
             if oSearchResult["title"] is not None:
@@ -1900,25 +1937,29 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
     return sReturn
 
 
-def importProduct(asProduct, sProvider=None):
+def importProduct(oProduct, sProvider=None):
     """
     Imports a product from a Provider in WASDI starting from the object returned by searchEOImages
-    :param asProduct: product dictionary as returned by searchEOImages
+    :param oProduct: product dictionary as returned by searchEOImages
     :param sProvider: WASDI Data Provider. Use None for default
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
 
-    if asProduct is None:
+    if oProduct is None:
         wasdiLog("[ERROR] waspy.importProduct: input asPRoduct is none")
         return "ERROR"
 
-    _log('[INFO] waspy.importProduct( ' + str(asProduct) + ' )')
+    _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
         sBoundingBox = None
-        sFileUrl = asProduct["link"]
-        if "footprint" in asProduct:
-            sBoundingBox = asProduct["footprint"]
+        sFileUrl = oProduct["link"]
+        if "footprint" in oProduct:
+            sBoundingBox = oProduct["footprint"]
+        
+        if sProvider is None:
+            if "provider" in oProduct:
+                sProvider = oProduct["provider"]
 
         return importProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
     except Exception as e:
@@ -1926,25 +1967,29 @@ def importProduct(asProduct, sProvider=None):
         return "ERROR"
 
 
-def asynchImportProduct(asProduct, sProvider=None):
+def asynchImportProduct(oProduct, sProvider=None):
     """
     Asynch Import a product from a Provider in WASDI starting from the object returned by searchEOImages
-    :param asProduct: product dictionary as returned by searchEOImages
+    :param oProduct: product dictionary as returned by searchEOImages
     :param sProvider: WASDI Data Provider. Use None for default
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
 
-    if asProduct is None:
+    if oProduct is None:
         wasdiLog("[ERROR] waspy.importProduct: input asPRoduct is none")
         return "ERROR"
 
-    _log('[INFO] waspy.importProduct( ' + str(asProduct) + ' )')
+    _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
         sBoundingBox = None
-        sFileUrl = asProduct["link"]
-        if "footprint" in asProduct:
-            sBoundingBox = asProduct["footprint"]
+        sFileUrl = oProduct["link"]
+        if "footprint" in oProduct:
+            sBoundingBox = oProduct["footprint"]
+            
+        if sProvider is None:
+            if "provider" in oProduct:
+                sProvider = oProduct["provider"]            
 
         return asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
     except Exception as e:
@@ -1952,33 +1997,39 @@ def asynchImportProduct(asProduct, sProvider=None):
         return "ERROR"
 
 
-def importProductList(aasProduct, sProvider=None):
+def importProductList(aoProducts, sProvider=None):
     """
     Imports a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
-    :param aasProduct: Array of product dictionary as returned by searchEOImages
+    :param aoProducts: Array of product dictionary as returned by searchEOImages
     :param sProvider: WASDI Data Provider. Use None for default 
     :return: execution status as an array of  STRINGs, one for each product in input. Can be DONE, ERROR, STOPPED.
     """
 
-    if aasProduct is None:
+    if aoProducts is None:
         wasdiLog("[ERROR] waspy.importProductList: input asPRoduct is none")
         return "ERROR"
 
-    _log('[INFO] waspy.importProductList( ' + str(aasProduct) + ' )')
+    _log('[INFO] waspy.importProductList( ' + str(aoProducts) + ' )')
 
     asReturnList = []
 
     # For Each product in input
-    for asProduct in aasProduct:
+    for oProduct in aoProducts:
         try:
             # Get BBOX and Link from the dictionary
             sBoundingBox = None
-            sFileUrl = asProduct["link"]
-            if "footprint" in asProduct:
-                sBoundingBox = asProduct["footprint"]
+            sFileUrl = oProduct["link"]
+            if "footprint" in oProduct:
+                sBoundingBox = oProduct["footprint"]
+                
+            sActualProvider = sProvider
+
+            if sActualProvider is None:
+                if "provider" in oProduct:
+                    sActualProvider = oProduct["provider"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sActualProvider)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -1990,30 +2041,36 @@ def importProductList(aasProduct, sProvider=None):
     return waitProcesses(asReturnList)
 
 
-def asynchImportProductList(aasProduct, sProvider=None):
+def asynchImportProductList(aoProducts, sProvider=None):
     """
     Asynch Import a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
-    :param aasProduct: Array of product dictionary as returned by searchEOImages
+    :param aoProducts: Array of product dictionary as returned by searchEOImages
     :param sProvider: WASDI Data Provider. Use None for default
     :return: array of the ProcessId of the Download Operations. An element can be "ERROR" if there was any problem
     """
 
-    if aasProduct is None:
+    if aoProducts is None:
         wasdiLog("[ERROR] waspy.importProductList: input asPRoduct is none")
         return "ERROR"
 
-    _log('[INFO] waspy.importProductList( ' + str(aasProduct) + ' )')
+    _log('[INFO] waspy.importProductList( ' + str(aoProducts) + ' )')
 
     asReturnList = []
 
     # For Each product in input
-    for asProduct in aasProduct:
+    for oProduct in aoProducts:
         try:
             # Get BBOX and Link from the dictionary
             sBoundingBox = None
-            sFileUrl = asProduct["link"]
-            if "footprint" in asProduct:
-                sBoundingBox = asProduct["footprint"]
+            sFileUrl = oProduct["link"]
+            if "footprint" in oProduct:
+                sBoundingBox = oProduct["footprint"]
+
+            sActualProvider = sProvider
+
+            if sActualProvider is None:
+                if "provider" in oProduct:
+                    sActualProvider = oProduct["provider"]
 
             # Start the download propagating the Asynch Flag
             sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
@@ -2271,22 +2328,24 @@ def _uploadFile(sFileName):
     return bResult
 
 
-def addFileToWASDI(sFileName):
+def addFileToWASDI(sFileName, sStyle=""):
     """
     Add a file to the wasdi workspace
     :param sFileName: Name (with extension) of the file to add
+    :param sStyle: name of a valid WMS style
     :return: status of the operation
     """
-    return _internalAddFileToWASDI(sFileName, False)
+    return _internalAddFileToWASDI(sFileName, False, sStyle)
 
 
-def asynchAddFileToWASDI(sFileName):
+def asynchAddFileToWASDI(sFileName, sStyle=""):
     """
     Triggers the ingestion of File Name in the workspace
     :param: sFileName: Name (with extension) of the file to add
+    :param sStyle: name of a valid WMS style
     :return: Process Id of the ingestion
     """
-    return _internalAddFileToWASDI(sFileName, True)
+    return _internalAddFileToWASDI(sFileName, True, sStyle)
 
 
 def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
@@ -2885,7 +2944,7 @@ def _normPath(sPath):
 
     return sPath
 
-def _internalAddFileToWASDI(sFileName, bAsynch=None):
+def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle = ""):
     _log('[INFO] waspy._internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
 
     if sFileName is None:
@@ -2918,6 +2977,17 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
                   '  ******************************************************************************')
             return ''
 
+
+    if not isinstance(sStyle, str):
+        wasdiLog('[WARNING] waspy._internalAddFileToWASDI: style is not a string, trying conversion' +
+              '  ******************************************************************************')
+        try:
+            sStyle = str(sStyle)
+        except:
+            wasdiLog('[ERROR] waspy._internalAddFileToWASDI: cannot convert style name into string, set empty')
+            sStyle = ""
+
+
     sResult = ''
     try:
         if m_bIsOnServer is False:
@@ -2948,6 +3018,11 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
             
 
         sUrl = getWorkspaceBaseUrl() + "/catalog/upload/ingestinws?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
+        
+        # If present, add the default product style
+        if sStyle is not None:
+            if sStyle != "":
+                sUrl = sUrl + "&style=" + sStyle
 
         if m_bIsOnServer:
             sUrl += "&parent="
