@@ -9,6 +9,16 @@ package wasdi.shared.parameters;
 public class IngestFileParameter extends BaseParameter{
     
     private String filePath;
+    
+    private String style;
+
+	public String getStyle() {
+		return style;
+	}
+
+	public void setStyle(String style) {
+		this.style = style;
+	}
 
 	public String getFilePath() {
 		return filePath;

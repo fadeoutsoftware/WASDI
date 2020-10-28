@@ -218,6 +218,13 @@ public class FileBufferResource {
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullProductPath+sFileUrl);
 			
+			// If the style is not set, look if there is a default one in the downloaded file
+			if (Utils.isNullOrEmpty(sStyle)) {
+				if (!Utils.isNullOrEmpty(oDownloadedFile.getDefaultStyle())) {
+					sStyle = oDownloadedFile.getDefaultStyle();
+				}
+			}
+			
 			// Is there this publish band?
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 			PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
