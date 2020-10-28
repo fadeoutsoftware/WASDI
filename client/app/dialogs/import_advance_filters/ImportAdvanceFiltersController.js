@@ -80,19 +80,19 @@ var ImportAdvanceFiltersController = (function() {
 
     ImportAdvanceFiltersController.prototype.getPeriodSpring = function()
     {
-        return this.getPeriod(02,21,05,20)
+        return this.getPeriod(2,21,5,20)
     };
     ImportAdvanceFiltersController.prototype.getPeriodSummer = function()
     {
-        return this.getPeriod(05,21,08,22)
+        return this.getPeriod(5,21,8,22)
     };
     ImportAdvanceFiltersController.prototype.getPeriodWinter = function()
     {
-        return this.getPeriod(11,21,02,20)
+        return this.getPeriod(11,21,2,20)
     };
     ImportAdvanceFiltersController.prototype.getPeriodAutumn = function()
     {
-        return this.getPeriod(08,23,11,20)
+        return this.getPeriod(8,23,11,20)
     };
 
 
