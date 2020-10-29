@@ -1,0 +1,40 @@
+{
+    "renderAsStrings": true,
+    "tabs": [
+        {
+            "name": "Input",
+            "controls": [
+                {
+                    "param": "DATE",
+                    "type": "date",
+                    "label": "Date",
+                    "required": true
+                },
+                {
+                    "param": "SEARCHDAYS",
+                    "type": "slider",
+                    "label": "Days to search in the past",
+                    "default": 10,
+                    "min": 5,
+                    "max": 20,
+                    "required": true
+                },
+                {
+                    "param": "BBOX",
+                    "type": "bbox",
+                    "label": "Bounding Box",
+                    "required": true
+                },
+                {
+                    "param": "MAXCLOUD",
+                    "type": "slider",
+                    "label": "Max cloud cover (percent)",
+                    "default": 30,
+                    "min": 0,
+                    "max": 100,
+                    "required": true
+                }
+            ]
+        }
+    ]
+}
