@@ -755,12 +755,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
 			} else {
-				throw new Exception("Donwload File is null. Check the provider name");
+				throw new Exception("LauncherMain.Download: Provider Adapter is null. Check the provider name");
 			}
 			oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
 			oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
 
 			if (oProcessWorkspace != null) {
+				oProviderAdapter.setProcessWorkspace(oProcessWorkspace);
 				// get file size
 				long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
 				// set file size

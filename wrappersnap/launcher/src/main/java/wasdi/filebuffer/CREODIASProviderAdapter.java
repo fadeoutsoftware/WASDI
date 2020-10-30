@@ -42,7 +42,6 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	/**
 	 * 
 	 */
-	//TODO uncapitalize method
 	public CREODIASProviderAdapter() {
 		// TODO Auto-generated constructor stub
 	}
