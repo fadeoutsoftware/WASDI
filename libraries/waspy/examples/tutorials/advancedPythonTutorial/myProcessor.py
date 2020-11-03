@@ -8,7 +8,6 @@ import numpy
 
 
 def extractBands(sFile, sImageType):
-
     try:
 
         sOutputVrtFile = sFile.replace(".zip", ".vrt")
@@ -20,11 +19,11 @@ def extractBands(sFile, sImageType):
         sOutputTiffPath = wasdi.getPath(sOutputTiffFile)
 
         # Band Names for S2 L2
-        asBandsJp2 = ['B02_10m.jp2', 'B03_10m.jp2', 'B04_10m.jp2']
+        asBandsJp2 = ['B04_10m.jp2', 'B03_10m.jp2', 'B02_10m.jp2']
 
         if sImageType != "S2MSI2A":
             # Band Names for S2 L1
-            asBandsJp2 = ['B02.jp2', 'B03.jp2', 'B04.jp2']
+            asBandsJp2 = ['B04.jp2', 'B03.jp2', 'B02.jp2']
 
         with zipfile.ZipFile(sLocalFilePath, 'r') as sZipFiles:
             asZipNameList = sZipFiles.namelist()
@@ -35,7 +34,7 @@ def extractBands(sFile, sImageType):
 
             asOrderedZipBands = []
 
-            for sBand in ['B02', 'B03', 'B04']:
+            for sBand in ['B04', 'B03', 'B02']:
                 for sZipBand in asBandsZip:
                     if sBand in sZipBand:
                         asOrderedZipBands.append(sZipBand)
@@ -50,16 +49,11 @@ def extractBands(sFile, sImageType):
 
             return sOutputTiffFile
     except Exception as oEx:
-        wasdi.wasdiLog("extractBands EXCEPTION")
-        wasdi.wasdiLog(repr(oEx))
-    except:
-        wasdi.wasdiLog("extractBands generic EXCEPTION")
-
+        wasdi.wasdiLog(f'extractBands EXCEPTION: {repr(oEx)}')
     return ""
 
 
 def stretchBandValues(sOutputTiffPath, sStretchedOutputFile):
-
     oDataset = gdal.Open(wasdi.getPath(sOutputTiffPath))
 
     if not oDataset:
@@ -92,7 +86,7 @@ def stretchBandValues(sOutputTiffPath, sStretchedOutputFile):
 
         oOutDataFile.GetRasterBand(iBand).WriteArray(adBandArray)
         oOutDataFile.GetRasterBand(iBand).SetNoDataValue(0)
-        oBand = None
+        del oBand
 
     # saves to disk!!
     oOutDataFile.FlushCache()
@@ -109,15 +103,18 @@ def run():
 
     sProvider = wasdi.getParameter("PROVIDER", "ONDA")
 
-    sImageType = wasdi.getParameter("IMAGETYPE", "S2MSI2A")
+    # L1
+    sImageType = wasdi.getParameter("IMAGETYPE", "S2MSI1C")
+    # L2
+    # sImageType = wasdi.getParameter("IMAGETYPE", "S2MSI2A")
 
-    #Check the Bounding Box: is needed
+    # Check the Bounding Box: is needed
     if sBBox is None:
         wasdi.wasdiLog("BBOX Parameter not set. Exit")
         wasdi.updateStatus("ERROR", 0)
         return
 
-    #Split the bbox: it is in the format: NORTH, WEST, SOUTH, EAST
+    # Split the bbox: it is in the format: NORTH, WEST, SOUTH, EAST
     asBBox = sBBox.split(",")
 
     if len(asBBox) != 4:
@@ -127,7 +124,7 @@ def run():
         wasdi.updateStatus("ERROR", 0)
         return
 
-    #Ok is good, print it and convert in float
+    # Ok is good, print it and convert in float
     wasdi.wasdiLog("Bounding Box: " + sBBox)
 
     fLatN = float(asBBox[0])
@@ -139,28 +136,28 @@ def run():
 
     try:
         iDaysToSearch = int(sSearchDays)
-    except:
-        wasdi.wasdiLog(' Number of days to search not valid, assuming 10 [' + str(sSearchDays) + "]")
+    except Exception as oEx:
+        wasdi.wasdiLog(f'Number of days to search not valid due to {repr(oEx)}, assuming 10 [' + str(sSearchDays) + "]")
 
-    #Check the date: assume now
+    # Check the date: assume now
     oEndDay = datetime.today()
 
     try:
-        #Try to convert the one in the params
+        # Try to convert the one in the params
         oEndDay = datetime.strptime(sDate, '%Y-%m-%d')
-    except:
-        #No good: force to yesterday
-        wasdi.wasdiLog(' Date not valid, assuming today')
+    except Exception as oEx:
+        # No good: force to yesterday
+        wasdi.wasdiLog(f'Date not valid due to {repr(oEx)}, assuming today')
 
     oTimeDelta = timedelta(days=iDaysToSearch)
     oStartDay = oEndDay - oTimeDelta
     sEndDate = oEndDay.strftime("%Y-%m-%d")
     sStartDate = oStartDay.strftime("%Y-%m-%d")
 
-    #Print the date
+    # Print the date
     wasdi.wasdiLog("Search from " + sStartDate + " to " + sEndDate)
 
-    #Check the cloud coverage
+    # Check the cloud coverage
     sCloudCoverage = None
 
     if sMaxCloud is not None:
@@ -170,7 +167,8 @@ def run():
         wasdi.wasdiLog("Cloud Coverage not set")
 
     # STEP 2: Search EO Images
-    aoImages = wasdi.searchEOImages("S2", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider)
+    aoImages = wasdi.searchEOImages("S2", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None,
+                                    sCloudCoverage, sProvider)
 
     for oImage in aoImages:
         wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
@@ -231,8 +229,8 @@ def run():
     # so there is the need to clean only the physical file
     try:
         os.remove(wasdi.getPath(sTiffFile))
-    except:
-        wasdi.wasdiLog("Error removing " + sTiffFile)
+    except Exception as oEx:
+        wasdi.wasdiLog(f'Error removing {sTiffFile} due to {repr(oEx)}')
 
     # Add the real output to the WASDI Workspace
     # NOTE: here starts the opposite path: when running locally, WASDI will upload the file to the cloud
@@ -247,6 +245,7 @@ def run():
     wasdi.setPayload(aoPayload)
 
     wasdi.updateStatus("DONE", 100)
+
 
 if __name__ == '__main__':
     wasdi.init("./config.json")
