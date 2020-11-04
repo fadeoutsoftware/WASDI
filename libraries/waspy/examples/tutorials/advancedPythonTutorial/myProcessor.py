@@ -172,8 +172,6 @@ def run():
 
     for oImage in aoImages:
         wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
-        wasdi.wasdiLog("Image Footprint: " + oImage["footprint"])
-        wasdi.wasdiLog("Image Relative Orbit: " + str(oImage["properties"]["relativeorbitnumber"]))
 
     # STEP 3: Import EO Images in the workspace
 
