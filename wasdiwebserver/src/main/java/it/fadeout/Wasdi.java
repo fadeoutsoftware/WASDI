@@ -616,7 +616,7 @@ public class Wasdi extends ResourceConfig {
 	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
 		
 		try {
-			
+			Utils.debugLog("Wasdi.httpPost( " + sUrl + ", ... )");
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			

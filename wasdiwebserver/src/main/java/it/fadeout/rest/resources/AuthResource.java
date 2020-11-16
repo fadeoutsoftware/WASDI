@@ -685,7 +685,7 @@ public class AuthResource {
 
 					String sPayload = "client_id=admin-cli" +
 							"&grant_type=client_credentials" +
-							"&client_secret=" + m_oServletConfig.getInitParameter("keycloak_cliSecret");
+							"&client_secret=" + m_oServletConfig.getInitParameter("keycloak_CLI_Secret");
 
 					Map<String, String> asHeaders = new HashMap<>();
 					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -705,6 +705,7 @@ public class AuthResource {
 					}
 
 					sMyTokenId = oJson.optString("access_token", null);
+					Utils.debugLog("AuthResource.userRegistration: admin token obtained :-)");
 
 					// Create new keycloak user for the realm
 					try {
