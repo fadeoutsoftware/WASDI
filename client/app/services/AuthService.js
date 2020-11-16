@@ -126,52 +126,6 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     }
 */
     this.login = function(oCredentials) {
-        /**
-         * login
-         * @param user
-         * @param pass
-         */
-        //todo check
-        // function login(user, pass) {
-        //
-        //     function loginError(data) {
-        //         clearToken();
-        //         console.log('AUTH: UNABLE TO OBTAIN TOKEN: ' + data)
-        //         resetSession();
-        //         raiseSessionChanged();
-        //         //todo alert of error in login
-        //         // if (typeof vex !== 'undefined') {
-        //         //     vex.dialog.alert($translate.instant("MSG_LOGINERROR"));
-        //         // } else {
-        //         //     alert($translate.instant("MSG_LOGINERROR"))
-        //         // }
-        //     }
-        //
-        //     params = 'client_id=' + m_sAuthClientId + '&grant_type=password&username=' + user + '&password=' + pass
-        //     $http.post(keycloakConfiguration['token_endpoint'],
-        //         params,
-        //         {'headers': {'Content-Type': 'application/x-www-form-urlencoded'}}
-        //     ).then(
-        //         function (data, status, headers, config) {
-        //             if (data.status < 200 || data.status >= 300) {
-        //                 loginError(data)
-        //             } else {
-        //                 data = data.data
-        //                 console.log('AUTH: token obtained')
-        //                 console.log(data)
-        //                 // var now = new Date();
-        //                 // var validitySeconds = data['expires_in'] - 30
-        //                 // data['myexpires'] = new Date(now.getTime() + validitySeconds * 1000)
-        //                 // console.log('AUTH: token obtained. Expires at ' + data['myexpires'])
-        //                 saveToken(data)
-        //                 getUser();
-        //                 raiseSessionChanged();
-        //             }
-        //             //todo return response w/ token
-        //         },
-        //         loginError
-        //     );
-        // }
 
         let sParams = 'client_id=' + m_sAuthClientId + '&grant_type=password&username=' + oCredentials.userId + '&password=' + oCredentials.userPassword
         let sAddress = keycloakConfiguration['token_endpoint'];
