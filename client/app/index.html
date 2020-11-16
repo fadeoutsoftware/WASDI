@@ -15,6 +15,24 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!---------------- KeyCloak Auth Client ---------------->
+
+        <script src="https://test.wasdi.net/auth/js/keycloak.js"></script>
+        <script>
+            var keycloak = new Keycloak();
+
+            // keycloak.init().then()[..]
+            keycloak.init(({
+                onLoad: 'login-required'
+            })).then(function(authenticated) {
+                alert(authenticated ? 'authenticated' : 'not authenticated');
+            }).catch(function() {
+                alert('failed to initialize');
+            });
+        </script>
+
+
+
     <!---------------- GOOGLE LOGIN ---------------->
     <meta name="google-signin-client_id"  content="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com">
 
