@@ -1,6 +1,7 @@
 /**
  * Created by p.campanella on 21/10/2016.
  */
+//'use strict';
 
 var HomeController = (function() {
     function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState,oAuthServiceFacebook,
@@ -32,7 +33,7 @@ var HomeController = (function() {
             repeatPassword:"",
             email:"",
             userId:""//userId == email
-        }
+        };
         this.m_bRegisterIsVisible = false;
         this.m_bBrowserIsIE = utilsUserUseIEBrowser();
         this.m_bVisualizeLink = false;

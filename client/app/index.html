@@ -121,7 +121,8 @@
     oKeycloak.init(/*{
             onLoad: 'login-required'
         }*/
-    ).then(function(authenticated) {
+    ).then(function() {
+        console.log('Keycloak initialized');
         //alert(authenticated ? 'authenticated' : 'not authenticated');
     }).catch(function() {
         //alert('failed to initialize');
@@ -201,7 +202,7 @@
 <script src="services/PagesService.js"></script>
 <script src="services/FilterService.js"></script>
 <script src="services/ProcessorService.js"></script>
-//<script src="services/AuthServiceGoogle.js_DISABLED"></script>
+<!--<script src="services/AuthServiceGoogle.js_DISABLED"></script>-->
 <script src="services/TreeService.js"></script>
 <script src="services/ProcessorMediaService.js"></script>
 
@@ -406,7 +407,7 @@
 <!-- include the dependencies in this order (if you don't already have them) -->
 <script src="bower_components/json-edit/bower_components/jquery-ui/jquery-ui.min.js"></script>
 <script src="bower_components/json-edit/bower_components/angular-ui-sortable/sortable.min.js"></script>
-//<script src="bower_components/angular-directive.g-signin/google-plus-signin.js"></script>
+<!--<script src="bower_components/angular-directive.g-signin/google-plus-signin.js"></script>-->
 
 <!-- WPS -->
 <script src="lib/wps-js/js/openlayers/OpenLayers-closure.js"></script>
