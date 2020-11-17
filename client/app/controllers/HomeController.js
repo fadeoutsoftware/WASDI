@@ -40,6 +40,19 @@ var HomeController = (function() {
 
         this.m_bRegistering = false;
 
+        var oController = this;
+        oKeycloak.onAuthSuccess = function() {
+            console.log("oKeycloak ok ! ");
+            if (oKeycloak.idToken) {
+                data = {
+                    'access_token': oKeycloak.idToken,
+                    'refresh_token' : ""
+                };
+            }
+            HomeController.prototype.callbackLogin(data,null, oController);
+        };
+
+
         if(this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.marketplace");// go workspaces
         if(this.m_bBrowserIsIE === true)
@@ -53,7 +66,7 @@ var HomeController = (function() {
         }
 
 
-        var oController = this;
+
         /*
         // on success google login event
         this.onSuccess = function (googleUser) {
@@ -97,18 +110,6 @@ var HomeController = (function() {
             });
         };
         */
-        oKeycloak.onAuthSuccess = function() {
-            console.log("oKeycloak ok ! ");
-            if (oKeycloak.idToken) {
-                data = {
-                    'access_token': oKeycloak.idToken,
-                    'refresh_token' : ""
-                }
-            }
-            HomeController.prototype.callbackLogin(data,null, oController);
-        }
-
-
     }
 
 
