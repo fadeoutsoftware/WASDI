@@ -18,18 +18,7 @@
     <!---------------- KeyCloak Auth Client ---------------->
 
         <script src="https://test.wasdi.net/auth/js/keycloak.js"></script>
-        <script>
-            var keycloak = new Keycloak();
 
-            // keycloak.init().then()[..]
-            keycloak.init(({
-                onLoad: 'login-required'
-            })).then(function(authenticated) {
-                alert(authenticated ? 'authenticated' : 'not authenticated');
-            }).catch(function() {
-                alert('failed to initialize');
-            });
-        </script>
 
 
 
@@ -124,6 +113,23 @@
 
 
 <body>
+
+<script>
+    var oKeycloak = new Keycloak();
+
+    // keycloak.init().then()[..]
+    oKeycloak.init({
+            onLoad: 'login-required'
+        }
+    ).then(function(authenticated) {
+        //alert(authenticated ? 'authenticated' : 'not authenticated');
+    }).catch(function() {
+        //alert('failed to initialize');
+    });
+
+</script>
+
+
 <!--[if lt IE 7]>
 <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
     your browser</a> to improve your experience.</p>

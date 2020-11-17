@@ -124,7 +124,6 @@ var HomeController = (function() {
         var oController = this;
         oLoginInfo.userId = oController.m_sUserName;
         oLoginInfo.userPassword = oController.m_sUserPassword;
-
         // var oConstantsService = oController.m_oConstantsService;
         this.m_oConstantsService.setUser(null);
         this.m_oAuthService.login(oLoginInfo).success(
@@ -136,6 +135,12 @@ var HomeController = (function() {
 
         });
     }
+
+    oKeycloak.onAuthSuccess = function(data, status, oController) {
+        console.log("oKeycloak ok ! ");
+        alert('HOLLA !');
+    }
+
 
     HomeController.prototype.callbackLogin = function(data, status,oController)
     {
@@ -164,7 +169,7 @@ var HomeController = (function() {
         oUser.refreshToken = data['refresh_token'];
 
         oController.m_oConstantsService.setUser(oUser);//set user
-        oController.m_oState.go("root.workspaces");// go workspaces
+        oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
 
         // raiseSessionChanged();
 
