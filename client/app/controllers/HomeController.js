@@ -93,6 +93,22 @@ var HomeController = (function() {
                 'onfailure': oController.onFailure
             });
         };
+
+        oKeycloak.onAuthSuccess = function() {
+            console.log("oKeycloak ok ! ");
+          //  alert('HOLLA !');
+
+            if (oKeycloak.idToken) {
+                data = {
+                    'access_token': oKeycloak.idToken,
+                    'refresh_token' : ""
+                }
+            }
+
+            HomeController.prototype.callbackLogin(data,null, oController);
+        }
+
+
     }
 
 
@@ -136,16 +152,27 @@ var HomeController = (function() {
         });
     }
 
-    oKeycloak.onAuthSuccess = function(data, status, oController) {
+/*    oKeycloak.onAuthSuccess = function() {
         console.log("oKeycloak ok ! ");
         alert('HOLLA !');
-    }
+
+        if (oKeycloak.idToken) {
+        data = {
+            'access_token': oKeycloak.idToken,
+            'refresh_token' : ""
+        }
+        }
+        HomeController.prototype.callbackLogin(data,null, this);
+    }*/
 
 
     HomeController.prototype.callbackLogin = function(data, status,oController)
     {
+
         console.log('AUTH: token obtained')
         console.log(data)
+
+        if (!oController) oController = this;
         // var now = new Date();
         // var validitySeconds = data['expires_in'] - 30
         // data['myexpires'] = new Date(now.getTime() + validitySeconds * 1000)
@@ -171,28 +198,6 @@ var HomeController = (function() {
         oController.m_oConstantsService.setUser(oUser);//set user
         oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
 
-        // raiseSessionChanged();
-
-        // if (data != null)
-        // {
-        //     if (data != undefined)
-        //     {
-        //         if (data.userId != null && data.userId != "")
-        //         {
-        //             //LOGIN OK
-        //             if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
-        //             {
-        //                 oController.m_oConstantsService.setUser(data);//set user
-        //                 oController.m_oState.go("root.workspaces");// go workspaces
-        //             }
-        //         }
-        //         else
-        //         {
-        //             //LOGIN FAIL
-        //             utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
-        //         }
-        //     }
-        // }
     }
 
     HomeController.prototype.getUserName = function () {

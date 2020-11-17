@@ -118,9 +118,9 @@
     var oKeycloak = new Keycloak();
 
     // keycloak.init().then()[..]
-    oKeycloak.init({
+    oKeycloak.init(/*{
             onLoad: 'login-required'
-        }
+        }*/
     ).then(function(authenticated) {
         //alert(authenticated ? 'authenticated' : 'not authenticated');
     }).catch(function() {
