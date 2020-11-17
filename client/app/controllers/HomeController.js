@@ -12,7 +12,7 @@ var HomeController = (function() {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oState = oState;
         this.m_oAuthServiceFacebook = oAuthServiceFacebook;
-        this.m_oAuthServiceGoogle = oAuthServiceGoogle;
+        //this.m_oAuthServiceGoogle = oAuthServiceGoogle;
         this.m_oAnchorService = $anchorScroll;
 
         this.m_sEmailToRecoverPassword = "";
@@ -52,6 +52,7 @@ var HomeController = (function() {
 
 
         var oController = this;
+        /*
         // on success google login event
         this.onSuccess = function (googleUser) {
 
@@ -93,18 +94,15 @@ var HomeController = (function() {
                 'onfailure': oController.onFailure
             });
         };
-
+        */
         oKeycloak.onAuthSuccess = function() {
             console.log("oKeycloak ok ! ");
-          //  alert('HOLLA !');
-
             if (oKeycloak.idToken) {
                 data = {
                     'access_token': oKeycloak.idToken,
                     'refresh_token' : ""
                 }
             }
-
             HomeController.prototype.callbackLogin(data,null, oController);
         }
 
@@ -152,18 +150,6 @@ var HomeController = (function() {
         });
     }
 
-/*    oKeycloak.onAuthSuccess = function() {
-        console.log("oKeycloak ok ! ");
-        alert('HOLLA !');
-
-        if (oKeycloak.idToken) {
-        data = {
-            'access_token': oKeycloak.idToken,
-            'refresh_token' : ""
-        }
-        }
-        HomeController.prototype.callbackLogin(data,null, this);
-    }*/
 
 
     HomeController.prototype.callbackLogin = function(data, status,oController)
@@ -393,7 +379,7 @@ var HomeController = (function() {
         'RabbitStompService',
         '$state',
         'AuthServiceFacebook',
-        'AuthServiceGoogle',
+ //       'AuthServiceGoogle',
         '$window',
         '$anchorScroll'
     ];
