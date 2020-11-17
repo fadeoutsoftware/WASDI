@@ -38,13 +38,13 @@ var RootController = (function() {
                 forceNotification = false;
             }
             var connectionState = oRabbitStompService.getConnectionState();
-            if( connectionState === 1) {
+            if( connectionState == 1) {
                 oController.m_isRabbitConnected = true;
             }
             else
             {
                 oController.m_isRabbitConnected = false;
-                if( connectionState === 2)
+                if( connectionState == 2)
                 {
                     if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
                     {

@@ -72,13 +72,17 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 							// Get the absolute orbit
 							String sAbsoluteOrbit = asTitleParts[6];
 							
+							if (sTitle.contains("_SLC_")) {
+								sAbsoluteOrbit = asTitleParts[7];
+							}
+							
 							// Cast to int
 							int iAbsoluteOrbit = -1;
 							try {
 								iAbsoluteOrbit = Integer.parseInt(sAbsoluteOrbit);
 							}
 							catch (Exception oEx) {
-								Utils.debugLog("Exception converting EODC Result Relative Orbit: "  + oEx.toString()) ;
+								Utils.debugLog("Exception converting LSA Result Relative Orbit: "  + oEx.toString()) ;
 							}
 							
 							if (iAbsoluteOrbit != -1) {

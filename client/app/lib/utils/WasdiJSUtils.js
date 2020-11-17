@@ -85,7 +85,7 @@ function utilsProjectConvertJSONFromServerInOptions(oJSONInput)
         if( ( utilsIsObjectNullOrUndefined(oJSONInput[iIndexParameter]) == true ) || ( utilsIsObjectNullOrUndefined(oJSONInput[iIndexParameter].field) == true ) ||
             ( utilsIsStrNullOrEmpty(oJSONInput[iIndexParameter].field) == true ) || ( utilsIsObjectNullOrUndefined(oJSONInput[iIndexParameter].defaultValue) == true ) )
         {
-            next;//return null?
+            continue;
         }
         else
         {

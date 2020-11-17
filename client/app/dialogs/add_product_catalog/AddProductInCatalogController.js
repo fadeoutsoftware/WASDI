@@ -80,13 +80,7 @@ var AddProductInCatalogController = (function() {
             var aWorkspaceId = this.m_aoSelectedWorkspaces[iIndexSelectedWorkspace].split("Id:");
             var sProductFileNameViewModel = this.m_aoProduct.productViewModel.fileName;
             this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,aWorkspaceId[1]).success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
-                {
-
-                }
-                else
-                {
-                }
+                console.log("prod added");
             }).error(function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN ADD PRODUCT IN WORKSPACES");
             });

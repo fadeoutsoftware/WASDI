@@ -167,10 +167,9 @@ angular.module('wasdi.wapSearchEOImage', [])
                 };
 
                 this.selectedProducts = function(){
-                    this.lightSearchObject.oTableOfProducts.oSingleSelectionLayer;
-                    this.lightSearchObject.oTableOfProducts.aoProducts;
+                    //this.lightSearchObject.oTableOfProducts.oSingleSelectionLayer;
+                    //this.lightSearchObject.oTableOfProducts.aoProducts;
                     this.backToLightSearch();
-
                 }
                 /**************************** BEGIN ****************************/
                 oOpenSearchService.getListOfProvider().success(function (data) {

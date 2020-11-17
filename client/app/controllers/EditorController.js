@@ -1229,13 +1229,15 @@ var EditorController = (function () {
      */
     EditorController.prototype.getProductListByWorkspace = function () {
         var oController = this;
-        oController.m_aoProducts = [];
 
         if (utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) return;
 
         this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
 
             if (utilsIsObjectNullOrUndefined(data) == false) {
+
+                oController.m_aoProducts = []
+
                 //push all products
                 for (var iIndex = 0; iIndex < data.length; iIndex++) {
 
@@ -3774,11 +3776,7 @@ var EditorController = (function () {
                                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
                                                     oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
-
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
-
-
-
                                                     }).error(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                     });

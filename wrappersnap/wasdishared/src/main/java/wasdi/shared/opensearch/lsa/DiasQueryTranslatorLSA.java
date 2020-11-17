@@ -77,6 +77,10 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 			else {
 				sParentId = "S1_SAR_" + oWasdiQuery.productType;
 			}
+			
+			if (sParentId.contains("GRD")) {
+				sParentId += "&processingMode=Fast-24h";
+			}
 		}
 		else if (oWasdiQuery.platformName.equals("Sentinel-2")) {
 			if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {

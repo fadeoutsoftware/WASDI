@@ -170,7 +170,7 @@ var ProcessorController = (function() {
             userRuns: 0   // NOTE: not set at the moment
         }
 
-        this.m_oImageToUpload;
+        this.m_oImageToUpload = [];
 
         /**
          * Processor UI
