@@ -4,7 +4,8 @@
 
 var HomeController = (function() {
     function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState,oAuthServiceFacebook,
-                            oAuthServiceGoogle,oWindow,$anchorScroll) {
+                            //oAuthServiceGoogle,
+                            oWindow,$anchorScroll) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;

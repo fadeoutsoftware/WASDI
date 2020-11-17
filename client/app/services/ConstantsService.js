@@ -194,11 +194,12 @@ service('ConstantsService', [function () {
      * Get the google client id
      * @returns {string}
      */
+    /*
     this.getClientIdGoogle=function()
     {
         return Secrets.GOOGLE_ID;
     }
-
+    */
     /**
      * Set active user
      * @param oUser
@@ -347,7 +348,7 @@ service('ConstantsService', [function () {
     {
         this.deleteCookie("oUser");
         //todo keycloak logout
-        this.logOutGoogle();
+        //this.logOutGoogle();
 
         this.m_oUser = null;
     }
@@ -355,6 +356,7 @@ service('ConstantsService', [function () {
     /**
      * Logout from google
      */
+    /*
     this.logOutGoogle = function ()
     {
         try
@@ -383,10 +385,11 @@ service('ConstantsService', [function () {
             console.error("logOutGoogle(): ", e);
         }
     }
-
+    */
     /**
      * Goggle sign out
      */
+    /*
     this.googleSignOutAPI = function()
     {
         var auth2 = gapi.auth2.getAuthInstance();
@@ -394,7 +397,7 @@ service('ConstantsService', [function () {
             console.log('User signed out.');
         });
     };
-
+    */
 
     /**
      * Get WASDI OGC WMS Server address
