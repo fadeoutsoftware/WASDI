@@ -75,7 +75,10 @@
                     height: 85%;
                     overflow-x: hidden;
                     overflow-y: auto;
-
+                    margin-top: 10px;
+                    .is-public-content {
+                        margin-top: 15px;
+                    }
                     .tab-pane{
                         //display: flex;
                         //flex: 1 1 auto !important;
@@ -92,6 +95,9 @@
 
                 .multiselect-directive{
                     width: 100%;
+                    .list-group{
+                        max-height: 240px;
+                    }
                 }
 
 
@@ -133,12 +139,7 @@
                     }
                 }
 
-                .tab-content {
-                    margin-top: 10px;
-                    .is-public-content {
-                        margin-top: 15px;
-                    }
-                }
+
 
                 .multi-input-workflows {
                     margin-bottom: 100px;
@@ -149,11 +150,6 @@
                     }
                 }
 
-                .multiselect-directive{
-                    .list-group{
-                        max-height: 240px;
-                    }
-                }
 
             }
 

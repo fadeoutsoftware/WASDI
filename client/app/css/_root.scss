@@ -149,6 +149,7 @@
         color: $wasdi-white;
         border-color: $wasdi-white;
     }
+    display: flex;
 }
 
 .name-workspace:hover .input-myenable ~ .cursor {
@@ -160,9 +161,7 @@
     transition: all 0.2s ease;
 }
 
-.name-workspace .form-group {
-    display: flex;
-}
+
 
 .name-workspace .cursor {
     display: none;
@@ -175,7 +174,6 @@
 .cursor {
     font-size: 1em;
     margin: 4px;
-    width: 20px;
     color: transparent;
     animation: 1s blink step-end infinite;
     position: relative;
