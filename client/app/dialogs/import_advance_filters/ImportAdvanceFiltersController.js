@@ -285,7 +285,6 @@ var ImportAdvanceFiltersController = (function() {
         switch(sMonthLowerCase) {
             case "january":
                 return 31;
-                break;
             case "february":
 
                 if(utilsLeapYear(sYear))
@@ -296,37 +295,26 @@ var ImportAdvanceFiltersController = (function() {
                 {
                     return 28;
                 }
-                break;
             case "march":
                 return 31;
-                break;
             case "april":
                 return 30;
-                break;
             case "may":
                 return 31;
-                break;
             case "june":
                 return 30;
-                break;
             case "july":
                 return 31;
-                break;
             case "august":
                 return 31;
-                break;
             case "september":
                 return 30;
-                break;
             case "october":
                 return 31;
-                break;
             case "november":
                 return 30;
-                break;
             case "december":
                 return 31;
-                break;
 
         }
     };
@@ -430,40 +418,28 @@ var ImportAdvanceFiltersController = (function() {
         switch(sMonthLowerCase) {
             case "january":
                 return 0;
-                break;
             case "february":
                 return 1;
-                break;
             case "march":
                 return 2;
-                break;
             case "april":
                 return 3;
-                break;
             case "may":
                 return 4;
-                break;
             case "june":
                 return 5;
-                break;
             case "july":
                 return 6;
-                break;
             case "august":
                 return 7;
-                break;
             case "september":
                 return 8;
-                break;
             case "october":
                 return 9;
-                break;
             case "november":
                 return 10;
-                break;
             case "december":
                 return 11;
-                break;
 
         }
         return -1;
