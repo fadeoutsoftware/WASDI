@@ -18,21 +18,22 @@ $fgColor: $color_space;
   //margin-top: 50px;
   // left: 50%;
   margin:auto;
+  position: relative;
 }
 
-.invader {
-  //position:relative;
-  /*-webkit-animation-name: MOVE;
-  -webkit-animation-duration: 6s;
-  -webkit-animation-timing-function: step-end;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-direction: alternate;*/
-        //-webkit-animation-fill-mode:both;
-
-        //animation: SPRITE_A 1s step-start infinite alternate, MOVE 6s step-end infinite alternate;
-
-}
-.invader {position: relative;}
+//.invader {
+//  //position:relative;
+//  /*-webkit-animation-name: MOVE;
+//  -webkit-animation-duration: 6s;
+//  -webkit-animation-timing-function: step-end;
+//  -webkit-animation-iteration-count: infinite;
+//  -webkit-animation-direction: alternate;*/
+//        //-webkit-animation-fill-mode:both;
+//
+//        //animation: SPRITE_A 1s step-start infinite alternate, MOVE 6s step-end infinite alternate;
+//
+//}
+//.invader {position: relative;}
 .step1 {
         animation: MOVE 6s step-end infinite alternate, STEP_A 6s step-end infinite;
 }
