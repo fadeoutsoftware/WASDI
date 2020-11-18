@@ -241,11 +241,6 @@
 			<artifactId>s3tbx-aatsr-sst</artifactId>
 			<version>7.0.2</version>     
 		</dependency>
-		<!--dependency>
-			<groupId>org.esa.s3tbx</groupId>
-			<artifactId>s3tbx-aerosol-retrieval</artifactId>
-			<version>7.0.2</version>     
-		</dependency-->
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-alos-reader</artifactId>
@@ -291,11 +286,6 @@
 			<artifactId>s3tbx-fu-operator</artifactId>
 			<version>7.0.2</version>     
 		</dependency>
-		<!-- dependency>
-			<groupId>org.esa.s3tbx</groupId>
-			<artifactId>s3tbx-idepix</artifactId>
-			<version>7.0.2</version>     
-		</dependency> -->
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-kit</artifactId>
