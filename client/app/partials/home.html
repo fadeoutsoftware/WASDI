@@ -17,7 +17,7 @@
             <!------------------------------- LOGO(write) ------------------------------->
             <div  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
 
-                <img class="write-logo" id="write-logo">
+                <img class="write-logo" id="write-logo" alt="WASDI">
                 <script>
                     // Script fix an error with Firefox which does not
                     // show image correctly if the 'SRC' is set from CSS
@@ -166,35 +166,29 @@
                                 ng-show = "!m_oController.m_sMessageError || m_oController.m_sMessageError.length  === 0">
                         {{m_oController.m_sMessageError}}
                     </div>
-                    <!--<div class="form-group">-->
-                        <!--<input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">-->
-                    <!--</div>-->
-                    <!--<label>-->
-                        <!--<input type="checkbox" value="remember-me"> {{"LOGIN_CHECK_BOX_LABEL"|translate}}-->
-                    <!--</label>-->
-                    <!--<button class="btn btn-md btn-primary btn-block btn-signin" type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}</button>-->
+
                 </form>
 
             </div>
 
-            <!--snake></snake-->
+
         </div>
 
         <section class="container text-center">
             <div class="row">
                 <div class="col-md-12">
-                    <img class="snake_wasdi img-responsive">
+                    <img class="snake_wasdi img-responsive" alt="WASDI">
                 </div>
 
                 <div class="col-md-3">
-                    <img  class="loghi_fadeout_acrotec img-responsive center-block">
+                    <img  class="loghi_fadeout_acrotec img-responsive center-block" alt="FADEOUT - ACROTEC">
                 </div>
                 <div class="col-md-6">
                     <h4>Web Advanced Space Developer Interface</h4>
                     <a class="btn btn-large" href="#introwasdi" ng-click="m_oController.m_oAnchorService('introwasdi')"> <i class="fa fa-angle-double-down fa-4x animated bounce login-more-icon" aria-hidden="true"></i></a>
                 </div>
                 <div class="col-md-3">
-                    <img  class="loghi_esa_asi img-responsive center-block">
+                    <img  class="loghi_esa_asi img-responsive center-block" alt="ESA - ASI">
                 </div>
 
             </div>
@@ -208,13 +202,13 @@
                 <div class="col-md-6 text-center">
                     <h2 style="font-weight: bold">DEVELOP AT HOME,<br>DEPLOY TO THE CLOUD!</h2>
 
-                    <img class="ufo">
+                    <img class="ufo" alt="UFO">
 
                 </div>
                 <div class="col-md-6 text-center">
 
                     <h3 style="color:#009036;">Discover the amazing  <strong>WASDI</strong> features</h3>
-                    <p class="home_p"><br>> WASDI is an <strong> online EO Image Elaboration Software</strong>: <i>handle your Earth Observation project in the Cloud.</i>.</p>
+                    <p class="home_p"><br>> WASDI is an <strong> online EO Image Elaboration Software</strong>: <em>handle your Earth Observation project in the Cloud.</em>.</p>
                     <br>
                     <p class="home_p">> WASDI allows to <strong>search</strong> a multi provider catalogue, explore and process EO images in the cloud.</p>
                     <br>
@@ -228,14 +222,14 @@
                 <div class="container">
                     <div class="col-md-4">
                         <div class="user-change bg_bluewasdi">
-                        <img class="alien_user animated heartBeat slow delay-2s">
-                        <img class="alien_user_green_eyes img-top">
+                        <img class="alien_user animated heartBeat slow delay-2s" alt="Alien-Animation">
+                        <img class="alien_user_green_eyes img-top" alt="Alien">
                         </div>
                         <h4>
                             <strong>BASIC</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#eoexpert" ng-click="m_oController.m_oAnchorService('eoexpert')"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s login-more-icon-white" aria-hidden="true""></i></a>
+                        <a class="btn bg-transparent text-white" href="#eoexpert" ng-click="m_oController.m_oAnchorService('eoexpert')"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s login-more-icon-white" aria-hidden="true"></i></a>
                     </div>
                     <div class="col-md-4">
                         <div class="user-change bg_bluewasdi">
@@ -478,7 +472,7 @@
 
         <!-- LOGIN LOGO SNAKE (background color white )
         <div class="login-bottom">
-            <!------------------------------- LOGO
+            ----------------------------- LOGO
             <img class="logo" id="logo"  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
             <script>
                 // Script fix an error with Firefox which does not
