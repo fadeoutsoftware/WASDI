@@ -96,9 +96,9 @@ var SearchOrbitController = (function() {
             if(!utilsIsObjectNullOrUndefined(configuration))
             {
                 oController.m_oConfiguration = configuration;
-                if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.satelliteNames))
-                {
-                }
+                // if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.satelliteNames))
+                // {
+                // }
                 if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.sensortypes))
                 {
                     //check as selected all sensor type
@@ -287,7 +287,7 @@ var SearchOrbitController = (function() {
         {
             return false;
         }
-        var oController = this;
+
         var sText = oNode.text;
         var sFootPrint = oNode.original.FrameFootPrint;
         console.log(sFootPrint);
