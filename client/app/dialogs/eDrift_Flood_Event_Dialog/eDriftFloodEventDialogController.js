@@ -98,9 +98,8 @@
         {
             return true;
         }
-        else {
-            return false;
-        }
+        return false;
+
      };
 
      eDriftFloodEventDialogController.prototype.readGDACS = function(){
@@ -110,7 +109,7 @@
 
              if(utilsIsObjectNullOrUndefined(data) == false)
              {
-                 for (iFeature = 0; iFeature<data.features.length; iFeature++) {
+                 for (var iFeature = 0; iFeature<data.features.length; iFeature++) {
                      var oFeature = data.features[iFeature];
                      var oComboFeature = {};
                      oComboFeature.name = oFeature.properties.name;
@@ -179,7 +178,7 @@
 
      eDriftFloodEventDialogController.prototype.initMap = function(sMapDiv) {
 
-        oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
             maxZoom: 18,
@@ -257,13 +256,13 @@
         });
 
         oMap.on(L.Draw.Event.DELETESTOP, function (event) {
-            var layer = event.layers;
+            // var layer = event.layers;
         });
 
 
         var geocoder = L.Control.Geocoder.nominatim();
 
-        var control = L.Control.geocoder({
+        L.Control.geocoder({
             geocoder: geocoder,
             position:'topleft'
         }).addTo(oMap);
@@ -318,11 +317,11 @@
              asParams.push('"PROVIDER":"'+ oParams.PROVIDER + '"')
          }
 
-         sJSON = '{ "BBOX": "'+sBbox+'", "EVENT_DATE":"' + sDate + '", "BASENAME":"'+ sBaseName + '"';
+         var sJSON = '{ "BBOX": "'+sBbox+'", "EVENT_DATE":"' + sDate + '", "BASENAME":"'+ sBaseName + '"';
 
          var iParams = 0;
 
-         for (iParams=0; iParams<asParams.length; iParams++) {
+         for (; iParams<asParams.length; iParams++) {
              sJSON += ", " + asParams[iParams];
          }
 
