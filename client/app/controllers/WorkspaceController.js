@@ -240,7 +240,8 @@ var WorkspaceController = (function() {
         if (utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected)) return false;
         if (utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected.workspaceId))  return false;
         if (this.m_oWorkspaceSelected.workspaceId  == sWorkspaceId) return true;
-        else return false;
+
+        return false;
     }
 
     WorkspaceController.prototype.createBoundingBoxInGlobe = function () {
@@ -423,14 +424,14 @@ var WorkspaceController = (function() {
                 oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
 
                     oController.m_oWorkspaceService.DeleteWorkspace(data, bDeleteFile, bDeleteLayer)
-                        .success(function (data, status) {
+                        .success(function () {
                             oController.deselectWorskpace();
                             oController.fetchWorkspaceInfoList();
                         })
-                        .error(function (data, status) {
+                        .error(function () {
                             console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
                         });
-                }).error(function (data, status) {
+                }).error(function () {
                     console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
                 });
 
@@ -451,7 +452,7 @@ var WorkspaceController = (function() {
         for (iSat=0; iSat<this.m_aoSateliteInputTraks.length; iSat++) {
 
             var oActualSat = this.m_aoSateliteInputTraks[iSat];
-            var oFakePosition = null;
+
 
             this.m_oSatelliteService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then( function successCallback(response) {
 
@@ -462,7 +463,7 @@ var WorkspaceController = (function() {
                     if(utilsIsObjectNullOrUndefined(oData) === false)
                     {
 
-                        for (iOriginalSat=0; iOriginalSat<oController.m_aoSateliteInputTraks.length; iOriginalSat++) {
+                        for (var iOriginalSat=0; iOriginalSat<oController.m_aoSateliteInputTraks.length; iOriginalSat++) {
                             if (oController.m_aoSateliteInputTraks[iOriginalSat].name === oData.code) {
                                 oActualSat = oController.m_aoSateliteInputTraks[iOriginalSat];
                                 break;
@@ -513,7 +514,7 @@ var WorkspaceController = (function() {
     WorkspaceController.prototype.updatePositionsSatellites = function()
     {
         if(utilsIsObjectNullOrUndefined(this.m_aoSatellitePositions ))  return false;
-        var oController = this;
+
 
         this.m_aoSateliteInputTraks = this.m_oGlobeService.getSatelliteTrackInputList();
 
