@@ -5,7 +5,7 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title ">
-                    <img class="snap-logo" src="assets/wasdi/SnapLogo.jpg" >
+                    <img class="snap-logo" src="assets/wasdi/SnapLogo.jpg" alt="SnapLogo">
                     <a href="http://step.esa.int/main/toolboxes/snap/" target="_blank" style="color: white" rel="noopener noreferrer">{{"DIALOG_WORKFLOW_MANAGER_TITLE"|translate}}</a>
                 </h4>
 
@@ -42,7 +42,7 @@
                          ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
                          ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
                         <ng-include src="'dialogs/workflow_manager/tab-execute-batch.html'"></ng-include>
-                        <!--<div style="height: 60px; width: 60px; background-color: red"></div>-->
+
                     </div>
 
                     <!------- MULTI WORKFLOW INPUT ------->
@@ -50,7 +50,7 @@
                          ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
                          ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab3'">
                         <ng-include src="'dialogs/workflow_manager/tab-execute.html'"></ng-include>
-                        <!--<div style="height: 60px; width: 60px; background-color: blue"></div>-->
+
                     </div>
 
                     <!------- Upload ------->
@@ -58,7 +58,7 @@
                          ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
                          ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab2'">
                         <ng-include src="'dialogs/workflow_manager/tab-upload.html'"></ng-include>
-                        <!--<div style="height: 60px; width: 60px; background-color: green"></div>-->
+
                     </div>
 
 
