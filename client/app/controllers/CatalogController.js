@@ -168,9 +168,6 @@ var CatalogController = (function() {
                     }
                 }
             }
-            else
-            {
-            }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET CATEGORIES");
         });
@@ -216,7 +213,6 @@ var CatalogController = (function() {
         if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false) sTo =  this.m_oDataTo.replace(/-/g,'');
 
         var sFreeText = this.m_sInputQuery;
-        var oController = this;
         var iNumberOfCategories = this.m_asCategories.length;
         this.m_iNumberOfEntryRequest = 0;
         sFrom += "00";
@@ -224,7 +220,8 @@ var CatalogController = (function() {
         this.m_aoEntries = [];
 
         //How many request to server ?
-        for(var iIndexCategory = 0 ; iIndexCategory < iNumberOfCategories; iIndexCategory++)
+        var iIndexCategory;
+        for(iIndexCategory = 0 ; iIndexCategory < iNumberOfCategories; iIndexCategory++)
         {
             if(this.m_asCategories[iIndexCategory].isSelected === true)
             {
@@ -232,7 +229,7 @@ var CatalogController = (function() {
             }
         }
         //send request to server (get entries)
-        for(var iIndexCategory = 0 ; iIndexCategory < iNumberOfCategories; iIndexCategory++)
+        for(iIndexCategory = 0 ; iIndexCategory < iNumberOfCategories; iIndexCategory++)
         {
             var sCategory = this.m_asCategories[iIndexCategory].name;
             if(this.m_asCategories[iIndexCategory].isSelected === true)
@@ -416,7 +413,6 @@ var CatalogController = (function() {
                 return false;
             }
             var aoWorkSpaces = result;
-            var oController = this;
             var iNumberOfWorkspaces = aoWorkSpaces.length;
             if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
             {
