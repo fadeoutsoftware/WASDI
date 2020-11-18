@@ -128,13 +128,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
         oMap.fitBounds(oBoundaries);
         oMap.setZoom(3);
 
-        var oActiveBaseLayer = this.m_oActiveBaseLayer;
+        // var oActiveBaseLayer = this.m_oActiveBaseLayer;
 
         //add event on base change
         oMap.on('baselayerchange', function(e){
             // console.log(e);
             //e.layer.bringToBack();
-            oActiveBaseLayer = e;
+            // oActiveBaseLayer = e;
         });
 
         return oMap;
@@ -194,13 +194,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
         oMap.fitBounds(oBoundaries);
         oMap.setZoom(3);
 
-        var oActiveBaseLayer = oOSMBasic;
+        // var oActiveBaseLayer = oOSMBasic;
 
         //add event on base change
         oMap.on('baselayerchange', function(e){
             // console.log(e);
             //e.layer.bringToBack();
-            oActiveBaseLayer = e;
+            // oActiveBaseLayer = e;
         });
 
         return oMap;
@@ -271,10 +271,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
         //REMOVE IT ?
         this.m_oWasdiMap.on(L.Draw.Event.DELETESTOP, function (event) {
-           var layer = event.layers;
+           // var layer = event.layers;
         });
 
-        let oModalService = this.m_oModalService;
+        let oModalServiceTemp = this.m_oModalService;
 
         L.control.custom({
             position: 'topright',
@@ -289,7 +289,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
                 {
                     click: function(data)
                     {
-                        oModalService.showModal({
+                        oModalServiceTemp.showModal({
                             templateUrl: "dialogs/manual_insert_bbox/ManualInsertBboxView.html",
                             controller: "ManualInsertBboxController",
                             inputs: {
@@ -369,7 +369,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
         var geocoder = L.Control.Geocoder.nominatim();
 
-        var control = L.Control.geocoder({
+        L.Control.geocoder({
             geocoder: geocoder,
             position:'topleft'
         }).addTo(this.m_oWasdiMap);
@@ -530,7 +530,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
             // }
 
             var oMap = this.getMap();
-            var oController = this;
             var isAlreadyDraw = false;
             oMap.eachLayer( function(layer) {
                 if(layer instanceof L.Polygon) {
@@ -585,7 +584,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
         oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
             $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
-            var temp = oRectangle.getBounds()
+            oRectangle.getBounds();
 
 
         });
@@ -635,7 +634,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
             oRectangle.on("mouseover", function (event) {
                 oRectangle.setStyle({weight:3,fillOpacity:0.7});
                 $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
-                var temp = oRectangle.getBounds()
+                oRectangle.getBounds();
             });
 
             //mouse out event set default value of style
