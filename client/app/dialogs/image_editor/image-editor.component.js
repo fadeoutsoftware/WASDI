@@ -16,7 +16,7 @@ var ImageEditorController = (function() {
 
         this._selectedTab = TabType.ImageEditorMask;
 
-        
+
         this.m_oExtras = oExtras;
         this.m_oSnapOperationService = oSnapOperationService;
         this.m_oFile = null;
@@ -45,8 +45,7 @@ var ImageEditorController = (function() {
         // this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
         this.m_bIsLoadingWorkflows = false;
         this.m_oHttp =  oHttp;
-        //$scope.close = oClose;
-        var oController = this;
+
 
         $scope.close = function(result) {
 
