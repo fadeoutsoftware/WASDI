@@ -1,5 +1,12 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.6.1] - 2020-11-18
+
+### Fixed
+
+- import `__builtin__` or `builtins` depending on the version of Python
+ being used 
+
 ## [0.6.0] - 2020-10-28
 
 ### Added
