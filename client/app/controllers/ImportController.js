@@ -926,7 +926,6 @@ var ImportController = (function() {
             if(utilsIsObjectNullOrUndefined(result))
                 return false;
             var oWorkSpace = result;
-            var oController = this;
             var iNumberOfProducts = aoProducts.length;
             if(utilsIsObjectNullOrUndefined(oWorkSpace) )
             {
@@ -1070,7 +1069,7 @@ var ImportController = (function() {
         var oController = this;
         if(utilsIsObjectNullOrUndefined(aData) === true) return false;
 
-        var aaoAllBounds = [];
+        // var aaoAllBounds = [];
 
         var iDataLength = aData.length;
         for(var iIndexData = 0; iIndexData < iDataLength; iIndexData++)
@@ -1085,7 +1084,7 @@ var ImportController = (function() {
                 //get bounds
                 var aoBounds = oController.polygonToBounds( aData[iIndexData].footprint);
                 aData[iIndexData].bounds = aoBounds;
-                aaoAllBounds.push(aoBounds);
+                // aaoAllBounds.push(aoBounds);
             }
 
             aData[iIndexData].rectangle = null;
@@ -1422,7 +1421,6 @@ var ImportController = (function() {
             }
 
             var aoWorkSpaces = result;
-            var oController = this;
             var iNumberOfWorkspaces = aoWorkSpaces.length;
             if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
             {
@@ -1477,7 +1475,6 @@ var ImportController = (function() {
                 return false;
             }
             var aoWorkSpaces = result;
-            var oController = this;
             var iNumberOfWorkspaces = aoWorkSpaces.length;
             var iNumberOfProducts = aoListOfSelectedProducts.length;
             if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
