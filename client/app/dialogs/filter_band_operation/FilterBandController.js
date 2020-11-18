@@ -117,11 +117,11 @@ var FilterBandController = (function() {
         if( utilsIsObjectNullOrUndefined(iNumberOfCollumns) || utilsIsObjectNullOrUndefined(iNumberOfRows)|| utilsIsObjectNullOrUndefined(iDefaultValue) )
             return null;
         var aaMatrix = [];
-        for(iIndexRows = 0; iIndexRows <  iNumberOfRows; iIndexRows++)
+        for(var iIndexRows = 0; iIndexRows <  iNumberOfRows; iIndexRows++)
         {
 
             var aoRow = [];
-            for(iIndexCollumns = 0; iIndexCollumns <  iNumberOfCollumns; iIndexCollumns++)
+            for(var iIndexCollumns = 0; iIndexCollumns <  iNumberOfCollumns; iIndexCollumns++)
             {
                //aoRow.push(iDefaultValue);
                aoRow[iIndexCollumns] =  {color: iDefaultValue.color ,fontcolor:iDefaultValue.fontcolor, value:iDefaultValue.value, click:iDefaultValue.click};
@@ -257,23 +257,25 @@ var FilterBandController = (function() {
 
         if(asProperties === []) return false;
 
+        var oThat = this;
+        var oDefaultValue = {
+            color:"white" ,
+            fontcolor:"black",
+            value:"0",
+            click:function(){this.value = oThat.m_iSelectedValue;}
+        };
+
         for(var iIndexProperty = 0; iIndexProperty < asProperties.length; iIndexProperty++)
         {
             for(var iIndexOptions = 0 ; iIndexOptions < oData[asProperties[iIndexProperty]].length ; iIndexOptions++)
             {
                 var iNumberOfRows = oData[asProperties[iIndexProperty]][iIndexOptions].kernelHeight;
                 var iNumberOfColumns = oData[asProperties[iIndexProperty]][iIndexOptions].kernelWidth;
-                var oThat = this;
-                var oDefaultValue = {
-                    color:"white" ,
-                    fontcolor:"black",
-                    value:"0",
-                    click:function(){this.value = oThat.m_iSelectedValue;}
-                };
+
                 oData[asProperties[iIndexProperty]][iIndexOptions].matrix =  this.makeEmptyMatrix(iNumberOfColumns,iNumberOfRows,oDefaultValue);
                 var aiArray = this.generateArrayOptionsValues(oData[asProperties[iIndexProperty]][iIndexOptions].kernelElements);
                 this.initMatrix(oData[asProperties[iIndexProperty]][iIndexOptions].matrix,aiArray );
-            };
+            }
 
             var oObject = {
                 name:asProperties[iIndexProperty],
