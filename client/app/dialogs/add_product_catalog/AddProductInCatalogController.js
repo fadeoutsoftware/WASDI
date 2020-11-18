@@ -28,7 +28,7 @@ var AddProductInCatalogController = (function() {
         };
         this.getWorkspaces();
         this.checkExtras();
-    };
+    }
 
     AddProductInCatalogController.prototype.checkExtras = function()
     {
