@@ -784,17 +784,17 @@ var ImportAdvanceFiltersController = (function() {
 
             if(asSeasonsSelected[iIndexSeason].toLowerCase() !== "winter")
             {
-                if (oDataPeriod != null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear);
+                if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear);
             }
             else
             {
                 // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
-                if (oDataPeriod != null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear-1);
+                if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear-1);
             }
             oDataPeriod.dateSensingPeriodTo.setYear(iYear);
             var sName = iYear.toString() + asSeasonsSelected[iIndexSeason];
             this.saveDataInAdvanceFilter(sName, oDataPeriod, aoSaveData);
-        };
+        }
         // var sSeason = this.m_oAdvanceFilterOptions.selectedSeasons;
         return true;
 
