@@ -42,6 +42,9 @@
                         .description-label {
                             margin-top: 7px;
                         }
+                        input[type=text] {
+                            width: 20%;
+                        }
                     }
 
                     .btn-group-vertical {
@@ -67,11 +70,7 @@
                     .advanced-calendar-button:hover {
                         background-color: $wasdi-green-logo;
                     }
-                    .ingestion-time {
-                        input[type=text] {
-                            width: 20%;
-                        }
-                    }
+
 
                     form {
                         fieldset {
