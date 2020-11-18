@@ -115,7 +115,7 @@ function utilsProjectGetArrayOfValuesForParameterInOperation(oJSONInput,sPropert
     if(utilsIsObjectNullOrUndefined(sProperty) === true)
         return null;
 
-    var oReturnArray = [];
+
     for(var iIndexParameter = 0; iIndexParameter < iNumberOfParameters; iIndexParameter++ )
     {
         // if field === sProperty
@@ -260,7 +260,7 @@ function utilsJstreeUpdateLabelNode (sIdNodeInput, sNewLabelNodeInput)
     $('#jstree').jstree(true).rename_node(oNode,sNewLabelNodeInput);
 
     return true;
-};
+}
 
 function utilsProjectConvertPositionsSatelliteFromServerInCesiumArray(aaArrayInput)
 {
@@ -286,7 +286,7 @@ function utilsProjectConvertPositionsSatelliteFromServerInCesiumArray(aaArrayInp
     }
 
     return aReturnArray;
-};
+}
 
 function utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(sInput)
 {
@@ -334,17 +334,6 @@ function utilsProjectGetSelectedBandsByProductName(sProductName, asSelectedBands
     return asReturnBandsName;
 }
 
-function utilsProjectGetProductsName (aoProducts){
-    if(utilsIsObjectNullOrUndefined(aoProducts) === true)
-        return null;
-    var iNumberOfProducts = aoProducts.length;
-    var asProductsName = [];
-    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
-    {
-        asProductsName.push(aoProducts[iIndexProduct].name);
-    }
-    return asProductsName;
-}
 
 function utilsProjectGetProductByName(sName,aoProducts){
     if(utilsIsStrNullOrEmpty(sName) === true)
@@ -359,7 +348,7 @@ function utilsProjectGetProductByName(sName,aoProducts){
         }
     }
     return null;
-};
+}
 
 function utilsProjectGetBandsFromSelectedProducts(asSelectedProducts,aoProducts)
 {
@@ -387,7 +376,7 @@ function utilsProjectGetBandsFromSelectedProducts(asSelectedProducts,aoProducts)
     }
     return asProductsBands;
     // return ["test","secondo"];
-};
+}
 
 
 function utilsProjectGetProductsName (aoProducts)
