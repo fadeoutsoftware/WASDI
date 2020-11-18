@@ -83,6 +83,9 @@
         }
         .dropdown-menu {
             z-index: 1500;
+            .dropdown-header {
+                cursor: default;
+            }
             li {
                 &:not(.divider){
                     width: 100%;
@@ -129,11 +132,7 @@
         //    padding-right: 3px;
         //  }
         //}
-        .dropdown-menu {
-            .dropdown-header {
-                cursor: default;
-            }
-        }
+
         &:hover {
             cursor: pointer;
             button {
