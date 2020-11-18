@@ -143,7 +143,7 @@
 
                     <div class="form-group">
                         <input type="checkbox" id="accept" name="accept"  ng-model="m_oController.m_oRegistrationUser.accept" required>
-                        I agree to WASDI <a href="http://www.wasdi.net/index.php?title=Terms" target="_blank">Terms of Service</a> and <a href="http://www.wasdi.net/index.php?title=Privacy" target="_blank">Privacy Statement</a>
+                        I agree to WASDI <a href="http://www.wasdi.net/index.php?title=Terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="http://www.wasdi.net/index.php?title=Privacy" target="_blank">Privacy Statement</a>
                         <h6 class="error-message" ng-if="(signinForm.accept.$dirty === true) &&
                                                          (!signinForm.accept.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_ACCEPT_CONDITIONS"|translate}}
