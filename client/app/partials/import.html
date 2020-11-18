@@ -37,7 +37,7 @@
                     <span ng-hide="$ctrl.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
                     <div class="btn btn-wasdi btn-outline-light no-border btn-sm" ng-click="$ctrl.clearFilter();$ctrl.cleanAdvanceFilters();$ctrl.removeAllAdvanceSavedFilters()"
                          title="Clear Search Filter" ng-show="$ctrl.m_bClearFiltersEnabled">
-                        <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+
                         <!--{{"IMPORT_CLEAR_BUTTON"|translate}}-->
                         <i class="fa fa-bath mr-0" aria-hidden="true" ></i>
                     </div>
@@ -59,7 +59,7 @@
                                 <div class="col-v4-auto">
                                     <button type="button" class="btn btn-primary btn-wasdi selected-time-series h-100"
                                             ng-click="$ctrl.openAdvanceFiltersDialog(); $ctrl.m_sTypeOfFilterSelected = 'Time series'">
-                                        <i class="fa fa-calendar"></i>CronTab
+                                        <em class="fa fa-calendar"></em>CronTab
                                     </button>
                                 </div>
                                 <div class="col-v4-auto">
@@ -82,7 +82,7 @@
                                                    max-date="$ctrl.m_oModel.sensingPeriodTo" ng-required="true"
                                                    ng-blur="$ctrl.updateAdvancedSearch()"
                                                    ng-change="$ctrl.updateAdvancedSearch()"
-                                                   close-text="Close"/><!--readonly="true"-->
+                                                   close-text="Close"/>
 
                                             <span class="input-group-btn">
                                                 <button type="button" class="btn btn-default advanced-calendar-button"
@@ -107,7 +107,7 @@
                                                    min-date="$ctrl.m_oModel.sensingPeriodFrom"
                                                    ng-blur="$ctrl.updateAdvancedSearch()" close-text="Close"
                                                    ng-change="$ctrl.updateAdvancedSearch()"
-                                                   data-container="body"/><!--readonly="true"-->
+                                                   data-container="body"/>
 
                                             <span class="input-group-btn">
                                                 <button type="button" class="btn btn-default advanced-calendar-button"
@@ -122,12 +122,12 @@
                             <div class="row-v4 mt-2" ng-hide="$ctrl.m_sTypeOfFilterSelected != 'Time series'">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
                                     <!--PROVIDERS-->
-                                    <div style="">
-                                        <!--<multiselectdropdownmenu options="$ctrl.m_aListOfProvider"></multiselectdropdownmenu>-->
+                                    <div>
+
                                     </div>
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <!--<button type="button" class="my-button selected-time-series" ng-click="$ctrl.openAdvanceFiltersDialog()">Select Time Series</button>-->
+
                                 </div>
                             </div>
                             <div class="row-v4 mt-2" ng-hide="$ctrl.m_oAdvanceFilter.savedData.length === 0">
@@ -135,7 +135,7 @@
                                     <div class="well well-sm">
                                         <div class="chip" ng-repeat="data in $ctrl.m_oAdvanceFilter.savedData">
                                             {{data.name}}
-                                            <span class="closebtn" ng-click="$ctrl.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                                            <span class="closebtn" ng-click="$ctrl.removeSaveDataChips(data) ">&times;</span>
                                         </div>
                                     </div>
                                 </div>
@@ -161,13 +161,6 @@
                                 <div class="col-v4-12">
                                     <div class="container-fluid-v4"><label>Select missions</label></div>
                                     <ul class="nav-v4 nav-v4-tabs nav-v4-fill">
-                                        <!--<li ng-class="{active: $ctrl.m_activeMissionTab === $index}" ng-repeat="mission in $ctrl.getMissions()" ng-click="$ctrl.m_activeMissionTab = $index">-->
-                                        <!--<a href="">-->
-                                        <!--<i class="fa fa-check-circle" aria-hidden="true" ng-show="mission.selected"></i>-->
-                                        <!--<i class="fa fa-times-circle" aria-hidden="true" ng-hide="mission.selected"></i>-->
-                                        <!--{{mission.name}}-->
-                                        <!--</a>-->
-                                        <!--</li>-->
                                         <li class="nav-v4-item" ng-repeat="mission in $ctrl.getMissions()"
                                             ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.selectTabMission(mission, $index, $event)">
                                             <div class="nav-v4-link" ng-class="{active: $ctrl.m_activeMissionTab === $index}">
@@ -190,7 +183,7 @@
                                                 <label class="filter-label" ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
                                                     {{filter.indexlabel}}
                                                 </label>
-                                                <!--INPUT class="form controller"-->
+
                                                 <input type="text" class="filter-input wasdi-input"
                                                        placeholder="{{$ctrl.getFilterPlaceholder(filter)}}"
                                                        ng-model="filter.indexvalue"
@@ -205,15 +198,7 @@
                                         </div>
 
                                         <!-- INPUT NUMBER-->
-                                        <!--<div class="col-md-6" ng-if="(filter.indexmin && filter.indexmax && filter.indexvalues === '')">-->
-                                        <!--<div class="group">-->
-                                        <!--<div class="my-input-text" >-->
-                                        <!--<label class="filter-label">{{filter.indexlabel}}</label>-->
-                                        <!--<input type="number" ng-model="filter.indexvalue" ng-value="filter.indexvalue"-->
-                                        <!--name="points" min="filter.indexmin" max="filter.indexmax" ng-blur="$ctrl.updateFilter($parent.$parent.$index)">-->
-                                        <!--</div>-->
-                                        <!--</div>-->
-                                        <!--</div>-->
+
 
                                         <!-- LIST OF OPTIONS-->
                                         <div id="adv-options" class="group" ng-if="(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
@@ -221,8 +206,8 @@
                                                    ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
                                                 {{filter.indexlabel}}
                                             </label>
-                                            <!--INPUT class="form controller"-->
-                                            <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"in
+                                            <!--INPUT -->
+                                            <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"
                                                    class="filter-input wasdi-input"
                                                    ng-blur="$ctrl.updateFilter($parent.$parent.$index)"
                                                    ng-click="$ctrl.clearInput($parent.$parent.$index, $parent.$index)"
@@ -245,44 +230,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
-                            <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; MERGER SEARCH &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-                            <!--<div class="merge-search" ng-show="$ctrl.m_bisVisibleLocalStorageInputs == true">-->
-
-                            <!--<div class="col-md-4 col-sd-4 col-xs-4 advanced-calendar-label ">-->
-                            <!--Time for Local storage:-->
-                            <!--</div>-->
-
-                            <!--<div class="col-md-8 col-sd-8 col-xs-8  advanced-calendar-input input-calendar-container my-input-text">-->
-                            <!--<p class="input-group">-->
-
-                            <!--<input type="text" class="form-control advanced-calendar-date-input"-->
-                            <!--uib-datepicker-popup="yyyy/MM/dd"-->
-                            <!--ng-model="$ctrl.m_oMergeSearch.period"-->
-                            <!--close-text="Close"-->
-                            <!--readonly="true" data-container="body"-->
-                            <!--is-open="$ctrl.m_oMergeSearch.statusIsOpen"/>-->
-
-                            <!--<span class="input-group-btn">-->
-                            <!--<button type="button" class="btn btn-default advanced-calendar-button"-->
-                            <!--ng-click="$ctrl.openPeriodForMergeSearch($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>-->
-                            <!--</span>-->
-                            <!--</p>-->
-
-                            <!--<br/>-->
-                            <!--<div class="search-button-container" >-->
-
-                            <!--<div class="search-button" ng-click="$ctrl.loadProductsInLocalStorage()" >-->
-                            <!--&lt;!&ndash;<i class="fa fa-search fa-lg" aria-hidden="true"></i>&ndash;&gt;-->
-                            <!--{{"IMPORT_SEARCH_BUTTON"|translate}}-->
-                            <!--</div>-->
-
-                            <!--&lt;!&ndash;<span class="advanced-search-clear" ng-click="$ctrl.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>&ndash;&gt;-->
-                            <!--</div>-->
-                            <!--</div>-->
-
-                            <!--</div>-->
                         </div>
                     </div>
 
@@ -315,13 +262,3 @@
         });
     });
 </script>
-
-<!--<script>-->
-<!--function openNav() {-->
-<!--document.getElementById("mySidenav").style.width = "250px";-->
-<!--}-->
-
-<!--function closeNav() {-->
-<!--document.getElementById("mySidenav").style.width = "0";-->
-<!--}-->
-<!--</script>-->
