@@ -73,16 +73,6 @@
 
     }
 
-    .side-panel{
-        .panel{
-            height: 100%;
-            overflow: hidden;
-        }
-
-        label{
-            font-weight: normal;
-        }
-    }
 
     .filters-wrapper {
         .MultiselectDropdownMenuDirective{
@@ -104,7 +94,7 @@
         input[type=text] {
             width: 100%;
             padding: 12px 20px;
-            margin: 8px 0;
+            //margin: 8px 0;
             box-sizing: border-box;
             background-color: white;
             border-color: #2D394F;
@@ -209,14 +199,21 @@
 
     //SIDEBAR
     .side-panel {
+        .panel{
+            height: 100%;
+            overflow: hidden;
+        }
 
+        label{
+            font-weight: normal;
+        }
         //change font family
         font-family: $wasdi-font-web-normal;
         font-weight: $wasdi-font-weight-normal;
 
         font-size: 14px;
         line-height: 1.42857;
-        font-weight: 400;
+        //font-weight: 400;
 
         h1 {
             font-family: $wasdi-font-web-normal;
@@ -690,6 +687,9 @@
                     background-color: $wasdi-blue-logo;
                     border-color: $wasdi-blue-logo;
                     opacity: 0.9;
+                    .text-info {
+                        color: white;
+                    }
                 }
                 .btn-info:hover {
                     background-color: $wasdi-blue-logo;
@@ -707,11 +707,7 @@
                     opacity: 1;
 
                 }
-                .btn-info {
-                    .text-info {
-                        color: white;
-                    }
-                }
+
 
             }
 
