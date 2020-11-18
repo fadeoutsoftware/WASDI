@@ -489,12 +489,6 @@
          box-shadow: none;
      }
 
-     .navbar.navbar-inverse {
-         border: 0;
-         -webkit-box-shadow: none;
-         box-shadow: none;
-     }
-
 
      //background blu
      .bg_bluewasdi {
@@ -503,7 +497,7 @@
     // margini vari v. bootstrap 4
      .marginiverticali {
          margin-bottom: 5px;
-         margin-bottom: 5px;
+
      }
 
      //link
@@ -4155,8 +4149,8 @@
          -webkit-animation-duration: 5s;
          animation-duration: 5s;
      }
-
-     @media (print), (prefers-reduced-motion: reduce) {
+    
+     @media (prefers-reduced-motion: reduce) {
          .animated {
              -webkit-animation-duration: 1ms !important;
              animation-duration: 1ms !important;
