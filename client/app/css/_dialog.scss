@@ -146,25 +146,35 @@ $color_alto_approx: #ddd;
     background-color:inherit!important;
     border-radius:0!important;
     border-width:2px!important;
-    border-style: solid!important;
+    //border-style: solid!important;
     border:none!important;
     padding: .2em!important;
-    //padding:2px 3px;
-  }
-  .vex-dialog-button-primary,
-  .vex-dialog-button-secondary {
-    &:after {content:' ]';}
-    &:before {content:'[ ';}
-    // border-color: $color_jordy_blue_approx!important;
-    color: $wasdi-green-logo!important;
-    &:hover {
-      background: $wasdi-green-logo!important;
-      color: $black!important;
-      //animation: cursor .95s ease-in-out infinite;
-      transition: all .15s ease-in-out;
+      &:after {content:' ]';}
+      &:before {content:'[ ';}
+      // border-color: $color_jordy_blue_approx!important;
+      color: $wasdi-green-logo!important;
+      &:hover {
+          background: $wasdi-green-logo!important;
+          color: $black!important;
+          //animation: cursor .95s ease-in-out infinite;
+          transition: all .15s ease-in-out;
 
-    }
+      }
   }
+  //.vex-dialog-button-primary,
+  //.vex-dialog-button-secondary {
+  //  &:after {content:' ]';}
+  //  &:before {content:'[ ';}
+  //  // border-color: $color_jordy_blue_approx!important;
+  //  color: $wasdi-green-logo!important;
+  //  &:hover {
+  //    background: $wasdi-green-logo!important;
+  //    color: $black!important;
+  //    //animation: cursor .95s ease-in-out infinite;
+  //    transition: all .15s ease-in-out;
+  //
+  //  }
+  //}
   /* .vex-dialog-button-secondary {
     border-color: $color_mountain_mist_approx!important;
     color: $wasdi-green-logo!important;
