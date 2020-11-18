@@ -42,7 +42,13 @@ Created on 11 Jun 2018
 @author: p.campanella
 """
 from time import sleep
-from __builtin__ import str
+try:
+    from __builtin__ import str
+except Exception as oE0:
+    try:
+        from builtins import str
+    except Exception as oE1:
+        print('Cannot import str. This is bad')
 
 name = "wasdi"
 
