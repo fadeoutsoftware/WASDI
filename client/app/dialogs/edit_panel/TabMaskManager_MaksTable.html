@@ -1,6 +1,7 @@
 <input  class="my-input-text" type="text" placeholder="{{'DIALOG_MASK_MANAGER_FILTER_TABLE_INPUT'|translate}}" ng-model="m_oController.m_sFilterMaskTable">
 
 <table class="table table-hover">
+    <caption>Masks list</caption>
     <tr>
         <thead>
         <th ng-click="m_oController.m_bAreSelectedAllMasks = !m_oController.m_bAreSelectedAllMasks; m_oController.clickedSelectAllMasks()" class="over-icon">
@@ -8,12 +9,12 @@
             <i class="fa fa-square-o" aria-hidden="true" ng-hide="m_oController.m_aoMasks.length === 0 || m_oController.m_bAreSelectedAllMasks === true"></i>
 
         </th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Colour</th>
+        <th scope="col">Name</th>
+        <th scope="col">Type</th>
+        <th scope="col">Colour</th>
         <!--<th>Transparency</th>-->
-        <th>Description</th>
-        <th></th>
+        <th scope="col">Description</th>
+        <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
