@@ -195,7 +195,7 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
         {
             if(aoProviders[iIndexProvider].name === sProvider)
                 return aoProviders[iIndexProvider].totalOfProducts;
-        };
+        }
 
         return -1;
     };
