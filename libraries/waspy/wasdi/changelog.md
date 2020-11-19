@@ -7,6 +7,11 @@
 - import `__builtin__` or `builtins` depending on the version of Python
  being used 
 
+### Changed
+
+- removed log in `updateProcessStatus` when the percent == -1, as
+ that value is assigned by default by other calls 
+
 ## [0.6.0] - 2020-10-28
 
 ### Added
