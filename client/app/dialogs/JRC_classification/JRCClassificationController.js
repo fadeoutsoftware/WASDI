@@ -29,7 +29,7 @@ var JRCClassificationController = (function() {
         //     oClose(aoSavedData, 300); // close, but give 500ms for bootstrap to animate
         // };
 
-    };
+    }
     JRCClassificationController.prototype.getDropdownMenuList = function(aoProduct){
 
         return utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
