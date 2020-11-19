@@ -9,19 +9,19 @@
                 <h4>
                     <div class="row">
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 opera-logos-container">
-                            <img class="logo-container" src="assets/myDewetra/opera.png" ng-click="m_oController.redirectToOperaWebSite()">
-                            <!--<img class="opera-logo" src="assets/myDewetra/mydewetra_12.png" ng-click="m_oController.redirectToOperaWebSite()">-->
-                        </div>
-                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 opera-logos-container">
-                            <img class="logo-container" src="assets/myDewetra/DPC_small.png" ng-click="m_oController.redirectToOperaWebSite()">
-                            <!--<img class="opera-logo" src="assets/myDewetra/mydewetra_12.png" ng-click="m_oController.redirectToOperaWebSite()">-->
-                        </div>
-                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 opera-logos-container">
-                            <img class="logo-container" src="assets/wasdi/logoAsi.png" ng-click="m_oController.redirectToOperaWebSite()">
+                            <img class="logo-container" src="assets/myDewetra/opera.png" ng-click="m_oController.redirectToOperaWebSite()" alt="Opera Project">
 
                         </div>
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 opera-logos-container">
-                            <img class="logo-container" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToOperaWebSite()">
+                            <img class="logo-container" src="assets/myDewetra/DPC_small.png" ng-click="m_oController.redirectToOperaWebSite()" alt="Protezione Civile">
+
+                        </div>
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 opera-logos-container">
+                            <img class="logo-container" src="assets/wasdi/logoAsi.png" ng-click="m_oController.redirectToOperaWebSite()" alt="ASI">
+
+                        </div>
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 opera-logos-container">
+                            <img class="logo-container" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToOperaWebSite()" alt="Cima Research Foundation">
 
                         </div>
                     </div>
@@ -29,19 +29,6 @@
                     <div class="row opera-wapp-container">
                         <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 ">
                             <div class="dropdown my-dropdown">
-                                <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownProductOpera"-->
-                                        <!--data-toggle="dropdown">-->
-                                    <!--{{m_oController.m_oSelectedProduct.name}}-->
-                                    <!--<span class="caret"></span>-->
-                                <!--</button>-->
-                                <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownProductOpera">-->
-                                    <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >-->
-                                        <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedProduct = product">-->
-                                            <!--{{product.name}}-->
-                                        <!--</a>-->
-                                    <!--</li>-->
-
-                                <!--</ul>-->
                                 <dropdownmenudirective list-of-values="m_oController.m_aoProductListDropdown"
                                                        selected-value="m_oController.m_oReturnValueDropdown"
                                                        enable-search-filter="true"
@@ -60,7 +47,7 @@
                                 </label>
                             </div>
                             <div class="well-sm">{{m_oController.m_sResultFromServer}}</div>
-                            <div class="loadIcon" ng-show="m_oController.m_bIsRunning"><!-- ng-show="m_oController.m_bIsRunning"-->
+                            <div class="loadIcon" ng-show="m_oController.m_bIsRunning">
                                 <invader ></invader>
                             </div>
                         </div>
