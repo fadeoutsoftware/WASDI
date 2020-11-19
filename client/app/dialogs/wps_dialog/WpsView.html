@@ -7,24 +7,18 @@
             </div>
             <div class="modal-body">
                 <div id="wrapper">
-                    <!--<div>
-                        <h1>wps-js example</h1>
-                        <p>wps-js is an <a href="https://github.com/52North/wps-js/" title="wps-js on GitHub">open source client library</a> for connecting Javascript client to <a href="http://www.opengeospatial.org/standards/wps" title="WPS @ Open Geospatial Consortium">OGC Web Processing</a> services. This page demonstrates how you can use it. More documentation is available in the <a href="https://wiki.52north.org/bin/view/Geoprocessing/Wps-js" title="wps-js wiki page">52&deg;North Wiki</a> and on <a href="https://github.com/52North/wps-js/blob/master/README.md" title="wps-js readme">GitHub</a>.</p>
-                    </div>-->
+
                     <h3>
                         {{"DIALOG_WPS_TITLE_WPS_LIST"|translate}}
                     </h3>
 
                     <div>
-                        <select id="wps" ng-model="m_oController.m_sSelectedWps" ng-change="m_oController.onChangeWPS()"><!--ng-change="m_oController.onChangeWPS()"-->
-                            <!--<option>Select a WPS</option>-->
-                            <!--<option>http://178.22.66.96/geoserver/wps</option>-->
-                            <!--<option>http://gpod.eo.esa.int/wps</option>-->
+                        <select id="wps" ng-model="m_oController.m_sSelectedWps" ng-change="m_oController.onChangeWPS()">
                             <option ng-repeat="wpsUrl in m_oController.m_asWPSListURL">
                                 {{wpsUrl}}
                             </option>
                         </select>
-                        <!--{{m_oController.m_sSelectedWps}}-->
+
                     </div>
                     <div class="row" ng-hide="m_oController.m_sSelectedWps === '' ">
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -38,8 +32,7 @@
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div>
                                 <h3>Execute Process</h3>
-                                <!--<div class="wps-container">-->
-                                    <select id="processes" ><!--ng-model="m_oController.m_sSelectedProcess" ng-change="m_oController.onChangeProcesses()"-->
+                                    <select id="processes" >
                                         <option>
                                             {{"DIALOG_WPS_TITLE_SELECT_PROCESS"|translate}}
                                         </option>
@@ -47,8 +40,7 @@
                                     </select>
                                     <span id="processDescriptionLink"></span>
                                     <div class="wps-execute-container" id="wps-execute-container"></div>
-                                <!--</div>-->
-                                <!--<p></p>-->
+
 
                             </div>
                         </div>
@@ -59,9 +51,7 @@
                             <h3>
                                 {{"DIALOG_WPS_TITLE_EXECUTE_RESULTS"|translate}}
                             </h3>
-                            <!--<div class="wps-container">-->
                                 <div id="executeProcess"></div>
-                            <!--</div>-->
                         </div>
 
                     </div>
@@ -75,10 +65,7 @@
 
                     $(document).ready(function() {
                         $.wpsSetup({
-                            /*proxy : {
-                                url : "/wps_proxy/wps_proxy?url=",
-                                type : "parameter"
-                            },*/
+
                             configuration : {
                                 showImages : true
                             }
