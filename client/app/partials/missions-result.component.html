@@ -2,7 +2,7 @@
 
     <!-- TAB NAVIGATION -->
     <div class="tabs-container">
-        <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="$ctrl.m_bIsVisibleListOfLayers " && $ctrl.isEmptyProductsList() == true-->
+        <ul class="nav nav-tabs" role="tablist" >
             <li class="nav-item" ng-class="{active: $ctrl.m_iActiveProvidersTab === $index}"
                 ng-repeat="provider in $ctrl.m_aListOfProvider | filter:{ selected: true }"
                 ng-click="$ctrl.m_iActiveProvidersTab = $index; $ctrl.updateLayerListForActiveTab(provider.name)">
@@ -23,7 +23,7 @@
                             <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
                             <select class="form-control" id="selectPages" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
                                     ng-options="product for product in $ctrl.m_oPageService.m_iProductsPerPage"
-                                    ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)"><!--ng-change="$ctrl.search(provider.name)">-->
+                                    ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)">
                             </select>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                 </div>
 
             </div>
-            <!--<div class="test">-->
+
 
             <div class="container-table-row flex-grow-1" ng-class="{'container-table-row-without-pagination' :
                                             ($ctrl.m_bIsVisibleListOfLayers && $ctrl.m_bIsPaginatedList === false)
@@ -61,14 +61,18 @@
                             No results from {{provider.description}}
                             </h3>
                         </span>
-                        <img src="assets/img/Guybrush2.gif" style="width: fit-content">
+                        <img src="assets/img/Guybrush2.gif"
+                             alt="Guybrush"
+                             style="width: fit-content">
                     </div>
                     <div style="margin: auto; text-align: center" ng-show="$ctrl.m_oPageService.getNumberOfProductByProvider(provider.name)==-1">
                         <span><h3>
                             Got Error from {{provider.description}}
                             </h3>
                         </span>
-                        <img src="assets/img/LemmingExplode.gif" width="300px">
+                        <img src="assets/img/LemmingExplode.gif"
+                             alt="Lemming Explode"
+                             width="300px">
                     </div>
                 </div>
                 <!----------------- LOADING ANIMATION ---------------------->
