@@ -56,45 +56,7 @@
                                     </label>
                                     <multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sRedSourceBandSelected"></multiselect>
                                 </div>
-                                <!--<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">-->
-                                    <!--<label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>-->
-                                    <!--&lt;!&ndash;<div class="dropdown dropup">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"&ndash;&gt;-->
-                                                <!--&lt;!&ndash;data-toggle="dropdown">&ndash;&gt;-->
-                                            <!--&lt;!&ndash;{{m_oController.m_sRedSourceBandSelected}}&ndash;&gt;-->
-                                            <!--&lt;!&ndash;<span class="caret"></span>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</button>&ndash;&gt;-->
 
-                                        <!--&lt;!&ndash;<ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">&ndash;&gt;-->
-                                            <!--&lt;!&ndash;<li role="presentation" ng-repeat="RedSourceBand in m_oController.m_asSourceBands">&lt;!&ndash;m_oController.m_asSourceBands&ndash;&gt;&ndash;&gt;-->
-                                                <!--&lt;!&ndash;<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sRedSourceBandSelected = RedSourceBand">{{RedSourceBand}}</a>&ndash;&gt;-->
-                                            <!--&lt;!&ndash;</li>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</ul>&ndash;&gt;-->
-
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                    <!--<multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sRedSourceBandSelected"></multiselect>-->
-                                <!--</div>-->
-
-
-                                <!--<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">-->
-                                    <!--<label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>-->
-                                    <!--&lt;!&ndash;<div class="dropdown dropup">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"&ndash;&gt;-->
-                                                <!--&lt;!&ndash;data-toggle="dropdown">&ndash;&gt;-->
-                                            <!--&lt;!&ndash;{{m_oController.m_sNIRSourceBandSelected}}&ndash;&gt;-->
-                                            <!--&lt;!&ndash;<span class="caret"></span>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</button>&ndash;&gt;-->
-
-                                        <!--&lt;!&ndash;<ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">&ndash;&gt;-->
-                                            <!--&lt;!&ndash;<li role="presentation" ng-repeat="NIRSourceBand in m_oController.m_asSourceBands">&lt;!&ndash;m_oController.m_asSourceBands&ndash;&gt;&ndash;&gt;-->
-                                                <!--&lt;!&ndash;<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sNIRSourceBandSelected = NIRSourceBand">{{NIRSourceBand}}</a>&ndash;&gt;-->
-                                            <!--&lt;!&ndash;</li>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</ul>&ndash;&gt;-->
-
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                    <!--<multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sNIRSourceBandSelected"></multiselect>-->
-
-                                <!--</div>-->
                             </div>
                             <div class="row">
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -107,7 +69,6 @@
 
                         </fieldset>
                     </form>
-                    <!--</div>-->
                 </h4>
             </div>
             <div class="modal-footer">
@@ -122,12 +83,11 @@
                             </div>
                         </div>
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                            <!--<button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>-->
                             <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
                                 {{"DIALOG_CLOSE_BUTTON"|translate}}
                             </button>
                             <button type="button" ng-click="run(m_oController.m_oReturnValue)" class="my-button" data-dismiss="modal"
-                                  >  <!--ng-disabled="m_oController.selectedProductIsEmpty()"-->
+                                  >  
                                 {{"DIALOG_RUN_BUTTON"|translate}}
                             </button>
                         </div>
