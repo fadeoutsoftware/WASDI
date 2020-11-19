@@ -35,7 +35,7 @@ var ListFloodAreaDetectionController = (function() {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
-    };
+    }
 
     ListFloodAreaDetectionController.prototype.getDropdownMenuList = function(aoProduct){
 
@@ -76,7 +76,7 @@ var ListFloodAreaDetectionController = (function() {
             PRE_PROC_FLAG: this.m_sPreprocess
         };
 
-        sJSON=JSON.stringify(oListFlood);
+        var sJSON=JSON.stringify(oListFlood);
 
         if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === true)
         {
