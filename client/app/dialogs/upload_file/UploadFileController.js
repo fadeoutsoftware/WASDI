@@ -24,7 +24,7 @@ var UploadFileController = (function() {
             // oClose("close", 500); // close, but give 500ms for bootstrap to animate
         };
 
-    };
+    }
 
     UploadFileController.prototype.isFileChosen = function()
     {
