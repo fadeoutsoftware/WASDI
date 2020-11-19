@@ -7,8 +7,6 @@ angular.module('wasdi.TreeDirective', [])
 
         function linkFunction($scope, element, attr){
 
-            var generateWellFormedTree;// method
-
             /* the oTreeAttribute is a object
              * as in the following:
              * {

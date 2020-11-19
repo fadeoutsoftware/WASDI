@@ -28,7 +28,7 @@ var JRCS2Controller = (function() {
         //     oClose(aoSavedData, 300); // close, but give 500ms for bootstrap to animate
         // };
 
-    };
+    }
 
     JRCS2Controller.prototype.getDropdownMenuList = function(aoProduct){
 

@@ -132,10 +132,10 @@ angular.module('wasdi.SnakeDirective', [])
                     var oGoalRect = PointToRectangle(oGoalPoint);
                     oGoalShape.graphics.beginFill(sGoalColor).drawRect(oGoalRect.x, oGoalRect.y, oGoalRect.width, oGoalRect.height);
                     scope.stage.addChild(oGoalShape);
-
+                    var oText;
                     if (bGaming == false && bGameOver == false) {
                         // Show Start Text
-                        var oText = new createjs.Text();
+                        oText = new createjs.Text();
                         oText.x = 90;
                         oText.y = 0;
                         oText.font = "68px astronaut";
@@ -147,7 +147,7 @@ angular.module('wasdi.SnakeDirective', [])
                     else if (bGaming == false && bGameOver == true ) {
 
                         // Show Game Over Text
-                        var oText = new createjs.Text();
+                        oText = new createjs.Text();
 
                         oText.x = 260;
                         oText.y = 0;
@@ -291,7 +291,7 @@ angular.module('wasdi.SnakeDirective', [])
                         { x:iXStart,y:iYStart-8}, { x:iXStart-1,y:iYStart-8}, { x:iXStart-2,y:iYStart-8}, { x:iXStart-3,y:iYStart-8}, { x:iXStart-3,y:iYStart-7}, { x:iXStart-3,y:iYStart-6}, { x:iXStart-3,y:iYStart-5}, { x:iXStart-3,y:iYStart-4},{ x:iXStart-3,y:iYStart-3}, { x:iXStart-3,y:iYStart-2},
                         { x:iXStart-3,y:iYStart-1}, { x:iXStart-3,y:iYStart}];
 
-                    iPoints = 0;
+                    // iPoints = 0;
                     oGoalPoint = GetGoalPoint();
                     iSlowLimit = 10;
                 }

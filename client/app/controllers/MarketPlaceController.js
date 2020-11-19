@@ -336,9 +336,8 @@ var MarketPlaceController = (function() {
             if (oProcessor.publisher === this.m_oConstantsService.getUserId()) {
                 return true;
             }
-            else {
-                return  false;
-            }
+
+            return  false;
         }
     }
 

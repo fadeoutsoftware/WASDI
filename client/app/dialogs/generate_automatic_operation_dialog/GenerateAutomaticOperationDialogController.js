@@ -119,7 +119,6 @@ var GenerateAutomaticOperationDialogController = (function() {
             return "text";
         }
 
-        return null;
     };
 
     /**
