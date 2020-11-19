@@ -43,7 +43,7 @@ var ProcessesLogsController = (function() {
         else{
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
-        };
+        }
 
     }
 
@@ -220,7 +220,7 @@ var ProcessesLogsController = (function() {
             sText += iIndexProcessLog +") "+ "Id: "+ sPid +",Product Name: "+sProductName +",Operation Type: " + sOperationType +
                 ",User: "+ sUserId + ",Status: " + sStatus + ",Progress: " + sProgressPerc +"%" +
                 ",Operation date: "+ sOperationDate +",Operation end date: "+ sOperationEndDate + ",File size: " + sFileSize + "\r\n";
-        };
+        }
 
         return sText;
     }

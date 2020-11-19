@@ -66,9 +66,9 @@ var OperaWappController = (function() {
             oController.m_bIsRunning = false;
 
             if (data.intValue == 200) {
-                var sFile = data.stringValue;
-                oController.m_sResultFromServer = "Flooded Area Map Created. File Added to Workspace " + sFile;
-                oController.m_sLastGeneratedFile = sFile;
+                var sFileValue = data.stringValue;
+                oController.m_sResultFromServer = "Flooded Area Map Created. File Added to Workspace " + sFileValue;
+                oController.m_sLastGeneratedFile = sFileValue;
                 oController.m_bHasResult = true;
             }
             var oDialog = utilsVexDialogAlertBottomRightCorner("OPERA FLOOD DETECTION<br>DONE");
@@ -93,9 +93,9 @@ var OperaWappController = (function() {
             oController.m_bIsRunning = false;
 
             if (data.intValue == 200) {
-                var sFile = data.stringValue;
-                oController.m_sResultFromServer = "File available in Dewetra " + sFile;
-                oController.m_sLastGeneratedFile = sFile;
+                var sFileValue = data.stringValue;
+                oController.m_sResultFromServer = "File available in Dewetra " + sFileValue;
+                oController.m_sLastGeneratedFile = sFileValue;
                 oController.m_bHasResult = false;
             }
             var oDialog = utilsVexDialogAlertBottomRightCorner("FLOODED AREA<br>PUBLISHED");
