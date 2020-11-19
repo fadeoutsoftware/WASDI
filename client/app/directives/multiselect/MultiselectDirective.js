@@ -49,8 +49,12 @@ angular.module('wasdi.MultiselectDirective', [])
                     var bResult=utilsFindObjectInArray(scope.selectedDirective ,sBandInput);
                     if(utilsIsObjectNullOrUndefined(bResult) == true) return false;
 
-                    if(bResult == -1) return false;
-                    else return true;
+                    if(bResult == -1)
+                    {
+                        return false;
+                    }
+
+                    return true;
                 }
             }
         };
