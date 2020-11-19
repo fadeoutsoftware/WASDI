@@ -107,7 +107,7 @@ var MultilookingController = (function() {
         {
             $scope.m_oController.m_asSourceBands = $scope.m_oController.getBandsFromSelectedProducts();
         },true);
-    };
+    }
 
     MultilookingController.prototype.nameIsUsed = function()
     {
@@ -130,11 +130,11 @@ var MultilookingController = (function() {
 
 
         this.m_asSourceBandsSelected = [];
-
+        var iNumberOfBands;
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
-            var iNumberOfBands = 0;
+            iNumberOfBands = 0;
         else
-            var iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
+            iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
 
 
 
