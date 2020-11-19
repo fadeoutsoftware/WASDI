@@ -118,8 +118,7 @@ var GenerateAutomaticOperationDialogController = (function() {
             //input text case
             return "text";
         }
-
-        return null;
+        
     };
 
     /**
