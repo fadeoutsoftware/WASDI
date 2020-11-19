@@ -188,7 +188,7 @@ service('ConstantsService', [function () {
         this.m_oUser = oUser;
         //set coockie
         this.setCookie("oUser",this.m_oUser,this.COOKIE_EXPIRE_TIME_DAYS);
-    }
+    };
 
     /**
      * Get Active user
@@ -206,7 +206,7 @@ service('ConstantsService', [function () {
         }
 
         return this.m_oUser;
-    }
+    };
 
     /**
      * Get active user id or empty string
@@ -220,7 +220,7 @@ service('ConstantsService', [function () {
         }
 
         return this.m_oUser.userId;
-    }
+    };
 
     /**
      * Chek if the user is logged or not
@@ -235,7 +235,7 @@ service('ConstantsService', [function () {
         if (this.m_oUser.userId == "") return false;
 
         return true;
-    }
+    };
 
     /**
      * Set Active Workspace Object
@@ -243,7 +243,7 @@ service('ConstantsService', [function () {
      */
     this.setActiveWorkspace = function (oWorkspace) {
         this.m_oActiveWorkspace = oWorkspace;
-    }
+    };
 
     /**
      * Get Active Workpsace Object
@@ -251,7 +251,7 @@ service('ConstantsService', [function () {
      */
     this.getActiveWorkspace = function () {
         return this.m_oActiveWorkspace;
-    }
+    };
 
     /**
      * Set the name of the processor selected in the store
@@ -405,8 +405,8 @@ service('ConstantsService', [function () {
             return false;
         }
 
-        return false;
-    }
+
+    };
     /*
     * Set local storage, if sName is empty or null return false
     * */
