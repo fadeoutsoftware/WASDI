@@ -10,9 +10,7 @@
             </div>
             <!-- BODY -->
             <div class="modal-body ">
-                <!--<h4>-->
 
-                <!--</h4>-->
                 <div class="advance-search">
                     <div class="row-v4">
                         <div class="col-v4-12">
@@ -41,7 +39,6 @@
 
 
                     <div class="row-v4 mt-3 edit-filters-buttons">
-                        <!--<div class= "col-xs-7 col-sm-7 col-md-7 col-lg-7 col-xs-offset-5 col-sm-offset-5 col-md-offset-5 col-lg-offset-5" >-->
                         <div class= "col-v4-auto ml-auto">
                             <span class="btn btn-primary btn-wasdi" ng-click="m_oController.addFiltersData()">
                                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
@@ -55,7 +52,7 @@
 
                     </div>
 
-                    <div  class="row-v4" ng-show="m_oController.m_oAdvanceFilterOptions.savedData.length > 0"><!--class="row well well-sm"-->
+                    <div  class="row-v4" ng-show="m_oController.m_oAdvanceFilterOptions.savedData.length > 0">
                         <div class="col-v4-12">
                             <form >
                                 <fieldset>
@@ -63,7 +60,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                         <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilterOptions.savedData">
                                             {{data.name}}
-                                            <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                                            <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> 
                                         </div>
                                     </div>
                                 </fieldset>
