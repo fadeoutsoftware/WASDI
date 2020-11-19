@@ -12,16 +12,16 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     this.login = function(oCredentials) {
         return this.m_oHttp.post(this.APIURL + '/auth/login',oCredentials);
         //return this.m_oHttp.post('http://localhost:8080/wasdiwebserver/rest//auth/login',oCredentials);
-    }
+    };
 
     /**
      * logout
      */
-    var _this = this;
+
     this.logout = function() {
         //CLEAN COOKIE
         return this.m_oHttp.get(this.APIURL + '/auth/logout')
-    }
+    };
 
     /**
      * signingUser
@@ -29,12 +29,12 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
      */
     this.signingUser = function(oUser){
         return this.m_oHttp.post(this.APIURL + '/auth/register',oUser);
-    }
+    };
 
     this.checkSession = function(sSession)
     {
         return this.m_oHttp.get(this.APIURL + '/auth/checksession');
-    }
+    };
 
     /**
      * Create sftp account on node
