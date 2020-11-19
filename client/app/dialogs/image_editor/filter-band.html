@@ -4,9 +4,7 @@
         <li ng-class="{active: m_oController.m_iActiveProvidersTab === 0}" ng-click="m_oController.m_iActiveProvidersTab = 0">
             <a href="" role="tab" data-toggle="tab">{{"DIALOG_FILTER_BAND_TAB_NAME_SYSTEM"|translate}}</a>
         </li>
-        <!--<li ng-class="{active: m_oController.m_iActiveProvidersTab === 1}" ng-click="m_oController.m_iActiveProvidersTab = 1">-->
-        <!--<a href="" role="tab" data-toggle="tab">{{"DIALOG_FILTER_BAND_TAB_NAME_USER"|translate}}</a>-->
-        <!--</li>-->
+
     </ul>
     <!--------------------------------------- TAB CONTENT ------------------------------------------>
     <div class="tab-content">
@@ -141,7 +139,6 @@
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                     Width: <input type="text" class="" placeholder="" ng-value="m_oController.numberOfCollumns(options.matrix)">
-                                    <!-- Height:<input type="text" class="" placeholder="">-->
                                 </div>
                                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                                     <div class="btn-group-vertical increase-buttons">
@@ -152,31 +149,16 @@
                                             <i class="fa fa-caret-down" aria-hidden="true"></i>
                                         </button>
                                     </div>
-                                    <!--<div class="btn-group-vertical">-->
-                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">-->
-                                    <!--<i class="fa fa-caret-up" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">-->
-                                    <!--<i class="fa fa-caret-down" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                    <!--</div>-->
+
                                 </div>
                             </div>
 
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                    <!--Width: <input type="text" class="" placeholder="">-->
                                     Height:<input type="text" class="" placeholder="" ng-value="m_oController.numberOfRows(options.matrix)">
                                 </div>
                                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <!--<div class="btn-group-vertical increase-buttons">-->
-                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">-->
-                                    <!--<i class="fa fa-caret-up" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">-->
-                                    <!--<i class="fa fa-caret-down" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                    <!--</div>-->
+
                                     <div class="btn-group-vertical increase-buttons">
                                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="m_oController.addDefaultRowInMatrix(options.matrix)">
                                             <i class="fa fa-caret-up" aria-hidden="true"></i>
@@ -189,12 +171,7 @@
                             </div>
 
 
-                            <!--<button>-->
-                            <!--<i class="fa fa-caret-up" aria-hidden="true"></i>-->
-                            <!--</button>-->
-                            <!--<button>-->
-                            <!--<i class="fa fa-caret-down" aria-hidden="true"></i>-->
-                            <!--</button>-->
+
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <squares matrix = "options.matrix"  borderColor="black" side="50" cursor="pointer"></squares>
                             </div>
@@ -207,9 +184,6 @@
 
             </p>
         </div>
-        <!--<div class="tab-pane fade" id="tab3">-->
-        <!--<h2>tab3</h2>-->
-        <!--<p>lorem ipsum.</p>-->
-        <!--</div>-->
+      
     </div>
 </div>
