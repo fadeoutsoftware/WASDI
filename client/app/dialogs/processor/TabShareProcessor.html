@@ -14,7 +14,7 @@
             <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                 <button class="btn btn-primary btn-wasdi"
                         ng-click="m_oController.shareProcessorByUserEmail(m_oController.m_sProcessorId,m_oController.m_sUserEmail)">
-                    <i class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></i>
+                    <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
                     <span class="ng-binding">Share</span>
                 </button>
             </div>
@@ -24,6 +24,7 @@
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <label>Acual Users:</label>
                 <table class="table table-hover">
+                    <description>Actual users</description>
                     <tbody>
                     <tr ng-repeat="oUser in m_oController.m_aoEnableUsers">
                         <td class="over-icon">
