@@ -882,7 +882,7 @@ var ImportController = (function() {
                 return false;
             oProduct.isDisabledToDoDownload = true;
             var oWorkSpace = result;
-            var oController = this;
+
             if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oProduct))
             {
                 console.log("Error there isn't workspaceID or layer");
@@ -1652,11 +1652,7 @@ var ImportController = (function() {
             bReturnValue = true;
             oLayer.isDisabledToDoDownload = false;
         }
-        else
-        {
-            bReturnValue = false;
 
-        }
         return bReturnValue;
     };
 
@@ -2319,14 +2315,12 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
                 return true;
-                break;
+
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
                 return false;
-                break;
 
             default: return false;
 
-            return false;
         }
 
     };
@@ -2354,18 +2348,15 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
 
                 return true;
-                break;
 
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
                 return false;
-                break;
 
             default: return false;
 
-            return false;
         }
 
     };
@@ -2393,18 +2384,18 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
 
                 return true;
-                break;
+
 
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
                 return false;
-                break;
+
 
             default: return false;
 
-            return false;
+
         }
 
     };
@@ -2418,7 +2409,7 @@ var ImportController = (function() {
         switch(sCollection){
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
                 return true;
-                break;
+
 
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
@@ -2438,11 +2429,11 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
                 return false;
-                break;
+
 
             default: return false;
 
-            return false;
+
         }
 
     };
@@ -2457,7 +2448,7 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
                 return true;
-                break;
+
 
 
             case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
@@ -2476,11 +2467,10 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
                 return false;
-                break;
+
 
             default: return false;
 
-            return false;
         }
 
     }
