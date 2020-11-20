@@ -156,13 +156,13 @@ angular.module('wasdi.wapSelectArea', [])
                     return oMap;
                 }
 
-                let oController = this;
+                let oThat = this;
                 //init the map after the directive is loaded
                 setTimeout(function() {
-                    oController.oMap = $MapService.initMapSingleton(oController.mapId);
+                    oThat.oMap = $MapService.initMapSingleton(oThat.mapId);
 
                     //is it an option?
-                    oController.oMap = oController.addBoundingBoxDrawerOnMap(oController.oMap);
+                    oThat.oMap = oThat.addBoundingBoxDrawerOnMap(oThat.oMap);
                 }, 500);
 
             },

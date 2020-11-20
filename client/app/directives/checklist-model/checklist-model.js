@@ -95,13 +95,13 @@ angular.module('checklist-model', [])
                 }
             });
 
-            function setValueInChecklistModel(value, checked) {
+            function setValueInChecklistModel(oValue, checked) {
                 var current = getter(scope.$parent);
                 if (angular.isFunction(setter)) {
                     if (checked === true) {
-                        setter(scope.$parent, add(current, value, comparator));
+                        setter(scope.$parent, add(current, oValue, comparator));
                     } else {
-                        setter(scope.$parent, remove(current, value, comparator));
+                        setter(scope.$parent, remove(current, oValue, comparator));
                     }
                 }
 

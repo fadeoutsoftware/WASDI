@@ -767,7 +767,7 @@ var ImportAdvanceFiltersController = (function() {
                 // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
                 if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear-1);
             }
-            oDataPeriod.dateSensingPeriodTo.setYear(iYear);
+            if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodTo.setYear(iYear);
             var sName = iYear.toString() + asSeasonsSelected[iIndexSeason];
             this.saveDataInAdvanceFilter(sName, oDataPeriod, aoSaveData);
         }
