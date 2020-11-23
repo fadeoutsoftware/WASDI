@@ -367,7 +367,7 @@ var EditorController = (function () {
     }
 
     EditorController.prototype.openImageEditorDialog = function () {
-        var oController = this;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/image_editor/image-editor.component.html",
             controller: ImageEditorController.REG_NAME,
@@ -402,13 +402,13 @@ var EditorController = (function () {
      */
     EditorController.prototype.setActiveTab = function (iTab) {
         if (this.m_iActiveMapPanelTab === iTab) return;
-
+        let oBand,sFileName;
         this.m_iActiveMapPanelTab = iTab;
         // if was clicked the tab color manipulation && the active band isn't null && there isn't any saved colour manipulation, get colour manipulation
         if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
             (this.m_bIsLoadingColourManipulation === false)) {
-            var oBand = this.m_oActiveBand;
-            var sFileName = this.m_aoProducts[oBand.productIndex].fileName
+            oBand = this.m_oActiveBand;
+            sFileName = this.m_aoProducts[oBand.productIndex].fileName
             this.getProductColorManipulation(sFileName, oBand.name, true, this.m_oActiveWorkspace.workspaceId);
 
         }
@@ -417,8 +417,8 @@ var EditorController = (function () {
             (this.m_bIsLoadedPreviewBandImage === true)) {
             // Initialize Image Preview
 
-            var oBand = this.m_oActiveBand;
-            var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
+            oBand = this.m_oActiveBand;
+            sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
             // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
             var elementImagePreview = angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
@@ -464,7 +464,6 @@ var EditorController = (function () {
                 for (var iIndexLayers = 0; iIndexLayers < oController.m_aoVisibleBands.length; iIndexLayers++) {
                     // Check if it is a valid layer
                     if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
-                        var sColor = "#f22323";
                         var sGeoserverBBox = oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox;
                         var oRectangleIsNotGeoreferencedProduct = oController.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox, oController.m_aoVisibleBands[iIndexLayers].bbox,
                             oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox, oController.m_aoVisibleBands[iIndexLayers].layerId);
@@ -739,7 +738,7 @@ var EditorController = (function () {
                         // oController.m_oGlobeService.removeAllEntities();
                     }
 
-                    var iNumberOfLayers = oController.m_aoVisibleBands.length;
+                    iNumberOfLayers = oController.m_aoVisibleBands.length;
                     // Close all the layers
                     for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
                         if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayer].layerId)) {
@@ -1416,8 +1415,7 @@ var EditorController = (function () {
         // Get Preview Dimension
         // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
         var elementImagePreview = angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
-        var heightImagePreview = elementImagePreview[0].offsetHeight;
-        var widthImagePreview = elementImagePreview[0].offsetWidth;
+
 
         // Initialize the info for the Image Preview Directive
         this.m_oImagePreviewDirectivePayload.originalBandHeight = oBand.height;
@@ -1619,10 +1617,10 @@ var EditorController = (function () {
                     var sMapLayer = layer.options.layers;
                     var sMapLayer2 = "wasdi:" + layer.options.layers;
 
-                    if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer == sLayerId) {
+                    if (utilsIsStrNullOrEmpty(sLayerId) === false && sMapLayer === sLayerId) {
                         oMap2D.removeLayer(layer);
                     }
-                    else if (utilsIsStrNullOrEmpty(sLayerId) == false && sMapLayer2 == sLayerId) {
+                    if (utilsIsStrNullOrEmpty(sLayerId) === false && sMapLayer2 === sLayerId) {
                         oMap2D.removeLayer(layer);
                     }
                 });
@@ -1712,12 +1710,11 @@ var EditorController = (function () {
 
         //Remove band layer
         for (var iIndexLayer = 0; iIndexLayer < aoGlobeLayers.length; iIndexLayer++) {
-            var oLayer = aoGlobeLayers.get(iIndexLayer);
+            aoGlobeLayers.get(iIndexLayer);
 
-            if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId) {
-                oLayer = aoGlobeLayers.remove(oLayer);
-                // oLayer = oGlobe.remove(oLayer);
-                //break;
+            if (utilsIsStrNullOrEmpty(sLayerId) === false && utilsIsObjectNullOrUndefined(oLayer) === false && oLayer.imageryProvider.layers === sLayerId) {
+                aoGlobeLayers.remove(oLayer);
+
                 iIndexLayer = 0;
             }
             else {
@@ -1725,7 +1722,7 @@ var EditorController = (function () {
                 if (!utilsIsObjectNullOrUndefined(oLayer.imageryProvider.layers)) {
                     var sMapLayer = "wasdi:" + oLayer.imageryProvider.layers;
                     if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sMapLayer == sLayerId) {
-                        oLayer = aoGlobeLayers.remove(oLayer);
+                        aoGlobeLayers.remove(oLayer);
                         // oLayer = oGlobe.remove(oLayer);
                         //break;
                         iIndexLayer = 0;
@@ -2066,8 +2063,8 @@ var EditorController = (function () {
                 keyboard: false
             });
             modal.close.then(function (oResult) {
-                var i = 0;
-                i++;
+
+
             });
         });
 
@@ -2851,7 +2848,7 @@ var EditorController = (function () {
      * @returns {boolean}
      */
     EditorController.prototype.openProductInfoDialog = function (oProductInput) {
-        var oController = this;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
             controller: "ProductEditorInfoController",
@@ -2999,8 +2996,7 @@ var EditorController = (function () {
                 var widthMapContainer = oMapContainerSize.width;
 
                 var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
-                var heightImagePreview = elementImagePreview[0].offsetHeight;
-                var widthImagePreview = elementImagePreview[0].offsetWidth;
+
 
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
 
@@ -3314,14 +3310,14 @@ var EditorController = (function () {
 
         // Compute integral histogram:
         var prev = hist[0];
-        for (var i = 1; i < 512; ++i) {
-            prev = hist[i] += prev;
+        for (var j = 1; j < 512; ++j) {
+            prev = hist[j] += prev;
         }
 
         // Equalize image:
         var norm = 511 / sum;
-        for (var i = 0; i < srcLength; ++i) {
-            dst[i] = hist[~~src[i]] * norm;
+        for (var k = 0; k < srcLength; ++k) {
+            dst[k] = hist[~~src[k]] * norm;
         }
         return dst;
     }
@@ -3889,11 +3885,11 @@ var EditorController = (function () {
                                         "separator_before": true,
                                         "action": function (obj) {
                                             //$node.original.fileName;
-                                            if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
+                                            if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
                                                 var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts; iIndexProduct++) {
-                                                    if (oController.m_aoProducts[iIndexProduct].fileName == $node.original.fileName) {
-                                                        oController.openProductInfoDialog(oController.m_aoProducts[iIndexProduct]);
+                                                for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
+                                                    if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
+                                                        oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
                                                         break;
                                                     }
 
@@ -3909,10 +3905,10 @@ var EditorController = (function () {
                                             //$node.original.fileName;
                                             if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
                                                 var oProduct = oController.findProductByName($node.original.fileName);
-                                                var oEntry = {
-                                                    "fileName": oProduct.fileName,
-                                                    "filePath": oProduct.filePath
-                                                };
+                                                // var oEntry = {
+                                                //     "fileName": oProduct.fileName,
+                                                //     "filePath": oProduct.filePath
+                                                // };
                                                 // oController.downloadEntry(oEntry);
                                                 oController.downloadProductByName($node.original.fileName);
                                             }
@@ -3973,7 +3969,7 @@ var EditorController = (function () {
             this.m_aoProducts[iIndexProduct].selfIndex = iIndexProduct;
             oNode.productIndex = iIndexProduct;
 
-            var oController = this;
+            // var oThat = this;
 
             oNode.children = [
                 {
@@ -4035,7 +4031,6 @@ var EditorController = (function () {
 
         var sFileName = oEntry.fileName;
         // this.m_bIsDownloadingProduct = true;
-        var oController = this;
 
         var sUrl = null;
 

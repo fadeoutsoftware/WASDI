@@ -30,7 +30,7 @@ var JRCWorkflowController = (function() {
         //     oClose(aoSavedData, 300); // close, but give 500ms for bootstrap to animate
         // };
 
-    };
+    }
     JRCWorkflowController.prototype.getDropdownMenuList = function(aoProduct){
 
         return utilsProjectGetDropdownMenuListFromProductsList(aoProduct)

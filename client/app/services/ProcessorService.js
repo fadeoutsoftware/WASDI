@@ -244,8 +244,10 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.redeployProcessor = function(sProcessorId){
 
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        var sUrl = this.APIURL;
-        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+        // var sUrl = this.APIURL;
+        // if (oWorkspace.apiUrl != null) {
+        //     sUrl = oWorkspace.apiUrl;
+        // }
 
         return this.m_oHttp.get(this.APIURL + '/processors/redeploy?processorId=' + sProcessorId + "&workspaceId=" + oWorkspace.workspaceId);
     };

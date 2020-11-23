@@ -1,11 +1,12 @@
 <div class="squares">
-    <!--<label>SONO UN QUADRATO</label>-->
-    <!--{{inputMatrix}}-->
-    <table class="table table-hover">
+
+    <table class="table table-hover" >
         <tbody>
-        <tr ng-repeat="row in inputMatrix track by $index">
+        <tr ng-repeat="row in inputMatrix track by $index"  aria-label="Square View">
             <td ng-style="{'background-color': cell.color, 'color':cell.fontcolor, 'border-color':inputBorderColor ,
-                'height':inputSide+'px','width':inputSide+'px','cursor':inputCursor }" align="center" ng-repeat="cell in row" ng-click="cell.click()">
+                'height':inputSide+'px','width':inputSide+'px','cursor':inputCursor , 'align': 'center'}"
+                ng-repeat="cell in row" ng-click="cell.click()">
+<!--                align="center"-->
                 {{cell.value}}
             </td>
         </tr>

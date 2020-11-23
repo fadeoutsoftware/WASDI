@@ -34,7 +34,7 @@ function ViewElementFactory() {
 
             oViewElement.asListValues = [];
 
-            for (iValues = 0; iValues < oControl.values.length; iValues ++) {
+            for (; iValues < oControl.values.length; iValues ++) {
                 let oItem = {
                     name: oControl.values[iValues],
                     id: "" + iValues

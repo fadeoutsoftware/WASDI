@@ -236,7 +236,7 @@ var WappsController = (function() {
                     try {
                         //sHelpMessage = data.stringValue.replace("\\n", "<br>");
                         //sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
-                        oHelp = JSON.parse(sHelpMessage);
+                        var oHelp = JSON.parse(sHelpMessage);
                         sHelpMessage = oHelp.help;
                     }
                     catch(err) {

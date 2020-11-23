@@ -40,7 +40,7 @@ var WorkFlowManagerController = (function() {
         this.m_bIsLoadingWorkflows = false;
         this.m_oHttp =  oHttp;
         //$scope.close = oClose;
-        var oController = this;
+
 
         $scope.close = function(result) {
 
@@ -444,7 +444,7 @@ var WorkFlowManagerController = (function() {
         {
             return false;
         }
-        var oController = this;
+
 
         this.m_oSnapOperationService.downloadWorkflow(oWorkflow.workflowId);
         return true;

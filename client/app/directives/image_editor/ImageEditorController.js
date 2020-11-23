@@ -35,7 +35,6 @@ angular.module('wasdi.ImageEditorDirective', [])
                 //     heie[0].parentElement.clientWidth
                 // })
 
-                var iDefaultValueZoom = 100;
                 // var dimension = utilsProjectGetMapContainerSize();
                 //default value canvas
                 // var m_iHeightCanvas = scope.heightCanvas;
@@ -64,7 +63,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     {
                         stage.update(event);
                     }
-                };
+                }
                 //TODO DESTROY EVENT
                 // scope.$on(
                 //     "$destroy",
@@ -596,24 +595,24 @@ angular.module('wasdi.ImageEditorDirective', [])
                 /**
                  *
                  */
-                scope.$watch('urlImage', function (newValue, oldValue, scope)
+                scope.$watch('urlImage', function (newValue, oldValue, oScope)
                 {
-                    scope.m_bIsVisibleMouseCursorWait = false;
-                    scope.Stage.removeAllChildren();
+                    oScope.m_bIsVisibleMouseCursorWait = false;
+                    oScope.Stage.removeAllChildren();
 
                     if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "//:0")
                     {
-                        scope.m_bIsActiveZoom = false;
-                        var oBitmap =  new createjs.Bitmap(newValue);
+                        oScope.m_bIsActiveZoom = false;
+                        var oBitMap =  new createjs.Bitmap(newValue);
                         //AFTER PAN
                         var oPan = new createjs.Container();
                         oPan.x = oPan.y = 0;
-                        oPan.addChild(oBitmap); //, label
-                        oPan.on("mousedown", scope.panMouseDown);
-                        oPan.on("pressmove",scope.panPressMove);
-                        scope.Pan = oPan;
-                        scope.Stage.addChild(oPan);
-                        scope.Bitmap = oBitmap;
+                        oPan.addChild(oBitMap); //, label
+                        oPan.on("mousedown", oScope.panMouseDown);
+                        oPan.on("pressmove",oScope.panPressMove);
+                        oScope.Pan = oPan;
+                        oScope.Stage.addChild(oPan);
+                        oScope.Bitmap = oBitMap;
 
                         // BEFORE PAN
                         // scope.Bitmap = oBitmap;
@@ -621,12 +620,12 @@ angular.module('wasdi.ImageEditorDirective', [])
 
 
 
-                        scope.removeSquareAndDraggerContainer();
+                        oScope.removeSquareAndDraggerContainer();
                         // scope.Stage.update();
 
                     }
 
-                    scope.Stage.update();
+                    oScope.Stage.update();
                 });
             }
         };

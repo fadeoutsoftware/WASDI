@@ -6,34 +6,29 @@
             </div>
         </div>
     </div>
-
     <div class="workflows-container row-v4 mt-3 " ng-show="m_oController.m_aoWorkflows.length > 0">
         <div class="col-v4-8 list-of-workflows">
             <div class="well pointer-cursor-hover" ng-repeat="workflow in m_oController.getSingleInputWorkflow()"
                  ng-class="{'selectedWorkflow': m_oController.m_oSelectedWorkflow  === workflow}"
                  ng-click="m_oController.selectBatchWorkflow(workflow)">
-
                 <div>
                     <h4>
-                        <b>{{workflow.name}}</b>
+                        <strong>{{workflow.name}}</strong>
                     </h4>
                 </div>
                 <div>
-                    <label> <b>Description:</b> </label>
+                    <label> <strong>Description:</strong> </label>
                     <span>
                  {{workflow.description}}
                 </span>
                 </div>
 
                 <div>
-                    <label><b>Owner:</b> </label>
+                    <label><strong>Owner:</strong> </label>
                     <span>
                 {{workflow.userId}}
             </span>
                 </div>
-
-
-
                 <div class="buttons-container" ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false">
                     <button class="btn btn-wasdi my-align-right"ng-click="m_oController.openDeleteWorkflowDialog(workflow)">
                         Delete
@@ -44,11 +39,9 @@
             </div>
         </div>
         <div class="col-v4-4" ng-hide="m_oController.m_oSelectedWorkflow == null">
-            <!--<div class="mb-3">Select Product</div>-->
             <h3> {{m_oController.m_oSelectedWorkflow.name}} </h3>
             <!-------------------------------- LIST OF PRODUCTS -------------------------------->
             <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts">
-                <!--ng-show="m_oController.isSelectedWorkFlow()"-->
             </multiselect>
 
             <div class="w-100 text-right">
@@ -59,65 +52,4 @@
             </div>
         </div>
     </div>
-
-    <!--OLD VERSION-->
-    <!--<div class="row-v4" ng-show="m_oController.m_aoWorkflows.length > 0">-->
-    <!--<div class="col-v4-6">-->
-    <!--<div class="mb-3">Select Workflow</div>-->
-    <!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; WORKFLOWS TABLE -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-    <!--<table class="table table-hover my-table" >-->
-    <!--<thead>-->
-    <!--<tr>-->
-    <!--<th>-->
-    <!--{{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}-->
-    <!--</th>-->
-    <!--<th>-->
-    <!--{{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}-->
-    <!--</th>-->
-    <!--<th>-->
-    <!--{{"DIALOG_WORKFLOW_MANAGER_TABLE_OWNER"|translate}}-->
-    <!--</th>-->
-    <!--<th>-->
-
-    <!--</th>-->
-    <!--</tr>-->
-
-    <!--</thead>-->
-    <!--<tbody>-->
-
-    <!--<tr class="tr-over" ng-repeat="workflow in m_oController.getSingleInputWorkflow() "-->
-    <!--ng-class="{'selectedWorkflow': m_oController.m_oSelectedWorkflow  === workflow}"-->
-    <!--ng-click="m_oController.m_oSelectedWorkflow = workflow">-->
-    <!--<td >{{workflow.name}}</td>-->
-    <!--<td>{{workflow.description}}</td>-->
-    <!--<td>{{workflow.userId}}</td>-->
-    <!--&lt;!&ndash;<td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">&ndash;&gt;-->
-    <!--<td class="td-button" ng-click="m_oController.openDeleteWorkflowDialog(workflow)"-->
-    <!--ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false">-->
-    <!--<i class="fa fa-trash" aria-hidden="true"></i>-->
-    <!--</td>-->
-    <!--</tr>-->
-    <!--</tbody>-->
-    <!--</table>-->
-    <!--</div>-->
-    <!---->
-    <!--<div class="col-v4-6">-->
-    <!--<div class="mb-3">Select Product</div>-->
-    <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; LIST OF PRODUCTS &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-    <!--<multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts">-->
-    <!--&lt;!&ndash;ng-show="m_oController.isSelectedWorkFlow()"&ndash;&gt;-->
-    <!--</multiselect>-->
-
-    <!--<div class="w-100 text-right">-->
-    <!--<button class="btn btn-primary btn-wasdi btn-mdlg" ng-click="m_oController.runWorkFlowPerProducts();" ng-class ="{ 'disabled' : m_oController.isPossibleDoUpload()}"-->
-    <!--ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()" data-dismiss="modal" >-->
-    <!--{{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}-->
-    <!--</button>-->
-    <!--</div>-->
-    <!--</div>-->
-
-    <!--<div class="col-v4-xs-12 col-v4-sm-12 col-v4-md-12 col-v4-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">-->
-    <!---->
-    <!--</div>-->
-    <!--</div>-->
 </div>

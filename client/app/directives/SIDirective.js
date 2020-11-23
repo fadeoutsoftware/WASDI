@@ -132,10 +132,10 @@ angular.module('wasdi.SIDirective', [])
                     var oGoalRect = PointToRectangle(oGoalPoint);
                     oGoalShape.graphics.beginFill(sGoalColor).drawRect(oGoalRect.x, oGoalRect.y, oGoalRect.width, oGoalRect.height);
                     scope.stage.addChild(oGoalShape);
-
+                    var oText;
                     if (bGaming == false && bGameOver == false) {
                         // Show Start Text
-                        var oText = new createjs.Text();
+                        oText = new createjs.Text();
                         oText.x = oText.y = 0;
                         oText.font = "68px astronaut";
                         oText.color = sFontColor;
@@ -146,7 +146,7 @@ angular.module('wasdi.SIDirective', [])
                     else if (bGaming == false && bGameOver == true ) {
 
                         // Show Game Over Text
-                        var oText = new createjs.Text();
+                        oText = new createjs.Text();
                         oText.x = oText.y = 0;
                         oText.font = "68px astronaut";
                         oText.color = sFontColor;
@@ -277,7 +277,7 @@ angular.module('wasdi.SIDirective', [])
                         { x:20,y:12}, { x:20,y:11}, { x:20,y:10}, { x:20,y:9}, { x:20,y:8}, { x:20,y:7}, { x:19,y:7}, { x:18,y:7}, { x:17,y:7}, { x:16,y:7},
                         { x:15,y:7}, { x:14,y:7}, { x:13,y:7}, { x:12,y:7}, { x:12,y:8}, { x:12,y:9}, { x:12,y:10}, { x:12,y:11},{ x:12,y:12}, { x:12,y:13},
                         { x:12,y:14}, { x:12,y:15}];
-                    iPoints = 0;
+                    // iPoints = 0;
                     oGoalPoint = GetGoalPoint();
                     iSlowLimit = 10;
                 }

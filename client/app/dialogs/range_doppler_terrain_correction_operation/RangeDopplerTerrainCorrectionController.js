@@ -61,7 +61,7 @@ var RangeDopplerTerrainCorrectionController = (function() {
         $scope.run = function() {
             var iNumberOfSelectedProducts = oController.m_asSelectedProducts.length;
             var aoReturnValue = [];
-            var bAreOkOptions = true;
+            // var bAreOkOptions = true;
             for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts ; iIndexSelectedProduct++)
             {
                 var oProduct = oController.getProductByName(oController.m_asSelectedProducts[iIndexSelectedProduct]);
@@ -192,7 +192,7 @@ var RangeDopplerTerrainCorrectionController = (function() {
         {
             $scope.m_oController.m_asSourceBands = $scope.m_oController.getBandsFromSelectedProducts();
         },true);
-    };
+    }
 
 
     RangeDopplerTerrainCorrectionController.prototype.nameIsUsed = function()
@@ -212,11 +212,11 @@ var RangeDopplerTerrainCorrectionController = (function() {
             options:this.m_oOptions
         };
         this.m_asSourceBandsSelected = [];
-
+        var iNumberOfBands;
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
-            var iNumberOfBands = 0;
+            iNumberOfBands = 0;
         else
-            var iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
+            iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
 
         this.m_asSourceBands = [];
         //load bands

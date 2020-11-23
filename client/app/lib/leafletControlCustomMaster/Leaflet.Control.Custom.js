@@ -1,4 +1,4 @@
-(function (window, document, undefined) {
+(function (window, document, temp) {
     L.Control.Custom = L.Control.extend({
         version: '1.0.1',
         options: {

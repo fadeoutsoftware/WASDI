@@ -55,11 +55,11 @@ var SftpUploadController = (function() {
         this.m_bIsVisibleLoadIcon = true;
         var oController = this;
         this.m_oAuthService.updatePasswordUpload(this.m_sEmailNewPassword).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-
-                }
-            }
+            // if (data != null) {
+            //     if (data != undefined) {
+            //
+            //     }
+            // }
             oController.m_bIsVisibleLoadIcon = false;
         }).error(function (data, status) {
             if(data)
@@ -135,9 +135,9 @@ var SftpUploadController = (function() {
         {
             return true;
         }
-        else{
-            return false;
-        }
+
+        return false;
+
     };
 
     SftpUploadController.prototype.isAccountCreated = function(){
@@ -145,9 +145,9 @@ var SftpUploadController = (function() {
         {
             return true;
         }
-        else{
-            return false;
-        }
+
+        return false;
+
 
     };
 
@@ -169,11 +169,11 @@ var SftpUploadController = (function() {
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
         this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-
-                }
-            }
+            // if (data != null) {
+            //     if (data != undefined) {
+            //
+            //     }
+            // }
         }).error(function (data, status) {
             if(data)
             {

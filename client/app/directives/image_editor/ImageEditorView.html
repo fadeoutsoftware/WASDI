@@ -1,29 +1,13 @@
 <div class="image-editor-container w-100 h-100" id="imageEditorContainer" ng-class="{ 'wait-cursor-hover':m_bIsVisibleMouseCursorWait === true, 'crosshair-cursor-hover':m_bIsActiveZoom === true }">
-    <!--<div class="loadIcon" ng-hide="isLoaded">-->
-        <!--<invader></invader>-->
-    <!--</div>-->
+
     <div class="btn-group btn-group-right" role="group" >
-        <!--<button type="button" class="btn btn-default" ng-click="clickOnEdit()"  data-toggle="tooltip"-->
-                <!--data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_FILTER_BAND'|translate}}"-->
-                <!--ng-disabled=" urlImage === '' || urlImage ==='//:0' " >-->
-            <!--<i class="fa fa-pencil mr-2" aria-hidden="true"></i>Edit-->
-        <!--</button>-->
+
         <button type="button" class="btn btn-default" ng-click="clickOnEditPanel()"  data-toggle="tooltip"
                 data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_EDIT_PANEL'|translate}}"
                 ng-disabled=" urlImage === '' || urlImage ==='//:0' "> <!-- ng-disabled=" urlImage === '' || urlImage ==='//:0' "-->
             <i class="fa fa-image" aria-hidden="true"></i>
         </button>
 
-<!--        <button type="button" class="btn btn-default" ng-click="clickOnMask()"  data-toggle="tooltip"-->
-<!--                data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_MASK_MANAGER'|translate}}"-->
-<!--                ng-disabled=" urlImage === '' || urlImage ==='//:0' " >-->
-<!--            <i class="fa fa-image" aria-hidden="true"></i>-->
-<!--        </button>-->
-        <!--button type="button" class="btn btn-default" ng-click="clickOnFilter()"  data-toggle="tooltip"
-                data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_FILTER_BAND'|translate}}"
-                ng-disabled=" urlImage === '' || urlImage ==='//:0' " >
-            <i class="fa fa-filter" aria-hidden="true"></i>
-        </button-->
         <button type="button" class="btn btn-default" ng-class="{'zoomButtonActive': m_bIsActiveZoom}" ng-click="clickOnZoom()"  data-toggle="tooltip"
                 data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_ZOOM_ON'|translate}}"
                 ng-disabled=" urlImage === '' || urlImage ==='//:0' " >
@@ -37,18 +21,8 @@
         </button>
     </div>
 
-    <!--<div> &lt;!&ndash; ng-show="isLoaded"&ndash;&gt;-->
-        <!--<canvas id='imageviewcanvas'  width='1238px' height='707.797px' ></canvas>&lt;!&ndash; width='800' height='600'&ndash;&gt;-->
+    <canvas id='imageviewcanvas'  width='{{widthCanvas}}' height='{{heightCanvas}}' ></canvas>
 
-    <canvas id='imageviewcanvas'  width='{{widthCanvas}}' height='{{heightCanvas}}' ></canvas><!-- width='800' height='600'-->
-
-    <!--</div>-->
-    <!--<button ng-click="changeZoomSquareSize()"> resize </button>-->
-    <!--<button ng-click="onClick()"> Zoom </button>-->
-
-    <!--<div class="range-container">&lt;!&ndash; style="width: 100%;"&ndash;&gt;-->
-        <!--<input type="range" min="1" max="100" value="100" class="slider" ng-model="selectedValue" ng-change="changeZoomSquareSize(selectedValue)">&lt;!&ndash;ng-change="m_oController.maxSliderColourManipulation()"&ndash;&gt;-->
-    <!--</div>-->
 </div>
 
 <script>

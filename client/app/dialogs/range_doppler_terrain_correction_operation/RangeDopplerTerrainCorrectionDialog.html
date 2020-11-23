@@ -17,16 +17,10 @@
             <!-------------------------- BODY ------------------------->
             <div class="modal-body">
                 <h4>
-                    <!--<ul class="nav nav-tabs">-->
-                    <!--<li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>-->
-                    <!--<li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>-->
-                    <!--</ul>-->
+
                     <!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
-                    <!--<div ng-show="m_oController.firstTabIsOpen()">-->
                     <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
-                    <!--</div>-->
                     <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
-                    <!--<div ng-show="m_oController.secondTabIsOpen()" class="second-tab">-->
                     </br>
                     <form>
                         <fieldset class="my-input-text">
@@ -45,10 +39,7 @@
                             <!-- INPUT -->
                             <!-- digital elevation model-->
 
-                            <!--<div class="form-group">-->
-                            <!--<label for="RangeDopplerTerrainCorrectionDigitalElevationModel">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</label>-->
-                            <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDigitalElevationModel">-->
-                            <!--</div>-->
+
                             <div class="row">
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"> {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</div>
 
@@ -69,10 +60,7 @@
                                 </div>
                             </div>
                             <!--DEM Resamplig Method-->
-                            <!--<div class="form-group">-->
-                                <!--<label for="RangeDopplerTerrainCorrectionDEMResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</label>-->
-                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDEMResamplingMethod">-->
-                            <!--</div>-->
+
                             <div class="row">
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</div>
                                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -92,10 +80,7 @@
                                 </div>
                             </div>
                             <!-- Image resamplig Method-->
-                            <!--<div class="form-group">-->
-                                <!--<label for="RangeDopplerTerrainCorrectionImageResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</label>-->
-                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionImageResamplingMethod">-->
-                            <!--</div>-->
+
                             <div class="row">
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</div>
                                 <div class=" col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -129,20 +114,13 @@
                                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"><input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInMeter"></div>
                             </div>
 
-                            <!--<div class="form-group">-->
-                                <!--<label for="RangeDopplerTerrainCorrectionPixelSpacingM">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_M_LABEL"|translate}}</label>-->
-                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInMeter">-->
-                            <!--</div>-->
+
                             <div class="row">
                                 <!-- Pixel spacing(deg)-->
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</div>
                                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"> <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree"></div>
                             </div>
 
-                            <!--<div class="form-group">-->
-                                <!--<label for="RangeDopplerTerrainCorrectionPixelSpacingDeg">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</label>-->
-                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree">-->
-                            <!--</div>-->
 
                             <div class="row">
                                 <!--Map Projection-->
@@ -241,7 +219,6 @@
                                 </div>
                             </div>
 
-                            <!--<label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</label><button class="my-button">button</button>-->
 
                             <!--CheckBoxs-->
                             <div class="row">

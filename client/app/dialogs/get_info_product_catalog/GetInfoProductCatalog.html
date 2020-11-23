@@ -27,9 +27,6 @@
                             <div class="panel panel-default ">
                                 <div class="panel-heading pointer-cursor-hover" data-toggle="collapse" href="#productinfo"
                                      ng-model="arrowIconInfo" ng-init="arrowIconInfo = false" ng-click="arrowIconInfo = !arrowIconInfo;">
-                                    <!--ng-model="arrowIconBands" ng-init="arrowIconBands = false" ng-click="arrowIconBands = !arrowIconBands">-->
-                                    <!--<i class="fa fa-angle-double-down" aria-hidden="true" ng-hide="arrowIconBands"></i>-->
-                                    <!--<i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconBands"></i>-->
                                     <h4 class="panel-title">
                                         <i class="fa fa-angle-double-down" aria-hidden="true" ng-hide="arrowIconInfo"></i>
                                         <i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconInfo"></i>
@@ -57,20 +54,6 @@
                                                 {{m_oController.getFriendlyOperationName(m_oController.m_oProduct.category)}}
                                             </div>
                                         </div>
-                                        <!--<div class="row">-->
-                                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                                <!--<label>Bounding box:</label>-->
-                                            <!--</div>-->
-                                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                                                <!--&lt;!&ndash;{{m_oController.m_oProduct.boundingBox}}&ndash;&gt;-->
-                                                <!--&lt;!&ndash;<div id="getInfoProductCatalogMap" class="map" ></div>&ndash;&gt;-->
-                                                <!--&lt;!&ndash;<div id="test" class="map" ></div>&ndash;&gt;-->
-                                                <!--<div class="test">-->
-                                                    <!--<div id="getInfoProductCatalogMap" class="map" ></div>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-
-                                        <!--</div>-->
 
                                     </div>
                                 </div>
@@ -94,12 +77,6 @@
                                                 <i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconBands"></i>
                                                 {{"DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_BANDS_LABEL"|translate}}
                                             </div>
-                                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                                <!--<a href="" ng-click="m_oController.publicAllSelectedBands()">-->
-                                                    <!--<i class="fa fa-paper-plane" aria-hidden="true"></i>-->
-                                                    <!--Public all bands-->
-                                                <!--</a>-->
-                                            <!--</div>-->
                                         </div>
                                     </h4>
 
@@ -110,10 +87,11 @@
                                     <div class="panel-body" >
                                         <div class="table-container">
                                             <table class="table table-hover">
+                                                <caption>Products list</caption>
                                                 <thead>
-                                                <th>{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_NAME"|translate}}</th>
-                                                <th>{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_PUBLISHED"|translate}}</th>
-                                                <th>{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_WORKSPACE"|translate}}</th>
+                                                <th scope="col">{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_NAME"|translate}}</th>
+                                                <th scope="col">{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_PUBLISHED"|translate}}</th>
+                                                <th scope="col">{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_WORKSPACE"|translate}}</th>
                                                 </thead>
                                                 <tbody>
                                                 <tr ng-repeat="band in m_oController.getProductBands()">
@@ -180,13 +158,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                        <!--<div class="row">-->
-                            <!--<div id="imagestest"></div>-->
-                        <!--</div>-->
-                    <!--</div>-->
-
                 </h4>
 
             </div>

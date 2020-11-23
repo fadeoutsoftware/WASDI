@@ -174,10 +174,9 @@
                 {
                     return false;
                 }
-                else
-                {
-                    return true;
-                }
+
+                return true;
+
             }
             else
             {
@@ -186,10 +185,9 @@
                 {
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
+
             }
         }
         else

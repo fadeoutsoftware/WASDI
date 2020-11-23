@@ -67,7 +67,7 @@ function utilsIsStrNullOrEmpty(sString)
     if( sString && typeof sString != 'string')
     {
         throw "[Utils.isStrNullOrEmpty] The value is NOT a string";
-        return true;
+
     }
 
     if( sString && sString.length > 0)
@@ -321,7 +321,6 @@ function utilsCheckIfBrowserSupportLocalStorage()
         return false;
     }
 
-    return false;
 }
 
 /*
@@ -490,7 +489,6 @@ function utilsAddTextInCursorPosition(areaId, text) {
         var txtarea = document.getElementById(areaId);
         if (!txtarea) { return; }
 
-        var scrollPos = txtarea.scrollTop;
         var strPos = 0;
         var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ?
             "ff" : (document.selection ? "ie" : false ) );
@@ -502,7 +500,7 @@ function utilsAddTextInCursorPosition(areaId, text) {
         } else if (br == "ff") {
             strPos = txtarea.selectionStart;
         }
-        ngModel = utilsInsertSubstringIntoString(ngModel,strPos,0,text);
+        utilsInsertSubstringIntoString(ngModel,strPos,0,text);
 
     }
 
@@ -519,7 +517,7 @@ function utilsMakeFile(sText,textFile,sType){
     textFile = window.URL.createObjectURL(data);
 
     return textFile;
-};
+}
 
 function utilsSaveFile(sUrl,sFilename)
 {
@@ -540,7 +538,7 @@ function utilsSaveFile(sUrl,sFilename)
     window.URL.revokeObjectURL(sUrl);
 
     return true;
-};
+}
 
 function utilsUserUseIEBrowser()
 {
@@ -650,7 +648,7 @@ function utilsGetMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
         x:iMidPointX,
         y:iMidPointY
     }
-};
+}
 // function utilsCalcuMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
 //     if( utilsIsANumber(iPointAX) === false || utilsIsANumber(iPointAY) === false || utilsIsANumber(iPointBX) === false || utilsIsANumber(iPointBY) === false )
 //     {
@@ -707,8 +705,8 @@ function utilsIsPointInsideSquare(x, y, pointARectangleX, pointARectangleY, poin
         return true;
     } else {
         return false;
-    };
-};
+    }
+}
 
 function utilsConvertRGBAInObjectColor (sRGBA)
 {
@@ -742,16 +740,16 @@ function utilsConvertRGBAInObjectColor (sRGBA)
         oReturnValue.transparency = 1;
     }
     return oReturnValue;
-};
+}
 
 function utilsComponentToHex(c) {
     var hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
-};
+}
 
 function utilsRgbToHex(r, g, b) {
     return "#" + utilsComponentToHex(r) + utilsComponentToHex(g) + utilsComponentToHex(b);
-};
+}
 
 
 function utilsSearchTree(element, matchingTitle,sPropertyIdNodeName,sChildrenNodeName){

@@ -16,7 +16,7 @@ function nl2br(txt){
 }
 
 function writeit(from, e){
-    e = e || window.event;
+    // e = e || window.event;
     var w = $("writer");
     var tw = from.value;
     w.innerHTML = nl2br(tw);

@@ -30,7 +30,6 @@
                                 </div>
                                 <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9" ><!---->
 
-                                    <!--<multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_asSourceBandsSelected"></multiselect>-->
                                     <multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_asSourceBandsSelected"></multiselect>
                                 </div>
                             </div>
@@ -47,7 +46,7 @@
                                     <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                         <label>
                                             <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputIntensity"
-                                                   ng-click="m_oController.clickOnCheckBoxOutputIntensity()"><!--m_oController.m_oReturnValue.options.grSquarePixel=false; m_oController.m_iSquarePixel = '';-->
+                                                   ng-click="m_oController.clickOnCheckBoxOutputIntensity()">
                                             {{"DIALOG_MULTILOOKING_CHECKBOX_INDIPENDENT_LOOKS"|translate}}
 
                                         </label>
@@ -118,12 +117,6 @@
                     </div>
                 </div>
 
-                <!--<button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">-->
-                    <!--{{"DIALOG_CLOSE_BUTTON"|translate}}-->
-                <!--</button>-->
-                <!--<button type="button" ng-click="run(m_oController.m_oReturnValue)" class="my-button" data-dismiss="modal"  ng-disabled="m_oController.selectedProductIsEmpty()">-->
-                    <!--{{"DIALOG_RUN_BUTTON"|translate}}-->
-                <!--</button>-->
             </div>
         </div>
     </div>

@@ -22,12 +22,11 @@ var EdriftCheckImagesTool = (function() {
 
         this.initializeParameters();
 
-        var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
-    };
+    }
 
 
     EdriftCheckImagesTool.prototype.initializeParameters = function()
@@ -68,13 +67,13 @@ var EdriftCheckImagesTool = (function() {
         // Per tutte le orbite
         for (iOrbits = 0 ; iOrbits < asOrbits.length; iOrbits ++ ) {
 
-            sActualOrbit = asOrbits[iOrbits];
-            aiImagesPerOrbit = [];
+            var sActualOrbit = asOrbits[iOrbits];
+            var aiImagesPerOrbit = [];
 
             // Per tutti i giorni
             for (iResults= 0; iResults<aoResults.length; iResults ++) {
 
-                iImagePerOrbitPerDay = 0;
+                var iImagePerOrbitPerDay = 0;
 
                 // Se il giorno ha orbita => numero se no zero
                 for (i=0; i< aoResults[iResults].orbits.length; i++) {
@@ -109,7 +108,7 @@ var EdriftCheckImagesTool = (function() {
         var oController = this;
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
-        sJSON=JSON.stringify(this.m_oParameters);
+        var sJSON=JSON.stringify(this.m_oParameters);
 
         if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === true)
         {

@@ -13,7 +13,7 @@ var SnakeController = (function() {
             oClose("close", 500); // close, but give 300ms for bootstrap to animate
         };
 
-    };
+    }
 
     SnakeController.$inject = [
         '$scope',
