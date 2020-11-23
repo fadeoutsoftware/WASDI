@@ -438,7 +438,7 @@ var WasdiApplicationUIController = (function() {
                     let sWorkspaceId = data.stringValue;
 
                     // Get the view model of this workspace
-                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (oData, status) {
+                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (oData) {
                         if (utilsIsObjectNullOrUndefined(oData) == false)
                         {
                             // Ok execute

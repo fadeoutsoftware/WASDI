@@ -35,7 +35,6 @@ var WpsController = (function() {
         var oController = this;
         var capabilitiesCallback = function(response) {
 
-            var capabilities = response;
             // extract processes, add them to process-list
             //array of processes
             oController.m_aoProcesses = response.capabilities.processes;

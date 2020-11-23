@@ -248,7 +248,7 @@ var RootController = (function() {
 
                     //time by server
                     oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationStartDate);
-                    oEndTime = new Date(aoProcessesRunning[iIndexNewProcess].operationEndDate);
+                    var oEndTime = new Date(aoProcessesRunning[iIndexNewProcess].operationEndDate);
                     //pick time
                     result =  Math.abs(oEndTime-oStartTime);
                     //approximate result

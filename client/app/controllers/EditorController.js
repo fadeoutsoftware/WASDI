@@ -1414,7 +1414,7 @@ var EditorController = (function () {
 
         // Get Preview Dimension
         // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
-        var elementImagePreview = angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
+        angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
 
 
         // Initialize the info for the Image Preview Directive
@@ -2995,7 +2995,7 @@ var EditorController = (function () {
                 var heightMapContainer = oMapContainerSize.height;
                 var widthMapContainer = oMapContainerSize.width;
 
-                var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+                angular.element(document.querySelector('#imagepreviewcanvas'));
 
 
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
@@ -3904,7 +3904,7 @@ var EditorController = (function () {
                                         "action": function (obj) {
                                             //$node.original.fileName;
                                             if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                                var oProduct = oController.findProductByName($node.original.fileName);
+                                                oController.findProductByName($node.original.fileName);
                                                 // var oEntry = {
                                                 //     "fileName": oProduct.fileName,
                                                 //     "filePath": oProduct.filePath
