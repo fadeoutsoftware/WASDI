@@ -555,7 +555,8 @@ public class ProductResource {
 
 		// Check the file name
 		if (Utils.isNullOrEmpty(sName) || sName.isEmpty()) {
-			sName = "defaultName";
+			//get a random name
+			sName = "defaultName-" + Utils.GetRandomName();
 		}
 
 		// Take path
