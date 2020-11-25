@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -345,18 +349,71 @@ public class ProcessorsMediaResource {
 				
 		if(Utils.isNullOrEmpty(sImageName)) {
 			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name is null" );
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		//sanity check: is sImageName safe? It must be a file name, not a path
+		if(sImageName.contains("/") || sImageName.contains("\\")) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name looks like a path" );
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		String sPathFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
-		
-		File oImageFile = new File(sPathFolder + sImageName);
-		
-		if (oImageFile.exists()) {
-			oImageFile.delete();
+
+		java.nio.file.Path oNioDir = null;
+		try {
+			oNioDir = Paths.get(sPathFolder);
+		} catch (InvalidPathException  oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be obtained from OS due to " + oE );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		if(!java.nio.file.Files.isDirectory(oNioDir)) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: " + sPathFolder + " is not a directory" );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+		java.nio.file.Path oNioFile = oNioDir.resolve(oNioDir);
+		if(!java.nio.file.Files.exists(oNioFile)) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder);
+			return Response.status(Status.NOT_FOUND).build();
 		}
 		
-		return Response.status(200).build();
+		//delete file
+		try {
+			java.nio.file.Files.delete(oNioFile);
+		} catch (NoSuchFileException oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder + ": " + oE);
+			return Response.status(Status.NOT_FOUND).build();
+		} catch (DirectoryNotEmptyException oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: " + sImageName + " in " + sPathFolder + " is a non-empty directory and cannot be deleted: " + oE);
+			return Response.status(Status.BAD_REQUEST).build();
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be deleted due to " + oE );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		
+/*		
+		File oDir = new File(sPathFolder);
+		File oImageFile = new File(sPathFolder + sImageName);
+		
+		try {
+			//check the file exists in given directory
+			if(!FileUtils.directoryContains(oDir, oImageFile) || !oImageFile.exists()) {
+				Utils.debugLog("ProcessorsResource.deleteProcessorImage: file "  + sImageName + " does not exist");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+		} catch (IOException oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: could not check for file " + sImageName + " in dir " + sPathFolder + " due to: " + oE );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		
+
+		if(!oImageFile.delete()){
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: could not delete file " + sImageName );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+*/		
+		return Response.status(Status.OK).build();
 	}
 	
 	
