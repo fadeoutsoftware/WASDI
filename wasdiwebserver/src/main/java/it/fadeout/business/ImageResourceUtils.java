@@ -159,7 +159,9 @@ public class ImageResourceUtils {
 			String sFileName = FilenameUtils.removeExtension(sName);	
 			
 			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
-				oImage.delete();
+				if (!oImage.delete()) {
+					Utils.debugLog("Image resource Utils - File " + sFileName + " can't be deleted");
+					};
 				break;
 			} 
 			

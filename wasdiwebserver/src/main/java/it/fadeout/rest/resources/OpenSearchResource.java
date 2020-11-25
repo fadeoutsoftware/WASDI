@@ -468,7 +468,7 @@ public class OpenSearchResource {
 						}
 						
 						
-						float fMaxPages = iTotalResultsForProviders / iLimit;
+						float fMaxPages = iTotalResultsForProviders / (float)iLimit;
 						int iMaxPages = (int) Math.ceil(fMaxPages);
 						iMaxPages *= 2;
 						Utils.debugLog(s_sClassName + ".SearchList: Augmentented Max Pages: " + iMaxPages + " Total Results: " + iTotalResultsForProviders + " Limit " + iLimit);

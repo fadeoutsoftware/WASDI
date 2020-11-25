@@ -272,7 +272,7 @@ public class ProcessWorkspaceResource {
 			}
 			
 			// The main node needs to query also the others
-			if (Wasdi.s_sMyNodeCode == "wasdi") {
+			if (Wasdi.s_sMyNodeCode.equals("wasdi") ) {
 				
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
