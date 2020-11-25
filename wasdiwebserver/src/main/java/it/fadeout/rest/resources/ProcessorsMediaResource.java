@@ -370,7 +370,7 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
-		java.nio.file.Path oNioFile = oNioDir.resolve(oNioDir);
+		java.nio.file.Path oNioFile = oNioDir.resolve(sImageName);
 		if(!java.nio.file.Files.exists(oNioFile)) {
 			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder);
 			return Response.status(Status.NOT_FOUND).build();
