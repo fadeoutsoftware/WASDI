@@ -242,7 +242,7 @@ public class WasdiGraph {
 				// First Try: corresponding input plus workflowname
 				if (oGraphSettings.getInputFileNames() != null) {
 					if (oGraphSettings.getInputFileNames().size()>iNode) {
-						sOutputName = Utils.GetFileNameWithoutExtension(oGraphSettings.getInputFileNames().get(iNode));
+						sOutputName = Utils.getFileNameWithoutLastExtension(oGraphSettings.getInputFileNames().get(iNode));
 						sOutputName = sOutputName + "_" + oGraphSettings.getWorkflowName();						
 					}
 				}

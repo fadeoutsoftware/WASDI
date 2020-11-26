@@ -398,7 +398,7 @@ public class ProductResource {
 				oGeoPVM.setBbox(aoProductWorkspace.get(iProducts).getBbox());
 				
 				File oFile = new File(aoProductWorkspace.get(iProducts).getProductName());
-				String sName = Utils.GetFileNameWithoutExtension(oFile.getName());
+				String sName = Utils.getFileNameWithoutLastExtension(oFile.getName());
 				oGeoPVM.setProductFriendlyName(sName);
 				oGeoPVM.setName(sName);
 				
@@ -715,7 +715,7 @@ public class ProductResource {
 			// P.Campanella:20190724: try to fix the bug that pub bands are not deleted.
 			// Here the name has the extension. In the db the reference to the product is without
 			// Try to split the extension
-			String sProductNameWithoutExtension = Utils.GetFileNameWithoutExtension(sProductName);
+			String sProductNameWithoutExtension = Utils.getFileNameWithoutLastExtension(sProductName);
 			
 			
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();

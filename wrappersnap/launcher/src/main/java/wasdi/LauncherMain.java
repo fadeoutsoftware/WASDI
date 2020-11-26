@@ -1694,7 +1694,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Generate Layer Id
 			sLayerId = sInputFileNameOnly;
-			sLayerId = Utils.GetFileNameWithoutExtension(sFile);
+			sLayerId = Utils.getFileNameWithoutLastExtension(sFile);
 			sLayerId += "_" + oParameter.getBandName();
 
 			// Is already published?

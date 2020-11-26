@@ -312,7 +312,7 @@ public class CatalogResources {
 	private Response zipShapeFile(File oInitialFile) {
 		
 		// Remove extension
-		final String sNameToFind = Utils.GetFileNameWithoutExtension(oInitialFile.getName());
+		final String sNameToFind = Utils.getFileNameWithoutLastExtension(oInitialFile.getName());
 		
 		// Get parent folder
 		File oFolder = oInitialFile.getParentFile();
