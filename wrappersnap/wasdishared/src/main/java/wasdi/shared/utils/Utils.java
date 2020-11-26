@@ -6,6 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -302,10 +304,8 @@ public class Utils {
 	}
 
 	public static String generateRandomPassword() {
-		// String sPassword = UUID.randomUUID().toString().split("-")[0];
-		String sPassword = new String(UUID.randomUUID().toString());
+		String sPassword = UUID.randomUUID().toString();
 		sPassword = sPassword.replace('-', randomChar());
-		// XXX shuffle string before returning
 		return sPassword;
 	}
 
@@ -350,11 +350,17 @@ public class Utils {
 	}
 
 	public static String[] convertPolygonToArray(String sArea) {
+		String[] asAreaPoints = new String[0];
 		if (sArea.isEmpty() == true) {
-			return null;
+			return asAreaPoints;
 		}
-		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
-		String[] asAreaPoints = sCleanedArea.split(",");
+
+		try {
+			String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
+			asAreaPoints = sCleanedArea.split(",");
+		} catch (Exception oE) {
+			Utils.debugLog("Utils.convertPolygonToArray( " + sArea + "  ): could not extract area points due to " + oE); 
+		}
 		return asAreaPoints;
 	}
 
@@ -546,44 +552,53 @@ public class Utils {
 	 * @param sZipFile Zip file name only
 	 * @param sPath
 	 */
-	public static void unzip(String sZipFile, String sPath) {
+	public static void unzip(String sZipFile, String sPath) throws FileNotFoundException {
 		
 		ZipFile oZipFile = null;
-		
+		String sUtilsUnzip = "Utils.unzip: ";
+
+		if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
+			sPath+="/";
+		}
+		Path oDirPath = Paths.get(sPath);
+		if(!Files.isDirectory(oDirPath)) {
+			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): invalid directory, aborting");
+			throw new FileNotFoundException(sUtilsUnzip + sPath + " is not a valid directory");
+		}
+		if( sZipFile.contains("\\") || sZipFile.contains("/")) {
+			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): invalid file name, aborting");
+			throw new FileNotFoundException(sUtilsUnzip + sZipFile + " does not look like a valid file name");
+		}
+		Path oFilePath = oDirPath.resolve(sZipFile);
+		if(Files.exists(oFilePath)) {
+			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): file not found");
+			throw new FileNotFoundException(sUtilsUnzip + sZipFile + " not found in " + sPath);
+		}
+
 		try {
-			
-			if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
-				sPath+="/";
-			}
-			
 			String sZipFilePath = sPath+sZipFile;
-			
-			//create directories first, otherwise there's no place to write the files
 			oZipFile = new ZipFile(sZipFilePath);
-			
+
+			//phase 1: loop to create required directories, otherwise there's no place to unzip files
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
-			
 			while(aoEntries.hasMoreElements()) {
-				
 				ZipEntry oZipEntry = aoEntries.nextElement();
-				
 				if(oZipEntry.isDirectory()) {
+					
 					String sDirName = sPath+oZipEntry.getName();
 					File oDir = new File(sDirName);
 					if(!oDir.exists()) {
 						boolean bCreated = oDir.mkdirs();
 						if(!bCreated) {
-							throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+							throw new IOException(sUtilsUnzip + "cannot create directory " + oDir);
 						}
 					}
 				}
 			}
 			
-			//now unzip files
+			//phase 2: now unzip files
 			aoEntries = oZipFile.entries();
-			
 			while(aoEntries.hasMoreElements()) {
-				
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				
 				if(!oZipEntry.isDirectory()) {
@@ -591,7 +606,7 @@ public class Utils {
 					BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
 					String sFileName = sPath+oZipEntry.getName();
 					File oFile = new File(sFileName);
-					//oFile.createNewFile();
+
 					try (FileOutputStream oFileOutputStream = new FileOutputStream(oFile)) {
 						BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
 						Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
@@ -600,15 +615,15 @@ public class Utils {
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			Utils.debugLog(sUtilsUnzip + oE);
 		}
 		finally {
 			if (oZipFile != null) {
 				try {
 					oZipFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (IOException oE) {
+					Utils.debugLog(sUtilsUnzip + "finally: could not close the zip file due to: " + oE);
 				}
 			}
 		}
