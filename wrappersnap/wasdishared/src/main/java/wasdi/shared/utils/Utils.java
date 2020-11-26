@@ -115,19 +115,19 @@ public class Utils {
 		return true;
 	}
 
-	// FIXME it may not work as expected in the following case:
-	// the filename contains one or more dots ('.'):
-	// /home/username/my.lovely.file.name.zip
-		String sReturn = "";
+	/**
+	 * This method removes the last extension from a filename 
+	 * @param sInputFile the name of the input file
+	 * @return
+	 */
+	public static String getFileNameWithoutLastExtension(String sInputFile) {
 		File oFile = new File(sInputFile);
 		String sInputFileNameOnly = oFile.getName();
-
-		// Create a clean layer id: the file name without any extension
-		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-		if (asLayerIdSplit != null) {
-			if (asLayerIdSplit.length > 0) {
-				sReturn = asLayerIdSplit[0];
-			}
+		String sReturn = sInputFileNameOnly;
+		
+		if(sInputFileNameOnly.contains(".")) {
+			int iLastDot = sInputFileNameOnly.lastIndexOf('.');
+			sReturn = sInputFileNameOnly.substring(0, iLastDot);
 		}
 
 		return sReturn;
