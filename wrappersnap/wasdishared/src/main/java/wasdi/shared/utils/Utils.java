@@ -51,6 +51,11 @@ public class Utils {
 	public static int m_iSessionValidityMinutes = 24 * 60;
 	private static Random s_oUtilsRandom = new Random();
 
+
+	private Utils() {
+		throw new IllegalStateException("Utils.Utils: this is just a utility class, please do not instantiate it");
+	}
+	
 	public static boolean isNullOrEmpty(String sString) {
 		if (sString == null)
 			return true;
