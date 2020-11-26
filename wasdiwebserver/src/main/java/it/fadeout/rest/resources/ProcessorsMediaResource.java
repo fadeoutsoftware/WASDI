@@ -390,27 +390,6 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
-/*		
-		File oDir = new File(sPathFolder);
-		File oImageFile = new File(sPathFolder + sImageName);
-		
-		try {
-			//check the file exists in given directory
-			if(!FileUtils.directoryContains(oDir, oImageFile) || !oImageFile.exists()) {
-				Utils.debugLog("ProcessorsResource.deleteProcessorImage: file "  + sImageName + " does not exist");
-				return Response.status(Status.NOT_FOUND).build();
-			}
-		} catch (IOException oE) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: could not check for file " + sImageName + " in dir " + sPathFolder + " due to: " + oE );
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-		
-
-		if(!oImageFile.delete()){
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: could not delete file " + sImageName );
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-*/		
 		return Response.status(Status.OK).build();
 	}
 	
