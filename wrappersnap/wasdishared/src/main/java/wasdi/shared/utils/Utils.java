@@ -140,10 +140,8 @@ public class Utils {
 
 		// Create a clean layer id: the file name without any extension
 		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-		if (asLayerIdSplit != null) {
-			if (asLayerIdSplit.length > 0) {
-				sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
-			}
+		if (asLayerIdSplit != null && asLayerIdSplit.length > 0) {
+			sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
 		}
 
 		return sReturn;
