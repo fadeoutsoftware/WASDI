@@ -228,7 +228,7 @@ public class Utils {
 	 */
 	public static String getLocalDateOffsetFromUTCForJS() {
 		TimeZone oTimeZone = TimeZone.getDefault();
-		Calendar oCalendar = GregorianCalendar.getInstance(oTimeZone);
+		GregorianCalendar oCalendar = new GregorianCalendar(oTimeZone);
 		int iOffsetInMillis = oTimeZone.getOffset(oCalendar.getTimeInMillis());
 		
 		if (iOffsetInMillis == 0) return "Z";
