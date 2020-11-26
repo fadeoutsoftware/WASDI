@@ -68,6 +68,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.WpsProvidersRepository;
+import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
 import wasdi.shared.parameters.BaseParameter;
@@ -1194,6 +1195,13 @@ public class ProcessingResources {
 		// Log intro
 		Utils.debugLog("ProsessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
+		
+		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+			// Bad request
+			oResult.setIntValue(400);
+			oResult.setBoolValue(false);
+			return oResult;
+		}
 
 		try {
 
