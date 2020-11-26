@@ -260,20 +260,20 @@ public class Utils {
 	    String sOS = System.getProperty("os.name").toLowerCase();
 	    String sCommand = null;
 	    if (sOS.indexOf("win") >= 0) {
-	    	//("Check alive Windows mode. Pid: " + sPidStr);
+	    	//("Check alive Windows mode. Pid: " + sPidStr)
 	        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
 	    } else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
-	    	//("Check alive Linux/Unix mode. Pid: " + sPidStr);
+	    	//("Check alive Linux/Unix mode. Pid: " + sPidStr)
 	        sCommand = "ps -p " + sPidStr;            
 	    } else {
-	    	//("Unsuported OS: go on Linux");
+	    	//("Unsuported OS: go on Linux")
 	    	sCommand = "ps -p " + sPidStr;
 	    }
 	    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation
 	}
 	
 	private static boolean isProcessIdRunning(String sPid, String sCommand) {
-		//("Command " + sCommand );
+		//("Command " + sCommand )
 	    try {
 	        Runtime oRunTime = Runtime.getRuntime();
 	        Process oProcess = oRunTime.exec(sCommand);
@@ -615,7 +615,6 @@ public class Utils {
 	}
 	
 	///////// units conversion
-
 	private static String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O
 	
 	public static String getNormalizedSize(double dSize, String sInputUnit) {
