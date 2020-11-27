@@ -29,6 +29,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
@@ -197,11 +198,19 @@ public class ProcessWorkspaceResource {
 	@Path("/byapp")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
-		
+				
 		Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " )");
 
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
-			
+		
+		// checks that processor is in db -> EXPENSIVE OPERATION but needed to avoid url injection from users 
+		ProcessorRepository oProcessRepository = new ProcessorRepository();
+		if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
+			Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): invalid Processor name");
+			return aoProcessList;
+		}
+		
+		
 
 		try {
 			// Domain Check
