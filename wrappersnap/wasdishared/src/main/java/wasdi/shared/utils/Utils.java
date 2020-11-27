@@ -467,13 +467,13 @@ public class Utils {
 	 * @return True if the zip contains a .shp file, False otherwise
 	 */
 	public static boolean isShapeFileZipped(String sZipFile) {
+				
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
+		if(!oZipPath.toFile().exists()) {
+			return false;
+		}
+		try (ZipFile oZipFile = new ZipFile(oZipPath.toString())){
 		
-		ZipFile oZipFile = null;
-		
-		try {
-			
-			oZipFile = new ZipFile(sZipFile);
-			
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
 			
 			while(aoEntries.hasMoreElements()) {
@@ -487,15 +487,6 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		finally {
-			if (oZipFile != null) {
-				try {
-					oZipFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 		
 		return false;
 	}
@@ -506,13 +497,12 @@ public class Utils {
 	 * @return True if the zip contains a .shp file, False otherwise
 	 */
 	public static String getShpFileNameFromZipFile(String sZipFile) {
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize(); 
+		if(!oZipPath.toFile().exists()) {
+			return "";
+		}
 		
-		ZipFile oZipFile = null;
-		
-		try {
-			
-			oZipFile = new ZipFile(sZipFile);
-			
+		try(ZipFile oZipFile = new ZipFile(oZipPath.toString())) {
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
 			
 			while(aoEntries.hasMoreElements()) {
@@ -526,15 +516,6 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		finally {
-			if (oZipFile != null) {
-				try {
-					oZipFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 		
 		return "";
 	}
@@ -544,16 +525,14 @@ public class Utils {
 	 * Unzip "ZipFile" in Path (in place) 
 	 * @param sZipFile Zip file name only
 	 * @param sPath
+	 * @throws Exception 
 	 */
-	public static void unzip(String sZipFile, String sPath) throws FileNotFoundException {
+	public static void unzip(String sZipFile, String sPath) throws Exception {
 		
-		ZipFile oZipFile = null;
 		String sUtilsUnzip = "Utils.unzip: ";
 
-		if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
-			sPath+="/";
-		}
 		Path oDirPath = Paths.get(sPath);
+		oDirPath = oDirPath.toAbsolutePath().normalize();
 		if(!Files.isDirectory(oDirPath)) {
 			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): invalid directory, aborting");
 			throw new FileNotFoundException(sUtilsUnzip + sPath + " is not a valid directory");
@@ -563,28 +542,24 @@ public class Utils {
 			throw new FileNotFoundException(sUtilsUnzip + sZipFile + " does not look like a valid file name");
 		}
 		Path oFilePath = oDirPath.resolve(sZipFile);
-		if(Files.exists(oFilePath)) {
+		if(!oFilePath.toFile().exists()) {
 			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): file not found");
 			throw new FileNotFoundException(sUtilsUnzip + sZipFile + " not found in " + sPath);
 		}
 
-		try {
-			String sZipFilePath = sPath+sZipFile;
-			oZipFile = new ZipFile(sZipFilePath);
-
+		try(ZipFile oZipFile = new ZipFile(oFilePath.toString())) {
+			
 			//phase 1: loop to create required directories, otherwise there's no place to unzip files
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
 			while(aoEntries.hasMoreElements()) {
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				if(oZipEntry.isDirectory()) {
 					
-					String sDirName = sPath+oZipEntry.getName();
-					File oDir = new File(sDirName);
-					if(!oDir.exists()) {
-						boolean bCreated = oDir.mkdirs();
-						if(!bCreated) {
-							throw new IOException(sUtilsUnzip + "cannot create directory " + oDir);
-						}
+					Path oZippedDirEntry = oDirPath.resolve(oZipEntry.getName());
+					//do not catch exception here: we need to fail the unzip
+					Path oResultingPath = Files.createDirectories(oZippedDirEntry);
+					if(null == oResultingPath) {
+						throw new IOException(sUtilsUnzip + "cannot create directory " + oZippedDirEntry.toString() + " from zip file");
 					}
 				}
 			}
@@ -597,8 +572,7 @@ public class Utils {
 				if(!oZipEntry.isDirectory()) {
 					InputStream oInputStream = oZipFile.getInputStream(oZipEntry);
 					BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
-					String sFileName = sPath+oZipEntry.getName();
-					File oFile = new File(sFileName);
+					File oFile = oDirPath.resolve(oZipEntry.getName()).toFile();
 
 					try (FileOutputStream oFileOutputStream = new FileOutputStream(oFile)) {
 						BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
@@ -610,15 +584,8 @@ public class Utils {
 			}
 		} catch (Exception oE) {
 			Utils.debugLog(sUtilsUnzip + oE);
-		}
-		finally {
-			if (oZipFile != null) {
-				try {
-					oZipFile.close();
-				} catch (IOException oE) {
-					Utils.debugLog(sUtilsUnzip + "finally: could not close the zip file due to: " + oE);
-				}
-			}
+			//propagate the exception: we need to inform the caller that the unzip failed
+			throw oE;
 		}
 	}
 	
