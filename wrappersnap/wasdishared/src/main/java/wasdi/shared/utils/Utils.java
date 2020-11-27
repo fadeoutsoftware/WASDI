@@ -78,15 +78,13 @@ public class Utils {
 		int iLeftLimit = 48; // numeral '0'
 	    int iRightLimit = 122; // letter 'z'
 	 
-	    String sGeneratedString = s_oUtilsRandom.ints(iLeftLimit, iRightLimit + 1)
+	    return s_oUtilsRandom.ints(iLeftLimit, iRightLimit + 1)
     		//filter method above to leave out Unicode characters between 65 and 90
 	    	//to avoid out of range characters.
     		.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
     		.limit(iLen)
     		.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
     		.toString();
-	    
-	    return sGeneratedString;
 	}
 	
 	public static String GetRandomName() {
@@ -298,9 +296,7 @@ public class Utils {
 
 	
 	private static char randomChar() {
-		
-		char c = (char) (s_oUtilsRandom.nextInt(26) + 'a');
-		return c;
+		return (char) (s_oUtilsRandom.nextInt(26) + 'a');
 	}
 
 	public static String generateRandomPassword() {
@@ -351,7 +347,7 @@ public class Utils {
 
 	public static String[] convertPolygonToArray(String sArea) {
 		String[] asAreaPoints = new String[0];
-		if (sArea.isEmpty() == true) {
+		if (sArea.isEmpty()) {
 			return asAreaPoints;
 		}
 
@@ -432,10 +428,7 @@ public class Utils {
 		if (isNullOrEmpty(sUrl)) {
 			return false;
 		}
-		if (sUrl.startsWith("https://") || sUrl.startsWith("http://")) {
-			return true;
-		}
-		return false;
+		return (sUrl.startsWith("https://") || sUrl.startsWith("http://"));
 	}
 	
 	
@@ -673,6 +666,6 @@ public class Utils {
 	 * @return
 	 */
 	public static int getRandomNumber(int iMin, int iMax) {
-	    return (int) ((Math.random() * (iMax - iMin)) + iMin);
+		return iMin + new Random().nextInt(iMax - iMin);
 	}	
 }
