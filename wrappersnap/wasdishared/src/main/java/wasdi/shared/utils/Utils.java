@@ -317,12 +317,12 @@ public class Utils {
 		return true;
 	}
 
-	public static Boolean isServerNamePlausible(String sServer) {
+	public static boolean isServerNamePlausible(String sServer) {
 		if (isNullOrEmpty(sServer)) {
 			return false;
 		}
 		// Ok, let's inspect the server...
-		Boolean bRes = false;
+		boolean bRes = false;
 		bRes = InetAddressValidator.getInstance().isValid(sServer);
 		if (!bRes) {
 			// then maybe it's a domain
