@@ -51,11 +51,10 @@ public class ProcessorRepository extends  MongoRepository {
         try {
             Document oWSDocument = getCollection(m_sThisCollection).find(new Document("processorId", sProcessorId)).first();
 
-            String sJSON = oWSDocument.toJson();
-
-            Processor oProcessor = s_oMapper.readValue(sJSON,Processor.class);
-
-            return oProcessor;
+            if (null != oWSDocument) {
+            	String sJSON = oWSDocument.toJson();
+            	return s_oMapper.readValue(sJSON,Processor.class);
+            }
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -71,13 +70,12 @@ public class ProcessorRepository extends  MongoRepository {
     public Processor getProcessorByName(String sName) {
 
         try {
+        	
             Document oWSDocument = getCollection(m_sThisCollection).find(new Document("name", sName)).first();
-
-            String sJSON = oWSDocument.toJson();
-
-            Processor oProcessor = s_oMapper.readValue(sJSON,Processor.class);
-
-            return oProcessor;
+            if (null != oWSDocument) {
+            	String sJSON = oWSDocument.toJson();
+            	return s_oMapper.readValue(sJSON,Processor.class);
+            }
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
