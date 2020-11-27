@@ -50,7 +50,7 @@ import wasdi.shared.business.UserSession;
  */
 public class Utils {
 
-	public static int m_iSessionValidityMinutes = 24 * 60;
+	public static int s_iSessionValidityMinutes = 24 * 60;
 	private static Random s_oUtilsRandom = new Random();
 
 
@@ -111,7 +111,7 @@ public class Utils {
 		long lNow = new Date().getTime();
 		long lLastTouch = oLastTouch.getTime();
 
-		if ((lNow - lLastTouch) > m_iSessionValidityMinutes * 60 * 1000)
+		if ((lNow - lLastTouch) > s_iSessionValidityMinutes * 60 * 1000)
 			return false;
 
 		return true;

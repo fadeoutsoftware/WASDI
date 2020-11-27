@@ -114,9 +114,9 @@ public class Wasdi extends ResourceConfig {
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 
 		try {
-			Utils.m_iSessionValidityMinutes = Integer
-					.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.m_iSessionValidityMinutes));
-			Utils.debugLog("-------Session Validity [minutes]: " + Utils.m_iSessionValidityMinutes);
+			Utils.s_iSessionValidityMinutes = Integer
+					.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
+			Utils.debugLog("-------Session Validity [minutes]: " + Utils.s_iSessionValidityMinutes);
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
