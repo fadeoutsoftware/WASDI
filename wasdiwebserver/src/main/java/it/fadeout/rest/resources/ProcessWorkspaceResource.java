@@ -203,7 +203,7 @@ public class ProcessWorkspaceResource {
 
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
 		
-		// checks that processor is in db -> EXPENSIVE OPERATION but needed to avoid url injection from users 
+		// checks that processor is in db -> needed to avoid url injection from users 
 		ProcessorRepository oProcessRepository = new ProcessorRepository();
 		if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
 			Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): invalid Processor name");
