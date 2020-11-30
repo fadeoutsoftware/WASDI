@@ -36,6 +36,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -535,12 +536,12 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
+	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user
 		if (sName.contains("/") && sName.contains("\\")) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): Injection attempt from users");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
 			return Response.status(400).build();
 		}
 		
@@ -551,7 +552,7 @@ public class ProductResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): invalid session");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
 			return Response.status(401).build();
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -564,8 +565,14 @@ public class ProductResource {
 			sName = "defaultName";
 		}
 
+		// If workspace is not found in DB returns bad request
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
+			return Response.status(400).build();
+		}
 		// Take path
-		String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+		String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
+		String sPath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
 
 		File oOutputFilePath = new File(sPath + sName);
 		
@@ -593,12 +600,12 @@ public class ProductResource {
 			String sProcessObjId = Utils.GetRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspace);
+			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspace);
+			oParameter.setExchange(sWorkspaceId);
 			oParameter.setFilePath(oOutputFilePath.getAbsolutePath());
 			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
@@ -621,18 +628,18 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfilebylib")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
+	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user 
 		if (sName.contains("/") && sName.contains("\\")) { 
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): Injection attempt from users");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
 			return Response.status(400).build();
 		}
 		
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): invalid session");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
 			return Response.status(401).build();
 		}
 
@@ -643,6 +650,12 @@ public class ProductResource {
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
 			return Response.status(401).build();
 		}
+		
+		// If workspace is not found in DB returns bad request
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
+			return Response.status(403).build();
+		}
 
 		// Check the file name
 		if (Utils.isNullOrEmpty(sName) || sName.isEmpty()) {
@@ -651,7 +664,7 @@ public class ProductResource {
 		
 		try {
 			// Take path
-			String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+			String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
 			File oOutputFilePath = new File(sPath + sName);
 
@@ -714,6 +727,14 @@ public class ProductResource {
 				Utils.debugLog("ProductResource.DeleteProduct: " + sMessage);
 				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
+				return oReturn;
+			}
+			// If workspace is not found in DB returns bad request
+			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
+				String sMessage = "ProductResource.deleteProduct( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", ProductName: " + sProductName + " ): invalid workspace";
+				Utils.debugLog(sMessage);
+				oReturn.setStringValue(sMessage);
+				oReturn.setIntValue(403);
 				return oReturn;
 			}
 			
