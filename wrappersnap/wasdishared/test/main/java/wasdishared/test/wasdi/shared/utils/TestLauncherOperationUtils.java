@@ -1,15 +1,19 @@
+package wasdishared.test.wasdi.shared.utils;
+
 /**
  * Created by Marco Menapace on 2020-11-26
  * 
  * Fadeout software
  *
  */
+
+/*
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.params.Test;
 
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 
-package wasdishared.test.wasdi.shared.utils;
+
 
 
 public class TestLauncherOperationUtils {
@@ -29,3 +33,4 @@ public class TestLauncherOperationUtils {
 	}
 
 }
+*/
