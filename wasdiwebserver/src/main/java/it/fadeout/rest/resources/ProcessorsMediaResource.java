@@ -704,7 +704,7 @@ public class ProcessorsMediaResource {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 		
-		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+		if(oProcessor == null || Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
