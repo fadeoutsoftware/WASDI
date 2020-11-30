@@ -538,6 +538,12 @@ public class ProductResource {
 	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
 
+		// before any operation check that this is not an injection attempt from the user
+		if (sName.contains("/") && sName.contains("\\")) {
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): Injection attempt from users");
+			return Response.status(400).build();
+		}
+		
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return Response.status(401).build();
@@ -566,7 +572,7 @@ public class ProductResource {
 		Utils.debugLog("ProductResource.uploadfile: destination " + oOutputFilePath.getAbsolutePath());
 
 		if (oOutputFilePath.getParentFile().exists() == false) {
-			Utils.debugLog("ProductResource.uploadfile: Creating dirs" + oOutputFilePath.getParentFile().getAbsolutePath());
+			Utils.debugLog("ProductResource.uploadfile: Creating dirs " + oOutputFilePath.getParentFile().getAbsolutePath());
 			oOutputFilePath.getParentFile().mkdirs();
 		}
 
@@ -618,6 +624,12 @@ public class ProductResource {
 	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
 
+		// before any operation check that this is not an injection attempt from the user 
+		if (sName.contains("/") && sName.contains("\\")) { 
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): Injection attempt from users");
+			return Response.status(400).build();
+		}
+		
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " ): invalid session");
@@ -631,7 +643,6 @@ public class ProductResource {
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
 			return Response.status(401).build();
 		}
-		String sUserId = oUser.getUserId();
 
 		// Check the file name
 		if (Utils.isNullOrEmpty(sName) || sName.isEmpty()) {
@@ -705,6 +716,8 @@ public class ProductResource {
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
+			
+			
 			
 			// Get the file path
 			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
