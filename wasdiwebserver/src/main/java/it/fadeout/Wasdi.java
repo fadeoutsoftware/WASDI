@@ -49,6 +49,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
@@ -408,6 +409,14 @@ public class Wasdi extends ResourceConfig {
 	}
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+		
+		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+			// Bad request
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setIntValue(400);
+			oResult.setBoolValue(false);
+			return oResult;
+		}
 		
 		// Get the Ob Id
 		String sProcessObjId = oParameter.getProcessObjId();

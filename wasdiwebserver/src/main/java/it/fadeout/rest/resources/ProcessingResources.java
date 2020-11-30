@@ -1190,18 +1190,11 @@ public class ProcessingResources {
 	public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, String sParameter) throws IOException {
 		//@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
-
+		
 
 		// Log intro
 		Utils.debugLog("ProsessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
-		
-		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
-			// Bad request
-			oResult.setIntValue(400);
-			oResult.setBoolValue(false);
-			return oResult;
-		}
 
 		try {
 
