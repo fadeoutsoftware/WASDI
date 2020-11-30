@@ -540,7 +540,7 @@ public class ProductResource {
 		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user
-		if (sName.contains("/") && sName.contains("\\")) {
+		if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
 			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
 			return Response.status(400).build();
 		}
@@ -568,7 +568,7 @@ public class ProductResource {
 		// If workspace is not found in DB returns bad request
 		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
 			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
-			return Response.status(400).build();
+			return Response.status(403).build();
 		}
 		// Take path
 		String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
@@ -632,7 +632,7 @@ public class ProductResource {
 		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user 
-		if (sName.contains("/") && sName.contains("\\")) { 
+		if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) { 
 			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
 			return Response.status(400).build();
 		}
@@ -701,9 +701,17 @@ public class ProductResource {
 		
 		Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
 				+ sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " )");
+		
 
 		PrimitiveResult oReturn = new PrimitiveResult();
 		oReturn.setBoolValue(false);
+		
+		// before any operation check that this is not an injection attempt from the user 
+		if (sProductName.contains("/") || sProductName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
+			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Product name: " + sProductName + " ): Injection attempt from users");
+			oReturn.setIntValue(400);
+			return oReturn;
+		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		try {
