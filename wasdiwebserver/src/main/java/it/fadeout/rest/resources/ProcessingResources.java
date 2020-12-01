@@ -1197,6 +1197,12 @@ public class ProcessingResources {
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		try {
+			if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+				// Bad request
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
 
 			// Check the user
 			String sUserId = acceptedUserAndSession(sSessionId);
