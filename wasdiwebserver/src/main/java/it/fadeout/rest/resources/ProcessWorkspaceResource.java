@@ -71,24 +71,6 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 			
-			String[] asForbidden = {
-					"delete",
-					"insert",
-					"update",
-					/*
-					"$where",
-					*/
-					"$",
-					"{", "}",
-					"(", ")"
-			};
-			for (String sForbidden : asForbidden) {
-				if(sNamePattern.toLowerCase().contains(sForbidden)) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: forbidden regex received, aborting");
-					return aoProcessList;
-				}
-			}
-			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId +
