@@ -204,24 +204,24 @@ public class ProcessWorkspaceResource {
 
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
 		
-		// checks that processor is in db -> needed to avoid url injection from users 
-		ProcessorRepository oProcessRepository = new ProcessorRepository();
-		if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
-			Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): invalid Processor name");
-			return aoProcessList;
-		}
-		
-		
 
-		try {
+		try {			
 			// Domain Check
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): invalid session");
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): invalid session, aborting");
 				return aoProcessList;
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): is valid, but userId is not (" + oUser.getUserId() + "), aborting");
+				return aoProcessList;
+			}
+			
+			// checks that processor is in db -> needed to avoid url injection from users 
+			ProcessorRepository oProcessRepository = new ProcessorRepository();
+			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): invalid Processor name, aborting");
 				return aoProcessList;
 			}
 
