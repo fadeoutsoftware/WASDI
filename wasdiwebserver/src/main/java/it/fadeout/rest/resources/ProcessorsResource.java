@@ -1501,7 +1501,9 @@ public class ProcessorsResource  {
 					
 					// Computational Node: delete the zip file after update
 					try {
-						oProcessorFile.delete();
+						if (!oProcessorFile.delete()) {
+							Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
+						};
 					}
 					catch (Exception oEx) {
 						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
@@ -1819,8 +1821,12 @@ public class ProcessorsResource  {
 		    
 		    try {
 			    // Remove the zip?
-			    if (bDeleteFile) oProcessorZipFile.delete();		    	
-		    }
+			    if (bDeleteFile) {
+			    	if(!oProcessorZipFile.delete()){
+			    		Utils.debugLog("ProcessorsResource.unzipProcessor: can't delete local zip file");
+			    	}
+			    }
+			    }
 		    catch (Exception e) {
 				Utils.debugLog("ProcessorsResource.UnzipProcessor Exception Deleting Zip File " + e.toString());
 				return false;
