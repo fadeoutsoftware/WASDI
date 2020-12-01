@@ -32,6 +32,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.common.io.Files;
+import com.mchange.v1.util.DebugUtils;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
@@ -137,7 +138,9 @@ public class ProcessorsMediaResource {
 		if(sExtensionOfSavedLogo.isEmpty() == false){
 			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: delete old logo");
 		    File oOldLogo = new File(sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExtensionOfSavedLogo);
-		    oOldLogo.delete();
+		    if (!oOldLogo.delete()) {
+		    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: can't delete old logo");
+		   	}
 		}
 			
 		ImageResourceUtils.createDirectory(sPath);
@@ -149,7 +152,9 @@ public class ProcessorsMediaResource {
 	    File oTouchFile = new File(sOutputFilePath);
 	    
 	    try {
-			oTouchFile.createNewFile();
+			if (!oTouchFile.createNewFile()) {
+				Utils.debugLog("ProcessorsResource.uploadProcessorLogo: can't create new file");
+			}
 		} catch (IOException e) {
 			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: " + e.toString());
 			e.printStackTrace();
@@ -470,7 +475,9 @@ public class ProcessorsMediaResource {
 	    File oTouchFile = new File(sAbsoluteImageFilePath);
 	    
 	    try {
-			oTouchFile.createNewFile();
+			if (!oTouchFile.createNewFile()) {
+				Utils.debugLog("ProcessorsResource.uploadProcessorImage: can't create new file");
+			}
 		} catch (IOException e) {
 			Utils.debugLog("ProcessorsResource.uploadProcessorImage: " + e.toString());
 			e.printStackTrace();
