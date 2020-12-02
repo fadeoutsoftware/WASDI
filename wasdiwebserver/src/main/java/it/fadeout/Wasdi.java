@@ -201,7 +201,6 @@ public class Wasdi extends ResourceConfig {
 				String sSnapLogFolder = getInitParameter("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snapweb.log");
 
 				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
-				// ConsoleHandler handler = new ConsoleHandler();
 				oFileHandler.setLevel(Level.ALL);
 				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
 				oFileHandler.setFormatter(oSimpleFormatter);
@@ -297,14 +296,6 @@ public class Wasdi extends ResourceConfig {
 		return sParameterValue == null ? sDefault : sParameterValue;
 	}
 
-	/*
-	 * 
-	 */
-	/*
-	 * private void initPasswordAuthenticationParameters() {
-	 * PasswordAuthentication.setAlgorithm(getInitParameter("PWD_AUTHENTICATION",
-	 * "PBKDF2WithHmacSHA1")); }
-	 */
 	/**
 	 * Get Safe Random file name
 	 * 
@@ -463,8 +454,6 @@ public class Wasdi extends ResourceConfig {
 					return oResult;									
 				}
 				
-				// Get the JSON of the parameter
-				//String sPayload = MongoRepository.s_oMapper.writeValueAsString(oParameter);
 				Utils.debugLog("Wasdi.runProcess: serializing parameter to XML");
 				String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
 
@@ -673,7 +662,7 @@ public class Wasdi extends ResourceConfig {
 			oConnection.setDoOutput(true);
 			oConnection.setDoInput(true);
 			oConnection.setUseCaches(false);
-			int iBufferSize = 8192;//8*1024*1024;
+			int iBufferSize = 8192;//8*1024*1024
 			oConnection.setChunkedStreamingMode(iBufferSize);
 			Long lLen = oFile.length();
 			Utils.debugLog("Wasdi.httpPostFile: file length is: "+Long.toString(lLen));
@@ -720,8 +709,8 @@ public class Wasdi extends ResourceConfig {
 				}
 				if(null!=oResponseInputStream) {
 					Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-					String sMessage = oByteArrayOutputStream.toString();
-					System.out.println(sMessage);
+					String sMessage = "WasdiLib.uploadFile: " + oByteArrayOutputStream.toString();
+					Utils.debugLog(sMessage);
 				} else {
 					throw new NullPointerException("WasdiLib.uploadFile: stream is null");
 				}
@@ -748,13 +737,13 @@ public class Wasdi extends ResourceConfig {
 		try {
 			
 			if (Utils.isNullOrEmpty(sWorkflowId)) {
-				System.out.println("sWorkflowId is null or empty");
+				Utils.debugLog("sWorkflowId is null or empty");
 				return "";
 			}
 			
 			String sBaseUrl = sNodeUrl;
 			
-			if (Utils.isNullOrEmpty(sNodeUrl)) sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest";
+			if (Utils.isNullOrEmpty(sNodeUrl)) { sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest"; }
 
 		    String sUrl = sBaseUrl + "/processing/downloadgraph?workflowId="+sWorkflowId;
 		    
@@ -796,7 +785,7 @@ public class Wasdi extends ResourceConfig {
 						if(sAttachmentName.endsWith("\"")) {
 							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
 						}
-						System.out.println(sAttachmentName);
+						Utils.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
 						
 					}
 					
@@ -820,8 +809,8 @@ public class Wasdi extends ResourceConfig {
 					
 					return sOutputFilePath;
 				} else {
-					String sMessage = oConnection.getResponseMessage();
-					System.out.println(sMessage);
+					String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
+					Utils.debugLog(sMessage);
 					return "";
 				}
 
