@@ -80,4 +80,27 @@ public class WasdiFileUtils {
 		return oJson;
 	}
 	
+	/**
+	 * Check zip file entries name and path, according to:
+	 * https://wiki.sei.cmu.edu/confluence/display/java/IDS04-J.+Safely+extract+files+from+ZipInputStream
+	 * 
+	 * @param sFilename name of file in zip entry
+	 * @param sIntendedDir directory where entry should be extracted
+	 * @return canonical path of file name to extract
+	 * @throws java.io.IOException if entry is outside intended directory
+	 */
+	public static String validateZipEntryFilename(String sFilename, String sIntendedDir) throws java.io.IOException {
+		  File oFile = new File(sFilename);
+		  String sFileCanonicalPath = oFile.getCanonicalPath();
+		 
+		  File oDir = new File(sIntendedDir);
+		  String sDirCanonicalPath = oDir.getCanonicalPath();
+		   
+		  if (sFileCanonicalPath.startsWith(sDirCanonicalPath)) {
+		    return sFileCanonicalPath;
+		  } else {
+		    throw new IllegalStateException("File is outside extraction target directory.");
+		  }
+		}
+	
 }

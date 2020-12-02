@@ -36,6 +36,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class IDLProcessorEngine extends WasdiProcessorEngine{
 	
@@ -281,7 +282,11 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			    while(oZipEntry != null){
 			    	
 			    	try  {
-				    	String sZippedFileName = oZipEntry.getName();
+				    	String sZippedFileName = WasdiFileUtils.validateZipEntryFilename(oZipEntry.getName(), sProcessorFolder);
+				    	
+				    	if(sZippedFileName.contains("..")) {
+				    		continue;
+				    	}
 				    	
 				    	if (sZippedFileName.startsWith(sProcessorName)) {
 				    		bMyProcessorExists = true;
