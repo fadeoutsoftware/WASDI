@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
@@ -1411,16 +1412,13 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid session, aborting");
 				return Response.status(401).build();
 			}
-			
-			String sUserId = oUser.getUserId();
-			if (Utils.isNullOrEmpty(sUserId)) {
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: userid of user (from session) is null or empty, aborting");
 				return Response.status(401).build();
 			}
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
-			
 			if (oProcessorToUpdate == null) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unable to find processor " + sProcessorId + ", aborting");
 				return Response.serverError().build();
@@ -1443,8 +1441,6 @@ public class ProcessorsResource  {
 			// Set the processor path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 
-			//TODO remove
-			//File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + oProcessorToUpdate.getName());
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName()).toAbsolutePath().normalize();
 			File oProcessorPath = oDirPath.toFile();
 			if (!oProcessorPath.isDirectory()) {
@@ -1454,13 +1450,18 @@ public class ProcessorsResource  {
 			
 			// Create file
 			java.nio.file.Path oFilePath = oDirPath.resolve(java.nio.file.Paths.get(sProcessorId + ".zip")).toAbsolutePath().normalize();
-
-			//TODO remove
-			//File oProcessorFile = new File(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName() + "/" + sProcessorId + ".zip");
 			File oProcessorFile = oFilePath.toFile();
-			if(!oProcessorFile.exists()) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sProcessorId + ".zip does not exist. No update, aborting");
-				return Response.serverError().build();
+			if(oProcessorFile.exists()) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sProcessorId + ".zip exists. Deleting it...");
+//				try {
+//					if(!oProcessorFile.delete()) {
+//						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip exists. aborting");
+//						return Response.serverError().build();
+//					}
+//				} catch (Exception oE) {
+//					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip due to: " + oE + ", aborting");
+//					return Response.serverError().build();
+//				}
 			}
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
@@ -1797,7 +1798,7 @@ public class ProcessorsResource  {
 	}	
 
     
-	public boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
+	private boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
 		try {
 						
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists
