@@ -304,12 +304,12 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
-	public Boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-			return null;
+		if (oUser == null) {
+			return false;
 		}
 		String sAccount = oUser.getUserId();		
 		
