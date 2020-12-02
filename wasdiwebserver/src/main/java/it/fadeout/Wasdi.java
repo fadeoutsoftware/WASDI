@@ -630,7 +630,7 @@ public class Wasdi extends ResourceConfig {
 
 			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 			String sInputLine;
-			StringBuffer sResponse = new StringBuffer();
+			StringBuilder sResponse = new StringBuilder();
 	
 			while ((sInputLine = oInputBuffer.readLine()) != null) {
 				sResponse.append(sInputLine);
