@@ -39,7 +39,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
@@ -117,6 +116,12 @@ public class ProcessorsResource  {
 		oResult.setBoolValue(false);
 		
 		try {
+			if(sName.contains("/") || sName.contains("\\")) {
+				Utils.debugLog("ProcessorsResource.uploadProcessor: ( " +sSessionId + "...: " + sName + " is not a valid filename, aborting");
+				oResult.setIntValue(400);
+				return oResult;
+			}
+			
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: session is null or empty, aborting");
@@ -196,10 +201,6 @@ public class ProcessorsResource  {
 				oOutputStream.flush();
 				oOutputStream.close();				
 			}
-			
-			// TODO: check it is a zip file
-			// TODO: check it contains at least myProcessor.py
-			// XXX: check it also has a run
 			
 			if (Utils.isNullOrEmpty(sType)) {
 				sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
@@ -1453,15 +1454,15 @@ public class ProcessorsResource  {
 			File oProcessorFile = oFilePath.toFile();
 			if(oProcessorFile.exists()) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sProcessorId + ".zip exists. Deleting it...");
-//				try {
-//					if(!oProcessorFile.delete()) {
-//						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip exists. aborting");
-//						return Response.serverError().build();
-//					}
-//				} catch (Exception oE) {
-//					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip due to: " + oE + ", aborting");
-//					return Response.serverError().build();
-//				}
+				try {
+					if(!oProcessorFile.delete()) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip exists. aborting");
+						return Response.serverError().build();
+					}
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip due to: " + oE + ", aborting");
+					return Response.serverError().build();
+				}
 			}
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
@@ -1676,8 +1677,6 @@ public class ProcessorsResource  {
 			
 			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
 			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
-			//TODO remove
-			//File oFile = new File(sProcessorZipPath);
 			File oFile = oFilePath.toFile();
 			if(!oFile.exists()) {
 				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): zip file not found");
