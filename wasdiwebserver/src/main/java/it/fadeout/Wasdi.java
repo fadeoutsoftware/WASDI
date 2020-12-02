@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -69,10 +70,6 @@ public class Wasdi extends ResourceConfig {
 	@Context
 	ServletContext m_oContext;
 
-	/**
-	 * Flag for Debug Log: if true Authentication is disabled
-	 */
-	private static boolean s_bDebug = false;
 
 	/**
 	 * User for debug mode auto login
@@ -543,11 +540,11 @@ public class Wasdi extends ResourceConfig {
 	 * @return
 	 */
 	public static HashMap<String, String> getStandardHeaders(String sSessionId) {
-		HashMap<String, String> aoHeaders = new HashMap<String, String>();
-		aoHeaders.put("x-session-token", sSessionId);
-		aoHeaders.put("Content-Type", "application/json");
+		HashMap<String, String> asHeaders = new HashMap<String, String>();
+		asHeaders.put("x-session-token", sSessionId);
+		asHeaders.put("Content-Type", "application/json");
 		
-		return aoHeaders;
+		return asHeaders;
 	}
 
 	
@@ -728,6 +725,7 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 	
+	
 	/**
 	 * Download a file on the local PC
 	 * @param sWorkflowId File Name
@@ -749,9 +747,9 @@ public class Wasdi extends ResourceConfig {
 		    
 		    String sOutputFilePath = "";
 		    
-		    HashMap<String, String> asHeaders = getStandardHeaders(sSessionId);
 		    
-		    FileOutputStream oOutputStream = null;
+		    
+		    
 			
 			try {
 				URL oURL = new URL(sUrl);
@@ -759,12 +757,11 @@ public class Wasdi extends ResourceConfig {
 
 				// optional default is GET
 				oConnection.setRequestMethod("GET");
-				
-				if (asHeaders != null) {
-					for (String sKey : asHeaders.keySet()) {
-						oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-					}
+				HashMap<String, String> asHeaders = getStandardHeaders(sSessionId);
+				for (Entry<String,String> asEntry : asHeaders.entrySet()) {
+						oConnection.setRequestProperty(asEntry.getKey(),asEntry.getValue());
 				}
+				
 				
 				int responseCode =  oConnection.getResponseCode();
 
@@ -789,40 +786,34 @@ public class Wasdi extends ResourceConfig {
 						
 					}
 					
+
 					String sSavePath = getDownloadPath(oServletConfig) + "workflows/";
 					sOutputFilePath = sSavePath + sWorkflowId+".xml";
 					
 					File oTargetFile = new File(sOutputFilePath);
 					File oTargetDir = oTargetFile.getParentFile();
 					oTargetDir.mkdirs();
-
-					// opens an output stream to save into file
-					oOutputStream = new FileOutputStream(sOutputFilePath);
-
-					InputStream oInputStream = oConnection.getInputStream();
-
-					Util.copyStream(oInputStream, oOutputStream);
+				
 					
-					if(null!=oInputStream) {
-						oInputStream.close();
+					try(FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+						InputStream oInputStream = oConnection.getInputStream()){
+							// 	opens an output stream to save into file
+							Util.copyStream(oInputStream, oOutputStream);
+					}catch (Exception oEx) {
+						oEx.printStackTrace();
 					}
-					
 					return sOutputFilePath;
 				} else {
 					String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
 					Utils.debugLog(sMessage);
 					return "";
 				}
-
+ 				
 			} catch (Exception oEx) {
 				oEx.printStackTrace();
 				return "";
 			}
-			finally {
-				if(null!=oOutputStream) {
-					oOutputStream.close();
-				}				
-			}
+			
 			
 		}
 		catch (Exception oEx) {
