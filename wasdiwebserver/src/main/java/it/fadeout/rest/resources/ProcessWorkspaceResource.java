@@ -198,15 +198,18 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byapp")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
-				
+	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorName") String sProcessorName) {
 		Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " )");
-
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
-		
-
 		try {			
 			// Domain Check
+			if(Utils.isNullOrEmpty(sProcessorName)) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( " + sSessionId + ", " + sProcessorName + " ): invalid processor name, aborting");
+				return aoProcessList;
+			}
+			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
 				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): invalid session, aborting");
@@ -221,7 +224,7 @@ public class ProcessWorkspaceResource {
 			// checks that processor is in db -> needed to avoid url injection from users 
 			ProcessorRepository oProcessRepository = new ProcessorRepository();
 			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): invalid Processor name, aborting");
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
 				return aoProcessList;
 			}
 
