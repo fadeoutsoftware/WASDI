@@ -282,9 +282,9 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			    while(oZipEntry != null){
 			    	
 			    	try  {
-				    	String sZippedFileName = WasdiFileUtils.validateZipEntryFilename(oZipEntry.getName(), sProcessorFolder);
+				    	String sZippedFileName = oZipEntry.getName();
 				    	
-				    	if(sZippedFileName.contains("..")) {
+				    	if(sZippedFileName.contains("..") || sZippedFileName.startsWith("/") || sZippedFileName.startsWith("\\")) {
 				    		continue;
 				    	}
 				    	
@@ -294,11 +294,11 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				    		sZippedFileName = sProcessorName + ".pro";
 				    	}
 				    	
-				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;   
 				    	
-				    	if (oZipEntry.isDirectory()) {
+				    	if (oZipEntry.isDirectory()) { 
 				    		File oUnzippedDir = new File(sUnzipFilePath);
-			                oUnzippedDir.mkdirs();
+				    			oUnzippedDir.mkdirs();
 				    	}
 				    	else {
 					    	
