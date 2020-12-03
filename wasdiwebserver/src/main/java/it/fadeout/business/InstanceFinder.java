@@ -1,5 +1,6 @@
 package it.fadeout.business;
 
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -523,8 +524,8 @@ public class InstanceFinder {
 		
 		return sTime;
 	}
-	
-	private static Random s_oRandom = new Random();
+
+	private static SecureRandom s_oRandom = new SecureRandom();
 	
 	private static Polygon prepareAreaOfInterest(String sArea){
 //		String sArea = oOpportunitiesSearch.getPolygon();

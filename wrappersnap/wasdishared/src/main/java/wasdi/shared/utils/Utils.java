@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -48,7 +49,7 @@ import wasdi.shared.business.UserSession;
 public class Utils {
 
 	public static int s_iSessionValidityMinutes = 24 * 60;
-	private static Random s_oUtilsRandom = new Random();
+	private static SecureRandom s_oUtilsRandom = new SecureRandom();
 
 
 	private Utils() {
@@ -630,6 +631,6 @@ public class Utils {
 	 * @return
 	 */
 	public static int getRandomNumber(int iMin, int iMax) {
-		return iMin + new Random().nextInt(iMax - iMin);
+		return iMin + new SecureRandom().nextInt(iMax - iMin);
 	}	
 }
