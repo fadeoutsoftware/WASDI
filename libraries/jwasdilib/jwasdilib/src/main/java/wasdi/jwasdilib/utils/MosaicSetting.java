@@ -5,12 +5,12 @@ import java.util.ArrayList;
 public class MosaicSetting {
 
 	String crs = "GEOGCS[\"WGS84(DD)\", \r\n" + 
-    		"		  DATUM[\"WGS84\", \r\n" + 
-    		"			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" + 
-    		"		  PRIMEM[\"Greenwich\", 0.0], \r\n" + 
-    		"		  UNIT[\"degree\", 0.017453292519943295], \r\n" + 
-    		"		  AXIS[\"Geodetic longitude\", EAST], \r\n" + 
-    		"		  AXIS[\"Geodetic latitude\", NORTH]]";
+    		"\t\t  DATUM[\"WGS84\", \r\n" + 
+    		"\t\t\tSPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" + 
+    		"\t\t  PRIMEM[\"Greenwich\", 0.0], \r\n" + 
+    		"\t\t  UNIT[\"degree\", 0.017453292519943295], \r\n" + 
+    		"\t\t  AXIS[\"Geodetic longitude\", EAST], \r\n" + 
+    		"\t\t  AXIS[\"Geodetic latitude\", NORTH]]";
 	double southBound = -1.0;
 	double eastBound = -1.0;
 	double westBound = -1.0;
