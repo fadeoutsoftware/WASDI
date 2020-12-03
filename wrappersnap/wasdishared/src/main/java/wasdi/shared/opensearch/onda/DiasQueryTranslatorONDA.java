@@ -277,7 +277,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 			if(sQuery.substring(iStart).contains("timeliness")) {
 				sResult += " AND timeliness:";
-				iStart = sQuery.substring(iStart).indexOf("timeliness");
+				iStart = sQuery.indexOf("timeliness",iStart);
 				if(sQuery.substring(iStart).contains("Near Real Time") ){
 					sResult += "NRT";
 				} else if(sQuery.substring(iStart).contains("Short Time Critical")) {

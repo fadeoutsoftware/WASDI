@@ -171,6 +171,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	 * @param sKeyword
 	 * @param asStartEnd
 	 */
+	@Override
 	protected void parseInterval(String sQuery, String sKeyword, String[] asStartEnd) {
 		Preconditions.checkNotNull(sQuery, "DiasQueryTranslatorCREODIAS.parseInterval: query is null");
 		Preconditions.checkNotNull(sKeyword, "DiasQueryTranslatorCREODIAS.parseInterval: field keyword is null");

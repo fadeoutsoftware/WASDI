@@ -99,6 +99,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	 * @param iLimit
 	 * @return
 	 */
+	@Override
 	protected int readInt(String sQuery, String sKeyword) {
 		int iStart;
 		int iEnd;
@@ -321,6 +322,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	 * @param sKeyword
 	 * @param alStartEnd
 	 */
+	@Override
 	protected void parseInterval(String sQuery, String sKeyword, String[] asInterval) {
 		Preconditions.checkNotNull(sQuery, "DiasQueryTranslatorEODC.parseInterval: query is null");
 		Preconditions.checkNotNull(sKeyword, "DiasQueryTranslatorEODC.parseInterval: field keyword is null");

@@ -14,6 +14,10 @@ import wasdi.shared.utils.Utils;
 
 public class ImageResourceUtils {
 	
+	private ImageResourceUtils() {
+		// private constructor to hide the public implicit one 
+	};
+	
 	public static String s_sWebAppBasePath = "/var/lib/tomcat8/webapps/wasdiwebserver/";
 	
 	/**
@@ -40,7 +44,7 @@ public class ImageResourceUtils {
 		File oDirectory = new File(sPath);
 		//create directory
 	    if (! oDirectory.exists()){
-	    	oDirectory.mkdir();
+	    	oDirectory.mkdirs();
 	    }
 	} 
 	

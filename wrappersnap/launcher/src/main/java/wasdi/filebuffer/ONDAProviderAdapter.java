@@ -482,6 +482,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		if (sDownloadUser != null) {
 			Authenticator.setDefault(new Authenticator() {
+				@Override
 				protected PasswordAuthentication getPasswordAuthentication() {
 					try {
 						return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
