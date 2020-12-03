@@ -16,6 +16,10 @@ import java.util.Properties;
  *
  */
 public class ConfigReader {
+	
+	private ConfigReader() {
+		// private constructor to hide the public implicit one 
+	};
 
     static HashMap<String,String> m_aoProperties;
 
