@@ -22,7 +22,7 @@ public class SaveMetadataThread extends Thread {
 		m_oReadProduct = new WasdiProductReader();
 		m_oProductFile = new File(sProductFile);
 	}
-	
+	@Override
 	public void run() {
 		try {
 			

@@ -186,6 +186,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 			// dhus authentication
 			Authenticator.setDefault(new Authenticator() {
+				@Override
 				protected PasswordAuthentication getPasswordAuthentication() {
 					try {
 						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
@@ -305,6 +306,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			
 			if (sDownloadUser != null) {
 				Authenticator.setDefault(new Authenticator() {
+					@Override
 					protected PasswordAuthentication getPasswordAuthentication() {
 						try {
 							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
@@ -545,6 +547,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         
         // dhus authentication
         Authenticator.setDefault(new Authenticator() {
+        	@Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 try{
                     return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());

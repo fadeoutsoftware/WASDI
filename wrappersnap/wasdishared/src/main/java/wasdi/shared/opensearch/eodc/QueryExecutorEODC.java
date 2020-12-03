@@ -105,6 +105,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 		return sCount;
 	}
 
+	@Override
 	public int executeCount(String sQuery) throws IOException {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
