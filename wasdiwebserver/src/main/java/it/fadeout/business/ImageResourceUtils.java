@@ -14,6 +14,10 @@ import wasdi.shared.utils.Utils;
 
 public class ImageResourceUtils {
 	
+	private ImageResourceUtils() {
+		// private constructor to hide the public implicit one 
+	};
+	
 	public static String s_sWebAppBasePath = "/var/lib/tomcat8/webapps/wasdiwebserver/";
 	
 	/**
