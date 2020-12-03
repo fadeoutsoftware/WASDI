@@ -55,7 +55,7 @@ public class ZipStreamingOutput implements StreamingOutput {
 		ZipOutputStream oZipOutputStream = new ZipOutputStream(oOutputStream);
 		//TODO try reducing the compression to increase speed
 		//oZipOutputStream.setLevel(level);
-		InputStream oInputStream = null;
+		
 		try {
 			Set<String> oZippedFileNames = m_aoFileEntries.keySet();
 			int iTotalFiles = m_aoFileEntries.size();
@@ -70,41 +70,21 @@ public class ZipStreamingOutput implements StreamingOutput {
 					oZipOutputStream.closeEntry();
 				} else {
 					oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
-					oInputStream = new FileInputStream(oFileToZip);
-					long lCopiedBytes = 0;
-					long lThreshold = 2L*1024*1024*1024;
-					long lSize = oFileToZip.length(); 
-					if(lSize > lThreshold) {
-						lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
-					} else {
-						//IOUtils.copy(oInputStream, oZipOutputStream, 16384);
-						lCopiedBytes = IOUtils.copy(oInputStream, oZipOutputStream);
-					}
-					Utils.debugLog("ZipStreamingOutput.write: file " + oZippedName + "copied " + lCopiedBytes + " B out of " + oFileToZip.length());
-					//
-					//TODO try different buffer sizes
-					//					byte[] bytes = new byte[16384];
-					//					//byte[] bytes = new byte[1024];
-					//					int iLength = -1;
-					//					long lTotalLength = oFileToZip.length();
-					//					long lCumulativeLength = 0;
-					//					iLength = oInputStream.read(bytes);
-					//					//while ((iLength = oInputStream.read(bytes)) >= 0) {
-					//					while(iLength>=0) {
-					//						lCumulativeLength += iLength;
-					//						oZipOutputStream.write(bytes, 0, iLength);
-					//						oZipOutputStream.flush();
-					//						oBufferedOutputStream.flush();
-					//						oOutputStream.flush();
-					//						double dPerc = (double)lCumulativeLength / (double)lTotalLength;
-					//						dPerc = Math.floor(dPerc * 100.0) / 100.0;
-					//						//Wasdi.DebugLog("ZipStreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength + " = " + dPerc + "%");
-					//						iLength = oInputStream.read(bytes);
-					//					}
-					//
+					
+					try(InputStream oInputStream = new FileInputStream(oFileToZip)){
+						long lCopiedBytes = 0;
+						long lThreshold = 2L*1024*1024*1024;
+						long lSize = oFileToZip.length(); 
+						if(lSize > lThreshold) {
+							lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
+						} else {
+							lCopiedBytes = IOUtils.copy(oInputStream, oZipOutputStream);
+						}
+						Utils.debugLog("ZipStreamingOutput.write: file " + oZippedName + "copied " + lCopiedBytes + " B out of " + oFileToZip.length());
 
-					oZipOutputStream.closeEntry();
-					oInputStream.close();
+						oZipOutputStream.closeEntry();
+						oInputStream.close();
+					}
 				}
 				Utils.debugLog("ZipStreamingOutput.write: done file: "+oZippedName+" -> "+ iDone +" / " +iTotalFiles);
 			}
@@ -128,19 +108,6 @@ public class ZipStreamingOutput implements StreamingOutput {
 				catch (Exception oEx) {
 					Utils.debugLog("ZipStreamingOutput.write: OutputStream close exception: " + oEx.toString());
 				}				
-			}
-			// Close input
-			if( oInputStream !=null ) {
-				try {
-					oInputStream.close();
-					Utils.debugLog("ZipStreamingOutput.write: InputStream closed");						
-				}
-				catch (Exception oEx) {
-					Utils.debugLog("ZipStreamingOutput.write: InputStream close exception: " + oEx.toString());
-				}				
-				
-				
-				
 			}
 		}
 	}

@@ -298,8 +298,6 @@ public class ProcessingResources {
 			@QueryParam("public") Boolean bPublic) throws Exception {
 
 		Utils.debugLog("ProcessingResources.uploadGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkspace + ", Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " )");
-		
-		OutputStream oOutStream = null;
 
 		try {
 			// Check authorization
@@ -333,15 +331,12 @@ public class ProcessingResources {
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
 
-			oOutStream = new FileOutputStream(oWorkflowXmlFile);
-
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
-				oOutStream.write(ayBytes, 0, iRead);
+			try(OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFile)) {
+				while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+					oOutStream.write(ayBytes, 0, iRead);
+				}
+				oOutStream.flush();
 			}
-
-			oOutStream.flush();
-			// Close it in the finally clause
-			//oOutStream.close();
 
 			// Create Entity
 			SnapWorkflow oWorkflow = new SnapWorkflow();
@@ -359,41 +354,31 @@ public class ProcessingResources {
 				oWorkflow.setNodeUrl(Wasdi.getActualNode().getNodeBaseAddress());
 			}
 
-			// Read the graph
-			Graph oGraph = GraphIO.read(new FileReader(oWorkflowXmlFile));
+			try(FileReader oFileReader = new FileReader(oWorkflowXmlFile)){
+				// Read the graph
+				Graph oGraph = GraphIO.read(oFileReader);
+				// Take the nodes
+				Node[] aoNodes = oGraph.getNodes();
 
-			// Take the nodes
-			Node[] aoNodes = oGraph.getNodes();
-
-			for (int iNodes = 0; iNodes < aoNodes.length; iNodes++) {
-				Node oNode = aoNodes[iNodes];
-				// Search Read and Write nodes
-				if (oNode.getOperatorName().equals("Read")) {
-					oWorkflow.getInputNodeNames().add(oNode.getId());
-				} else if (oNode.getOperatorName().equals("Write")) {
-					oWorkflow.getOutputNodeNames().add(oNode.getId());
+				for (int iNodes = 0; iNodes < aoNodes.length; iNodes++) {
+					Node oNode = aoNodes[iNodes];
+					// Search Read and Write nodes
+					if (oNode.getOperatorName().equals("Read")) {
+						oWorkflow.getInputNodeNames().add(oNode.getId());
+					} else if (oNode.getOperatorName().equals("Write")) {
+						oWorkflow.getOutputNodeNames().add(oNode.getId());
+					}
 				}
+
+				// Save the Workflow
+				SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+				oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);
 			}
-
-			// Save the Workflow
-			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-			oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);
-
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResources.uploadGraph: " + oEx);
 			return Response.serverError().build();
 		}
-		finally {
-			if (oOutStream != null) {
-				try {
-					oOutStream.close();
-				}
-				catch (Exception oEx) {
-					Utils.debugLog("ProcessingResources.uploadGraph: Error " + oEx.toString());
-				}
-			}
-		}
-
+		
 		return Response.ok().build();
 	}
 
@@ -597,8 +582,6 @@ public class ProcessingResources {
 			oResult.setIntValue(401);
 			return oResult;
 		}
-		
-		FileInputStream oFileInputStream = null;
 
 		try {
 			String sUserId = oUser.getUserId();
@@ -639,45 +622,14 @@ public class ProcessingResources {
 				sWorkflowPath = sDownloadedWorflowPath;
 			}
 
-			oFileInputStream = new FileInputStream(sWorkflowPath);
-
-			String sWorkFlowName = oWF.getName().replace(' ', '_');
-
-			sGraphXml = IOUtils.toString(oFileInputStream, Charset.defaultCharset().name());
-			oGraphSettings.setGraphXml(sGraphXml);
-			oGraphSettings.setWorkflowName(sWorkFlowName);
-
-			oGraphSettings.setInputFileNames(oSnapWorkflowViewModel.getInputFileNames());
-			oGraphSettings.setInputNodeNames(oSnapWorkflowViewModel.getInputNodeNames());
-			oGraphSettings.setOutputFileNames(oSnapWorkflowViewModel.getOutputFileNames());
-			oGraphSettings.setOutputNodeNames(oSnapWorkflowViewModel.getOutputNodeNames());
-
-			String sSourceProductName = "";
-			String sDestinationProdutName = "";
-
-			if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
-				sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
-				// TODO: Output file name
-				sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
+			try(FileInputStream oFileInputStream = new FileInputStream(sWorkflowPath)){					String sWorkFlowName = oWF.getName().replace(' ', '_');							sGraphXml = IOUtils.toString(oFileInputStream, Charset.defaultCharset().name());					oGraphSettings.setGraphXml(sGraphXml);					oGraphSettings.setWorkflowName(sWorkFlowName);							oGraphSettings.setInputFileNames(oSnapWorkflowViewModel.getInputFileNames());					oGraphSettings.setInputNodeNames(oSnapWorkflowViewModel.getInputNodeNames());					oGraphSettings.setOutputFileNames(oSnapWorkflowViewModel.getOutputFileNames());					oGraphSettings.setOutputNodeNames(oSnapWorkflowViewModel.getOutputNodeNames());							String sSourceProductName = "";					String sDestinationProdutName = "";							if (oSnapWorkflowViewModel.getInputFileNames().size() > 00) {						sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);						// TODO: Output file name						sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;					}							return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
 			}
-
-			return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Error " + oEx.toString());
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
-		}
-		finally {
-			if (oFileInputStream != null) {
-				try {
-					oFileInputStream.close();
-				}
-				catch (Exception oEx) {
-					Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Error " + oEx.toString());
-				}				
-			}
 		}
 	}
 
