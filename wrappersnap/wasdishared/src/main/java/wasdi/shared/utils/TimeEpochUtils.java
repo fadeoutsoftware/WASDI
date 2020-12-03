@@ -15,6 +15,9 @@ import java.util.TimeZone;
  *
  */
 public class TimeEpochUtils {
+	private TimeEpochUtils() {
+		// / private constructor to hide the public implicit one 
+	}
 	
 	private static final String s_sTIMEZONE = "GMT";
 	private static final String s_sDATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";

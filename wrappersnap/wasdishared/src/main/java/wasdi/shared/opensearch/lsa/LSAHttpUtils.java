@@ -16,6 +16,9 @@ import org.apache.commons.net.io.Util;
 import wasdi.shared.utils.Utils;
 
 public class LSAHttpUtils {
+	private LSAHttpUtils() {
+		// / private constructor to hide the public implicit one 
+	}
 	
     public static String s_sLoginBaseUrl = "https://sso.collgs.lu/auth/realms/lucollgs/protocol/openid-connect/auth?";
     public static String s_sClientId = "client_id=account&response_mode=fragment&response_type=code&";

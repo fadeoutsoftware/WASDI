@@ -6,6 +6,10 @@ package wasdi.shared.business;
  *
  */
 public class ProcessorTypes {
+	
+	private ProcessorTypes() {
+		// / private constructor to hide the public implicit one 
+	}
 	public static String UBUNTU_PYTHON27_SNAP = "ubuntu_python_snap";
 	public static String UBUNTU_PYTHON37_SNAP = "ubuntu_python37_snap";
 	public static String IDL = "ubuntu_idl372";

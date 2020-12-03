@@ -12,6 +12,9 @@ import java.io.InputStream;
  * Created by s.adamo on 10/10/2016.
  */
 public class SerializationUtils {
+	private SerializationUtils() {
+		// / private constructor to hide the public implicit one 
+	}
 
     /**
      * This method saves (serializes) any java bean object into xml file

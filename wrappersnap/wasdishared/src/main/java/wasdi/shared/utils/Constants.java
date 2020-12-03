@@ -4,6 +4,9 @@ package wasdi.shared.utils;
  * Created by s.adamo on 08/02/2017.
  */
 public class Constants {
+	private Constants() {
+		// / private constructor to hide the public implicit one 
+	}
 
     //Resampling Factor
     public static final String NEAREST_NEIGHBOUR_NAME = "NEAREST_NEIGHBOUR";
