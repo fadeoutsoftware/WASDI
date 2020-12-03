@@ -44,7 +44,7 @@ public class ImageResourceUtils {
 		File oDirectory = new File(sPath);
 		//create directory
 	    if (! oDirectory.exists()){
-	    	oDirectory.mkdir();
+	    	oDirectory.mkdirs();
 	    }
 	} 
 	

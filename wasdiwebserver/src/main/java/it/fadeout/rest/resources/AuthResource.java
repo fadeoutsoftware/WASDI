@@ -2,6 +2,7 @@ package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -71,7 +72,6 @@ public class AuthResource {
 	
 	
 	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
-//	String m_oServletConfig.getInitParameter("DownloadRootPath") = m_oServletConfig.getInitParameter("DownloadRootPath"); //TODO TEST IT 
 	final String USER_IMAGE_FOLDER_NAME = "userImage";			
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
 	final UserRepository m_oUserRepository = new UserRepository();
@@ -441,12 +441,12 @@ public class AuthResource {
 			return Response.status(400).build();
 		}
 		
-		if ( ImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS) == false) {
+		if (!ImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS)) {
 			return Response.status(400).build();
 		}
-		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
 		ImageResourceUtils.createDirectory(sPath);
-	    String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+	    String sOutputFilePath = sPath + "/" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
 	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
 	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
 	    if(bIsSaved == false ){
