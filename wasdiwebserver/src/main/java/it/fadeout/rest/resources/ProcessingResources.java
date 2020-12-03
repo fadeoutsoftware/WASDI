@@ -235,7 +235,7 @@ public class ProcessingResources {
 			return oChoices.toArray(new SnapOperatorParameterViewModel[oChoices.size()]);
 		}
 		try {
-			Class oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
+			Class<?> oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
 
 			Field[] aoOperatorFields = oOperatorClass.getDeclaredFields();
 			for (Field oOperatorField : aoOperatorFields) {
