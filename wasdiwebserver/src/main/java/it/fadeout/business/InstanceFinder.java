@@ -33,7 +33,7 @@ public class InstanceFinder {
 
 	private InstanceFinder() {
 		// private constructor to hide the public implicit one 
-	};
+	}
 	/**
 	 * List of Orbit's CosmoSkyMed satellites references
 	 */

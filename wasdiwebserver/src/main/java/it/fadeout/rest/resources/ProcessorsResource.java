@@ -1518,7 +1518,7 @@ public class ProcessorsResource  {
 					try {
 						if (!oProcessorFile.delete()) {
 							Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
-						};
+						}
 					}
 					catch (Exception oEx) {
 						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
