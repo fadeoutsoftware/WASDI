@@ -16,7 +16,7 @@ public class ImageResourceUtils {
 	
 	private ImageResourceUtils() {
 		// private constructor to hide the public implicit one 
-	};
+	}
 	
 	public static String s_sWebAppBasePath = "/var/lib/tomcat8/webapps/wasdiwebserver/";
 	
@@ -165,7 +165,7 @@ public class ImageResourceUtils {
 			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
 				if (!oImage.delete()) {
 					Utils.debugLog("Image resource Utils - File " + sFileName + " can't be deleted");
-					};
+					}
 				break;
 			} 
 			
