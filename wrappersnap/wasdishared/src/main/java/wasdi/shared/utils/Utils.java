@@ -6,6 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,12 +14,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -38,8 +40,6 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
-import com.google.common.base.Preconditions;
-
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.UserSession;
 
@@ -48,9 +48,14 @@ import wasdi.shared.business.UserSession;
  */
 public class Utils {
 
-	public static int m_iSessionValidityMinutes = 24 * 60;
-	private static Random s_oUtilsRandom = new Random();
+	public static int s_iSessionValidityMinutes = 24 * 60;
+	private static SecureRandom s_oUtilsRandom = new SecureRandom();
 
+
+	private Utils() {
+		throw new IllegalStateException("Utils.Utils: this is just a utility class, please do not instantiate it");
+	}
+	
 	public static boolean isNullOrEmpty(String sString) {
 		if (sString == null)
 			return true;
@@ -71,15 +76,13 @@ public class Utils {
 		int iLeftLimit = 48; // numeral '0'
 	    int iRightLimit = 122; // letter 'z'
 	 
-	    String sGeneratedString = s_oUtilsRandom.ints(iLeftLimit, iRightLimit + 1)
+	    return s_oUtilsRandom.ints(iLeftLimit, iRightLimit + 1)
     		//filter method above to leave out Unicode characters between 65 and 90
 	    	//to avoid out of range characters.
     		.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
     		.limit(iLen)
     		.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
     		.toString();
-	    
-	    return sGeneratedString;
 	}
 	
 	public static String GetRandomName() {
@@ -104,26 +107,25 @@ public class Utils {
 		long lNow = new Date().getTime();
 		long lLastTouch = oLastTouch.getTime();
 
-		if ((lNow - lLastTouch) > m_iSessionValidityMinutes * 60 * 1000)
+		if ((lNow - lLastTouch) > s_iSessionValidityMinutes * 60 * 1000)
 			return false;
 
 		return true;
 	}
 
-	// FIXME it may not work as expected in the following case:
-	// the filename contains one or more dots ('.'):
-	// /home/username/my.lovely.file.name.zip
-	public static String GetFileNameWithoutExtension(String sInputFile) {
-		String sReturn = "";
+	/**
+	 * This method removes the last extension from a filename 
+	 * @param sInputFile the name of the input file
+	 * @return
+	 */
+	public static String getFileNameWithoutLastExtension(String sInputFile) {
 		File oFile = new File(sInputFile);
 		String sInputFileNameOnly = oFile.getName();
-
-		// Create a clean layer id: the file name without any extension
-		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-		if (asLayerIdSplit != null) {
-			if (asLayerIdSplit.length > 0) {
-				sReturn = asLayerIdSplit[0];
-			}
+		String sReturn = sInputFileNameOnly;
+		
+		if(sInputFileNameOnly.contains(".")) {
+			int iLastDot = sInputFileNameOnly.lastIndexOf('.');
+			sReturn = sInputFileNameOnly.substring(0, iLastDot);
 		}
 
 		return sReturn;
@@ -136,10 +138,8 @@ public class Utils {
 
 		// Create a clean layer id: the file name without any extension
 		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-		if (asLayerIdSplit != null) {
-			if (asLayerIdSplit.length > 0) {
-				sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
-			}
+		if (asLayerIdSplit != null && asLayerIdSplit.length > 0) {
+			sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
 		}
 
 		return sReturn;
@@ -224,7 +224,7 @@ public class Utils {
 	 */
 	public static String getLocalDateOffsetFromUTCForJS() {
 		TimeZone oTimeZone = TimeZone.getDefault();
-		Calendar oCalendar = GregorianCalendar.getInstance(oTimeZone);
+		GregorianCalendar oCalendar = new GregorianCalendar(oTimeZone);
 		int iOffsetInMillis = oTimeZone.getOffset(oCalendar.getTimeInMillis());
 		
 		if (iOffsetInMillis == 0) return "Z";
@@ -258,20 +258,20 @@ public class Utils {
 	    String sOS = System.getProperty("os.name").toLowerCase();
 	    String sCommand = null;
 	    if (sOS.indexOf("win") >= 0) {
-	    	//("Check alive Windows mode. Pid: " + sPidStr);
+	    	//("Check alive Windows mode. Pid: " + sPidStr)
 	        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
 	    } else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
-	    	//("Check alive Linux/Unix mode. Pid: " + sPidStr);
+	    	//("Check alive Linux/Unix mode. Pid: " + sPidStr)
 	        sCommand = "ps -p " + sPidStr;            
 	    } else {
-	    	//("Unsuported OS: go on Linux");
+	    	//("Unsuported OS: go on Linux")
 	    	sCommand = "ps -p " + sPidStr;
 	    }
 	    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation
 	}
 	
 	private static boolean isProcessIdRunning(String sPid, String sCommand) {
-		//("Command " + sCommand );
+		//("Command " + sCommand )
 	    try {
 	        Runtime oRunTime = Runtime.getRuntime();
 	        Process oProcess = oRunTime.exec(sCommand);
@@ -294,16 +294,12 @@ public class Utils {
 
 	
 	private static char randomChar() {
-		
-		char c = (char) (s_oUtilsRandom.nextInt(26) + 'a');
-		return c;
+		return (char) (s_oUtilsRandom.nextInt(26) + 'a');
 	}
 
 	public static String generateRandomPassword() {
-		// String sPassword = UUID.randomUUID().toString().split("-")[0];
-		String sPassword = new String(UUID.randomUUID().toString());
+		String sPassword = UUID.randomUUID().toString();
 		sPassword = sPassword.replace('-', randomChar());
-		// XXX shuffle string before returning
 		return sPassword;
 	}
 
@@ -315,12 +311,12 @@ public class Utils {
 		return true;
 	}
 
-	public static Boolean isServerNamePlausible(String sServer) {
+	public static boolean isServerNamePlausible(String sServer) {
 		if (isNullOrEmpty(sServer)) {
 			return false;
 		}
 		// Ok, let's inspect the server...
-		Boolean bRes = false;
+		boolean bRes = false;
 		bRes = InetAddressValidator.getInstance().isValid(sServer);
 		if (!bRes) {
 			// then maybe it's a domain
@@ -348,11 +344,17 @@ public class Utils {
 	}
 
 	public static String[] convertPolygonToArray(String sArea) {
-		if (sArea.isEmpty() == true) {
-			return null;
+		String[] asAreaPoints = new String[0];
+		if (sArea.isEmpty()) {
+			return asAreaPoints;
 		}
-		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
-		String[] asAreaPoints = sCleanedArea.split(",");
+
+		try {
+			String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
+			asAreaPoints = sCleanedArea.split(",");
+		} catch (Exception oE) {
+			Utils.debugLog("Utils.convertPolygonToArray( " + sArea + "  ): could not extract area points due to " + oE); 
+		}
 		return asAreaPoints;
 	}
 
@@ -424,10 +426,7 @@ public class Utils {
 		if (isNullOrEmpty(sUrl)) {
 			return false;
 		}
-		if (sUrl.startsWith("https://") || sUrl.startsWith("http://")) {
-			return true;
-		}
-		return false;
+		return (sUrl.startsWith("https://") || sUrl.startsWith("http://"));
 	}
 	
 	
@@ -466,13 +465,13 @@ public class Utils {
 	 * @return True if the zip contains a .shp file, False otherwise
 	 */
 	public static boolean isShapeFileZipped(String sZipFile) {
+				
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
+		if(!oZipPath.toFile().exists()) {
+			return false;
+		}
+		try (ZipFile oZipFile = new ZipFile(oZipPath.toString())){
 		
-		ZipFile oZipFile = null;
-		
-		try {
-			
-			oZipFile = new ZipFile(sZipFile);
-			
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
 			
 			while(aoEntries.hasMoreElements()) {
@@ -486,15 +485,6 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		finally {
-			if (oZipFile != null) {
-				try {
-					oZipFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 		
 		return false;
 	}
@@ -505,13 +495,12 @@ public class Utils {
 	 * @return True if the zip contains a .shp file, False otherwise
 	 */
 	public static String getShpFileNameFromZipFile(String sZipFile) {
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize(); 
+		if(!oZipPath.toFile().exists()) {
+			return "";
+		}
 		
-		ZipFile oZipFile = null;
-		
-		try {
-			
-			oZipFile = new ZipFile(sZipFile);
-			
+		try(ZipFile oZipFile = new ZipFile(oZipPath.toString())) {
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
 			
 			while(aoEntries.hasMoreElements()) {
@@ -525,15 +514,6 @@ public class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		finally {
-			if (oZipFile != null) {
-				try {
-					oZipFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 		
 		return "";
 	}
@@ -543,53 +523,55 @@ public class Utils {
 	 * Unzip "ZipFile" in Path (in place) 
 	 * @param sZipFile Zip file name only
 	 * @param sPath
+	 * @throws Exception 
 	 */
-	public static void unzip(String sZipFile, String sPath) {
+	public static void unzip(String sZipFile, String sPath) throws Exception {
 		
-		ZipFile oZipFile = null;
-		
-		try {
+		String sUtilsUnzip = "Utils.unzip: ";
+
+		Path oDirPath = Paths.get(sPath);
+		oDirPath = oDirPath.toAbsolutePath().normalize();
+		if(!Files.isDirectory(oDirPath)) {
+			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): invalid directory, aborting");
+			throw new FileNotFoundException(sUtilsUnzip + sPath + " is not a valid directory");
+		}
+		if( sZipFile.contains("\\") || sZipFile.contains("/")) {
+			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): invalid file name, aborting");
+			throw new FileNotFoundException(sUtilsUnzip + sZipFile + " does not look like a valid file name");
+		}
+		Path oFilePath = oDirPath.resolve(sZipFile);
+		if(!oFilePath.toFile().exists()) {
+			Utils.debugLog(sUtilsUnzip + "( " + sZipFile + ", " + sPath + " ): file not found");
+			throw new FileNotFoundException(sUtilsUnzip + sZipFile + " not found in " + sPath);
+		}
+
+		try(ZipFile oZipFile = new ZipFile(oFilePath.toString())) {
 			
-			if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
-				sPath+="/";
-			}
-			
-			String sZipFilePath = sPath+sZipFile;
-			
-			//create directories first, otherwise there's no place to write the files
-			oZipFile = new ZipFile(sZipFilePath);
-			
+			//phase 1: loop to create required directories, otherwise there's no place to unzip files
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
-			
 			while(aoEntries.hasMoreElements()) {
-				
 				ZipEntry oZipEntry = aoEntries.nextElement();
-				
 				if(oZipEntry.isDirectory()) {
-					String sDirName = sPath+oZipEntry.getName();
-					File oDir = new File(sDirName);
-					if(!oDir.exists()) {
-						boolean bCreated = oDir.mkdirs();
-						if(!bCreated) {
-							throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
-						}
+					
+					Path oZippedDirEntry = oDirPath.resolve(oZipEntry.getName());
+					//do not catch exception here: we need to fail the unzip
+					Path oResultingPath = Files.createDirectories(oZippedDirEntry);
+					if(null == oResultingPath) {
+						throw new IOException(sUtilsUnzip + "cannot create directory " + oZippedDirEntry.toString() + " from zip file");
 					}
 				}
 			}
 			
-			//now unzip files
+			//phase 2: now unzip files
 			aoEntries = oZipFile.entries();
-			
 			while(aoEntries.hasMoreElements()) {
-				
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				
 				if(!oZipEntry.isDirectory()) {
 					InputStream oInputStream = oZipFile.getInputStream(oZipEntry);
 					BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
-					String sFileName = sPath+oZipEntry.getName();
-					File oFile = new File(sFileName);
-					//oFile.createNewFile();
+					File oFile = oDirPath.resolve(oZipEntry.getName()).toFile();
+
 					try (FileOutputStream oFileOutputStream = new FileOutputStream(oFile)) {
 						BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
 						Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
@@ -598,22 +580,14 @@ public class Utils {
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			if (oZipFile != null) {
-				try {
-					oZipFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+		} catch (Exception oE) {
+			Utils.debugLog(sUtilsUnzip + oE);
+			//propagate the exception: we need to inform the caller that the unzip failed
+			throw oE;
 		}
 	}
 	
 	///////// units conversion
-
 	private static String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O
 	
 	public static String getNormalizedSize(double dSize, String sInputUnit) {
@@ -657,6 +631,6 @@ public class Utils {
 	 * @return
 	 */
 	public static int getRandomNumber(int iMin, int iMax) {
-	    return (int) ((Math.random() * (iMax - iMin)) + iMin);
+		return iMin + new SecureRandom().nextInt(iMax - iMin);
 	}	
 }

@@ -29,6 +29,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
@@ -69,6 +70,7 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: workspace id is null, aborting");
 				return aoProcessList;
 			}
+			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId +
@@ -196,22 +198,33 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byapp")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
-		
+	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorName") String sProcessorName) {
 		Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " )");
-
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
-			
-
-		try {
+		try {			
 			// Domain Check
+			if(Utils.isNullOrEmpty(sProcessorName)) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( " + sSessionId + ", " + sProcessorName + " ): invalid processor name, aborting");
+				return aoProcessList;
+			}
+			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): invalid session");
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): invalid session, aborting");
 				return aoProcessList;
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " ): is valid, but userId is not (" + oUser.getUserId() + "), aborting");
+				return aoProcessList;
+			}
+			
+			// checks that processor is in db -> needed to avoid url injection from users 
+			ProcessorRepository oProcessRepository = new ProcessorRepository();
+			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
+				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
 				return aoProcessList;
 			}
 
@@ -272,7 +285,7 @@ public class ProcessWorkspaceResource {
 			}
 			
 			// The main node needs to query also the others
-			if (Wasdi.s_sMyNodeCode == "wasdi") {
+			if (Wasdi.s_sMyNodeCode.equals("wasdi") ) {
 				
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();

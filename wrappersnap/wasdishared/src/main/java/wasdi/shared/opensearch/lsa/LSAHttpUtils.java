@@ -16,6 +16,9 @@ import org.apache.commons.net.io.Util;
 import wasdi.shared.utils.Utils;
 
 public class LSAHttpUtils {
+	private LSAHttpUtils() {
+		// / private constructor to hide the public implicit one 
+	}
 	
     public static String s_sLoginBaseUrl = "https://sso.collgs.lu/auth/realms/lucollgs/protocol/openid-connect/auth?";
     public static String s_sClientId = "client_id=account&response_mode=fragment&response_type=code&";
@@ -34,6 +37,9 @@ public class LSAHttpUtils {
     		// Login URL
     		String sLoginUrl = s_sLoginBaseUrl+s_sClientId+s_sRedirectUrl;
     		String sLoginPage = httpGetResults(sLoginUrl, oCookieManager);
+    		if (Utils.isNullOrEmpty(sLoginPage)) {
+    			throw new Exception("Authentication failed - httpGETResults returned NULL string");
+    		}
     		
     		// Get the path of the login link
     		String sActionToSearch = "action=\"";

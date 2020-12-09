@@ -413,6 +413,14 @@ public class WorkspaceResource {
 
 		Utils.debugLog("WorkspaceResource.DeleteWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId
 				+ ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " )");
+		
+		// before any operation check that this is not an injection attempt from the user 
+		if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
+			Utils.debugLog("WorkspaceResource.deleteWorkspace( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + 
+					", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + 
+					" ): Injection attempt from users");
+			return Response.status(400).build();
+		}
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);

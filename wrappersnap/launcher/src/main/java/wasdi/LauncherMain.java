@@ -111,7 +111,6 @@ import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.RegridSetting;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
-import wasdi.shared.parameters.WpsParameters;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
@@ -584,11 +583,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeGDALMultiSubset(oParameter);
 			}
 				break;
-			case WPS: {
-				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeWPS(oParameter);
-			}
-				break;
 			case REGRID: {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -720,17 +714,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		return sWorkspacePath;
 	}
 
-	private void executeWPS(WpsParameters oParameter) {
-		s_oLogger.debug("ExecuteWPS");
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		// Work in Progress
-		// issue #89
-		// https://github.com/fadeoutsoftware/WASDI/issues/89
-
-	}
 
 	/**
 	 * Downloads a new product
@@ -1694,7 +1677,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Generate Layer Id
 			sLayerId = sInputFileNameOnly;
-			sLayerId = Utils.GetFileNameWithoutExtension(sFile);
+			sLayerId = Utils.getFileNameWithoutLastExtension(sFile);
 			sLayerId += "_" + oParameter.getBandName();
 
 			// Is already published?

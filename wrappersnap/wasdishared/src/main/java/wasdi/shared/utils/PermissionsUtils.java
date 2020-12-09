@@ -15,6 +15,10 @@ import wasdi.shared.data.WorkspaceSharingRepository;
  *
  */
 public class PermissionsUtils {
+	
+	private PermissionsUtils() {
+		// / private constructor to hide the public implicit one 
+	}
 
 	/**
 	 * @param sUserId a valid userId

@@ -25,9 +25,9 @@ public class GeoServerManager {
 	
 	private final String m_sWorkspace = "wasdi";
 
-    String m_sRestUrl  = "http://localhost:8080/geoserver";
-    String m_sRestUser = "admin";
-    String m_sRestPassword   = "geoserver";
+    String m_sRestUrl;
+    String m_sRestUser;
+    String m_sRestPassword;
     GeoServerRESTPublisher m_oGsPublisher;
     GeoServerRESTReader m_oGsReader;
 

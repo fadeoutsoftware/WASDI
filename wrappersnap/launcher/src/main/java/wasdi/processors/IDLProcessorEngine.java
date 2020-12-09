@@ -7,6 +7,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +36,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class IDLProcessorEngine extends WasdiProcessorEngine{
 	
@@ -244,11 +248,30 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 
 	public boolean UnzipProcessor(String sProcessorFolder, String sProcessorName, String sZipFileName) {
 		try {
-			// Create the file
-			File oProcessorZipFile = new File(sProcessorFolder+sZipFileName);
+			Path oDirPath = Paths.get(sProcessorFolder);
+			if(!Files.isDirectory(oDirPath)) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + sProcessorFolder +
+						" is not a valid directory, aborting");
+				return false;
+			}
+
+			if(sZipFileName.contains("/") || sZipFileName.contains("\\") || !sZipFileName.endsWith(".zip") ) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + sZipFileName +
+						" is not a valid zip file name, aborting" );
+				return false;
+			}
+			
+			// file name dentro dir esista
+			Path oFilePath = Paths.get(sZipFileName);
+			File oProcessorZipFile = oDirPath.resolve(oFilePath).toAbsolutePath().normalize().toFile();
+			if(!oProcessorZipFile.exists()) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + oDirPath.resolve(oFilePath).toAbsolutePath().normalize().toString() +
+						" not found on file system, aborting" );
+				return false;
+			}
+			
 						
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists
-			
 			boolean bMyProcessorExists = false;
 			
 			byte[] ayBuffer = new byte[1024];
@@ -261,17 +284,21 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			    	try  {
 				    	String sZippedFileName = oZipEntry.getName();
 				    	
+				    	if(sZippedFileName.contains("..") || sZippedFileName.startsWith("/") || sZippedFileName.startsWith("\\")) {
+				    		continue;
+				    	}
+				    	
 				    	if (sZippedFileName.startsWith(sProcessorName)) {
 				    		bMyProcessorExists = true;
 				    		// Force extension case
 				    		sZippedFileName = sProcessorName + ".pro";
 				    	}
 				    	
-				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;   
 				    	
-				    	if (oZipEntry.isDirectory()) {
+				    	if (oZipEntry.isDirectory()) { 
 				    		File oUnzippedDir = new File(sUnzipFilePath);
-			                oUnzippedDir.mkdirs();
+				    			oUnzippedDir.mkdirs();
 				    	}
 				    	else {
 					    	

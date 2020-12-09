@@ -6,6 +6,9 @@ import java.util.Map;
 import org.apache.abdera.i18n.templates.Template;
 
 public class OpenSearchTemplate {
+	private OpenSearchTemplate() {
+		// / private constructor to hide the public implicit one 
+	}
 
 
 	private static final Template m_sSentinelTemplate =
@@ -24,10 +27,6 @@ public class OpenSearchTemplate {
 			new Template(
 					"{scheme}://{-append|.|host}fedeo.esa.int{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 
-	public OpenSearchTemplate()
-	{
-
-	}
 
 	public static String getHttpUrl(String qParams, String sStart, String sRows, String sOrderBy, String sOrder, String sProvider)
 	{

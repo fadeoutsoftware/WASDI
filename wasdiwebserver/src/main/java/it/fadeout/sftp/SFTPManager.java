@@ -78,29 +78,4 @@ public class SFTPManager {
 			return null;
 		}
 	}
-
-	
-	public static void main(String[] args) {
-		
-		String wsAddress = "ws://10.172.47.35:6703"; 
-		SFTPManager oManager = new SFTPManager(wsAddress);
-		String sAccount = "prova";
-		
-//		oManager.createAccount(sAccount, sAccount);		
-//		Wasdi.debugLog(Arrays.toString(oManager.list(sAccount)));
-		oManager.removeAccount(sAccount);		
-		
-		
-//		String sPassword = UUID.randomUUID().toString().split("-")[0];
-//		Wasdi.debugLog(sPassword);
-//		oManager.removeAccount(sAccount);
-//		if (!oManager.createAccount(sAccount, sPassword)) Wasdi.debugLog("NOOOO");
-//		//send email with new password
-//		MercuriusAPI oAPI = new MercuriusAPI("http://130.251.104.84:8080/it.fadeout.mercurius.webapi");			
-//		Message oMessage = new Message();
-//		oMessage.setTilte("Wasdi sftp account");
-//		oMessage.setSender("adminwasdi@acrotec.it");
-//		oMessage.setMessage("USER: " + sAccount + " - PASSWORD: " + sPassword);
-//		Wasdi.debugLog(oAPI.sendMailDirect("alessandro.burastero@gmail.com", oMessage));
-	}
 }

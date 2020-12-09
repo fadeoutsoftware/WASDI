@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -144,7 +145,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 							TimeUnit.SECONDS.sleep(lFirstWait);
 							bInit = false;
 						} else {
-							long lRandomWaitSeconds = new Random().longs(lLo, lUp).findFirst().getAsLong();
+							long lRandomWaitSeconds = new SecureRandom().longs(lLo, lUp).findFirst().getAsLong();
 							//prepare to wait longer next time
 							lLo = lRandomWaitSeconds;
 							lUp += lWaitStep;
@@ -185,7 +186,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				if(Utils.isNullOrEmpty(sResult)) {
 					//try again
 					++iAttempt;
-					long lRandomWaitSeconds = new Random().longs(lLo, lUp).findFirst().getAsLong();
+					long lRandomWaitSeconds = new SecureRandom().longs(lLo, lUp).findFirst().getAsLong();
 					//prepare to wait longer next time
 					lLo = lRandomWaitSeconds;
 					lUp += lWaitStep;

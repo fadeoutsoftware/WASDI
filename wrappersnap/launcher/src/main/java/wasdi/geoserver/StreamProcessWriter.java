@@ -18,7 +18,7 @@ public class StreamProcessWriter extends Thread {
         this.m_oInputStream = oIs;
         this.m_sType = sType;
     }
-
+    @Override
     public void run()
     {
         try

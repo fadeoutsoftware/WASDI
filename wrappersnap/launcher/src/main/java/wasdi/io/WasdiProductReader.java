@@ -149,7 +149,7 @@ public class WasdiProductReader {
             	
             	// Set name values
             	oRetViewModel.setFileName(oFile.getName());
-            	oRetViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getName()));
+            	oRetViewModel.setName(Utils.getFileNameWithoutLastExtension(oFile.getName()));
             	oRetViewModel.setProductFriendlyName(oRetViewModel.getName());
             	
             	// Create the sub folder

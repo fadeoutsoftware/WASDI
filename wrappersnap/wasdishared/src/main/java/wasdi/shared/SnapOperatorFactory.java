@@ -11,6 +11,10 @@ import org.esa.s2tbx.radiometry.TndviOp;
 import org.esa.snap.core.gpf.OperatorSpi;
 
 public class SnapOperatorFactory {
+	
+	private SnapOperatorFactory() {
+		// / private constructor to hide the public implicit one 
+	}
 
 	public static Class getOperatorClass(String sOperation) {
 		

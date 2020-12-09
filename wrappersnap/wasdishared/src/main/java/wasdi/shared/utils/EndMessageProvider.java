@@ -6,6 +6,7 @@
  */
 package wasdi.shared.utils;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +55,7 @@ public class EndMessageProvider {
 	}
 	
 	private String getRandom(List<String> asList) {
-		String sTmp = asList.get(((int)(Math.random()*100000))%asList.size()); 
+		String sTmp = asList.get(new SecureRandom().nextInt(asList.size())); 
 		return sTmp;
 	}
 	
