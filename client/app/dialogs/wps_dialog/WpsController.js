@@ -35,7 +35,6 @@ var WpsController = (function() {
         var oController = this;
         var capabilitiesCallback = function(response) {
 
-            capabilities = response;
             // extract processes, add them to process-list
             //array of processes
             oController.m_aoProcesses = response.capabilities.processes;
@@ -50,7 +49,7 @@ var WpsController = (function() {
             // $('#processes').append(_select.html());
             // $('#processes_execute').append(_select.html());
 
-            var capabilitiesDocument = capabilities.responseDocument;
+
             //made a list on info
             // $("textarea#capabilitiesText").val((new XMLSerializer()).serializeToString(capabilitiesDocument));
         };
@@ -70,10 +69,8 @@ var WpsController = (function() {
         var oController = this;
         var describeProcessCallback = function(response) {
 
-            processDescription = response;
+            var processDescription = response;
 
-            //set value of textarea
-            var processDocument = processDescription.responseDocument;
 
             // $("textarea#processDescriptionText").val((new XMLSerializer()).serializeToString(processDocument));
             oController.generateInput(processDescription.processOffering.process.inputs);
@@ -117,28 +114,28 @@ var WpsController = (function() {
 
     WpsController.prototype.literalDataInput = function(sIdentifier,dataType, uom, value){
         var inputGenerator = new InputGenerator();
-        var literalInput = inputGenerator.createLiteralDataInput_wps_1_0_and_2_0(sIdentifier, dataType, uom, value);
+        inputGenerator.createLiteralDataInput_wps_1_0_and_2_0(sIdentifier, dataType, uom, value);
     };
 
     WpsController.prototype.complexDataInput = function(sIdentifier, mimeType, schema,
                                                              encoding,  asReference, complexPayload){
         var inputGenerator = new InputGenerator();
-        var complexInput = inputGenerator.createComplexDataInput_wps_1_0_and_2_0(sIdentifier, mimeType, schema, encoding, asReference, complexPayload);
+        inputGenerator.createComplexDataInput_wps_1_0_and_2_0(sIdentifier, mimeType, schema, encoding, asReference, complexPayload);
     };
 
     WpsController.prototype.boundingBoxDataInput = function(sIdentifier, crs, dimension, lowerCorner, upperCorner){
         var inputGenerator = new InputGenerator();
-        var bboxInput = inputGenerator.createBboxDataInput_wps_1_0_and_2_0(sIdentifier, crs, dimension, lowerCorner, upperCorner);
+        inputGenerator.createBboxDataInput_wps_1_0_and_2_0(sIdentifier, crs, dimension, lowerCorner, upperCorner);
     };
 
     WpsController.prototype.literalDataOutputWPS1 = function(sIdentifier, bReference){
         var outputGenerator = new OutputGenerator();
-        var literalOutput = outputGenerator.createLiteralOutput_WPS_1_0(sIdentifier, bReference);
+        outputGenerator.createLiteralOutput_WPS_1_0(sIdentifier, bReference);
     };
     WpsController.prototype.complexDataOutputWPS1 = function(sIdentifier, bReferenceidentifier, mimeType, schema,
                                                          encoding, uom, asReference, title, abstractValue){
         var outputGenerator = new OutputGenerator();
-        var complexOutput = outputGenerator.createComplexOutput_WPS_1_0(sIdentifier, bReferenceidentifier, mimeType, schema,
+        outputGenerator.createComplexOutput_WPS_1_0(sIdentifier, bReferenceidentifier, mimeType, schema,
             encoding, uom, asReference, title, abstractValue);
     };
 

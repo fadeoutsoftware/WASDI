@@ -1,11 +1,9 @@
 package it.fadeout.rest.resources;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -14,8 +12,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +43,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
+import it.fadeout.mercurius.business.Message;
+import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
@@ -118,6 +116,12 @@ public class ProcessorsResource  {
 		oResult.setBoolValue(false);
 		
 		try {
+			if(sName.contains("/") || sName.contains("\\")) {
+				Utils.debugLog("ProcessorsResource.uploadProcessor: ( " +sSessionId + "...: " + sName + " is not a valid filename, aborting");
+				oResult.setIntValue(400);
+				return oResult;
+			}
+			
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: session is null or empty, aborting");
@@ -197,10 +201,6 @@ public class ProcessorsResource  {
 				oOutputStream.flush();
 				oOutputStream.close();				
 			}
-			
-			// TODO: check it is a zip file
-			// TODO: check it contains at least myProcessor.py
-			// XXX: check it also has a run
 			
 			if (Utils.isNullOrEmpty(sType)) {
 				sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
@@ -1398,6 +1398,11 @@ public class ProcessorsResource  {
 
 		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
 		try {
+			if(sProcessorId.contains("\\") || sProcessorId.contains("/")) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid processor name, aborting");
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: session is null or empty, aborting");
@@ -1405,34 +1410,29 @@ public class ProcessorsResource  {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " ): invalid session");
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid session, aborting");
 				return Response.status(401).build();
 			}
-			
-			String sUserId = oUser.getUserId();
-			if (Utils.isNullOrEmpty(sUserId)) {
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: userid of user (from session) is null or empty, aborting");
 				return Response.status(401).build();
 			}
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
-			
 			if (oProcessorToUpdate == null) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unable to find processor " + sProcessorId);
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unable to find processor " + sProcessorId + ", aborting");
 				return Response.serverError().build();
 			}
 			
-			
+			//not the owner?
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				
 				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-				
 				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing == null) {
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor not of user " + oUser.getUserId());
-					return Response.status(Status.UNAUTHORIZED).build();					
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor not of user " + oUser.getUserId() + ", aborting");
+					return Response.status(Status.FORBIDDEN).build();					
 				}
 				else {
 					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor of user " + oProcessorToUpdate.getUserId() + " is shared with " + oUser.getUserId());
@@ -1441,22 +1441,35 @@ public class ProcessorsResource  {
 			
 			// Set the processor path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
-			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + oProcessorToUpdate.getName());
-			
-			// Create folders
-			if (!oProcessorPath.exists()) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor Path " + oProcessorPath.getPath() + " does not exists. No update");
+
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName()).toAbsolutePath().normalize();
+			File oProcessorPath = oDirPath.toFile();
+			if (!oProcessorPath.isDirectory()) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor path " + oProcessorPath.getPath() + " does not exist or is not a directory. No update, aborting");
 				return Response.serverError().build();
 			}
 			
 			// Create file
-			File oProcessorFile = new File(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName() + "/" + sProcessorId + ".zip");
+			java.nio.file.Path oFilePath = oDirPath.resolve(java.nio.file.Paths.get(sProcessorId + ".zip")).toAbsolutePath().normalize();
+			File oProcessorFile = oFilePath.toFile();
+			if(oProcessorFile.exists()) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sProcessorId + ".zip exists. Deleting it...");
+				try {
+					if(!oProcessorFile.delete()) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip exists. aborting");
+						return Response.serverError().build();
+					}
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip due to: " + oE + ", aborting");
+					return Response.serverError().build();
+				}
+			}
+			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
 			
 			//save uploaded file
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
-			
 			
 			try (OutputStream oOutputStream = new FileOutputStream(oProcessorFile)) {
 				while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
@@ -1503,7 +1516,9 @@ public class ProcessorsResource  {
 					
 					// Computational Node: delete the zip file after update
 					try {
-						oProcessorFile.delete();
+						if (!oProcessorFile.delete()) {
+							Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
+						}
 					}
 					catch (Exception oEx) {
 						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
@@ -1637,7 +1652,7 @@ public class ProcessorsResource  {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor( Session: " + sSessionId + ", processorId: " + sProcessorId + " ): invalid session");
+				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -1653,9 +1668,20 @@ public class ProcessorsResource  {
 			
 			// Take path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
-			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
+			if(!oDirFile.isDirectory()) {
+				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): directory " + oDirPath.toString() + " not found");
+				return Response.serverError().build();
+			}
 			
-			File oFile = new File(sProcessorZipPath);
+			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
+			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
+			File oFile = oFilePath.toFile();
+			if(!oFile.exists()) {
+				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): zip file not found");
+				return Response.status(Status.NOT_FOUND).build();
+			}
 			
 			return zipProcessor(oFile, oProcessor);			
 		} 
@@ -1771,7 +1797,7 @@ public class ProcessorsResource  {
 	}	
 
     
-	public boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
+	private boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
 		try {
 						
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists
@@ -1821,8 +1847,12 @@ public class ProcessorsResource  {
 		    
 		    try {
 			    // Remove the zip?
-			    if (bDeleteFile) oProcessorZipFile.delete();		    	
-		    }
+			    if (bDeleteFile) {
+			    	if(!oProcessorZipFile.delete()){
+			    		Utils.debugLog("ProcessorsResource.unzipProcessor: can't delete local zip file");
+			    	}
+			    }
+			    }
 		    catch (Exception e) {
 				Utils.debugLog("ProcessorsResource.UnzipProcessor Exception Deleting Zip File " + e.toString());
 				return false;
@@ -1907,7 +1937,44 @@ public class ProcessorsResource  {
 			oProcessorSharing.setShareDate((double) oTimestamp.getTime());
 			oProcessorSharingRepository.insertProcessorSharing(oProcessorSharing);
 			
-			Utils.debugLog("Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			
+			try {
+				String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+				
+				if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+					Utils.debugLog("ProcessorsResource.shareProcessor: sMercuriusAPIAddress is null");
+				}
+				else {
+					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+					Message oMessage = new Message();
+					
+					String sTitle = "Processor " + oValidateProcessor.getName() + " Shared";
+					
+					oMessage.setTilte(sTitle);
+					
+					String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+					if (sSender==null) {
+						sSender = "wasdi@wasdi.net";
+					}
+					
+					oMessage.setSender(sSender);
+					
+					String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
+									
+					oMessage.setMessage(sMessage);
+			
+					Integer iPositiveSucceded = 0;
+									
+					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
+					
+					Utils.debugLog("ProcessorsResource.shareProcessor: notification sent with result " + iPositiveSucceded);
+				}
+					
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("ProcessorsResource.shareProcessor: notification exception " + oEx.toString());
+			}				
 			
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.shareProcessor: " + oEx);
@@ -1916,7 +1983,7 @@ public class ProcessorsResource  {
 			oResult.setBoolValue(false);
 
 			return oResult;
-		}
+		}	
 
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);

@@ -315,7 +315,7 @@ public class CatalogResources {
 	private Response zipShapeFile(File oInitialFile) {
 		
 		// Remove extension
-		final String sNameToFind = Utils.GetFileNameWithoutExtension(oInitialFile.getName());
+		final String sNameToFind = Utils.getFileNameWithoutLastExtension(oInitialFile.getName());
 		
 		// Get parent folder
 		File oFolder = oInitialFile.getParentFile();
@@ -445,6 +445,8 @@ public class CatalogResources {
 			String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
 			File oFile = new File(sTargetFilePath);
+			
+			Utils.debugLog("CatalogResources.checkFileByNode: path " + sTargetFilePath);
 			
 			boolean bExists = oFile.exists();
 			
@@ -600,9 +602,12 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
-	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId) {
+	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+		
+		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
+		if (Utils.isNullOrEmpty(sStyle)) sStyle = "";
 
-		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspace);
+		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspace + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
 
 		// Check user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -620,11 +625,7 @@ public class CatalogResources {
 			Utils.debugLog("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
 			return Response.serverError().build();
 		}
-		try {
-			// Create the ingest process
-			ProcessWorkspace oProcess = null;
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-						
+		try {						
 			// Generate the unique process id
 			String sProcessObjId = Utils.GetRandomName();
 			
@@ -634,6 +635,7 @@ public class CatalogResources {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			oParameter.setStyle(sStyle);
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 

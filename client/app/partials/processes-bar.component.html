@@ -1,10 +1,9 @@
 <div class="status-bar " id="status-bar" ng-show="m_oController.isProcessesBarVisible() == true" ng-class="{'open' : m_oController.isProcesssBarOpened() == true}">
 
     <div class="row-v4 always-visible-part">
-        <div class="col-v4-1 processes-list pt-1" ><!--style="margin:0; padding:0;" -->
+        <div class="col-v4-1 processes-list pt-1" >
             <div class="loadIcon" ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"><!---->
                 <smallinvaderfixed></smallinvaderfixed>
-                <!--<invader></invader>-->
             </div>
         </div>
         <div class="col-v4-8 d-flex flex-column justify-content-center processes-list last-process">
@@ -18,11 +17,8 @@
                         <div class="progress-single-process" >
                             <div class="progress-bar progress-bar-success" role="progressbar"  aria-valuemin="0" aria-valuemax="100" ng-style="{width:m_oController.m_oLastProcesses.progressPerc+'%' }">
                                 <span class="">{{m_oController.m_oLastProcesses.progressPerc}} %</span>
-                                <!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
                             </div>
-                            <!--<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:oProcess.progressPerc+'%' }" style="width: 100%;">-->
-                            <!--<span class="ng-binding">100 %</span>&lt;!&ndash; class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) &ndash;&gt;-->
-                            <!--</div>-->
+
                         </div>
 
                     </div>
@@ -31,7 +27,6 @@
                         <span class="label label-default">{{"ROOT_LABEL_NAME"|translate}}</span>
                         <div class="single-process">{{m_oController.m_oLastProcesses.productName}}</div>
                     </div>
-                    <!--{{oProcess.progressPerc}} %-->
                 </div>
             </div>
         </div>
@@ -39,7 +34,6 @@
         <div class="col-v4-auto ml-auto rabbit-connection-status-wrapper">
             <div class="icon-bg" ng-class="{'disconnected' : m_oController.isRabbitConnected() == false}"
                  data-toggle="tooltip" data-placement="top" title="Asynchronous Notifications {{m_oController.getConnectionStatusForTooltip()}}">
-                <!--<div class="loadIcon"><smallinvaderfixed></smallinvaderfixed></div>-->
                 <i class="icon fa fa-plug" aria-hidden="true"></i>
             </div>
         </div>
@@ -72,7 +66,7 @@
             <div class="col-v4-12 h-100">
                 <div class="processes-list" ng-show="m_oController.m_bIsOpenNav || 1 == 1">
 
-                    <table class="table table-responsive table-striped " id="tableProcesses" >
+                    <table class="table table-responsive table-striped " id="tableProcesses" aria-label="table process" >
                         <thead>
                         <tr>
                             <th></th>
@@ -90,7 +84,6 @@
 
                         <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning  | orderBy:'-' track by $index ">
                             <td>
-                                <!--<invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>-->
                                 <smallinvaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'"></smallinvaderfixed>
                                 <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
                                 <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
@@ -131,14 +124,10 @@
                             </td>
                             <td class="over-icon" ng-click="m_oController.openErrorLogsDialog(oProcess)" >
                                 <div ng-show="oProcess.operationType === 'RUNIDL' || oProcess.operationType === 'RUNPROCESSOR'">
-                                    <!--<i class="fa fa-file-text-o" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>-->
                                     <i class="fa fa-file-text" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>
 
                                 </div>
-                                <!--<button class="btn btn-default btn-wasdi" ng-click="m_oController.openErrorLogsDialog(oProcess)"-->
-                                         <!--&gt;&lt;!&ndash; ng-show="oProcess.operationType === 'RUNIDL' || oProcess.status === 'RUNPROCESSOR'" &ndash;&gt;-->
-                                    <!--Logs-->
-                                <!--</button>-->
+
                             </td>
                         </tr>
 
@@ -155,13 +144,6 @@
             </div>
         </div>
 
-        <!--<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 ">
-            <button class="btn my-button" ng-click="m_oController.openProcessLogsDialog()">
-                <i class="fa fa-refresh" aria-hidden="true"></i>
-                <h5>Load more...</h5>
-            </button>
-        </div>-->
 
-        <!--</div>-->
     </div>
 </div>

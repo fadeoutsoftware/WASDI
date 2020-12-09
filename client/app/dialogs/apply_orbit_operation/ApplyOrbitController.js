@@ -114,7 +114,7 @@ var ApplyOrbitController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
             });
 
-    };
+    }
 
     ApplyOrbitController.prototype.nameIsUsed = function()
     {

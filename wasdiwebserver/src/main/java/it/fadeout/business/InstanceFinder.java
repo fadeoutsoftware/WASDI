@@ -1,5 +1,6 @@
 package it.fadeout.business;
 
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,14 +17,10 @@ import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.ISatellite;
-import org.nfs.orbits.sat.LookingType;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SensorMode;
-import org.nfs.orbits.sat.SwathArea;
-import org.nfs.orbits.sat.ViewAngle;
-import org.nfs.orbits.sat.swathSize;
 
 import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
 import it.fadeout.viewmodels.SatelliteFilterViewModel;
@@ -34,6 +31,9 @@ import wasdi.shared.utils.Utils;
 
 public class InstanceFinder {
 
+	private InstanceFinder() {
+		// private constructor to hide the public implicit one 
+	}
 	/**
 	 * List of Orbit's CosmoSkyMed satellites references
 	 */
@@ -527,8 +527,8 @@ public class InstanceFinder {
 		
 		return sTime;
 	}
-	
-	private static Random s_oRandom = new Random();
+
+	private static SecureRandom s_oRandom = new SecureRandom();
 	
 	private static Polygon prepareAreaOfInterest(String sArea){
 //		String sArea = oOpportunitiesSearch.getPolygon();

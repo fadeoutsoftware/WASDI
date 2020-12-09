@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +32,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.common.io.Files;
+import com.mchange.v1.util.DebugUtils;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
@@ -113,13 +118,13 @@ public class ProcessorsMediaResource {
 		} 
 		else {
 			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: File metadata not available");
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		// Check if this is an accepted file extension
 		if(ImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
 			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: extension invalid");
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		// Take path
@@ -133,7 +138,9 @@ public class ProcessorsMediaResource {
 		if(sExtensionOfSavedLogo.isEmpty() == false){
 			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: delete old logo");
 		    File oOldLogo = new File(sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExtensionOfSavedLogo);
-		    oOldLogo.delete();
+		    if (!oOldLogo.delete()) {
+		    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: can't delete old logo");
+		   	}
 		}
 			
 		ImageResourceUtils.createDirectory(sPath);
@@ -145,7 +152,9 @@ public class ProcessorsMediaResource {
 	    File oTouchFile = new File(sOutputFilePath);
 	    
 	    try {
-			oTouchFile.createNewFile();
+			if (!oTouchFile.createNewFile()) {
+				Utils.debugLog("ProcessorsResource.uploadProcessorLogo: can't create new file");
+			}
 		} catch (IOException e) {
 			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: " + e.toString());
 			e.printStackTrace();
@@ -156,7 +165,7 @@ public class ProcessorsMediaResource {
 	    
 	    if(bIsSaved == false){
 	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo:  not saved!");
-	    	return Response.status(400).build();
+	    	return Response.status(Status.BAD_REQUEST).build();
 	    }
 	    
 	    boolean bIsResized = oOutputLogo.resizeImage(LOGO_SIZE, LOGO_SIZE);
@@ -197,7 +206,7 @@ public class ProcessorsMediaResource {
 	    
 	    oProcessorRepository.updateProcessorDate(oProcessor);
 	    
-		return Response.status(200).build();
+		return Response.status(Status.OK).build();
 	}	
 	
 	@GET
@@ -244,7 +253,7 @@ public class ProcessorsMediaResource {
 		
 		//Check the logo and extension
 		if(oLogo == null || sLogoExtension.isEmpty() ){
-			return Response.status(204).build();
+			return Response.status(Status.NO_CONTENT).build();
 		}
 		//prepare buffer and send the logo to the client 
 		ByteArrayInputStream abImageLogo = oLogo.getByteArrayImage();
@@ -298,7 +307,7 @@ public class ProcessorsMediaResource {
 		
 		//Check the logo and extension
 		if(oImage == null || sLogoExtension.isEmpty() ){
-			return Response.status(204).build();
+			return Response.status(Status.NO_CONTENT).build();
 		}
 		//prepare buffer and send the logo to the client 
 		ByteArrayInputStream abImage = oImage.getByteArrayImage();
@@ -329,9 +338,7 @@ public class ProcessorsMediaResource {
 		}
 		
 		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
-			
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			
 			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
@@ -345,18 +352,50 @@ public class ProcessorsMediaResource {
 				
 		if(Utils.isNullOrEmpty(sImageName)) {
 			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name is null" );
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+
+		//sanity check: is sImageName safe? It must be a file name, not a path
+		if(sImageName.contains("/") || sImageName.contains("\\")) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name looks like a path" );
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		String sPathFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
-		
-		File oImageFile = new File(sPathFolder + sImageName);
-		
-		if (oImageFile.exists()) {
-			oImageFile.delete();
+
+		java.nio.file.Path oNioDir = null;
+		try {
+			oNioDir = Paths.get(sPathFolder);
+		} catch (InvalidPathException  oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be obtained from OS due to " + oE );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		if(!java.nio.file.Files.isDirectory(oNioDir)) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: " + sPathFolder + " is not a directory" );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+		java.nio.file.Path oNioFile = oNioDir.resolve(sImageName);
+		if(!java.nio.file.Files.exists(oNioFile)) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder);
+			return Response.status(Status.NOT_FOUND).build();
 		}
 		
-		return Response.status(200).build();
+		//delete file
+		try {
+			java.nio.file.Files.delete(oNioFile);
+		} catch (NoSuchFileException oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder + ": " + oE);
+			return Response.status(Status.NOT_FOUND).build();
+		} catch (DirectoryNotEmptyException oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: " + sImageName + " in " + sPathFolder + " is a non-empty directory and cannot be deleted: " + oE);
+			return Response.status(Status.BAD_REQUEST).build();
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be deleted due to " + oE );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		
+		return Response.status(Status.OK).build();
 	}
 	
 	
@@ -407,12 +446,12 @@ public class ProcessorsMediaResource {
 			sExt = FilenameUtils.getExtension(sFileName);
 		} else {
 			Utils.debugLog("ProcessorsResource.uploadProcessorImage: Invalid uploaded file");
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		if( ImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
 			Utils.debugLog("ProcessorsResource.uploadProcessorImage: Invalid extension");
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		// Take path
@@ -427,7 +466,7 @@ public class ProcessorsMediaResource {
 		if(sAvaibleFileName.isEmpty()){
 			Utils.debugLog("ProcessorsResource.uploadProcessorImage: max images count reached");
 			//the user have reach the max number of images 
-	    	return Response.status(400).build();
+	    	return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		String sAbsoluteImageFilePath = sAbsolutePathFolder + sAvaibleFileName + "." + sExt.toLowerCase();
@@ -436,7 +475,9 @@ public class ProcessorsMediaResource {
 	    File oTouchFile = new File(sAbsoluteImageFilePath);
 	    
 	    try {
-			oTouchFile.createNewFile();
+			if (!oTouchFile.createNewFile()) {
+				Utils.debugLog("ProcessorsResource.uploadProcessorImage: can't create new file");
+			}
 		} catch (IOException e) {
 			Utils.debugLog("ProcessorsResource.uploadProcessorImage: " + e.toString());
 			e.printStackTrace();
@@ -448,7 +489,7 @@ public class ProcessorsMediaResource {
 		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
 	    if(bIsSaved == false){
 	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: error saving the image");
-	    	return Response.status(400).build();
+	    	return Response.status(Status.BAD_REQUEST).build();
 	    }
 	    
 	    Utils.debugLog("ProcessorsResource.uploadProcessorImage: image saved, check size");
@@ -460,7 +501,7 @@ public class ProcessorsMediaResource {
 		if( dMegabytes > (double) ProcessorsMediaResource.MAX_IMAGE_MB_SIZE){
 			Utils.debugLog("ProcessorsResource.uploadProcessorImage: image too big, delete it");
 			oNewImage.delete();
-	    	return Response.status(400).build();
+	    	return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 	    try {
@@ -514,7 +555,7 @@ public class ProcessorsMediaResource {
 		
 		// Check the user session
 		if(oUser == null){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		
@@ -548,7 +589,7 @@ public class ProcessorsMediaResource {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sUserId = oUser.getUserId();
@@ -558,23 +599,23 @@ public class ProcessorsMediaResource {
 
 
 		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		ReviewRepository oReviewRepository = new ReviewRepository();
 		
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 		if( oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false ){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		int iDeletedCount = oReviewRepository.deleteReview(sProcessorId, sReviewId);
 
 		if( iDeletedCount == 0 ){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		return Response.status(200).build();
+		return Response.status(Status.OK).build();
 	}
 	
 	@POST
@@ -586,30 +627,30 @@ public class ProcessorsMediaResource {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sUserId = oUser.getUserId();
 		
 		if(oReviewViewModel == null ){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 				
 		Review oReview = getReviewFromViewModel(oReviewViewModel, sUserId, oReviewViewModel.getId());
 		
 		boolean isUpdated = oReviewRepository.updateReview(oReview);
 		if(isUpdated == false){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		else {
-			return Response.status(200).build();
+			return Response.status(Status.OK).build();
 		}
 	}
 	
@@ -623,18 +664,18 @@ public class ProcessorsMediaResource {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if(oReviewViewModel == null ){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}		
 		
 		String sUserId = oUser.getUserId();
 				
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
@@ -643,7 +684,7 @@ public class ProcessorsMediaResource {
 		
 		//LIMIT THE NUMBER OF COMMENTS
 		if(oReviewRepository.alreadyVoted(oReviewViewModel.getProcessorId(), sUserId) == true){
-			return Response.status(400).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		// ADD ID 
@@ -651,7 +692,7 @@ public class ProcessorsMediaResource {
 		
 		oReviewRepository.addReview(oReview);
 		
-		return Response.status(200).build();
+		return Response.status(Status.OK).build();
 	}
 	
 	@GET
@@ -664,14 +705,14 @@ public class ProcessorsMediaResource {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 		
-		if(oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			return Response.status(400).build();
+		if(oProcessor == null || Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		if (iPage==null) iPage = 0;
@@ -721,7 +762,7 @@ public class ProcessorsMediaResource {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			return Response.status(401).build();
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		// Get all the processors
@@ -731,7 +772,7 @@ public class ProcessorsMediaResource {
 		List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
 		
 		if(aoProcessors == null) {
-			return Response.status(500).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
 		// Create a return list of publishers

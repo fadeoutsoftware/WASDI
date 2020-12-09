@@ -114,11 +114,11 @@ var UploadController = (function() {
         this.m_bIsVisibleLoadIcon = true;
         var oController = this;
         this.m_oAuthService.updatePasswordUpload(this.m_sEmailNewPassword).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-
-                }
-            }
+            // if (data != null) {
+            //     if (data != undefined) {
+            //
+            //     }
+            // }
             oController.m_bIsVisibleLoadIcon = false;
         }).error(function (data, status) {
             if(data)
@@ -196,9 +196,9 @@ var UploadController = (function() {
         {
             return true;
         }
-        else{
-            return false;
-        }
+
+        return false;
+
     };
 
     UploadController.prototype.isAccountCreated = function(){
@@ -206,9 +206,9 @@ var UploadController = (function() {
         {
             return true;
         }
-        else{
-            return false;
-        }
+
+        return false;
+
 
     };
 
@@ -230,11 +230,11 @@ var UploadController = (function() {
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
         this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-
-                }
-            }
+            // if (data != null) {
+            //     if (data != undefined) {
+            //
+            //     }
+            // }
         }).error(function (data, status) {
             if(data)
             {

@@ -1,7 +1,5 @@
 package wasdi.shared.business;
 
-import org.bson.types.ObjectId;
-
 /**
  * Represent a row of the log of a custom processor
  * @author p.campanella

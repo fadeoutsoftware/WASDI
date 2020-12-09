@@ -111,7 +111,6 @@ import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.RegridSetting;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
-import wasdi.shared.parameters.WpsParameters;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
@@ -119,6 +118,7 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
@@ -409,8 +409,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			Engine.start(false);
 
-		} catch (Throwable e) {
-			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+		} catch (Throwable oEx) {
+			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 
@@ -584,11 +584,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeGDALMultiSubset(oParameter);
 			}
 				break;
-			case WPS: {
-				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeWPS(oParameter);
-			}
-				break;
 			case REGRID: {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -720,17 +715,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		return sWorkspacePath;
 	}
 
-	private void executeWPS(WpsParameters oParameter) {
-		s_oLogger.debug("ExecuteWPS");
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		// Work in Progress
-		// issue #89
-		// https://github.com/fadeoutsoftware/WASDI/issues/89
-
-	}
 
 	/**
 	 * Downloads a new product
@@ -755,12 +739,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
 			} else {
-				throw new Exception("Donwload File is null. Check the provider name");
+				throw new Exception("LauncherMain.Download: Provider Adapter is null. Check the provider name");
 			}
 			oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
 			oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
 
 			if (oProcessWorkspace != null) {
+				oProviderAdapter.setProcessWorkspace(oProcessWorkspace);
 				// get file size
 				long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
 				// set file size
@@ -1203,15 +1188,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		File oFileToIngestPath = new File(oParameter.getFilePath());
 
 		if (!oFileToIngestPath.canRead()) {
-			String sMsg = "LauncherMain.Ingest: ERROR: unable to access file to Ingest "
-					+ oFileToIngestPath.getAbsolutePath();
+			String sMsg = "LauncherMain.Ingest: ERROR: unable to access file to Ingest " + oFileToIngestPath.getAbsolutePath();
 			s_oLogger.error(sMsg);
 			throw new IOException(sMsg);
 		}
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			if (oProcessWorkspace != null) {
@@ -1220,10 +1203,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
-
-				// get process pid
-				// oProcessWorkspace.setPid(getProcessId());
-
+				
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			} else {
 				s_oLogger.error("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
@@ -1238,8 +1218,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
-				s_oLogger.error("LauncherMain.Ingest: ERROR: unable to access destination directory "
-						+ oDstDir.getAbsolutePath());
+				s_oLogger.error("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
 				throw new IOException("Unable to access destination directory for the Workspace");
 			}
 
@@ -1292,8 +1271,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
+			// P.Campanella 2020/10/07: Metadata can be now be requested on demand 
 			// Save Metadata
-			oImportProductViewModel.setMetadataFileReference(asynchSaveMetadata(oParameter.getFilePath()));
+			//oImportProductViewModel.setMetadataFileReference(asynchSaveMetadata(oParameter.getFilePath()));
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
@@ -1325,7 +1305,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// add product to db
 			addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
-					oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null);
+					oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle());
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -1698,7 +1678,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Generate Layer Id
 			sLayerId = sInputFileNameOnly;
-			sLayerId = Utils.GetFileNameWithoutExtension(sFile);
+			sLayerId = Utils.getFileNameWithoutLastExtension(sFile);
 			sLayerId += "_" + oParameter.getBandName();
 
 			// Is already published?
@@ -1747,6 +1727,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sFile.toUpperCase().contains("FRISK")) {
 				sStyle = "frisk";
 			}
+			// Hard Coded set Flood Risk Style - STYLES HAS TO BE MANAGED
+			if (sFile.toUpperCase().contains("_rgb")) {
+				sStyle = "wasdi_s2_rgb";
+			}			
 
 			if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
 				sStyle = oParameter.getStyle();
@@ -2802,8 +2786,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * rabbit queue The method is Safe: controls if the products already exists and
 	 * if it is already added to the workspace
 	 * 
-	 * @param oVM               View Model... if null, read it from the product in
-	 *                          sFileName
+	 * @param oVM               View Model... if null, read it from the product in sFileName
 	 * @param sFullPathFileName File Name
 	 * @param sWorkspace        Workspace
 	 * @param sExchange         Queue Id
@@ -2820,8 +2803,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * rabbit queue The method is Safe: controls if the products already exists and
 	 * if it is already added to the workspace
 	 * 
-	 * @param oVM               View Model... if null, read it from the product in
-	 *                          sFileName
+	 * @param oVM               View Model... if null, read it from the product in sFileName
 	 * @param sFullPathFileName File Name
 	 * @param sWorkspace        Workspace
 	 * @param sExchange         Queue Id
@@ -2835,61 +2817,73 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			throws Exception {
 		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, bAsynchMetadata, true);
 	}
+	
+	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName,
+			String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata,
+			Boolean bSendToRabbit) throws Exception {
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, bAsynchMetadata, bSendToRabbit, "");
+	}
 
 	/**
 	 * Converts a product in a ViewModel, add it to the workspace and send it to the
-	 * rabbit queue The method is Safe: controls if the products already exists and
+	 * rabbit queue. The method is Safe: it controls if the products already exists and
 	 * if it is already added to the workspace
 	 * 
-	 * @param oVM               View Model... if null, read it from the product in
-	 *                          sFileName
+	 * @param oProductViewModel	View Model... if null, read it from the product in sFileName
 	 * @param sFullPathFileName File Name
 	 * @param sWorkspace        Workspace
 	 * @param sExchange         Queue Id
 	 * @param sOperation        Operation Done
 	 * @param sBBox             Bounding Box
 	 * @param bAsynchMetadata   Flag to know if save metadata in asynch or synch way
-	 * @param bSendToRabbit     Flat to know it we need to send update on rabbit or
-	 *                          not
+	 * @param bSendToRabbit     Flat to know it we need to send update on rabbit or not
 	 * @throws Exception
 	 */
-	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName,
+	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oProductViewModel, String sFullPathFileName,
 			String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata,
-			Boolean bSendToRabbit) throws Exception {
+			Boolean bSendToRabbit, String sStyle) throws Exception {
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
 
 		// Check if the file is really to Add
 		DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-		DownloadedFile oCheck = oDownloadedRepo.getDownloadedFileByPath(sFullPathFileName);
+		DownloadedFile oCheckAlreadyExists = oDownloadedRepo.getDownloadedFileByPath(sFullPathFileName);
 
 		File oFile = new File(sFullPathFileName);
 
 		WasdiProductReader oReadProduct = new WasdiProductReader(oFile);
 
-		// Get the Boundig Box
+		// Get the Bounding Box
+		if(Utils.isNullOrEmpty(sBBox)) {
+			try {
+				GeorefProductViewModel oGeorefProductViewModel = (GeorefProductViewModel) oProductViewModel;
+				sBBox = oGeorefProductViewModel.getBbox();
+			}catch (Exception oE) {
+				s_oLogger.warn("LauncherMain.AddProductToDbAndSendToRabbit: could not extract BBox from GeorefProductViewModel due to: " + oE);
+			}
+		}
 		if (Utils.isNullOrEmpty(sBBox)) {
 			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
 			sBBox = oReadProduct.getProductBoundingBox();
 		}
 
-		if (oCheck == null) {
+		if (oCheckAlreadyExists == null) {
 
 			// The VM Is Available?
-			if (oVM == null) {
+			if (oProductViewModel == null) {
 
 				// Get The product view Model
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
-				oVM = oReadProduct.getProductViewModel();
+				oProductViewModel = oReadProduct.getProductViewModel();
 
 				// P.Campanella 20200126: ma non sarebbe forse più corretto il contrario?!?
-				if (oVM.getMetadata() != null) {
+				if (oProductViewModel.getMetadata() != null) {
 					if (bAsynchMetadata) {
 						// Asynch Metadata Save
 						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
-						oVM.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
+						oProductViewModel.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
 					} else {
 						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
-						oVM.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
+						oProductViewModel.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
 					}
 				}
 
@@ -2903,9 +2897,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			oDownloadedProduct.setFileName(oFile.getName());
 			oDownloadedProduct.setFilePath(sFullPathFileName);
-			oDownloadedProduct.setProductViewModel(oVM);
+			oDownloadedProduct.setProductViewModel(oProductViewModel);
 			oDownloadedProduct.setBoundingBox(sBBox);
 			oDownloadedProduct.setRefDate(new Date());
+			oDownloadedProduct.setDefaultStyle(sStyle);
 			oDownloadedProduct.setCategory(DownloadedFileCategory.COMPUTED.name());
 
 			// Insert in the Db
@@ -2917,13 +2912,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		} else {
 
 			// The product is already there. No need to add
-			if (oVM == null) {
-				oVM = oCheck.getProductViewModel();
+			if (oProductViewModel == null) {
+				oProductViewModel = oCheckAlreadyExists.getProductViewModel();
 			}
 
 			// Update the Product View Model
-			oCheck.setProductViewModel(oVM);
-			oDownloadedRepo.updateDownloadedFile(oCheck);
+			oCheckAlreadyExists.setProductViewModel(oProductViewModel);
+			oDownloadedRepo.updateDownloadedFile(oCheckAlreadyExists);
 
 			// TODO: Update metadata?
 
@@ -2935,11 +2930,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace, sBBox);
 
 		if (bSendToRabbit) {
-			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = "
-					+ sExchange);
+			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 
 			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(true, sOperation, sWorkspace, oVM, sExchange);
+				s_oSendToRabbit.SendRabbitMessage(true, sOperation, sWorkspace, oProductViewModel, sExchange);
 		}
 
 		if (oReadProduct.getSnapProduct() != null) {

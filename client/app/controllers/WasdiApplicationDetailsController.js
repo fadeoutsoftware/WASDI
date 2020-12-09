@@ -318,9 +318,9 @@ var WasdiApplicationDetailsController = (function() {
         if (sActualUser == oReview.userId) {
             return true;
         }
-        else {
-            return  false;
-        }
+
+        return  false;
+
     }
 
     /**

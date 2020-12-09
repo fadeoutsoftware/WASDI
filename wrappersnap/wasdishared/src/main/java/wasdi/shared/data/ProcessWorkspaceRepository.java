@@ -247,8 +247,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			oFilter = Filters.and(oFilter, oCond);
 		}
 		if(!Utils.isNullOrEmpty(sProductNameSubstring)) {
-			
-			Pattern regex = Pattern.compile(sProductNameSubstring);
+			Pattern regex = Pattern.compile(Pattern.quote(sProductNameSubstring));
 			Bson oCond = Filters.eq("productName", regex);
 			oFilter = Filters.and(oFilter, oCond);
 		}

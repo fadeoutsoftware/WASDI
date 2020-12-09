@@ -48,7 +48,7 @@ angular.module('wasdi.wapSearchEOImage', [])
                 };
 
                 this.loadMore = function(){
-                    let oController = this;
+                    let oThat = this;
                     this.m_oSelectedProvider.currentPage = this.m_oSelectedProvider.currentPage + 1;
                     let oCallback = function(result){
                         var sResults = result;
@@ -57,20 +57,20 @@ angular.module('wasdi.wapSearchEOImage', [])
                             if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
                                 var aoData = sResults.data;
                                 $LightSearchService.setDefaultPreviews(aoData);
-                                oController.lightSearchObject.oTableOfProducts.aoProducts = oController.lightSearchObject.oTableOfProducts.aoProducts.concat(aoData);
+                                oThat.lightSearchObject.oTableOfProducts.aoProducts = oThat.lightSearchObject.oTableOfProducts.aoProducts.concat(aoData);
 
                             } else {
                                 utilsVexDialogAlertTop("There are no other products");
                             }
                         }
-                        oController.m_bLoadingData = false;
+                        oThat.m_bLoadingData = false;
                     };
                     this.search(oCallback);
                 };
 
                 this.lightSearch = function(){
                     this.m_bAreVisibleProducts = true;
-                    let oController = this;
+                    let oThat = this;
                     // clean table
                     this.lightSearchObject.oTableOfProducts.aoProducts = [];
 
@@ -81,11 +81,11 @@ angular.module('wasdi.wapSearchEOImage', [])
                             if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
                                 var aoData = sResults.data;
                                 $LightSearchService.setDefaultPreviews(aoData);
-                                oController.lightSearchObject.oTableOfProducts.aoProducts = aoData;
+                                oThat.lightSearchObject.oTableOfProducts.aoProducts = aoData;
 
                             }
                         }
-                        oController.m_bLoadingData = false;
+                        oThat.m_bLoadingData = false;
                     };
 
                     this.search(oCallback);
@@ -119,12 +119,12 @@ angular.module('wasdi.wapSearchEOImage', [])
                 };
 
                 this.loadConfiguration = function(){
-                    var oController = this;
+                    var oThat = this;
                     oConfigurationService.getConfiguration().then(function(configuration){
 
-                        oController.m_oConfiguration = configuration;
+                        oThat.m_oConfiguration = configuration;
 
-                        oController.m_aoMissions = oController.m_oConfiguration.missions;
+                        oThat.m_aoMissions = oThat.m_oConfiguration.missions;
 
                     });
                 };
@@ -167,10 +167,9 @@ angular.module('wasdi.wapSearchEOImage', [])
                 };
 
                 this.selectedProducts = function(){
-                    this.lightSearchObject.oTableOfProducts.oSingleSelectionLayer;
-                    this.lightSearchObject.oTableOfProducts.aoProducts;
+                    //this.lightSearchObject.oTableOfProducts.oSingleSelectionLayer;
+                    //this.lightSearchObject.oTableOfProducts.aoProducts;
                     this.backToLightSearch();
-
                 }
                 /**************************** BEGIN ****************************/
                 oOpenSearchService.getListOfProvider().success(function (data) {

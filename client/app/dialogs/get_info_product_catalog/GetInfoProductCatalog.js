@@ -24,10 +24,8 @@ var GetInfoProductCatalogController = (function() {
         this.m_oMapService = oMapService;
         this.m_oTimeout = oTimeout;
         this.m_oMap = null;
-
-        var oController = this;
+        
         $scope.close = function(result) {
-            oController.clearMap
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 

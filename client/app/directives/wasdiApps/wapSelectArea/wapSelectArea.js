@@ -69,7 +69,7 @@ angular.module('wasdi.wapSelectArea', [])
                     oMap.addControl(oDrawControl);
 
                     //Without this.m_oWasdiMap.on() the shape isn't saved on map
-                    var oController = this;
+                    let oController = this;
                     oMap.on(L.Draw.Event.CREATED, function (event)
                     {
                         var layer = event.layer;
@@ -85,7 +85,7 @@ angular.module('wasdi.wapSelectArea', [])
                     });
 
                     oMap.on(L.Draw.Event.DELETESTOP, function (event) {
-                        var layer = event.layers;
+                        // var layer = event.layers;
                     });
 
                     //
@@ -148,7 +148,7 @@ angular.module('wasdi.wapSelectArea', [])
 
                     var oGeocoder = L.Control.Geocoder.nominatim();
 
-                    var oSearchControl = L.Control.geocoder({
+                    L.Control.geocoder({
                         geocoder: oGeocoder,
                         position:'topleft'
                     }).addTo(oMap);
@@ -156,13 +156,13 @@ angular.module('wasdi.wapSelectArea', [])
                     return oMap;
                 }
 
-                let oController = this;
+                let oThat = this;
                 //init the map after the directive is loaded
                 setTimeout(function() {
-                    oController.oMap = $MapService.initMapSingleton(oController.mapId);
+                    oThat.oMap = $MapService.initMapSingleton(oThat.mapId);
 
                     //is it an option?
-                    oController.oMap = oController.addBoundingBoxDrawerOnMap(oController.oMap);
+                    oThat.oMap = oThat.addBoundingBoxDrawerOnMap(oThat.oMap);
                 }, 500);
 
             },

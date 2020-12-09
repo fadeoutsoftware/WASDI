@@ -29,7 +29,7 @@ var FTPController = (function() {
 
     FTPController.prototype.sendFTPUploadRequest = function()
     {
-        var oController = this;
+
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace()
 
         if(this.isDataFtpRequestValid() === false  )

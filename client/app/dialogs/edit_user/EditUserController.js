@@ -18,12 +18,11 @@ var EditUserController = (function() {
         this.m_oEditUser = {};
         this.initializeEditUserInfo();
 
-        var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
-    };
+    }
     /*
         getUserAuthProvider
      */

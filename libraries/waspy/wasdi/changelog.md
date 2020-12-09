@@ -1,12 +1,26 @@
 # \_\_/== Changelog ==\\\_\_
 
-## [0.6.0] - 2020-09-25
+## [0.6.1] - 2020-11-18
+
+### Fixed
+
+- import `__builtin__` or `builtins` depending on the version of Python
+ being used 
+
+### Changed
+
+- removed log in `updateProcessStatus` when the percent == -1, as
+ that value is assigned by default by other calls 
+
+## [0.6.0] - 2020-10-28
 
 ### Added
 
 - support to the auto upload and download by nodes
 - getProcessorPath method to have the absolute path of the running processor
-- fileName and relativeOrbit properties to the search EO Images results
+- fileName, provider and relativeOrbit properties to the search EO Images results
+- Support for string and json bounding box in the searchEOImages method
+- importImage methods use the provider specified in the image properties if not set
 
 ### Fixed
 

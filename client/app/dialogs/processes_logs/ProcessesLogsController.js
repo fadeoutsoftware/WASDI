@@ -43,7 +43,7 @@ var ProcessesLogsController = (function() {
         else{
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
-        };
+        }
 
     }
 
@@ -139,8 +139,14 @@ var ProcessesLogsController = (function() {
 
         if( utilsIsValidDate(oEndTime) === false )
         {
+            oEndTime = new Date(oProcess.lastChangeDate);
+        }
+
+        if( utilsIsValidDate(oEndTime) === false )
+        {
             oEndTime = new Date();
         }
+
         //pick time
         let iMilliseconds =  Math.abs(oEndTime-oStartTime);
         //approximate result
@@ -214,7 +220,7 @@ var ProcessesLogsController = (function() {
             sText += iIndexProcessLog +") "+ "Id: "+ sPid +",Product Name: "+sProductName +",Operation Type: " + sOperationType +
                 ",User: "+ sUserId + ",Status: " + sStatus + ",Progress: " + sProgressPerc +"%" +
                 ",Operation date: "+ sOperationDate +",Operation end date: "+ sOperationEndDate + ",File size: " + sFileSize + "\r\n";
-        };
+        }
 
         return sText;
     }

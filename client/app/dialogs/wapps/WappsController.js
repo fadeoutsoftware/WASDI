@@ -25,7 +25,6 @@ var WappsController = (function() {
         this.m_oConstantsService = oConstantsService;
         // this.m_sSearchTextApp = "";
 
-        var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
@@ -236,7 +235,7 @@ var WappsController = (function() {
                     try {
                         //sHelpMessage = data.stringValue.replace("\\n", "<br>");
                         //sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
-                        oHelp = JSON.parse(sHelpMessage);
+                        var oHelp = JSON.parse(sHelpMessage);
                         sHelpMessage = oHelp.help;
                     }
                     catch(err) {

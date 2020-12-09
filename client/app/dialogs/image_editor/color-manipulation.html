@@ -2,9 +2,6 @@
     <div class="row histogram-container">
         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
 
-            <!--<div class="loadIcon" ng-show="m_oController.m_oActiveBand.colorManipulation == null" >-->
-            <!--<invader></invader>-->
-            <!--</div>          -->
             <div class="loadIcon" ng-show="m_oController.m_bIsLoadingColourManipulation === true" >
                 <invader></invader>
             </div>
@@ -19,9 +16,7 @@
                         data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_95%'|translate}}">
                     95%
                 </button>
-                <!--<button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">-->
-                <!--100%-->
-                <!--</button>-->
+
                 <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()"
                         data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_RESET_DEFAULTS'|translate}}">
                     <i class="fa fa-undo" aria-hidden="true"></i>
@@ -46,13 +41,10 @@
                            max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"
                            ng-model="m_oController.m_oActiveBand.colorManipulation.colors[0].value" class="slider"
                            ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[0])}"
-                           ng-change="m_oController.minSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)"><!--ng-change="m_oController.maxSliderColourManipulation()"-->
+                           ng-change="m_oController.minSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">
 
-                    <!--<p>-->
-                    <!--Value: <span id="demo"></span>-->
-                    <!--</p>-->
                 </div>
-                <div class="range-container"><!-- style="width: 100%;"-->
+                <div class="range-container">
                     <label class="color-value">
                         {{m_oController.m_oActiveBand.colorManipulation.colors[1].value}}
                     </label>
@@ -60,12 +52,9 @@
                            max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"
                            ng-model="m_oController.m_oActiveBand.colorManipulation.colors[1].value" class="slider"
                            ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[1])}"
-                           ng-change="m_oController.averageSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)"><!-- ng-change="m_oController.averageSliderColourManipulation()"-->
-                    <!--<p>-->
-                    <!--Value: <span id="demo"></span>-->
-                    <!--</p>-->
+                           ng-change="m_oController.averageSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">
                 </div>
-                <div class="range-container"><!-- style="width: 100%;"-->
+                <div class="range-container">
                     <label class="color-value">
                         {{m_oController.m_oActiveBand.colorManipulation.colors[2].value}}
                     </label>
@@ -73,10 +62,7 @@
                            max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"
                            ng-model="m_oController.m_oActiveBand.colorManipulation.colors[2].value" class="slider"
                            ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[2])}"
-                           ng-change="m_oController.maxSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)"><!--ng-change="m_oController.minSliderColourManipulation()"-->
-                    <!--<p>-->
-                    <!--Value: <span id="demo"></span>-->
-                    <!--</p>-->
+                           ng-change="m_oController.maxSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">
                 </div>
             </div>
 

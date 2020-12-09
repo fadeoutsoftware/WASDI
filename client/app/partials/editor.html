@@ -7,21 +7,21 @@
             <div class="row-v4">
                 <div class="col-v4-auto" style="padding-right: 0px">
                     <input type="text" name="name" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"
-                           required="required"  placeholder="Products Filter..."> <!--ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)"-->
+                           required="required"  placeholder="Products Filter...">
                 </div>
                 <div class="col-v4-auto" style="padding-left: 3px">
                     <button class="btn btn-wasdi fa btn-outline-primary"
                             title="Apply Filter"
                             ng-disabled="m_oController.m_sTextQueryFilterInTree.length  === 0"
                             ng-click="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)">
-                        <i class="fa fa-search" aria-hidden="true" style="margin-right: 0px;"></i>
+                        <em class="fa fa-search" aria-hidden="true" style="margin-right: 0px;"></em>
                     </button>
 
                     <button class="btn btn-wasdi fa btn-outline-primary"
                             title="Clean Filter"
                             ng-click="m_oController.cleanFilterTree(); "
                             ng-disabled="m_oController.m_bIsFilteredTree === false">
-                        <i class="fa fa-bath" aria-hidden="true" style="margin-right: 0px;"></i>
+                        <em class="fa fa-bath" aria-hidden="true" style="margin-right: 0px;"></em>
 
                     </button>
 
@@ -36,24 +36,23 @@
              ng-class="{'ml-auto' : $index === 0}"
              ng-hide="m_oController.isHiddenOperationMainBar();">
 
-                <!--<div class="button-container" ng-repeat="button in m_oController.m_aoNavBarMenu">-->
+
             <div class="button-container" >
                 <button class="btn btn-outline-primary no-border btn-wasdi" ng-if="m_oController.isToolbarBtnDropdown(button) == false"  ng-click="button.onClick(m_oController)">
-                    <i class="custom-icon" ng-class="button.icon"></i>
+                    <em class="custom-icon" ng-class="button.icon"></em>
                     <span>{{button.name}}</span>
                 </button>
 
                 <div class="dropdown" ng-if="m_oController.isToolbarBtnDropdown(button) == true">
-                    <!--<button class="btn btn-primary btn-wasdi dropdown-toggle" id="navBarMenuDropdown" data-toggle="dropdown">-->
                     <button class="btn btn-outline-primary no-border btn-wasdi dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="custom-icon" ng-class="button.icon"></i>
+                        <em class="custom-icon" ng-class="button.icon"></em>
                         <span>{{button.name}}</span>
-                        <i class="fa fa-caret-down ml-2 mr-0" aria-hidden="true"></i>
+                        <em class="fa fa-caret-down ml-2 mr-0" aria-hidden="true"></em>
                     </button>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="navBarMenuDropdown"  >
                         <li class="dropdown-item" role="presentation" ng-repeat="subbutton in button.subMenu"  ng-click="subbutton.onClick(m_oController)">
                             <a class="pl-2" role="menuitem" tabindex="-1" href="">
-                                <i class="mr-2" ng-class="subbutton.icon"></i>
+                                <em class="mr-2" ng-class="subbutton.icon"></em>
                                 <span>{{subbutton.name}}</span>
                             </a>
                         </li>
@@ -76,7 +75,7 @@
                     <span class="badge">{{m_oController.m_aoProducts.length}}</span>
 
                     <div ng-click="m_oController.openPublishedBandsInTree()" class="my-button" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_OPEN_BAND'|translate}}">
-                        <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+                        <em class="fa fa-folder-open-o" aria-hidden="true"></em>
                     </div>
 
                 </div>
@@ -84,26 +83,22 @@
                     <div class="loadIcon" ng-show="m_oController.m_bIsLoadingTree">
                         <invader ></invader>
                     </div>
-                    <!--<input type="text" name="name" id="inputID" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"-->
-                           <!--required="required" ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)">-->
+
 
                     <tree class="flex-fill d-flex flex-column" ngModelTree="prova" ng-hide="m_oController.isHideTree() || (m_oController.m_bIsLoadingTree === true)" ></tree>
 
-                    <!--|| (m_oController.m_oTree === null)||(m_oController.m_oTree.core.data.length === 0)-->
+
                     <div class = "wizards p-4" ng-show="m_oController.isHideTree() && (m_oController.m_bIsLoadingTree === false)">
                         <h4 class="mt-0">{{"EDITOR_WIZARDS_HOW_TO_ADD_NEW_PRODUCT"|translate}} :</h4>
                         <div class="row-v4 mt-4 justify-content-center">
                             <div class="col-v4-5">
-                                <button class="btn btn-wasdi btn-primary w-100" ng-click="m_oController.goSearch()"><i class="fa fa-search"></i>{{"BTN_SEARCH"|translate}}</button>
+                                <button class="btn btn-wasdi btn-primary w-100" ng-click="m_oController.goSearch()"><em class="fa fa-search"></em>{{"BTN_SEARCH"|translate}}</button>
                             </div>
                             <div class="col-v4-5">
-                                <button class="btn btn-wasdi btn-primary w-100" ng-click="m_oController.openImportsDialog()"><i class="fa fa-plus"></i>{{"BTN_IMPORT"|translate}}</button>
+                                <button class="btn btn-wasdi btn-primary w-100" ng-click="m_oController.openImportsDialog()"><em class="fa fa-plus"></em>{{"BTN_IMPORT"|translate}}</button>
                             </div>
                         </div>
-                        <!--<h4>-->
-                            <!--<div>{{"EDITOR_WIZARDS_TREE_SEARCH"|translate}} <a ng-click="m_oController.goSearch()" href="">Search</a></div>-->
-                            <!--<div>{{"EDITOR_WIZARDS_TREE_SFTP"|translate}} <a ng-click="m_oController.openSFTPDialog()" href="">SFTP</a></div>-->
-                        <!--</h4>-->
+
                     </div>
                 </div>
             </div>
@@ -123,12 +118,10 @@
                             ng-click="m_oController.setActiveTab(2)">
                             <a href="">Preview</a>
                         </li>
-                        <!--<li role="presentation"><a href="#">Messages</a></li>-->
                     </ul>
                 </div>
 
                 <div class="panel-body fixed-panel auto-parent-height" id="panelBodyMapPreviewEditor">
-                    <!--TODO: SLIDER-->
                     <!---------------------- TAB 0 NAVIGATION------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 navigation-tab h-100"  ng-show="m_oController.m_iActiveMapPanelTab === 0">
                         <!-- 3D MAP  -->
@@ -139,45 +132,20 @@
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 map-container-panel h-100" ng-show="m_oController.m_b2DMapModeOn == false">
                             <div class="map h-100" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false"></div>
                             <div class="btn-group-vertical ">
-                                <!--button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
-                                        data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
-                                        ng-show=" m_oController.m_bIsActiveGeoraphicalMode == true">
-                                    <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map-o" aria-hidden="true"></i>
-                                    <i  ng-show="m_oController.m_b2DMapModeOn == false" class="fa fa-globe " aria-hidden="true"></i>
-                                </button-->
                                 <button type="button" class="btn btn-primary" ng-click="m_oController.synchronize2DMap()"
                                         data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
                                         ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode == true ">
-                                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                                    <em class="fa fa-location-arrow" aria-hidden="true"></em>
                                 </button>
                                 <button type="button" class="btn btn-primary" ng-click="m_oController.synchronize3DMap()"
                                         data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
                                         ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode == true">
-                                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                                    <em class="fa fa-location-arrow" aria-hidden="true"></em>
                                 </button>
                             </div>
-                            <!--<div class="map" id="cesiumContainer2"  ng-show="m_oController.m_b2DMapModeOn == true"  ></div>-->
+
                         </div>
-                        <!--<div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 buttons-container" ng-show="m_oController.m_b2DMapModeOn == false">-->
-                        <!--<div class="btn-group-vertical">-->
-                        <!--&lt;!&ndash;button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"-->
-                        <!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"-->
-                        <!--ng-show=" m_oController.m_bIsActiveGeoraphicalMode == true">-->
-                        <!--<i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map-o" aria-hidden="true"></i>-->
-                        <!--<i  ng-show="m_oController.m_b2DMapModeOn == false" class="fa fa-globe " aria-hidden="true"></i>-->
-                        <!--</button&ndash;&gt;-->
-                        <!--<button type="button" class="btn btn-primary" ng-click="m_oController.synchronize2DMap()"-->
-                        <!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"-->
-                        <!--ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode == true ">-->
-                        <!--<i class="fa fa-location-arrow" aria-hidden="true"></i>-->
-                        <!--</button>-->
-                        <!--<button type="button" class="btn btn-primary" ng-click="m_oController.synchronize3DMap()"-->
-                        <!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"-->
-                        <!--ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode == true">-->
-                        <!--<i class="fa fa-location-arrow" aria-hidden="true"></i>-->
-                        <!--</button>-->
-                        <!--</div>-->
-                        <!--</div>-->
+
                     </div>
                     <!---------------------- TAB 1 COLOURS------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="(m_oController.m_iActiveMapPanelTab === 1) &&
@@ -185,9 +153,6 @@
                         <div class="row histogram-container">
                             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
 
-                                <!--<div class="loadIcon" ng-show="m_oController.m_oActiveBand.colorManipulation == null" >-->
-                                <!--<invader></invader>-->
-                                <!--</div>          -->
                                 <div class="loadIcon" ng-show="m_oController.m_bIsLoadingColourManipulation === true" >
                                     <invader></invader>
                                 </div>
@@ -202,16 +167,14 @@
                                             data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_95%'|translate}}">
                                         95%
                                     </button>
-                                    <!--<button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">-->
-                                    <!--100%-->
-                                    <!--</button>-->
+
                                     <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()"
                                             data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_RESET_DEFAULTS'|translate}}">
-                                        <i class="fa fa-undo" aria-hidden="true"></i>
+                                        <em class="fa fa-undo" aria-hidden="true"></em>
                                     </button>
                                     <button type="button" class="btn btn-primary" ng-click="m_oController.processingProductColorManipulation()"
                                             data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_APPLY_COLOR_MANIPULATION'|translate}}">
-                                        <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                                        <em class="fa fa-paper-plane" aria-hidden="true"></em>
 
                                     </button>
                                 </div>
@@ -221,7 +184,7 @@
 
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <div class="ranges-container" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">
-                                    <div class="range-container"><!-- style="width: 100%;"-->
+                                    <div class="range-container">
                                         <label class="color-value">
                                             {{m_oController.m_oActiveBand.colorManipulation.colors[0].value}}
                                         </label>
@@ -229,13 +192,10 @@
                                                max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"
                                                ng-model="m_oController.m_oActiveBand.colorManipulation.colors[0].value" class="slider"
                                                ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[0])}"
-                                               ng-change="m_oController.minSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)"><!--ng-change="m_oController.maxSliderColourManipulation()"-->
+                                               ng-change="m_oController.minSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">
 
-                                        <!--<p>-->
-                                        <!--Value: <span id="demo"></span>-->
-                                        <!--</p>-->
                                     </div>
-                                    <div class="range-container"><!-- style="width: 100%;"-->
+                                    <div class="range-container">
                                         <label class="color-value">
                                             {{m_oController.m_oActiveBand.colorManipulation.colors[1].value}}
                                         </label>
@@ -243,12 +203,9 @@
                                                max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"
                                                ng-model="m_oController.m_oActiveBand.colorManipulation.colors[1].value" class="slider"
                                                ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[1])}"
-                                               ng-change="m_oController.averageSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)"><!-- ng-change="m_oController.averageSliderColourManipulation()"-->
-                                        <!--<p>-->
-                                        <!--Value: <span id="demo"></span>-->
-                                        <!--</p>-->
+                                               ng-change="m_oController.averageSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">
                                     </div>
-                                    <div class="range-container"><!-- style="width: 100%;"-->
+                                    <div class="range-container">
                                         <label class="color-value">
                                             {{m_oController.m_oActiveBand.colorManipulation.colors[2].value}}
                                         </label>
@@ -256,10 +213,7 @@
                                                max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"
                                                ng-model="m_oController.m_oActiveBand.colorManipulation.colors[2].value" class="slider"
                                                ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[2])}"
-                                               ng-change="m_oController.maxSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)"><!--ng-change="m_oController.minSliderColourManipulation()"-->
-                                        <!--<p>-->
-                                        <!--Value: <span id="demo"></span>-->
-                                        <!--</p>-->
+                                               ng-change="m_oController.maxSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">
                                     </div>
                                 </div>
 
@@ -278,14 +232,6 @@
                             </imagepreview>
 
                         </div>
-
-                        <!--<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">-->
-                        <!--<button ng-click="m_oController.applyEditorPreviewImageUpdate()"-->
-                        <!--ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">-->
-                        <!--Apply-->
-                        <!--</button>-->
-                        <!--&lt;!&ndash; on-click="m_oController.processingGetBandImage()"&ndash;&gt;-->
-                        <!--</div>-->
                     </div>
                 </div>
             </div>
@@ -298,13 +244,10 @@
                     <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic"
                             ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"
                             data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"
-                            ng-disabled="!(m_oController.m_bIsLoadedViewBandImage === true || m_oController.m_bIsEditorZoomingOnExistingImage)"> <!--ng-disabled="m_oController.m_b2DMapModeOn == false"-->
+                            ng-disabled="!(m_oController.m_bIsLoadedViewBandImage === true || m_oController.m_bIsEditorZoomingOnExistingImage)">
                     </button>
-
-                    <!--<button class="btn-group btn-group-left" role="group"-->
-                    <!--ng-click = " m_oController.m_oMapService.isProductGeoreferenced( m_oController.m_aoVisibleBands[0].bbox, m_oController.m_aoVisibleBands[0].geoserverBoundingBox ) ">-->
                     <!--TEST-->
-                    <!--</button>-->
+
                 </div>
 
                 <div class="btn-group btn-group-right" role="group" >
@@ -312,58 +255,56 @@
                     <button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
                             data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
                             ng-hide=" m_oController.m_bIsActiveGeoraphicalMode == false">
-                        <!--<i ng-show="m_oController.m_b2DMapModeOn == true" aria-hidden="true">2D</i>-->
-                        <!--<i  ng-show="m_oController.m_b2DMapModeOn == false" aria-hidden="true">3D</i>-->
                         <div ng-show="m_oController.m_b2DMapModeOn === true">
-                            <span class="deselected-mode">3D</span> <i class="fa fa-toggle-on" aria-hidden="true"  ></i> <span class="selected-mode">2D</span>
+                            <span class="deselected-mode">3D</span> <em class="fa fa-toggle-on" aria-hidden="true"  ></em> <span class="selected-mode">2D</span>
                         </div>
 
                         <div ng-show="m_oController.m_b2DMapModeOn === false">
-                            <span class="selected-mode">3D</span> <i class="fa fa-toggle-on fa-rotate-180" aria-hidden="true"  ></i> <span class="deselected-mode">2D</span>
+                            <span class="selected-mode">3D</span> <em class="fa fa-toggle-on fa-rotate-180" aria-hidden="true"  ></em> <span class="deselected-mode">2D</span>
                         </div>
                     </button>
 
                     <button  type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === true
                              && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveUndoMode()"
                              title="{{'EDITOR_TOOLTIP_UNDO_ZOOM'|translate}}" ng-click="m_oController.clickOnUndoZoom2DMap()">
-                        <i class="fa fa-undo" aria-hidden="true"></i>
+                        <em class="fa fa-undo" aria-hidden="true"></em>
                     </button>
 
                     <button type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === false
                             && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveUndoMode()"
                             title="{{'EDITOR_TOOLTIP_UNDO_ZOOM'|translate}}" ng-click="m_oController.clickOnUndoZoom3DGLobe()">
-                        <i class="fa fa-undo" aria-hidden="true"></i>
+                        <em class="fa fa-undo" aria-hidden="true"></em>
                     </button>
 
                     <button  type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === true
                              && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveRedoMode()"
                              title="{{'EDITOR_TOOLTIP_REDO_ZOOM'|translate}}" ng-click="m_oController.clickOnRedoZoom2DMap()">
-                        <i class="fa fa-repeat" aria-hidden="true"></i>
+                        <em class="fa fa-repeat" aria-hidden="true"></em>
                     </button>
 
                     <button type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === false
                             && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveRedoMode()"
                             title="{{'EDITOR_TOOLTIP_REDO_ZOOM'|translate}}" ng-click="m_oController.clickOnRedoZoom3DGlobe()">
-                        <i class="fa fa-repeat" aria-hidden="true"></i>
+                        <em class="fa fa-repeat" aria-hidden="true"></em>
                     </button>
 
                     <!-- 2D map Home button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
                             ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false">
-                        <i class="fa fa-home fa-lg" aria-hidden="true"></i>
+                        <em class="fa fa-home fa-lg" aria-hidden="true"></em>
                     </button>
                     <!-- 2D map button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
                             ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode == true">
-                        <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                        <em class="fa fa-location-arrow" aria-hidden="true"></em>
                     </button>
                     <!-- 3D map button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
                             ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode == true">
-                        <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                        <em class="fa fa-location-arrow" aria-hidden="true"></em>
                     </button>
 
 
@@ -371,20 +312,20 @@
                     <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
                             ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false" >
-                        <i class="fa fa-server" aria-hidden="true"></i>
+                        <em class="fa fa-server" aria-hidden="true"></em>
                     </button>
 
                     <button type="button" class="btn btn-default" ng-click="m_oController.changeModeOnOffPixelInfo();m_oController.hideOrShowPixelInfo();"  data-toggle="tooltip"
                             data-placement="bottom"  title="Show/hide pixel info"
-                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false" ng-style="{'background-color': m_oController.getClassPixelInfo()}">  <!--ng-class="{'active' : m_oController.Mode}"-->
-                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                        <!--<pre>{{m_oController.m_bIsModeOnPixelInfo|json}}</pre>-->
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false" ng-style="{'background-color': m_oController.getClassPixelInfo()}">
+                        <em class="fa fa-info-circle" aria-hidden="true"></em>
+
                     </button>
 
                 </div>
 
                 <!-- BAND 2d m_oController.m_b2DMapModeOn === true && -->
-                <!--<img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">-->
+
                 <imageeditor url-image="m_oController.m_sViewUrlSelectedBand"
                              body = "m_oController.m_oImagePreviewDirectivePayload"
                              get-default-image="m_oController.applyMapViewImageOriginalValues()"
@@ -396,7 +337,7 @@
                              pan-scaling = "m_oController.m_iPanScalingValue"
                              height-canvas = "m_oController.m_oMapContainerSize.height"
                              width-canvas = "m_oController.m_oMapContainerSize.width"
-                             ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && (m_oController.m_bIsLoadedViewBandImage || m_oController.m_bIsEditorZoomingOnExistingImage)"><!--is-loaded="m_oController.m_bIsLoadedPreviewBandImage" ng-show&& m_oController.m_bIsLoadedViewBandImage-->
+                             ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && (m_oController.m_bIsLoadedViewBandImage || m_oController.m_bIsEditorZoomingOnExistingImage)">
                 </imageeditor>
                 <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage === true || m_oController.m_bIsEditorZoomingOnExistingImage" >
                     <invader></invader>
@@ -408,7 +349,6 @@
                 <!-- 3D map -->
                 <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode === true"></div>
                 <!--cesium layers map dropdown menu  https://cesiumjs.org/Cesium/Build/Documentation/BaseLayerPicker.html -->
-                <!--<div id="baseLayerPickerContainer" style="position:absolute;top:24px;right:24px;width:38px;height:38px;"></div>-->
 
             </div>
         </div>
@@ -424,8 +364,8 @@
 
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 
-        <!--<div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" ></div>-->
-        <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar"  ><!--style="height: 80px;"-->
+
+        <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar"  >
             <!--MAIN OPERATION BAR-->
 
 

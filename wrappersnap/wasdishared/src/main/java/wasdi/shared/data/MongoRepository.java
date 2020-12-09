@@ -213,7 +213,7 @@ public class MongoRepository {
 		    }
 		});
 	}
-	public <T> String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
+	public String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
 		String sResult = "";
 		if(oNewDocument != null) {
 			try {

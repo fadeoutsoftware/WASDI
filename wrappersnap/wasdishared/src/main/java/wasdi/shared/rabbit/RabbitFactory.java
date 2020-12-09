@@ -8,6 +8,9 @@ import java.io.IOException;
  * Created by s.adamo on 14/02/2017.
  */
 public class RabbitFactory {
+	private RabbitFactory() {
+		// / private constructor to hide the public implicit one 
+	}
 
     public static String s_sRABBIT_QUEUE_USER = "user";
     public static String s_sRABBIT_QUEUE_PWD = "password";

@@ -334,7 +334,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					else {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: impossible to place product Order");
 						// Wait 20 minutes
-						lDeltaT = 60*20;
+						lDeltaT = 60l*20l;
 					}
 					
 					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: going to sleep for " + lDeltaT + " [s]");										
@@ -482,6 +482,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		
 		if (sDownloadUser != null) {
 			Authenticator.setDefault(new Authenticator() {
+				@Override
 				protected PasswordAuthentication getPasswordAuthentication() {
 					try {
 						return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());

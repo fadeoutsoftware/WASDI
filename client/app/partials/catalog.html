@@ -69,23 +69,10 @@
                         </div>
                     </div>
 
-                    <!--<div class="checkbox" ng-repeat="category in m_oController.m_asCategories track by $index">-->
-                    <!--<label >-->
-                    <!--<input type="checkbox" value="" ng-model="category.isSelected">-->
-                    <!--{{category.name}}-->
-                    <!--</label>-->
-                    <!--</div>-->
                     <div class="row-v4">
                         <div class="col-v4-6">
                             <i class="fa fa-filter mr-2" aria-hidden="true"></i>Filters:
                             <div class="well well-sm">
-                                <!--<div class="radio" ng-repeat="category in m_oController.m_asCategories ">-->
-                                <!--<label >-->
-                                <!--<input type="radio" name="pageNumber" ng-value="category.isSelected"-->
-                                <!--ng-click="m_oController.radioButtonOnCLick(category)" ng-checked="category.isSelected">&lt;!&ndash; ng-model="category.isSelected"&ndash;&gt;-->
-                                <!--{{m_oController.getFriendlyOperationName(category.name)}}-->
-                                <!--</label>-->
-                                <!--</div>-->
 
                                 <div class="checkbox" ng-repeat="category in m_oController.m_asCategories ">
                                     <label>
@@ -99,7 +86,6 @@
                             </div>
                         </div>
                     </div>
-                    <!--<button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>-->
                 </div>
             </div>
 
@@ -162,9 +148,7 @@
                     <td ng-click="m_oController.getInfoProduct(entry)">
                         <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
                     </td>
-                    <!--<td ng-click="m_oController.addProductToWorkspace(entry)">-->
-                    <!--<i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>-->
-                    <!--</td>         -->
+
                     <td ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(entry)">
                         <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
                     </td>

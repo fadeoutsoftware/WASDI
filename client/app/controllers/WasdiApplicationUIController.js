@@ -213,7 +213,7 @@ var WasdiApplicationUIController = (function() {
                 if(utilsIsObjectNullOrUndefined(sHelpMessage) === false )
                 {
                     try {
-                        oHelp = JSON.parse(sHelpMessage);
+                        var oHelp = JSON.parse(sHelpMessage);
                         sHelpMessage = oHelp.help;
                     }
                     catch(err) {
@@ -438,13 +438,13 @@ var WasdiApplicationUIController = (function() {
                     let sWorkspaceId = data.stringValue;
 
                     // Get the view model of this workspace
-                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
-                        if (utilsIsObjectNullOrUndefined(data) == false)
+                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (oData) {
+                        if (utilsIsObjectNullOrUndefined(oData) == false)
                         {
                             // Ok execute
-                            oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, data);
+                            oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, oData);
                         }
-                    }).error(function (data,status) {
+                    }).error(function () {
                         utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
                     });
 

@@ -80,19 +80,19 @@ var ImportAdvanceFiltersController = (function() {
 
     ImportAdvanceFiltersController.prototype.getPeriodSpring = function()
     {
-        return this.getPeriod(02,21,05,20)
+        return this.getPeriod(2,21,5,20)
     };
     ImportAdvanceFiltersController.prototype.getPeriodSummer = function()
     {
-        return this.getPeriod(05,21,08,22)
+        return this.getPeriod(5,21,8,22)
     };
     ImportAdvanceFiltersController.prototype.getPeriodWinter = function()
     {
-        return this.getPeriod(11,21,02,20)
+        return this.getPeriod(11,21,2,20)
     };
     ImportAdvanceFiltersController.prototype.getPeriodAutumn = function()
     {
-        return this.getPeriod(08,23,11,20)
+        return this.getPeriod(8,23,11,20)
     };
 
 
@@ -285,7 +285,6 @@ var ImportAdvanceFiltersController = (function() {
         switch(sMonthLowerCase) {
             case "january":
                 return 31;
-                break;
             case "february":
 
                 if(utilsLeapYear(sYear))
@@ -296,37 +295,26 @@ var ImportAdvanceFiltersController = (function() {
                 {
                     return 28;
                 }
-                break;
             case "march":
                 return 31;
-                break;
             case "april":
                 return 30;
-                break;
             case "may":
                 return 31;
-                break;
             case "june":
                 return 30;
-                break;
             case "july":
                 return 31;
-                break;
             case "august":
                 return 31;
-                break;
             case "september":
                 return 30;
-                break;
             case "october":
                 return 31;
-                break;
             case "november":
                 return 30;
-                break;
             case "december":
                 return 31;
-                break;
 
         }
     };
@@ -430,40 +418,28 @@ var ImportAdvanceFiltersController = (function() {
         switch(sMonthLowerCase) {
             case "january":
                 return 0;
-                break;
             case "february":
                 return 1;
-                break;
             case "march":
                 return 2;
-                break;
             case "april":
                 return 3;
-                break;
             case "may":
                 return 4;
-                break;
             case "june":
                 return 5;
-                break;
             case "july":
                 return 6;
-                break;
             case "august":
                 return 7;
-                break;
             case "september":
                 return 8;
-                break;
             case "october":
                 return 9;
-                break;
             case "november":
                 return 10;
-                break;
             case "december":
                 return 11;
-                break;
 
         }
         return -1;
@@ -784,17 +760,17 @@ var ImportAdvanceFiltersController = (function() {
 
             if(asSeasonsSelected[iIndexSeason].toLowerCase() !== "winter")
             {
-                oDataPeriod.dateSensingPeriodFrom.setYear(iYear);
+                if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear);
             }
             else
             {
                 // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
-                oDataPeriod.dateSensingPeriodFrom.setYear(iYear-1);
+                if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodFrom.setYear(iYear-1);
             }
-            oDataPeriod.dateSensingPeriodTo.setYear(iYear);
+            if (oDataPeriod !== null) oDataPeriod.dateSensingPeriodTo.setYear(iYear);
             var sName = iYear.toString() + asSeasonsSelected[iIndexSeason];
             this.saveDataInAdvanceFilter(sName, oDataPeriod, aoSaveData);
-        };
+        }
         // var sSeason = this.m_oAdvanceFilterOptions.selectedSeasons;
         return true;
 

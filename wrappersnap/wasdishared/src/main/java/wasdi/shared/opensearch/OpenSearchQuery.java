@@ -36,6 +36,10 @@ import wasdi.shared.utils.Utils;
 
 public class OpenSearchQuery{
 	
+	private OpenSearchQuery() {
+		// / private constructor to hide the public implicit one 
+	}
+	
 	static String s_sClassName;
 	
 	static {

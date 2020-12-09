@@ -14,9 +14,9 @@
     padding: 0px;
     height: $size-status-bar-height-closed;
 
-    &.open{
-        height: $size-status-bar-height-opened;
-    }
+    //&.open{
+    //    height: $size-status-bar-height-opened;
+    //}
 
 
     .always-visible-part{
@@ -102,6 +102,7 @@
         height: 0px;
     }
     &.open {
+        height: $size-status-bar-height-opened;
         .processes-list-wrapper {
             height: $size-status-bar-height-opened - $size-status-bar-height-closed;
         }
@@ -153,7 +154,6 @@
         }
     }
     .my-button {
-        color: white;
         color: white;
         padding: 0;
         margin: 0;

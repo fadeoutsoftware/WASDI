@@ -3,13 +3,15 @@ import wasdi
 
 def run():
     wasdi.setVerbose(True)
-    bVerbosity = wasdi.getVerbose()
         
     wasdi.hello()
 
     wasdi.wasdiLog("Welcome to your first WASPY processor :-)")
     sNome = wasdi.getParameter("name")
     wasdi.wasdiLog("Hello " + str(sNome))
+    
+    bIsThere = wasdi._fileOnNode("medium_map.tif")
+    wasdi.wasdiLog("Result " + str(bIsThere))
 
     aoProducts = wasdi.getProductsByActiveWorkspace()
 

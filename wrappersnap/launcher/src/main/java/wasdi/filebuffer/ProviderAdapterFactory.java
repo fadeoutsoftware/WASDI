@@ -31,6 +31,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("CREODIAS", CREODIASProviderAdapter::new);
 		aoDownloaders.put("SOBLOO", SOBLOOProviderAdapter::new);
 		aoDownloaders.put("EODC", EODCProviderAdapter::new);
+		aoDownloaders.put("LSA", LSAProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 

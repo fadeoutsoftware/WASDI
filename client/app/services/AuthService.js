@@ -5,6 +5,7 @@
 'use strict';
 angular.module('wasdi.AuthService', ['wasdi.ConstantsService']).
 service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http, $state, oConstantsService) {
+    this.m_oConstantsService = oConstantsService;
     this.APIURL = oConstantsService.getAPIURL();
     this.AUTHURL = oConstantsService.getAUTHURL();
     this.m_oHttp = $http;
@@ -143,11 +144,11 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     /**
      * logout
      */
-    var _this = this;
+
     this.logout = function() {
         //CLEAN COOKIE
         return this.m_oHttp.get(this.APIURL + '/auth/logout')
-    }
+    };
 
     /**
      * signingUser
@@ -155,46 +156,105 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
      */
     this.signingUser = function(oUser){
         return this.m_oHttp.post(this.APIURL + '/auth/register',oUser);
-    }
+    };
 
     this.checkSession = function(sSession)
     {
         return this.m_oHttp.get(this.APIURL + '/auth/checksession');
-    }
-
-    /* USER UPLOAD AUTH API */
-    this.createAccountUpload = function(sEmailInput)
-    {
-        // if(utilsIsEmail() === false)
-        //     return null;
-
-        return this.m_oHttp.post(this.APIURL + '/auth/upload/createaccount', sEmailInput);//JSON.stringify({"sEmail":sEmailInput})
     };
 
+    /**
+     * Create sftp account on node
+     * @param sEmailInput
+     * @returns {*}
+     */
+    this.createAccountUpload = function(sEmailInput)
+    {
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace != null) {
+            if (oWorkspace.apiUrl != null) {
+                sUrl = oWorkspace.apiUrl;
+            }
+        }
+
+        return this.m_oHttp.post(sUrl + '/auth/upload/createaccount', sEmailInput);//JSON.stringify({"sEmail":sEmailInput})
+    };
+
+    /**
+     * Delete sftp account
+     * @param sIdInput
+     * @returns {null|*}
+     */
     this.deleteAccountUpload = function(sIdInput)
     {
         if(utilsIsObjectNullOrUndefined(sIdInput))
             return null;
 
-        return this.m_oHttp.delete(this.APIURL + '/auth/upload/removeaccount',sIdInput);
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace != null) {
+            if (oWorkspace.apiUrl != null) {
+                sUrl = oWorkspace.apiUrl;
+            }
+        }
+
+        return this.m_oHttp.delete(sUrl + '/auth/upload/removeaccount',sIdInput);
     };
 
+    /**
+     * Update SFTP Account Password
+     * @param sEmailInput
+     * @returns {null|*}
+     */
     this.updatePasswordUpload = function(sEmailInput)
     {
         if(utilsIsEmail(sEmailInput) === false)
             return null;
 
-        return this.m_oHttp.post(this.APIURL + '/auth/upload/updatepassword',sEmailInput);
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace != null) {
+            if (oWorkspace.apiUrl != null) {
+                sUrl = oWorkspace.apiUrl;
+            }
+        }
+
+        return this.m_oHttp.post(sUrl + '/auth/upload/updatepassword',sEmailInput);
     };
 
+    /**
+     * Test if the sftp account exists
+     * @returns {*}
+     */
     this.isCreatedAccountUpload = function()
     {
-        return this.m_oHttp.get(this.APIURL + '/auth/upload/existsaccount');
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace != null) {
+            if (oWorkspace.apiUrl != null) {
+                sUrl = oWorkspace.apiUrl;
+            }
+        }
+
+        return this.m_oHttp.get(sUrl + '/auth/upload/existsaccount');
     };
 
+    /**
+     * Get the list of sftp files in the node
+     * @returns {*}
+     */
     this.getListFilesUpload = function()
     {
-        return this.m_oHttp.get(this.APIURL + '/auth/upload/list');
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace != null) {
+            if (oWorkspace.apiUrl != null) {
+                sUrl = oWorkspace.apiUrl;
+            }
+        }
+
+        return this.m_oHttp.get(sUrl + '/auth/upload/list');
     };
 
     this.changePassword = function(oPasswords)

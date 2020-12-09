@@ -21,6 +21,8 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 
 import it.fadeout.Wasdi;
+import it.fadeout.mercurius.business.Message;
+import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -411,6 +413,14 @@ public class WorkspaceResource {
 
 		Utils.debugLog("WorkspaceResource.DeleteWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId
 				+ ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " )");
+		
+		// before any operation check that this is not an injection attempt from the user 
+		if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
+			Utils.debugLog("WorkspaceResource.deleteWorkspace( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + 
+					", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + 
+					" ): Injection attempt from users");
+			return Response.status(400).build();
+		}
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -596,24 +606,35 @@ public class WorkspaceResource {
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			Utils.debugLog("WorkspaceResource.ShareWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", User: "
-					+ sUserId + " ): invalid session");
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid session");
 			return oResult;
 		}
 
 		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid user");
 			oResult.setStringValue("Invalid user.");
 			return oResult;
 		}
 
 		if (m_oCredentialPolicy.validUserId(sUserId) == false) {
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid user");
 			oResult.setStringValue("Invalid user.");
 			return oResult;
 		}
 
 		if (m_oWorkspacePolicy.validWorkspaceId(sWorkspaceId) == false) {
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid workspace");
 			oResult.setStringValue("Invalid workspace.");
 			return oResult;
+		}
+		
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+		
+		if (oWorkspace == null) {
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid workspace");
+			oResult.setStringValue("Invalid workspace.");
+			return oResult;			
 		}
 
 		try {
@@ -629,6 +650,7 @@ public class WorkspaceResource {
 				oWorkspaceSharingRepository.insertWorkspaceSharing(oWorkspaceSharing);				
 			}
 			else {
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: already shared!");
 				oResult.setStringValue("Already Shared.");
 				oResult.setBoolValue(true);
 				return oResult;
@@ -645,6 +667,46 @@ public class WorkspaceResource {
 
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);
+		
+		try {
+			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+			
+			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: sMercuriusAPIAddress is null");
+			}
+			else {
+				
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: send notification");
+				
+				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+				Message oMessage = new Message();
+				
+				String sTitle = "Workspace " + oWorkspace.getName() + " Shared";
+				
+				oMessage.setTilte(sTitle);
+				
+				String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+				if (sSender==null) {
+					sSender = "wasdi@wasdi.net";
+				}
+				
+				oMessage.setSender(sSender);
+				
+				String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the workspace: " + oWorkspace.getName();
+								
+				oMessage.setMessage(sMessage);
+		
+				Integer iPositiveSucceded = 0;
+								
+				iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
+				
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: notification sent with result " + iPositiveSucceded);
+			}
+				
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: notification exception " + oEx.toString());
+		}
 
 		return oResult;
 

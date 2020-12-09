@@ -24,7 +24,9 @@ input#setter { /* explorer doesn't support [att=val] selector :( */
   color: red;
   position: relative;
   opacity: 0.5;
-
+  //position: relative;
+  animation: blink .8s ease-in-out infinite;
+  box-shadow: -1px 0px 5px $wasdi-green-logo;
 }
 
 #terminal {
@@ -41,11 +43,11 @@ input#setter { /* explorer doesn't support [att=val] selector :( */
 
 }
 #getter {margin: 5px;}
-.cursor {
-  position: relative;
-  animation: blink .8s ease-in-out infinite;
-  box-shadow: -1px 0px 5px $wasdi-green-logo;
-}
+//.cursor {
+//  position: relative;
+//  animation: blink .8s ease-in-out infinite;
+//  box-shadow: -1px 0px 5px $wasdi-green-logo;
+//}
 
 @-moz-keyframes blink {
   0% {opacity: 0;}

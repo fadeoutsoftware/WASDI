@@ -425,7 +425,7 @@ public class OpenSearchResource {
 					Map<String, Integer> aoCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 					
 					if (aoCounterMap == null) {
-						Utils.debugLog(" aoCounterMap null ");
+						Utils.debugLog(s_sClassName + ".SearchList aoCounterMap null ");
 						aoResults.add(null);
 						continue;
 					}
@@ -457,18 +457,37 @@ public class OpenSearchResource {
 							}
 						}
 						
+						// Check the value, never known...
+						if (iLimit<=0) iLimit = 100;
+						
 						QueryExecutor oExecutor = getExecutor(sProvider);
 						
 						if (oExecutor == null) {
-							Utils.debugLog("Executor Null for Provider: " + sProvider);
+							Utils.debugLog(s_sClassName + ".SearchList: Executor Null for Provider: " + sProvider);
 							continue;
 						}
+						
+						
+						float fMaxPages = iTotalResultsForProviders / (float)iLimit;
+						int iMaxPages = (int) Math.ceil(fMaxPages);
+						iMaxPages *= 2;
+						Utils.debugLog(s_sClassName + ".SearchList: Augmentented Max Pages: " + iMaxPages + " Total Results: " + iTotalResultsForProviders + " Limit " + iLimit);
+						
+						
+						int iActualPage = 0;
 						
 						// Until we do not get all the results
 						while (iObtainedResults < iTotalResultsForProviders) {
 							
+							if (iActualPage>iMaxPages) {
+								Utils.debugLog(s_sClassName + ".SearchList: cycle running out of control, actual page " + iActualPage + " , Max " + iMaxPages + " break");
+								break;
+							}
+							
 							// Actual Offset
 							String sCurrentOffset = "" + iObtainedResults;
+							
+							String sOriginalLimit = "" + iLimit;
 	
 							// How many elements do we need yet?
 							if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
@@ -478,7 +497,7 @@ public class OpenSearchResource {
 							String sCurrentLimit = "" + iLimit;
 							
 							// Create the paginated Query
-							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
+							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder, sOriginalLimit);
 							// Log the query
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							
@@ -512,9 +531,11 @@ public class OpenSearchResource {
 								} else {
 									Utils.debugLog(s_sClassName + ".SearchList, NO results found for " + sProvider);
 								}
-							} catch (Exception oE4s) {
-								Utils.debugLog(s_sClassName + ".SearchList: " + oE4s);
+							} catch (Exception oEx) {
+								Utils.debugLog(s_sClassName + ".SearchList: " + oEx);
 							}
+							
+							iActualPage ++;
 						}
 					}
 				} catch (NumberFormatException oE) {

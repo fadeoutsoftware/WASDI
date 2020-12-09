@@ -39,7 +39,7 @@ var EDriftFloodAutomaticChainController = (function() {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
-    };
+    }
 
     EDriftFloodAutomaticChainController.prototype.redirectToWebSite = function(){
         this.m_oWindow.open('http://edrift.cimafoundation.org', '_blank');
@@ -51,7 +51,7 @@ var EDriftFloodAutomaticChainController = (function() {
 
         var oAutoChain = this.m_oParameters;
 
-        sJSON=JSON.stringify(oAutoChain);
+        var sJSON=JSON.stringify(oAutoChain);
 
         if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === true)
         {

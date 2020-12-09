@@ -20,9 +20,9 @@ public class WrapperFile  extends File  {
 		
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
-		OutputStream oOutStream;
-		try {
-			oOutStream = new FileOutputStream(this);
+
+		// Try with resources. Resource declaration auto closes object(even if IOExeption occours)
+		try (OutputStream oOutStream = new FileOutputStream(this)){
 			while ((iRead = oInputStream.read(ayBytes)) != -1) {
 				oOutStream.write(ayBytes, 0, iRead);
 			}

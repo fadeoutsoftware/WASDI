@@ -92,7 +92,6 @@
             &:after{
                 right: 0;
                 border: 9px solid transparent;
-                border-right-color: transparent;
                 content: " ";
                 height: 0;
                 width: 0;
@@ -208,9 +207,7 @@
 
 
 /*==================ELEMENT STYLE==================*/
-.input-text {
 
-}
 /*MAP*/
 .map-container[style] {
     width: 100% !important;

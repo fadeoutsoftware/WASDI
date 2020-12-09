@@ -9,32 +9,19 @@
                 <h4>
                     <div class="row">
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 rasor-logos-container">
-                            <img class="logo-container" src="assets/rasor/rasor_logo.png" ng-click="m_oController.redirectToRasorWebSite()">
+                            <img class="logo-container" src="assets/rasor/rasor_logo.png" ng-click="m_oController.redirectToRasorWebSite()" alt="RASOR">
                         </div>
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 rasor-logos-container">
-                            <img class="logo-container" src="assets/myDewetra/DPC_small.png" ng-click="m_oController.redirectToRasorWebSite()">
+                            <img class="logo-container" src="assets/myDewetra/DPC_small.png" ng-click="m_oController.redirectToRasorWebSite()" alt="Protezione Civile">
                         </div>
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 rasor-logos-container">
-                            <img class="logo-container" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToRasorWebSite()">
+                            <img class="logo-container" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToRasorWebSite()" alt="Cima Research Foundation">
                         </div>
                     </div>
 
                     <div class="row rasor-wapp-container">
                         <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 ">
                             <div class="dropdown my-dropdown">
-                                <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownProductRasor"-->
-                                        <!--data-toggle="dropdown">-->
-                                    <!--{{m_oController.m_oSelectedProduct.name}}-->
-                                    <!--<span class="caret"></span>-->
-                                <!--</button>-->
-                                <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownProductRasor">-->
-                                    <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >-->
-                                        <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedProduct = product">-->
-                                            <!--{{product.name}}-->
-                                        <!--</a>-->
-                                    <!--</li>-->
-
-                                <!--</ul>-->
                                 <dropdownmenudirective list-of-values="m_oController.m_aoProductListDropdown"
                                                        selected-value="m_oController.m_oReturnValueDropdown"
                                                        enable-search-filter="true"
@@ -56,13 +43,13 @@
                                 </label>
                             </div>
                             <div class="well-sm">{{m_oController.m_sResultFromServer}}</div>
-                            <div><!--ng-show="m_oController.m_bIsRunning"-->
+                            <div>
                                 <invader ></invader>
                             </div>
                         </div>
                     </div>
                     <div class="row" >
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 loadIcon" ng-show="m_oController.m_bIsRunning"><!--class="loadIcon" ng-show="m_oController.m_bIsRunning"-->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 loadIcon" ng-show="m_oController.m_bIsRunning">
                             <invader ></invader>
                         </div>
                     </div>

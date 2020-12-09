@@ -14,15 +14,15 @@
                     <div class="row">
 
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 ">
-                            <img class="logo-container-partner" src="assets/wasdi/FadeoutLogo.png" ng-click="m_oController.redirectToWebSite()">
+                            <img class="logo-container-partner" src="assets/wasdi/FadeoutLogo.png" ng-click="m_oController.redirectToWebSite()" alt="Fadeout">
                         </div>
 
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                            <img class="logo-container-partner" src="assets/JRCProcessor/logo-jrc2.png" ng-click="m_oController.redirectToWebSite()">
+                            <img class="logo-container-partner" src="assets/JRCProcessor/logo-jrc2.png" ng-click="m_oController.redirectToWebSite()" alt="JRC">
                         </div>
 
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 ">
-                            <img class="logo-container-partner" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToWebSite()">
+                            <img class="logo-container-partner" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToWebSite()" alt="Cima Research Foundation">
                         </div>
 
                     </div>
@@ -33,22 +33,7 @@
                         Input File:
                     </div>
                     <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                        <!--<multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"></multiselect>-->
-
                         <div class="dropdown my-dropdown">
-                            <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownJRCProcessorProduct"-->
-                                    <!--data-toggle="dropdown">-->
-                                <!--{{m_oController.m_oSelectedReferenceProduct.name}}-->
-                                <!--<span class="caret"></span>-->
-                            <!--</button>-->
-                            <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownJRCProcessorProduct">-->
-                                <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProduct" >-->
-                                    <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedReferenceProduct = product">-->
-                                        <!--{{product.name}}-->
-                                    <!--</a>-->
-                                <!--</li>-->
-
-                            <!--</ul>-->
                             <dropdownmenudirective list-of-values="m_oController.m_aoProductListDropdown"
                                                    selected-value="m_oController.m_oReturnValueDropdown"
                                                    enable-search-filter="true"
@@ -92,10 +77,6 @@
                 <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
                     {{"DIALOG_JRCTEST_CLOSE"|translate}}
                 </button>
-                <!--<button type="button" ng-click="add(null)" class="my-button" ng-disabled="m_oController.isEmptyListOfFilters()" data-dismiss="modal">-->
-                    <!--{{"DIALOG_CRONOTAB_OK_BUTTON"|translate}}-->
-                <!--</button>      -->
-
                 <button type="button" ng-click="m_oController.runJrcProcessor();close(null);" class="my-button"  data-dismiss="modal">
                     {{"DIALOG_JRCTEST_RUN"|translate}}
                 </button>

@@ -94,7 +94,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 
 			buildLink(oResult);
 			buildSummary(oResult);
-			System.out.println(oResult);
+			
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorCREODIAS.translate( " +
 					oInJson.toString() + ", " +
@@ -137,8 +137,14 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 				sBuffer = oGeometry.optString(DiasResponseTranslatorCREODIAS.STYPE, null);
 				if(null != sBuffer) {
 					StringBuilder oFootPrint = new StringBuilder(sBuffer.toUpperCase());
-					oFootPrint.append(" (((");
-
+					
+					if (sBuffer.equalsIgnoreCase("POLYGON")) {
+						oFootPrint.append(" ((");
+					}
+					else if (sBuffer.equalsIgnoreCase("MULTIPOLYGON")) {
+						oFootPrint.append(" (((");
+					}
+					
 					parseCoordinates(oGeometry, oFootPrint);
 
 					//remove ending spaces and commas in excess
@@ -148,7 +154,15 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 						sFootPrint = sFootPrint.substring(0,  sFootPrint.length() - 1 );
 						sFootPrint = sFootPrint.trim();
 					}
-					sFootPrint += ")))";
+					
+					if (sBuffer.equalsIgnoreCase("POLYGON")) {
+						sFootPrint += "))";
+					}
+					else if (sBuffer.equalsIgnoreCase("MULTIPOLYGON")) {
+						sFootPrint += ")))";
+					}
+					
+					
 					oResult.setFootprint(sFootPrint);
 				}
 			}
@@ -247,8 +261,16 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			//title
 			oResult.setTitle("");
 			if(!oProperties.isNull(DiasResponseTranslatorCREODIAS.STITLE)) {
-				oResult.setTitle(oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
-				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null));
+				
+				String sTitle = oProperties.optString(DiasResponseTranslatorCREODIAS.STITLE, null);
+				
+				// Remove .SAFE from the name returned by EODC
+				if (sTitle.endsWith(".SAFE")) {
+					sTitle = sTitle.replace(".SAFE", "");
+				}
+				
+				oResult.setTitle(sTitle);
+				oResult.getProperties().put(DiasResponseTranslatorCREODIAS.STITLE, sTitle);
 			}
 
 			//preview
@@ -427,8 +449,6 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 							oProperties.toString() + 
 							"JSON DUMP END" );
 				}
-			} else {
-				Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices: \"services\" field not found, aborting");
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("DiasResponseTranslatorCREODIAS.parseServices( ..., " + oProperties.toString() + " ):" + oE );
@@ -444,7 +464,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			
 			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL);
 			if(null==sItem) {
-				sItem = "";
+				sItem = "http://";
 			} 
 			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //0
 		

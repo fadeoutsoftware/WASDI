@@ -162,52 +162,35 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(fX, fY, fNewWidth, fNewHeight);
                 };
 
-                scope.$watchGroup(['body.viewportX','body.viewportY','body.viewportWidth','body.viewportHeight'], function (newValue, oldValue, scope)
+                scope.$watchGroup(['body.viewportX','body.viewportY','body.viewportWidth','body.viewportHeight'], function (newValue, oldValue, oScope)
                 {
-                    // if(utilsIsObjectNullOrUndefined(scope.body) === false)
-                    // {
-                        scope.resizeRectangle(scope.body);
-                    // }
-
-                    // var element = angular.element(document.querySelector('#imagepreviewcanvas'));
-                    // var iCanvasHeight = element[0].offsetHeight;
-                    // var iCanvasWidth = element[0].offsetWidth;
-                    // //originalBandWidth  originalBandHeight
-                    // var fX = scope.body.viewportX / scope.body.originalBandWidth;
-                    // var fY = scope.body.viewportY /scope. body.originalBandHeight;
-                    // fX =  fX * iCanvasWidth;
-                    // fY =  fY * iCanvasHeight;
-                    // var fNewWidth = scope.body.viewportWidth / scope.body.originalBandWidth;
-                    // var fNewHeight = scope.body.viewportHeight / scope.body.originalBandHeight;
-                    // fNewWidth = fNewWidth * iCanvasWidth;
-                    // fNewHeight = fNewHeight * iCanvasHeight;
-                    // scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(fX, fY, fNewWidth, fNewHeight);
+                    oScope.resizeRectangle(oScope.body);
                 });
 
                 /**
                  *
                  */
-                scope.$watch('urlImage', function (newValue, oldValue, scope)
+                scope.$watch('urlImage', function (newValue, oldValue, oScope)
                 {
                     if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
                     {
-                        var oBitmap =  new createjs.Bitmap(newValue);
-                        scope.Stage.addChild(oBitmap);
-                        scope.Stage.addChild(scope.Square);
+                        var oBitmapValue =  new createjs.Bitmap(newValue);
+                        oScope.Stage.addChild(oBitmapValue);
+                        oScope.Stage.addChild(oScope.Square);
                         // scope.Stage.addChild(scope.Dragger);
                         // scope.zoom();
                         // scope.resizeRectangle(scope.body);
                         // scope.Stage.update();
                     }
                     else {
-                        scope.Stage.autoClear = true;
-                        scope.Stage.removeAllChildren();
+                        oScope.Stage.autoClear = true;
+                        oScope.Stage.removeAllChildren();
                         // scope.Stage.update();
                         // scope.resizeRectangle(scope.body);
                         // scope.Stage.update();
                     }
-                    scope.resizeRectangle(scope.body);
-                    scope.Stage.update();
+                    oScope.resizeRectangle(oScope.body);
+                    oScope.Stage.update();
 
                 });
 

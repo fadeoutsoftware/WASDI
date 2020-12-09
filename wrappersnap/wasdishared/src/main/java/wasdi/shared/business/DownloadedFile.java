@@ -11,6 +11,7 @@ import wasdi.shared.viewmodels.ProductViewModel;
  * Downloaded File Entity
  * Represents a EO File ingested in WASDI
  * Created by p.campanella on 11/11/2016.
+ * 
  */
 public class DownloadedFile {
 	
@@ -36,6 +37,11 @@ public class DownloadedFile {
     private String category = DownloadedFileCategory.PUBLIC.name();
     
     /**
+     * Default style to use for the bands of this file
+     */
+    private String defaultStyle;
+    
+	/**
      * Product View Model
      * NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
      */
@@ -96,4 +102,12 @@ public class DownloadedFile {
 		this.category = category;
 	}
     
+    public String getDefaultStyle() {
+		return defaultStyle;
+	}
+
+	public void setDefaultStyle(String defaultStyle) {
+		this.defaultStyle = defaultStyle;
+	}
+
 }

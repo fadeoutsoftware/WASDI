@@ -95,6 +95,10 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			sResult += parseFootPrint(sQuery);
 			sResult += parseTimeFrame(sQuery);
 			sResult += "&status=all";
+			
+			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
+				sResult += "&timeliness=Fast-24h";
+			}
 
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
@@ -167,6 +171,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	 * @param sKeyword
 	 * @param asStartEnd
 	 */
+	@Override
 	protected void parseInterval(String sQuery, String sKeyword, String[] asStartEnd) {
 		Preconditions.checkNotNull(sQuery, "DiasQueryTranslatorCREODIAS.parseInterval: query is null");
 		Preconditions.checkNotNull(sKeyword, "DiasQueryTranslatorCREODIAS.parseInterval: field keyword is null");

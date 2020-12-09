@@ -34,17 +34,17 @@ var RootController = (function() {
 
         this.updateRabbitConnectionState = function(forceNotification)
         {
-            if( forceNotification == null || forceNotification === undefined){
+            if( forceNotification == null || forceNotification == undefined){
                 forceNotification = false;
             }
             var connectionState = oRabbitStompService.getConnectionState();
-            if( connectionState === 1) {
+            if( connectionState == 1) {
                 oController.m_isRabbitConnected = true;
             }
             else
             {
                 oController.m_isRabbitConnected = false;
-                if( connectionState === 2)
+                if( connectionState == 2)
                 {
                     if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
                     {
@@ -121,7 +121,6 @@ var RootController = (function() {
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
-                var iTotalProcessesNumber = aoProcessesRunning.length;
 
                 // Set the number of running processes
 
@@ -140,7 +139,7 @@ var RootController = (function() {
             let intervalId = setInterval(function(){
                 if( $scope.m_oController.openLogsDialogByProcessId(data.processId) == true){
                     clearInterval(intervalId);
-                };
+                }
             }, 1000);
         });
 
@@ -184,7 +183,7 @@ var RootController = (function() {
                 }
             }
             //$scope.m_oController.time++;
-            mytimeout = $timeout($scope.onTimeout,1000);
+
         };
 
         this.isProcesssBarOpened = function()
@@ -192,7 +191,7 @@ var RootController = (function() {
             return this.m_bIsOpenStatusBar;
         };
 
-        var mytimeout = $timeout($scope.onTimeout,1000);
+
 
 
         this.getWorkspacesInfo();
@@ -210,27 +209,33 @@ var RootController = (function() {
         }
         var iTotalProcessesNumber = aoProcessesRunning.length;
 
-        for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++)
+        for( var  iIndexNewProcess= 0; iIndexNewProcess  < iTotalProcessesNumber; iIndexNewProcess++)
         {
+            //time by server
+            var oStartTime;
+            var oNow;
+            var result;
+            var seconds;
+            var oDate;
             if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING" || aoProcessesRunning[iIndexNewProcess].status === "WAITING" || aoProcessesRunning[iIndexNewProcess].status === "READY")
             {
                 if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
                     // add start time (useful if the page was reloaded)
 
                     //time by server
-                    var oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationStartDate);
+                    oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationStartDate);
                     //pick time
-                    var oNow = new Date();
-                    var result =  Math.abs(oNow-oStartTime);
+                    oNow = new Date();
+                    result =  Math.abs(oNow-oStartTime);
                     //approximate result
-                    var seconds = Math.ceil(result / 1000);
+                    seconds = Math.ceil(result / 1000);
 
                     if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0 || utilsIsANumber(seconds)=== false)
                     {
                         seconds = 0;
                     }
 
-                    var oDate = new Date(1970, 0, 1);
+                    oDate = new Date(1970, 0, 1);
                     oDate.setSeconds(0 + seconds);
                     //add running time
                     aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
@@ -241,19 +246,19 @@ var RootController = (function() {
                     aoProcessesRunning[iIndexNewProcess].timeRunning = 0;
 
                     //time by server
-                    var oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationStartDate);
+                    oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationStartDate);
                     var oEndTime = new Date(aoProcessesRunning[iIndexNewProcess].operationEndDate);
                     //pick time
-                    var result =  Math.abs(oEndTime-oStartTime);
+                    result =  Math.abs(oEndTime-oStartTime);
                     //approximate result
-                    var seconds = Math.ceil(result / 1000);
+                    seconds = Math.ceil(result / 1000);
 
                     if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0  || utilsIsANumber(seconds)=== false)
                     {
                         seconds = 0;
                     }
 
-                    var oDate = new Date(1970, 0, 1);
+                    oDate = new Date(1970, 0, 1);
                     oDate.setSeconds(0 + seconds);
                     //add running time
                     aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
@@ -446,23 +451,16 @@ var RootController = (function() {
     RootController.prototype.isVisibleNavBar=function()
     {
         var sState=this.m_oState.current.name;
-        switch(sState) {
-            case "root.workspaces":
-                return false;
-                break;
-            default: return true;
+        if (sState=="root.workspaces") {
+            return false;
+        }else{
+            return true;
         }
 
-        return true;
     };
 
     RootController.prototype.disableEditorButton = function(){
-        if (utilsIsObjectNullOrUndefined(this.m_oConstantsService.getActiveWorkspace())) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (utilsIsObjectNullOrUndefined(this.m_oConstantsService.getActiveWorkspace()));
     };
 
     RootController.prototype.hideWorkspaceName = function(){
@@ -473,7 +471,6 @@ var RootController = (function() {
 
 
     RootController.prototype.cursorCss = function(){
-        var sState=this.m_oState.current.name;
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         if(utilsIsObjectNullOrUndefined(oWorkspace) === true || utilsIsObjectNullOrUndefined(oWorkspace.workspaceId)=== true )
             return "no-drop";
@@ -517,8 +514,7 @@ var RootController = (function() {
 
     RootController.prototype.activePageCss = function(oPage)
     {
-        if(oPage == this.m_oState.current.name ) return true;
-        else return false;
+        return (oPage == this.m_oState.current.name );
     };
 
     RootController.prototype.toggleProcessesBar = function()
@@ -634,7 +630,7 @@ var RootController = (function() {
     RootController.prototype.editUserInfo = function(oProcessInput)
     {
         var oController = this;
-        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/edit_user/EditUserDialog.html",
             controller: "EditUserController",

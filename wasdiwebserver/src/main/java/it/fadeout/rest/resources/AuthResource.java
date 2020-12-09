@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,9 +77,7 @@ public class AuthResource {
 	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 
-	final ImageResourceUtils oImageResourceUtils = new ImageResourceUtils();
 	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
-	//	String m_oServletConfig.getInitParameter("DownloadRootPath") = m_oServletConfig.getInitParameter("DownloadRootPath"); //TODO TEST IT 
 	final String USER_IMAGE_FOLDER_NAME = "userImage";			
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
 	final UserRepository m_oUserRepository = new UserRepository();
@@ -323,12 +319,12 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
-	public Boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthService.ExistsSftpAccount");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-			return null;
+		if (oUser == null) {
+			return false;
 		}
 		String sAccount = oUser.getUserId();		
 
@@ -459,18 +455,18 @@ public class AuthResource {
 		} else {
 			return Response.status(400).build();
 		}
-
-		if ( oImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS) == false) {
+		
+		if (!ImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS)) {
 			return Response.status(400).build();
 		}
-		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
-		oImageResourceUtils.createDirectory(sPath);
-		String sOutputFilePath = sPath + "\\" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
-		ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
-		boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
-		if(bIsSaved == false ){
-			return Response.status(400).build();
-		}
+		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
+		ImageResourceUtils.createDirectory(sPath);
+	    String sOutputFilePath = sPath + "/" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
+	    if(bIsSaved == false ){
+	    	return Response.status(400).build();
+	    }
 		return Response.status(200).build();
 	}
 
@@ -486,8 +482,8 @@ public class AuthResource {
 		}
 
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
-		ImageFile oUserImage = oImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
-		String sImageExtension = oImageResourceUtils.getExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		ImageFile oUserImage = ImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		String sImageExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
 
 		//Check the image and extension
 		if(oUserImage == null || sImageExtension.isEmpty() ){
@@ -516,8 +512,7 @@ public class AuthResource {
 		//		final String DEFAULT_USER_IMAGE_NAME = "userimage";
 
 		String sPathFolder = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
-		oImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
-
+		ImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
 		return Response.status(200).build();
 	}
 

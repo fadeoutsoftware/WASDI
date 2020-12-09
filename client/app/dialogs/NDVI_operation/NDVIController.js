@@ -135,7 +135,7 @@ var NDVIController = (function() {
         });
 
         //Watch if the user select a product
-        var oController = this;
+
         $scope.$watch('m_oController.m_asSelectedProducts', function(newValue, oldValue, scope)
         {
             $scope.m_oController.m_asSourceBands = $scope.m_oController.getBandsFromSelectedProducts();
@@ -183,10 +183,11 @@ var NDVIController = (function() {
 
     NDVIController.prototype.loadBands = function()
     {
+        var iNumberOfBands;
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
-            var iNumberOfBands = 0;
+            iNumberOfBands = 0;
         else
-            var iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
+            iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
 
         this.m_asSourceBands = [""];
         //load bands

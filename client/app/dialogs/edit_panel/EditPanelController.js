@@ -331,7 +331,6 @@ var EditPanelController = (function() {
         var txtarea = document.getElementById(areaId);
         if (!txtarea) { return; }
 
-        var scrollPos = txtarea.scrollTop;
         var strPos = 0;
         var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ?
             "ff" : (document.selection ? "ie" : false ) );
@@ -769,7 +768,7 @@ var EditPanelController = (function() {
 
     EditPanelController.prototype.addUserFilterOptions = function()
     {
-        var oThat = this;
+
         var oDefaultValue = {
             color:"white" ,
             fontcolor:"black",
@@ -785,11 +784,11 @@ var EditPanelController = (function() {
         if( utilsIsObjectNullOrUndefined(iNumberOfCollumns) || utilsIsObjectNullOrUndefined(iNumberOfRows)|| utilsIsObjectNullOrUndefined(iDefaultValue) )
             return null;
         var aaMatrix = [];
-        for(iIndexRows = 0; iIndexRows <  iNumberOfRows; iIndexRows++)
+        for(var iIndexRows = 0; iIndexRows <  iNumberOfRows; iIndexRows++)
         {
 
             var aoRow = [];
-            for(iIndexCollumns = 0; iIndexCollumns <  iNumberOfCollumns; iIndexCollumns++)
+            for(var iIndexCollumns = 0; iIndexCollumns <  iNumberOfCollumns; iIndexCollumns++)
             {
                 //aoRow.push(iDefaultValue);
                 aoRow[iIndexCollumns] =  {color: iDefaultValue.color ,fontcolor:iDefaultValue.fontcolor, value:iDefaultValue.value, click:iDefaultValue.click};
@@ -837,11 +836,11 @@ var EditPanelController = (function() {
     {
         if(utilsIsObjectNullOrUndefined(aaoMatrix) || utilsIsObjectNullOrUndefined(oElementRow)  )
             return false;
-
+        var iNumberOfRowValues;
         if(aaoMatrix.length === 0)
-            var iNumberOfRowValues = 5;//default value
+            iNumberOfRowValues = 5;//default value
         else
-            var iNumberOfRowValues = aaoMatrix[0].length;
+            iNumberOfRowValues = aaoMatrix[0].length;
 
         var aoRow = [];
         for(var iIndexRow = 0; iIndexRow < iNumberOfRowValues; iIndexRow++)
@@ -861,7 +860,7 @@ var EditPanelController = (function() {
 
     EditPanelController.prototype.addDefaultRowInMatrix = function(aaoMatrix)
     {
-        var oThat=this;
+
         var oDefaultValue = {
             color:"white" ,
             fontcolor:"black",
@@ -895,7 +894,7 @@ var EditPanelController = (function() {
     };
     EditPanelController.prototype.addDefaultColumnInMatrix = function(aaoMatrix)
     {
-        var oThat=this;
+
         var oDefaultValue = {
             color:"white" ,
             fontcolor:"black",
@@ -931,7 +930,7 @@ var EditPanelController = (function() {
             {
                 var iNumberOfRows = oData[asProperties[iIndexProperty]][iIndexOptions].kernelHeight;
                 var iNumberOfColumns = oData[asProperties[iIndexProperty]][iIndexOptions].kernelWidth;
-                var oThat = this;
+
                 var oDefaultValue = {
                     color:"white" ,
                     fontcolor:"black",
@@ -942,7 +941,7 @@ var EditPanelController = (function() {
                 oData[asProperties[iIndexProperty]][iIndexOptions].matrix =  this.makeEmptyMatrix(iNumberOfColumns,iNumberOfRows,oDefaultValue);
                 var aiArray = this.generateArrayOptionsValues(oData[asProperties[iIndexProperty]][iIndexOptions].kernelElements);
                 this.initMatrix(oData[asProperties[iIndexProperty]][iIndexOptions].matrix,aiArray );
-            };
+            }
 
             var oObject = {
                 name:asProperties[iIndexProperty],
@@ -958,7 +957,7 @@ var EditPanelController = (function() {
     {
         if(utilsIsObjectNullOrUndefined(aArrayValues) === true)
             return [];
-        var oThat = this;
+
 
         var aReturnArray = [];
         var iNumberOfValues =  aArrayValues.length;

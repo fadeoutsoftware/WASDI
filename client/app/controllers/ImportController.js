@@ -1,4 +1,4 @@
-3/**
+/**
  * Created by a.corrado on 30/11/2016.
  */
 
@@ -812,63 +812,15 @@ var ImportController = (function() {
 
     };
 
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-    /* us server Download the product in geoserver, the parameter oLayer = product*/
-    // ImportController.prototype.downloadProduct = function(oLayer)
-    // {
-    //
-    //     if(utilsIsObjectNullOrUndefined(oLayer))
-    //         return false;
-    //
-    //     var oThat = this;
-    //     this.m_oModalService.showModal({
-    //         templateUrl: "dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceView.html",
-    //         controller: "DownloadProductInWorkspaceController",
-    //         inputs: {
-    //             extras: oLayer
-    //         }
-    //     }).then(function(modal) {
-    //         modal.element.modal();
-    //
-    //         modal.close.then(function(result) {
-    //
-    //             if(utilsIsObjectNullOrUndefined(result))
-    //                 return false;
-    //             oLayer.isDisabledToDoDownload = true;
-    //             var oWorkSpace = result;
-    //             var oController = this;
-    //             if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
-    //             {
-    //                 //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
-    //                 console.log("Error there isn't workspaceID or layer");
-    //                 return false;
-    //             }
-    //             var url = oLayer.link;
-    //             if(utilsIsObjectNullOrUndefined(url))
-    //             {
-    //                 //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
-    //                 console.log("Error there isn't workspaceID or layer")
-    //                 return false;
-    //             }
-    //
-    //             oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
-    //                 var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-    //                 utilsVexCloseDialogAfter("3000",oDialog);
-    //
-    //
-    //             }).error(function (data,status) {
-    //                 utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
-    //                 oLayer.isDisabledToDoDownload = false;
-    //             });
-    //             return true;
-    //         });
-    //     });
-    //
-    //     return true;
-    // };
+        /**
+         * Download a product
+         * @param sUrl
+         * @param sWorkspaceId
+         * @param sBounds
+         * @param oProvider
+         * @param oCallback
+         * @param oError
+         */
     ImportController.prototype.downloadProduct = function(sUrl,sWorkspaceId,sBounds,oProvider,oCallback,oError)
     {
         if(utilsIsObjectNullOrUndefined(oCallback) === true)
@@ -930,7 +882,7 @@ var ImportController = (function() {
                 return false;
             oProduct.isDisabledToDoDownload = true;
             var oWorkSpace = result;
-            var oController = this;
+
             if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oProduct))
             {
                 console.log("Error there isn't workspaceID or layer");
@@ -974,7 +926,6 @@ var ImportController = (function() {
             if(utilsIsObjectNullOrUndefined(result))
                 return false;
             var oWorkSpace = result;
-            var oController = this;
             var iNumberOfProducts = aoProducts.length;
             if(utilsIsObjectNullOrUndefined(oWorkSpace) )
             {
@@ -1118,7 +1069,7 @@ var ImportController = (function() {
         var oController = this;
         if(utilsIsObjectNullOrUndefined(aData) === true) return false;
 
-        var aaoAllBounds = [];
+        // var aaoAllBounds = [];
 
         var iDataLength = aData.length;
         for(var iIndexData = 0; iIndexData < iDataLength; iIndexData++)
@@ -1133,7 +1084,7 @@ var ImportController = (function() {
                 //get bounds
                 var aoBounds = oController.polygonToBounds( aData[iIndexData].footprint);
                 aData[iIndexData].bounds = aoBounds;
-                aaoAllBounds.push(aoBounds);
+                // aaoAllBounds.push(aoBounds);
             }
 
             aData[iIndexData].rectangle = null;
@@ -1470,7 +1421,6 @@ var ImportController = (function() {
             }
 
             var aoWorkSpaces = result;
-            var oController = this;
             var iNumberOfWorkspaces = aoWorkSpaces.length;
             if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
             {
@@ -1525,7 +1475,6 @@ var ImportController = (function() {
                 return false;
             }
             var aoWorkSpaces = result;
-            var oController = this;
             var iNumberOfWorkspaces = aoWorkSpaces.length;
             var iNumberOfProducts = aoListOfSelectedProducts.length;
             if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
@@ -1703,11 +1652,7 @@ var ImportController = (function() {
             bReturnValue = true;
             oLayer.isDisabledToDoDownload = false;
         }
-        else
-        {
-            bReturnValue = false;
 
-        }
         return bReturnValue;
     };
 
@@ -1992,7 +1937,6 @@ var ImportController = (function() {
                 {
                     return 28;
                 }
-                break;
             case "march":
                 return 31;
             case "april":
@@ -2013,7 +1957,6 @@ var ImportController = (function() {
                 return 30;
             case "december":
                 return 31;
-                break;
 
         }
     };
@@ -2094,40 +2037,28 @@ var ImportController = (function() {
         switch(sMonthLowerCase) {
             case "january":
                 return 0;
-                break;
             case "february":
                 return 1;
-                break;
             case "march":
                 return 2;
-                break;
             case "april":
                 return 3;
-                break;
             case "may":
                 return 4;
-                break;
             case "june":
                 return 5;
-                break;
             case "july":
                 return 6;
-                break;
             case "august":
                 return 7;
-                break;
             case "september":
                 return 8;
-                break;
             case "october":
                 return 9;
-                break;
             case "november":
                 return 10;
-                break;
             case "december":
                 return 11;
-                break;
 
         }
         return -1;
@@ -2384,14 +2315,12 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
                 return true;
-                break;
+
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
                 return false;
-                break;
 
             default: return false;
 
-            return false;
         }
 
     };
@@ -2419,18 +2348,15 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
 
                 return true;
-                break;
 
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
                 return false;
-                break;
 
             default: return false;
 
-            return false;
         }
 
     };
@@ -2458,18 +2384,18 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
 
                 return true;
-                break;
+
 
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
                 return false;
-                break;
+
 
             default: return false;
 
-            return false;
+
         }
 
     };
@@ -2483,7 +2409,7 @@ var ImportController = (function() {
         switch(sCollection){
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
                 return true;
-                break;
+
 
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
@@ -2503,11 +2429,11 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
                 return false;
-                break;
+
 
             default: return false;
 
-            return false;
+
         }
 
     };
@@ -2522,7 +2448,7 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
                 return true;
-                break;
+
 
 
             case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
@@ -2541,11 +2467,10 @@ var ImportController = (function() {
             case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
             case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
                 return false;
-                break;
+
 
             default: return false;
 
-            return false;
         }
 
     }

@@ -170,7 +170,7 @@ var ProcessorController = (function() {
             userRuns: 0   // NOTE: not set at the moment
         }
 
-        this.m_oImageToUpload;
+        this.m_oImageToUpload = [];
 
         /**
          * Processor UI
@@ -262,7 +262,7 @@ var ProcessorController = (function() {
             // Select the right processor type
             var i=0;
 
-            for (i=0; i<this.m_aoProcessorTypes.length; i++) {
+            for (; i<this.m_aoProcessorTypes.length; i++) {
                 if (this.m_aoProcessorTypes[i].id === this.m_oInputProcessor.type) {
                     this.m_sTypeNameOnly = this.m_aoProcessorTypes[i].name;
                     this.m_sTypeIdOnly = this.m_aoProcessorTypes[i].id;
@@ -283,8 +283,8 @@ var ProcessorController = (function() {
                 {
                     oController.m_oProcessorDetails = data;
 
-                    oController.m_oProcessorMediaService.getCategories().success(function (data) {
-                        oController.m_aoCategories = data;
+                    oController.m_oProcessorMediaService.getCategories().success(function (oData) {
+                        oController.m_aoCategories = oData;
 
                     }).error(function (error) {
 
@@ -313,7 +313,7 @@ var ProcessorController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP UI");
             });
         }
-    };
+    }
 
      /**
       * Utility method to define if the drag and drop box can be shown or not
@@ -369,9 +369,9 @@ var ProcessorController = (function() {
          oController.m_oProcessorDetails.processorDescription = oController.m_sDescription;
 
          // Update processor data
-         oController.m_oProcessorService.updateProcessor(oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function (data) {
+         oController.m_oProcessorService.updateProcessor(oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function () {
 
-             oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).success(function (data) {
+             oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).success(function () {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
              }).error(function (error) {
@@ -436,7 +436,7 @@ var ProcessorController = (function() {
 
         this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody).success(function (data) {
 
-            sMessage = ""
+            var sMessage = ""
             if (data.boolValue == true) {
                 sMessage = "PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE"
             }
@@ -605,9 +605,9 @@ var ProcessorController = (function() {
          if (this.m_oProcessorDetails.categories.includes(sCategoryId)) {
             return true;
          }
-         else {
-             return false;
-         }
+
+         return false;
+
      }
 
      /**

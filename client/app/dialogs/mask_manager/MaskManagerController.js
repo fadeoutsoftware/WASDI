@@ -180,7 +180,7 @@ var MaskManagerController = (function() {
 
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
-    };
+    }
 
     /**
      *
@@ -273,7 +273,6 @@ var MaskManagerController = (function() {
         var txtarea = document.getElementById(areaId);
         if (!txtarea) { return; }
 
-        var scrollPos = txtarea.scrollTop;
         var strPos = 0;
         var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ?
             "ff" : (document.selection ? "ie" : false ) );

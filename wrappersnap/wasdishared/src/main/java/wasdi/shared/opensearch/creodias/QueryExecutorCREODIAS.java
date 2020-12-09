@@ -29,11 +29,8 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 
 	public QueryExecutorCREODIAS() {
 		Utils.debugLog(s_sClassName);
-		m_sProvider="s_sClassName";
+		m_sProvider=s_sClassName;
 		this.m_oQueryTranslator = new DiasQueryTranslatorCREODIAS();
-		
-		
-		
 		this.m_oResponseTranslator = new DiasResponseTranslatorCREODIAS();
 	}
 	
@@ -115,7 +112,23 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	@Override
 	protected String getSearchUrl(PaginatedQuery oQuery) {
 		String sUrl = getUrl(oQuery.getQuery());
-		sUrl += "&maxRecords=" + oQuery.getLimit();
+		sUrl += "&maxRecords=" + oQuery.getOriginalLimit();
+		
+		try {
+			
+			int iItemsPerPage = Integer.parseInt(oQuery.getOriginalLimit());
+			int iActualOffset = Integer.parseInt(oQuery.getOffset());
+			int iPage = (int) Math.floor( (double)iActualOffset / (double)iItemsPerPage );
+			iPage++;
+			
+			if (iPage>1) {
+				sUrl += "&page=" + iPage;
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog(s_sClassName + ".getSearchUrl: exception generating the page parameter  " + oEx.toString());
+		}
+		
 		sUrl += "&sortParam=" + oQuery.getSortedBy(); //"startDate"
 		sUrl += "&sortOrder=" + oQuery.getOrder(); //"descending"
 		sUrl += "&status=all&dataset=ESA-DATASET";

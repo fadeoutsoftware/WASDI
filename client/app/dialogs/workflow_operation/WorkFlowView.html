@@ -12,30 +12,12 @@
                            <div class="select-input-label">{{"DIALOG_WORKFLOW_INPUTFILE"|translate}}</div>
                         </div>
                         <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 my-input-text">
-                            <!--<div class="dropdown">-->
-                                <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"-->
-                                        <!--data-toggle="dropdown">-->
-                                    <!--{{ m_oController.m_oSelectedFile.productFriendlyName || "Products"  }}-->
-                                    <!--<span class="caret"></span>-->
-                                <!--</button>-->
-                                <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">-->
-                                    <!--<li role="presentation" ng_repeat="product in m_oController.m_aoProducts" ng-click="m_oController.selectedProduct(product)" ><a role="menuitem" tabindex="-1" href="">{{product.productFriendlyName}}</a></li>-->
-                                <!--</ul>-->
-                            <!--</div>-->
 
                             <multiselect options = "m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"></multiselect>
 
                         </div>
                     </div>
-                    <!--<div class="row">-->
-                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                            <!--<div class="output-file-label">{{"DIALOG_WORKFLOW_OUTPUTFILE"|translate}}</div>-->
-                        <!--</div>-->
 
-                        <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 my-input-text">-->
-                            <!--<input type="text" class="" placeholder="Output File..." ng-model="m_oController.m_sOutputFile">-->
-                        <!--</div>-->
-                    <!--</div>-->
                     <div class="drag-and-drop ">
                         {{"DIALOG_WORKFLOW_DROP_OR_CLICK"|translate}}
                         <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
