@@ -29,7 +29,9 @@ public class ZipExtractor {
 	long m_lToobigtotal = 1024L * 1024L * 1024L; // Max size of unzipped total Data, 1 GB
 	long m_lToobigsingle = 1024L * 1024L * 512L; // Max size of unzipped total Data, 512 MB
 	int m_lToomany = 1024; // Maximum number of files that can be extracted
+	LoggerWrapper m_oLogger;
 
+	
 	/**
 	 * Safer version of the unzip method.
 	 * This method take in account the total dimension extracted and the dimension for each file.
@@ -55,14 +57,14 @@ public class ZipExtractor {
 		String sTempPath = sPath + sTemp;
 
 		if (new File(sTempPath).mkdir()) {
-			System.out.println("Temp directory created");
+			System.out.println("ZipExtractor ---- Temporary directory created");
 		} else {
 			throw new IOException("Can't create temporary dir " + sTempPath);
 		}
 
 		try (ZipInputStream oZis = new ZipInputStream(new BufferedInputStream(oFis))) {
 			while ((oEntry = oZis.getNextEntry()) != null) {
-				System.out.println("Extracting: " + oEntry);
+				System.out.println("ZipExtractor ---- Extracting: " + oEntry);
 				int iCount;
 				byte[] ayData = new byte[BUFFER];
 				// Write the files to the disk, but ensure that the filename is valid,
@@ -70,9 +72,9 @@ public class ZipExtractor {
 				String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
 				// Random used to mitigate attacks
 				if (oEntry.isDirectory()) {
-					System.out.println("Creating directory " + sName);
+					System.out.println("ZipExtractor ---- Creating directory " + sName);
 					if (new File(sName).mkdir()) {
-						System.out.println("Directory created");
+						System.out.println("ZipExtractor ---- Directory created");
 					}
 					iEntries++; // count also a directory creation as an entry
 					continue;
@@ -249,5 +251,14 @@ public class ZipExtractor {
 	 */
 	public void setTOOMANY(int iTooMany) {
 		m_lToomany = iTooMany;
+	}
+
+
+	/**
+	 * Setter of the logger
+	 * @param oLogger the logger
+	 */
+	public void setLogger(LoggerWrapper oLogger) {
+		this.m_oLogger = oLogger;
 	}
 }
