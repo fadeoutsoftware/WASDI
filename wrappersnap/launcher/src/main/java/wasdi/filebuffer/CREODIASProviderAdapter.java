@@ -27,9 +27,9 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
-import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
 /**

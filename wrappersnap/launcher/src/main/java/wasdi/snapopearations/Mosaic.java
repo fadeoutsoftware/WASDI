@@ -20,11 +20,11 @@ import org.esa.snap.core.gpf.common.MosaicOp.Variable;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 
 import wasdi.LauncherMain;
-import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MosaicSetting;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
 public class Mosaic {

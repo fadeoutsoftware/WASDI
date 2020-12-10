@@ -116,6 +116,7 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.MetadataViewModel;
