@@ -456,6 +456,14 @@ public class Wasdi extends ResourceConfig {
 			return oResult;
 		}
 		
+		User oUser = getUserFromSession(sSessionId);
+		if(null == oUser) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setIntValue(401);
+			oResult.setBoolValue(false);
+			return oResult;
+		}
+		
 		// Get the Ob Id
 		String sProcessObjId = oParameter.getProcessObjId();
 		
