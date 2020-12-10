@@ -50,7 +50,7 @@ public class ZipExtractor {
         long total = 0;
         long single = 0;
         int iRandom = Math.abs(new SecureRandom().nextInt());
-        String sTemp = "tmp-" + iRandom + "/";
+        String sTemp = "tmp-" + iRandom + File.separator;
         String sTempPath = path + sTemp;
 
         if (new File(sTempPath).mkdir()) System.out.println("Temp directory created");
