@@ -39,65 +39,69 @@ public class ZipExtractor {
      * - errors occurs (I.E. a file is bigger than the limit imposed)
      * - the unzip is completed without errors
      *
-     * @param filename the filename of the Zip file to be extracted
-     * @param path     The intended path in which the file should be extracted
+     * @param sFilename the filename of the Zip file to be extracted
+     * @param sPath     The intended path in which the file should be extracted
      * @throws java.io.IOException Throws IO exception in case the zip file is not founded
      */
-    public String unzip(String filename, String path) throws java.io.IOException {
-        FileInputStream fis = new FileInputStream(filename);
-        ZipEntry entry;
-        int entries = 0;
-        long total = 0;
-        long single = 0;
+    public String unzip(String sFilename, String sPath) throws java.io.IOException {
+        FileInputStream oFis = new FileInputStream(sFilename);
+        ZipEntry oEntry;
+        int iEntries = 0;
+        long lTotal = 0;
+        long lSingle = 0;
         int iRandom = Math.abs(new SecureRandom().nextInt());
         String sTemp = "tmp-" + iRandom + File.separator;
-        String sTempPath = path + sTemp;
+        String sTempPath = sPath + sTemp;
 
-        if (new File(sTempPath).mkdir()) System.out.println("Temp directory created");
-        else throw new IOException("Can't create temporary dir " + sTempPath);
+        if (new File(sTempPath).mkdir()) {
+        	System.out.println("Temp directory created");
+        } else {
+        	throw new IOException("Can't create temporary dir " + sTempPath);
+        }
 
-        try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
-            while ((entry = zis.getNextEntry()) != null) {
-                System.out.println("Extracting: " + entry);
-                int count;
-                byte[] data = new byte[BUFFER];
+        try (ZipInputStream oZis = new ZipInputStream(new BufferedInputStream(oFis))) {
+            while ((oEntry = oZis.getNextEntry()) != null) {
+                System.out.println("Extracting: " + oEntry);
+                int iCount;
+                byte[] ayData = new byte[BUFFER];
                 // Write the files to the disk, but ensure that the filename is valid,
                 // and that the file is not insanely big
-                String name = validateFilename(sTempPath + entry.getName(), sTempPath); // throws exception in case
+                String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
                 // Random used to mitigate attacks
-                //File oTempDir = new File(path + "/tmp-" +iRandom+"/");
-                if (entry.isDirectory()) {
-                    System.out.println("Creating directory " + name);
-                    if (new File(name).mkdir()) System.out.println("Directory created");
-                    entries++; // count also a directory creation as an entry
+                if (oEntry.isDirectory()) {
+                    System.out.println("Creating directory " + sName);
+                    if (new File(sName).mkdir()) {
+                    	System.out.println("Directory created");
+                    }
+                    iEntries++; // count also a directory creation as an entry
                     continue;
                 }
-                FileOutputStream fos = new FileOutputStream(name);
-                BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
-                while (total + BUFFER <= m_lToobigtotal &&
-                        single + BUFFER <= m_lToobigsingle &&
-                        (count = zis.read(data, 0, BUFFER)) != -1) {
-                    dest.write(data, 0, count);
-                    total += count;
-                    single += count;
+                FileOutputStream oFos = new FileOutputStream(sName);
+                BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER);
+                while (lTotal + BUFFER <= m_lToobigtotal &&
+                        lSingle + BUFFER <= m_lToobigsingle &&
+                        (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
+                    oDest.write(ayData, 0, iCount);
+                    lTotal += iCount;
+                    lSingle += iCount;
                 }
-                dest.flush();
-                dest.close();
-                zis.closeEntry();
-                entries++;
-                if (single + BUFFER > m_lToobigsingle) {
+                oDest.flush();
+                oDest.close();
+                oZis.closeEntry();
+                iEntries++;
+                if (lSingle + BUFFER > m_lToobigsingle) {
                     cleanTempDir(sTempPath, sTemp);
                     throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
                 }
-                if (total + BUFFER > m_lToobigtotal) {
+                if (lTotal + BUFFER > m_lToobigtotal) {
                     cleanTempDir(sTempPath, sTemp);
                     throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
                 }
-                if (entries > m_lToomany) {
+                if (iEntries > m_lToomany) {
                     cleanTempDir(sTempPath, sTemp);
                     throw new IllegalStateException("Too many files to unzip.");
                 }
-                single = 0; // resets single file byte-counter
+                lSingle = 0; // resets single file byte-counter
             }
             /// IF everything went well cp temp content to original folder (overwrite it's fine) and delete temp dir
             cleanTempDir(sTempPath, sTemp);
@@ -114,35 +118,35 @@ public class ZipExtractor {
     /**
      * Instantiates a ZipExtractor passing 3 critical parameters (in bytes)
      *
-     * @param toobigtotal     the total maximum size allowed for extraction
-     * @param m_lToobigsingle the maximum single size for each file
-     * @param m_lToomany      the maximum number of files allowed to be extracted
+     * @param lToobigtotal     the total maximum size allowed for extraction
+     * @param lToobigsingle the maximum single size for each file
+     * @param lToomany      the maximum number of files allowed to be extracted
      */
-    public ZipExtractor(long toobigtotal, long m_lToobigsingle, int m_lToomany) {
-        this.m_lToobigtotal = toobigtotal;
-        this.m_lToobigsingle = m_lToobigsingle;
-        this.m_lToomany = m_lToomany;
+    public ZipExtractor(long lToobigtotal, long lToobigsingle, int lToomany) {
+        this.m_lToobigtotal = lToobigtotal;
+        this.m_lToobigsingle = lToobigsingle;
+        this.m_lToomany = lToomany;
     }
 
     /**
      * Checks that the the output dir is coherent with the current dir.
      * This methods filters out directory traversal attempts.
      *
-     * @param filename    the file name of the zip file to be extracted
-     * @param intendedDir the intended directory where the extraction must be done
+     * @param sFilename    the file name of the zip file to be extracted
+     * @param sIntendedDir the intended directory where the extraction must be done
      * @return the canonical path of the file
      * @throws java.io.IOException in case of the file is outside target extraction directory
      */
-    private static String validateFilename(String filename, String intendedDir)
+    private static String validateFilename(String sFilename, String sIntendedDir)
             throws java.io.IOException {
-        File f = new File(filename);
-        String canonicalPath = f.getCanonicalPath();
+        File oF = new File(sFilename);
+        String sCanonicalPath = oF.getCanonicalPath();
 
-        File iD = new File(intendedDir);
-        String canonicalID = iD.getCanonicalPath();
+        File oIDir = new File(sIntendedDir);
+        String sCanonicalID = oIDir.getCanonicalPath();
 
-        if (canonicalPath.startsWith(canonicalID)) {
-            return canonicalPath;
+        if (sCanonicalPath.startsWith(sCanonicalID)) {
+            return sCanonicalPath;
         } else {
             throw new IllegalStateException("File is outside extraction target directory.");
         }
@@ -152,59 +156,53 @@ public class ZipExtractor {
      * Util methods to obtain a human readable byte count(GB,MB,KB) from
      * a byte count.
      *
-     * @param bytes the number of the bytes that should be considered
+     * @param lBytes the number of the bytes that should be considered
      * @return String with the human readable string (e.g. kB, MB, GB)
      */
-    public static String humanReadableByteCountSI(long bytes) {
-        if (-1000 < bytes && bytes < 1000) {
-            return bytes + " B";
+    public static String humanReadableByteCountSI(long lBytes) {
+        if (-1000 < lBytes && lBytes < 1000) {
+            return lBytes + " B";
         }
-        CharacterIterator ci = new StringCharacterIterator("kMGTPE");
-        while (bytes <= -999_950 || bytes >= 999_950) {
-            bytes /= 1000;
-            ci.next();
+        CharacterIterator oCi = new StringCharacterIterator("kMGTPE");
+        while (lBytes <= -999_950 || lBytes >= 999_950) {
+            lBytes /= 1000;
+            oCi.next();
         }
-        return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+        return String.format("%.1f %cB", lBytes / 1000.0, oCi.current());
     }
 
     /**
      * After a successful extraction this method is invoked in order to move the
      * temporary folder content and cleanup the directory.
-     * @param tempPath the temp path where to clean up
+     * @param sTempPath the temp path where to clean up
      * @param sTemp the folder name of the temp path [temp-{random-generated-id}]
      * @return True if the operation is done without errors nor exceptions. False instead
      */
-    private boolean cleanTempDir(String tempPath, String sTemp) {
-        File dir = new File(tempPath); // point one dir
+    private boolean cleanTempDir(String sTempPath, String sTemp) {
+        File oDir = new File(sTempPath); // point one dir
 
         try {
-            Files.walk(dir.toPath())
+            Files.walk(oDir.toPath())
                     .sorted(Comparator.naturalOrder()). // this make the dir before other files
                     map(Path::toFile).
-                    forEach(f -> {
+                    forEach(oFile -> {
                         try {
-                            File dest = new File(f.getCanonicalPath().replace(sTemp, "")); // removes the tmp-part from the destination files
-                            if (dest.isDirectory()) return; // checks the existence of the dir
-                            /*System.out.println("moving " +
-                                    f.getCanonicalFile().toPath() +
-                                    " to " +
-                                    dest.getCanonicalFile().toPath());*/
-
-                            Files.copy(f.getCanonicalFile().toPath(), dest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            File oDest = new File(oFile.getCanonicalPath().replace(sTemp, "")); // removes the tmp-part from the destination files
+                            if (oDest.isDirectory()) return; // checks the existence of the dir
+                            Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException oE) {
+                            oE.printStackTrace();
                         }
                     });
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException oE) {
+            oE.printStackTrace();
             return false;
         }
 
         try {
-            deleteDirectory(dir.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
+            deleteDirectory(oDir.toPath());
+        } catch (IOException oE) {
+            oE.printStackTrace();
             return false;
         }
         return true;
@@ -214,11 +212,11 @@ public class ZipExtractor {
     /**
      * Util method that recursively delete the path passed as input
      * On unix systems is equivalent to "rm -rf [path]"
-     * @param toBeDeleted path to be deleted
+     * @param oToBeDeleted path to be deleted
      * @throws IOException
      */
-    protected void deleteDirectory(Path toBeDeleted) throws IOException {
-        Files.walk(toBeDeleted)
+    protected void deleteDirectory(Path oToBeDeleted) throws IOException {
+        Files.walk(oToBeDeleted)
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
                 .forEach(File::delete);
@@ -227,27 +225,27 @@ public class ZipExtractor {
     /**
      * Setter of the parameter that checks the total size of the extracted files
      *
-     * @param TOOBIGTOTAL size, in bytes, of the limit
+     * @param lTooBigTotal size, in bytes, of the limit
      */
-    public void setTOOBIGTOTAL(long TOOBIGTOTAL) {
-        m_lToobigtotal = TOOBIGTOTAL;
+    public void setTOOBIGTOTAL(long lTooBigTotal) {
+        m_lToobigtotal = lTooBigTotal;
     }
 
     /**
      * Setter of the parameter that checks the size of each single file
      *
-     * @param TOOBIGSINGLE size, in bytes, of the limit
+     * @param lTooBigSingle size, in bytes, of the limit
      */
-    public void setTOOBIGSINGLE(long TOOBIGSINGLE) {
-        m_lToobigsingle = TOOBIGSINGLE;
+    public void setTOOBIGSINGLE(long lTooBigSingle) {
+        m_lToobigsingle = lTooBigSingle;
     }
 
     /**
      * Setter of the parameter that checks the number of files being extracted
      *
-     * @param TOOMANY count of the files that must not be exceed
+     * @param iTooMany count of the files that must not be exceed
      */
-    public void setTOOMANY(int TOOMANY) {
-        m_lToomany = TOOMANY;
+    public void setTOOMANY(int iTooMany) {
+        m_lToomany = iTooMany;
     }
 }
