@@ -26,7 +26,7 @@ public class TestZipExtractor {
 
     private ZipExtractor zipExtractor;
     // final string pointing the path for testing
-    private final static String sExtractionPath = "./src/test/java/extractionFolder/";
+    private final static String sExtractionPath = "." + File.separator + "src" + File.separator + "test" + File.separator + "java" + File.separator + "extractionFolder" + File.separator;
     private final static String sExtractionFileName = "test.zip";
 
     /**
@@ -152,7 +152,7 @@ public class TestZipExtractor {
             ZipEntry ze = zis.getNextEntry();
             while (ze != null) {
                 //if (!ze.getName().endsWith(".zip")) {
-                if (ze.getName().endsWith("/")) {
+                if (ze.getName().endsWith(File.separator)) {
                     returnArray.add(ze.getName().substring(0, ze.getName().length() - 1));
                 } else {
                     returnArray.add(ze.getName());
