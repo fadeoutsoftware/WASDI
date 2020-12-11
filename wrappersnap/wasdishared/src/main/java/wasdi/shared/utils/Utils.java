@@ -464,36 +464,6 @@ public class Utils {
 	 * @param sZipFile Full path of the zip file
 	 * @return True if the zip contains a .shp file, False otherwise
 	 */
-	public static boolean isShapeFileZipped(String sZipFile) {
-				
-		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize();
-		if(!oZipPath.toFile().exists()) {
-			return false;
-		}
-		try (ZipFile oZipFile = new ZipFile(oZipPath.toString())){
-		
-			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
-			
-			while(aoEntries.hasMoreElements()) {
-				ZipEntry oZipEntry = aoEntries.nextElement();
-				
-				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
-					return true;
-				}
-			}			
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
-	 * @param sZipFile Full path of the zip file
-	 * @return True if the zip contains a .shp file, False otherwise
-	 */
 	public static String getShpFileNameFromZipFile(String sZipFile) {
 		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize(); 
 		if(!oZipPath.toFile().exists()) {

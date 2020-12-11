@@ -118,6 +118,7 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.ShapeFileUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
@@ -1242,7 +1243,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// Check if this is a Zipped Shape File
 				if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
-					if (Utils.isShapeFileZipped(oFileToIngestPath.getPath())) {
+					if (new ShapeFileUtils(oParameter.getProcessObjId()).isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
 
 						// May be.
 						s_oLogger.info("File to ingest looks can be a zipped shape file, try to unzip");
@@ -2881,7 +2882,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
 				oProductViewModel = oReadProduct.getProductViewModel();
 
-				// P.Campanella 20200126: ma non sarebbe forse più corretto il contrario?!?
+				// P.Campanella 20200126: ma non sarebbe forse piï¿½ corretto il contrario?!?
 				if (oProductViewModel.getMetadata() != null) {
 					if (bAsynchMetadata) {
 						// Asynch Metadata Save
