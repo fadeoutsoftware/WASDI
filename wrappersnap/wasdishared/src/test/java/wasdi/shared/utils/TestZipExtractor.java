@@ -87,10 +87,100 @@ class TestZipExtractor {
         for (String sZipEntryName : asFileListInTestZip) {
             Assertions.assertTrue(path.contains(s_sExtractionPath + sZipEntryName));
         }
-
-
     }
 
+    /**
+     * Test that the extraction is done by checking that the files list contained
+     * in the original zip file are on the file system.
+     */
+    @Test
+    void testExtractionDoneBackSlash() {
+        // first unzip
+        String sTempDir = "";
+        try {
+        	String sPath = new String(s_sExtractionPath.substring(0, s_sExtractionPath.length()-1));
+        	sPath += "\\";
+            sTempDir = oZipExtractor.unzip(sPath + s_sExtractionFileName, sPath);
+        } catch (IOException oE) {
+            oE.printStackTrace();
+        }
+        // then check files in temp dir
+        File oHere = new File(sTempDir);
+        ArrayList<String> path = new ArrayList<>();
+        try {
+            Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
+                    .forEach(oFileInStream -> path.add(oFileInStream.toString()));
+        } catch (IOException oE) {
+            oE.printStackTrace();
+        }
+        String[] asFileListInTestZip = getFileListInTestZip();
+        // this checks is done on temp dir but at this point the temp dir is deleted
+        for (String sZipEntryName : asFileListInTestZip) {
+            Assertions.assertTrue(path.contains(s_sExtractionPath + sZipEntryName));
+        }
+    }
+    
+    /**
+     * Test that the extraction is done by checking that the files list contained
+     * in the original zip file are on the file system.
+     */
+    @Test
+    void testExtractionDoneFileSeparator() {
+        // first unzip
+        String sTempDir = "";
+        try {
+        	String sPath = new String(s_sExtractionPath.substring(0, s_sExtractionPath.length()-1));
+        	sPath += File.separator;
+            sTempDir = oZipExtractor.unzip(sPath + s_sExtractionFileName, sPath);
+        } catch (IOException oE) {
+            oE.printStackTrace();
+        }
+        // then check files in temp dir
+        File oHere = new File(sTempDir);
+        ArrayList<String> path = new ArrayList<>();
+        try {
+            Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
+                    .forEach(oFileInStream -> path.add(oFileInStream.toString()));
+        } catch (IOException oE) {
+            oE.printStackTrace();
+        }
+        String[] asFileListInTestZip = getFileListInTestZip();
+        // this checks is done on temp dir but at this point the temp dir is deleted
+        for (String sZipEntryName : asFileListInTestZip) {
+            Assertions.assertTrue(path.contains(s_sExtractionPath + sZipEntryName));
+        }
+    }
+    
+    /**
+     * Test that the extraction is done by checking that the files list contained
+     * in the original zip file are on the file system.
+     */
+    @Test
+    void testExtractionDoneNoSep() {
+        // first unzip
+        String sTempDir = "";
+        try {
+        	String sPath = new String(s_sExtractionPath.substring(0, s_sExtractionPath.length()-1));
+            sTempDir = oZipExtractor.unzip(sPath + File.separator + s_sExtractionFileName, sPath);
+        } catch (IOException oE) {
+            oE.printStackTrace();
+        }
+        // then check files in temp dir
+        File oHere = new File(sTempDir);
+        ArrayList<String> path = new ArrayList<>();
+        try {
+            Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
+                    .forEach(oFileInStream -> path.add(oFileInStream.toString()));
+        } catch (IOException oE) {
+            oE.printStackTrace();
+        }
+        String[] asFileListInTestZip = getFileListInTestZip();
+        // this checks is done on temp dir but at this point the temp dir is deleted
+        for (String sZipEntryName : asFileListInTestZip) {
+            Assertions.assertTrue(path.contains(s_sExtractionPath + sZipEntryName));
+        }
+    }
+    
     /**
      * Checks that extraction fails for a single file being too big
      */

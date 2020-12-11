@@ -8,6 +8,7 @@ package wasdi.shared.utils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.text.CharacterIterator;
@@ -57,9 +58,14 @@ public class ZipExtractor {
 		long lSingle = 0;
 		int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
 		String sTemp = "tmp-" + iRandom + File.separator;
-		String sTempPath = sPath + sTemp;
-
-		if (new File(sTempPath).mkdir()) {
+		String sTempPath = sPath;
+		if(!sTempPath.endsWith(File.separator)) {
+			sTempPath += File.separator;
+		}
+		sTempPath += sTemp;
+		
+		Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
+		if (oPath.toFile().mkdir()) {
 			s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created");
 		} else {
 			throw new IOException("Can't create temporary dir " + sTempPath);
