@@ -1243,7 +1243,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// Check if this is a Zipped Shape File
 				if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
-					if (new ShapeFileUtils(oParameter.getProcessObjId()).isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
+					ShapeFileUtils oShapeFileUtils = new ShapeFileUtils(oParameter.getProcessObjId());
+					if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
 
 						// May be.
 						s_oLogger.info("File to ingest looks can be a zipped shape file, try to unzip");
@@ -1253,7 +1254,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
 
 						// Get the name of shp from the zip file (case safe)
-						String sShapeFileTest = Utils.getShpFileNameFromZipFile(oFileToIngestPath.getPath());
+						String sShapeFileTest = oShapeFileUtils.getShpFileNameFromZipFile(oFileToIngestPath.getPath(), 30);
 
 						if (Utils.isNullOrEmpty(sShapeFileTest) == false) {
 							// Ok, we have our file

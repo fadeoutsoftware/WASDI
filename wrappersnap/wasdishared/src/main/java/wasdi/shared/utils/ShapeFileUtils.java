@@ -60,4 +60,40 @@ public class ShapeFileUtils {
 		return false;
 	}
 
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * @param sZipFile Full path of the zip file
+	 * @param iMaxFileInZipFile TODO
+	 * @return True if the zip contains a .shp file, False otherwise
+	 */
+	public String getShpFileNameFromZipFile(String sZipFile, int iMaxFileInZipFile) {
+		Path oZipPath = Paths.get(sZipFile).toAbsolutePath().normalize(); 
+		if(!oZipPath.toFile().exists()) {
+			return "";
+		}
+		
+		int iFileCounter = 0;
+		try(ZipFile oZipFile = new ZipFile(oZipPath.toString())) {
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				if (iFileCounter > iMaxFileInZipFile) {
+					s_oLogger.error(this.m_sLoggerPrefix + "isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					return "";
+				}
+				
+				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
+					return oZipEntry.getName();
+				}
+				iFileCounter++;
+			}			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
+
 }
