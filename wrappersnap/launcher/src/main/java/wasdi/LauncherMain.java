@@ -119,6 +119,7 @@ import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.MetadataViewModel;
@@ -843,11 +844,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oProviderAdapter.unsubscribe(this);
 
 					// Control Check for the file Name
-					sFileName = sFileName.replaceAll("//", "/");
+					sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
 
 					if (sFileNameWithoutPath.startsWith("S3") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
 						s_oLogger.debug("LauncherMain.download: File is a Sentinel 3 image, start unzip");
-						Utils.unzip(sFileNameWithoutPath, sDownloadPath);
+						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
 						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", ".SEN3");
 						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
 						sFileName = sFolderName + "/" + "xfdumanifest.xml";
@@ -1289,8 +1291,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Must be unzipped?
 				if (bUnzipAfterCopy) {
 
-					s_oLogger.debug("File must be unzipped");
-					Utils.unzip(oFileToIngestPath.getName(), oDstDir.getPath());
+					s_oLogger.debug("File must be unzipped");					
+					ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+					oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oDstDir.getCanonicalPath());
 					s_oLogger.debug("Unzip done");
 				}
 			} else {
