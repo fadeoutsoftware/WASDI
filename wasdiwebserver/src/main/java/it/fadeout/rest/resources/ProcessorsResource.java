@@ -1830,13 +1830,15 @@ public class ProcessorsResource  {
 
 			//rename those files
 			try {
-				for (File f: aoFileList) {
-					if (f.getCanonicalPath().toUpperCase().endsWith(".PRO") && !f.isDirectory()) {
-						String sNewPath = f.getCanonicalPath();
+				for (File oFile: aoFileList) {
+					if (oFile.getCanonicalPath().toUpperCase().endsWith(".PRO") && !oFile.isDirectory()) {
+						String sNewPath = oFile.getCanonicalPath();
 						sNewPath = sNewPath.substring(0, sNewPath.length() - 4);
 						sNewPath += ".pro";
 						// Force extension case
-						Files.move(new File(f.getCanonicalPath()).toPath(), new File(sNewPath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+						String sOld = oFile.getCanonicalPath();
+						java.nio.file.Path oMovePath = Files.move(new File(sOld).toPath(), new File(sNewPath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+						Utils.debugLog("ProcessorsResource.unzipProcessor: renaming from " + sOld + " to " + oMovePath.toString());
 					}
 				}
 			} catch (IOException oE) {
