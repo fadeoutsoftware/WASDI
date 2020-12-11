@@ -17,7 +17,7 @@ public class ShapeFileUtils {
 	 * @param sPrefix prefix of the logger
 	 */
 	public ShapeFileUtils(String sPrefix) {
-		this.m_sLoggerPrefix += " - " + sPrefix;
+		this.m_sLoggerPrefix = sPrefix + " - " + this.m_sLoggerPrefix ;
 	}
 	
 	/**
@@ -43,7 +43,7 @@ public class ShapeFileUtils {
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				
 				if (iFileCounter > iMaxFileInZipFile) {
-					s_oLogger.error(this.m_sLoggerPrefix + " too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					s_oLogger.error(this.m_sLoggerPrefix + "isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
 					return false;
 				}
 				
