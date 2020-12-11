@@ -116,9 +116,11 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
+import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
@@ -1244,7 +1246,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						s_oLogger.info("File to ingest looks can be a zipped shape file, try to unzip");
 
 						// Unzip
-						Utils.unzip(oFileToIngestPath.getName(), oFileToIngestPath.getParent());
+						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+						oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
 
 						// Get the name of shp from the zip file (case safe)
 						String sShapeFileTest = Utils.getShpFileNameFromZipFile(oFileToIngestPath.getPath());
