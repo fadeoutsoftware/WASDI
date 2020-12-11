@@ -22,7 +22,7 @@ import java.util.zip.ZipInputStream;
  * Checks different condition. Before every single test the directory of the extraction is
  * cleaned. Tests also several settings of zip extractor itself.
  */
-public class TestZipExtractor {
+class TestZipExtractor {
 
     private ZipExtractor oZipExtractor;
     // final string pointing the path for testing
@@ -132,7 +132,7 @@ public class TestZipExtractor {
             oZipExtractor.unzip(s_sExtractionPath + s_sExtractionFileName, s_sExtractionPath);
         });
         // first unzip
-        Assertions.assertTrue(oException.getMessage().contains("Too many files to unzip"));
+        Assertions.assertTrue(oException.getMessage().contains("Too many files inside the archive."));
 
     }
 

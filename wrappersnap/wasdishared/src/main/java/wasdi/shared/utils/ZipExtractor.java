@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * Utility class for zip extraction operation with some security considerations.
  *
@@ -29,9 +31,10 @@ public class ZipExtractor {
 	long m_lToobigtotal = 1024L * 1024L * 1024L; // Max size of unzipped total Data, 1 GB
 	long m_lToobigsingle = 1024L * 1024L * 512L; // Max size of unzipped total Data, 512 MB
 	int m_lToomany = 1024; // Maximum number of files that can be extracted
-	LoggerWrapper m_oLogger;
+	String m_sLoggerPrefix = "ZipExtractor."; 
+	static Logger s_oLogger = Logger.getLogger(ZipExtractor.class);
 
-	
+
 	/**
 	 * Safer version of the unzip method.
 	 * This method take in account the total dimension extracted and the dimension for each file.
@@ -57,14 +60,14 @@ public class ZipExtractor {
 		String sTempPath = sPath + sTemp;
 
 		if (new File(sTempPath).mkdir()) {
-			System.out.println("ZipExtractor ---- Temporary directory created");
+			s_oLogger.info(m_sLoggerPrefix + "Temporary directory created");
 		} else {
 			throw new IOException("Can't create temporary dir " + sTempPath);
 		}
 
 		try (ZipInputStream oZis = new ZipInputStream(new BufferedInputStream(oFis))) {
 			while ((oEntry = oZis.getNextEntry()) != null) {
-				System.out.println("ZipExtractor ---- Extracting: " + oEntry);
+				s_oLogger.info(m_sLoggerPrefix + "Extracting: " + oEntry);
 				int iCount;
 				byte[] ayData = new byte[BUFFER];
 				// Write the files to the disk, but ensure that the filename is valid,
@@ -72,9 +75,9 @@ public class ZipExtractor {
 				String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
 				// Random used to mitigate attacks
 				if (oEntry.isDirectory()) {
-					System.out.println("ZipExtractor ---- Creating directory " + sName);
+					s_oLogger.info(m_sLoggerPrefix + "Creating directory " + sName);
 					if (new File(sName).mkdir()) {
-						System.out.println("ZipExtractor ---- Directory created");
+						s_oLogger.info(m_sLoggerPrefix + "Directory "+sName+" created");
 					}
 					iEntries++; // count also a directory creation as an entry
 					continue;
@@ -93,15 +96,18 @@ public class ZipExtractor {
 					iEntries++;
 					if (lSingle + BUFFER > m_lToobigsingle) {
 						cleanTempDir(sTempPath, sTemp);
+						s_oLogger.error(m_sLoggerPrefix + "File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 						throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 					}
 					if (lTotal + BUFFER > m_lToobigtotal) {
 						cleanTempDir(sTempPath, sTemp);
+						s_oLogger.error(m_sLoggerPrefix + "File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 						throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 					}
 					if (iEntries > m_lToomany) {
 						cleanTempDir(sTempPath, sTemp);
-						throw new IllegalStateException("Too many files to unzip.");
+						s_oLogger.error(m_sLoggerPrefix + "Too many files inside the archive. The limit is "+m_lToomany);
+						throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
 					}
 					lSingle = 0; // resets single file byte-counter
 				}
@@ -117,18 +123,29 @@ public class ZipExtractor {
 	 */
 	public ZipExtractor() {
 	}
+	
+	/**
+	 * Instantiates a ZipExtractor with default parameters and initialize the logger
+	 * prefix
+	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
+	 */
+	public ZipExtractor(String sLoggerPrefix) {
+		this.m_sLoggerPrefix =sLoggerPrefix;
+	}
 
 	/**
 	 * Instantiates a ZipExtractor passing 3 critical parameters (in bytes)
 	 *
-	 * @param lToobigtotal     the total maximum size allowed for extraction
+	 * @param lToobigtotal  the total maximum size allowed for extraction
 	 * @param lToobigsingle the maximum single size for each file
 	 * @param lToomany      the maximum number of files allowed to be extracted
+	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
-	public ZipExtractor(long lToobigtotal, long lToobigsingle, int lToomany) {
+	public ZipExtractor(long lToobigtotal, long lToobigsingle, int lToomany, String sLoggerPrefix) {
 		this.m_lToobigtotal = lToobigtotal;
 		this.m_lToobigsingle = lToobigsingle;
 		this.m_lToomany = lToomany;
+		this.m_sLoggerPrefix = this.m_sLoggerPrefix + sLoggerPrefix; 
 	}
 
 	/**
@@ -253,12 +270,4 @@ public class ZipExtractor {
 		m_lToomany = iTooMany;
 	}
 
-
-	/**
-	 * Setter of the logger
-	 * @param oLogger the logger
-	 */
-	public void setLogger(LoggerWrapper oLogger) {
-		this.m_oLogger = oLogger;
-	}
 }
