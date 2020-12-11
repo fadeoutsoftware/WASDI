@@ -60,7 +60,7 @@ public class ZipExtractor {
 		String sTempPath = sPath + sTemp;
 
 		if (new File(sTempPath).mkdir()) {
-			s_oLogger.info(m_sLoggerPrefix + "Temporary directory created");
+			s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created");
 		} else {
 			throw new IOException("Can't create temporary dir " + sTempPath);
 		}
@@ -75,9 +75,9 @@ public class ZipExtractor {
 				String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
 				// Random used to mitigate attacks
 				if (oEntry.isDirectory()) {
-					s_oLogger.info(m_sLoggerPrefix + "Creating directory " + sName);
+					s_oLogger.info(m_sLoggerPrefix + "unzip: Creating directory " + sName);
 					if (new File(sName).mkdir()) {
-						s_oLogger.info(m_sLoggerPrefix + "Directory "+sName+" created");
+						s_oLogger.info(m_sLoggerPrefix + "unzip: Directory "+sName+" created");
 					}
 					iEntries++; // count also a directory creation as an entry
 					continue;
@@ -96,17 +96,17 @@ public class ZipExtractor {
 					iEntries++;
 					if (lSingle + BUFFER > m_lToobigsingle) {
 						cleanTempDir(sTempPath, sTemp);
-						s_oLogger.error(m_sLoggerPrefix + "File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
+						s_oLogger.error(m_sLoggerPrefix + "unzip: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 						throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 					}
 					if (lTotal + BUFFER > m_lToobigtotal) {
 						cleanTempDir(sTempPath, sTemp);
-						s_oLogger.error(m_sLoggerPrefix + "File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
+						s_oLogger.error(m_sLoggerPrefix + "unzip: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 						throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 					}
 					if (iEntries > m_lToomany) {
 						cleanTempDir(sTempPath, sTemp);
-						s_oLogger.error(m_sLoggerPrefix + "Too many files inside the archive. The limit is "+m_lToomany);
+						s_oLogger.error(m_sLoggerPrefix + "unzip: Too many files inside the archive. The limit is "+m_lToomany);
 						throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
 					}
 					lSingle = 0; // resets single file byte-counter
@@ -130,7 +130,7 @@ public class ZipExtractor {
 	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
 	public ZipExtractor(String sLoggerPrefix) {
-		this.m_sLoggerPrefix =sLoggerPrefix;
+		this.m_sLoggerPrefix = sLoggerPrefix + " - " + this.m_sLoggerPrefix;
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class ZipExtractor {
 		this.m_lToobigtotal = lToobigtotal;
 		this.m_lToobigsingle = lToobigsingle;
 		this.m_lToomany = lToomany;
-		this.m_sLoggerPrefix = this.m_sLoggerPrefix + sLoggerPrefix; 
+		this.m_sLoggerPrefix = sLoggerPrefix + " - " + this.m_sLoggerPrefix; 
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class ZipExtractor {
 	 * @return the canonical path of the file
 	 * @throws java.io.IOException in case of the file is outside target extraction directory
 	 */
-	private static String validateFilename(String sFilename, String sIntendedDir)
+	private String validateFilename(String sFilename, String sIntendedDir)
 			throws java.io.IOException {
 		File oF = new File(sFilename);
 		String sCanonicalPath = oF.getCanonicalPath();
@@ -168,6 +168,7 @@ public class ZipExtractor {
 		if (sCanonicalPath.startsWith(sCanonicalID)) {
 			return sCanonicalPath;
 		} else {
+			s_oLogger.error(m_sLoggerPrefix + "validateFilename: File is outside extraction target directory." );
 			throw new IllegalStateException("File is outside extraction target directory.");
 		}
 	}
@@ -179,7 +180,7 @@ public class ZipExtractor {
 	 * @param lBytes the number of the bytes that should be considered
 	 * @return String with the human readable string (e.g. kB, MB, GB)
 	 */
-	public static String humanReadableByteCountSI(long lBytes) {
+	private String humanReadableByteCountSI(long lBytes) {
 		if (-1000 < lBytes && lBytes < 1000) {
 			return lBytes + " B";
 		}
