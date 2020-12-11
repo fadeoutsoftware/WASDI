@@ -1395,11 +1395,11 @@ public class ProcessorsResource  {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspace") String sWorkspaceId) throws Exception {
+			@QueryParam("workspace") String sWorkspaceId) {
 
 		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
 		try {
-			if(sProcessorId.contains("\\") || sProcessorId.contains("/")) {
+			if(Utils.isNullOrEmpty(sProcessorId) || sProcessorId.contains("\\") || sProcessorId.contains("/")) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid processor name, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
