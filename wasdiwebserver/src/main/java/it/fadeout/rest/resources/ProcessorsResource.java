@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -12,6 +13,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -75,6 +79,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.AppDetailViewModel;
 import wasdi.shared.viewmodels.AppFilterViewModel;
 import wasdi.shared.viewmodels.AppListViewModel;
@@ -1337,14 +1342,12 @@ public class ProcessorsResource  {
 			}
 			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				
-				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-				
+				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();				
 				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing == null) {
 					Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oUser.getUserId());
-					return Response.status(Status.UNAUTHORIZED).build();					
+					return Response.status(Status.FORBIDDEN).build();					
 				}
 				else {
 					Utils.debugLog("ProcessorsResource.updateProcessor: processor of user " + oProcessorToUpdate.getUserId() + " is shared with " + oUser.getUserId());
@@ -1353,12 +1356,10 @@ public class ProcessorsResource  {
 			
 			if (Utils.isNullOrEmpty(oUpdatedProcessorVM.getParamsSample())==false) {				
 				try {
-					
 					String sDecodedJSON = java.net.URLDecoder.decode(oUpdatedProcessorVM.getParamsSample(), StandardCharsets.UTF_8.name());
 					MongoRepository.s_oMapper.readTree(sDecodedJSON);
 				}
 				catch (Exception oJsonEx) {
-					
 					Utils.debugLog("ProcessorsResource.updateProcessor: JSON Exception: " + oJsonEx.toString());
 					//oResult.setStringValue("Parameter Sample is not a valid JSON");
 					return Response.status(422).build();
@@ -1481,7 +1482,7 @@ public class ProcessorsResource  {
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
 			
-			if (unzipProcessor(oProcessorFile, false)) {
+			if (unzipProcessor(oProcessorFile, sSessionId, sProcessorId)) {
 				
 				oProcessorRepository.updateProcessorDate(oProcessorToUpdate);
 				
@@ -1797,74 +1798,56 @@ public class ProcessorsResource  {
 	}	
 
     
-	private boolean unzipProcessor(File oProcessorZipFile, boolean bDeleteFile) {
+	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
 		try {
-						
-			// Unzip the file and, meanwhile, check if a pro file with the same name exists
+			ZipExtractor oZipExtractor = new ZipExtractor(sSessionId + " : " + sProcessorId);
+
+			//get containing dir 
 			String sProcessorFolder = oProcessorZipFile.getParent();
-			sProcessorFolder += "/";
-			
-			byte[] ayBuffer = new byte[1024];
-			
-			
-		    try (ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile))) {
-			    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
-			    while(oZipEntry != null){
-			    	
-			    	String sZippedFileName = oZipEntry.getName();
-			    	
-			    	if (sZippedFileName.toUpperCase().endsWith(".PRO")) {
-			    		
-			    		// Force extension case
-			    	
-			    		sZippedFileName = sZippedFileName.replace(".Pro", ".pro");
-			    		sZippedFileName = sZippedFileName.replace(".PRO", ".pro");
-			    		sZippedFileName = sZippedFileName.replace(".PRo", ".pro");
-			    	}
-			    	
-			    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-			    	
-			    	if (oZipEntry.isDirectory()) {
-			    		File oUnzippedDir = new File(sUnzipFilePath);
-		                oUnzippedDir.mkdir();
-			    	}
-			    	else {
-				    	
-				        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-				        try (FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile)) {
-					        int iLen;
-					        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-					        	oOutputStream.write(ayBuffer, 0, iLen);
-					        }
-					        oOutputStream.close();				        	
-				        }
-			    	}
-			        oZipEntry = oZipInputStream.getNextEntry();
-		        }
-			    oZipInputStream.closeEntry();
-			    oZipInputStream.close();		    	
-		    }
-		    
-		    try {
-			    // Remove the zip?
-			    if (bDeleteFile) {
-			    	if(!oProcessorZipFile.delete()){
-			    		Utils.debugLog("ProcessorsResource.unzipProcessor: can't delete local zip file");
-			    	}
-			    }
-			    }
-		    catch (Exception e) {
-				Utils.debugLog("ProcessorsResource.UnzipProcessor Exception Deleting Zip File " + e.toString());
+			sProcessorFolder += File.separator;
+
+			//unzip
+			try {
+				String sTmpFolder = oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
+				Utils.debugLog("ProcessorsResource.unzipProcessor: temporary dir: " + sTmpFolder );
+			} catch (IOException | SecurityException oE) {
+				Utils.debugLog("ProcessorsResource.unzipProcessor: unzip failed: " + oE);
 				return false;
 			}
-		    
+
+			//find files that need renaming
+			List<File> aoFileList = new ArrayList<>();
+			try {
+				java.nio.file.Path oFolderPath = java.nio.file.Paths.get(sProcessorFolder);
+				try(Stream<java.nio.file.Path> aoPathStream = Files.walk(oFolderPath)){
+					aoPathStream.map(java.nio.file.Path::toFile)
+					.forEach(aoFileList::add);
+				}
+			} catch (IOException | InvalidPathException | SecurityException oE) {
+				Utils.debugLog("ProcessorsResource.unzipProcessor: finding files that need renaming failed: " + oE);
+				return false;
+			}
+
+			//rename those files
+			try {
+				for (File f: aoFileList) {
+					if (f.getCanonicalPath().toUpperCase().endsWith(".PRO") && !f.isDirectory()) {
+						String sNewPath = f.getCanonicalPath();
+						sNewPath = sNewPath.substring(0, sNewPath.length() - 4);
+						sNewPath += ".pro";
+						// Force extension case
+						Files.move(new File(f.getCanonicalPath()).toPath(), new File(sNewPath).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+					}
+				}
+			} catch (IOException oE) {
+				Utils.debugLog("ProcessorsResource.unzipProcessor: renaming failed: " + oE);
+				return false;
+			}
+			return true;
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessorsResource.unzipProcessor: " + oE);
 		}
-		catch (Exception oEx) {
-			Utils.debugLog("ProcessorsResource.DeployProcessor Exception " + oEx.toString());
-			return false;
-		}
-		
-		return true;
+		return false;
 	}
 	
 	
