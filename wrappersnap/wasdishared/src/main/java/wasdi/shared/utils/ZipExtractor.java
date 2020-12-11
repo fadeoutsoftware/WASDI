@@ -136,7 +136,9 @@ public class ZipExtractor {
 	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
 	public ZipExtractor(String sLoggerPrefix) {
-		this.m_sLoggerPrefix = sLoggerPrefix + " - " + this.m_sLoggerPrefix;
+		if(!Utils.isNullOrEmpty(sLoggerPrefix)) {
+			this.m_sLoggerPrefix = sLoggerPrefix + " - " + this.m_sLoggerPrefix;
+		}
 	}
 
 	/**
