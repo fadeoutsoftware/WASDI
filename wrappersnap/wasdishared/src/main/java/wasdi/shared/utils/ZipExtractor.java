@@ -51,14 +51,14 @@ public class ZipExtractor {
 	 * @throws java.io.IOException Throws IO exception in case the zip file is not founded
 	 */
 	public String unzip(String sFilename, String sPath) throws java.io.IOException {
-		FileInputStream oFis = new FileInputStream(sFilename);
+		FileInputStream oFis = new FileInputStream(WasdiFileUtils.fixPathSeparator(sFilename));
 		ZipEntry oEntry;
 		int iEntries = 0;
 		long lTotal = 0;
 		long lSingle = 0;
 		int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
 		String sTemp = "tmp-" + iRandom + File.separator;
-		String sTempPath = sPath;
+		String sTempPath = WasdiFileUtils.fixPathSeparator(sPath);
 		if(!sTempPath.endsWith(File.separator)) {
 			sTempPath += File.separator;
 		}
