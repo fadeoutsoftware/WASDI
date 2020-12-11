@@ -119,6 +119,7 @@ import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -2828,10 +2829,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 	/**
 	 * Converts a product in a ViewModel, add it to the workspace and send it to the
-	 * rabbit queue The method is Safe: controls if the products already exists and
+	 * rabbit queue. The method is Safe: it controls if the products already exists and
 	 * if it is already added to the workspace
 	 * 
-	 * @param oProductViewModel               View Model... if null, read it from the product in sFileName
+	 * @param oProductViewModel	View Model... if null, read it from the product in sFileName
 	 * @param sFullPathFileName File Name
 	 * @param sWorkspace        Workspace
 	 * @param sExchange         Queue Id
@@ -2854,7 +2855,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		WasdiProductReader oReadProduct = new WasdiProductReader(oFile);
 
-		// Get the Boundig Box
+		// Get the Bounding Box
+		if(Utils.isNullOrEmpty(sBBox)) {
+			try {
+				GeorefProductViewModel oGeorefProductViewModel = (GeorefProductViewModel) oProductViewModel;
+				sBBox = oGeorefProductViewModel.getBbox();
+			}catch (Exception oE) {
+				s_oLogger.warn("LauncherMain.AddProductToDbAndSendToRabbit: could not extract BBox from GeorefProductViewModel due to: " + oE);
+			}
+		}
 		if (Utils.isNullOrEmpty(sBBox)) {
 			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
 			sBBox = oReadProduct.getProductBoundingBox();

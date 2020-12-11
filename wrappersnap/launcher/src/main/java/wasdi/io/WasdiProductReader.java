@@ -348,7 +348,7 @@ public class WasdiProductReader {
 			LauncherMain.s_oLogger.info("WasdiProductReader.getProductBoundingBox: product is null return empty ");
 			return "";
 		}
-		
+		String sBB = "";
 		try {
 			
 			// Snap Bounding Box
@@ -362,8 +362,12 @@ public class WasdiProductReader {
 				float fMaxX = (float) Math.max(oMin.lon, oMax.lon);
 				float fMaxY = (float) Math.max(oMin.lat, oMax.lat);
 				
-				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", fMinY, fMinX, fMinY, fMaxX, fMaxY, fMaxX, fMaxY, fMinX, fMinY, fMinX);
-			}							
+				sBB = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", fMinY, fMinX, fMinY, fMaxX, fMaxY, fMaxX, fMaxY, fMinX, fMinY, fMinX);
+			}
+			if(Utils.isNullOrEmpty(sBB)) {
+				//todo try reading BB from a shapefile
+			}
+			return sBB;
 		} catch (Exception e) {
 			LauncherMain.s_oLogger.error("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
 		}
