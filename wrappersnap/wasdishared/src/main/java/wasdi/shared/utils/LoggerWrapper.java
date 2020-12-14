@@ -1,4 +1,4 @@
-package wasdi;
+package wasdi.shared.utils;
 
 import org.apache.log4j.Logger;
 

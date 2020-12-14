@@ -27,12 +27,12 @@ import org.esa.snap.core.datamodel.Product;
 import org.json.JSONObject;
 
 import wasdi.LauncherMain;
-import wasdi.LoggerWrapper;
 import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
 /**

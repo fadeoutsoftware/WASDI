@@ -79,5 +79,20 @@ public class WasdiFileUtils {
 		}
 		return oJson;
 	}
+	/**
+	 * Utilities method that fix non homogeneous path separators in a 
+	 * String representing a PATH. Using different file separators 
+	 * could lead to errors in path specifications. In particular 
+	 * Windows-based systems use the char '\' as file separator and
+	 * Unix Based systems use the char '/'.
+	 * With this method the system file separator is used and its initialization 
+	 * i done by the JVM
+	 * @param sPathString
+	 * @return
+	 */
+	public static String fixPathSeparator(String sPathString) {
+	return sPathString.replace("/",File.separator).replace("\\",File.separator);
+		
+	}
 	
 }

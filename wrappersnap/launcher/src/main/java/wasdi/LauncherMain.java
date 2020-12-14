@@ -116,9 +116,13 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.ShapeFileUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
+import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
@@ -841,11 +845,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oProviderAdapter.unsubscribe(this);
 
 					// Control Check for the file Name
-					sFileName = sFileName.replaceAll("//", "/");
+					sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
 
 					if (sFileNameWithoutPath.startsWith("S3") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
 						s_oLogger.debug("LauncherMain.download: File is a Sentinel 3 image, start unzip");
-						Utils.unzip(sFileNameWithoutPath, sDownloadPath);
+						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
 						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", ".SEN3");
 						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
 						sFileName = sFolderName + "/" + "xfdumanifest.xml";
@@ -1238,16 +1243,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// Check if this is a Zipped Shape File
 				if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
-					if (Utils.isShapeFileZipped(oFileToIngestPath.getPath())) {
+					ShapeFileUtils oShapeFileUtils = new ShapeFileUtils(oParameter.getProcessObjId());
+					if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
 
 						// May be.
 						s_oLogger.info("File to ingest looks can be a zipped shape file, try to unzip");
 
 						// Unzip
-						Utils.unzip(oFileToIngestPath.getName(), oFileToIngestPath.getParent());
+						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+						oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
 
 						// Get the name of shp from the zip file (case safe)
-						String sShapeFileTest = Utils.getShpFileNameFromZipFile(oFileToIngestPath.getPath());
+						String sShapeFileTest = oShapeFileUtils.getShpFileNameFromZipFile(oFileToIngestPath.getPath(), 30);
 
 						if (Utils.isNullOrEmpty(sShapeFileTest) == false) {
 							// Ok, we have our file
@@ -1286,8 +1293,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Must be unzipped?
 				if (bUnzipAfterCopy) {
 
-					s_oLogger.debug("File must be unzipped");
-					Utils.unzip(oFileToIngestPath.getName(), oDstDir.getPath());
+					s_oLogger.debug("File must be unzipped");					
+					ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+					oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oDstDir.getCanonicalPath());
 					s_oLogger.debug("Unzip done");
 				}
 			} else {
@@ -2875,7 +2883,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
 				oProductViewModel = oReadProduct.getProductViewModel();
 
-				// P.Campanella 20200126: ma non sarebbe forse più corretto il contrario?!?
+				// P.Campanella 20200126: ma non sarebbe forse piï¿½ corretto il contrario?!?
 				if (oProductViewModel.getMetadata() != null) {
 					if (bAsynchMetadata) {
 						// Asynch Metadata Save

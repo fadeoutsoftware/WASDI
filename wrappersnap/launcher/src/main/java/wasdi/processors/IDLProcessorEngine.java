@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -37,6 +40,7 @@ import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipExtractor;
 
 public class IDLProcessorEngine extends WasdiProcessorEngine{
 	
@@ -110,7 +114,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor: unzip processor");
 			
 			// Unzip the processor (and check for entry point)
-			if (!UnzipProcessor(sProcessorFolder, sProcessorName, sProcessorId + ".zip")) {
+			if (!UnzipProcessor(sProcessorFolder, sProcessorName, sProcessorId + ".zip", oParameter.getProcessObjId())) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
 				if (bFirstDeploy) {
 					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: delete processor db entry");
@@ -246,7 +250,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		return true;
 	}
 
-	public boolean UnzipProcessor(String sProcessorFolder, String sProcessorName, String sZipFileName) {
+	public boolean UnzipProcessor(String sProcessorFolder, String sProcessorName, String sZipFileName, String sProcessObjId) {
 		try {
 			Path oDirPath = Paths.get(sProcessorFolder);
 			if(!Files.isDirectory(oDirPath)) {
@@ -271,67 +275,28 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			}
 			
 						
+			ZipExtractor oZipExtractor = new ZipExtractor(sProcessObjId);
+			oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
+					        
 			// Unzip the file and, meanwhile, check if a pro file with the same name exists
-			boolean bMyProcessorExists = false;
-			
-			byte[] ayBuffer = new byte[1024];
-			
-		    try (ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile))) {
-			    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
-			    
-			    while(oZipEntry != null){
-			    	
-			    	try  {
-				    	String sZippedFileName = oZipEntry.getName();
-				    	
-				    	if(sZippedFileName.contains("..") || sZippedFileName.startsWith("/") || sZippedFileName.startsWith("\\")) {
-				    		continue;
-				    	}
-				    	
-				    	if (sZippedFileName.startsWith(sProcessorName)) {
-				    		bMyProcessorExists = true;
-				    		// Force extension case
-				    		sZippedFileName = sProcessorName + ".pro";
-				    	}
-				    	
-				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;   
-				    	
-				    	if (oZipEntry.isDirectory()) { 
-				    		File oUnzippedDir = new File(sUnzipFilePath);
-				    			oUnzippedDir.mkdirs();
-				    	}
-				    	else {
-					    	
-					        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-					        
-					        if (oUnzippedFile.getParentFile().isDirectory()) {
-					        	if (!oUnzippedFile.getParentFile().exists()) {
-					        		oUnzippedFile.getParentFile().mkdirs();
-					        	}
-					        }
-					        
-					        try (FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile)) {
-						        int iLen;
-						        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-						        	oOutputStream.write(ayBuffer, 0, iLen);
-						        }
-						        oOutputStream.close();				        	
-					        }
-				    	}	    		
-			    	}
-			    	catch (Exception e) {
-			    		LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor exception in zip entry " + e.getMessage());
+			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
+			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
+				oWalk.map(Path::toFile).forEach(oFile->{
+					if(oFile.getName().equals(sProcessorName) && !oFile.isDirectory()) {
+						oMyProcessorExists.set(true);
+						try {
+							Files.move(new File(oFile.getCanonicalPath()).toPath(), new File(oFile.getCanonicalPath()+".pro").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException oE) {
+							LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor Error renaming processor file " + oE);
+							oMyProcessorExists.set(false);
+							
+						}
+						
 					}
-			    	
-			    	
-
-			        oZipEntry = oZipInputStream.getNextEntry();
-		        }
-			    oZipInputStream.closeEntry();
-			    oZipInputStream.close();		    	
-		    }
-		    
-		    if (!bMyProcessorExists) {
+				});
+			}
+			
+		    if (!oMyProcessorExists.get()) {
 		    	LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor" + sProcessorName + ".pro not present in processor " + sZipFileName);
 		    	return false;
 		    }

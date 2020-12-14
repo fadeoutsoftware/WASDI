@@ -12,8 +12,8 @@ import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 
 import wasdi.ConfigReader;
-import wasdi.LoggerWrapper;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 

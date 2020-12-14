@@ -19,10 +19,10 @@ import com.google.common.io.CharStreams;
 
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
-import wasdi.LoggerWrapper;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
 /**

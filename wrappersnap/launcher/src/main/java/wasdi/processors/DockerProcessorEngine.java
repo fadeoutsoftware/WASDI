@@ -8,9 +8,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -27,6 +32,8 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipExtractor;
 
 public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -73,9 +80,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
-			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
 			
-			String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;
+			String sProcessorFolder = sDownloadRootPath+ "processors" + File.separator + sProcessorName + File.separator;
 			// Create the file
 			File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
 			
@@ -95,7 +102,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor: unzip processor");
 			
 			// Unzip the processor (and check for entry point myProcessor.py)
-			if (!UnzipProcessor(sProcessorFolder, sProcessorId + ".zip")) {
+			if (!UnzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
 				if (bFirstDeploy) {
 					oProcessorRepository.deleteProcessor(sProcessorId);
@@ -177,77 +184,55 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	 * @param sZipFileName
 	 * @return
 	 */
-	public boolean UnzipProcessor(String sProcessorFolder, String sZipFileName) {
+	public boolean UnzipProcessor(String sProcessorFolder, String sZipFileName, String sProcessObjId) {
 		try {
+			
+			sProcessorFolder = WasdiFileUtils.fixPathSeparator(sProcessorFolder);
+			if(!sProcessorFolder.endsWith(File.separator)) {
+				sProcessorFolder+=File.separator;
+			}
+			
 			// Create the file
 			File oProcessorZipFile = new File(sProcessorFolder+sZipFileName);
-						
-			// Unzip the file and, meanwhile, check if myProcessor.py exists
-			
-			boolean bMyProcessorExists = false;
-			
-			byte[] ayBuffer = new byte[1024];
-			
-		    try (ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile))) {
-		    	
-			    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
-			    while(oZipEntry != null){
-			    	
-			    	try {
-				    	String sZippedFileName = oZipEntry.getName();
-				    	
-				    	if (sZippedFileName.equals("myProcessor.py")) bMyProcessorExists = true;
-				    	
-				    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
-				    	
-				    	if (oZipEntry.isDirectory()) {
-				    		File oUnzippedDir = new File(sUnzipFilePath);
-			                oUnzippedDir.mkdir();
-				    	}
-				    	else {
-					        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
-					        try (FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile)) {
-						        int iLen;
-						        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
-						        	oOutputStream.write(ayBuffer, 0, iLen);
-						        }
-						        oOutputStream.close();				        	
-					        }
-				    	}		    		
-			    	}
-			    	catch (Exception oInnerEx) {
-			    		LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception unzipping Zip entry", oInnerEx);
+			if(!oProcessorZipFile.exists()) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
+				return false;
+			}
+			try {
+				ZipExtractor oZipExtractor = new ZipExtractor(sProcessObjId);
+				oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
+			} catch (Exception oE) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
+				return false;
+			}
+			//check myProcessor exists:
+			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
+			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
+				oWalk.map(Path::toFile).forEach(oFile->{
+					if(oFile.getName().equals("myProcessor.py")) {
+						oMyProcessorExists.set(true);
 					}
-
-			        oZipEntry = oZipInputStream.getNextEntry();
-		        }
-			    oZipInputStream.closeEntry();
-			    oZipInputStream.close();		    	
-		    }
-
-		    
-		    if (!bMyProcessorExists) {
+				});
+			}
+		    if (!oMyProcessorExists.get()) {
 		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
 		    	return false;
 		    }
 		    
 		    try {
 			    // Remove the zip?
-			    if (oProcessorZipFile.delete()==false) {
+			    if (!oProcessorZipFile.delete()) {
 			    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
 			    }
 		    }
 		    catch (Exception e) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
-				//return false;
 			}
-		    
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
 			return false;
-		}
-		
+		}		
 		return true;
 	}
 	
