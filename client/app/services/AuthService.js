@@ -160,6 +160,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
 
     this.checkSession = function(sSession)
     {
+        //TODO check this: no param?
         return this.m_oHttp.get(this.APIURL + '/auth/checksession');
     };
 

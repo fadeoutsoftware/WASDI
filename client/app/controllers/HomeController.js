@@ -3,12 +3,12 @@
  */
 //'use strict';
 
-var HomeController = (function() {
-    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState,oAuthServiceFacebook,
+var HomeController = (function () {
+    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState, oAuthServiceFacebook,
                             //oAuthServiceGoogle,
-                            oWindow,$anchorScroll) {
+                            oWindow, $anchorScroll) {
         this.m_oScope = $scope;
-        this.m_oLocation  = $location;
+        this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oRabbitStompService = oRabbitStompService;
@@ -18,7 +18,7 @@ var HomeController = (function() {
         this.m_oAnchorService = $anchorScroll;
 
         this.m_sEmailToRecoverPassword = "";
-        this.m_oScope.m_oController=this;
+        this.m_oScope.m_oController = this;
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
         this.m_bIsVisibleRecoveryPassword = false;
         this.m_sUserName = "";
@@ -26,13 +26,13 @@ var HomeController = (function() {
         this.m_bSuccess = false;
         this.m_bError = false;
         this.m_sMessageError = "";
-        this.m_oRegistrationUser={
-            name:"",
-            surname:"",
-            password:"",
-            repeatPassword:"",
-            email:"",
-            userId:""//userId == email
+        this.m_oRegistrationUser = {
+            name: "",
+            surname: "",
+            password: "",
+            repeatPassword: "",
+            email: "",
+            userId: ""//userId == email
         };
         this.m_bRegisterIsVisible = false;
         this.m_bBrowserIsIE = utilsUserUseIEBrowser();
@@ -41,90 +41,72 @@ var HomeController = (function() {
         this.m_bRegistering = false;
 
         var oController = this;
-        oKeycloak.onAuthSuccess = function() {
-            console.log("oKeycloak ok ! ");
-            if (oKeycloak.idToken) {
-                data = {
-                    'access_token': oKeycloak.idToken,
-                    'refresh_token' : ""
-                };
-            }
-            HomeController.prototype.callbackLogin(data,null, oController);
-        };
+        if (oKeycloak.onAuthSuccess == undefined) {
+            oKeycloak.onAuthSuccess = function () {
+                console.log("oKeycloak ok ! ");
+                if (oKeycloak.idToken) {
+                    data = {
+                        'access_token': oKeycloak.idToken,
+                        'refresh_token': ""
+                    };
+                }
+                oController.callbackLogin(data, null, oController);
+            };
+        }
 
 
-        if(this.m_oConstantsService.isUserLogged())
+        if (this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.marketplace");// go workspaces
-        if(this.m_bBrowserIsIE === true)
-        {
+        if (this.m_bBrowserIsIE === true) {
             this.m_bVisualizeLink = false;
             alert("Wasdi doesn't work on IE/EDGE");// + this.m_bVisualizeLink
-        }
-        else
-        {
+        } else {
             this.m_bVisualizeLink = true;
         }
-
-
-
-        /*
-        // on success google login event
-        this.onSuccess = function (googleUser) {
-
-            if(utilsIsObjectNullOrUndefined(googleUser) === false)
-            {
-                var oIdToken = {
-                    userId: oController.m_oConstantsService.getClientIdGoogle(),
-                    googleIdToken : googleUser.Zi.id_token
-                }
-                if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
-                {
-                    oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken)
-                        .success(function (data,status)
-                        {
-                            oController.callbackLogin(data, status,oController)
-                        })
-                        .error(function (data,status)
-                        {
-                            utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
-                        });
-                }
-
-            }
-        };
-        // on failure google login event
-        this.onFailure = function (error) {
-            console.log("Login failure");
-        };
-
-        //Render google login button after the google api are loaded
-        oWindow.renderButton = function () {
-            gapi.signin2.render('my-signin2', {
-                'scope': 'profile email',
-                'width': 267,
-                'height': 40,
-                'longtitle': true,
-                'theme': 'dark',
-                'onsuccess': oController.onSuccess,
-                'onfailure': oController.onFailure
-            });
-        };
-        */
     }
 
+    HomeController.prototype.keycloakLogin = function () {
 
-    HomeController.prototype.changeVisibilityLoginRegister = function(sStatus){
+        if (!utilsIsObjectNullOrUndefined(oKeycloak)) {
+            // if (!bKeyCloakInitialized) {
+            //     console.log('HOME: init from Home controller');
+            //
+            //     //fixme: duplicate in index.html
+            //     oKeycloak.init({
+            //             onLoad : 'check-sso',
+            //             enableLogging: true
+            //         }
+            //     ).then(function() {
+            //         console.log('HOME: Keycloak initialized from home controller');
+            //
+            //         console.log('HOME: Subject home: ' + oKeycloak.subject);
+            //         console.log('HOME: Token  home: ' + oKeycloak.token);
+            //         bKeyCloakInitialized = true;
+            //     }).catch(function() {
+            //         console.log('HOME: Keycloak init error');
+            //     });
+            // }
+            // else  {
+            //     console.log('HOME: NOT init from Home controller');
+            // }
+            console.log('HOME.keycloakLogin: ERROR: KC not initialized');
+        }
 
-        if(sStatus === "Login")
-        {
+        console.log("TEST LOGIN START");
+        oKeycloak.login();
+        console.log("TEST LOGIN END")
+    }
+
+    HomeController.prototype.changeVisibilityLoginRegister = function (sStatus) {
+
+        if (sStatus === "Login") {
             this.m_bLoginIsVisible = true;
             this.m_bRegisterIsVisible = false;
             this.cleanSignInForm();
 
         }
 
-        if(sStatus === "Register")
-        {
+        if (sStatus === "Register") {
             this.m_bLoginIsVisible = false;
             this.m_bRegisterIsVisible = true;
         }
@@ -144,8 +126,8 @@ var HomeController = (function() {
         // var oConstantsService = oController.m_oConstantsService;
         this.m_oConstantsService.setUser(null);
         this.m_oAuthService.login(oLoginInfo).success(
-            function (data,status) {
-                oController.callbackLogin(data, status,oController)
+            function (data, status) {
+                oController.callbackLogin(data, status, oController)
             }).error(function (error) {
             //alert('error');
             utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
@@ -154,9 +136,7 @@ var HomeController = (function() {
     }
 
 
-
-    HomeController.prototype.callbackLogin = function(data, status,oController)
-    {
+    HomeController.prototype.callbackLogin = function (data, status, oController) {
 
         console.log('AUTH: token obtained')
         console.log(data)
@@ -175,7 +155,7 @@ var HomeController = (function() {
         console.log(oDecodedToken)
 
         let oUser = {}
-        oUser.userId =oDecodedToken.preferred_username;
+        oUser.userId = oDecodedToken.preferred_username;
         oUser.name = oDecodedToken.given_name;
         oUser.surname = oDecodedToken.family_name;
         oUser.authProvider = "wasdi";
@@ -192,18 +172,14 @@ var HomeController = (function() {
     HomeController.prototype.getUserName = function () {
         var oUser = this.m_oConstantsService.getUser();
 
-        if (oUser != null)
-        {
-            if (oUser != undefined)
-            {
+        if (oUser != null) {
+            if (oUser != undefined) {
                 var sName = oUser.name;
                 if (sName == null) sName = "";
                 if (sName == undefined) sName = "";
 
-                if (oUser.surname != null)
-                {
-                    if (oUser.surname != undefined)
-                    {
+                if (oUser.surname != null) {
+                    if (oUser.surname != undefined) {
                         sName += " " + oUser.surname;
 
                         return sName;
@@ -219,13 +195,11 @@ var HomeController = (function() {
      * signingUser
      * @returns {boolean}
      */
-    HomeController.prototype.signingUser = function(myForm)
-    {
+    HomeController.prototype.signingUser = function (myForm) {
         var oUser = {};
         var oController = this;
 
-        if( (utilsIsObjectNullOrUndefined(oController.m_oRegistrationUser) === true) || (this.isValidSigningUser(oController.m_oRegistrationUser) === false) )
-        {
+        if ((utilsIsObjectNullOrUndefined(oController.m_oRegistrationUser) === true) || (this.isValidSigningUser(oController.m_oRegistrationUser) === false)) {
             return false;
         }
 
@@ -242,64 +216,51 @@ var HomeController = (function() {
         this.m_bSuccess = false;
         this.m_bError = false;
         this.m_oAuthService.signingUser(oUser).success(
-
-            function (data,status) {
-                if(utilsIsObjectNullOrUndefined(data) !== true)
-                {
-                    if(data.boolValue === true)
-                    {
+            function (data, status) {
+                if (utilsIsObjectNullOrUndefined(data) !== true) {
+                    if (data.boolValue === true) {
                         oController.m_bSuccess = true;
-                    }
-                    else
-                    {
-                        if(utilsIsStrNullOrEmpty(data.stringValue) === false)
-                        {
+                    } else {
+                        if (utilsIsStrNullOrEmpty(data.stringValue) === false) {
                             oController.m_sMessageError = data.stringValue;
                         }
                         oController.m_bError = true;
 
                         utilsVexDialogAlertTop("GURU MEDITATION<br>" + oController.m_sMessageError);
                     }
-                }
-                else
-                {
+                } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 }
 
                 oController.m_bRegistering = false;
-            }).error(function (data,status) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
-                oController.m_bRegistering = false;
+            }).error(function (data, status) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+            oController.m_bRegistering = false;
         });
 
         return true;
     }
 
-    HomeController.prototype.isValidSigningUser = function(oRegistrationUser)
-    {
-        if(utilsIsObjectNullOrUndefined(oRegistrationUser) === true )
+    HomeController.prototype.isValidSigningUser = function (oRegistrationUser) {
+        if (utilsIsObjectNullOrUndefined(oRegistrationUser) === true) {
+            return false;
+        }
+
+        if ((utilsIsStrNullOrEmpty(oRegistrationUser.userId) === true) || (utilsIsEmail(oRegistrationUser.userId) === false)) //
         {
             return false;
         }
 
-        if( (utilsIsStrNullOrEmpty(oRegistrationUser.userId) === true) || (utilsIsEmail(oRegistrationUser.userId) === false) ) //
-        {
+        if ((utilsIsStrNullOrEmpty(oRegistrationUser.password) === true) || (oRegistrationUser.password.length < 8) ||
+            (utilsIsStrNullOrEmpty(oRegistrationUser.repeatPassword) === true) || (oRegistrationUser.password !== oRegistrationUser.repeatPassword)) {
             return false;
         }
 
-        if( (utilsIsStrNullOrEmpty(oRegistrationUser.password) === true) || (oRegistrationUser.password.length < 8) ||
-            (utilsIsStrNullOrEmpty(oRegistrationUser.repeatPassword) === true) || (oRegistrationUser.password !== oRegistrationUser.repeatPassword) )
-        {
+        if (utilsIsStrNullOrEmpty(oRegistrationUser.name) === true) {
             return false;
         }
 
-        if( utilsIsStrNullOrEmpty(oRegistrationUser.name) === true )
-        {
-            return false;
-        }
-
-        if( utilsIsStrNullOrEmpty(oRegistrationUser.surname) === true )
-        {
+        if (utilsIsStrNullOrEmpty(oRegistrationUser.surname) === true) {
             return false;
         }
 
@@ -312,51 +273,41 @@ var HomeController = (function() {
         return this.m_oConstantsService.isUserLogged();
     };
 
-    HomeController.prototype.cleanSignInForm = function()
-    {
+    HomeController.prototype.cleanSignInForm = function () {
         this.m_bSuccess = false;
         this.m_bError = false;
         this.m_oScope.signinForm.$setPristine();
-        this.m_oRegistrationUser={
-            name:"",
-            surname:"",
-            password:"",
-            repeatPassword:"",
-            email:"",
-            userId:""//userId == email
+        this.m_oRegistrationUser = {
+            name: "",
+            surname: "",
+            password: "",
+            repeatPassword: "",
+            email: "",
+            userId: ""//userId == email
         }
     }
 
-    HomeController.prototype.recoverPassword = function(sEmailToRecoverPassword)
-    {
-        if(utilsIsStrNullOrEmpty(sEmailToRecoverPassword) === true)
-        {
+    HomeController.prototype.recoverPassword = function (sEmailToRecoverPassword) {
+        if (utilsIsStrNullOrEmpty(sEmailToRecoverPassword) === true) {
             return false;
         }
         var oController = this;
         this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).success(
-            function (data,status) {
+            function (data, status) {
                 // oController.callbackLogin(data, status,oController);
-                if(utilsIsObjectNullOrUndefined(data) !== true)
-                {
-                    if(data.boolValue === true)
-                    {
+                if (utilsIsObjectNullOrUndefined(data) !== true) {
+                    if (data.boolValue === true) {
                         oController.m_bSuccess = true;
-                    }
-                    else
-                    {
-                        if(utilsIsStrNullOrEmpty(data.stringValue) === false)
-                        {
+                    } else {
+                        if (utilsIsStrNullOrEmpty(data.stringValue) === false) {
                             oController.m_sMessageError = data.stringValue;
                         }
                         oController.m_bError = true;
                     }
-                }
-                else
-                {
+                } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 }
-            }).error(function (data,status) {
+            }).error(function (data, status) {
             //alert('error');
             utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
 
@@ -365,10 +316,8 @@ var HomeController = (function() {
         return true;
     };
 
-    HomeController.prototype.isRecoverPasswordButtonEnable = function(sEmailToRecoverPassword )
-    {
-        if(utilsIsStrNullOrEmpty(sEmailToRecoverPassword) === true || sEmailToRecoverPassword === "" || utilsIsEmail(sEmailToRecoverPassword) === false)
-        {
+    HomeController.prototype.isRecoverPasswordButtonEnable = function (sEmailToRecoverPassword) {
+        if (utilsIsStrNullOrEmpty(sEmailToRecoverPassword) === true || sEmailToRecoverPassword === "" || utilsIsEmail(sEmailToRecoverPassword) === false) {
             return false;
         }
 
@@ -382,10 +331,10 @@ var HomeController = (function() {
         'RabbitStompService',
         '$state',
         'AuthServiceFacebook',
- //       'AuthServiceGoogle',
+        //       'AuthServiceGoogle',
         '$window',
         '$anchorScroll'
     ];
 
     return HomeController;
-}) ();
+})();

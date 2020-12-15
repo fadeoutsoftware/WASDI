@@ -117,16 +117,24 @@
 <script>
     var oKeycloak = new Keycloak();
 
-    // keycloak.init().then()[..]
-    oKeycloak.init(/*{
-            onLoad: 'login-required'
-        }*/
+    console.log('Subject PRE: ' + oKeycloak.subject);
+    console.log('Token PRE: ' + oKeycloak.token);
+
+    oKeycloak.init({
+            onLoad : 'check-sso',
+            enableLogging: true
+        }
     ).then(function() {
         console.log('Keycloak initialized');
-        //alert(authenticated ? 'authenticated' : 'not authenticated');
+
+        console.log('Subject after init: ' + oKeycloak.subject);
+        console.log('Token  after init: ' + oKeycloak.token);
     }).catch(function() {
-        //alert('failed to initialize');
+        console.log('Keycloak init error');
     });
+
+    console.log('Subject POST: ' + oKeycloak.subject);
+    console.log('Token: POST' + oKeycloak.token);
 
 </script>
 

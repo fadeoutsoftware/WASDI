@@ -77,6 +77,7 @@ var RootController = (function() {
         /**
          * Check user session
          */
+        //todo either get rid of it or check it against keycloak server
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data === null || data === undefined || data === '' || data.userId === ''  )
             {
