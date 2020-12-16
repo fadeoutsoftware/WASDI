@@ -158,12 +158,6 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         return this.m_oHttp.post(this.APIURL + '/auth/register',oUser);
     };
 
-    this.checkSession = function(sSession)
-    {
-        //TODO check this: no param?
-        return this.m_oHttp.get(this.APIURL + '/auth/checksession');
-    };
-
     /**
      * Create sftp account on node
      * @param sEmailInput

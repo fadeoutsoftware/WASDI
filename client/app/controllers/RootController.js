@@ -74,25 +74,6 @@ var RootController = (function() {
         // then immediatly check rabbit connection state
         this.updateRabbitConnectionState(true);
 
-        /**
-         * Check user session
-         */
-        //todo either get rid of it or check it against keycloak server
-        this.m_oAuthService.checkSession().success(function (data, status) {
-            if (data === null || data === undefined || data === '' || data.userId === ''  )
-            {
-                oController.m_oConstantsService.logOut();
-                oController.m_oState.go("home");
-            }
-            else
-            {
-                oController.m_oUser = oController.m_oConstantsService.getUser();
-            }
-        }).error(function (data,status) {
-            utilsVexDialogAlertTop('ERROR IN CHECK ID SESSION');
-            oController.onClickLogOut();
-        });
-
         //if user is logged
         if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser())) {
             try {
