@@ -122,6 +122,7 @@
     oKeycloak.init({
             onLoad: 'check-sso',
             checkLoginIframe: false,
+            flow: 'implicit',
             enableLogging: true
         }
     ).then(function () {
