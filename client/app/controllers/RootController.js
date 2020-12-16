@@ -77,11 +77,9 @@ var RootController = (function() {
         //if user is logged
         if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser())) {
             try {
-                this.m_oUser = oKeycloak.idTokenParsed.preferred_username;
-                this.m_oConstantsService.setUser(this.m_oUser);
-                //this.m_oConstantsService.getUser();
+                this.m_oUser = this.m_oConstantsService.getUser();
             } catch (oE) {
-                console.log("RootController: could not retrieve username from keycloak: " + oE);
+                console.log("RootController: could not retrieve username: " + oE);
             }
         }
         //FIXME: state "login" not found
@@ -353,10 +351,10 @@ var RootController = (function() {
         var _this = this;
 
         try {
-            _this.m_oState.go("home");
-            oKeycloak.logout();
             _this.m_oConstantsService.setActiveWorkspace(null);
             _this.m_oConstantsService.logOut();
+            oKeycloak.logout();
+            _this.m_oState.go("home");
         }catch(e)
         {
         console.log("RootController - Exception " + e);

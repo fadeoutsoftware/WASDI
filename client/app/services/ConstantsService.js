@@ -347,9 +347,6 @@ service('ConstantsService', [function () {
     this.logOut= function()
     {
         this.deleteCookie("oUser");
-        //todo keycloak logout
-        //this.logOutGoogle();
-
         this.m_oUser = null;
     }
 
