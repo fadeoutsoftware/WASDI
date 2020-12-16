@@ -49,7 +49,7 @@ var HomeController = (function () {
             if (oKeycloak.idToken) {
                 data = {
                     'access_token': oKeycloak.idToken,
-                    'refresh_token': ""
+                    'refresh_token': oKeycloak.refresh_token
                 };
             }
             oController.callbackLogin(data, null, oController);
