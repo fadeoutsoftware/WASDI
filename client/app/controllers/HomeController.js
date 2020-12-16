@@ -56,7 +56,7 @@ var HomeController = (function () {
         }
 
 
-        if (oKeycloak.onAuthSuccess == undefined) {
+/*        if (oKeycloak.onAuthSuccess == undefined) {
             console.log("Home controller - Keycloak Adapter - ON AUTH SUCCESS UNDEFINED");
             oKeycloak.onAuthSuccess = function () {
                 console.log("Home controller - Keycloak Adapter - EVENT AUTH SUCCESS TRIGGERED");
@@ -68,13 +68,13 @@ var HomeController = (function () {
                 }
                 oController.callbackLogin(data, null, oController);
             };
-        }
+        }*/
 
 
 
 
-        if (this.m_oConstantsService.isUserLogged())
-            this.m_oState.go("root.marketplace");// go workspaces
+        //if (this.m_oConstantsService.isUserLogged())
+           // this.m_oState.go("root.marketplace");// go workspaces
         if (this.m_bBrowserIsIE === true) {
             this.m_bVisualizeLink = false;
             alert("Wasdi doesn't work on IE/EDGE");// + this.m_bVisualizeLink
