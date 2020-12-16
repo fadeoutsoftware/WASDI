@@ -366,6 +366,9 @@ var RootController = (function() {
             _this.m_oConstantsService.setActiveWorkspace(null);
             _this.m_oConstantsService.logOut();
             _this.m_oState.go("home");
+        }catch(e)
+        {
+        console.log("RootController - Exception " + e);
         }
         //this.openLogoutModal();
         /*this.m_oAuthService.logout()
