@@ -17,13 +17,11 @@
 
     <!---------------- KeyCloak Auth Client ---------------->
 
-        <script src="https://test.wasdi.net/auth/js/keycloak.js"></script>
-
-
+    <script src="https://test.wasdi.net/auth/js/keycloak.js"></script>
 
 
     <!---------------- GOOGLE LOGIN ---------------->
-<!--    <meta name="google-signin-client_id"  content="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com">-->
+    <!--    <meta name="google-signin-client_id"  content="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com">-->
 
     <!-- Fonts -->
     <link rel="stylesheet" href="fonts/astronaut/stylesheet.css">
@@ -60,7 +58,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.js"></script>
 
     <!--SLIDERS-->
-    <link type="text/css" rel="stylesheet" href="assets/slider-appdetails/css/lightslider.css" />
+    <link type="text/css" rel="stylesheet" href="assets/slider-appdetails/css/lightslider.css"/>
     <script src="assets/slider-appdetails/js/lightslider.js"></script>
 
     <!-- LEAFLET -->
@@ -74,7 +72,8 @@
     <script src="https://code.createjs.com/createjs-2014.12.12.min.js"></script>
 
     <!--LEAFLET MOUSE POSITION-->
-    <link rel="stylesheet" href="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.css"/>
+    <link rel="stylesheet"
+          href="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.css"/>
     <script src="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.js"></script>
 
     <!-- Better WMS leaflet-->
@@ -90,7 +89,7 @@
     <script src="lib/enum/ProductsProviders.js"></script>
 
     <!--Geocoder-->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
     <!-- Leaflet Draw -->
@@ -103,7 +102,7 @@
     <script src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script> <!--TODO REMOVE IT-->
 
     <script src="bower_components/jwt-decode/build/jwt-decode.min.js"></script>
-	<!--Back Btn-->
+    <!--Back Btn-->
     <script>
         function goBack() {
             window.history.back()
@@ -121,15 +120,16 @@
     console.log('Token PRE: ' + oKeycloak.token);
 
     oKeycloak.init({
-            onLoad : 'check-sso',
+            onLoad: 'check-sso',
+            checkLoginIframe: false,
             enableLogging: true
         }
-    ).then(function() {
+    ).then(function () {
         console.log('Keycloak initialized');
 
         console.log('Subject after init: ' + oKeycloak.subject);
         console.log('Token  after init: ' + oKeycloak.token);
-    }).catch(function() {
+    }).catch(function () {
         console.log('Keycloak init error');
     });
 
@@ -157,13 +157,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.11/angular-animate.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.8/angular-ui-router.min.js"></script>
 <script src="bower_components/angular-translate/angular-translate.min.js"></script>
-<script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
+<script
+    src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 <script src="bower_components/moment/moment.js"></script>
 <script src="bower_components/wms-capabilities/dist/wms-capabilities.min.js"></script> <!-- WMS CAPABILITIES-->
 <script src="bower_components/ng-file-upload/ng-file-upload.min.js"></script><!-- Upload file drang and drop-->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"  integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"
+        integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
 
 <script src="bower_components/angular-colorpicker-directive/js/color-picker.min.js"></script>
 
@@ -340,35 +342,29 @@
 <!--VEX DIALOG-->
 
 <script type="text/javascript">
-    function vexTerminalPromptWriteIt(from, event)
-    {
+    function vexTerminalPromptWriteIt(from, event) {
         event = event || window.event;
         var w = document.getElementById("writer");
         var tw = from.value;
         w.innerHTML = tw.replace(/\n/g, "<br />");
     };
 
-    function vexTerminalPromptMoveIt(count, e)
-    {
+    function vexTerminalPromptMoveIt(count, e) {
 
         e = e || window.event;
         var keycode = e.keyCode || e.which;
 
-        if (keycode == 37 && parseInt(cursor.style.left) >= (0 - ((count - 1) * 10)))
-        {
+        if (keycode == 37 && parseInt(cursor.style.left) >= (0 - ((count - 1) * 10))) {
             cursor.style.left = parseInt(cursor.style.left) - 10 + "px";
-        } else if (keycode == 39 && (parseInt(cursor.style.left) + 10) <= 0)
-        {
+        } else if (keycode == 39 && (parseInt(cursor.style.left) + 10) <= 0) {
             cursor.style.left = parseInt(cursor.style.left) + 10 + "px";
         }
     };
 
-    function SetCaretAtEnd(elem)
-    {
+    function SetCaretAtEnd(elem) {
         var elemLen = elem.value.length;
         // For IE Only
-        if (document.selection)
-        {
+        if (document.selection) {
             // Set focus
             elem.focus();
             // Use IE Ranges
@@ -378,9 +374,7 @@
             oSel.moveStart('character', elemLen);
             oSel.moveEnd('character', 0);
             oSel.select();
-        }
-        else if (elem.selectionStart || elem.selectionStart == '0')
-        {
+        } else if (elem.selectionStart || elem.selectionStart == '0') {
             // Firefox/Chrome
             elem.selectionStart = elemLen;
             elem.selectionEnd = elemLen;
@@ -388,8 +382,7 @@
         } // if
     } // SetCaretAtEnd()
 
-    function vexTerminalPromptFocus()
-    {
+    function vexTerminalPromptFocus() {
         var w = document.getElementById("setter");
         w.focus();
         SetCaretAtEnd(w);
