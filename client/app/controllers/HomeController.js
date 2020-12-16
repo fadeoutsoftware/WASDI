@@ -47,12 +47,12 @@ var HomeController = (function () {
         // and state.go -> marketplace
         if (oKeycloak.authenticated){
             if (oKeycloak.idToken) {
-                data = {
+                var dataTokens = {
                     'access_token': oKeycloak.idToken,
                     'refresh_token': oKeycloak.refreshToken
                 };
             }
-            oController.callbackLogin(data, null, oController);
+            oController.callbackLogin(dataTokens, null, oController);
         }
 
 
