@@ -41,9 +41,25 @@ var HomeController = (function () {
         this.m_bRegistering = false;
 
         var oController = this;
+
+        // Instead of oAuthSuccess if on loading of this js, the
+        // okeycloak variable is setted and authenticated, do the callbacklogin
+        // and state.go -> marketplace
+        if (oKeycloak.authenticated){
+            if (oKeycloak.idToken) {
+                data = {
+                    'access_token': oKeycloak.idToken,
+                    'refresh_token': ""
+                };
+            }
+            oController.callbackLogin(data, null, oController);
+        }
+
+
         if (oKeycloak.onAuthSuccess == undefined) {
+            console.log("Home controller - Keycloak Adapter - ON AUTH SUCCESS UNDEFINED");
             oKeycloak.onAuthSuccess = function () {
-                console.log("oKeycloak ok ! ");
+                console.log("Home controller - Keycloak Adapter - EVENT AUTH SUCCESS TRIGGERED");
                 if (oKeycloak.idToken) {
                     data = {
                         'access_token': oKeycloak.idToken,
@@ -65,37 +81,6 @@ var HomeController = (function () {
         }
     }
 
-    HomeController.prototype.keycloakLogin = function () {
-
-        if (!utilsIsObjectNullOrUndefined(oKeycloak)) {
-            // if (!bKeyCloakInitialized) {
-            //     console.log('HOME: init from Home controller');
-            //
-            //     //fixme: duplicate in index.html
-            //     oKeycloak.init({
-            //             onLoad : 'check-sso',
-            //             enableLogging: true
-            //         }
-            //     ).then(function() {
-            //         console.log('HOME: Keycloak initialized from home controller');
-            //
-            //         console.log('HOME: Subject home: ' + oKeycloak.subject);
-            //         console.log('HOME: Token  home: ' + oKeycloak.token);
-            //         bKeyCloakInitialized = true;
-            //     }).catch(function() {
-            //         console.log('HOME: Keycloak init error');
-            //     });
-            // }
-            // else  {
-            //     console.log('HOME: NOT init from Home controller');
-            // }
-            console.log('HOME.keycloakLogin: ERROR: KC not initialized');
-        }
-
-        console.log("TEST LOGIN START");
-        oKeycloak.login();
-        console.log("TEST LOGIN END")
-    }
 
     HomeController.prototype.changeVisibilityLoginRegister = function (sStatus) {
 
