@@ -361,9 +361,14 @@ var RootController = (function() {
     RootController.prototype.onClickLogOut = function()
     {
         var _this = this;
-
+        oKeycloak.logout();
+        try {
+            _this.m_oConstantsService.setActiveWorkspace(null);
+            _this.m_oConstantsService.logOut();
+            _this.m_oState.go("home");
+        }
         //this.openLogoutModal();
-        this.m_oAuthService.logout()
+        /*this.m_oAuthService.logout()
             .success(function (data, status) {
                 if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
                 {
@@ -388,7 +393,7 @@ var RootController = (function() {
                 _this.m_oConstantsService.logOut();
                 //_this.closeLogoutModal();
                 _this.m_oState.go("home");
-            });
+            });*/
 
 
     };
