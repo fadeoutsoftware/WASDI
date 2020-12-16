@@ -71,6 +71,8 @@ var HomeController = (function () {
         }
 
 
+
+
         if (this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.marketplace");// go workspaces
         if (this.m_bBrowserIsIE === true) {
@@ -174,6 +176,15 @@ var HomeController = (function () {
         }
 
         return "";
+    }
+
+    /**
+     *
+     */
+
+    HomeController.prototype.keycloakLogin = function (){
+    console.log("Home Controller - OKEYCLOAK login invoked");
+    oKeycloak.login();
     }
 
     /**
