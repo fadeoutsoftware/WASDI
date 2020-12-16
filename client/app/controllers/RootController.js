@@ -99,10 +99,10 @@ var RootController = (function() {
                 this.m_oUser = oKeycloak.idTokenParsed.preferred_username;
                 this.m_oConstantsService.setUser(this.m_oUser);
                 //this.m_oConstantsService.getUser();
-            }catch (oE) {
+            } catch (oE) {
                 console.log("RootController: could not retrieve username from keycloak: " + oE);
             }
-
+        }
         //FIXME: state "login" not found
         //else this.m_oState.go("login");
 
@@ -789,4 +789,5 @@ var RootController = (function() {
     ];
 
     return RootController;
-}) ();
+})
+();
