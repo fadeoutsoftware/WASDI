@@ -4,8 +4,7 @@
 //'use strict';
 
 var HomeController = (function () {
-    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState, oAuthServiceFacebook,
-                            //oAuthServiceGoogle,
+    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState,
                             oWindow, $anchorScroll) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
@@ -13,8 +12,6 @@ var HomeController = (function () {
         this.m_oAuthService = oAuthService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oState = oState;
-        this.m_oAuthServiceFacebook = oAuthServiceFacebook;
-        //this.m_oAuthServiceGoogle = oAuthServiceGoogle;
         this.m_oAnchorService = $anchorScroll;
 
         this.m_sEmailToRecoverPassword = "";
@@ -43,7 +40,7 @@ var HomeController = (function () {
         var oController = this;
 
         // Instead of oAuthSuccess if on loading of this js, the
-        // okeycloak variable is setted and authenticated, do the callbacklogin
+        // okeycloak variable is set and authenticated, do the callbacklogin
         // and state.go -> marketplace
         if (oKeycloak.authenticated){
             if (oKeycloak.idToken) {
@@ -55,20 +52,6 @@ var HomeController = (function () {
             oController.callbackLogin(dataTokens, null, oController);
         }
 
-
-/*        if (oKeycloak.onAuthSuccess == undefined) {
-            console.log("Home controller - Keycloak Adapter - ON AUTH SUCCESS UNDEFINED");
-            oKeycloak.onAuthSuccess = function () {
-                console.log("Home controller - Keycloak Adapter - EVENT AUTH SUCCESS TRIGGERED");
-                if (oKeycloak.idToken) {
-                    data = {
-                        'access_token': oKeycloak.idToken,
-                        'refresh_token': ""
-                    };
-                }
-                oController.callbackLogin(data, null, oController);
-            };
-        }*/
 
 
 
@@ -326,8 +309,6 @@ var HomeController = (function () {
         'AuthService',
         'RabbitStompService',
         '$state',
-        'AuthServiceFacebook',
-        //       'AuthServiceGoogle',
         '$window',
         '$anchorScroll'
     ];
