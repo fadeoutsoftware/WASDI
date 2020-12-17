@@ -354,7 +354,7 @@ var RootController = (function() {
             _this.m_oConstantsService.setActiveWorkspace(null);
 
             _this.m_oConstantsService.logOut();
-            var oLogOutOptions = { redirectUri :"http://test.wasdi.net"}
+            var oLogOutOptions = { redirectUri :"../#/home"}
             oKeycloak.logout(oLogOutOptions);
             //_this.m_oState.go("home");
         }catch(e)
