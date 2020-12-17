@@ -18,6 +18,30 @@
     <!---------------- KeyCloak Auth Client ---------------->
 
     <script src="https://test.wasdi.net/auth/js/keycloak.js"></script>
+    <script>
+        var oKeycloak = new Keycloak();
+
+        console.log('Subject PRE: ' + oKeycloak.subject);
+        console.log('Token PRE: ' + oKeycloak.token);
+
+        oKeycloak.init({
+                onLoad: 'check-sso',
+                checkLoginIframe: false,
+                enableLogging: true
+            }
+        ).then(function () {
+            console.log('Keycloak initialized');
+
+            console.log('Subject after init: ' + oKeycloak.subject);
+            console.log('Token  after init: ' + oKeycloak.token);
+        }).catch(function () {
+            console.log('Keycloak init error');
+        });
+
+        console.log('Subject POST: ' + oKeycloak.subject);
+        console.log('Token: POST' + oKeycloak.token);
+
+    </script>
 
 
     <!---------------- GOOGLE LOGIN ---------------->
@@ -112,31 +136,6 @@
 
 
 <body>
-
-<script>
-    var oKeycloak = new Keycloak();
-
-    console.log('Subject PRE: ' + oKeycloak.subject);
-    console.log('Token PRE: ' + oKeycloak.token);
-
-    oKeycloak.init({
-            onLoad: 'check-sso',
-            checkLoginIframe: false,
-            enableLogging: true
-        }
-    ).then(function () {
-        console.log('Keycloak initialized');
-
-        console.log('Subject after init: ' + oKeycloak.subject);
-        console.log('Token  after init: ' + oKeycloak.token);
-    }).catch(function () {
-        console.log('Keycloak init error');
-    });
-
-    console.log('Subject POST: ' + oKeycloak.subject);
-    console.log('Token: POST' + oKeycloak.token);
-
-</script>
 
 
 <!--[if lt IE 7]>
