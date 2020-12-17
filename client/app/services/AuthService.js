@@ -10,7 +10,6 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     this.AUTHURL = oConstantsService.getAUTHURL();
     this.m_oHttp = $http;
 
-
     var acSessionChangedEvent = 'ac-session-changed';
 
     /**

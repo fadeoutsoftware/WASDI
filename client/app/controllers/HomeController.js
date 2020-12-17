@@ -4,9 +4,10 @@
 //'use strict';
 
 var HomeController = (function () {
-    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState,
+    function HomeController($rootScope, $scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState,
                             oWindow, $anchorScroll) {
         this.m_oScope = $scope;
+        this.m_oRootScope = $rootScope;
         this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
@@ -23,6 +24,9 @@ var HomeController = (function () {
         this.m_bSuccess = false;
         this.m_bError = false;
         this.m_sMessageError = "";
+
+        this.m_bInternalKeycloakFlag = false;
+
         this.m_oRegistrationUser = {
             name: "",
             surname: "",
@@ -32,32 +36,29 @@ var HomeController = (function () {
             userId: ""//userId == email
         };
         this.m_bRegisterIsVisible = false;
-        this.m_bBrowserIsIE = utilsUserUseIEBrowser();
+
         this.m_bVisualizeLink = false;
 
         this.m_bRegistering = false;
 
         var oController = this;
 
-        // Instead of oAuthSuccess if on loading of this js, the
-        // okeycloak variable is set and authenticated, do the callbacklogin
-        // and state.go -> marketplace
-        if (oKeycloak.authenticated){
-            if (oKeycloak.idToken) {
-                var dataTokens = {
-                    'access_token': oKeycloak.idToken,
-                    'refresh_token': oKeycloak.refreshToken
-                };
-            }
-            oController.callbackLogin(dataTokens, null, oController);
+        console.log("HomeController: start waitForKeycloak")
+
+        if (bKeyCloakInitialized) {
+            this.checkKeycloakAuthStatus(oController);
+        }
+        else {
+            this.waitForKeycloak(oController);
+
+            this.m_oScope.$on('KC_INIT_DONE', function(events, args) {
+                oController.checkKeycloakAuthStatus(oController);
+            });
         }
 
 
+        this.m_bBrowserIsIE = utilsUserUseIEBrowser();
 
-
-
-        //if (this.m_oConstantsService.isUserLogged())
-           // this.m_oState.go("root.marketplace");// go workspaces
         if (this.m_bBrowserIsIE === true) {
             this.m_bVisualizeLink = false;
             alert("Wasdi doesn't work on IE/EDGE");// + this.m_bVisualizeLink
@@ -66,6 +67,37 @@ var HomeController = (function () {
         }
     }
 
+    HomeController.prototype.checkKeycloakAuthStatus = function(oController) {
+        console.log("HomeController KC_INIT_DONE")
+
+        if (oKeycloak.authenticated){
+            console.log("HomeController: authenticated = true")
+
+            if (oKeycloak.idToken) {
+                var aoDataTokens = {
+                    'access_token': oKeycloak.idToken,
+                    'refresh_token': oKeycloak.refreshToken
+                };
+            }
+
+            console.log("HomeController: move to marketplace")
+            oController.callbackLogin(aoDataTokens, null, oController);
+        }
+        else {
+            console.log("HomeController: not authenticated")
+        }
+    }
+
+    HomeController.prototype.waitForKeycloak = function(oController) {
+        if(bKeyCloakInitialized == false) {
+            console.log("waitForKeycloak: bKeyCloakInitialized == false try again")
+            window.setTimeout(this.waitForKeycloak, 100, oController); /* this checks the flag every 100 milliseconds*/
+            return;
+        } else {
+            console.log("waitForKeycloak: bKeyCloakInitialized == true");
+            oController.m_oRootScope.$broadcast("KC_INIT_DONE");
+        }
+    }
 
     HomeController.prototype.changeVisibilityLoginRegister = function (sStatus) {
 
@@ -80,8 +112,6 @@ var HomeController = (function () {
             this.m_bLoginIsVisible = false;
             this.m_bRegisterIsVisible = true;
         }
-
-
     };
 
     HomeController.prototype.moveTo = function (sPath) {
@@ -93,15 +123,12 @@ var HomeController = (function () {
         var oController = this;
         oLoginInfo.userId = oController.m_sUserName;
         oLoginInfo.userPassword = oController.m_sUserPassword;
-        // var oConstantsService = oController.m_oConstantsService;
         this.m_oConstantsService.setUser(null);
         this.m_oAuthService.login(oLoginInfo).success(
             function (data, status) {
                 oController.callbackLogin(data, status, oController)
             }).error(function (error) {
-            //alert('error');
-            utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
-
+                utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
         });
     }
 
@@ -166,8 +193,8 @@ var HomeController = (function () {
      */
 
     HomeController.prototype.keycloakLogin = function (){
-    console.log("Home Controller - OKEYCLOAK login invoked");
-    oKeycloak.login();
+        console.log("Home Controller - OKEYCLOAK login invoked");
+        oKeycloak.login();
     }
 
     /**
@@ -303,6 +330,7 @@ var HomeController = (function () {
         return true;
     }
     HomeController.$inject = [
+        '$rootScope',
         '$scope',
         '$location',
         'ConstantsService',

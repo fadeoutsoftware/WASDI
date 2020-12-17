@@ -20,9 +20,9 @@
     <script src="https://test.wasdi.net/auth/js/keycloak.js"></script>
     <script>
         var oKeycloak = new Keycloak();
+        var bKeyCloakInitialized = false;
 
-        console.log('Subject PRE: ' + oKeycloak.subject);
-        console.log('Token PRE: ' + oKeycloak.token);
+        console.log('INDEX: start oKeycloak.init');
 
         oKeycloak.init({
                 onLoad: 'check-sso',
@@ -30,19 +30,17 @@
                 enableLogging: true
             }
         ).then(function () {
+            bKeyCloakInitialized = true;
             console.log('Keycloak initialized');
 
             console.log('Subject after init: ' + oKeycloak.subject);
             console.log('Token  after init: ' + oKeycloak.token);
         }).catch(function () {
+            bKeyCloakInitialized = true;
             console.log('Keycloak init error');
         });
 
-        console.log('Subject POST: ' + oKeycloak.subject);
-        console.log('Token: POST' + oKeycloak.token);
-
     </script>
-
 
     <!---------------- GOOGLE LOGIN ---------------->
     <!--    <meta name="google-signin-client_id"  content="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com">-->

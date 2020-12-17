@@ -102,7 +102,7 @@ var RootController = (function() {
 
         this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
 
-        /*when ProccesLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
+        /*when ProcessLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
         $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
             // you could inspect the data to see
             if(data == true)
@@ -120,7 +120,6 @@ var RootController = (function() {
                 $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.initializeTimeCounter(aoProcessesRunning);
 
             }
-
         });
 
         $scope.$on(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, function(event,data) {
