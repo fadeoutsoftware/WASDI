@@ -352,9 +352,11 @@ var RootController = (function() {
 
         try {
             _this.m_oConstantsService.setActiveWorkspace(null);
+
             _this.m_oConstantsService.logOut();
-            oKeycloak.logout();
-            _this.m_oState.go("home");
+            var oLogOutOptions = { redirectUri :"http://test.wasdi.net"}
+            oKeycloak.logout(oLogOutOptions);
+            //_this.m_oState.go("home");
         }catch(e)
         {
         console.log("RootController - Exception " + e);
