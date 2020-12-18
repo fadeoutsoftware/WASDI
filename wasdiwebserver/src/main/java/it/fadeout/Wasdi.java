@@ -346,7 +346,7 @@ public class Wasdi extends ResourceConfig {
 			String sUserId = null;
 			//todo validate token with JWT
 	
-			Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): Trying introspect...");
+			Utils.debugLog("Wasdi.getUserFromSession: Trying introspect...");
 	
 			
 			String sPayload = "token=" + sSessionId;
@@ -364,12 +364,12 @@ public class Wasdi extends ResourceConfig {
 				return oUser;
 			} else {
 				//check session against DB
-				Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): introspect failed, checking against DB..."); 
+				Utils.debugLog("Wasdi.getUserFromSession: introspect failed, checking against DB..."); 
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				User oUser = null;
 				if(null!=oUserSession) {
-					Utils.debugLog("Wasdi.getUserFromSession( " + sSessionId + " ): checking against DB failed: session is not valid");
+					Utils.debugLog("Wasdi.getUserFromSession: checking against DB failed: session is not valid");
 				}
 				if(null!=oUserSession) {
 					sUserId = oUserSession.getUserId();

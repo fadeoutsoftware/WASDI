@@ -72,7 +72,7 @@ public class ProcessorsMediaResource {
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
 		
-		Utils.debugLog("ProcessorsMediaResource.uploadProcessorLogo( Session: " + sSessionId + ", ProcId: " + sProcessorId + ")");
+		Utils.debugLog("ProcessorsMediaResource.uploadProcessorLogo( ProcId: " + sProcessorId + ")");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -213,7 +213,7 @@ public class ProcessorsMediaResource {
 	@Path("/logo/get")
 	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getProcessorLogo ( Session: " + sSessionId + ", ProcId: " + sProcessorId + " )");
+		Utils.debugLog("ProcessorsMediaResource.getProcessorLogo ( ProcId: " + sProcessorId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -268,7 +268,7 @@ public class ProcessorsMediaResource {
 	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
 								@QueryParam("imageName") String sImageName) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getAppImage( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsMediaResource.getAppImage + " + sImageName + " Proc " + sProcessorId);
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -320,7 +320,7 @@ public class ProcessorsMediaResource {
 	@Path("/images/delete")
 	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", Image Name: " + sImageName + " )");
+		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( ProcId: " + sProcessorId + ", Image Name: " + sImageName + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -405,7 +405,7 @@ public class ProcessorsMediaResource {
 	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.uploadProcessorImage( Session: " + sSessionId + ", ProcId: " + sProcessorId + " )");
+		Utils.debugLog("ProcessorsMediaResource.uploadProcessorImage( ProcId: " + sProcessorId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -547,7 +547,7 @@ public class ProcessorsMediaResource {
 	@Path("categories/get")
 	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getCategories( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsMediaResource.getCategories");
 		
 		User oUser = getUser(sSessionId);
 		
@@ -582,7 +582,7 @@ public class ProcessorsMediaResource {
 			Utils.debugLog("ProcessorsMediaResource.deleteReview excepion decoding review Id");
 		}		
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteReview( Session: " + sSessionId + " sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
+		Utils.debugLog("ProcessorsMediaResource.deleteReview( sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
 		
 		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
 		
@@ -622,7 +622,7 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/update")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
 		
-		Utils.debugLog("ProcessorsMediaResource.updateReview( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsMediaResource.updateReview");
 	
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -659,7 +659,7 @@ public class ProcessorsMediaResource {
 //	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
 		
-		Utils.debugLog("ProcessorsMediaResource.addReview( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsMediaResource.addReview");
 	
 		User oUser = getUser(sSessionId);
 		// Check the user session
@@ -699,7 +699,7 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/getlist")
 	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getReview( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsMediaResource.getReview");
 
 
 		User oUser = getUser(sSessionId);
@@ -756,7 +756,7 @@ public class ProcessorsMediaResource {
 	@Path("/publisher/getlist")
 	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getPublishers( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessorsMediaResource.getPublishers");
 
 
 		User oUser = getUser(sSessionId);

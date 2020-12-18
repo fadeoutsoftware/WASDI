@@ -54,7 +54,7 @@ public class FileBufferResource {
 		oResult.setBoolValue(false);
 		try {
 			
-			Utils.debugLog("FileBufferResource.Download, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.Download ");
 
 			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
 			if (!bSessionIsValid) {
@@ -65,12 +65,7 @@ public class FileBufferResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.Download( " + sSessionId + ", " +
-						sFileUrl + ", " +
-						sProvider + ", " +
-						sWorkspaceId + ", " +
-						sBoundingBox + ", " +
-						sParentProcessWorkspaceId + " ): session is not valid");
+				Utils.debugLog("FileBufferResource.Download(): session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -136,18 +131,14 @@ public class FileBufferResource {
 	{
 		try {
 			
-			Utils.debugLog("FileBufferResource.Publish, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.Publish");
 
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.Publish( " +
-						sSessionId + ", " +
-						sFileUrl + ", " + 
-						sWorkspaceId + ", " +
-						sParentProcessWorkspaceId + " ): session is not valid");
+				Utils.debugLog("FileBufferResource.Publish: session is not valid");
 						
 				return Response.status(401).build();
 			}
@@ -197,13 +188,13 @@ public class FileBufferResource {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
-			Utils.debugLog("FileBufferResource.PublishBand, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.PublishBand");
 			
 			// Check Authentication
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.PublishBand: session " + sSessionId + " is invalid"); 
+				Utils.debugLog("FileBufferResource.PublishBand: session is invalid"); 
 				return oReturnValue;
 			}
 			String sUserId = oUser.getUserId();
@@ -286,17 +277,13 @@ public class FileBufferResource {
 	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
 	{
-		Utils.debugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
+		Utils.debugLog("FileBufferResource.GetBandLayerId");
 		PrimitiveResult oReturnValue = null;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.GetBandLayerId( " +
-						sSessionId + ", " +
-						sFileUrl + ", " + 
-						sWorkspaceId + ", " +
-						sBand + " ): session invalid");
+				Utils.debugLog("FileBufferResource.GetBandLayerId: session invalid");
 				return oReturnValue;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
