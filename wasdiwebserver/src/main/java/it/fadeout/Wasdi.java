@@ -344,10 +344,8 @@ public class Wasdi extends ResourceConfig {
 			}
 	
 			String sUserId = null;
-			//todo validate token with JWT
-	
-			Utils.debugLog("Wasdi.getUserFromSession: Trying introspect...");
-	
+			//todo validate token with JWT	
+			//Utils.debugLog("Wasdi.getUserFromSession: Trying introspect...");
 			
 			String sPayload = "token=" + sSessionId;
 			Map<String,String> asHeaders = new HashMap<>();
@@ -623,7 +621,8 @@ public class Wasdi extends ResourceConfig {
 	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
 		
 		try {
-			Utils.debugLog("Wasdi.httpPost( " + sUrl + ", ... )");
+			//Utils.debugLog("Wasdi.httpPost( " + sUrl + ", ... )");
+			
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			
@@ -800,7 +799,7 @@ public class Wasdi extends ResourceConfig {
 		try {
 			// response
 			int iResponseCode = oConnection.getResponseCode();
-			Utils.debugLog("Wasdi.httpPostFile: server returned " + iResponseCode);
+			//Utils.debugLog("Wasdi.readHttpResponse: server returned " + iResponseCode);
 
 			InputStream oResponseInputStream = null;
 
