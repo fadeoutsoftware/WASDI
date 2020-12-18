@@ -210,16 +210,15 @@ public class AuthResource {
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("AuthResource.CheckSession SessionId: " + sSessionId);
 
 		if(null == sSessionId) {
-			Utils.debugLog("AuthResource.CheckSession: null sSessionId");
+			Utils.debugLog("AuthResource.CheckSession: SessionId is null");
 			return UserViewModel.getInvalid();
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-			Utils.debugLog("AuthResource.CheckSession( " + sSessionId + "): invalid session");
+			Utils.debugLog("AuthResource.CheckSession: invalid session");
 			return UserViewModel.getInvalid();
 		}
 
@@ -506,12 +505,6 @@ public class AuthResource {
 			return Response.status(401).build();
 		}
 
-		String sUserId = oUser.getUserId();
-
-		//		final String USER_IMAGE_PATH_FOLDER = "C:\\temp\\wasdi\\data\\";
-		//		final String USER_IMAGE_FOLDER_NAME = "userImage";
-		//		final String DEFAULT_USER_IMAGE_NAME = "userimage";
-
 		String sPathFolder = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
 		ImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
 		return Response.status(200).build();
@@ -522,8 +515,8 @@ public class AuthResource {
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel loginGoogleUser(LoginInfo oLoginInfo) {
+		
 		Utils.debugLog("AuthResource.CheckGoogleUserId");
-		//TODO captcha
 
 		if (oLoginInfo == null) {
 			return UserViewModel.getInvalid();

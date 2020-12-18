@@ -126,7 +126,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, RangeDopplerGeocodingSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.TerrainCorrection( Session " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.TerrainCorrection( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN, sParentId);
 	}
 
@@ -138,7 +138,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, ApplyOrbitSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.ApplyOrbit( Session: " + sSessionId + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.ApplyOrbit( Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT, sParentId);
 	}
 
@@ -150,7 +150,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, CalibratorSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Calibrate( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.Calibrate( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE, sParentId);
 	}
 
@@ -162,7 +162,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, MultilookingSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Multilooking( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ")");
+		Utils.debugLog("ProcessingResources.Multilooking( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ")");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTILOOKING, sParentId);
 
 	}
@@ -175,7 +175,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId,
 			@QueryParam("parent") String sParentId, NDVISetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.NDVI( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Destination: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.NDVI( Source: " + sSourceProductName + ", Destination: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI, sParentId);
 	}
 
@@ -186,7 +186,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Mosaic( Session: " + sSessionId + ", Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.Mosaic( Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
 	}
 
@@ -197,7 +197,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, RegridSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Regrid( Session: " + sSessionId + ", Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.Regrid( Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
 	}
 
@@ -209,7 +209,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId,
 			@QueryParam("parent") String sParentId, SubsetSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.Subset( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.Subset( Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
 	}
 
@@ -221,7 +221,7 @@ public class ProcessingResources {
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, 
 			@QueryParam("parent") String sParentId, MultiSubsetSetting oSetting) throws IOException {
-		Utils.debugLog("ProcessingResources.MultiSubset( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+		Utils.debugLog("ProcessingResources.MultiSubset( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
 	}
 
@@ -229,12 +229,12 @@ public class ProcessingResources {
 	@Path("parameters")
 	@Produces({ "application/json" })
 	public SnapOperatorParameterViewModel[] operatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException {
-		Utils.debugLog("ProcessingResources.operatorParameters( Session: " + sSessionId + ", Operation: " + sOperation + " )");
+		Utils.debugLog("ProcessingResources.operatorParameters( Operation: " + sOperation + " )");
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null == oUser) {
-			Utils.debugLog("ProcessingResources.operatorParameters( Session: " + sSessionId + ", Operation: " + sOperation + " ): invalid session");
+			Utils.debugLog("ProcessingResources.operatorParameters( Operation: " + sOperation + " ): invalid session");
 			return oChoices.toArray(new SnapOperatorParameterViewModel[oChoices.size()]);
 		}
 		try {
@@ -275,7 +275,7 @@ public class ProcessingResources {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.operatorParameters( Session: " + sSessionId + ", Operation: " + sOperation + " ): " + oE);
+			Utils.debugLog("ProcessingResources.operatorParameters( Operation: " + sOperation + " ): " + oE);
 		}
 
 		return oChoices.toArray(new SnapOperatorParameterViewModel[oChoices.size()]);
@@ -300,12 +300,12 @@ public class ProcessingResources {
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) throws Exception {
 
-		Utils.debugLog("ProcessingResources.uploadGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkspace + ", Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " )");
+		Utils.debugLog("ProcessingResources.uploadGraph( Ws: " + sWorkspace + ", Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " )");
 
 		try {
 			// Check authorization
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessingResources.uploadGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkspace + ", Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " ): invalid session");
+				Utils.debugLog("ProcessingResources.uploadGraph: invalid session");
 				return Response.status(401).build();
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -394,7 +394,7 @@ public class ProcessingResources {
 	@GET
 	@Path("/getgraphsbyusr")
 	public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("ProcessingResources.getWorkflowsByUser( Session: " + sSessionId + " )");
+		Utils.debugLog("ProcessingResources.getWorkflowsByUser");
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			Utils.debugLog("ProcessingResources.getWorkflowsByUser: session null");
@@ -403,7 +403,7 @@ public class ProcessingResources {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " ): invalid session");
+			Utils.debugLog("ProcessingResources.getWorkflowsByUser: invalid session");
 			return null;
 		}
 
@@ -433,7 +433,7 @@ public class ProcessingResources {
 				aoRetWorkflows.add(oVM);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " ): " + oE);
+			Utils.debugLog("ProcessingResources.getWorkflowsByUser: " + oE);
 		}
 
 		Utils.debugLog("ProcessingResources.getWorkflowsByUser: return " + aoRetWorkflows.size() + " workflows");
@@ -451,14 +451,14 @@ public class ProcessingResources {
 	@GET
 	@Path("/deletegraph")
 	public Response deleteGraph(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
-		Utils.debugLog("ProcessingResources.deleteWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + " )");
+		Utils.debugLog("ProcessingResources.deleteWorkflow( Workflow: " + sWorkflowId + " )");
 		try {
 			// Check User
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ProcessingResources.deleteWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + " ): invalid session");
+				Utils.debugLog("ProcessingResources.deleteWorkflow( Workflow: " + sWorkflowId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
@@ -489,7 +489,7 @@ public class ProcessingResources {
 
 			oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.deleteWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + " ): " + oE);
+			Utils.debugLog("ProcessingResources.deleteWorkflow( Workflow: " + sWorkflowId + " ): " + oE);
 			return Response.serverError().build();
 		}
 		return Response.ok().build();
@@ -514,7 +514,7 @@ public class ProcessingResources {
 			@QueryParam("source") String sSourceProductName, @QueryParam("destination") String sDestinationProdutName, @QueryParam("parent") String sParentProcessWorkspaceId)
 					throws Exception {
 
-		Utils.debugLog("ProcessingResources.ExecuteGraph( InputStream, " + sSessionId + ", Ws: " + sWorkspace + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProdutName + " )");
+		Utils.debugLog("ProcessingResources.ExecuteGraph( Ws: " + sWorkspace + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProdutName + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
@@ -526,7 +526,7 @@ public class ProcessingResources {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ProcessingResources.ExecuteGraph( InputStream, " + sSessionId + ", Ws: " + sWorkspace + ", Source: " + sSourceProductName + ", Dest: " + sDestinationProdutName + " ): invalid session");
+			Utils.debugLog("ProcessingResources.ExecuteGraph: invalid session");
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;
@@ -565,7 +565,7 @@ public class ProcessingResources {
 			@QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
 
 		PrimitiveResult oResult = new PrimitiveResult();
-		Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Session: " + sSessionId + ", Ws: " + sWorkspace + ", ... )");
+		Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Ws: " + sWorkspace + ", ... )");
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			oResult.setBoolValue(false);
@@ -574,7 +574,7 @@ public class ProcessingResources {
 		}
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Session: " + sSessionId + ", Ws: " + sWorkspace + ", ... ): invalid session");
+			Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Ws: " + sWorkspace + ", ... ): invalid session");
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;
@@ -645,7 +645,7 @@ public class ProcessingResources {
 			@QueryParam("workflowId") String sWorkflowId)
 	{			
 
-		Utils.debugLog("ProcessingResource.downloadGraphByName( Session: " + sSessionId + ", WorkflowId: " + sWorkflowId + " )");
+		Utils.debugLog("ProcessingResource.downloadGraphByName( WorkflowId: " + sWorkflowId + " )");
 
 		try {
 
@@ -656,7 +656,7 @@ public class ProcessingResources {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ProcessingResource.downloadGraphByName( Session: " + sSessionId + ", WorkflowId: " + sWorkflowId + " ): invalid session");
+				Utils.debugLog("ProcessingResource.downloadGraphByName( WorkflowId: " + sWorkflowId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -702,13 +702,13 @@ public class ProcessingResources {
 	@Produces({ "application/json" })
 	public Map<String, Filter[]> getStandardFilters(@HeaderParam("x-session-token") String sSessionId) {
 
-		Utils.debugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " )");
+		Utils.debugLog("ProcessingResources.GetStandardFilters");
 
 		Map<String, Filter[]> aoFiltersMap = new HashMap<String, Filter[]>();
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " ): invalid session");
+				Utils.debugLog("ProcessingResources.GetStandardFilters: invalid session");
 				return aoFiltersMap;
 
 			}	
@@ -721,7 +721,7 @@ public class ProcessingResources {
 			aoFiltersMap.put("Non-Linear Filters", StandardFilters.NON_LINEAR_FILTERS);
 			aoFiltersMap.put("Morphological Filters", StandardFilters.MORPHOLOGICAL_FILTERS);
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " ): " + oE);
+			Utils.debugLog("ProcessingResources.GetStandardFilters: " + oE);
 		}
 		return aoFiltersMap;
 	}
@@ -738,8 +738,7 @@ public class ProcessingResources {
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog("ProcessingResources.getProductMasks( " + sSessionId + ", " + sProductFile + ", " +
-					sBandName + ", " + sWorkspaceId + " ): invalid session");	
+			Utils.debugLog("ProcessingResources.getProductMasks: invalid session");	
 			return null;
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
@@ -787,15 +786,13 @@ public class ProcessingResources {
 			@QueryParam("accurate") boolean bAccurate, @QueryParam("workspaceId") String sWorkspaceId)
 					throws Exception {
 		try {
-			Utils.debugLog("ProcessingResources.getColorManipulation( Session: " + sSessionId + ", Product: " + sProductFile + ", Band:" + sBandName + ", Accurate: " + bAccurate + ", WS: " + sWorkspaceId + " )");
+			Utils.debugLog("ProcessingResources.getColorManipulation( Product: " + sProductFile + ", Band:" + sBandName + ", Accurate: " + bAccurate + ", WS: " + sWorkspaceId + " )");
 
 			if (Utils.isNullOrEmpty(sSessionId)) return null;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ProcessingResources.getColorManipulation( Session: " + sSessionId +
-						", Product: " + sProductFile + ", Band:" + sBandName + ", Accurate: " + bAccurate +
-						", WS: " + sWorkspaceId + " ): invalid session");
+				Utils.debugLog("ProcessingResources.getColorManipulation: invalid session");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
@@ -811,8 +808,7 @@ public class ProcessingResources {
 			BandImageManager manager = new BandImageManager(product);
 			return manager.getColorManipulation(sBandName, bAccurate);
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.getColorManipulation( Session: " + sSessionId + ", Product: " + sProductFile +
-					", Band:" + sBandName + ", Accurate: " + bAccurate + ", WS: " + sWorkspaceId + " ): " + oE);
+			Utils.debugLog("ProcessingResources.getColorManipulation: " + oE);
 		}
 		return null;
 	}
@@ -824,12 +820,12 @@ public class ProcessingResources {
 			@QueryParam("workspace") String sWorkspace, BandImageViewModel oBandImageViewModel) throws IOException {
 
 		try {
-			Utils.debugLog("ProcessingResources.getBandImage( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... )");
+			Utils.debugLog("ProcessingResources.getBandImage( WS: " + sWorkspace + ", ... )");
 
 			// Check user session
 			String sUserId = acceptedUserAndSession(sSessionId);
 			if (Utils.isNullOrEmpty(sUserId)) {
-				Utils.debugLog("ProcessingResources.getBandImage( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... ): invalid session");
+				Utils.debugLog("ProcessingResources.getBandImage: invalid session");
 				return Response.status(401).build();
 			}
 
@@ -979,7 +975,7 @@ public class ProcessingResources {
 
 			return Response.ok(ayImageData).build();
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.getBandImage( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... ): " + oE);
+			Utils.debugLog("ProcessingResources.getBandImage: " + oE);
 		}
 		return Response.serverError().build();
 	}
@@ -999,10 +995,10 @@ public class ProcessingResources {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<WpsViewModel> getWpsList(@HeaderParam("x-session-token") String sSessionId) {
 		try {
-			Utils.debugLog("ProcessingResource.getWpsList( " + sSessionId + " )");
+			Utils.debugLog("ProcessingResource.getWpsList");
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessingResource.getWpsList( " + sSessionId + " ): invalid session");
+				Utils.debugLog("ProcessingResource.getWpsList: invalid session");
 				return null;
 			}
 	
@@ -1021,20 +1017,20 @@ public class ProcessingResources {
 				return aoResult;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResource.getWpsList( " + sSessionId + " ): " + oE);
+			Utils.debugLog("ProcessingResource.getWpsList: " + oE);
 		}
 		return null;
 	}
 
 	private String acceptedUserAndSession(String sSessionId) {
 		try {
-			Utils.debugLog("ProcessingResource.acceptedUserAndSession( " + sSessionId + " )");
+			Utils.debugLog("ProcessingResource.acceptedUserAndSession");
 			// Check user
 			if (Utils.isNullOrEmpty(sSessionId))
 				return null;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog("ProcessingResource.acceptedUserAndSession( " + sSessionId + " ): invalid session");
+				Utils.debugLog("ProcessingResource.acceptedUserAndSession: invalid session");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId()))
@@ -1042,7 +1038,7 @@ public class ProcessingResources {
 	
 			return oUser.getUserId();
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessingResource.acceptedUserAndSession( " + sSessionId + " ): " + oE);
+			Utils.debugLog("ProcessingResource.acceptedUserAndSession: " + oE);
 		}
 		return null;
 	}
@@ -1076,7 +1072,7 @@ public class ProcessingResources {
 	 */
 	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation, String sParentProcessWorkspaceId) {
 
-		Utils.debugLog("ProsessingResources.executeOperation( Session: " + sSessionId + ", Source: " + sSourceProductName + ", Destination: "
+		Utils.debugLog("ProsessingResources.executeOperation (Source: " + sSourceProductName + ", Destination: "
 				+ sDestinationProductName + ", WS: " + sWorkspaceId + ", Parent: " + sParentProcessWorkspaceId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = "";
@@ -1143,12 +1139,10 @@ public class ProcessingResources {
 	@Path("run")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, String sParameter) throws IOException {
-		//@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
-		
+			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, String sParameter) throws IOException {		
 
 		// Log intro
-		Utils.debugLog("ProcessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + ")");
+		Utils.debugLog("ProcessingResources.runProcess( Operation: " + sOperationId + ", Product: " + sProductName + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		try {
@@ -1204,7 +1198,7 @@ public class ProcessingResources {
 			}
 		} 
 		catch (Exception oE) {
-			Utils.debugLog("ProcessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + "): " + oE);
+			Utils.debugLog("ProcessingResources.runProcess: " + oE);
 			oE.printStackTrace();
 			oResult.setStringValue(oE.toString());
 			oResult.setIntValue(500);
