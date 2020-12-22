@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -74,6 +75,7 @@ public class AuthResource {
 	/**
 	 * Credential Policy
 	 */
+	//TODO get rid of these annoying policies once and for all
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 
 	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
@@ -652,8 +654,8 @@ public class AuthResource {
 				oResult.setStringValue("Mail address already in use");
 				return oResult;
 			} else {
-				//no, it's a new user!
-				//let's check it's a legit user (against kc) 
+				//no, it's a new user! :)
+				//let's check it's a legit one (against kc) 
 				
 			//first: authenticate on keycloak as admin and get the token
 				
@@ -698,6 +700,7 @@ public class AuthResource {
 					sUrl += "/";
 				}
 				sUrl += "admin/realms/wasdi/users?username=";
+				sUrl += oRegistrationInfoViewModel.getUserId();
 				
 				User oNewUser = new User();
 				OkHttpClient oClient = new OkHttpClient();
@@ -706,10 +709,15 @@ public class AuthResource {
 				        .build();
 				try (okhttp3.Response oResponse = oClient.newCall(oRequest).execute()) {
 				      if (!oResponse.isSuccessful()) throw new IOException("Unexpected code " + oResponse + ": " + oResponse.body());
-				      JSONObject oJsonResponse = new JSONObject(oResponse.body().toString());
-				      if(null==oJsonResponse) {
-				    	  throw new NullPointerException("JSON response is null");
+				      //parse response
+				      JSONArray oJsonArray = new JSONArray(oResponse.body().toString());
+				      if(oJsonArray.length() < 1 ) {
+				    	  throw new IllegalStateException("Returned JSON array has 0 or less elements");
 				      }
+				      if(oJsonArray.length() > 1 ) {
+				    	  throw new IllegalStateException("Returned JSON array has more than 1 element");
+				      }
+				      JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
 				      if(oJsonResponse.has("firstName")) {
 				    	  oNewUser.setName(oJsonResponse.optString("firstName", null));
 				      }
@@ -720,20 +728,13 @@ public class AuthResource {
 				    	  oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp")));
 				      }
 				      oNewUser.setValidAfterFirstAccess(true);
+				      oNewUser.setAuthServiceProvider("keycloak");
 				}
 
 
 			//third: store user in DB
 				//create new user
-				String sAuthProvider = "wasdi";
-				
-				oNewUser.setAuthServiceProvider(sAuthProvider);
 				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
-				oNewUser.setName(oRegistrationInfoViewModel.getName());
-				oNewUser.setSurname(oRegistrationInfoViewModel.getSurname());
-				oNewUser.setPassword(m_oPasswordAuthentication.hash(oRegistrationInfoViewModel.getPassword().toCharArray()));
-				
-				oNewUser.setRegistrationDate((new Date()).toString());
 				oNewUser.setDefaultNode("wasdi");
 				
 				PrimitiveResult oResult = null;
