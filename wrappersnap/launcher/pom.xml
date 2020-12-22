@@ -79,6 +79,13 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.9.0</version>
+		</dependency>
+		
 		<!-- Bouncy Castle is necessary to enable outgoing ssh connections -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
