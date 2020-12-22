@@ -624,20 +624,21 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{
-
-		Utils.debugLog("AuthService.UserRegistration");		 
-
-		if(null == oRegistrationInfoViewModel) {
-			return PrimitiveResult.getInvalid();
-		}
-
-
 		try{
-			if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
-				PrimitiveResult oInvalid = new PrimitiveResult();
-				oInvalid.setIntValue(400); //bad request
-				oInvalid.setStringValue("Input data not valid. Please use a valid mail and at least 8 char for password");
-				return oInvalid;
+			Utils.debugLog("AuthService.UserRegistration");		 
+
+			//filter bad cases out
+			if(null == oRegistrationInfoViewModel) {
+				Utils.debugLog("AuthService.UserRegistration: view model is null");
+				PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+				oPrimitiveResult.setIntValue(400);
+				return oPrimitiveResult;
+			}
+			if(Utils.isNullOrEmpty(oRegistrationInfoViewModel.getUserId())) {
+				Utils.debugLog("AuthService.UserRegistration: userid in view model is null");
+				PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+				oPrimitiveResult.setIntValue(400);
+				return oPrimitiveResult;
 			}
 
 			UserRepository oUserRepository = new UserRepository();
