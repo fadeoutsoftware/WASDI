@@ -1,11 +1,8 @@
 package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +27,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -45,6 +41,8 @@ import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
@@ -52,6 +50,7 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.LoginInfo;
@@ -455,18 +454,18 @@ public class AuthResource {
 		} else {
 			return Response.status(400).build();
 		}
-		
+
 		if (!ImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS)) {
 			return Response.status(400).build();
 		}
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
 		ImageResourceUtils.createDirectory(sPath);
-	    String sOutputFilePath = sPath + "/" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
-	    ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
-	    boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
-	    if(bIsSaved == false ){
-	    	return Response.status(400).build();
-	    }
+		String sOutputFilePath = sPath + "/" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
+		ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
+		boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
+		if(bIsSaved == false ){
+			return Response.status(400).build();
+		}
 		return Response.status(200).build();
 	}
 
@@ -515,7 +514,7 @@ public class AuthResource {
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel loginGoogleUser(LoginInfo oLoginInfo) {
-		
+
 		Utils.debugLog("AuthResource.CheckGoogleUserId");
 
 		if (oLoginInfo == null) {
@@ -624,214 +623,142 @@ public class AuthResource {
 	@Path("/register")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
-	{	
+	{
+
 		Utils.debugLog("AuthService.UserRegistration");		 
 
 		if(null == oRegistrationInfoViewModel) {
 			return PrimitiveResult.getInvalid();
-		} 
-		else {
-			try
-			{
-				if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
+		}
 
-					PrimitiveResult oInvalid = PrimitiveResult.getInvalid();
 
-					oInvalid.setStringValue("Input data not valid. Please use a valid mail and at least 8 char for password");
-					return oInvalid;
-				}
-
-				UserRepository oUserRepository = new UserRepository();
-				User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
-
-				//if oWasdiUser is a new user -> oWasdiUser == null
-				if(oWasdiUser == null) {
-
-					//create new user
-					String sAuthProvider = "wasdi";
-					User oNewUser = new User();
-					oNewUser.setAuthServiceProvider(sAuthProvider);
-					oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
-					oNewUser.setName(oRegistrationInfoViewModel.getName());
-					oNewUser.setSurname(oRegistrationInfoViewModel.getSurname());
-					oNewUser.setPassword(m_oPasswordAuthentication.hash(oRegistrationInfoViewModel.getPassword().toCharArray()));
-					oNewUser.setValidAfterFirstAccess(false);
-					oNewUser.setRegistrationDate((new Date()).toString());
-					oNewUser.setDefaultNode("wasdi");
-					String sToken = UUID.randomUUID().toString();
-					oNewUser.setFirstAccessUUID(sToken);
-
-					//next, add user to keycloak
-					String sMyTokenId = "";
-
-					//authenticate Admin against keycloak
-
-					String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
-					if(!sAuthUrl.endsWith("/")) {
-						sAuthUrl += "/";
-					}
-					sAuthUrl += "realms/master/protocol/openid-connect/token";
-
-					String sPayload = "client_id=admin-cli" +
-							"&grant_type=client_credentials" +
-							"&client_secret=" + m_oServletConfig.getInitParameter("keycloak_CLI_Secret");
-
-					Map<String, String> asHeaders = new HashMap<>();
-					asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-					String sAuthResult = Wasdi.httpPost(sAuthUrl, sPayload, asHeaders);
-					if(Utils.isNullOrEmpty(sAuthResult)) {
-						Utils.debugLog("AuthResource.userRegistration: could not login into keycloak, aborting");
-						return PrimitiveResult.getInvalid();
-					}
-
-					JSONObject oJson = new JSONObject(sAuthResult);
-					if( null == oJson||
-							!oJson.has("access_token") ||							
-							Utils.isNullOrEmpty(oJson.optString("access_token", null))
-							) {
-						Utils.debugLog("AuthResource.userRegistration: could parse login result, aborting");
-						return PrimitiveResult.getInvalid();
-					}
-
-					sMyTokenId = oJson.optString("access_token", null);
-					Utils.debugLog("AuthResource.userRegistration: admin token obtained :-)");
-
-					// Create new keycloak user for the realm
-					try {
-						String sCreateUserUrl = m_oServletConfig.getInitParameter("keycloak_server");
-						if(!sCreateUserUrl.endsWith("/")) {
-							sCreateUserUrl += "/";
-						}
-						sCreateUserUrl += "admin/realms/";
-						sCreateUserUrl += m_oServletConfig.getInitParameter("keycloak_realm");
-						sCreateUserUrl += "/users";
-						
-						JSONObject oPayload = new JSONObject();
-						oPayload.put("firstName", oRegistrationInfoViewModel.getName());
-						oPayload.put("lastName", oRegistrationInfoViewModel.getSurname());
-						oPayload.put("username", oRegistrationInfoViewModel.getUserId());
-						oPayload.put("email", oRegistrationInfoViewModel.getUserId());
-						oPayload.put("enabled", true);
-						JSONObject oCredentials = new JSONObject();
-						oCredentials.put("type", "password");
-						oCredentials.put("value", oRegistrationInfoViewModel.getPassword());
-						oCredentials.put("temporary", false);
-						JSONArray oCredentialsArray = new JSONArray();
-						oCredentialsArray.put(oCredentials);
-						oPayload.put("credentials", oCredentialsArray);
-						
-						sPayload = oPayload.toString();
-	
-//						sPayload = "{"
-//								+ "\"firstName\":\"" + oRegistrationInfoViewModel.getName() + "\","+
-//								"\"lastName\":\"\", "+ oRegistrationInfoViewModel.getSurname() + "\","+
-//								"\"username\":\"" + oNewUser.getUserId() + "\","+
-//								"\"email\":\""  + oNewUser.getUserId()+ "\"," +
-//								" \"enabled\":\"true\"";
-//						//sPayload += ",\"credentials\":[{\"type\":\"password\",\"value\":\"" + oRegistrationInfoViewModel.getPassword() + "\",\"temporary\":false}]}";
-	
-						
-						URL oUrl = new URL(sCreateUserUrl);
-						HttpURLConnection oConn = (HttpURLConnection) oUrl.openConnection();
-						oConn.setDoOutput(true);
-						oConn.setRequestMethod("POST");
-						oConn.setRequestProperty("Authorization","Bearer " + sMyTokenId);
-						oConn.setRequestProperty("Content-Type", "application/json");
-
-						OutputStream oPostOutputStream = oConn.getOutputStream();
-						OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
-						if (sPayload!= null) oStreamWriter.write(sPayload);
-						oStreamWriter.flush();
-						oStreamWriter.close();
-						oPostOutputStream.close(); 
-						
-						oConn.connect();
-						int iStatus = oConn.getResponseCode();
-						String sMessage = Wasdi.readHttpResponse(oConn);
-						if((200 == iStatus || 202 <= iStatus)&&(300>iStatus)) {
-							//not what we expected. Read the message
-							Utils.debugLog("AuthResource.userRegistration: keycloak returned " + iStatus + " but 201 was expected. Message: <" + sMessage + ">. Could not register new user. Aborting");
-							return PrimitiveResult.getInvalid();
-						} else if (300 <= iStatus) {
-							//read the error
-							sMessage = Wasdi.readHttpResponse(oConn);
-							Utils.debugLog("AuthResource.userRegistration: keycloak returned " + iStatus + " but 201 was expected. Message: <" + sMessage + ">. Could not register new user. Aborting");
-							return PrimitiveResult.getInvalid();
-						} else if (201 != iStatus) {
-							Utils.debugLog("AuthResource.userRegistration: keycloak returned " + iStatus + " but 201 was expected. Message: <" + sMessage + ">. Could not register new user. Aborting");
-							return PrimitiveResult.getInvalid();
-						}
-						assert(201 == iStatus);
-						Utils.debugLog("AuthResource.userRegistration: keycloak registration completed. Message: <" + sMessage + ">");
-						
-						
-//						asHeaders = new HashMap<>();
-//						asHeaders.put("Content-Type", "application/json");
-//						String sEncodedAuth = Base64.getEncoder().encodeToString(sMyTokenId.getBytes(StandardCharsets.UTF_8));
-//						String sAuth = "Bearer " + sEncodedAuth;
-//						asHeaders.put("Authorization", sAuth);
-//						sAuthResult = Wasdi.httpPost(sCreateUserUrl, sPayload, asHeaders);
-						//we expect the result to be empty
-						
-						//todo try to login to check if the user exists
-					} catch (Exception oE) {
-						Utils.debugLog("AuthResource.userRegistration: could not add user to keycloak due to: " + oE + ", aborting");
-						return PrimitiveResult.getInvalid();
-					}
-					
-					//store user in DB
-					PrimitiveResult oResult = null;
-					if(oUserRepository.insertUser(oNewUser)) {
-						//the user is stored in DB
-						oResult = new PrimitiveResult();
-						oResult.setBoolValue(true);
-						oResult.setStringValue(oNewUser.getUserId());
-					} else {
-						Utils.debugLog("AuthResource.userRegistration: insert new user in DB failed");
-						return PrimitiveResult.getInvalid();
-					}
-					//build confirmation link
-					String sLink = buildRegistrationLink(oNewUser);
-
-					Utils.debugLog(sLink);
-					//send it via email to the user
-					Boolean bMailSuccess = sendRegistrationEmail(oNewUser, sLink);
-
-					if(bMailSuccess){
-
-						notifyNewUserInWasdi(oNewUser, false);
-
-						return oResult;
-					} else {
-						//problem sending the email: either the given address is invalid
-						//or the mail server failed for some reason
-						//in both cases the user must be removed from DB
-						if( !oUserRepository.deleteUser(oNewUser.getUserId()) ) {
-							throw new Exception("failed removal of newly created user");
-						}
-						//and the client should be informed
-						oResult = new PrimitiveResult();
-						oResult.setBoolValue(false);
-						oResult.setStringValue("cannot send email");
-						return oResult;
-					} 
-
-					//uncomment only if email sending service does not work
-					//oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
-				}
-				else
-				{
-					PrimitiveResult oResult = PrimitiveResult.getInvalid();
-					oResult.setStringValue("Mail already in use, impossible to register the new user");
-					return oResult;
-				}
+		try{
+			if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
+				PrimitiveResult oInvalid = new PrimitiveResult();
+				oInvalid.setIntValue(400); //bad request
+				oInvalid.setStringValue("Input data not valid. Please use a valid mail and at least 8 char for password");
+				return oInvalid;
 			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
+
+			UserRepository oUserRepository = new UserRepository();
+			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
+
+			//do we already have this user in our DB?
+			if(oWasdiUser != null){
+				//yes, it's a well known user. Stop here
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setIntValue(403); //forbidden
+				oResult.setStringValue("Mail address already in use");
+				return oResult;
+			} else {
+				//no, it's a new user!
+				//let's check it's a legit user (against kc) 
+				
+			//first: authenticate on keycloak as admin and get the token
+				
+				//URL
+				String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
+				if(!sAuthUrl.endsWith("/")) {
+					sAuthUrl += "/";
+				}
+				sAuthUrl += "realms/master/protocol/openid-connect/token";
+				//payload
+				String sPayload = "client_id=admin-cli" +
+						"&grant_type=client_credentials" +
+						"&client_secret=" + m_oServletConfig.getInitParameter("keycloak_CLI_Secret");
+				//headers
+				Map<String, String> asHeaders = new HashMap<>();
+				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+				//POST -> authenticate on keycloak 
+				String sAuthResult = Wasdi.httpPost(sAuthUrl, sPayload, asHeaders);
+				if(Utils.isNullOrEmpty(sAuthResult)) {
+					throw new RuntimeException("could not login into keycloak");
+				}
+				//read response and get token
+				JSONObject oJson = new JSONObject(sAuthResult);
+				if( null == oJson||
+						!oJson.has("access_token") ||							
+						Utils.isNullOrEmpty(oJson.optString("access_token", null))
+						) {
+					throw new NullPointerException("Missing access token");
+				}
+				String sKcTokenId = "";
+				sKcTokenId = oJson.optString("access_token", null);
+				if(Utils.isNullOrEmpty(sKcTokenId)) {
+					throw new NullPointerException("Token id null or empty");
+				}
+				Utils.debugLog("AuthResource.userRegistration: admin token obtained :-)");
+
+			// second: check the user exists on keycloak
+				
+				// build keycloak API URL
+				String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
+				if(!sUrl.endsWith("/")) {
+					sUrl += "/";
+				}
+				sUrl += "admin/realms/wasdi/users?username=";
+				
+				User oNewUser = new User();
+				OkHttpClient oClient = new OkHttpClient();
+				Request oRequest = new Request.Builder()
+				        .url(sUrl)
+				        .build();
+				try (okhttp3.Response oResponse = oClient.newCall(oRequest).execute()) {
+				      if (!oResponse.isSuccessful()) throw new IOException("Unexpected code " + oResponse + ": " + oResponse.body());
+				      JSONObject oJsonResponse = new JSONObject(oResponse.body().toString());
+				      if(null==oJsonResponse) {
+				    	  throw new NullPointerException("JSON response is null");
+				      }
+				      if(oJsonResponse.has("firstName")) {
+				    	  oNewUser.setName(oJsonResponse.optString("firstName", null));
+				      }
+				      if(oJsonResponse.has("lastName")) {
+				    	  oNewUser.setSurname(oJsonResponse.optString("lastName", null));
+				      }
+				      if(oJsonResponse.has("createdTimestamp")) {
+				    	  oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp")));
+				      }
+				      oNewUser.setValidAfterFirstAccess(true);
+				}
+
+
+			//third: store user in DB
+				//create new user
+				String sAuthProvider = "wasdi";
+				
+				oNewUser.setAuthServiceProvider(sAuthProvider);
+				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
+				oNewUser.setName(oRegistrationInfoViewModel.getName());
+				oNewUser.setSurname(oRegistrationInfoViewModel.getSurname());
+				oNewUser.setPassword(m_oPasswordAuthentication.hash(oRegistrationInfoViewModel.getPassword().toCharArray()));
+				
+				oNewUser.setRegistrationDate((new Date()).toString());
+				oNewUser.setDefaultNode("wasdi");
+				
+				PrimitiveResult oResult = null;
+				if(oUserRepository.insertUser(oNewUser)) {
+					//success: the user is stored in DB!
+					oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					oResult.setStringValue(oNewUser.getUserId());
+					notifyNewUserInWasdi(oNewUser, true);
+				} else {
+					//insert failed: log, mail and throw
+					String sMessage = "could not insert new user in DB";
+					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", throwing");
+					notifyNewUserInWasdi(oNewUser, false);
+					throw new RuntimeException(sMessage);
+				}
 			}
 		}
-		return PrimitiveResult.getInvalid();
+		catch(Exception oE)
+		{
+			Utils.debugLog("AuthResource.userRegistration: " + oE + ", aborting");
+		}
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setIntValue(500);
+		return oResult;
 	}
 
 
@@ -1253,7 +1180,9 @@ public class AuthResource {
 			String sMessage = "A new user registered in WASDI. User Name: " + oUser.getUserId();
 
 			if (bConfirmed) {
-				sMessage = "The new User " + oUser.getUserId() + " confirmed the access and validated the account"; 
+				sMessage = "The new User " + oUser.getUserId() + " has been added to wasdi DB"; 
+			} else {
+				sMessage = "Confirmation failed: " + oUser.getUserId() + " is in kc but could not be added to wasdi DB";
 			}
 
 			oMessage.setMessage(sMessage);

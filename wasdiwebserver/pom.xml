@@ -26,18 +26,18 @@
 			<layout>default</layout>
 		</repository>
 		<repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
+			<id>snap-repo-public</id>
+			<name>Public Maven Repository for SNAP</name>
+			<url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
+		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -47,6 +47,14 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.9.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -123,7 +131,7 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>[2.9.10.5,)</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -404,11 +412,13 @@
 			<artifactId>orbit</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>de.micromata.jak</groupId>
 			<artifactId>JavaAPIforKml</artifactId>
 			<version>2.2.1</version>
 		</dependency>
+
 		<dependency>
 			<groupId>it.fadeout</groupId>
 			<artifactId>mercurius</artifactId>
