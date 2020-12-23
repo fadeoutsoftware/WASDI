@@ -44,6 +44,9 @@ import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
@@ -627,7 +630,7 @@ public class AuthResource {
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{
 		try{
-			Utils.debugLog("AuthService.UserRegistration");		 
+			Utils.debugLog("AuthService.UserRegistration"); 
 
 			//filter bad cases out
 			if(null == oRegistrationInfoViewModel) {
@@ -656,9 +659,9 @@ public class AuthResource {
 			} else {
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc) 
-				
-			//first: authenticate on keycloak as admin and get the token
-				
+
+				//first: authenticate on keycloak as admin and get the token
+
 				//URL
 				String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
 				if(!sAuthUrl.endsWith("/")) {
@@ -692,8 +695,8 @@ public class AuthResource {
 				}
 				Utils.debugLog("AuthResource.userRegistration: admin token obtained :-)");
 
-			// second: check the user exists on keycloak
-				
+				// second: check the user exists on keycloak
+
 				// build keycloak API URL
 				String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
 				if(!sUrl.endsWith("/")) {
@@ -701,42 +704,54 @@ public class AuthResource {
 				}
 				sUrl += "admin/realms/wasdi/users?username=";
 				sUrl += oRegistrationInfoViewModel.getUserId();
-				
+
 				User oNewUser = new User();
 				OkHttpClient oClient = new OkHttpClient();
 				Request oRequest = new Request.Builder()
-				        .url(sUrl)
-				        .build();
+						.url(sUrl)
+						.addHeader("Authorization", "Bearer " + sKcTokenId)
+						.build();
 				try (okhttp3.Response oResponse = oClient.newCall(oRequest).execute()) {
-				      if (!oResponse.isSuccessful()) throw new IOException("Unexpected code " + oResponse + ": " + oResponse.body());
-				      //parse response
-				      JSONArray oJsonArray = new JSONArray(oResponse.body().toString());
-				      if(oJsonArray.length() < 1 ) {
-				    	  throw new IllegalStateException("Returned JSON array has 0 or less elements");
-				      }
-				      if(oJsonArray.length() > 1 ) {
-				    	  throw new IllegalStateException("Returned JSON array has more than 1 element");
-				      }
-				      JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
-				      if(oJsonResponse.has("firstName")) {
-				    	  oNewUser.setName(oJsonResponse.optString("firstName", null));
-				      }
-				      if(oJsonResponse.has("lastName")) {
-				    	  oNewUser.setSurname(oJsonResponse.optString("lastName", null));
-				      }
-				      if(oJsonResponse.has("createdTimestamp")) {
-				    	  oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp")));
-				      }
-				      oNewUser.setValidAfterFirstAccess(true);
-				      oNewUser.setAuthServiceProvider("keycloak");
+					if (!oResponse.isSuccessful()) {
+						throw new IOException("Unexpected code " + oResponse + ": " + oResponse.body());
+					}
+					
+					
+					//parse response
+//					Moshi moshi = new Moshi.Builder().build();
+//					JsonAdapter<Gist> gistJsonAdapter = moshi.adapter(Gist.class);
+					
+					//TODO stream JSON a la ok http with moshi:
+					//https://square.github.io/okhttp/recipes/ -> Parse a JSON Response With Moshi
+					String sBody = oResponse.body().string();
+					
+					JSONArray oJsonArray = new JSONArray(sBody);
+					if(oJsonArray.length() < 1 ) {
+						throw new IllegalStateException("Returned JSON array has 0 or less elements");
+					}
+					if(oJsonArray.length() > 1 ) {
+						throw new IllegalStateException("Returned JSON array has more than 1 element");
+					}
+					JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
+					if(oJsonResponse.has("firstName")) {
+						oNewUser.setName(oJsonResponse.optString("firstName", null));
+					}
+					if(oJsonResponse.has("lastName")) {
+						oNewUser.setSurname(oJsonResponse.optString("lastName", null));
+					}
+					if(oJsonResponse.has("createdTimestamp")) {
+						oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", 0l)));
+					}
+					oNewUser.setValidAfterFirstAccess(true);
+					oNewUser.setAuthServiceProvider("keycloak");
 				}
 
 
-			//third: store user in DB
+				//third: store user in DB
 				//create new user
 				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
 				oNewUser.setDefaultNode("wasdi");
-				
+
 				PrimitiveResult oResult = null;
 				if(oUserRepository.insertUser(oNewUser)) {
 					//success: the user is stored in DB!
@@ -744,6 +759,9 @@ public class AuthResource {
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oNewUser.getUserId());
 					notifyNewUserInWasdi(oNewUser, true);
+					oResult.setIntValue(200);
+					oResult.setStringValue("Welcome to space");
+					return oResult;
 				} else {
 					//insert failed: log, mail and throw
 					String sMessage = "could not insert new user in DB";
@@ -757,7 +775,7 @@ public class AuthResource {
 		{
 			Utils.debugLog("AuthResource.userRegistration: " + oE + ", aborting");
 		}
-		
+
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setIntValue(500);
 		return oResult;
@@ -1031,19 +1049,7 @@ public class AuthResource {
 		return true;
 	}
 
-
-	private String buildRegistrationLink(User oUser) {
-		Utils.debugLog("AuthResource.buildRegistrationLink");
-		String sResult = "";
-		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
-		String sUserId = "email=" + oUser.getUserId();
-		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
-
-		sResult = sAPIUrl + sUserId + "&" + sToken;
-
-		return sResult;
-	}
-
+	
 	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Utils.debugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
@@ -1080,8 +1086,8 @@ public class AuthResource {
 			if(oMercuriusAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
 				return true;
 			}
-		} catch (Exception e) {
-			Utils.debugLog("sendPasswordEmail: " + e.toString());
+		} catch (Exception oE) {
+			Utils.debugLog("AuthResource.sendPasswordEmail: " + oE);
 			return false;
 		}
 		return false;
@@ -1124,8 +1130,8 @@ public class AuthResource {
 			if(oMercuriusAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
 				return true;
 			}
-		} catch (Exception e) {
-			Utils.debugLog("sendSFTPPasswordEmail: " + e.toString());
+		} catch (Exception oE) {
+			Utils.debugLog("AuthResource.sendSFTPPasswordEmail: " + oE);
 			return false;
 		}
 		return false;
