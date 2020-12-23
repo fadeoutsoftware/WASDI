@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
@@ -42,11 +41,6 @@ import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
@@ -646,7 +640,10 @@ public class AuthResource {
 				return oPrimitiveResult;
 			}
 
+			Utils.debugLog("AuthService.UserRegistration: input is good");
+
 			UserRepository oUserRepository = new UserRepository();
+			Utils.debugLog("AuthService.UserRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi "); 
 			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
 
 			//do we already have this user in our DB?
@@ -654,7 +651,7 @@ public class AuthResource {
 				//yes, it's a well known user. Stop here
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setIntValue(403); //forbidden
-				oResult.setStringValue("Mail address already in use");
+				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
 				return oResult;
 			} else {
 				//no, it's a new user! :)
@@ -704,47 +701,32 @@ public class AuthResource {
 				}
 				sUrl += "admin/realms/wasdi/users?username=";
 				sUrl += oRegistrationInfoViewModel.getUserId();
-
+				Utils.debugLog("AuthResource.userRegistration: about to post to " + sUrl);
+				asHeaders.clear();
+				asHeaders.put("Authorization", "Bearer " + sKcTokenId);
+				String sBody = Wasdi.httpGet(sUrl, asHeaders);
 				User oNewUser = new User();
-				OkHttpClient oClient = new OkHttpClient();
-				Request oRequest = new Request.Builder()
-						.url(sUrl)
-						.addHeader("Authorization", "Bearer " + sKcTokenId)
-						.build();
-				try (okhttp3.Response oResponse = oClient.newCall(oRequest).execute()) {
-					if (!oResponse.isSuccessful()) {
-						throw new IOException("Unexpected code " + oResponse + ": " + oResponse.body());
-					}
-					
-					
-					//parse response
-//					Moshi moshi = new Moshi.Builder().build();
-//					JsonAdapter<Gist> gistJsonAdapter = moshi.adapter(Gist.class);
-					
-					//TODO stream JSON a la ok http with moshi:
-					//https://square.github.io/okhttp/recipes/ -> Parse a JSON Response With Moshi
-					String sBody = oResponse.body().string();
-					
-					JSONArray oJsonArray = new JSONArray(sBody);
-					if(oJsonArray.length() < 1 ) {
-						throw new IllegalStateException("Returned JSON array has 0 or less elements");
-					}
-					if(oJsonArray.length() > 1 ) {
-						throw new IllegalStateException("Returned JSON array has more than 1 element");
-					}
-					JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
-					if(oJsonResponse.has("firstName")) {
-						oNewUser.setName(oJsonResponse.optString("firstName", null));
-					}
-					if(oJsonResponse.has("lastName")) {
-						oNewUser.setSurname(oJsonResponse.optString("lastName", null));
-					}
-					if(oJsonResponse.has("createdTimestamp")) {
-						oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", 0l)));
-					}
-					oNewUser.setValidAfterFirstAccess(true);
-					oNewUser.setAuthServiceProvider("keycloak");
+
+				JSONArray oJsonArray = new JSONArray(sBody);
+				if(oJsonArray.length() < 1 ) {
+					throw new IllegalStateException("Returned JSON array has 0 or less elements");
 				}
+				if(oJsonArray.length() > 1 ) {
+					throw new IllegalStateException("Returned JSON array has more than 1 element");
+				}
+				JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
+				if(oJsonResponse.has("firstName")) {
+					oNewUser.setName(oJsonResponse.optString("firstName", null));
+				}
+				if(oJsonResponse.has("lastName")) {
+					oNewUser.setSurname(oJsonResponse.optString("lastName", null));
+				}
+				if(oJsonResponse.has("createdTimestamp")) {
+					oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", 0l)));
+				}
+				oNewUser.setValidAfterFirstAccess(true);
+				oNewUser.setAuthServiceProvider("keycloak");
+				Utils.debugLog("AuthResource.userRegistration: user details parsed");
 
 
 				//third: store user in DB
@@ -755,18 +737,19 @@ public class AuthResource {
 				PrimitiveResult oResult = null;
 				if(oUserRepository.insertUser(oNewUser)) {
 					//success: the user is stored in DB!
+					Utils.debugLog("AuthResource.userRegistration: user " + oNewUser.getUserId() + " added to wasdi");
 					oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oNewUser.getUserId());
-					notifyNewUserInWasdi(oNewUser, true);
+					//notifyNewUserInWasdi(oNewUser, true);
 					oResult.setIntValue(200);
 					oResult.setStringValue("Welcome to space");
 					return oResult;
 				} else {
 					//insert failed: log, mail and throw
-					String sMessage = "could not insert new user in DB";
+					String sMessage = "could not insert new user " + oNewUser.getUserId() + " in DB";
 					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", throwing");
-					notifyNewUserInWasdi(oNewUser, false);
+					//notifyNewUserInWasdi(oNewUser, false);
 					throw new RuntimeException(sMessage);
 				}
 			}
@@ -1003,7 +986,7 @@ public class AuthResource {
 	}
 
 
-	
+
 	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Utils.debugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
