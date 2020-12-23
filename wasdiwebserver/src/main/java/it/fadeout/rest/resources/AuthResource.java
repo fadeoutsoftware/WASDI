@@ -1002,52 +1002,6 @@ public class AuthResource {
 		}
 	}
 
-	private Boolean sendRegistrationEmail(User oUser, String sLink) {
-		Utils.debugLog("AuthResource.sendRegistrationEmail");
-		//MAYBE validate input
-		//MAYBE check w/ CredentialPolicy
-		try {
-
-			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				Utils.debugLog("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
-				return false;
-			}
-			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-			Message oMessage = new Message();
-
-			String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
-
-			if (Utils.isNullOrEmpty(sTitle)) {
-				sTitle = "Welcome to WASDI";
-			}
-			oMessage.setTilte(sTitle);
-
-			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
-			if (sSender==null) {
-				sSender = "wasdi@wasdi.net";
-			}
-			oMessage.setSender(sSender);
-
-			//TODO read the message from the servlet config file
-			String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
-					"Please click on the link below to activate your account:\n\n" + 
-					sLink;
-			oMessage.setMessage(sMessage);
-
-			Integer iPositiveSucceded = 0;
-			iPositiveSucceded = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
-			Utils.debugLog("AuthResource.sendRegistrationEmail: "+iPositiveSucceded.toString());
-			if(iPositiveSucceded < 0 ) {
-				//negative result means email couldn't be sent
-				return false;
-			}
-		} catch(Exception e) {
-			Utils.debugLog("\n\n"+e.getMessage()+"\n\n" );
-			return false;
-		}
-		return true;
-	}
 
 	
 	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
