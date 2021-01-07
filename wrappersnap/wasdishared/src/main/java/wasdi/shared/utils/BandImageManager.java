@@ -78,7 +78,7 @@ public class BandImageManager {
 	
 	private static Thread m_oCacheThread = null;
 	
-	public static void stopChacheThread() {
+	public static void stopCacheThread() {
 		if (m_oCacheThread != null) {
 			try {
 				m_oCacheThread.interrupt();

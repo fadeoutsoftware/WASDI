@@ -1966,7 +1966,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		} finally {
 
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-			BandImageManager.stopChacheThread();
+			BandImageManager.stopCacheThread();
 		}
 
 		return sLayerId;
