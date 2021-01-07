@@ -709,6 +709,7 @@ public class AuthResource {
 
 				JSONArray oJsonArray = new JSONArray(sBody);
 				if(oJsonArray.length() < 1 ) {
+					//TODO this means no such user has been found, return 404
 					throw new IllegalStateException("Returned JSON array has 0 or less elements");
 				}
 				if(oJsonArray.length() > 1 ) {
