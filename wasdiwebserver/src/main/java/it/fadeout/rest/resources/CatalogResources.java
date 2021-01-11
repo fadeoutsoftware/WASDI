@@ -185,16 +185,12 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResources.DownloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspace);
 		
 		try {
-			
+						
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
 				sTokenSessionId = sSessionId;
 			}
 
-			
-			
-			Utils.debugLog("CatalogResources.DownloadEntryByName: call get user from session: " + sSessionId);
-
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
 				Utils.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
