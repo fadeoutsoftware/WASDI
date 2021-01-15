@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.0
-Last Update: 25/09/2020
+Version 0.6.1
+Last Update: 18/11/2020
 
 Tested with: Python 2.7, Python 3.7
 
@@ -42,6 +42,7 @@ Created on 11 Jun 2018
 @author: p.campanella
 """
 from time import sleep
+from telnetlib import AO
 try:
     from __builtin__ import str
 except Exception as oE0:
@@ -2777,6 +2778,46 @@ def getProcessorPath():
         return sCallerFilePath
     except:
         return "./"
+    
+def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperationType=None, sName=None):
+    """
+    Get a paginated list of processes in the active workspace
+    :param iStartIndex: start index of the process (0 by default is the last one)
+    :param iEndIndex: end index of the process (20 by default)
+    :param sStatus: status filter. None by default. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY 
+    :param sOperationType: Operation Type Filter. None by default. Can be RUNPROCESSOR, RUNIDL, RUNMATLAB, INGEST, DOWNLOAD, GRAPH, DEPLOYPROCESSOR
+    :param sName: Name filter. The name meaning depends by the operation type. None by default. For RUNPROCESSOR, RUNIDL and RUNMATLAB is the name of the application
+    """
+    
+    sWorkspaceId = getActiveWorkspaceId() 
+    asHeaders = _getStandardHeaders()
+    aoPayload = {'sWorkspaceId': sWorkspaceId, 'startindex': iStartIndex, 'endindex': iEndIndex}
+    
+    if sStatus is not None:
+        aoPayload['status'] = sStatus
+
+    if sOperationType is not None:
+        aoPayload['operationType'] = sOperationType
+
+    if sName is not None:
+        aoPayload['namePattern'] = sName
+
+    sUrl = getWorkspaceBaseUrl() + '/process/byws'
+
+    asProcesses = []
+
+    oResult = requests.get(sUrl, headers=asHeaders, params=aoPayload)
+
+    if oResult.ok is True:
+        oJsonResults = oResult.json()
+
+        for oProcess in oJsonResults:
+            try:
+                asProcesses.append(oProcess)
+            except:
+                continue
+
+    return asProcesses
 
 def _log(sLog):
     """
