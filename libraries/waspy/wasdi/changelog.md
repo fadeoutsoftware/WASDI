@@ -1,16 +1,17 @@
 # \_\_/== Changelog ==\\\_\_
 
-## [0.6.1] - 2020-11-18
+## [0.6.1] - 2021-01-14
+
+### Added
+- getProcessesByWorkspace: gets a list of the processes executed in the active workspace
 
 ### Fixed
 
-- import `__builtin__` or `builtins` depending on the version of Python
- being used 
+- import `__builtin__` or `builtins` depending on the version of Python being used 
 
 ### Changed
 
-- removed log in `updateProcessStatus` when the percent == -1, as
- that value is assigned by default by other calls 
+- removed log in `updateProcessStatus` when the percent == -1, as that value is assigned by default by other calls 
 
 ## [0.6.0] - 2020-10-28
 
