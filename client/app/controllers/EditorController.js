@@ -209,126 +209,14 @@ var EditorController = (function () {
 
             // --- Processor ---
             {
-                name: "",
-                icon: "icon-document-gear",
-                caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
-                onClick: "",
-                subMenu: [
-
-                    {
-                        name: "",// New Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
-                        subMenu: [],
-                        onClick: this.openProcessorDialog,
-                        icon: "fa fa-lg fa-plus-square"
-                    },
-                    {
-                        name: "",// E DRIFT FOOD EVENT
-                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_EVENT",
-                        subMenu: [],
-                        onClick: this.open_eDriftFloodEventDialog,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//EDriftFloodAutomaticChainController
-                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
-                        subMenu: [],
-                        onClick: this.openEDriftFloodAutomaticChain,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//LIST FLOOD AREA DETECTION
-                        caption_i18n: "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
-                        subMenu: [],
-                        onClick: this.openListtFloodAreaDetectionDialog,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//EDriftCheckImagesAvailability
-                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
-                        subMenu: [],
-                        onClick: this.openEDriftCheckImagesAvailability,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//RASOR
-                        caption_i18n: "EDITOR_OPERATION_TITLE_RASOR",
-                        subMenu: [],
-                        onClick: this.openRasorDialog,
-                        icon: "fa fa-lg fa-users"
-                    },
-                    // --- WPS ---
-                    {
-                        name: "WPS",
-                        icon: "fa fa-tasks",
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_WPS",
-                        onClick: this.openWPSDialog,
-                        subMenu: []
-                    },
-                    {
-                        name: "Mosaic",
-                        icon: "fa fa-tasks",
-                        caption_i18n: "EDITOR_OPERATION_TITLE_MOSAIC",
-                        onClick: this.openMosaicDialog,
-                        subMenu: []
-                    }
-                ]
-            },
-            // --- Optical ---
-            {
-                name: "",
-                icon: "icon-eye",
-                caption_i18n: "EDITOR_TOOLTIP_ICON_EYE",
-                onClick: "",
-                subMenu: [
-                    {
-                        name: "",//range doppler terrain correction
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI",
-                        subMenu: [],
-                        onClick: this.openNDVIDialogInNavBar,
-                        icon: ""
-                    }
-                ]
-            },
-            // --- Radar ---
-            {
-                name: "",
-                icon: "icon-radar",
-                caption_i18n: "EDITOR_TOOLTIP_ICON_RADAR",
-                onClick: "",
-                subMenu: [
-                    {
-                        name: "",//apply orbit
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_ORBIT",
-                        subMenu: [],
-                        onClick: this.openApplyOrbitDialogInNavBar,
-                        icon: "icon-applyorbit-operations"
-                    },
-                    {
-                        name: "",//multilooking
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING",
-                        subMenu: [],
-                        onClick: this.openMultilookingDialogInNavBar,
-                        icon: "icon-multilooking-operations"
-                    },
-                    {
-                        name: "",// radiometric calibrate
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE",
-                        subMenu: [],
-                        onClick: this.openRadiometricCalibrationDialogInNavBar,
-                        icon: "icon-radiometriccalibrate-operations"
-                    },
-                    {
-                        name: "",//range doppler terrain correction
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
-                        subMenu: [],
-                        onClick: this.rangeDopplerTerrainCorrectionDialogInNavBar,
-                        icon: "icon-range-doppler-terrain-correction-operations"
-                    }
-                ]
+                name: "",// New Processor
+                caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                subMenu: [],
+                onClick: this.openProcessorDialog,
+                icon: "fa fa-lg fa-plus-square"
             },
             {
-                name: "",//WAPPS
+                name: "",//Share
                 caption_i18n: "EDITOR_OPERATION_TITLE_SHARE",
                 subMenu: [],
                 onClick: this.openShareDialog,
