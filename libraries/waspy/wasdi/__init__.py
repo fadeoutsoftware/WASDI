@@ -1304,9 +1304,9 @@ def getProcessorPayloadAsJson(sProcessorPayload):
 
 def setSubPid(sProcessId, iSubPid):
     """
-    Saves the Payload of a process
+    Set the sub pid
     :param sProcessId: Id of the process
-    :param data: data to write in the payload. Suggestion to use a JSON
+    :param iSubPid: PID of the physical process
     :return: the updated status as a String or '' if there was any problem
     """
     global m_sBaseUrl
@@ -2010,7 +2010,7 @@ def importProductList(aoProducts, sProvider=None):
     Imports a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
     :param aoProducts: Array of product dictionary as returned by searchEOImages
     :param sProvider: WASDI Data Provider. Use None for default 
-    :return: execution status as an array of  STRINGs, one for each product in input. Can be DONE, ERROR, STOPPED.
+    :return: execution status as an array of  STRINGs, one for each product in input. Can be CREATED, DONE, ERROR, STOPPED, WAITING, READY
     """
 
     if aoProducts is None:
