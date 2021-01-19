@@ -275,6 +275,64 @@ FUNCTION WASDIHTTPGET, sUrlPath, sHostName
 	RETURN, wasdiResult
 END
 
+; IDL HTTP GET Function Utility that DOES NOT CONVERT IN JSON
+FUNCTION WASDIHTTPGETNOJSON, sUrlPath, sHostName
+	
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	
+	IF (sUrlPath EQ !NULL) THEN BEGIN
+		print, 'Url Path is null, return'
+		RETURN, !NULL
+	END
+  
+	IF (token EQ !NULL) OR (STRLEN(token) LE 1) THEN BEGIN
+		sessioncookie = ''
+	END ELSE BEGIN
+		sessioncookie = token
+	END 
+	
+	IF (sHostName EQ !NULL) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END
+
+	CATCH, iErrorStatus 
+
+	IF iErrorStatus NE 0 THEN BEGIN
+		IF (verbose EQ '1') THEN BEGIN
+			print, 'WasdiHttpGet ERROR STATUS=', STRTRIM(STRING(iErrorStatus),2), ' returning !NULL'
+		END
+		
+		RETURN, !NULL
+	ENDIF
+
+	IF (verbose EQ '1') THEN BEGIN
+		print, 'WasdiHttpGet Url ', sUrlPath
+	END
+  
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+
+	; This is an http transaction
+	oUrl->SetProperty, URL_SCHEME = 'http'
+
+	; Use the http server string
+	oUrl->SetProperty, URL_HOSTNAME = sHostName
+
+	; name of remote path
+	oUrl->SetProperty, URL_PATH = sUrlPath
+	oUrl->SetProperty, HEADERS = ['Content-Type: application/json','x-session-token: '+sessioncookie]
+
+	; Call the http url and get result
+	serverJSONResult = oUrl->Get( /STRING_ARRAY)
+	
+	; Close the connection to the remote server, and destroy the object
+	oUrl->CloseConnections
+	OBJ_DESTROY, oUrl
+
+	; Return the JSON
+	RETURN, serverJSONResult
+END
+
 ; IDL HTTP POST UTILITY FUNCTION
 FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 
@@ -1615,8 +1673,10 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
   oUrl = OBJ_NEW('IDLnetUrl')
   sEncodedLink = oUrl->URLEncode(sFileLink)
   sEncodedBB = oUrl->URLEncode(sBoundingBox)
+  
+  sProvider = "ONDA"
 
-  sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+  sQuery = "sFileUrl=" + sEncodedLink + "&sProvider="+sProvider+"&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
   
   UrlPath = UrlPath + '?' + sQuery
   
@@ -2153,9 +2213,447 @@ FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
 	; API url
 	UrlPath = '/wasdiwebserver/rest/process/payload?processObjId='+sProcessId
 
-	; Get the list of products
+	; Call url
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 	
 	; Return the process status
 	RETURN, wasdiResult
+END
+
+
+FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+	IF (sProcessId EQ !NULL) THEN BEGIN
+		RETURN, ""
+	END
+	
+	; API url
+	UrlPath = '/wasdiwebserver/rest/process/payload?processObjId='+sProcessId
+
+	; Call url
+	wasdiResult = WASDIHTTPGETNOJSON(UrlPath, workspaceurl)
+	
+	; Return the process status
+	RETURN, wasdiResult
+END
+
+;Set the sub pid
+;param sProcessId: Id of the process
+;param iSubPid: PID of the physical process
+;return: the updated status as a String or '' if there was any problem
+FUNCTION WASDISETSUBPID, sProcessId, iSubPid
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+	IF (sProcessId EQ !NULL) THEN BEGIN
+		RETURN, ""
+	END
+	
+	; API url
+	UrlPath = '/wasdiwebserver/rest/process/setsubpid?sProcessId='+sProcessId+'&subpid='+iSubPid
+
+	; Call url
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
+	
+	sNewStatus = GETVALUEBYKEY(wasdiResult, 'status')
+	
+	; Return the process status
+	RETURN, sNewStatus
+END
+
+
+
+; ASYNCH Import EO Image in WASDI
+FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  sessioncookie = token
+
+  ; API url
+  UrlPath = '/wasdiwebserver/rest/filebuffer/download'
+  
+  sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
+  sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+
+  ; Create a new url object
+  oUrl = OBJ_NEW('IDLnetUrl')
+  sEncodedLink = oUrl->URLEncode(sFileLink)
+  sEncodedBB = oUrl->URLEncode(sBoundingBox)
+
+  sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+  
+  UrlPath = UrlPath + '?' + sQuery
+  
+  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+   
+  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+  
+  sProcessID = ''
+  
+  ; get the process id
+  IF sResponse then BEGIN
+    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+    sProcessID=sValue
+  ENDIF
+  
+  RETURN, sProcessID
+END
+
+; Execute a WASDI PROCESSOR
+FUNCTION WASDIEXECUTEPROCESSOR, sProcessorName, aoParameters
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	sessioncookie = token
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/processors/run?workspace='+activeworkspace+'&name='+sProcessorName+'&encodedJson='
+
+	; Generate input file names JSON array
+	sParamsJSON = '{'
+
+	; For each input name
+	FOREACH sKey , aoParameters.Keys() DO BEGIN
+
+		sParamsJSON = sParamsJSON + '"' + sKey + '":'
+		
+		sValue = aoParameters[sKey]
+		
+		IF (sValue NE !NULL) THEN BEGIN
+			sParamsJSON = sParamsJSON + '"' + sValue + '" , '
+		END ELSE BEGIN
+			sParamsJSON = sParamsJSON + '"" , '
+		END
+		
+	END
+
+	sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+	sParamsJSON = sParamsJSON + '}'
+	
+	IF (verbose EQ 1) THEN BEGIN
+		print, 'Parameter JSON ', sParamsJSON
+	END
+	
+	;Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+	sEncodedParametersJSON = oUrl->URLEncode(sParamsJSON)
+
+	UrlPath = UrlPath + sEncodedParametersJSON
+
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	sProcessID = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
+	
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID ne '' then BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF  
+
+	RETURN, wasdiResult	
+END
+
+
+; Create a Mosaic from a list of input images
+FUNCTION WASDIASYNCHMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  sessioncookie = token
+
+
+  ; API url
+  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+ 
+  ; Generate input file names JSON array
+  sInputFilesJSON = '['
+ 
+  ; For each input name
+  FOR i=0,n_elements(asInputFileNames)-1 DO BEGIN
+   
+    sInputName = asInputFileNames[i]
+	; wrap with '
+	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
+	
+	; check of is not the last one
+   IF i lt n_elements(asInputFileNames)-1 then BEGIN
+	  ; add ,
+      sInputFilesJSON = sInputFilesJSON + ','
+    ENDIF
+  ENDFOR
+ 
+  ; close the array
+  sInputFilesJSON = sInputFilesJSON + ']'
+ 
+  IF (verbose eq '1') THEN BEGIN
+	print, 'Input Files JSON ', sInputFilesJSON
+  END
+ 
+  sOutputFormat='GeoTIFF'
+  IF (STRMATCH(sOutputFile, '*.tif', /FOLD_CASE) EQ 1) THEN BEGIN
+	sOutputFormat='GeoTIFF'
+  END ELSE IF (STRMATCH(sOutputFile, '*.dim', /FOLD_CASE) EQ 1)  THEN BEGIN
+	sOutputFormat='BEAM-DIMAP'
+  END
+ 
+  ; compose the full MosaicSetting JSON View Model
+  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '"'
+  
+  if (sNoDataValue NE !NULL) THEN BEGIN
+	sMosaicSettingsString = sMosaicSettingsString + ', "noDataValue":' + sNoDataValue
+  END
+  
+  if (sInputIgnoreValue NE !NULL) THEN BEGIN
+	sMosaicSettingsString = sMosaicSettingsString + ', "inputIgnoreValue":' + sInputIgnoreValue
+  END  
+  
+  sMosaicSettingsString = sMosaicSettingsString + ' }'
+ 
+  IF (verbose eq '1') THEN BEGIN
+	print, 'MOSAIC SETTINGS JSON ' , sMosaicSettingsString
+	print, 'URL: ', UrlPath
+  END
+
+  wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString, !NULL)
+ 
+  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+ 
+  sProcessID = ''
+ 
+  ; get the process id
+  IF sResponse then BEGIN
+    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+    sProcessID=sValue
+  ENDIF
+  
+  RETURN, sProcessID
+END
+
+; Adds a new product to the Workspace in WASDI
+FUNCTION WASDIASYNCHADDFILETOWASDI, sFileName
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+	IF (isonserver EQ '0') THEN BEGIN
+
+		; API url
+		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
+
+		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
+
+		; check bool response
+		sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
+
+		sProcessId = ""
+
+		; get the string value
+		IF sResponse THEN BEGIN
+			sValue = GETVALUEBYKEY (wasdiResult, 'stringValue')
+			sProcessID=sValue
+		ENDIF
+
+		RETURN, sProcessID
+	END ELSE BEGIN
+		RETURN, '';
+	END 
+END
+
+
+
+
+; IDL HTTP POST UTILITY FUNCTION
+FUNCTION WASDIHTTPPOSTFILE, sUrlPath, sFileName, sHostName
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	
+	IF (sUrlPath EQ !NULL) THEN BEGIN
+		print, 'Url Path is null, return'
+		RETURN, !NULL
+	END
+	
+	IF (sHostName EQ !NULL) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END	
+	
+	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+		sHostName = '217.182.93.57'
+	END		
+
+	sessioncookie = token
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+
+	; This is an http transaction
+	oUrl->SetProperty, URL_SCHEME = 'http'
+
+	; Use the http server string
+	oUrl->SetProperty, URL_HOSTNAME = sHostName
+	
+	sFullProductPath = WASDIGETPATH(sFileName)
+	
+	iFileSize = (file_info(sFullProductPath)).size
+	print, iFileSize
+
+	; name of remote path
+	oUrl->SetProperty, URL_PATH = sUrlPath
+	oUrl->SetProperty, HEADERS = ['Content-Type: multipart/form-data','Content-Disposition: form-data','Content-Length: '+ STRTRIM(STRING(iFileSize),2),'x-session-token: '+sessioncookie]
+	
+	IF (verbose EQ '1') THEN BEGIN
+		print, 'WASDIHTTPPOSTFILE Url ', sUrlPath
+	END  
+
+	print, 'sFullProductPath = ' + sFullProductPath
+
+	; CALL THE HTTP POST URL WITH BODY
+	serverJSONResult = oUrl->Put(sFullProductPath, /POST, /STRING_ARRAY)
+	
+	print, 'serverJSONResult = ' + serverJSONResult
+
+	; Close the connection to the remote server, and destroy the object
+	oUrl->CloseConnections
+	OBJ_DESTROY, oUrl
+
+	RETURN, serverJSONResult
+END
+
+
+; Adds a new product to the Workspace in WASDI
+FUNCTION WASDIUPLOADFILE, sFileName
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/product/uploadfilebylib?workspace='+activeworkspace+'&name='+sFileName
+	
+	print, 'UrlPath = ' + UrlPath
+	print, 'sFileName = ' + sFileName
+
+	wasdiResult = WASDIHTTPPOSTFILE(UrlPath, sFileName, workspaceurl)
+
+	RETURN, wasdiResult
+END
+
+
+;Imports a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
+;aoProducts: Array of product dictionary as returned by searchEOImages
+;sProvider: WASDI Data Provider. Use None for default 
+;return: execution status as an array of  STRINGs, one for each product in input. Can be CREATED, DONE, ERROR, STOPPED, WAITING, READY
+FUNCTION WASDIIMPORTPRODUCTLIST, aoEOImages
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+  sessioncookie = token
+  
+  IF (aoEOImages EQ !NULL) THEN BEGIN
+	RETURN, 'ERROR'
+  END
+  
+  asProcesses = []
+  
+  FOREACH oImage, aoEOImages DO BEGIN
+	sProcessId = WASDIASYNCHIMPORTEOIMAGE(oImage)
+	asProcesses = [asProcesses, sProcessId] 
+  END
+  
+  RETURN, WASDIWAITPROCESSES(asProcesses)
+END
+
+;Asynch Import a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
+;aoProducts: Array of product dictionary as returned by searchEOImages
+;sProvider: WASDI Data Provider. Use None for default 
+;return: array of the ProcessId of the Download Operations. An element can be "ERROR" if there was any problem
+FUNCTION WASDIASYNCHIMPORTPRODUCTLIST, aoEOImages
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+  sessioncookie = token
+  
+  IF (aoEOImages EQ !NULL) THEN BEGIN
+	RETURN, 'ERROR'
+  END
+  
+  asProcesses = []
+  
+  FOREACH oImage, aoEOImages DO BEGIN
+	sProcessId = WASDIASYNCHIMPORTEOIMAGE(oImage)
+	asProcesses = [asProcesses, sProcessId] 
+  END
+  
+  RETURN, asProcesses
+END
+
+
+;Copy a file from a workspace to the WASDI user's SFTP Folder
+;sFileName: FIle name (with extension, without path) to copy in the SFTP folder
+;bAsynch: True to return after the triggering, False to wait the process to finish
+;return: status. An empty string is returned in case of failure    
+FUNCTION WASDICOPYFILETOSFTP, sFileName
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/catalog/copytosfpt?file='+sFileName+'&workspace='+activeworkspace
+	
+	IF (isonserver EQ '1') THEN BEGIN
+		UrlPath = UrlPath + "&parent="+myprocid
+	END
+
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
+
+	; check bool response
+	sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
+
+	sProcessId = ""
+
+	; get the string value
+	IF sResponse THEN BEGIN
+		sValue = GETVALUEBYKEY (wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	RETURN, WASDIWAITPROCESS(sProcessID)
+END
+
+
+;Get a paginated list of processes in the active workspace
+;iStartIndex: start index of the process (0 by default is the last one)
+;iEndIndex: end index of the process (20 by default)
+;sStatus: status filter. None by default. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY 
+;sOperationType: Operation Type Filter. None by default. Can be RUNPROCESSOR, RUNIDL, RUNMATLAB, INGEST, DOWNLOAD, GRAPH, DEPLOYPROCESSOR
+;sName: Name filter. The name meaning depends by the operation type. None by default. For RUNPROCESSOR, RUNIDL and RUNMATLAB is the name of the application
+FUNCTION WASDIGETPROCESSESBYWORKSPACE, iStartIndex, iEndIndex, sStatus, sOperationType, sName
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	
+	IF (iStartIndex EQ !NULL) THEN BEGIN
+		iStartIndex = 0
+	END
+	
+	IF (iEndIndex EQ !NULL) THEN BEGIN
+		iEndIndex = 20
+	END
+	
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/process/byws?sWorkspaceId='+activeworkspace + '&startindex='+STRTRIM(STRING(iStartIndex),2) + '&endindex='+STRTRIM(STRING(iEndIndex),2)
+	
+	IF (sStatus NE !NULL) THEN BEGIN
+		UrlPath = UrlPath + '&status='+sStatus
+	END
+
+	IF (sOperationType NE !NULL) THEN BEGIN
+		UrlPath = UrlPath + '&operationType='+sOperationType
+	END
+
+	IF (sName NE !NULL) THEN BEGIN
+		UrlPath = UrlPath + '&namePattern='+sName
+	END
+
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
+
+	; check bool response
+	sResponse = GETVALUEBYKEY (wasdiResult, 'boolValue')
+
+	RETURN, sResponse
 END
