@@ -127,28 +127,44 @@ public abstract class DiasQueryTranslator {
 		return sQuery;
 	}
 
+	protected String getFreeTextSearch(String sQuery) {
+		//0. footprint not at the beginning
+		//1. no footprint and beginPosition not at the beginning
+		String sFootprint = " AND ( footprint";
+		int iEndOfPrefix = sQuery.indexOf(sFootprint);
+		if(iEndOfPrefix < 0) {
+			//then maybe no footprint has been specified
+			iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
+		}
+		if(iEndOfPrefix < 0) {
+			//no free text, return
+			return null;
+		}
+		return sQuery.substring(0, iEndOfPrefix);
+	}
+
 	protected String convertRanges(String sQuery) {
 		return sQuery;
 	}
-	
-	
+
+
 	protected abstract String parseTimeFrame(String sQuery);
 	protected abstract String parseFootPrint(String sQuery);
-	
+
 	/**
 	 * Convert the textual WASDI client Query in a View Mode
 	 * @param sQuery
 	 * @return
 	 */
 	protected QueryViewModel parseWasdiClientQuery(String sQuery) {
-		
+
 		QueryViewModel oResult = new QueryViewModel();
-		
+
 		try {
-			
+
 			// Prepare the text that is uniform			
 			sQuery = prepareQuery(sQuery);
-			
+
 			// Try to get offset
 			int iOffset = -1;
 			try {
@@ -156,10 +172,10 @@ public abstract class DiasQueryTranslator {
 			} catch (Exception oE) {
 				Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse offset: " + oE);
 			}
-			
+
 			oResult.offset = iOffset;
-			
-			
+
+
 			// Try to get limit
 			int iLimit = 10;
 			try {
@@ -167,11 +183,11 @@ public abstract class DiasQueryTranslator {
 			} catch (Exception oE) {
 				Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse limit: " + oE);
 			}
-			
+
 			oResult.limit = iLimit;
-			
+
 			// Try to get footprint
-			
+
 			try {
 				if(sQuery.contains("footprint")) {
 					String sIntro = "( footprint:\"intersects ( POLYGON ( ( ";
