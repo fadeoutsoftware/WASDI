@@ -6,9 +6,15 @@
             </div>
         </div>
     </div>
+    <!-- search textbox-->
+
+    <div class="ng-scope">
+        <input class="wasdi-input ng-valid ng-dirty ng-valid-parse ng-empty ng-touched" ng-model="searchText" placeholder="Filter WorkFlow Name..." style="margin-bottom: 15px;">
+    </div>
+
     <div class="workflows-container row-v4 mt-3 " ng-show="m_oController.m_aoWorkflows.length > 0">
         <div class="col-v4-8 list-of-workflows">
-            <div class="well pointer-cursor-hover" ng-repeat="workflow in m_oController.getSingleInputWorkflow()"
+            <div class="well pointer-cursor-hover" ng-repeat="workflow in m_oController.getSingleInputWorkflow() | filter:searchText"
                  ng-class="{'selectedWorkflow': m_oController.m_oSelectedWorkflow  === workflow}"
                  ng-click="m_oController.selectBatchWorkflow(workflow)">
                 <div>
