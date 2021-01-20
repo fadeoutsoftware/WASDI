@@ -114,8 +114,7 @@ public class Utils {
 		String sReturn = sInputFileNameOnly;
 		
 		if(sInputFileNameOnly.contains(".")) {
-			int iLastDot = sInputFileNameOnly.lastIndexOf('.');
-			sReturn = sInputFileNameOnly.substring(0, iLastDot);
+			sReturn = sInputFileNameOnly.substring(0, sInputFileNameOnly.lastIndexOf('.'));
 		}
 
 		return sReturn;
