@@ -62,6 +62,21 @@ public class WasdiFileUtils {
 		}
 	}
 
+	public static String getFileNameWithoutExtensions(String sInputFile) {
+			if(Utils.isNullOrEmpty(sInputFile)) {
+				Utils.debugLog("Utils.GetFileNameExtension: input null or empty");
+				return sInputFile;
+			}
+			String sReturn = sInputFile;
+			//remove trailing dots
+			sReturn = sReturn.replaceAll("\\.$", "");
+			//remove two-letters, e.g., .gz, .7z
+			sReturn = sReturn.replaceAll("\\...$", "");			
+			//remove three-letters, e.g., .zip, .tar, .rar....
+			sReturn = sReturn.replaceAll("\\....", "");
+			return sReturn;
+		}
+
 	public static JSONObject loadJsonFromFile(String sFileFullPath) {
 		Preconditions.checkNotNull(sFileFullPath);
 

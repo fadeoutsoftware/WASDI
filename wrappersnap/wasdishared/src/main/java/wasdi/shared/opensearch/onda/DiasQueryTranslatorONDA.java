@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * @author c.nattero
@@ -174,7 +175,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			return null;
 		}
 		
-		sFreeText = Utils.getFileNameWithoutExtensions(sFreeText);
+		sFreeText = WasdiFileUtils.getFileNameWithoutExtensions(sFreeText);
 		
 		//remove trailing asterisk ('*')
 		if(sFreeText.endsWith("*")) {

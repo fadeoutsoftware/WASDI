@@ -134,30 +134,6 @@ public class Utils {
 		return sReturn;
 	}
 
-	public static String getFileNameWithoutExtensions(String sInputFile) {
-		if(isNullOrEmpty(sInputFile)) {
-			debugLog("Utils.GetFileNameExtension: input null or empty");
-			return sInputFile;
-		}
-		String sReturn = sInputFile;
-		
-		//remove two-letters, e.g., .gz, .7z
-		sReturn = sInputFile.replaceAll("\\...$", "");
-//		if(sReturn.charAt(sReturn.length()-3)=='.') {
-//			sReturn = sReturn.substring(0, sReturn.length()-3);
-//		}
-		
-		
-		//remove three-letters, e.g., .zip, .tar, .rar....
-		sReturn = sReturn.replaceAll("\\....", "");
-//		if(sReturn.charAt(sReturn.length()-4)=='.') {
-//			sReturn = sReturn.substring(0, sReturn.length()-4);
-//		}
-		
-		
-		return sReturn;
-	}
-	
 	public static void fixUpPermissions(Path destPath) throws IOException {
 		Stream<Path> files = Files.list(destPath);
 		files.forEach(path -> {
