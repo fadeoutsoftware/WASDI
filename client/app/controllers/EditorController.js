@@ -114,6 +114,8 @@ var EditorController = (function () {
         this.m_aoProductsLayersIn3DMapArentGeoreferenced = [];
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
+        // add the GeoSearch plugin bar
+        oMapService.initGeoSearchPluginForOpenStreetMap({"position":'bottomRight'});
         oMapService.removeLayersFromMap();
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');

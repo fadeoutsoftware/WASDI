@@ -536,7 +536,7 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+	public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user
@@ -589,7 +589,7 @@ public class ProductResource {
 		byte[] ayBytes = new byte[1024];
 		
 		try (OutputStream oOutStream = new FileOutputStream(oOutputFilePath)) {
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+			while ((iRead = oFileInputStream.read(ayBytes)) != -1) {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 			oOutStream.flush();
@@ -629,18 +629,18 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfilebylib")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+	public Response uploadFileByLib(@FormDataParam("file") InputStream oFileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user 
 		if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) { 
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
+			Utils.debugLog("ProductResource.uploadFileByLib( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
 			return Response.status(400).build();
 		}
 		
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
+			Utils.debugLog("ProductResource.uploadFileByLib( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
 			return Response.status(401).build();
 		}
 
@@ -654,7 +654,7 @@ public class ProductResource {
 		
 		// If workspace is not found in DB returns bad request
 		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
+			Utils.debugLog("ProductResource.uploadFileByLib( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
 			return Response.status(403).build();
 		}
 
@@ -678,7 +678,7 @@ public class ProductResource {
 			byte[] ayBytes = new byte[1024];
 			
 			try (OutputStream oOutStream = new FileOutputStream(oOutputFilePath)) {
-				while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				while ((iRead = oFileInputStream.read(ayBytes)) != -1) {
 					oOutStream.write(ayBytes, 0, iRead);
 				}
 				oOutStream.flush();
@@ -688,7 +688,7 @@ public class ProductResource {
 			return Response.ok().build();			
 		}
 		catch (Exception e) {
-			Utils.debugLog("ProductResource.uploadfile: " + e);
+			Utils.debugLog("ProductResource.uploadFileByLib: " + e);
 			return Response.status(500).build();
 		}
 	}
