@@ -53,9 +53,6 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
 	 * 
 	 * translates from WASDI query (OpenSearch) to OpenData format used by ONDA DIAS
-	 * 
-	 * https://github.com/fadeoutsoftware/WASDI/issues/18
-	 * 
 	 */
 	@Override
 	protected String translate(String sQueryFromClient) {
@@ -70,7 +67,12 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 		//TODO refactor using QueryTranslationParser
 
-		sTmp += parseSentinel1(sQuery);
+		sTmp = parseFreeText(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			sResult += sTmp;
+		}
+		
+		sTmp = parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			sResult += sTmp;
 		}
@@ -116,14 +118,14 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			sResult += sTmp;
 		}
 
-		String sAdditional = parseAdditionalQuery(sQuery);
-		if(!Utils.isNullOrEmpty(sAdditional)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult = "( " + sResult + " ) AND ";
-				//sResult += " OR ";
-			}
-			sResult += sAdditional;
-		}
+//		String sAdditional = parseAdditionalQuery(sQuery);
+//		if(!Utils.isNullOrEmpty(sAdditional)) {
+//			if(!Utils.isNullOrEmpty(sResult)) {
+//				sResult = "( " + sResult + " ) AND ";
+//				//sResult += " OR ";
+//			}
+//			sResult += sAdditional;
+//		}
 
 		if(!Utils.isNullOrEmpty(sResult)) {
 			sResult = "( " + sResult + " )";
@@ -164,6 +166,24 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 
 		return sResult;
+	}
+
+	protected String parseFreeText(String sQuery) {
+		String sFreeText = getFreeTextSearch(sQuery);
+		if(Utils.isNullOrEmpty(sFreeText)) {
+			return null;
+		}
+		
+		sFreeText = Utils.getFileNameWithoutExtensions(sFreeText);
+		
+		//remove trailing asterisk ('*')
+		if(sFreeText.endsWith("*")) {
+			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
+		}
+		
+		//add an asterisk in case the string passed were missing the initial part
+		//(note: ONDA also work if the initial part is present)
+		return "*" + sFreeText;
 	}
 
 	protected String parseCopernicusMarine(String sQuery) {
