@@ -283,4 +283,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
 
             return true;
         };
+
+        this.getProcessorStatistics = function(sProcessorName)
+        {
+            let sUrl = this.APIURL;
+            return this.m_oHttp.get(sUrl + '/process/appstats?processorName='+sProcessorName);
+        };        
 }]);
