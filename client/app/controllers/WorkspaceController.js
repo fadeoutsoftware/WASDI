@@ -203,16 +203,16 @@ var WorkspaceController = (function() {
         this.m_bIsVisibleFiles = true;
 
         this.m_oProductService.getProductLightListByWorkspace(oWorkspaceId).then(function (data, status) {
-            if(!utilsIsObjectNullOrUndefined(data))
+            if(!utilsIsObjectNullOrUndefined(data.data))
             {
                 for (var i =0; i<oController.m_aoProducts.length; i++) {
                     oController.m_oGlobeService.removeEntity(oController.m_aoProducts[i].oRectangle)
                 }
 
                 oController.m_aoProducts = [];
-                for(var iIndex = 0; iIndex < data.length; iIndex++)
+                for(var iIndex = 0; iIndex < data.data.length; iIndex++)
                 {
-                    oController.m_aoProducts.push(data[iIndex]);
+                    oController.m_aoProducts.push(data.data[iIndex]);
                 }
                 oController.m_bIsOpenInfo = true;
                 oController.m_oWorkspaceSelected = oWorkspace;
