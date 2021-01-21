@@ -149,26 +149,26 @@ var CatalogController = (function() {
     CatalogController.prototype.GetCategories = function()
     {
         var oController = this;
-        this.m_oCatalogService.getCategories().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oCatalogService.getCategories().then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                if(data.length > 0)
+                if(data.data.length > 0)
                 {
-                    var iNumberOfCategories = data.length;
+                    var iNumberOfCategories = data.data.length;
                     for(var iIndexCategory = 0;iIndexCategory < iNumberOfCategories; iIndexCategory++)
                     {
                         var isSelected = false;
                         if(iIndexCategory === 0) isSelected = true;
                         var oCategory = {
-                            name:data[iIndexCategory],
+                            name:data.data[iIndexCategory],
                             isSelected:isSelected,
-                            friendlyName:oController.getFriendlyOperationName(data[iIndexCategory])
+                            friendlyName:oController.getFriendlyOperationName(data.data[iIndexCategory])
                         };
                         oController.m_asCategories.push(oCategory);
                     }
                 }
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET CATEGORIES");
         });
     };
@@ -190,14 +190,14 @@ var CatalogController = (function() {
     //     sFrom += "00";
     //     sTo += "00";
     //
-    //     this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
+    //     this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).then(function (data) {
     //         if(utilsIsObjectNullOrUndefined(data) == false)
     //         {
     //             oController.m_aoEntries = data;
     //             oController.drawEntriesBoundariesInMap();
     //         }
     //         oController.m_bIsLoadedTable = true;
-    //     }).error(function (error) {
+    //     },function (error) {
     //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SEARCHING THE CATALOGUE");
     //         oController.m_bIsLoadedTable = true;
     //     });
@@ -259,10 +259,10 @@ var CatalogController = (function() {
         }
         var oController = this;
         //get entries
-        this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoEntries = oController.m_aoEntries.concat(data);
+                oController.m_aoEntries = oController.m_aoEntries.concat(data.data);
                 oController.drawEntriesBoundariesInMap();
             }
 
@@ -272,7 +272,7 @@ var CatalogController = (function() {
                 oController.m_bIsLoadedTable = true;
             }
             // oController.m_bIsLoadedTable = true;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SEARCHING THE CATALOGUE");
             oController.m_iNumberOfEntryRequest--;
             if(oController.m_iNumberOfEntryRequest === 0)
@@ -312,11 +312,11 @@ var CatalogController = (function() {
             sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
         }
 
-        this.m_oCatalogService.downloadEntry(oJson, sUrl).success(function (data, status, headers, config) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oCatalogService.downloadEntry(oJson, sUrl).then(function (data, status, headers, config) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 //var FileSaver = require('file-saver');
-                var blob = new Blob([data], {type: "application/octet-stream"});
+                var blob = new Blob([data.data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
                 // var a = document.createElement("a"),
                 //     url = URL.createObjectURL(blob);
@@ -331,7 +331,7 @@ var CatalogController = (function() {
             }
             oController.m_bIsDownloadingProduct = false;
             oController.m_sProductNameInDownloadingStatus = "";
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");
             oController.m_bIsDownloadingProduct = false;
             oController.m_sProductNameInDownloadingStatus = "";
@@ -452,7 +452,7 @@ var CatalogController = (function() {
             return false;
         }
 
-        this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,sWorkspaceId).success(oCallback).error(oErrorCallback);
+        this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,sWorkspaceId).then(oCallback,oErrorCallback);
 
         return true;
     };

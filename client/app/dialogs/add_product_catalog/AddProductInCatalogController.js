@@ -45,19 +45,19 @@ var AddProductInCatalogController = (function() {
     AddProductInCatalogController.prototype.getWorkspaces = function()
     {
         var oController = this;
-        this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.m_aoWorkspaceList = data;
+                    oController.m_aoWorkspaceList = data.data;
                     oController.m_aWorkspacesName = oController.getWorkspacesNameInWorkspaceList();
                 }
             }
-        }).error(function (data,status) {
+        },(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
-        });
+        }));
     };
 
     AddProductInCatalogController.prototype.getWorkspacesNameInWorkspaceList = function()
@@ -79,11 +79,11 @@ var AddProductInCatalogController = (function() {
         {
             var aWorkspaceId = this.m_aoSelectedWorkspaces[iIndexSelectedWorkspace].split("Id:");
             var sProductFileNameViewModel = this.m_aoProduct.productViewModel.fileName;
-            this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,aWorkspaceId[1]).success(function (data) {
+            this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,aWorkspaceId[1]).then(function (data) {
                 console.log("prod added");
-            }).error(function (error) {
+            },(function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN ADD PRODUCT IN WORKSPACES");
-            });
+            }));
         }
     };
 

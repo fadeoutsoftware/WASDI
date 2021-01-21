@@ -46,7 +46,7 @@ var UploadFileController = (function() {
         this.m_bIsUploading = true;
         var oController = this;
         this.m_oProductService.uploadFile(this.m_sWorkspaceId,oBody,this.m_oFile[0].name)
-            .success(function(data,status){
+            .then(function(data,status){
                 if(status !== 200)
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD FILE");
@@ -58,13 +58,12 @@ var UploadFileController = (function() {
                 }
                 oController.cleanDragAndDrop();
                 oController.m_bIsUploading = false;
-            })
-            .error(function(data){
+            },(function(data){
                 oController.m_bIsUploading = false;
                 oController.cleanDragAndDrop();
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD FILE");
 
-            });
+            }));
 
         return true;
     }

@@ -1121,22 +1121,22 @@ var EditorController = (function () {
 
         if (utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) return;
 
-        this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+        this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).then(function (data, status) {
 
-            if (utilsIsObjectNullOrUndefined(data) == false) {
+            if (utilsIsObjectNullOrUndefined(data.data) == false) {
 
                 oController.m_aoProducts = []
 
                 //push all products
-                for (var iIndex = 0; iIndex < data.length; iIndex++) {
+                for (var iIndex = 0; iIndex < data.data.length; iIndex++) {
 
                     //check if friendly file name isn't null
-                    if (utilsIsObjectNullOrUndefined(data[iIndex].productFriendlyName) == true) {
-                        data[iIndex].productFriendlyName = data[iIndex].name;
+                    if (utilsIsObjectNullOrUndefined(data.data[iIndex].productFriendlyName) == true) {
+                        data.data[iIndex].productFriendlyName = data.data[iIndex].name;
                     }
 
                     // Add the product to the list
-                    oController.m_aoProducts.push(data[iIndex]);
+                    oController.m_aoProducts.push(data.data[iIndex]);
                 }
 
                 // i need to make the tree after the products are loaded
@@ -1154,9 +1154,9 @@ var EditorController = (function () {
 
 
             }
-        }).error(function (data, status) {
+        },(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
-        });
+        }));
     };
 
     /**
@@ -1167,10 +1167,10 @@ var EditorController = (function () {
 
         var oController = this;
 
-        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-                    oController.m_oConstantsService.setActiveWorkspace(data);
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+            if (data.data != null) {
+                if (data.data != undefined) {
+                    oController.m_oConstantsService.setActiveWorkspace(data.data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
                     oController.getProductListByWorkspace();
@@ -1182,9 +1182,9 @@ var EditorController = (function () {
                     }
                 }
             }
-        }).error(function (data, status) {
+        },(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITOR')
-        });
+        }));
 
         return true;
     };
@@ -1237,34 +1237,34 @@ var EditorController = (function () {
         if (this.m_bIsActiveGeoraphicalMode) {
 
             // Geographical Mode On: geoserver publish band
-            this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
+            this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).then(function (data, status) {
 
                 if (!bAlreadyPublished) {
                     var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
                     utilsVexCloseDialogAfter(4000, oDialog);
                 }
 
-                if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
+                if (!utilsIsObjectNullOrUndefined(data.data) && data.data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.data.messageResult)) {
                     /*if the band was published*/
 
-                    if (data.messageCode === "PUBLISHBAND") {
+                    if (data.data.messageCode === "PUBLISHBAND") {
                         // Already published: we already have the View Model
-                        oController.receivedPublishBandMessage(data);
+                        oController.receivedPublishBandMessage(data.data);
                     } else {
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         // It is publishing: we will receive Rabbit Message
-                        if (data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
+                        if (data.data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
                     }
 
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
                     oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
                 }
-            }).error(function (data, status) {
+            },(function (data, status) {
                 console.log('publish band error');
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
                 oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
-            });
+            }));
         } else {
 
             // Get Dimension of the Canvas
@@ -1351,21 +1351,21 @@ var EditorController = (function () {
         var oController = this;
         this.m_bIsLoadedPreviewBandImage = false;
 
-        this.m_oFilterService.getProductBand(oBody, workspaceId).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-                    var blob = new Blob([data], {type: "octet/stream"});
+        this.m_oFilterService.getProductBand(oBody, workspaceId).then(function (data, status) {
+            if (data.data != null) {
+                if (data.data != undefined) {
+                    var blob = new Blob([data.data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sPreviewUrlSelectedBand = objectUrl;
                     oController.m_bIsLoadedPreviewBandImage = true;
                 }
             }
-        }).error(function (data, status) {
+        },(function (data, status) {
             // Clear the editor
             oController.clearImageEditor();
             oController.m_bIsLoadedPreviewBandImage = true;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND PREVIEW IMAGE ');
-        });
+        }));
 
         return true;
     };
@@ -1388,17 +1388,17 @@ var EditorController = (function () {
         if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
             sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
         }
-        this.m_oFilterService.getProductBand(oBody, workspaceId, sUrl).success(function (data, status) {
+        this.m_oFilterService.getProductBand(oBody, workspaceId, sUrl).then(function (data, status) {
 
             // Anyway this is not more a zoom.
             oController.m_bIsEditorZoomingOnExistingImage = false;
             // Stop the waiter
             oController.m_bIsLoadedViewBandImage = true;
 
-            if (data != null) {
-                if (data != undefined) {
+            if (data.data != null) {
+                if (data.data != undefined) {
                     // Create the link to the stream
-                    var blob = new Blob([data], {type: "octet/stream"});
+                    var blob = new Blob([data.data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sViewUrlSelectedBand = objectUrl;
 
@@ -1416,7 +1416,7 @@ var EditorController = (function () {
                     // oController.getProductColorManipulation(oBody.productFileName,oBody.bandName,true,workspaceId);
                 }
             }
-        }).error(function (data, status) {
+        },(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
             // Set the node as selected
             var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
@@ -1429,7 +1429,7 @@ var EditorController = (function () {
             oController.m_bIsEditorZoomingOnExistingImage = false;
             // Stop the waiter
             oController.m_bIsLoadedViewBandImage = true;
-        });
+        }));
 
         return true;
     };
@@ -2101,7 +2101,7 @@ var EditorController = (function () {
      * @param oFunctionError
      */
     EditorController.prototype.getApplyOrbit = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
+        oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).then(oFunctionSuccess,(oFunctionError));
     };
     /**
      * getMultilooking
@@ -2114,7 +2114,7 @@ var EditorController = (function () {
      * @param oFunctionError
      */
     EditorController.prototype.getMultilooking = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
+        oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).then(oFunctionSuccess,(oFunctionError));
     };
     /**
      * getRadiometricCalibration
@@ -2127,7 +2127,7 @@ var EditorController = (function () {
      * @param oFunctionError
      */
     EditorController.prototype.getRadiometricCalibration = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
+        oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).then(oFunctionSuccess,(oFunctionError));
     };
     /**
      * getRangeDopplerTerrainCorrection
@@ -2140,11 +2140,11 @@ var EditorController = (function () {
      * @param oFunctionError
      */
     EditorController.prototype.getRangeDopplerTerrainCorrection = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
+        oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).then(oFunctionSuccess,(oFunctionError));
     };
 
     EditorController.prototype.getNDVI = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
+        oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).then(oFunctionSuccess,(oFunctionError));
     };
 
     /**
@@ -2263,20 +2263,20 @@ var EditorController = (function () {
                 oFinalBand.rangeMasks = oResult.body.rangeMasks;
                 oFinalBand.mathMasks = oResult.body.mathMasks;
                 oController.m_bIsLoadedViewBandImage = false;
-                oController.m_oFilterService.getProductBand(oResult.body, oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-                    if (data != null) {
-                        if (data != undefined) {
+                oController.m_oFilterService.getProductBand(oResult.body, oController.m_oActiveWorkspace.workspaceId).then(function (data, status) {
+                    if (data.data != null) {
+                        if (data.data != undefined) {
                             // Create the link to the stream
-                            var blob = new Blob([data], {type: "octet/stream"});
+                            var blob = new Blob([data.data], {type: "octet/stream"});
                             var objectUrl = URL.createObjectURL(blob);
                             oController.m_sViewUrlSelectedBand = objectUrl;
                         }
                     }
                     oController.m_bIsLoadedViewBandImage = true;
-                }).error(function (data, status) {
+                },(function (data, status) {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
                     oController.m_bIsLoadedViewBandImage = true;
-                });
+                }));
 
 
             });
@@ -2466,11 +2466,11 @@ var EditorController = (function () {
                     // oController.m_oScope.Result = oResult;
                     oController.m_oSnapOperationService.ApplyOrbit(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                         oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
-                        .success(function (data) {
+                        .then(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
+                        },(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
-                    });
+                    }));
                 }
 
                 return true;
@@ -2567,11 +2567,11 @@ var EditorController = (function () {
                     // oController.m_oScope.Result = oResult;
                     oController.m_oSnapOperationService.Calibrate(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                         oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
-                        .success(function (data) {
+                        .then(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
+                        },(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RADIOMETRIC CALIBRATION DOESN'T WORK");
-                    });
+                    }));
                 }
                 return true;
             });
@@ -2628,19 +2628,19 @@ var EditorController = (function () {
                 for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
                     oController.m_oSnapOperationService.Multilooking(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                         oController.m_oActiveWorkspace.workspaceId, oResult[[iIndexProduct]].options)
-                        .success(function (data) {
+                        .then(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
+                        },(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
-                    });
+                    }));
                 }
 
                 return true;
                 // oController.m_oScope.Result = oResult;
                 // oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                //     .success(function (data) {
+                //     .then(function (data) {
                 //
-                //     }).error(function (error) {
+                //     },(function (error) {
                 //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
                 // });
                 // return true;
@@ -2698,17 +2698,17 @@ var EditorController = (function () {
                 for (var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts; iIndexSelectedProduct++) {
                     var oProduct = oResult[iIndexSelectedProduct];
                     oController.m_oSnapOperationService.NDVI(oProduct.sourceFileName, oProduct.destinationFileName, oController.m_oActiveWorkspace.workspaceId, oProduct.options)
-                        .success(function (data) {
+                        .then(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
+                        },(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
-                    });
+                    }));
                 }
                 // oController.m_oScope.Result = oResult;
                 // oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                //     .success(function (data) {
+                //     .then(function (data) {
                 //         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                //     }).error(function (error) {
+                //     },(function (error) {
                 //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
                 // });
                 return true;
@@ -2798,11 +2798,11 @@ var EditorController = (function () {
                     // oController.m_oScope.Result = oResult;
                     oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                         oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
-                        .success(function (data) {
+                        .then(function (data) {
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
+                        },(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RANGE DOPPLER TERRATIN CORRECTION DOESN'T WORK");
-                    });
+                    }));
                 }
                 return true;
             });
@@ -2979,7 +2979,7 @@ var EditorController = (function () {
         oFinalBand.rangeMasks = oResult.body.rangeMasks;
         oFinalBand.mathMasks = oResult.body.mathMasks;
         oController.m_bIsLoadedViewBandImage = false;
-        oController.m_oFilterService.getProductBand(oResult.body, oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+        oController.m_oFilterService.getProductBand(oResult.body, oController.m_oActiveWorkspace.workspaceId).then(function (data, status) {
             if (data != null) {
                 if (data != undefined) {
                     // Create the link to the stream
@@ -3302,7 +3302,7 @@ var EditorController = (function () {
         }
         var oController = this;
         this.m_bIsLoadingColourManipulation = true;
-        this.m_oSnapOperationService.getProductColorManipulation(sFile, sBand, bAccurate, sWorkspaceId).success(function (data, status) {
+        this.m_oSnapOperationService.getProductColorManipulation(sFile, sBand, bAccurate, sWorkspaceId).then(function (data, status) {
             if (data != null) {
                 if (data != undefined) {
                     // oController.m_oColorManipulation = data;
@@ -3314,10 +3314,10 @@ var EditorController = (function () {
                 }
             }
             oController.m_bIsLoadingColourManipulation = false;
-        }).error(function (data, status) {
+        },(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>PRODUCT COLOR MANIPULATION ');
             oController.m_bIsLoadingColourManipulation = false;
-        });
+        }));
 
         return true;
     };
@@ -3661,11 +3661,11 @@ var EditorController = (function () {
 
                                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
-                                                    oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
+                                                    oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
-                                                    }).error(function (error) {
+                                                    },(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                                    });
+                                                    }));
                                                 }
                                             });
                                         }
@@ -3828,11 +3828,11 @@ var EditorController = (function () {
                                                     if (value.geoserver == 'on') bDeleteLayer = true;
                                                     this.temp = $node;
                                                     var that = this;
-                                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
+                                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands,that.temp.children_d);
-                                                    }).error(function (error) {
+                                                    },(function (error) {
                                                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                                    });
+                                                    }));
                                                 }
                                             });
                                         }
@@ -3929,14 +3929,14 @@ var EditorController = (function () {
             sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
         }
 
-        this.m_oCatalogService.downloadEntry(oJson, sUrl).success(function (data, status, headers, config) {
+        this.m_oCatalogService.downloadEntry(oJson, sUrl).then(function (data, status, headers, config) {
             if (utilsIsObjectNullOrUndefined(data) == false) {
-                var blob = new Blob([data], {type: "application/octet-stream"});
+                var blob = new Blob([data.data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
             }
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
-        });
+        }));
 
         return true;
     };

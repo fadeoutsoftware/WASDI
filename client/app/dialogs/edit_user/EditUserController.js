@@ -46,10 +46,10 @@ var EditUserController = (function() {
 
         this.m_bEditingPassword = true;
         this.m_oAuthService.changePassword(oJsonToSend)
-            .success(function (data) {
+            .then(function (data) {
                 if(utilsIsObjectNullOrUndefined(data) === false)
                 {
-                    if(data.boolValue ===  false)
+                    if(data.data.boolValue ===  false)
                     {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                     }
@@ -68,13 +68,12 @@ var EditUserController = (function() {
                 oController.m_bEditingPassword = false;
                 oController.cleanPasswordsInEditUserObject();
 
-            })
-            .error(function (error)
+            },(function (error)
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                 oController.m_bEditingPassword = false;
                 oController.cleanPasswordsInEditUserObject();
-            });
+            }));
     }
 
     EditUserController.prototype.changeUserInfo = function()
@@ -85,10 +84,10 @@ var EditUserController = (function() {
 
         this.m_bEditingUserInfo = true;
         this.m_oAuthService.changeUserInfo(oJsonToSend)
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) === false ||  data.userId !== "" )
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false ||  data.data.userId !== "" )
                 {
-                    if(data.boolValue ===  false)
+                    if(data.data.boolValue ===  false)
                     {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>IMPOSSIBLE TO CHANGE USER INFO");
                     }
@@ -96,8 +95,8 @@ var EditUserController = (function() {
                     {
                         var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED USER INFO");
                         utilsVexCloseDialogAfter(3000,oVexWindow);
-                        oController.m_oUser = data;
-                        oController.m_oConstantsService.setUser(data);//save in coockie
+                        oController.m_oUser = data.data;
+                        oController.m_oConstantsService.setUser(data.data);//save in cookie
                     }
 
 
@@ -109,13 +108,12 @@ var EditUserController = (function() {
                 oController.m_bEditingUserInfo = false;
                 oController.initializeEditUserInfo();
 
-            })
-            .error(function (error)
+            },(function (error)
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE USER INFO");
                 oController.m_bEditingUserInfo = false;
                 oController.initializeEditUserInfo();
-            });
+            }));
     }
 
     EditUserController.prototype.getPasswordsJSON = function()

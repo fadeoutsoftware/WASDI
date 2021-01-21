@@ -98,12 +98,13 @@ var MosaicController = (function() {
 
         this.m_oMosaicViewModel.sources = asSourceFiles;
 
-        this.m_oSnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel).success(function (data) {
+        this.m_oSnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel)
+            .then(function (data) {
             var oDialog = utilsVexDialogAlertBottomRightCorner("MOSAIC SCHEDULED<br>READY");
             utilsVexCloseDialogAfter(4000, oDialog);
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
-        });
+        }));
     }
     MosaicController.$inject = [
         '$scope',
