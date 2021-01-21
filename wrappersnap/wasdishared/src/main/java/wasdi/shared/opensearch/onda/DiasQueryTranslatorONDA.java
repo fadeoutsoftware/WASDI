@@ -169,6 +169,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sResult;
 	}
 
+	@Override
 	protected String parseFreeText(String sQuery) {
 		String sFreeText = getFreeTextSearch(sQuery);
 		if(Utils.isNullOrEmpty(sFreeText)) {
