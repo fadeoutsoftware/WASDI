@@ -142,6 +142,10 @@ public abstract class DiasQueryTranslator {
 		}
 		return sQuery.substring(0, iEndOfPrefix);
 	}
+	
+	protected String parseFreeText(String sQuery) {
+		return getFreeTextSearch(sQuery);
+	}
 
 	protected String convertRanges(String sQuery) {
 		return sQuery;
