@@ -175,21 +175,40 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			return null;
 		}
 
-		//remove trailing asterisk ('*')
-		if(sFreeText.endsWith("*")) {
+
+		//remove leading asterisks ('*')
+		while(sFreeText.startsWith("*")) {
+			sFreeText = sFreeText.substring(1);
+		}
+		//remove trailing asterisks ('*')
+		while(sFreeText.endsWith("*")) {
 			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
 		}
 
-		sFreeText = WasdiFileUtils.getFileNameWithoutExtensions(sFreeText);
+		String sOld = sFreeText;
+		sFreeText = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sFreeText);
 
-		//add an asterisk in case the string passed were missing the initial part
+		//this is a heuristic to understand if the filename has its tail:
+		//did it contain an extension?
+		//if yes, don't append an asterisk, the response will be faster 
+		//if not, it may be a file without the tail: append a trailing asterisk
+		boolean bAddAsterisk = sOld.equals(sFreeText); 
+
+		//again, remove trailing asterisks ('*')
+		while(sFreeText.endsWith("*")) {
+			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
+		}
+		
+		if(bAddAsterisk) {
+			sFreeText += "*";
+		}
+
+		//add an asterisk in front, in case the string passed were missing the initial part
 		//(note: ONDA also work if the initial part is present)
 		if(!sFreeText.startsWith("*")) {
 			sFreeText = "*" + sFreeText;
 		}
-		if(!sFreeText.endsWith("*")) {
-			sFreeText += "*";
-		}
+
 		return sFreeText;
 	}
 
@@ -524,59 +543,74 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	public static void main(String[] args) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		String[] asFullName = {
-				//three cases
-				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
-				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+		String[] asFullNameWO = {
 				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
-				
-				//name*
-				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
-				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
 				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*",
-				
-				//*name
-				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
-				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
 				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
-				
-				//*name*
-				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
-				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
 				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*"
 		}; 
 
-		for (String sFreeText : asFullName) {
+		for (String sFreeText : asFullNameWO) {
 			String sQuery = sFreeText + sSuffix;
 			String sResult = oDQT.parseFreeText(sQuery); 
 			if(!sResult.equals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*")) {
-				System.out.println("full name: failed translating: " + sFreeText + ", got: " + sResult);
+				System.out.println("full name without extension: failed translating: " + sFreeText + ", got: " + sResult);
 			}
 		}
 
-		String[] asNoHead = {
-				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
-				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+		String[] asFullNameW = {
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+		}; 
+
+		for (String sFreeText : asFullNameW) {
+			String sQuery = sFreeText + sSuffix;
+			String sResult = oDQT.parseFreeText(sQuery); 
+			if(!sResult.equals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423")) {
+				System.out.println("full name with extension: failed translating: " + sFreeText + ", got: " + sResult);
+			}
+		}
+
+		String[] asNoHeadWO = {
 				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
-				
-				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
-				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
 				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*",
-				
-				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
-				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
 				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
-				
-				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
-				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
 				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*"
 		};
 
-		for (String sFreeText : asNoHead) {
+		for (String sFreeText : asNoHeadWO) {
 			String sQuery = sFreeText + sSuffix;
 			String sResult = oDQT.parseFreeText(sQuery); 
 			if(!sResult.equals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*")) {
-				System.out.println("no head: failed translating: " + sFreeText + ", got: " + sResult);
+				System.out.println("no head without: failed translating: " + sFreeText + ", got: " + sResult);
+			}
+		}
+		
+		String[] asNoHeadW = {
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*"
+		};
+
+		for (String sFreeText : asNoHeadW) {
+			String sQuery = sFreeText + sSuffix;
+			String sResult = oDQT.parseFreeText(sQuery); 
+			if(!sResult.equals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423")) {
+				System.out.println("no head with: failed translating: " + sFreeText + ", got: " + sResult);
 			}
 		}
 
@@ -586,7 +620,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D",
 				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*"
 		};
-		
+
 		for (String sFreeText : asNoTail) {
 			String sQuery = sFreeText + sSuffix;
 			String sResult = oDQT.parseFreeText(sQuery); 
@@ -594,8 +628,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				System.out.println("no tail: failed translating: " + sFreeText + ", got: " + sResult);
 			}
 		}
-		
-		
+
+
 		String[] asNoHeadNoTail = {
 				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*",
 				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*",
