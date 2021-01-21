@@ -200,6 +200,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
 		}
 		
+
 		if(bAddAsterisk) {
 			sFreeText += "*";
 		}
