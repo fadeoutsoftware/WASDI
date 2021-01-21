@@ -213,20 +213,20 @@ var HomeController = (function() {
 
         this.m_bSuccess = false;
         this.m_bError = false;
-        this.m_oAuthService.signingUser(oUser).success(
+        this.m_oAuthService.signingUser(oUser).then(
 
             function (data,status) {
                 if(utilsIsObjectNullOrUndefined(data) !== true)
                 {
-                    if(data.boolValue === true)
+                    if(data.data.boolValue === true)
                     {
                         oController.m_bSuccess = true;
                     }
                     else
                     {
-                        if(utilsIsStrNullOrEmpty(data.stringValue) === false)
+                        if(utilsIsStrNullOrEmpty(data.data.stringValue) === false)
                         {
-                            oController.m_sMessageError = data.stringValue;
+                            oController.m_sMessageError = data.data.stringValue;
                         }
                         oController.m_bError = true;
 
@@ -239,10 +239,10 @@ var HomeController = (function() {
                 }
 
                 oController.m_bRegistering = false;
-            }).error(function (data,status) {
+            },(function (data,status) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 oController.m_bRegistering = false;
-        });
+        }));
 
         return true;
     }
@@ -306,7 +306,7 @@ var HomeController = (function() {
             return false;
         }
         var oController = this;
-        this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).success(
+        this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).then(
             function (data,status) {
                 // oController.callbackLogin(data, status,oController);
                 if(utilsIsObjectNullOrUndefined(data) !== true)
@@ -328,11 +328,11 @@ var HomeController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 }
-            }).error(function (data,status) {
+            },(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
 
-        });
+        }));
 
         return true;
     };

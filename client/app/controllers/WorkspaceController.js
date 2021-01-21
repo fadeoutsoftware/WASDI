@@ -79,20 +79,20 @@ var WorkspaceController = (function() {
 
         var oController = this;
 
-        this.m_oWorkspaceService.createWorkspace().success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.createWorkspace().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    var sWorkspaceId = data.stringValue;
+                    var sWorkspaceId = data.data.stringValue;
                     oController.openWorkspace(sWorkspaceId);
 
                 }
             }
-        }).error(function (data,status) {
+        },(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
-        });
+        }));
     };
 
 
@@ -101,10 +101,10 @@ var WorkspaceController = (function() {
         this.m_bOpeningWorkspace = true;
         var oController = this;
 
-        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
                     try {
                         oController.m_oRabbitStompService.subscribe(sWorkspaceId);
@@ -114,13 +114,13 @@ var WorkspaceController = (function() {
                     }
                     // oController.m_oRabbitStompService.subscribe(sWorkspaceId);
                     oController.m_oState.go("root.editor", { workSpace : sWorkspaceId });//use workSpace when reload editor page
-                    oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oConstantsService.setActiveWorkspace(data.data);
                 }
             }
-        }).error(function (data,status) {
+        },(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
-        });
+        }));
     }
 
     WorkspaceController.prototype.getWorkspaceInfoList = function () {
@@ -134,21 +134,21 @@ var WorkspaceController = (function() {
 
                 var oController = this;
 
-                this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
-                    if (data != null)
+                this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
+                    if (data.data != null)
                     {
-                        if (data != undefined)
+                        if (data.data != undefined)
                         {
-                            //data = []; // DEBUG
-                            oController.m_aoWorkspaceList = data;
+                            //data.data = []; // DEBUG
+                            oController.m_aoWorkspaceList = data.data;
                             oController.m_bIsLoading = false;
                         }
                     }
                     oController.m_bIsLoading = false;
-                }).error(function (data,status) {
+                },(function (data,status) {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
                     oController.m_bIsLoading = false;
-                });
+                }));
             }
         }
 
@@ -202,7 +202,7 @@ var WorkspaceController = (function() {
 
         this.m_bIsVisibleFiles = true;
 
-        this.m_oProductService.getProductLightListByWorkspace(oWorkspaceId).success(function (data, status) {
+        this.m_oProductService.getProductLightListByWorkspace(oWorkspaceId).then(function (data, status) {
             if(!utilsIsObjectNullOrUndefined(data))
             {
                 for (var i =0; i<oController.m_aoProducts.length; i++) {
@@ -228,10 +228,10 @@ var WorkspaceController = (function() {
             }
 
             oController.m_bLoadingWSFiles = false;
-        }).error(function (data,status) {
+        },(function (data,status) {
             oController.m_bLoadingWSFiles = false;
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE PRODUCTS");
-        });
+        }));
 
         return true;
     }
@@ -421,19 +421,19 @@ var WorkspaceController = (function() {
                 if (value.geoserver == 'on')
                     bDeleteLayer = true;
 
-                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
+                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
 
-                    oController.m_oWorkspaceService.DeleteWorkspace(data, bDeleteFile, bDeleteLayer)
-                        .success(function () {
+                    oController.m_oWorkspaceService.DeleteWorkspace(data.data, bDeleteFile, bDeleteLayer)
+                        .then(function () {
                             oController.deselectWorskpace();
                             oController.fetchWorkspaceInfoList();
                         })
                         .error(function () {
                             console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
                         });
-                }).error(function () {
+                },(function () {
                     console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
-                });
+                }));
 
             }
         });

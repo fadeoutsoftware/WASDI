@@ -837,7 +837,7 @@ var ImportController = (function() {
                 // oProduct.isDisabledToDoDownload = false;
             };
         }
-        this.m_oFileBufferService.download(sUrl,sWorkspaceId,sBounds,oProvider).success(oCallback).error(oError);
+        this.m_oFileBufferService.download(sUrl,sWorkspaceId,sBounds,oProvider).then(oCallback).error(oError);
     };
 
     ImportController.prototype.openSelectWorkspaceDialog = function(oCallback){
@@ -900,7 +900,7 @@ var ImportController = (function() {
                 oProduct.isDisabledToDoDownload = false;
             }
             oThat.downloadProduct(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider,null,oError);
-            // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider).success(function (data, status) {
+            // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider).then(function (data, status) {
             //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
             //     utilsVexCloseDialogAfter("3000",oDialog);
             //
@@ -945,7 +945,7 @@ var ImportController = (function() {
                 oThat.downloadProduct(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),aoProducts[iIndexProduct].provider,null,oError);
 
                 // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),
-                //     aoProducts[iIndexProduct].provider).success(function (data, status)
+                //     aoProducts[iIndexProduct].provider).then(function (data, status)
                 // {
                 //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
                 //     utilsVexCloseDialogAfter("3000",oDialog);
@@ -1566,12 +1566,12 @@ var ImportController = (function() {
 
         var oController = this;
 
-        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oConstantsService.setActiveWorkspace(data.data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
                     /*Start Rabbit WebStomp*/
@@ -1580,7 +1580,7 @@ var ImportController = (function() {
                     if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
             }
-        }).error(function (data,status) {
+        },function (data,status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
         });
     };
