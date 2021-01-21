@@ -64,14 +64,14 @@ var HomeController = (function() {
                 if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
                 {
                     oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken)
-                        .success(function (data,status)
+                        .then(function (data,status)
                         {
                             oController.callbackLogin(data, status,oController)
-                        })
-                        .error(function (data,status)
+                        },function (data,status)
                         {
                             utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
                         });
+
                 }
 
             }
@@ -127,10 +127,10 @@ var HomeController = (function() {
 
         // var oConstantsService = oController.m_oConstantsService;
         this.m_oConstantsService.setUser(null);
-        this.m_oAuthService.login(oLoginInfo).success(
+        this.m_oAuthService.login(oLoginInfo).then(
             function (data,status) {
-                oController.callbackLogin(data, status,oController)
-            }).error(function (data,status) {
+                oController.callbackLogin(data.data, status,oController)
+            },function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
 

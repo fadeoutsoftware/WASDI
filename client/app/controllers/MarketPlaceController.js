@@ -128,48 +128,48 @@ var MarketPlaceController = (function() {
 
 
         // Ask the list of Applications to the WASDI server
-        this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoApplicationList = oController.setDefaultImages(data);
+                oController.m_aoApplicationList = oController.setDefaultImages(data.data);
             }
             else
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             }
             oController.m_bWaiting = false;
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             oController.m_bWaiting = false;
-        });
+        })) ;
 
         // Get the list of categories
-        this.m_oProcessorMediaService.getCategories().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorMediaService.getCategories().then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoCategories = data;
+                oController.m_aoCategories = data.data;
             }
             else
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING CATEGORIES");
             }
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING CATEGORIES");
-        });
+        }));
 
         // Get the list of publishers
-        this.m_oProcessorMediaService.getPublishersFilterList().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorMediaService.getPublishersFilterList().then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoPublishers = data;
+                oController.m_aoPublishers = data.data;
             }
             else
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING PUBLISHERS");
             }
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING PUBLISHERS");
-        });
+        }));
     }
 
 
@@ -187,20 +187,20 @@ var MarketPlaceController = (function() {
 
         oController.m_bWaiting = true;
 
-        this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
+        this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 if (oController.m_oAppFilter.page == 0) {
-                    oController.m_aoApplicationList = oController.setDefaultImages(data);
+                    oController.m_aoApplicationList = oController.setDefaultImages(data.data);
                 }
                 else {
-                    if (data.length>0) {
-                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImages(data));
+                    if (data.data.length>0) {
+                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImages(data.data));
                     }
                 }
 
                 // If there is no data, we do not need Load More Button
-                if (data.length > 0) {
+                if (data.data.length > 0) {
                     oController.m_bLoadMoreEnabled = true;
                 }
                 else {
@@ -213,10 +213,11 @@ var MarketPlaceController = (function() {
             }
 
             oController.m_bWaiting = false;
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST")
             oController.m_bWaiting = false;
-        });
+
+        }));
 
     }
 

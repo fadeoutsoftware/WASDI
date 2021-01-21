@@ -77,8 +77,8 @@ var RootController = (function() {
         /**
          * Check user session
          */
-        this.m_oAuthService.checkSession().success(function (data, status) {
-            if (data === null || data === undefined || data === '' || data.userId === ''  )
+        this.m_oAuthService.checkSession().then(function (data, status) {
+            if (data.data === null || data.data === undefined || data.data === '' || data.data.userId === ''  )
             {
 
                 oController.m_oConstantsService.logOut();
@@ -88,7 +88,7 @@ var RootController = (function() {
             {
                 oController.m_oUser = oController.m_oConstantsService.getUser();
             }
-        }).error(function (data,status) {
+        },function (data,status) {
             utilsVexDialogAlertTop('ERROR IN CHECK ID SESSION');
             oController.onClickLogOut();
         });
@@ -293,23 +293,22 @@ var RootController = (function() {
     {
         var oController = this;
         this.m_oProcessesLaunchedService.getSummary()
-            .success(function (data, status) {
-                if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
+            .then(function (data, status) {
+                if(utilsIsObjectNullOrUndefined(data.data) === true || data.data.BoolValue === false)
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET SUMMARY");
                 }
                 else
                 {
-                    oController.m_oSummary = data;
-                    oController.m_iNumberOfProcesses = data.userProcessRunning + data.userDownloadRunning + data.userIDLRunning;
-                    oController.m_iWaitingProcesses = data.userProcessWaiting + data.userDownloadWaiting + data.userIDLWaiting;
+                    oController.m_oSummary = data.data;
+                    oController.m_iNumberOfProcesses = data.data.userProcessRunning + data.data.userDownloadRunning + data.data.userIDLRunning;
+                    oController.m_iWaitingProcesses = data.data.userProcessWaiting + data.data.userDownloadWaiting + data.data.userIDLWaiting;
                 }
 
-            })
-            .error(function (data,status) {
+            },(function (data,status) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET SUMMARY");
 
-            });
+            }));
     };
 
     RootController.prototype.getConnectionStatusForTooltip = function()
@@ -364,7 +363,7 @@ var RootController = (function() {
 
         //this.openLogoutModal();
         this.m_oAuthService.logout()
-            .success(function (data, status) {
+            .then(function (data, status) {
                 if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
                 {
                     utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
@@ -415,18 +414,18 @@ var RootController = (function() {
 
         var oController = this;
 
-        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             if (data != null)
             {
                 if (data != undefined)
                 {
-                    oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oConstantsService.setActiveWorkspace(data.data);
                     oController.m_sWorkSpace = oController.m_oConstantsService.getActiveWorkspace();
                 }
             }
-        }).error(function (data,status) {
+        },(function (data,status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
-        });
+        }));
     };
 
     /***************************** IS VISIBLE HTML ELEMENT ******************************/
@@ -618,10 +617,10 @@ var RootController = (function() {
             var oWorkspace = oController.m_oConstantsService.getActiveWorkspace();
             oWorkspace.name = value;
 
-            oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
-                oWorkspace.name = data.name
+            oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).then(function (data) {
+                oWorkspace.name = data.data.name
                 oController.m_bIsEditModelWorkspaceNameActive = false;
-            });
+            }); // no error handling in this case
         };
         utilsVexPrompt("Insert Workspace Name:<br>", oController.m_oConstantsService.getActiveWorkspace().name, oCallback);
 
@@ -660,16 +659,16 @@ var RootController = (function() {
 
                 var oController = this;
 
-                this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
+                this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
                     if (utilsIsObjectNullOrUndefined(data) === false)
                     {
                         oController.m_aoWorkspaces = data;
                     }
 
-                }).error(function (data,status) {
+                },(function (data,status) {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
 
-                });
+                }));
             }
         }
     }
