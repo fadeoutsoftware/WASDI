@@ -72,7 +72,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			sResult += sTmp;
 		}
-		
+
 		sTmp = parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			sResult += sTmp;
@@ -119,14 +119,14 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			sResult += sTmp;
 		}
 
-//		String sAdditional = parseAdditionalQuery(sQuery);
-//		if(!Utils.isNullOrEmpty(sAdditional)) {
-//			if(!Utils.isNullOrEmpty(sResult)) {
-//				sResult = "( " + sResult + " ) AND ";
-//				//sResult += " OR ";
-//			}
-//			sResult += sAdditional;
-//		}
+		//		String sAdditional = parseAdditionalQuery(sQuery);
+		//		if(!Utils.isNullOrEmpty(sAdditional)) {
+		//			if(!Utils.isNullOrEmpty(sResult)) {
+		//				sResult = "( " + sResult + " ) AND ";
+		//				//sResult += " OR ";
+		//			}
+		//			sResult += sAdditional;
+		//		}
 
 		if(!Utils.isNullOrEmpty(sResult)) {
 			sResult = "( " + sResult + " )";
@@ -162,7 +162,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			} else {
 				Utils.debugLog("DiasQueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");
 			}
-			
+
 		}
 
 
@@ -174,17 +174,23 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		if(Utils.isNullOrEmpty(sFreeText)) {
 			return null;
 		}
-		
-		sFreeText = WasdiFileUtils.getFileNameWithoutExtensions(sFreeText);
-		
+
 		//remove trailing asterisk ('*')
 		if(sFreeText.endsWith("*")) {
 			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
 		}
-		
+
+		sFreeText = WasdiFileUtils.getFileNameWithoutExtensions(sFreeText);
+
 		//add an asterisk in case the string passed were missing the initial part
 		//(note: ONDA also work if the initial part is present)
-		return "*" + sFreeText;
+		if(!sFreeText.startsWith("*")) {
+			sFreeText = "*" + sFreeText;
+		}
+		if(!sFreeText.endsWith("*")) {
+			sFreeText += "*";
+		}
+		return sFreeText;
 	}
 
 	protected String parseCopernicusMarine(String sQuery) {
@@ -512,6 +518,99 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			sFootprint+=")))\""; //no trailing spaces
 		}
 		return sFootprint;
+	}
+
+
+	public static void main(String[] args) {
+		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
+		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
+		String[] asFullName = {
+				//three cases
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
+				
+				//name*
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*",
+				
+				//*name
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
+				
+				//*name*
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*"
+		}; 
+
+		for (String sFreeText : asFullName) {
+			String sQuery = sFreeText + sSuffix;
+			String sResult = oDQT.parseFreeText(sQuery); 
+			if(!sResult.equals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*")) {
+				System.out.println("full name: failed translating: " + sFreeText + ", got: " + sResult);
+			}
+		}
+
+		String[] asNoHead = {
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
+				
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*",
+				
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423",
+				
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip*",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.*",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*"
+		};
+
+		for (String sFreeText : asNoHead) {
+			String sQuery = sFreeText + sSuffix;
+			String sResult = oDQT.parseFreeText(sQuery); 
+			if(!sResult.equals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*")) {
+				System.out.println("no head: failed translating: " + sFreeText + ", got: " + sResult);
+			}
+		}
+
+		String[] asNoTail = {
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*",
+				"S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D",
+				"*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*"
+		};
+		
+		for (String sFreeText : asNoTail) {
+			String sQuery = sFreeText + sSuffix;
+			String sResult = oDQT.parseFreeText(sQuery); 
+			if(!sResult.equals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*")) {
+				System.out.println("no tail: failed translating: " + sFreeText + ", got: " + sResult);
+			}
+		}
+		
+		
+		String[] asNoHeadNoTail = {
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*",
+				"*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D",
+				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D"
+		};
+		for (String sFreeText : asNoHeadNoTail) {
+			String sQuery = sFreeText + sSuffix;
+			String sResult = oDQT.parseFreeText(sQuery); 
+			if(!sResult.equals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*")) {
+				System.out.println("no head, no tail: failed translating: " + sFreeText + ", got: " + sResult);
+			}
+		}
+
+		System.out.println("DONE :-)");
 	}
 
 }
