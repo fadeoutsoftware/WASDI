@@ -100,8 +100,8 @@ public class WasdiFileUtils {
 	 * could lead to errors in path specifications. In particular 
 	 * Windows-based systems use the char '\' as file separator and
 	 * Unix Based systems use the char '/'.
-	 * With this method the system file separator is used and its initialization 
-	 * i done by the JVM
+	 * With this method the system file separator is used and its 
+	 * Initialisation is done by the JVM
 	 * @param sPathString
 	 * @return
 	 */
