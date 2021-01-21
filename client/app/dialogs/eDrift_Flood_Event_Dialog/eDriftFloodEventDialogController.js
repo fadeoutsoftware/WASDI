@@ -105,12 +105,12 @@
      eDriftFloodEventDialogController.prototype.readGDACS = function(){
          var oController = this;
 
-         this.m_oProcessorService.readGDACS().success(function (data) {
+         this.m_oProcessorService.readGDACS().then(function (data) {
 
-             if(utilsIsObjectNullOrUndefined(data) == false)
+             if(utilsIsObjectNullOrUndefined(data.data) == false)
              {
-                 for (var iFeature = 0; iFeature<data.features.length; iFeature++) {
-                     var oFeature = data.features[iFeature];
+                 for (var iFeature = 0; iFeature<data.data.features.length; iFeature++) {
+                     var oFeature = data.data.features[iFeature];
                      var oComboFeature = {};
                      oComboFeature.name = oFeature.properties.name;
                      oComboFeature.bbox = oFeature.bbox;
@@ -123,7 +123,7 @@
              {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING GDACS EVENTS");
              }
-         }).error(function (error) {
+         },function (error) {
 
              if (error.status == 404) {
                  utilsVexDialogAlertTop("NO FLOOD EVENTS<br> FOUND IN GDACS");
@@ -330,13 +330,13 @@
          console.log(sJSON);
 
          this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)
-             .success(function (data) {
-                 if(utilsIsObjectNullOrUndefined(data) == false)
+             .then(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data.data) == false)
                  {
                      var oDialog = utilsVexDialogAlertBottomRightCorner("FLOOD EVENT DETECTION SCHEDULED<br>READY");
                      utilsVexCloseDialogAfter(4000,oDialog);
 
-                     console.log('Run ' + data);
+                     console.log('Run ' + data.data);
 
                      let oRootscope = oController.m_oScope.$parent;
 
@@ -345,7 +345,7 @@
                          oRootscope = oRootscope.$parent;
                      }
 
-                     let payload = { processId: data.processingIdentifier };
+                     let payload = { processId: data.data.processingIdentifier };
                      oRootscope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, payload);
                  }
                  else
@@ -353,8 +353,7 @@
                      utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
                  }
                  oController.m_oScope.close(null);
-             })
-             .error(function (error) {
+             },function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
                  oController.m_oScope.close(null);
              });

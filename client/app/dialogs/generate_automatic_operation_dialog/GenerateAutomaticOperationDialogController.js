@@ -67,11 +67,11 @@ var GenerateAutomaticOperationDialogController = (function() {
     GenerateAutomaticOperationDialogController.prototype.getParameters = function()
     {
         var oController = this;
-        this.m_oGetParameters.success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oGetParameters.then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                // oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
-                oController.m_oParameters = data;
+                // oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data.data);
+                oController.m_oParameters = data.data;
                 // oController.m_oReturnValue.options = oController.m_oOptions;
                 // oController.m_oScope.$apply();
             }
@@ -79,7 +79,7 @@ var GenerateAutomaticOperationDialogController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS, THERE AREN'T DATA");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
 

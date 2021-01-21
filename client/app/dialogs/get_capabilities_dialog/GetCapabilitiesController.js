@@ -31,10 +31,10 @@ var GetCapabilitiesController = (function() {
 
         var oController = this;
 
-        this.m_oHttp.get(sServer).success(function (data, status) {
-            if (!utilsIsObjectNullOrUndefined(data) )
+        this.m_oHttp.get(sServer).then(function (data, status) {
+            if (!utilsIsObjectNullOrUndefined(data.data) )
             {
-                var oResult = new WMSCapabilities().parse(data);
+                var oResult = new WMSCapabilities().parse(data.data);
 
                 if(!utilsIsObjectNullOrUndefined(oResult.Capability) && !utilsIsObjectNullOrUndefined(oResult.Capability.Layer) && !utilsIsObjectNullOrUndefined(oResult.Capability.Layer.Layer))
                 {
@@ -49,7 +49,7 @@ var GetCapabilitiesController = (function() {
                 }
             }
             oController.m_bIsVisibleLoadIcon = false;
-        }).error(function (data,status)
+        },function (data,status)
         {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: THE GET CAPABILITIES DOESN'T WORK");
             oController.m_bIsVisibleLoadIcon = false;

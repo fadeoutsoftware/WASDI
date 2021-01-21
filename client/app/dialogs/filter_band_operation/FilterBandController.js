@@ -137,15 +137,15 @@ var FilterBandController = (function() {
     FilterBandController.prototype.getFilters = function()
     {
         var oController = this;
-        this.m_oFilterService.getFilters().success(function (data, status) {
-            if (data != null)
+        this.m_oFilterService.getFilters().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.generateFiltersListFromServer(data);
+                    oController.generateFiltersListFromServer(data.data);
                 }
             }
-        }).error(function (data,status) {
+        },function (data,status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET FILTERS');
         });
     };

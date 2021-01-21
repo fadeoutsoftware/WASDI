@@ -119,14 +119,14 @@ var EdriftCheckImagesTool = (function() {
         this.m_bIsRunning = true;
 
         this.m_oProcessorService.runProcessor('edriftcheckimages2',sJSON)
-            .success(function(data,status){
-                if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+            .then(function(data,status){
+                if( (utilsIsObjectNullOrUndefined(data.data) === false) && (status === 200))
                 {
                     var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIFT CHECK IMAGES<br>PROCESS HAS BEEN SCHEDULED");
                     utilsVexCloseDialogAfter(4000, oDialog);
 
 
-                    var sProcessId = data.processingIdentifier;
+                    var sProcessId = data.data.processingIdentifier;
 
                     oController.m_sProcessRunningId = sProcessId;
 
@@ -150,15 +150,15 @@ var EdriftCheckImagesTool = (function() {
 
         var oController = this;
 
-        this.m_oProcessesLaunchedService.getProcessWorkspaceById(oController.m_sProcessRunningId).success(function(data,status){
-            if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+        this.m_oProcessesLaunchedService.getProcessWorkspaceById(oController.m_sProcessRunningId).then(function(data,status){
+            if( (utilsIsObjectNullOrUndefined(data.data) === false) && (status === 200))
             {
                 oController.m_oModalService.showModal({
                     templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
                     controller: "ProcessErrorLogsDialogController",
                     inputs: {
                         extras: {
-                            process:data,
+                            process:data.data,
                         }
                     }
                 }).then(function (modal) {
@@ -174,8 +174,7 @@ var EdriftCheckImagesTool = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: CHECK IMAGES SCHEDULING FAILED");
             }
 
-        })
-            .error(function(){
+        },function(){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: CHECK IMAGES ERROR");
                 oController.m_bIsRunning = false;
             });
@@ -189,14 +188,14 @@ var EdriftCheckImagesTool = (function() {
 
         var oLinkToController = oController;
 
-        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sProcessId).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sProcessId).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                if (data.status == 'DONE') {
-                    console.log('---------------------------------Run Processor - DONE = ' + data.payload);
+                if (data.data.status == 'DONE') {
+                    console.log('---------------------------------Run Processor - DONE = ' + data.data.payload);
                     oLinkToController.m_bIsRunning = false;
 
-                    var oResult = JSON.parse(data.payload);
+                    var oResult = JSON.parse(data.data.payload);
 
                     if (oResult != null) {
                         //oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " People Affected Estimate";
@@ -214,29 +213,29 @@ var EdriftCheckImagesTool = (function() {
 
 
                 }
-                else if (data.status == 'STOPPED') {
+                else if (data.data.status == 'STOPPED') {
                     console.log('---------------------------------Run Processor - STOPPED');
                     oLinkToController.m_sResultFromServer = "eDRIFT CHECK IMAGES AVAILABILITY has been Stopped by the User";
                     oLinkToController.m_bIsRunning = false;
                 }
-                else if (data.status == 'ERROR') {
+                else if (data.data.status == 'ERROR') {
                     console.log('---------------------------------Run Processor - ERROR');
                     oLinkToController.m_sResultFromServer = "There was an Error running eDRIFT CHECK IMAGES AVAILABILITY";
                     oLinkToController.m_bIsRunning = false;
                 }
-                else if (data.status == 'CREATED') {
+                else if (data.data.status == 'CREATED') {
                     console.log('---------------------------------Run Processor - CREATED');
                     oLinkToController.m_sResultFromServer = "eDRIFT CHECK IMAGES AVAILABILITY is waiting to start";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'RUNNING' || data.status == 'WAITING' || data.status == 'READY') {
+                else if (data.data.status == 'RUNNING' || data.data.status == 'WAITING' || data.data.status == 'READY') {
                     console.log('---------------------------------Run Processor - RUNNING');
                     oLinkToController.m_sResultFromServer = "eDRIFT CHECK IMAGES AVAILABILITY is Running";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
                 else {
-                    console.log('---------------------------------Run Processor - UNKNOWN ' + data.status);
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    console.log('---------------------------------Run Processor - UNKNOWN ' + data.data.status);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
             }
             else
@@ -245,7 +244,7 @@ var EdriftCheckImagesTool = (function() {
 
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT CHECK IMAGES AVAILABILITY");
             }
-        }).error(function (error) {
+        },function (error) {
             console.log('---------------------------------Run Processor - ERROR');
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT CHECK IMAGES AVAILABILITY");
         });

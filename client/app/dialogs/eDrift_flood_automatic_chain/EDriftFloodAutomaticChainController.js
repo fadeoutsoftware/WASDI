@@ -61,8 +61,8 @@ var EDriftFloodAutomaticChainController = (function() {
 
 
         this.m_oProcessorService.runProcessor('mosaic_tile',sJSON)
-            .success(function(data,status){
-                if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+            .then(function(data,status){
+                if( (utilsIsObjectNullOrUndefined(data.data) === false) && (status === 200))
                 {
                     var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIFT AUTO CHAIN<br>THE PROCESS HAS BEEN SCHEDULED");
                     utilsVexCloseDialogAfter(4000, oDialog);
@@ -72,8 +72,7 @@ var EDriftFloodAutomaticChainController = (function() {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: AUTO CHAIN FAILED");
                 }
 
-            })
-            .error(function(){
+            },function(){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: AUTO CHAIN FAILED");
             });
     };

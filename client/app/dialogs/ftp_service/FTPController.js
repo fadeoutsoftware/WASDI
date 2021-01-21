@@ -56,8 +56,8 @@ var FTPController = (function() {
         oFtpTransferFile.server = this.m_oFtpRequest.serverIp;
 
         this.m_oCatalogService.uploadFTPFile(oFtpTransferFile,oActiveWorkspace.workspaceId)
-            .success(function(data,status){
-                if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+            .then(function(data,status){
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
                 {
                     console.log("done");
                 }
@@ -69,8 +69,7 @@ var FTPController = (function() {
                 }
                 // oController.cleanFormInputData();
 
-            })
-            .error(function(data,status){
+            },function(data,status){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR TRANSFERRING FILE TO FTP");
                 //oController.cleanFormInputData();
             });

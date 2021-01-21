@@ -24,7 +24,7 @@ var GetInfoProductCatalogController = (function() {
         this.m_oMapService = oMapService;
         this.m_oTimeout = oTimeout;
         this.m_oMap = null;
-        
+
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
@@ -95,20 +95,19 @@ var GetInfoProductCatalogController = (function() {
             return false;
         }
         this.m_oWorkspaceService.getWorkspaceListByProductName(sFileName)
-            .success(function(data,status){
-                if(utilsIsObjectNullOrUndefined(data) === false && status === 200)
+            .then(function(data,status){
+                if(utilsIsObjectNullOrUndefined(data.data) === false && status === 200)
                 {
                     // workspaceId;
                     // workspaceName;
                     // ownerUserId;
-                    oController.m_aoListOfProductWorkspaces = data;
+                    oController.m_aoListOfProductWorkspaces = data.data;
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WORKSPACES LIST");
                 }
-            })
-            .error(function(data,status){
+            },function(data,status){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WORKSPACES LIST");
             });
         return true;
@@ -153,8 +152,8 @@ var GetInfoProductCatalogController = (function() {
         }
 
         this.m_oFileBufferService.publishBand(sUrl, sWorkspaceId, sBand)
-            .success(function(data,status){
-                if( ( utilsIsObjectNullOrUndefined(data) === false ) && ( status === 200 ))
+            .then(function(data,status){
+                if( ( utilsIsObjectNullOrUndefined(data.data) === false ) && ( status === 200 ))
                 {
                     utilsVexDialogAlertBottomRightCorner("PUBLISHED BAND");
                 }
@@ -162,8 +161,7 @@ var GetInfoProductCatalogController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE PUBLISH BAND.");
                 }
-            })
-            .error(function(data,status){
+            },function(data,status){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE PUBLISH BAND.");
             });
 

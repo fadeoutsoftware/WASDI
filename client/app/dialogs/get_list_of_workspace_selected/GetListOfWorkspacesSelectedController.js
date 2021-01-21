@@ -67,12 +67,12 @@ var GetListOfWorkspacesController = (function() {
     {
         var oController = this;
         this.m_bisLoadingWorkspacesList = true;
-        this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.m_aoWorkspaceList = data;
+                    oController.m_aoWorkspaceList = data.data;
                     var oDefaultWorkspace = oController.getDefaultWorkspace(oController.m_oActiveWorkspace,oController.m_aoWorkspaceList);
                     if( utilsIsObjectNullOrUndefined(oDefaultWorkspace) === false)
                     {
@@ -81,7 +81,7 @@ var GetListOfWorkspacesController = (function() {
                 }
             }
             oController.m_bisLoadingWorkspacesList = false;
-        }).error(function (data,status) {
+        },function (data,status) {
             //alert('error');
             oController.m_bisLoadingWorkspacesList = false;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
@@ -164,10 +164,10 @@ var GetListOfWorkspacesController = (function() {
 
         var oController = this;
         this.m_bIsCreatingWorskapce = true;
-        this.m_oWorkspaceService.createWorkspace().success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.createWorkspace().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
                     // var sWorkspaceId = data.stringValue;
                     // oController.openWorkspace(sWorkspaceId);
@@ -175,7 +175,7 @@ var GetListOfWorkspacesController = (function() {
                 }
             }
             oController.m_bIsCreatingWorskapce = false;
-        }).error(function (data,status) {
+        },function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
             oController.m_bIsCreatingWorskapce = false;
@@ -190,10 +190,10 @@ var GetListOfWorkspacesController = (function() {
         // this.m_bIsLoadingWorkflows = true;
         oController.m_bisLoadingWorkflows = true;
 
-        this.m_oSnapOperationService.getWorkflowsByUser().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oSnapOperationService.getWorkflowsByUser().then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoWorkflows = data;
+                oController.m_aoWorkflows = data.data;
             }
             else
             {
@@ -207,7 +207,7 @@ var GetListOfWorkspacesController = (function() {
             //     oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
             // }
             // oController.m_bIsLoadingWorkflows = false;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS");
             // oController.m_bIsLoadingWorkflows = false;
             oController.m_bisLoadingWorkflows=false;
