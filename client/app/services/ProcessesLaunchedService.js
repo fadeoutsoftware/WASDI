@@ -37,14 +37,14 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
                 if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
             }
 
-            this.m_oHttp.get(sUrl + '/process/lastbyws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
+            this.m_oHttp.get(sUrl + '/process/lastbyws?sWorkspaceId='+sWorkSpaceId).then(function (data, status)
                 {
-                    if(!utilsIsObjectNullOrUndefined(data))
+                    if(!utilsIsObjectNullOrUndefined(data.data))
                     {
-                        oService.m_aoProcessesRunning = data;
+                        oService.m_aoProcessesRunning = data.data;
                         oService.updateProcessesBar();
                     }
-                }).error(function (data,status)
+                },function (data,status)
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
                 });
@@ -138,7 +138,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
             }
 
             var oService = this;
-            this.m_oHttp.get(sUrl + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
+            this.m_oHttp.get(sUrl + '/process/delete?sProcessObjId=' + sPidInput).then(function (data, status)
                 {
                     if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
                     {
@@ -146,10 +146,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
                         oService.m_aoProcessesStopped.push(oProcess);
                         oService.loadProcessesFromServer(sWorkSpaceId);
                     }
-                }).error(function (data,status)
+                },(function (data,status)
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR WHILE KILLING THE PROCESS");
-                });
+                }));
             return true;
         };
 

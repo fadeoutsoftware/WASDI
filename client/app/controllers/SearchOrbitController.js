@@ -165,12 +165,12 @@ var SearchOrbitController = (function() {
 
         var oController = this;
 
-        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oConstantsService.setActiveWorkspace(data.data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
                     // oController.m_oRabbitStompService.initWebStomp("SearchOrbitController",oController);
@@ -178,10 +178,10 @@ var SearchOrbitController = (function() {
 
                 }
             }
-        }).error(function (data,status) {
+        },(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE')
-        });
+        }));
     };
 
 
@@ -292,12 +292,12 @@ var SearchOrbitController = (function() {
         var sFootPrint = oNode.original.FrameFootPrint;
         console.log(sFootPrint);
         this.m_oSearchOrbitService.getKML(sText,sFootPrint)
-            .success(function(data,state){
-                if( utilsIsObjectNullOrUndefined(data) === false )
+            .then(function(data,state){
+                if( utilsIsObjectNullOrUndefined(data.data) === false )
                 {
                     var textFile = null;
                     var sType = 'application/xml';
-                    var sUrl = utilsMakeFile(data,textFile,sType);
+                    var sUrl = utilsMakeFile(data.data,textFile,sType);
                     utilsSaveFile(sUrl,sText+".kml");
 
                 }
@@ -305,10 +305,9 @@ var SearchOrbitController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DOWNLOAD KML");
                 }
-            })
-            .error(function(data,state){
+            },(function(data,state){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN  DOWNLOAD KML");
-            });
+            }));
 
         return true;
     };
@@ -620,22 +619,22 @@ var SearchOrbitController = (function() {
     {
         var oController = this;
         this.m_oSearchOrbitService.getSatellitesResources()
-            .success(function(data,status){
-                if(utilsIsObjectNullOrUndefined(data) === false || status !== 200)
+            .then(function(data,status){
+                if(utilsIsObjectNullOrUndefined(data.data) === false || status !== 200)
                 {
-                    // oController.m_aoSatelliteResources = data;
+                    // oController.m_aoSatelliteResources = data.data;
                     // var oTree = oController.getSatellitesResourcesTreeJson(oController.m_aoSatelliteResources);
-                    data = oController.setAllSatelliteSensorsDisable(data);
-                    oController.m_aoSatelliteResources = data;
+                    data.data = oController.setAllSatelliteSensorsDisable(data.data);
+                    oController.m_aoSatelliteResources = data.data;
                     if(utilsIsObjectNullOrUndefined(oController.m_aoSatelliteResourcesTree) === true)
                     {
-                        oController.m_aoSatelliteResources = data;
-                        oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data);
+                        oController.m_aoSatelliteResources = data.data;
+                        oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data.data);
                         oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDivSatelliteResourceTree,oController.m_aoSatelliteResourcesTree);
                     }
                     else
                     {
-                        oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data);
+                        oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data.data);
                         oController.m_oTreeService.loadNewTree(oController.m_sIdDivSatelliteResourceTree,oController.m_aoSatelliteResourcesTree);
                     }
 
@@ -645,10 +644,9 @@ var SearchOrbitController = (function() {
                 {
                     utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
                 }
-            })
-            .error(function(data,status){
+            },(function(data,status){
                 utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
-            })
+            }))
     };
 
     SearchOrbitController.prototype.setAllSatelliteSensorsDisable = function(aoSatelliteResources)
@@ -830,21 +828,21 @@ var SearchOrbitController = (function() {
         this.m_isDisabledSearchButton = true;
 
         this.m_oSearchOrbitService.searchOrbit(oJSON)
-            .success(function (data, status, headers, config) {
-                if(!utilsIsObjectNullOrUndefined(data))
+            .then(function (data, status, headers, config) {
+                if(!utilsIsObjectNullOrUndefined(data.data))
                 {
-                    //var oDataTree = oController.generateDataTree(data);
-                    // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data));
-                    oController.m_aoOrbits = data;
+                    //var oDataTree = oController.generateDataTree(data.data);
+                    // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data.data));
+                    oController.m_aoOrbits = data.data;
 
                     if(utilsIsObjectNullOrUndefined(oController.m_oOpportunitiesTree) === true)
                     {
-                        oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
+                        oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data.data);
                         oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
                     }
                     else
                     {
-                        oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
+                        oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data.data);
                         oController.m_oTreeService.loadNewTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
                     }
 
@@ -857,15 +855,14 @@ var SearchOrbitController = (function() {
                 // oController.initOrbitSearch();
                 oController.m_bIsVisibleLoadingIcon = false;
                 // oController.m_aoSatelliteResources=[];
-            })
-            .error(function (data, status, header, config) {
+            },(function (data, status, header, config) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
                 // oController.initOrbitSearch();
                 oController.m_aoOrbits = null;
                 oController.m_bIsVisibleLoadingIcon = false;
                 oController.m_isDisabledSearchButton = false;
                 // oController.m_aoSatelliteResources=[];
-            });
+            }));
 
     };
     SearchOrbitController.prototype.setDisabledAllOpportunities = function(aoSatelliteResources)

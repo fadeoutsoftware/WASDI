@@ -32,11 +32,11 @@ var ValidateUserController  = (function() {
     ValidateUserController.prototype.validateUser = function(sEmail,sValidationCode)
     {
         var oController = this;
-        this.m_oAuthService.validateUser(sEmail,sValidationCode).success(
+        this.m_oAuthService.validateUser(sEmail,sValidationCode).then(
         function (data,status) {
-            if(utilsIsObjectNullOrUndefined(data) === false)
+            if(utilsIsObjectNullOrUndefined(data.data) === false)
             {
-                if(data.boolValue === true)
+                if(data.data.boolValue === true)
                 {
                     oController.m_sMessage = "User validated";
                 }
@@ -47,11 +47,11 @@ var ValidateUserController  = (function() {
                 oController.m_sMessage = oController.m_sMessage + " Redirecting...";
                 oController.timeoutRedirect();
             }
-        }).error(function (data,status){
+        },(function (data,status){
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR VALIDATING USER");
             oController.timeoutRedirect();
 
-        });
+        }));
     };
 
     ValidateUserController.$inject = [
