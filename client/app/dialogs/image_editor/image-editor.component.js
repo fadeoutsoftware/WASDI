@@ -73,10 +73,10 @@ var ImageEditorController = (function() {
     {
         var oController = this;
         this.m_bIsLoadingWorkflows = true;
-        this.m_oSnapOperationService.getWorkflowsByUser().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oSnapOperationService.getWorkflowsByUser().then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoWorkflows = data;
+                oController.m_aoWorkflows = data.data;
             }
             else
             {
@@ -89,7 +89,7 @@ var ImageEditorController = (function() {
                 oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
             }
             oController.m_bIsLoadingWorkflows = false;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS");
             oController.m_bIsLoadingWorkflows = false;
         });
@@ -213,8 +213,8 @@ var ImageEditorController = (function() {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId,oObjectWorkFlow).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true )
+        this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId,oObjectWorkFlow).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true )
             {
                 oController.cleanAllExecuteWorkflowFields();
             }
@@ -224,7 +224,7 @@ var ImageEditorController = (function() {
             }
             oController.closeDialogWithDelay("",500);
 
-        }).error(function (error) {
+        },function (error) {
 
             oController.cleanAllExecuteWorkflowFields();
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN EXECUTE WORKFLOW");
@@ -248,9 +248,9 @@ var ImageEditorController = (function() {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.deleteWorkflow(oWorkflow.workflowId).success(function (data)
+        this.m_oSnapOperationService.deleteWorkflow(oWorkflow.workflowId).then(function (data)
         {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 oController.getWorkflowsByUser();
             }
@@ -259,7 +259,7 @@ var ImageEditorController = (function() {
                 //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE WORKFLOW");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE WORKFLOW");
         });
 
@@ -311,8 +311,8 @@ var ImageEditorController = (function() {
         }
         this.isUploadingWorkflow=true;
         var oController = this;
-        this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId,sName,sDescription,oBody).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId,sName,sDescription,oBody).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 //Reload list o workFlows
                 oController.getWorkflowsByUser();
@@ -327,7 +327,7 @@ var ImageEditorController = (function() {
             }
 
             oController.isUploadingWorkflow = false;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
             oController.cleanAllUploadWorkflowFields();
             oController.isUploadingWorkflow = false;

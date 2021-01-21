@@ -10,28 +10,28 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
     this.m_oFunction = null;
     var oController = this;
 
-    this.m_oOpenSearchService.getListOfProvider().success(function (data) {
-        if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
+    this.m_oOpenSearchService.getListOfProvider().then(function (data) {
+        if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.length > 0)
         {
-            var iLengthData = data.length;
+            var iLengthData = data.data.length;
             for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
             {
                 oController.m_aListOfProvider[iIndexProvider] = {
-                    "name": data[iIndexProvider].code,
+                    "name": data.data[iIndexProvider].code,
                     "totalOfProducts":0,
                     "totalPages":1,
                     "currentPage":1,
                     "productsPerPageSelected":10,
                     "selected":true,
                     "isLoaded":false,
-                    "description": data[iIndexProvider].description,
-                    "link": data[iIndexProvider].link
+                    "description": data.data[iIndexProvider].description,
+                    "link": data.data[iIndexProvider].link
                 };
             }
             // oController.m_aListOfProvider = data;
         }
 
-    }).error(function (data) {
+    },function (data) {
 
     });
 
