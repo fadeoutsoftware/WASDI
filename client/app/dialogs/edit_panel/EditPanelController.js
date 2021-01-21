@@ -517,11 +517,11 @@ var EditPanelController = (function() {
 
         var oController = this;
         this.m_bAreProductMasksLoading = true;
-        this.m_oSnapOperationService.getListOfProductMask(sFile,sBand,sWorkspaceId).success(function (data) {
+        this.m_oSnapOperationService.getListOfProductMask(sFile,sBand,sWorkspaceId).then(function (data) {
             oController.m_bAreProductMasksLoading = false;
-            if(utilsIsObjectNullOrUndefined(data) === false)
+            if(utilsIsObjectNullOrUndefined(data.data) === false)
             {
-                var aoProductMasks = data;
+                var aoProductMasks = data.data;
 
                 if (utilsIsObjectNullOrUndefined(aoProductMasks)) return;
 
@@ -537,7 +537,7 @@ var EditPanelController = (function() {
                 }
             }
 
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION GET PRODUCT MASK DOESN'T WORK");
             oController.m_bAreProductMasksLoading = false;
         });
@@ -804,15 +804,15 @@ var EditPanelController = (function() {
     EditPanelController.prototype.getFilters = function()
     {
         var oController = this;
-        this.m_oFilterService.getFilters().success(function (data, status) {
-            if (data != null)
+        this.m_oFilterService.getFilters().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.generateFiltersListFromServer(data);
+                    oController.generateFiltersListFromServer(data.data);
                 }
             }
-        }).error(function (data,status) {
+        },function (data,status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET FILTERS');
         });
     };
@@ -1043,22 +1043,22 @@ var EditPanelController = (function() {
         }
         var oController = this;
         this.m_bIsLoadingColourManipulation = true;
-        this.m_oSnapOperationService.getProductColorManipulation(sFile,sBand,bAccurate,sWorkspaceId).success(function (data, status) {
-            if (data != null)
+        this.m_oSnapOperationService.getProductColorManipulation(sFile,sBand,bAccurate,sWorkspaceId).then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                     //oController.m_oColorManipulation = data;
+                     //oController.m_oColorManipulation = data.data;
                      if (utilsIsObjectNullOrUndefined(oController.m_oBand) === false)
                      {
-                         oController.m_oBand.colorManipulation = data;
-                         oController.drawColourManipulationHistogram("colourManipulationContainer",data.histogramBins);
+                         oController.m_oBand.colorManipulation = data.data;
+                         oController.drawColourManipulationHistogram("colourManipulationContainer",data.data.histogramBins);
 
                    }
                 }
             }
             oController.m_bIsLoadingColourManipulation = false;
-        }).error(function (data, status) {
+        },function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>PRODUCT COLOR MANIPULATION ');
             oController.m_bIsLoadingColourManipulation = false;
         });

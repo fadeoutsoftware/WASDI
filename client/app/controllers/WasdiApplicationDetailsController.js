@@ -150,10 +150,10 @@ var WasdiApplicationDetailsController = (function() {
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_oApplication = data;
+                oController.m_oApplication = data.data;
                 oController.m_asImages.push(oController.m_oApplication.imgLink)
                 if (oController.m_oApplication.images.length>0) {
                     oController.m_asImages = oController.m_asImages.concat(oController.m_oApplication.images);
@@ -164,7 +164,7 @@ var WasdiApplicationDetailsController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
             }
             oController.m_bWaiting=false;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
             oController.m_bWaiting=false;
         });
@@ -182,11 +182,11 @@ var WasdiApplicationDetailsController = (function() {
 
         var oController = this;
 
-        this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_oReviewsWrapper = data;
-                if (data.reviews.length == 0) oController.m_bShowLoadMoreReviews = false;
+                oController.m_oReviewsWrapper = data.data;
+                if (data.data.reviews.length == 0) oController.m_bShowLoadMoreReviews = false;
             }
             else
             {
@@ -194,7 +194,7 @@ var WasdiApplicationDetailsController = (function() {
             }
 
             oController.m_bReviewsWaiting = false;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
             oController.m_bReviewsWaiting = false;
         });
@@ -232,15 +232,15 @@ var WasdiApplicationDetailsController = (function() {
         this.m_iReviewsPage = this.m_iReviewsPage + 1;
         this.m_bReviewsWaiting = true;
         // Get the reviews
-        this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
 
-                if (data.reviews.length == 0){
+                if (data.data.reviews.length == 0){
                     oController.m_bShowLoadMoreReviews = false;
                 }
                 else {
-                    oController.m_oReviewsWrapper.reviews = oController.m_oReviewsWrapper.reviews.concat(data.reviews);
+                    oController.m_oReviewsWrapper.reviews = oController.m_oReviewsWrapper.reviews.concat(data.data.reviews);
                 }
             }
             else
@@ -248,7 +248,7 @@ var WasdiApplicationDetailsController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
             }
             oController.m_bReviewsWaiting = false;
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
             oController.m_bReviewsWaiting = false;
         });
@@ -262,7 +262,7 @@ var WasdiApplicationDetailsController = (function() {
 
         this.m_oUserReview.processorId = this.m_oApplication.processorId;
 
-        this.m_oProcessorMediaService.addProcessorReview(this.m_oUserReview).success(function (data) {
+        this.m_oProcessorMediaService.addProcessorReview(this.m_oUserReview).then(function (data) {
             oController.m_oUserReview.title="";
             oController.m_oUserReview.comment="";
             oController.m_oUserReview.vote=-1;
@@ -273,7 +273,7 @@ var WasdiApplicationDetailsController = (function() {
             oController.m_iReviewsPage = 0;
             oController.refreshReviews();
 
-        }).error(function (error) {
+        },function (error) {
             oController.m_oUserReview.title="";
             oController.m_oUserReview.comment="";
             oController.m_oUserReview.vote=-1;
@@ -343,7 +343,7 @@ var WasdiApplicationDetailsController = (function() {
     WasdiApplicationDetailsController.prototype.editClick= function() {
         var oController = this;
 
-        oController.m_oProcessorService.getDeployedProcessor(oController.m_oApplication.processorId).success(function (data) {
+        oController.m_oProcessorService.getDeployedProcessor(oController.m_oApplication.processorId).then(function (data) {
             oController.m_oModalService.showModal({
                 templateUrl: "dialogs/processor/ProcessorView.html",
                 controller: "ProcessorController",
@@ -360,7 +360,7 @@ var WasdiApplicationDetailsController = (function() {
                     }
                 });
             });
-        }).error(function () {
+        },function () {
 
         });
 

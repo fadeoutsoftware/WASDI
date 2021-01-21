@@ -164,11 +164,11 @@ var WasdiApplicationUIController = (function() {
         /**
          * Ask the Processor UI to the WASDI server
          */
-        this.m_oProcessorService.getProcessorUI(this.m_sSelectedApplication).success(function(data,status){
+        this.m_oProcessorService.getProcessorUI(this.m_sSelectedApplication).then(function(data,status){
                 // For each Tab
-                for (let iTabs=0; iTabs<data.tabs.length; iTabs++) {
+                for (let iTabs=0; iTabs<data.data.tabs.length; iTabs++) {
                     // Get the tab
-                    let oTab = data.tabs[iTabs];
+                    let oTab = data.data.tabs[iTabs];
                     // Save the name
                     oController.m_asTabs.push(oTab.name);
                     // Set the first one as default
@@ -176,40 +176,39 @@ var WasdiApplicationUIController = (function() {
                 }
 
                 // Create all the components
-                oController.m_aoViewElements = oController.generateViewElements(data);
+                oController.m_aoViewElements = oController.generateViewElements(data.data);
 
                 if (!utilsIsObjectNullOrUndefined(data.renderAsStrings)) {
                     if (data.renderAsStrings === true) {
                         oController.m_bRenderAsStrings = true;
                     }
                 }
-            })
-            .error(function(oError ){
+            },function(oError ){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
             });
 
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_oApplication = data;
+                oController.m_oApplication = data.data;
             }
             else
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
         });
 
         // Retrive also the help
-        this.m_oProcessorService.getHelpFromProcessor(this.m_sSelectedApplication).success(function (data) {
+        this.m_oProcessorService.getHelpFromProcessor(this.m_sSelectedApplication).then(function (data) {
 
-            if(utilsIsObjectNullOrUndefined(data) === false)
+            if(utilsIsObjectNullOrUndefined(data.data) === false)
             {
-                var sHelpMessage = data.stringValue;
+                var sHelpMessage = data.data.stringValue;
                 if(utilsIsObjectNullOrUndefined(sHelpMessage) === false )
                 {
                     try {
@@ -217,7 +216,7 @@ var WasdiApplicationUIController = (function() {
                         sHelpMessage = oHelp.help;
                     }
                     catch(err) {
-                        sHelpMessage = data.stringValue;
+                        sHelpMessage = data.data.stringValue;
                     }
 
                 }
@@ -239,7 +238,7 @@ var WasdiApplicationUIController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP HELP");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP HELP");
             oController.cleanAllExecuteWorkflowFields();
         });
@@ -308,8 +307,8 @@ var WasdiApplicationUIController = (function() {
         oController.m_oConstantsService.setActiveWorkspace(oWorkspace);
 
         // Run the processor
-        oController.m_oProcessorService.runProcessor(sApplicationName,JSON.stringify(oProcessorInput)).success(function (data, status) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        oController.m_oProcessorService.runProcessor(sApplicationName,JSON.stringify(oProcessorInput)).then(function (data, status) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 // Ok, processor scheduled, notify the user
                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
@@ -323,7 +322,7 @@ var WasdiApplicationUIController = (function() {
                 //}
 
                 // send the message to show the processor log dialog
-                //let oPayload = { processId: data.processingIdentifier };
+                //let oPayload = { processId: data.data.processingIdentifier };
                 //oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
 
                 // Move to the editor
@@ -333,7 +332,7 @@ var WasdiApplicationUIController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
             }
-        }).error(function () {
+        },function () {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
         });
     }
@@ -432,24 +431,24 @@ var WasdiApplicationUIController = (function() {
 
         if (this.m_oSelectedWorkspace == null) {
             // Create a new Workspace
-            this.m_oWorkspaceService.createWorkspace(sWorkspaceName).success( function (data,status) {
+            this.m_oWorkspaceService.createWorkspace(sWorkspaceName).then( function (data,status) {
 
                     // Get the new workpsace Id
-                    let sWorkspaceId = data.stringValue;
+                    let sWorkspaceId = data.data.stringValue;
 
                     // Get the view model of this workspace
-                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (oData) {
-                        if (utilsIsObjectNullOrUndefined(oData) == false)
+                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (oData) {
+                        if (utilsIsObjectNullOrUndefined(oData.data) == false)
                         {
                             // Ok execute
-                            oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, oData);
+                            oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, oData.data);
                         }
-                    }).error(function () {
+                    },function () {
                         utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
                     });
 
                 }
-            ).error( function () {
+            , function () {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
             });
         }
@@ -500,15 +499,15 @@ var WasdiApplicationUIController = (function() {
 
         this.m_bHistoryLoading = true;
 
-        this.m_oProcessesLaunchedService.getProcessesByProcessor(this.m_sSelectedApplication).success(function (data, status) {
-            if (utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessesLaunchedService.getProcessesByProcessor(this.m_sSelectedApplication).then(function (data, status) {
+            if (utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 // Ok execute
-                oController.m_aoProcHistory = data;
+                oController.m_aoProcHistory = data.data;
             }
 
             oController.m_bHistoryLoading = false;
-        }).error(function (data,status) {
+        },function (data,status) {
             oController.m_bHistoryLoading = false;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING HISTORY');
         });
@@ -561,14 +560,14 @@ var WasdiApplicationUIController = (function() {
     WasdiApplicationUIController.prototype.openWorkspaceClicked = function()
     {
         var oController = this;
-        this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data,status) {
-            if (utilsIsObjectNullOrUndefined(data) == false) {
-                oController.m_aoWorkspaceList = data;
+        this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data,status) {
+            if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                oController.m_aoWorkspaceList = data.data;
             }
             else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING USER WORKSPACES");
             }
-        }).error(function () {
+        },function () {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING USER WORKSPACES");
         })
     };
@@ -582,18 +581,18 @@ var WasdiApplicationUIController = (function() {
 
         let oController = this;
 
-        this.m_oProductService.getProductListByWorkspace(oWorkspace.workspaceId).success(function (data, status) {
+        this.m_oProductService.getProductListByWorkspace(oWorkspace.workspaceId).then(function (data, status) {
 
             oController.m_aoProducts = [];
 
-            if (utilsIsObjectNullOrUndefined(data) == false) {
+            if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //push all products
-                for (var iIndex = 0; iIndex < data.length; iIndex++) {
+                for (var iIndex = 0; iIndex < data.data.length; iIndex++) {
 
                     let oProductItem = { value:"", id:""};
 
-                    oProductItem.name = data[iIndex].name;
-                    oProductItem.id = data[iIndex].name;
+                    oProductItem.name = data.data[iIndex].name;
+                    oProductItem.id = data.data[iIndex].name;
 
                     // Add the product to the list
                     oController.m_aoProducts.push(oProductItem);
@@ -613,7 +612,7 @@ var WasdiApplicationUIController = (function() {
             }
 
 
-        }).error(function (data, status) {
+        },function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         });
     }
@@ -621,7 +620,7 @@ var WasdiApplicationUIController = (function() {
     WasdiApplicationUIController.prototype.editClick= function() {
         var oController = this;
 
-        oController.m_oProcessorService.getDeployedProcessor(oController.m_oApplication.processorId).success(function (data) {
+        oController.m_oProcessorService.getDeployedProcessor(oController.m_oApplication.processorId).then(function (data) {
             oController.m_oModalService.showModal({
                 templateUrl: "dialogs/processor/ProcessorView.html",
                 controller: "ProcessorController",
@@ -638,7 +637,7 @@ var WasdiApplicationUIController = (function() {
                     }
                 });
             });
-        }).error(function () {
+        },function () {
 
         });
 

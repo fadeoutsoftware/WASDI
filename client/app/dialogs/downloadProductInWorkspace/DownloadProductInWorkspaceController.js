@@ -26,15 +26,15 @@ var DownloadProductInWorkspaceController = (function() {
     DownloadProductInWorkspaceController.prototype.getWorkspaces = function()
     {
         var oController = this;
-        this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
-                    oController.m_aoWorkspaceList = data;
+                    oController.m_aoWorkspaceList = data.data;
                 }
             }
-        }).error(function (data,status) {
+        },function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING WORKSPACES');
         });
@@ -44,17 +44,17 @@ var DownloadProductInWorkspaceController = (function() {
 
         var oController = this;
 
-        this.m_oWorkspaceService.createWorkspace().success(function (data, status) {
-            if (data != null)
+        this.m_oWorkspaceService.createWorkspace().then(function (data, status) {
+            if (data.data != null)
             {
-                if (data != undefined)
+                if (data.data != undefined)
                 {
                     //var sWorkspaceId = data.stringValue;
                    // oController.openWorkspace(sWorkspaceId);
                     oController.getWorkspaces();
                 }
             }
-        }).error(function (data,status) {
+        },function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR CREATING NEW WORKSPACE');
         });

@@ -93,24 +93,24 @@ var ApplyOrbitController = (function() {
         };
 
         this.m_oGetParametersOperationService.getparametersApplyOrbit()
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) == false)
                 {
 
-                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data.data);
                     oController.m_oReturnValue.options = oController.m_oOptions;
 
                     //set selected value(default value) orbit state
                     oController.m_sSelectedOrbitStateVectors = oController.m_oReturnValue.options.orbitType;
                     //array of value orbit state
-                    oController.m_asOrbitStateVectors = utilsProjectGetArrayOfValuesForParameterInOperation(data,"orbitType");
+                    oController.m_asOrbitStateVectors = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"orbitType");
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS, THERE AREN'T DATA");
                 }
 
-            }).error(function (error) {
+            },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
             });
 
