@@ -62,18 +62,26 @@ public class WasdiFileUtils {
 		}
 	}
 
-	public static String getFileNameWithoutExtensions(String sInputFile) {
+	public static String getFileNameWithoutExtensionsAndTrailingDots(String sInputFile) {
 			if(Utils.isNullOrEmpty(sInputFile)) {
 				Utils.debugLog("Utils.GetFileNameExtension: input null or empty");
 				return sInputFile;
 			}
 			String sReturn = sInputFile;
-			//remove trailing dots
-			sReturn = sReturn.replaceAll("\\.$", "");
+			
+			//remove trailing dots: filename....
+			while(sReturn.endsWith(".")) {
+				sReturn = sReturn.replaceAll("\\.$", "");
+			}
 			//remove two-letters, e.g., .gz, .7z
 			sReturn = sReturn.replaceAll("\\...$", "");			
 			//remove three-letters, e.g., .zip, .tar, .rar....
 			sReturn = sReturn.replaceAll("\\....", "");
+			
+			//again, remove trailing dots: filename...zip
+			while(sReturn.endsWith(".")) {
+				sReturn = sReturn.replaceAll("\\.$", "");
+			}
 			return sReturn;
 		}
 
