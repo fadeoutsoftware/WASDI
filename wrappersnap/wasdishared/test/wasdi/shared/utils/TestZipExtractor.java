@@ -26,7 +26,9 @@ class TestZipExtractor {
 
     private ZipExtractor oZipExtractor;
     // final string pointing the path for testing
-    private final static String s_sExtractionPath = "." + File.separator + "src" + File.separator + "test" + File.separator + "java" + File.separator + "extractionFolder" + File.separator;
+    private final static String s_sExtractionPath = "." + File.separator + "test" + File.separator +
+    		"wasdi" + File.separator + "shared" + File.separator + "utils" + File.separator +
+    		"extractionFolder" + File.separator;
     private final static String s_sExtractionFileName = "test.zip";
 
     /**

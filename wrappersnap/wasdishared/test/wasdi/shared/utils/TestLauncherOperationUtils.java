@@ -1,4 +1,4 @@
-package wasdishared.test.wasdi.shared.utils;
+package wasdi.shared.utils;
 
 /**
  * Created by Marco Menapace on 2020-11-26
