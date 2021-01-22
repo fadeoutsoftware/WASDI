@@ -28,12 +28,12 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
 	 */
-//	@Override
-//	public String translate(String sQuery) {
-//		// TODO translate and return the url string
-//		//already added prefix: https://finder.creodias.eu/resto/api/collections/
-//		return "Sentinel1/search.json?startDate=2019-12-01T00:00:00Z&completionDate=2019-12-03T23:59:59Z&geometry=POLYGON((7.397874989401342+45.00475144371268,10.373746303074263+44.94785607558927,10.389830621260842+43.612039503172866,7.703504034412235+43.809704932512176,7.397874989401342+45.00475144371268))";
-//	}
+	//	@Override
+	//	public String translate(String sQuery) {
+	//		// TODO translate and return the url string
+	//		//already added prefix: https://finder.creodias.eu/resto/api/collections/
+	//		return "Sentinel1/search.json?startDate=2019-12-01T00:00:00Z&completionDate=2019-12-03T23:59:59Z&geometry=POLYGON((7.397874989401342+45.00475144371268,10.373746303074263+44.94785607558927,10.389830621260842+43.612039503172866,7.703504034412235+43.809704932512176,7.397874989401342+45.00475144371268))";
+	//	}
 
 	//TODO check it, it is taken from sobloo
 
@@ -56,25 +56,23 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			//https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?maxRecords=10&startDate=2020-07-01T00%3A00%3A00Z&completionDate=2020-07-31T23%3A59%3A59Z&productType=GRD&relativeOrbitNumber=9&sortParam=startDate&sortOrder=descending&status=all&geometry=POLYGON((92.65416040497227+26.088955768777822%2C99.6675662125083+26.233334945401936%2C99.79625057598854+16.91245056850053%2C93.04021840440677+16.881668352246322%2C92.65416040497227+26.088955768777822))&dataset=ESA-DATASET
 			String sQuery = this.prepareQuery(sQueryFromClient);
 			//todo reformulate cloud cover intervals
-//			int iStart = 0;
-//			String sQueryPart = sQuery;
-//			while(sQueryPart.contains(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE)) {
-//				iStart = sQuery.indexOf(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE, iStart);
-//				iStart += DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE.length();
-//				iStart = sQuery.indexOf('[', iStart);
-//				int iEnd = sQuery.indexOf(" TO ", iStart);
-//				
-//			}
+			//			int iStart = 0;
+			//			String sQueryPart = sQuery;
+			//			while(sQueryPart.contains(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE)) {
+			//				iStart = sQuery.indexOf(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE, iStart);
+			//				iStart += DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE.length();
+			//				iStart = sQuery.indexOf('[', iStart);
+			//				int iEnd = sQuery.indexOf(" TO ", iStart);
+			//				
+			//			}
 
-			sResult = "";
-			//TODO move this after the mission part
-			sResult = parseFreeText(sQueryFromClient);
+			sResult = "";			
 
-			if(!oAppConf.has("missions") && Utils.isNullOrEmpty(sResult)) {
+			if(!oAppConf.has("missions") && Utils.isNullOrEmpty(getFreeTextSearch(sQueryFromClient))) {
 				throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
 			}
 			//first things first: append mission name + /search.json? 
-			
+
 			for (Object oMissionObject : oAppConf.optJSONArray("missions")) {
 				JSONObject oWasdiMissionJson = (JSONObject) oMissionObject;
 				String sName = oWasdiMissionJson.optString("indexname", null);
@@ -92,12 +90,13 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 					QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
 					String sLocalPart = oParser.parse(sQueryPart); 
 					sResult += sLocalPart;
+					sResult += parseFreeText(sQueryFromClient);
 				}
 			}
 			sResult += parseFootPrint(sQuery);
 			sResult += parseTimeFrame(sQuery);
 			sResult += "&status=all";
-			
+
 			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 				sResult += "&timeliness=Fast-24h";
 			}
@@ -108,39 +107,42 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		return sResult;
 	}
-	
+
 	@Override
 	protected String parseFreeText(String sQuery) {
 		String sOld = getFreeTextSearch(sQuery);
-		
+
 		while(sOld.startsWith("*")) {
 			sOld = sOld.substring(1);
 		}
 		while(sOld.endsWith("*")) {
 			sOld = sOld.substring(0, sOld.length()-1);
 		}
-		
+
 		String sResult = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sOld);
 		boolean bAddDot = !sOld.equals(sResult);
-		
+
 		//again, remove trailing asterisks
 		while(sOld.endsWith("*")) {
 			sOld = sOld.substring(0, sOld.length()-1);
 		}
-		
+
+		//make sure we do not add "null"
+		if(sResult == null) {
+			sResult = "";
+		}
 		if(bAddDot) {
 			sResult += ".";
 		}
-		
 		return sResult;
 	}
-	
+
 	@Override
 	protected String convertRanges(String sQuery) {
 		sQuery = sQuery.replaceAll("(\\[[0-9]*) TO ([0-9]*\\])", "$1<$2");
 		return sQuery;
 	}
-	
+
 
 	@Override
 	protected String parseFootPrint(String sQuery) {
@@ -165,15 +167,15 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		}
 		return sResult;
 	}
-	
-	
+
+
 	@Override
 	protected String parseTimeFrame(String sQuery) {
 		Preconditions.checkNotNull(sQuery, "Null query");
 		String sResult = "";
 		try {
 			String[] asStartEnd = {"", ""};
-			
+
 			String sKeyword = "beginPosition";
 			//beginPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
 			parseInterval(sQuery, sKeyword, asStartEnd);
@@ -181,15 +183,15 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			//endPosition:[2020-01-30T00:00:00.000Z TO 2020-02-06T23:59:59.999Z]
 			parseInterval(sQuery, sKeyword, asStartEnd);
 			if(Utils.isNullOrEmpty(asStartEnd[0]) || Utils.isNullOrEmpty(asStartEnd[1])) {
-				
+
 			}
 			sResult = "&startDate=" + asStartEnd[0];
 			sResult += "&completionDate=" + asStartEnd[1];
-			
+
 		}catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.parseTimeFrame: " + oE);
 		}
-		
+
 		return sResult;
 	}
 
@@ -205,7 +207,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		Preconditions.checkNotNull(asStartEnd, "DiasQueryTranslatorCREODIAS.parseInterval: array is null");
 		Preconditions.checkElementIndex(0, asStartEnd.length, "DiasQueryTranslatorCREODIAS.parseInterval: 0 is not a valid element index");
 		Preconditions.checkElementIndex(1, asStartEnd.length, "DiasQueryTranslatorCREODIAS.parseInterval: 1 is not a valid element index");
-		
+
 		String sStart = null;
 		String sEnd = null;
 		if( sQuery.contains(sKeyword)) {
@@ -216,15 +218,15 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 				iEnd = sQuery.length()-1;
 			};
 			String[] asTimeQuery= sQuery.substring(iStart, iEnd).trim().split(" TO ");
-			
+
 			sStart = asTimeQuery[0].trim();
 			asStartEnd[0] = sStart;
 			sEnd = asTimeQuery[1].trim();
 			asStartEnd[1] = sEnd;
 		}
 	}
-	
-	
+
+
 	public static void main(String[] args) {
 		DiasQueryTranslatorCREODIAS oDQT = new DiasQueryTranslatorCREODIAS();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
@@ -279,7 +281,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 				System.out.println("no head without: failed translating: " + sFreeText + ", got: " + sResult);
 			}
 		}
-		
+
 		String[] asNoHeadW = {
 				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.zip",
 				"_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.",
@@ -331,5 +333,5 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		System.out.println("DONE :-)");
 	}
-	
+
 }
