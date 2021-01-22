@@ -160,10 +160,10 @@ var RangeDopplerTerrainCorrectionController = (function() {
         };
 
         this.m_oGetParametersOperationService.getParametersRangeDopplerTerrainCorrection()
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) == false)
                 {
-                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data.data);
                     oController.m_oReturnValue.options = oController.m_oOptions;
 
                     oController.m_sLatestAuxiliaryFileSelected = oController.m_oReturnValue.options.auxFile;
@@ -173,18 +173,18 @@ var RangeDopplerTerrainCorrectionController = (function() {
                     oController.m_sSaveSigmaSelected = oController.m_oReturnValue.options.incidenceAngleForSigma0;
                     oController.m_sSaveGammaSelected =oController.m_oReturnValue.options.incidenceAngleForGamma0;
 
-                     oController.m_asLatestAuxiliaryFile = utilsProjectGetArrayOfValuesForParameterInOperation(data,"auxFile");
-                     oController.m_asDigitalElevationModel = utilsProjectGetArrayOfValuesForParameterInOperation(data,"demName");
-                     oController.m_asResamplingMethod = utilsProjectGetArrayOfValuesForParameterInOperation(data,"demResamplingMethod");
-                     oController.m_asResamplingMethodImg = utilsProjectGetArrayOfValuesForParameterInOperation(data,"imgResamplingMethod");
-                     oController.m_asSaveBandSigma = utilsProjectGetArrayOfValuesForParameterInOperation(data,"incidenceAngleForSigma0");
-                     oController.m_asSaveBandGamma = utilsProjectGetArrayOfValuesForParameterInOperation(data,"incidenceAngleForGamma0");
+                     oController.m_asLatestAuxiliaryFile = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"auxFile");
+                     oController.m_asDigitalElevationModel = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"demName");
+                     oController.m_asResamplingMethod = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"demResamplingMethod");
+                     oController.m_asResamplingMethodImg = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"imgResamplingMethod");
+                     oController.m_asSaveBandSigma = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"incidenceAngleForSigma0");
+                     oController.m_asSaveBandGamma = utilsProjectGetArrayOfValuesForParameterInOperation(data.data,"incidenceAngleForGamma0");
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS, THERE AREN'T DATA");
                 }
-            }).error(function (error) {
+            },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
 

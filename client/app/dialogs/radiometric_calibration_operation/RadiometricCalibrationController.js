@@ -129,17 +129,17 @@ var RadiometricCalibrationController = (function() {
         };
 
         this.m_oGetParametersOperationService.getParametersRadiometricCalibration()
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) == false)
                 {
-                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data.data);
                     oController.m_oReturnValue.options = oController.m_oOptions;
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS, THERE AREN'T DATA");
                 }
-            }).error(function (error) {
+            },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
 

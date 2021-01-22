@@ -278,15 +278,15 @@ var ProcessorController = (function() {
             }
 
             // Read also the details
-            this.m_oProcessorService.getMarketplaceDetail(this.m_oInputProcessor.processorName).success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) === false)
+            this.m_oProcessorService.getMarketplaceDetail(this.m_oInputProcessor.processorName).then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
-                    oController.m_oProcessorDetails = data;
+                    oController.m_oProcessorDetails = data.data;
 
-                    oController.m_oProcessorMediaService.getCategories().success(function (oData) {
-                        oController.m_aoCategories = oData;
+                    oController.m_oProcessorMediaService.getCategories().then(function (oData) {
+                        oController.m_aoCategories = oData.data;
 
-                    }).error(function (error) {
+                    },function (error) {
 
                     });
                 }
@@ -299,17 +299,17 @@ var ProcessorController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
             });
 
-            this.m_oProcessorService.getProcessorUI(this.m_oInputProcessor.processorName).success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) === false)
+            this.m_oProcessorService.getProcessorUI(this.m_oInputProcessor.processorName).then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
-                    oController.m_sProcessorUI = JSON.stringify(data, undefined, 4);
+                    oController.m_sProcessorUI = JSON.stringify(data.data, undefined, 4);
                 }
                 else
                 {
                     oController.m_sProcessorUI = "{}";
                 }
 
-            }).error(function (error) {
+            },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP UI");
             });
         }
@@ -369,24 +369,24 @@ var ProcessorController = (function() {
          oController.m_oProcessorDetails.processorDescription = oController.m_sDescription;
 
          // Update processor data
-         oController.m_oProcessorService.updateProcessor(oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).success(function () {
+         oController.m_oProcessorService.updateProcessor(oController.m_oInputProcessor.processorId, oController.m_oInputProcessor).then(function () {
 
-             oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).success(function () {
+             oController.m_oProcessorService.updateProcessorDetails(oController.m_oInputProcessor.processorId, oController.m_oProcessorDetails).then(function () {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR DATA UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
-             }).error(function (error) {
+             },function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
              });
 
-         }).error(function (error) {
+         },function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR DATA");
          });
 
          if (oController.m_bUIChanged) {
-             oController.m_oProcessorService.saveProcessorUI(oController.m_oInputProcessor.processorName, oController.m_sProcessorUI).success(function (data) {
+             oController.m_oProcessorService.saveProcessorUI(oController.m_oInputProcessor.processorName, oController.m_sProcessorUI).then(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UI UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
-             }).error(function (error) {
+             },function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR UI");
              });
          }
@@ -398,10 +398,10 @@ var ProcessorController = (function() {
              var oBody = new FormData();
              oBody.append('file', this.m_oFile[0]);
 
-             this.m_oProcessorService.updateProcessorFiles("", oController.m_oInputProcessor.processorId, oBody).success(function (data) {
+             this.m_oProcessorService.updateProcessorFiles("", oController.m_oInputProcessor.processorId, oBody).then(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR FILES UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
-             }).error(function (error) {
+             },function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR FILES");
              });
          }
@@ -434,14 +434,15 @@ var ProcessorController = (function() {
             oController.m_sName = oController.m_sName.toLowerCase();
         }
 
-        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody).success(function (data) {
+        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody)
+            .then(function (data) {
 
             var sMessage = ""
-            if (data.boolValue == true) {
+            if (data.data.boolValue == true) {
                 sMessage = "PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE"
             }
             else {
-                sMessage = "ERROR UPLOADING PROCESSOR<br>ERROR CODE: " + data.intValue;
+                sMessage = "ERROR UPLOADING PROCESSOR<br>ERROR CODE: " + data.data.intValue;
                 if (!utilsIsStrNullOrEmpty(data.stringValue)) {
                     sMessage += "<br>"+data.stringValue;
                 }
@@ -449,7 +450,7 @@ var ProcessorController = (function() {
 
             var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
             utilsVexCloseDialogAfter(5000,oDialog);
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DEPLOYING THE PROCESSOR");
         });
 
@@ -469,17 +470,17 @@ var ProcessorController = (function() {
          }
          var oController = this;
          this.m_oProcessorService.getUsersBySharedProcessor(sProcessorId)
-             .success(function (data) {
-                 if(utilsIsObjectNullOrUndefined(data) === false)
+             .then(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data.data) === false)
                  {
-                     oController.m_aoEnableUsers = data;
+                     oController.m_aoEnableUsers = data.data;
                  }
                  else
                  {
                      utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
                  }
 
-             }).error(function (error) {
+             },function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
          });
          return true;
@@ -504,8 +505,8 @@ var ProcessorController = (function() {
 
          var oController = this;
          this.m_oProcessorService.putShareProcessor(sProcessorId,sEmail)
-             .success(function (data) {
-                 if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+             .then(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
                  {
                      // SHARING SAVED
                  }else
@@ -514,7 +515,7 @@ var ProcessorController = (function() {
                  }
                  oController.getListOfEnableUsers(sFinalProcessorId);
 
-             }).error(function (error) {
+             },function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
          });
 
@@ -540,8 +541,8 @@ var ProcessorController = (function() {
          var sFinalProcessorId = sProcessorId;
 
          this.m_oProcessorService.deleteUserSharedProcessor(sProcessorId,sEmail)
-             .success(function (data) {
-                 if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+             .then(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
                  {
                      // SHARING SAVED
                  }
@@ -551,7 +552,7 @@ var ProcessorController = (function() {
                  }
                  oController.getListOfEnableUsers(sFinalProcessorId);
 
-             }).error(function (error) {
+             },function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
          });
 
@@ -573,10 +574,10 @@ var ProcessorController = (function() {
 
          // TODO: ADD CONFIRMATION DIALOG
          this.m_oProcessorService.redeployProcessor(sProcessorId)
-             .success(function (data) {
+             .then(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>REFRESH SCHEDULED");
                  utilsVexCloseDialogAfter(5000,oDialog);
-             }).error(function (error) {
+             },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR REFRESHING PROCESSOR");
          });
 
@@ -628,10 +629,10 @@ var ProcessorController = (function() {
              var oBody = new FormData();
              oBody.append('image', oSelectedFile);
 
-             this.m_oProcessorMediaService.uploadProcessorLogo(this.m_oInputProcessor.processorId, oBody).success(function (data) {
+             this.m_oProcessorMediaService.uploadProcessorLogo(this.m_oInputProcessor.processorId, oBody).then(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR LOGO UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
-             }).error(function (error) {
+             },function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR LOGO");
              });
          }
@@ -658,13 +659,13 @@ var ProcessorController = (function() {
              var oBody = new FormData();
              oBody.append('image', oSelectedFile);
 
-             this.m_oProcessorMediaService.uploadProcessorImage(this.m_oInputProcessor.processorId, oBody).success(function (data) {
+             this.m_oProcessorMediaService.uploadProcessorImage(this.m_oInputProcessor.processorId, oBody).then(function (data) {
 
-                 oController.m_oProcessorDetails.images.push(data.stringValue);
+                 oController.m_oProcessorDetails.images.push(data.data.stringValue);
 
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE ADDED");
                  utilsVexCloseDialogAfter(4000,oDialog);
-             }).error(function (error) {
+             },function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPLOADING IMAGE");
              });
          }
@@ -683,13 +684,13 @@ var ProcessorController = (function() {
          if (asSplit.length == 0) return;
          let sImageIndex = asSplit[asSplit.length-1];
 
-         this.m_oProcessorMediaService.removeProcessorImage(this.m_oInputProcessor.processorId, sImageIndex).success(function (data) {
+         this.m_oProcessorMediaService.removeProcessorImage(this.m_oInputProcessor.processorId, sImageIndex).then(function (data) {
 
              oController.m_oProcessorDetails.images = oController.m_oProcessorDetails.images.filter(function(e) { return e !== sImage });
 
              var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE REMOVED");
              utilsVexCloseDialogAfter(4000,oDialog);
-         }).error(function (error) {
+         },function (error) {
              utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DELETING THE IMAGE");
          });
      }

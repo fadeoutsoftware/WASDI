@@ -49,9 +49,9 @@ var ProductEditorInfoController = (function() {
             return false;
 
 
-        this.m_oProductService.updateProduct(this.m_oProduct, this.workspaceId).success(function (data, status)
+        this.m_oProductService.updateProduct(this.m_oProduct, this.workspaceId).then(function (data, status)
         {
-            if(data === "") {
+            if(data.data === "") {
                 _this.m_oProduct.metadata = oOldMetadata;
                 _this.m_oReturnProduct = _this.m_oProduct;
                 utilsJstreeUpdateLabelNode(_this.m_oReturnProduct.fileName, _this.m_oReturnProduct.productFriendlyName);
@@ -60,7 +60,7 @@ var ProductEditorInfoController = (function() {
             else
                 console.log("Error update product: there was an error to the server");
 
-        }).error(function (data,status) {
+        },function (data,status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE TO UPDATE THE PRODUCT");
 
             // restore product friendly name due to update failed
