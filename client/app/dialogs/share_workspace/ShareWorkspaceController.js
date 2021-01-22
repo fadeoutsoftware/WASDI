@@ -48,17 +48,17 @@ var ShareWorkspaceController = (function() {
         }
         var oController = this;
         this.m_oWorkspaceService.getUsersBySharedWorkspace(sWorkspaceId)
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) === false)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
-                    oController.m_aoEnableUsers = data;
+                    oController.m_aoEnableUsers = data.data;
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
                 }
 
-            }).error(function (error) {
+            },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
             });
         return true;
@@ -75,8 +75,8 @@ var ShareWorkspaceController = (function() {
         utilsRemoveSpaces(sEmail);
         var oController = this;
         this.m_oWorkspaceService.putShareWorkspace(sWorkspaceId,sEmail)
-            .success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+            .then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
             {
                 //TODO USER SAVED
             }else
@@ -85,7 +85,7 @@ var ShareWorkspaceController = (function() {
             }
             oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
         });
 
@@ -103,8 +103,8 @@ var ShareWorkspaceController = (function() {
         utilsRemoveSpaces(sEmail);
         var oController = this;
         this.m_oWorkspaceService.deleteUserSharedWorkspace(sWorkspaceId,sEmail)
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
                 {
                     //TODO USER SAVED
                 }
@@ -114,7 +114,7 @@ var ShareWorkspaceController = (function() {
                 }
                 oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
-            }).error(function (error) {
+            },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
         });
 

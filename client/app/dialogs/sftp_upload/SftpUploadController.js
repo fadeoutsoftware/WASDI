@@ -36,15 +36,15 @@ var SftpUploadController = (function() {
             return false;
         var oController = this;
         this.m_bIsVisibleLoadIcon = true;
-        this.m_oAuthService.deleteAccountUpload(this.m_oUser.userId).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
+        this.m_oAuthService.deleteAccountUpload(this.m_oUser.userId).then(function (data, status) {
+            if (data.data != null) {
+                if (data.data != undefined) {
                     oController.isCreatedAccountUpload();
                     oController.m_bIsVisibleLoadIcon = false;
                 }
             }
-        }).error(function (data, status) {
-            if(data) console.log("SftpUploadController error during delete account");
+        },function (data, status) {
+            if(data.data) console.log("SftpUploadController error during delete account");
             this.m_bIsVisibleLoadIcon = false;
         });
         return true;
@@ -54,15 +54,15 @@ var SftpUploadController = (function() {
             return false;
         this.m_bIsVisibleLoadIcon = true;
         var oController = this;
-        this.m_oAuthService.updatePasswordUpload(this.m_sEmailNewPassword).success(function (data, status) {
+        this.m_oAuthService.updatePasswordUpload(this.m_sEmailNewPassword).then(function (data, status) {
             // if (data != null) {
             //     if (data != undefined) {
             //
             //     }
             // }
             oController.m_bIsVisibleLoadIcon = false;
-        }).error(function (data, status) {
-            if(data)
+        },function (data, status) {
+            if(data.data)
                 console.log("SftpUploadController error during creation new password");
             oController.m_bIsVisibleLoadIcon = false;
         });
@@ -77,9 +77,9 @@ var SftpUploadController = (function() {
         var oController = this;
         // var sTestEmail = "a.corrado@fadeout.it";
         this.m_bIsVisibleLoadIcon = true;
-        this.m_oAuthService.createAccountUpload(this.m_sEmailNewUser).success(function (data, status) {
-            if (data !== null || status === 200) {
-                if (data !== undefined) {
+        this.m_oAuthService.createAccountUpload(this.m_sEmailNewUser).then(function (data, status) {
+            if (data.data !== null || status === 200) {
+                if (data.data !== undefined) {
                     oController.isCreatedAccountUpload();
                 }
             }
@@ -88,7 +88,7 @@ var SftpUploadController = (function() {
                 utilsVexDialogAlertTop("ERROR SERVER WAS IMPOSSIBLE CREATE ACCOUNT");
             }
             oController.m_bIsVisibleLoadIcon = false;
-        }).error(function (data, status) {
+        },function (data, status) {
             utilsVexDialogAlertTop("ERROR SERVER");
             oController.m_bIsVisibleLoadIcon = false;
         });
@@ -97,10 +97,10 @@ var SftpUploadController = (function() {
     SftpUploadController.prototype.isCreatedAccountUpload = function()
     {
         var oController = this;
-        this.m_oAuthService.isCreatedAccountUpload().success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-                    if(data === false) {
+        this.m_oAuthService.isCreatedAccountUpload().then(function (data, status) {
+            if (data.data != null) {
+                if (data.data != undefined) {
+                    if(data.data === false) {
                         oController.m_bIsAccountCreated = false;
                     }
                     else
@@ -110,7 +110,7 @@ var SftpUploadController = (function() {
                     }
                 }
             }
-        }).error(function (data, status) {
+        },function (data, status) {
             if(data)
                 console.log("SftpUploadController error during check if the account is created");
         });
@@ -118,13 +118,13 @@ var SftpUploadController = (function() {
     SftpUploadController.prototype.getListFiles = function ()
     {
         var oThat = this;
-        this.m_oAuthService.getListFilesUpload().success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
-                    oThat.m_aoListOfFiles = data;
+        this.m_oAuthService.getListFilesUpload().then(function (data, status) {
+            if (data.data != null) {
+                if (data.data != undefined) {
+                    oThat.m_aoListOfFiles = data.data;
                 }
             }
-        }).error(function (data, status) {
+        },function (data, status) {
             if(data)
                 console.log("SftpUploadController error during get-list");
         });
@@ -168,14 +168,14 @@ var SftpUploadController = (function() {
     SftpUploadController.prototype.ingestFile = function(oSelectedFile){
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
-        this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
+        this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).then(function (data, status) {
             // if (data != null) {
             //     if (data != undefined) {
             //
             //     }
             // }
-        }).error(function (data, status) {
-            if(data)
+        },function (data, status) {
+            if(data.data)
             {
                 console.log("SftpUploadController error during ingest file");
                 utilsVexDialogAlertTop("GURU MEDITATION<br>INGESTION ERROR FILE:<br>" + oSelectedFile);

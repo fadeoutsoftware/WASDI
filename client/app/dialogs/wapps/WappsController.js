@@ -41,16 +41,16 @@ var WappsController = (function() {
     WappsController.prototype.getProcessorsList = function() {
         var oController = this;
 
-        this.m_oProcessorService.getProcessorsList().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorService.getProcessorsList().then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoProcessorList = oController.setDefaultImages(data);
+                oController.m_aoProcessorList = oController.setDefaultImages(data.data);
             }
             else
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             oController.cleanAllExecuteWorkflowFields();
 
@@ -135,13 +135,13 @@ var WappsController = (function() {
 
 
         this.m_oProcessorService.runProcessor(this._selectedProcessor.processorName, sStringJSON)
-            .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) == false)
                 {
                     var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
                     utilsVexCloseDialogAfter(4000,oDialog);
 
-                    console.log('Run ' + data);
+                    console.log('Run ' + data.data);
 
                     let rootscope = oController.m_oScope.$parent;
                     while(rootscope.$parent != null || rootscope.$parent != undefined)
@@ -149,7 +149,7 @@ var WappsController = (function() {
                         rootscope = rootscope.$parent;
                     }
 
-                    let payload = { processId: data.processingIdentifier };
+                    let payload = { processId: data.data.processingIdentifier };
                     rootscope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, payload);
 
 
@@ -160,8 +160,7 @@ var WappsController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
                 }
-            })
-            .error(function (error) {
+            },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
             });
 
@@ -226,20 +225,20 @@ var WappsController = (function() {
 
         var oController = this;
 
-        this.m_oProcessorService.getHelpFromProcessor(this._selectedProcessor.processorName).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) === false)
+        this.m_oProcessorService.getHelpFromProcessor(this._selectedProcessor.processorName).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) === false)
             {
-                var sHelpMessage = data.stringValue;
+                var sHelpMessage = data.data.stringValue;
                 if(utilsIsObjectNullOrUndefined(sHelpMessage) === false )
                 {
                     try {
-                        //sHelpMessage = data.stringValue.replace("\\n", "<br>");
+                        //sHelpMessage = data.data.stringValue.replace("\\n", "<br>");
                         //sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
                         var oHelp = JSON.parse(sHelpMessage);
                         sHelpMessage = oHelp.help;
                     }
                     catch(err) {
-                        sHelpMessage = data.stringValue;
+                        sHelpMessage = data.data.stringValue;
                     }
 
                 }
@@ -262,7 +261,7 @@ var WappsController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING WAPP HELP");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING WAPP HELP");
             oController.cleanAllExecuteWorkflowFields();
         });

@@ -189,9 +189,9 @@ var WpsController = (function() {
     {
         var oController = this;
         this.m_oSnapOperationService.getWPSList()
-            .success(function(data,status)
+            .then(function(data,status)
             {
-                oController.callbackWPSList(oController,data,status)
+                oController.callbackWPSList(oController,data.data,status)
                 // if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
                 // {
                 //     oController.m_asWPSListURL = data;
@@ -201,8 +201,7 @@ var WpsController = (function() {
                 //     utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WPS LIST.");
                 //
                 // }
-            })
-            .error(function(data,status)
+            },function(data,status)
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WPS LIST.");
             });
