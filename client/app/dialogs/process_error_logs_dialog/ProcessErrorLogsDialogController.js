@@ -231,15 +231,15 @@
 
          var oController = this;
 
-         this.m_oProcessorService.getLogsCount(oProcessObjId).success(function (data, status) {
-             oCallback(data, status,oController);
-         }).error(function (data,status) {
+         this.m_oProcessorService.getLogsCount(oProcessObjId).then(function (data, status) {
+             oCallback(data.data, status,oController);
+         },function (data,status) {
              utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PROCESSOR LOGS');
          });
 
-         this.m_oProcessesLaunchedService.getProcessWorkspaceById(oProcessObjId).success(function (data, status) {
-            oController.m_oProcess = data;
-        }).error(function (data,status) {
+         this.m_oProcessesLaunchedService.getProcessWorkspaceById(oProcessObjId).then(function (data, status) {
+            oController.m_oProcess = data.data;
+        },function (data,status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR REFRESHING PROCESSOR STATUS');
         });
 
@@ -264,16 +264,16 @@
 
          // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";
          var oController = this;
-         this.m_oProcessorService.getPaginatedLogs(oProcessObjId,iStartRow,iEndRow).success(function (data, status) {
-             if (data != null)
+         this.m_oProcessorService.getPaginatedLogs(oProcessObjId,iStartRow,iEndRow).then(function (data, status) {
+             if (data.data != null)
              {
-                 if (data != undefined)
+                 if (data.data != undefined)
                  {
-                     oController.m_aoLogs = data;
+                     oController.m_aoLogs = data.data;
 
                  }
              }
-         }).error(function (data,status) {
+         },function (data,status) {
              //alert('error');
              utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET LOGS');
          });

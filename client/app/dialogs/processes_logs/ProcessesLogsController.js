@@ -91,12 +91,13 @@ var ProcessesLogsController = (function() {
         this.m_bAreProcessesLoaded = false;
 
         //this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName ).success(function (data, status)
+        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName )
+            .then(function (data, status)
         {
-            if(!utilsIsObjectNullOrUndefined(data))
+            if(!utilsIsObjectNullOrUndefined(data.data))
             {
-                if(data.length > 0){
-                    oController.m_aoProcessesLogs = oController.m_aoProcessesLogs.concat(data);
+                if(data.data.length > 0){
+                    oController.m_aoProcessesLogs = oController.m_aoProcessesLogs.concat(data.data);
                     oController.m_sHrefLogFile = oController.generateLogFile();
                     oController.calculateNextListOfProcess();
                 }
@@ -105,7 +106,7 @@ var ProcessesLogsController = (function() {
                     oController.isLoadMoreButtonClickable = false;
                 }
 
-                if(data.length < oController.m_iNumberOfProcessForRequest )
+                if(data.data.length < oController.m_iNumberOfProcessForRequest )
                 {
                     //there aren't enough processes for other requests so you can't load more processes
                     oController.isLoadMoreButtonClickable = false;
@@ -113,7 +114,7 @@ var ProcessesLogsController = (function() {
                 }
                 oController.m_bAreProcessesLoaded = true;
             }
-        }).error(function (data,status)
+        },function (data,status)
         {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PROCESSES LOGS DIALOG<br>UNABLE TO LOAD ALL PROCESSES LOGS FROM SERVER");
             oController.m_bAreProcessesLoaded = true;
