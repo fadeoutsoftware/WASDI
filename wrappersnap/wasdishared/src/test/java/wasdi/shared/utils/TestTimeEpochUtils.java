@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdishared.test.wasdi.shared.utils;
+package wasdi.shared.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
