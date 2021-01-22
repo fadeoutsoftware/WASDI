@@ -59,10 +59,9 @@ var JRCS2Controller = (function() {
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
         this.m_oSnapOperationService.runJRCS2(oJRCJson,oActiveWorkspace.workspaceId)
-            .success(function(data,status){
+            .then(function(data,status){
 
-            })
-            .error(function(){
+            },function(){
 
             });
     }

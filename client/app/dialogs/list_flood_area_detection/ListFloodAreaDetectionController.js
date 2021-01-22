@@ -85,8 +85,8 @@ var ListFloodAreaDetectionController = (function() {
         }
 
         this.m_oProcessorService.runProcessor('edriftlistflood',sJSON)
-            .success(function(data,status){
-                if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+            .then(function(data,status){
+                if( (utilsIsObjectNullOrUndefined(data.data) === false) && (status === 200))
                 {
                     var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIFT FLOODED AREA DETECTION<br>THE PROCESS HAS BEEN SCHEDULED");
                     utilsVexCloseDialogAfter(4000, oDialog);
@@ -96,8 +96,7 @@ var ListFloodAreaDetectionController = (function() {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED");
                 }
 
-            })
-            .error(function(){
+            },function(){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED");
             });
 

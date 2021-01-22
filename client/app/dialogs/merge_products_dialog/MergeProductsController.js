@@ -219,13 +219,13 @@ var MergeProductsController = (function() {
         var sCategory = "PUBLIC";
         var oController = this;
         this.m_bIsLoadedTable = false;
-        this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoEntries = data;
+                oController.m_aoEntries = data.data;
                 oController.m_aoProductListDropdown = oController.getDropdownMenuList(oController.m_aoEntries);
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET ENTRIES");
         });
     };

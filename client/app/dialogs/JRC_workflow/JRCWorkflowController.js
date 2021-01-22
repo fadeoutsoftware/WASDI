@@ -58,10 +58,9 @@ var JRCWorkflowController = (function() {
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
         this.m_oSnapOperationService.runJRCWorkflow(oJRCJson,oActiveWorkspace.workspaceId)
-            .success(function(data,status){
+            .then(function(data,status){
 
-            })
-            .error(function(){
+            },function(){
 
             });
     }

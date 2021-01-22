@@ -62,18 +62,18 @@ var OperaWappController = (function() {
         var oController = this;
         this.m_bIsRunning = true;
 
-        this.m_oSnapOperationService.runSaba(sFile,sWorkspaceId).success(function (data) {
+        this.m_oSnapOperationService.runSaba(sFile,sWorkspaceId).then(function (data) {
             oController.m_bIsRunning = false;
 
-            if (data.intValue == 200) {
-                var sFileValue = data.stringValue;
+            if (data.data.intValue == 200) {
+                var sFileValue = data.data.stringValue;
                 oController.m_sResultFromServer = "Flooded Area Map Created. File Added to Workspace " + sFileValue;
                 oController.m_sLastGeneratedFile = sFileValue;
                 oController.m_bHasResult = true;
             }
             var oDialog = utilsVexDialogAlertBottomRightCorner("OPERA FLOOD DETECTION<br>DONE");
             utilsVexCloseDialogAfter(4000,oDialog);
-        }).error(function (error) {
+        },function (error) {
             oController.m_bIsRunning = false;
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR RUNNING OPERA");
         });
@@ -89,18 +89,18 @@ var OperaWappController = (function() {
         this.m_sResultFromServer = "Publishing OPERA Result in Dewetra";
         var oController = this;
 
-        this.m_oSnapOperationService.publishSabaResult(sFile,sWorkspaceId).success(function (data) {
+        this.m_oSnapOperationService.publishSabaResult(sFile,sWorkspaceId).then(function (data) {
             oController.m_bIsRunning = false;
 
-            if (data.intValue == 200) {
-                var sFileValue = data.stringValue;
+            if (data.data.intValue == 200) {
+                var sFileValue = data.data.stringValue;
                 oController.m_sResultFromServer = "File available in Dewetra " + sFileValue;
                 oController.m_sLastGeneratedFile = sFileValue;
                 oController.m_bHasResult = false;
             }
             var oDialog = utilsVexDialogAlertBottomRightCorner("FLOODED AREA<br>PUBLISHED");
             utilsVexCloseDialogAfter(4000,oDialog);
-        }).error(function (error) {
+        },function (error) {
             oController.m_bIsRunning = false;
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR PUBLISHING OPERA");
         });
