@@ -53,14 +53,14 @@ var RasorWappController = (function() {
 
         var oLinkToController = oController;
 
-        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sRasorProcessId).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sRasorProcessId).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                if (data.status == 'DONE') {
-                    console.log('---------------------------------Run Rasor - DONE = ' + data.payload);
+                if (data.data.status == 'DONE') {
+                    console.log('---------------------------------Run Rasor - DONE = ' + data.data.payload);
                     oLinkToController.m_bIsRunning = false;
 
-                    var oResult = JSON.parse(data.payload);
+                    var oResult = JSON.parse(data.data.payload);
                     var oDialog;
                     if (oResult != null) {
                         oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " Persone";
@@ -76,34 +76,34 @@ var RasorWappController = (function() {
 
 
                 }
-                else if (data.status == 'STOPPED') {
+                else if (data.data.status == 'STOPPED') {
                     console.log('---------------------------------Run Rasor - STOPPED');
                     oLinkToController.m_sResultFromServer = "RASOR has been Stopped by the User";
                     oLinkToController.m_bIsRunning = false;
                 }
-                else if (data.status == 'ERROR') {
+                else if (data.data.status == 'ERROR') {
                     console.log('---------------------------------Run Rasor - ERROR');
                     oLinkToController.m_sResultFromServer = "There was an Error running RASOR";
                     oLinkToController.m_bIsRunning = false;
                 }
-                else if (data.status == 'WAITING') {
+                else if (data.data.status == 'WAITING') {
                     console.log('---------------------------------Run Rasor - WAITING');
                     oLinkToController.m_sResultFromServer = "RASOR App is waiting to start";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'RUNNING' || data.status == 'WAITING' || data.status == 'READY') {
+                else if (data.data.status == 'RUNNING' || data.data.status == 'WAITING' || data.data.status == 'READY') {
                     console.log('---------------------------------Run Rasor - RUNNING');
                     oLinkToController.m_sResultFromServer = "RASOR App is Running";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'CREATED') {
+                else if (data.data.status == 'CREATED') {
                     console.log('---------------------------------Run Rasor - CREATED');
                     oLinkToController.m_sResultFromServer = "RASOR App Created";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
                 else {
-                    console.log('---------------------------------Run Rasor - UNKNOWN ' + data.status);
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.processObjId, oLinkToController);
+                    console.log('---------------------------------Run Rasor - UNKNOWN ' + data.data.status);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult,1000,1,true,data.data.processObjId, oLinkToController);
                 }
             }
             else
@@ -112,7 +112,7 @@ var RasorWappController = (function() {
 
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING RASOR WAPP");
             }
-        }).error(function (error) {
+        },function (error) {
             console.log('---------------------------------Run Rasor - ERROR');
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING RASOR WAPP");
             oController.cleanAllExecuteWorkflowFields();
@@ -124,14 +124,14 @@ var RasorWappController = (function() {
 
         var oLinkToController = oController;
 
-        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sRasorProcessId).success(function (data) {
+        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sRasorProcessId).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                if (data.status == 'DONE') {
-                    console.log('---------------------------------Run Rasor - DONE = ' + data.payload);
+                if (data.data.status == 'DONE') {
+                    console.log('---------------------------------Run Rasor - DONE = ' + data.data.payload);
                     oLinkToController.m_bIsRunning = false;
 
-                    var oResult = JSON.parse(data.payload);
+                    var oResult = JSON.parse(data.data.payload);
                     var oDialog;
                     if (oResult != null) {
                         oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " People Affected Estimate";
@@ -147,34 +147,34 @@ var RasorWappController = (function() {
 
 
                 }
-                else if (data.status == 'STOPPED') {
+                else if (data.data.status == 'STOPPED') {
                     console.log('---------------------------------Run Rasor - STOPPED');
                     oLinkToController.m_sResultFromServer = "eDRIFT RASOR has been Stopped by the User";
                     oLinkToController.m_bIsRunning = false;
                 }
-                else if (data.status == 'ERROR') {
+                else if (data.data.status == 'ERROR') {
                     console.log('---------------------------------Run Rasor - ERROR');
                     oLinkToController.m_sResultFromServer = "There was an Error running eDRIFT RASOR";
                     oLinkToController.m_bIsRunning = false;
                 }
-                else if (data.status == 'WAITING') {
+                else if (data.data.status == 'WAITING') {
                     console.log('---------------------------------Run Rasor - WAITING');
                     oLinkToController.m_sResultFromServer = "eDRIFT RASOR App is waiting to start";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'RUNNING' || data.status == 'WAITING' || data.status == 'READY') {
+                else if (data.data.status == 'RUNNING' || data.data.status == 'WAITING' || data.data.status == 'READY') {
                     console.log('---------------------------------Run Rasor - RUNNING');
                     oLinkToController.m_sResultFromServer = "eDRIFT RASOR App is Running";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.data.processObjId, oLinkToController);
                 }
-                else if (data.status == 'CREATED') {
+                else if (data.data.status == 'CREATED') {
                     console.log('---------------------------------Run Rasor - CREATED');
                     oLinkToController.m_sResultFromServer = "eDRIFT RASOR App Created";
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.data.processObjId, oLinkToController);
                 }
                 else {
-                    console.log('---------------------------------Run Rasor - UNKNOWN ' + data.status);
-                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                    console.log('---------------------------------Run Rasor - UNKNOWN ' + data.data.status);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.data.processObjId, oLinkToController);
                 }
             }
             else
@@ -183,7 +183,7 @@ var RasorWappController = (function() {
 
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
             }
-        }).error(function (error) {
+        },function (error) {
             console.log('---------------------------------Run Rasor - ERROR');
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
             oController.cleanAllExecuteWorkflowFields();
@@ -206,10 +206,10 @@ var RasorWappController = (function() {
         this.m_sResultFromServer = "eDRIFT RASOR App is waiting to start";
         this.m_bIsRunning = true;
 
-        this.m_oProcessorService.runProcessor('rasoredrift2', sJSON).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorService.runProcessor('rasoredrift2', sJSON).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                var sRasorProcessId = data.processingIdentifier;
+                var sRasorProcessId = data.data.processingIdentifier;
                 console.log('Run Rasor - Proc ID = ' + sRasorProcessId);
                 oController.m_oInterval(oController.checkProcessResult2,1000,1,true,sRasorProcessId,oController);
             }
@@ -217,7 +217,7 @@ var RasorWappController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
             oController.cleanAllExecuteWorkflowFields();
             oController.m_bIsRunning = false;
@@ -241,10 +241,10 @@ var RasorWappController = (function() {
         this.m_sResultFromServer = "RASOR App is waiting to start";
         this.m_bIsRunning = true;
 
-        this.m_oProcessorService.runProcessor('rasor2', sJSON).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oProcessorService.runProcessor('rasor2', sJSON).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                var sRasorProcessId = data.processingIdentifier;
+                var sRasorProcessId = data.data.processingIdentifier;
                 console.log('Run Rasor - Proc ID = ' + sRasorProcessId);
                 oController.m_oInterval(oController.checkProcessResult,1000,1,true,sRasorProcessId,oController);
             }
@@ -252,7 +252,7 @@ var RasorWappController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
             }
-        }).error(function (error) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
             oController.cleanAllExecuteWorkflowFields();
             //oController.m_sResultFromServer = "RASOR App is waiting to start";
