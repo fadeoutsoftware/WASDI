@@ -185,12 +185,12 @@ angular.module('wasdi.TreeDirective', [])
                                     $('#jstree').jstree(true).set_icon( data.node.id, 'fa fa-spinner fa-spin');
 
                                     //if url != 0 AND (children IS empty == true)
-                                    $http.get(data.node.original.url).success(function (result_data) {
+                                    $http.get(data.node.original.url).then(function (result_data) {
                                             //reload product list
-                                            if(result_data !== "")
+                                            if(result_data.data !== "")
                                             {
                                                 var temp=[];
-                                                oController.generateMetadataTree(result_data,temp,0);
+                                                oController.generateMetadataTree(result_data.data,temp,0);
 
                                                 var iLengthChildren = temp[0].children.length;
 
@@ -205,7 +205,7 @@ angular.module('wasdi.TreeDirective', [])
                                             $("#jstree").jstree().enable_node(data.node);
                                             $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/metadata-24.png');
 
-                                        }).error(function (error) {
+                                        },function (error) {
                                             console.log("Error in: " + data.node.original.url + " the request doesn't work");
                                             data.node.original.clicked = false; //release semaphore
                                             $("#jstree").jstree().enable_node(data.node);
