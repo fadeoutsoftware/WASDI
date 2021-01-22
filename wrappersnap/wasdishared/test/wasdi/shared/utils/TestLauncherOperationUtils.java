@@ -7,30 +7,25 @@ package wasdi.shared.utils;
  *
  */
 
-/*
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.params.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.Test;
 
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
-
-
 
 
 public class TestLauncherOperationUtils {
 	
 	@Test
-	public void callTests(String sDate, Long lEpoch) {
-		testValid();
-		testError();
+	void testValid() {
+		assertTrue(LauncherOperationsUtils.isValidLauncherOperation("INGEST"));
 	}
-	
-	final void testValid() {
-		assertTrue(LauncherOperationsUtils.isValidResourceOperation("INGEST"));
-	}
-	final void testError() {
-		// Assert false
-		assertTrue(!LauncherOperationsUtils.isValidResourceOperation("vndoicdsniovn"));
+	@Test
+	void testError() {
+		assertFalse(LauncherOperationsUtils.isValidLauncherOperation("vndoicdsniovn"));
 	}
 
 }
-*/
+
