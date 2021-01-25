@@ -1669,20 +1669,9 @@ public class ProcessorsResource  {
 			
 			// Take path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-			if(!oDirFile.isDirectory()) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): directory " + oDirPath.toString() + " not found");
-				return Response.serverError().build();
-			}
-			
 			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
-			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
-			File oFile = oFilePath.toFile();
-			if(!oFile.exists()) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): zip file not found");
-				return Response.status(Status.NOT_FOUND).build();
-			}
+			
+			File oFile = new File(sProcessorZipPath);
 			
 			return zipProcessor(oFile, oProcessor);			
 		} 
