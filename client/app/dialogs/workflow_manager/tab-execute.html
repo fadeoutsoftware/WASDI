@@ -85,7 +85,7 @@
                          </span>
 
                         <div class="dropdown my-dropdown">
-                            <button class="btn btn-default dropdown-toggle" type="button"
+                            <button class="btn btn-default dropdown-toggle w-100" type="button"
                                     id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown">
                                 Products
                                 <span class="caret"></span>
@@ -103,15 +103,15 @@
 
                             </ul>
                         </div>
-
-
+                        <br>
                         <span class="selected-input">
-                             {{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}
+                            <label>{{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}</label>
                              </span>
+                        <br>
 
                     </div>
 
-                    <button class="btn btn-wasdi my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
+                    <button class="my-button my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
                             data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">
                         {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON" | translate}}
                     </button>
