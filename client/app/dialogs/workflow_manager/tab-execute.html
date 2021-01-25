@@ -11,10 +11,10 @@
     </div>
     <!-- search textbox-->
 
-    <div class="ng-scope">
+<!--    <div class="ng-scope">
         <input class="wasdi-input ng-valid ng-dirty ng-valid-parse ng-empty ng-touched" ng-model="searchText"
                placeholder="Filter WorkFlow Name..." style="margin-bottom: 15px;">
-    </div>
+    </div>-->
 
     <!--LIST OF WORKFLOWS  -->
     <div class="modal-body d-flex flex-column">
@@ -113,6 +113,19 @@
                           </div>-->
 
                     </div>
+                </div>
+            </div>
+            <div class="col-v4-auto d-flex flex-fill mt-3 mb-3">
+                <h3> {{m_oController.m_oSelectedWorkflow.name}} </h3>
+                <!-------------------------------- LIST OF PRODUCTS -------------------------------->
+                <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts">
+                </multiselect>
+
+                <div class="w-100 text-right">
+                    <button class="btn btn-primary btn-wasdi btn-mdlg" ng-click="m_oController.runWorkFlowPerProducts();" ng-class ="{ 'disabled' : m_oController.isPossibleDoUpload()}"
+                            ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()" data-dismiss="modal" >
+                        {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}
+                    </button>
                 </div>
             </div>
         </div>
