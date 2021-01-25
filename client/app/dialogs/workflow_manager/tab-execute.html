@@ -72,47 +72,51 @@
                 </div>
 
             </div>
+
+            <!--------------------   LAUNCH WORKFLOW DIALOG -------------------->
             <div class="col-v4">
-                <h3> {{m_oController.m_oSelectedMultiInputWorkflow.name}} </h3>
-                <div class="input-nodes"
-                     ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
+                <div class="well h-100 m-0 d-flex flex-column">
+                    <h3> {{m_oController.m_oSelectedMultiInputWorkflow.name}} </h3>
+                    <div class="input-nodes"
+                         ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
 
                          <span class="node-title">
                              <h4>{{node}} :</h4>
                          </span>
 
-                    <div class="dropdown my-dropdown">
-                        <button class="btn btn-default dropdown-toggle" type="button"
-                                id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown">
-                            Products
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu"
-                            aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
+                        <div class="dropdown my-dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button"
+                                    id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown">
+                                Products
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu"
+                                aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
 
-                            <li role="presentation">
-                                <a role="menuitem" tabindex="-1" href=""
-                                   ng-repeat="product in m_oController.m_asProductsName"
-                                   ng-click="m_oController.addProductInputInNode(node,product)">
-                                    {{product}}
-                                </a>
-                            </li>
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" href=""
+                                       ng-repeat="product in m_oController.m_asProductsName"
+                                       ng-click="m_oController.addProductInputInNode(node,product)">
+                                        {{product}}
+                                    </a>
+                                </li>
 
-                        </ul>
-                    </div>
+                            </ul>
+                        </div>
 
 
-                    <span class="selected-input">
+                        <span class="selected-input">
                              {{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}
                              </span>
 
+                    </div>
+
+                    <button class="btn btn-wasdi my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
+                            data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">
+                        {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON" | translate}}
+                    </button>
+
                 </div>
-
-                <button class="btn btn-wasdi my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
-                        data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">
-                    {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON" | translate}}
-                </button>
-
             </div>
 
             <!--            new COLUMN   imported from execute batch -->
