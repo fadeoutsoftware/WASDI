@@ -112,6 +112,10 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	protected String parseFreeText(String sQuery) {
 		String sOld = getFreeTextSearch(sQuery);
 
+		if(Utils.isNullOrEmpty(sOld)) {
+			return "";
+		}
+		
 		while(sOld.startsWith("*")) {
 			sOld = sOld.substring(1);
 		}
@@ -134,6 +138,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		if(bAddDot) {
 			sResult += ".";
 		}
+		sResult = "%productIdentifier=%" + sResult;
 		return sResult;
 	}
 
