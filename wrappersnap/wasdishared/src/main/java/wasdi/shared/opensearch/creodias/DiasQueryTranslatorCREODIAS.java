@@ -69,6 +69,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			sResult = "";			
 
 			if(!oAppConf.has("missions") && Utils.isNullOrEmpty(getFreeTextSearch(sQueryFromClient))) {
+				//todo infer collection from free text
 				throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
 			}
 			//first things first: append mission name + /search.json? 
@@ -90,7 +91,6 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 					QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
 					String sLocalPart = oParser.parse(sQueryPart); 
 					sResult += sLocalPart;
-					sResult += parseFreeText(sQueryFromClient);
 				}
 			}
 			sResult += parseFootPrint(sQuery);
@@ -100,6 +100,8 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 				sResult += "&timeliness=Fast-24h";
 			}
+			
+			sResult += parseFreeText(sQueryFromClient);
 
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
@@ -138,7 +140,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		if(bAddDot) {
 			sResult += ".";
 		}
-		sResult = "%productIdentifier=%" + sResult;
+		sResult = "&productIdentifier=%" + sResult + "%";
 		return sResult;
 	}
 
