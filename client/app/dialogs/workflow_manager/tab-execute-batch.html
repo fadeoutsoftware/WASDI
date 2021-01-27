@@ -58,7 +58,7 @@
                                 <strong>{{workflow.name.replaceAll("_"," ")}}</strong>
                             </h4>
                         </div>
-                        <div>
+<!--                        <div>
                             <label> <strong>Description:</strong> </label>
                             <span>{{workflow.description.replaceAll("_"," ")}}</span>
                         </div>
@@ -66,7 +66,7 @@
                         <div>
                             <label><strong>Owner:</strong> </label>
                             <span> {{workflow.userId}}</span>
-                        </div>
+                        </div>-->
                     </div>
 
 
@@ -80,6 +80,17 @@
             <div class="well h-100 m-0 d-flex flex-column">
                 <div class="" ng-hide="m_oController.m_oSelectedWorkflow == null">
                     <h3> {{m_oController.m_oSelectedWorkflow.name}} </h3>
+                    <div>
+                        <label><strong>Owner:</strong>
+                        </label>
+                        <span> {{m_oController.m_oSelectedMultiInputWorkflow.userId}}</span>
+                    </div>
+                    <div>
+                        <label> <strong>Description:</strong>
+                        </label>
+                        <span>{{m_oController.m_oSelectedMultiInputWorkflow.description.replaceAll("_", " ")}}</span>
+                    </div>
+
                     <!-------------------------------- LIST OF PRODUCTS -------------------------------->
                     <multiselect options="m_oController.m_asProductsName"
                                  selected="m_oController.m_asSelectedProducts">
