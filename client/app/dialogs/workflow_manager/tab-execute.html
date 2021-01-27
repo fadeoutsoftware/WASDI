@@ -53,18 +53,18 @@
 
                         <div>
                             <h4>
-                                <strong>{{workflow.name.replaceAll("_"," ")}}</strong>
+                                <strong>{{workflow.name.replaceAll("_", " ")}}</strong>
                             </h4>
                         </div>
-                        <div>
-                            <label> <strong>Description:</strong> </label>
-                            <span>{{workflow.description.replaceAll("_"," ")}}</span>
-                        </div>
+                        <!--     <div>
+                                 <label> <strong>Description:</strong> </label>
+                                 <span>{{workflow.description.replaceAll("_"," ")}}</span>
+                             </div>-->
 
-                        <div>
-                            <label><strong>Owner:</strong> </label>
-                            <span> {{workflow.userId}}</span>
-                        </div>
+                        <!--      <div>
+                                  <label><strong>Owner:</strong> </label>
+                                  <span> {{workflow.userId}}</span>
+                              </div>-->
                     </div>
 
 
@@ -77,6 +77,16 @@
         <div class="col-v4">
             <div class="well h-100 m-0 d-flex flex-column">
                 <h3> {{m_oController.m_oSelectedMultiInputWorkflow.name}} </h3>
+                <div>
+                    <label><strong ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">Owner:</strong>
+                    </label>
+                    <span> {{m_oController.m_oSelectedMultiInputWorkflow.userId}}</span>
+                </div>
+                <div>
+                    <label> <strong ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">Description:</strong>
+                    </label>
+                    <span>{{m_oController.m_oSelectedMultiInputWorkflow.description.replaceAll("_", " ")}}</span>
+                </div>
                 <div class="input-nodes"
                      ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
 
