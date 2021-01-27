@@ -101,7 +101,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 				sResult += "&timeliness=Fast-24h";
 			}
 			
-			sResult += parseFreeText(sQueryFromClient);
+			sResult = sResult + parseFreeText(sQueryFromClient);
 
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
@@ -140,7 +140,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		if(bAddDot) {
 			sResult += ".";
 		}
-		sResult = "&productIdentifier=%" + sResult + "%";
+		sResult = "&productIdentifier=%25" + sResult + "%25";
 		return sResult;
 	}
 
