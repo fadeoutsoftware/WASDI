@@ -266,6 +266,10 @@ var ProcessesLogsController = (function() {
         return true;
     };
 
+    ProcessesLogsController.prototype.getOperationDescription = function(sOperation) {
+        return utilsConvertOperationToDescription(sOperation);
+    }
+
 
     ProcessesLogsController.$inject = [
         '$scope',

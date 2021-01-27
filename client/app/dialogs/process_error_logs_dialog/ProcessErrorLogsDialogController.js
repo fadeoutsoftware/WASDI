@@ -270,7 +270,6 @@
                  if (data != undefined)
                  {
                      oController.m_aoLogs = data;
-
                  }
              }
          }).error(function (data,status) {
@@ -279,6 +278,10 @@
          });
          return true;
      };
+
+     ProcessErrorLogsDialogController.prototype.getOperationDescription = function(sOperation) {
+        return utilsConvertOperationToDescription(sOperation);
+    }
 
      ProcessErrorLogsDialogController.$inject = [
         '$scope',

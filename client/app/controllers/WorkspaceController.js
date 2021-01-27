@@ -412,14 +412,10 @@ var WorkspaceController = (function() {
 
         var oController = this;
 
-        utilsVexDialogConfirmWithCheckBox("DELETING WORKSPACE<br>ARE YOU SURE?", function (value) {
-            var bDeleteFile = false;
-            var bDeleteLayer = false;
+        utilsVexDialogConfirm("DELETING WORKSPACE<br>ARE YOU SURE?", function (value) {
             if (value) {
-                if (value.files == 'on')
-                    bDeleteFile = true;
-                if (value.geoserver == 'on')
-                    bDeleteLayer = true;
+                bDeleteFile = true;
+                bDeleteLayer = true;
 
                 oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
 

@@ -122,6 +122,26 @@
                                                         DEPLOYPROCESSOR
                                                     </a>
                                                 </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("DEPLOYPROCESSOR")'>
+                                                        COPYTOSFTP
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("DEPLOYPROCESSOR")'>
+                                                        FTPUPLOAD
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("DEPLOYPROCESSOR")'>
+                                                        MOSAIC
+                                                    </a>
+                                                </li>
+                                                <li role="presentation" class="ng-scope">
+                                                    <a role="menuitem" tabindex="6" href="" class="ng-binding" ng-click='m_oController.comboTypeClick("DEPLOYPROCESSOR")'>
+                                                        MULTISUBSET
+                                                    </a>
+                                                </li>                                                                                                                             
                                             </ul>
                                         </div>
                                     </th>
@@ -129,7 +149,7 @@
                                     <th><a ng-click="m_oController.applyFilters()" style="cursor:pointer"><span><i class="custom-icon fa fa-filter"></i>&nbsp;Apply Filters</span></a></th>
                                     <th><a ng-click="m_oController.resetFilters()" style="cursor:pointer"><span><i class="custom-icon fa fa-remove"></i>&nbsp;Reset Filters</span></a></th>
                                     <th></th>
-                                    <th><a ng-href="{{m_oController.m_sHrefLogFile}}" download ="download"  style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download Logs</span></a></th>
+                                    <th><a ng-href="{{m_oController.m_sHrefLogFile}}" download ="download"  style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download</span></a></th>
                                     <th></th>
                                     <th></th>
                                 </tr>
@@ -150,8 +170,8 @@
                                     <th>{{"ROOT_TABLE_HEAD_TYPE_OF_OPERATION"|translate}}</th>
                                     <th>{{"ROOT_TABLE_HEAD_NAME"|translate}}</th>
                                     <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
-                                    <th>Real size</th>
-                                    <th>Progress</th>
+                                    <th>{{"ROOT_TABLE_HEAD_SIZE"|translate}}</th>
+                                    <th>{{"ROOT_TABLE_HEAD_PROGRESS"|translate}} </th>
                                     <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
                                     <th></th>
                                     <th></th>
@@ -171,7 +191,7 @@
                                         {{oProcess.operationDate}}
                                     </td>
                                     <td>
-                                        {{oProcess.operationType}}
+                                        {{m_oController.getOperationDescription(oProcess.operationType)}}
                                     </td>
                                     <td class="text" data-toggle="tooltip" title="{{oProcess.productName}}"  data-placement="bottom">
                                         <span class="ellipsis">{{oProcess.productName}}</span>

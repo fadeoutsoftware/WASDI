@@ -560,21 +560,6 @@ var RootController = (function() {
 
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
-
-        // var oController = this;
-        // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        // this.m_oModalService.showModal({
-        //     templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
-        //     controller: "DeleteProcessController"
-        // }).then(function(modal) {
-        //     modal.element.modal();
-        //     modal.close.then(function(result) {
-        //         oController.m_oScope.Result = result ;
-        //
-        //         if(result === 'delete')
-        //             oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
-        //     });
-        // });
         this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
         return true;
     };
@@ -755,6 +740,10 @@ var RootController = (function() {
     RootController.prototype.openDocumentatonCenter = function () {
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
     }
+
+    RootController.prototype.getOperationDescription = function(sOperation) {
+        return utilsConvertOperationToDescription(sOperation);
+    }    
 
     /*********************************************************************/
     RootController.$inject = [

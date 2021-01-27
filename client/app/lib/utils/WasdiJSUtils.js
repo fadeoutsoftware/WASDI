@@ -131,19 +131,6 @@ function utilsProjectGetArrayOfValuesForParameterInOperation(oJSONInput,sPropert
         }
     }
 }
-//test
-String.prototype.distance = function (char) {
-    var index = this.indexOf(char);
-
-    if (index === -1) {
-        alert(char + " does not appear in " + this);
-    } else {
-        alert(char + " is " + (this.length - index) + " characters from the end of the string!");
-    }
-}
-
-
-
 
 function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
 
@@ -192,13 +179,13 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "WORKFLOW COMPLETED<br>READY";
             break;
         case "RUNPROCESSOR":
-            sUserMessage = "WASDI APP DONE<br>READY";
+            sUserMessage = "APP DONE<br>READY";
             break;
         case "RUNIDL":
-            sUserMessage = "IDL PROCESSOR COMPLETED<br>READY";
+            sUserMessage = "APP DONE<br>READY";
             break;
         case "RUNMATLAB":
-            sUserMessage = "MATLAB PROCESSOR COMPLETED<br>READY";
+            sUserMessage = "APP DONE<br>READY";
             break;
         case "FTPUPLOAD":
             sUserMessage = "FTP UPLOAD DONE<br>READY";
@@ -213,16 +200,16 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "REGRID DONE<br>READY";
             break;
         case "DEPLOYPROCESSOR":
-            sUserMessage = "NEW WASDI APP PUBLISHED<br>READY";
+            sUserMessage = "APP PUBLISHED<br>READY";
             break;
         case "DELETEPROCESSOR":
-            sUserMessage = "WASDI APP DELETED<br>READY";
+            sUserMessage = "APP DELETED<br>READY";
             break;
         case "INFO":
             sUserMessage =  oMessage.payload;
             break;
         case "REDEPLOYPROCESSOR":
-            sUserMessage = "WASDI APP RE DEPLOYED<br>READY";
+            sUserMessage = "APP RE DEPLOYED<br>READY";
             break;
         case "LIBRARYUPDATE":
             sUserMessage = "WASDI LIB UPDATED FOR APP<br>READY";
@@ -234,7 +221,7 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "METADATA READ<br>READY";
             break;
         default:
-            console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");
+            console.log("ERROR: GOT EMPTY MESSAGE<br>READY");
     }
 
     // Is there a feedback for the user?
@@ -249,6 +236,11 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
 
 }
 
+/**
+ * Updates the label of a node of a tree
+ * @param {*} sIdNodeInput 
+ * @param {*} sNewLabelNodeInput 
+ */
 function utilsJstreeUpdateLabelNode (sIdNodeInput, sNewLabelNodeInput)
 {
     if(utilsIsObjectNullOrUndefined(sIdNodeInput) === true)return false;
@@ -484,14 +476,6 @@ function utilsProjectCreateBodyForProcessingBandImage(sFileName, sBandName, sFil
  */
 function utilsProjectGetMapContainerSize()
 {
-    // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-    // var heightMapContainer = elementMapContainer[0].offsetHeight;
-    // var widthMapContainer = elementMapContainer[0].offsetWidth;
-    //
-    // return {
-    //     height:heightMapContainer,
-    //     width:widthMapContainer
-    // };
     return utilsProjectGetContainerSize(('#mapcontainer'));
 }
 
@@ -578,5 +562,40 @@ function utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct){
 
     }
     return oReturnValue;
+}
+
+/**
+ * Converts the WASDI Operation Code in a more user friendly description
+ * @param {String} sOperation 
+ */
+function utilsConvertOperationToDescription(sOperation) {
+    var sDescription = sOperation;
+
+    if (sOperation == "RUNPROCESSOR") {
+        sDescription = "APP"
+    }
+    else if (sOperation == "RUNIDL") {
+        sDescription = "APP"
+    }
+    else if (sOperation == "RUNMATLAB") {
+        sDescription = "APP"
+    }
+    else if (sOperation == "INGEST") {
+        sDescription = "INGEST"
+    }
+    else if (sOperation == "DOWNLOAD") {
+        sDescription = "FETCH"
+    }
+    else if (sOperation == "PUBLISHBAND") {
+        sDescription = "PUBLISH"
+    }
+    else if (sOperation == "GRAPH") {
+        sDescription = "INGEST"
+    }
+    else if (sOperation == "DEPLOYPROCESSOR") {
+        sDescription = "DEPLOY"
+    }
+
+    return sDescription;
 }
 
