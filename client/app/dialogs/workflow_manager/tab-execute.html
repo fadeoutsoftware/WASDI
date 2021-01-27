@@ -91,7 +91,7 @@
                      ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
 
                          <span class="node-title">
-                             <h4>{{node}} :</h4>
+                             <h4>{{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_LABEL" | translate}} :</h4>
                          </span>
 
                     <div class="dropdown my-dropdown">
@@ -115,6 +115,9 @@
                     </div>
                     <br>
                     <span class="selected-input">
+                        <div ng-hide="$index === null">
+                            {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_SELECTED" | translate}}
+                        </div>
                             <label>{{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}</label>
                              </span>
                     <br>
