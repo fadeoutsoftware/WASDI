@@ -9,10 +9,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import wasdi.shared.utils.ZipExtractor;
+//import wasdi.shared.utils.ZipExtractor;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -26,9 +28,15 @@ class TestZipExtractor {
 
     private ZipExtractor oZipExtractor;
     // final string pointing the path for testing
-    private final static String s_sExtractionPath = "." + File.separator + "src" + File.separator + "test" + File.separator + "java" + File.separator + "extractionFolder" + File.separator;
+    private final static String s_sStartingPath = //"." + File.separator +
+    		"src" + File.separator + "test" + File.separator +
+    		"java" + File.separator + "wasdi" + File.separator +
+    		"shared" + File.separator + "utils" + File.separator +
+    		"extractionFolder" + File.separator;
+    private static String s_sExtractionPath = ""; 
     private final static String s_sExtractionFileName = "test.zip";
 
+    
     /**
      * This methods cleans the out directory before and after each test.
      */
@@ -41,6 +49,9 @@ class TestZipExtractor {
         oZipExtractor.setTOOBIGSINGLE(1024L * 1024L * 512L); // Max size of single file, 512 MB
         oZipExtractor.setTOOMANY(30); // Max count of unzipped files
 
+        Path oWorkingDir = Paths.get(System.getProperty("user.dir"));
+        Path oExtractionPath = oWorkingDir.resolve(s_sStartingPath);
+        s_sExtractionPath = oExtractionPath.toString() + File.separator;
         // Directory clean
         // for each file
         for (File oFile : new File(s_sExtractionPath).listFiles()) {
@@ -98,9 +109,7 @@ class TestZipExtractor {
         // first unzip
         String sTempDir = "";
         try {
-        	String sPath = new String(s_sExtractionPath.substring(0, s_sExtractionPath.length()-1));
-        	sPath += "\\";
-            sTempDir = oZipExtractor.unzip(sPath + s_sExtractionFileName, sPath);
+            sTempDir = oZipExtractor.unzip(s_sExtractionPath + s_sExtractionFileName, s_sExtractionPath);
         } catch (IOException oE) {
             oE.printStackTrace();
         }
@@ -129,9 +138,7 @@ class TestZipExtractor {
         // first unzip
         String sTempDir = "";
         try {
-        	String sPath = new String(s_sExtractionPath.substring(0, s_sExtractionPath.length()-1));
-        	sPath += File.separator;
-            sTempDir = oZipExtractor.unzip(sPath + s_sExtractionFileName, sPath);
+            sTempDir = oZipExtractor.unzip(s_sExtractionPath + s_sExtractionFileName, s_sExtractionPath);
         } catch (IOException oE) {
             oE.printStackTrace();
         }

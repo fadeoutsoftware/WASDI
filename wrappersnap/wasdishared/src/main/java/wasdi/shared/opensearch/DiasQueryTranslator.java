@@ -8,7 +8,6 @@ package wasdi.shared.opensearch;
 
 import com.google.common.base.Preconditions;
 
-import wasdi.shared.opensearch.eodc.DiasQueryTranslatorEODC;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryViewModel;
 
@@ -141,6 +140,10 @@ public abstract class DiasQueryTranslator {
 			return null;
 		}
 		return sQuery.substring(0, iEndOfPrefix);
+	}
+	
+	protected String parseFreeText(String sQuery) {
+		return getFreeTextSearch(sQuery);
 	}
 
 	protected String convertRanges(String sQuery) {
@@ -506,5 +509,5 @@ public abstract class DiasQueryTranslator {
 			asInterval[1] = asTimeQuery[1];
 		}
 	}
-
+	
 }
