@@ -142,7 +142,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		if(Utils.isNullOrEmpty(sQuery)) {
 			Utils.debugLog(s_sClassName + ".getUrl: sQuery is null");
 		}
-		String sUrl = "https://finder.creodias.eu/resto/api2/collections/";
+		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
 		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		return sUrl;
 	}
