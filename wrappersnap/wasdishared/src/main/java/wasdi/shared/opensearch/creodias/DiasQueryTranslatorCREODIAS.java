@@ -66,11 +66,18 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			//				
 			//			}
 
-			sResult = "";			
-
-			if(!oAppConf.has("missions") && Utils.isNullOrEmpty(getFreeTextSearch(sQueryFromClient))) {
+			sResult = "";
+			String sMission = "";
+			sMission = getMissionFromFreeText(sQueryFromClient);
+			
+			if(!oAppConf.has("missions")) {
 				//todo infer collection from free text
-				throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
+				if(Utils.isNullOrEmpty(sMission)) {
+					throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
+				} else {
+					//since mission is not specified in the query, add /search.json here
+					sResult += sMission + "/search.json?";
+				}
 			}
 			//first things first: append mission name + /search.json? 
 
@@ -108,6 +115,26 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		}
 
 		return sResult;
+	}
+
+	private String getMissionFromFreeText(String sQueryFromClient) {
+		String sFreeText = getFreeTextSearch(sQueryFromClient);
+		if(Utils.isNullOrEmpty(sFreeText)) {
+			return sFreeText;
+		}
+		if(sFreeText.startsWith("S1A_") || sFreeText.startsWith("S1B_")) {
+			return "Sentinel1";
+		}
+		if(sFreeText.startsWith("S2A_") || sFreeText.startsWith("S2B_")) {
+			return "Sentinel2";
+		}
+		if(sFreeText.startsWith("S3A_") || sFreeText.startsWith("S3B_")) {
+			return "Sentinel3";
+		}
+		if(sFreeText.startsWith("LC08_")) {
+			return "Landsat8";
+		}
+		return null;
 	}
 
 	@Override
