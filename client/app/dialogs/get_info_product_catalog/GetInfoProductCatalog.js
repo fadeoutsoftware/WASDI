@@ -298,7 +298,6 @@ var GetInfoProductCatalogController = (function() {
         '$translate',
         'MapService',
         '$timeout'
-        // 'GetParametersOperationService'
     ];
     return GetInfoProductCatalogController;
 })();

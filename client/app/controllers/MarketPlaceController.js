@@ -351,7 +351,14 @@ var MarketPlaceController = (function() {
     }
 
     MarketPlaceController.prototype.getVotesText = function(oProcessor) {
-        
+        let sText = "";
+
+        if (oProcessor.votes>0) {
+
+        }
+        else {
+            
+        }
     }
 
     MarketPlaceController.$inject = [

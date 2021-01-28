@@ -12,7 +12,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
  * @author p.campanella
  *
  */
-public class WasdiProgreeMonitor implements ProgressMonitor {
+public class WasdiProgressMonitor implements ProgressMonitor {
 	
 	private ProcessWorkspaceRepository m_oProcessRepository = null;
 	private ProcessWorkspace m_oProcess = null;
@@ -21,7 +21,7 @@ public class WasdiProgreeMonitor implements ProgressMonitor {
 	private int m_iComputedIntervals = 0;
 	private int m_iIntervalPercStep = 5;
 	
-	public WasdiProgreeMonitor(ProcessWorkspaceRepository oProcessRepository, ProcessWorkspace oProcess) {
+	public WasdiProgressMonitor(ProcessWorkspaceRepository oProcessRepository, ProcessWorkspace oProcess) {
 		super();
 		this.m_oProcessRepository = oProcessRepository;
 		this.m_oProcess = oProcess;

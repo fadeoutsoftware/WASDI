@@ -50,10 +50,8 @@ public class WasdiScheduler
 		catch(Exception oEx)
 		{
 			//no log4j configuration
-			//System.err.println( "WasdiScheduler.main: Error Configuring log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
 			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
 			oEx.printStackTrace();
-//			System.exit(-1);
 		}
 		s_oLogger.info("main: Logger configured :-)\n");
 		

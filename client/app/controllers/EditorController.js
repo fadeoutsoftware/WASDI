@@ -4,7 +4,7 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate, oCatalogService,
+                              oSnapOperationService, oModalService, oFilterService, oTranslate, oCatalogService,
                               $window) {
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -24,7 +24,7 @@ var EditorController = (function () {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oFilterService = oFilterService;
         this.m_oModalService = oModalService;
-        this.m_oGetParametersOperationService = oGetParametersOperationService;
+
         this.m_oTranslate = oTranslate;
         this.m_oCatalogService = oCatalogService;
         // Flag to know if in the big map is 2d (true) or 3d (false)
@@ -776,11 +776,6 @@ var EditorController = (function () {
                 oController.receivedPublishBandMessage(oMessage);
                 break;
             case "DOWNLOAD":
-            case "APPLYORBIT":
-            case "CALIBRATE":
-            case "MULTILOOKING":
-            case "NDVI":
-            case "TERRAIN":
             case "GRAPH":
             case "INGEST":
             case "MOSAIC":
@@ -3272,7 +3267,6 @@ var EditorController = (function () {
         'SnapOperationService',
         'ModalService',
         'FilterService',
-        'GetParametersOperationService',
         '$translate',
         'CatalogService',
         '$window'

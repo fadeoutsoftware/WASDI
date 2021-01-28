@@ -86,11 +86,8 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
-import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
-import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
-import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
@@ -99,13 +96,8 @@ import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.MultiSubsetSetting;
-import wasdi.shared.parameters.MultilookingParameter;
-import wasdi.shared.parameters.NDVIParameter;
-import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
-import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
-import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
 import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.RegridSetting;
@@ -121,20 +113,12 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.ShapeFileUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
-import wasdi.snapopearations.ApplyOrbit;
-import wasdi.snapopearations.BaseOperation;
-import wasdi.snapopearations.Calibration;
-import wasdi.snapopearations.Filter;
 import wasdi.snapopearations.Mosaic;
-import wasdi.snapopearations.Multilooking;
-import wasdi.snapopearations.NDVI;
-import wasdi.snapopearations.RasterGeometricResampling;
-import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 
 /**
@@ -470,48 +454,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				publishBandImage(oPublishBandParameter);
 			}
 				break;
-			case APPLYORBIT: {
-				// Deserialize Parameters
-				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
-			}
-				break;
-			case CALIBRATE: {
-				// Deserialize Parameters
-				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
-			}
-				break;
-			case MULTILOOKING: {
-				// Deserialize Parameters
-				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
-			}
-				break;
-			case TERRAIN: {
-				// Deserialize Parameters
-				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
-			}
-				break;
-			case FILTER: {
-				// Deserialize Parameters
-				FilterParameter oParameter = (FilterParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeOperator(oParameter, new Filter(), LauncherOperations.FILTER);
-			}
-				break;
-			case NDVI: {
-				// Deserialize Parameters
-				NDVIParameter oParameter = (NDVIParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeOperator(oParameter, new NDVI(), LauncherOperations.NDVI);
-			}
-				break;
-			case RASTERGEOMETRICRESAMPLE: {
-				// Deserialize Parameters
-				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				rasterGeometricResample(oParameter);
-			}
-				break;
 			case GRAPH: {
 				// Execute SNAP Workflow
 				GraphParameter oParameter = (GraphParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -621,33 +563,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
-	}
-
-
-	/**
-	 * Execute a SNAP Workflow
-	 * 
-	 * @param oGraphParams
-	 * @throws Exception
-	 */
-	public void executeGraph(GraphParameter oGraphParams) throws Exception {
-
-		try {
-			WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, s_oSendToRabbit);
-			oGraphManager.execute();
-		} catch (Exception oEx) {
-			s_oLogger.error("ExecuteGraph Exception", oEx);
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-
-			// P.Campanella 2018/03/30: handle exception and close the process
-			ProcessWorkspaceRepository oRepo = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = oRepo.getProcessByProcessObjId(oGraphParams.getProcessObjId());
-			updateProcessStatus(oRepo, oProcessWorkspace, ProcessStatus.ERROR, 100);
-
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oGraphParams.getWorkspace(),
-						sError, oGraphParams.getExchange());
-		}
 	}
 
 	/**
@@ -1506,122 +1421,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 
 	/**
-	 * Generic Execute Operation Method
-	 * 
-	 * @param oParameter
-	 * @return
-	 */
-	public void executeOperator(OperatorParameter oParameter, BaseOperation oBaseOperation,
-			LauncherOperations oLauncherOperation) {
-
-		s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + oLauncherOperation);
-
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == " + oProcessWorkspace.getProcessObjId());
-
-		try {
-			if (oProcessWorkspace != null) {
-
-				// get process pid
-				// oProcessWorkspace.setPid(getProcessId());
-				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
-				oProcessWorkspace.setProgressPerc(0);
-				// update the process
-				if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
-					s_oLogger.debug("LauncherMain.ExecuteOperation: Error during process update (starting)");
-				} else {
-					s_oLogger.debug(
-							"LauncherMain.ExecuteOperation: Updated process  " + oProcessWorkspace.getProcessObjId());
-				}
-			}
-
-			// send update process message
-			if (s_oSendToRabbit != null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-				s_oLogger.debug("LauncherMain.ExecuteOperation: Error sending rabbitmq message to update process list");
-			}
-
-			// Read File Name
-			String sFile = oParameter.getSourceProductName();
-
-			final String sPath = getWorspacePath(oParameter);
-			sFile = sPath + sFile;
-
-			// Check integrity
-			if (Utils.isNullOrEmpty(sFile)) {
-				s_oLogger.debug("LauncherMain.ExecuteOperation: file is null or empty");
-
-				String sError = "The name of input file for the operation is null";
-				if (s_oSendToRabbit != null)
-					s_oSendToRabbit.SendRabbitMessage(false, oLauncherOperation.name(), oParameter.getWorkspace(),
-							sError, oParameter.getExchange());
-
-				return;
-			}
-
-			File oSourceFile = new File(sFile);
-
-			// set file size
-			setFileSizeToProcess(oSourceFile, oProcessWorkspace);
-
-			WasdiProductWriter oWriter = new WasdiProductWriter(oProcessWorkspaceRepository, oProcessWorkspace);
-
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-			s_oLogger.debug("LauncherMain.ExecuteOperation: Read Product");
-			Product oSourceProduct = oReadProduct.readSnapProduct(oSourceFile, null);
-
-			if (oSourceProduct == null) {
-				throw new Exception("LauncherMain.ExecuteOperation: Source Product null");
-			}
-
-			// Operation
-			s_oLogger.debug("LauncherMain.ExecuteOperation: Execute Operation");
-			Product oTargetProduct = oBaseOperation.getOperation(oSourceProduct, oParameter.getSettings());
-			if (oTargetProduct == null) {
-				throw new Exception("LauncherMain.ExecuteOperation: Output Product is null");
-			}
-
-			String sTargetFileName = oTargetProduct.getName();
-
-			if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
-				sTargetFileName = oParameter.getDestinationProductName();
-
-			s_oLogger.debug("LauncherMain.ExecuteOperation: Save Output Product " + sTargetFileName);
-
-			// writing product in default snap format
-			String sTargetAbsFileName = oWriter.WriteBEAMDIMAP(oTargetProduct, sPath, sTargetFileName);
-
-			if (Utils.isNullOrEmpty(sTargetAbsFileName)) {
-				throw new Exception("LauncherMain.ExecuteOperation: Tiff not created");
-			}
-
-			s_oLogger.debug("LauncherMain.ExecuteOperation: convert product to view model");
-
-			addProductToDbAndWorkspaceAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(),
-					oParameter.getExchange(), oLauncherOperation.name(), null);
-
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-		} catch (Throwable oEx) {
-			s_oLogger.error("LauncherMain.ExecuteOperation: exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			String sErrorMessage = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, oLauncherOperation.name(), oParameter.getWorkspace(),
-						sErrorMessage, oParameter.getExchange());
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-		} finally {
-			s_oLogger.debug("LauncherMain.ExecuteOperation: End");
-
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-
-		}
-	}
-
-	/**
 	 * Publish single band image
 	 * 
 	 * @param oParameter
@@ -1971,101 +1770,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		return sLayerId;
 	}
-
-	/**
-	 * SNAP Resample operation
-	 * 
-	 * @param oParameter
-	 * @return
-	 */
-	public void rasterGeometricResample(RasterGeometricResampleParameter oParameter) {
-
-		s_oLogger.debug("LauncherMain.RasterGeometricResample: Start");
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
-
-		try {
-
-			if (oProcessWorkspace != null) {
-				// get process pid
-				// oProcessWorkspace.setPid(getProcessId());
-				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
-				oProcessWorkspace.setProgressPerc(0);
-				// update the process
-				oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
-				// send update process message
-				if (s_oSendToRabbit != null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-					s_oLogger.debug(
-							"LauncherMain.RasterGeometricResample: Error sending rabbitmq message to update process list");
-				}
-			}
-
-			// Read File Name
-			String sFile = oParameter.getSourceProductName();
-			String sFileNameOnly = sFile;
-
-			// String sRootPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-			// if (!sRootPath.endsWith("/")) sRootPath += "/";
-			// final String sPath = sRootPath + oParameter.getUserId() + "/" +
-			// oParameter.getWorkspace() + "/";
-			final String sPath = getWorspacePath(oParameter);
-			sFile = sPath + sFile;
-
-			// Check integrity
-			if (Utils.isNullOrEmpty(sFile)) {
-				s_oLogger.debug("LauncherMain.RasterGeometricResample: file is null or empty");
-				return;
-			}
-
-			File oSourceFile = new File(sFile);
-
-			// FileUtils.copyFile(oDownloadedFile, oTargetFile);
-			WasdiProductWriter oWriter = new WasdiProductWriter(oProcessWorkspaceRepository, oProcessWorkspace);
-
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-
-			s_oLogger.debug("LauncherMain.RasterGeometricResample: Read Product");
-			Product oSourceProduct = oReadProduct.readSnapProduct(oSourceFile, null);
-
-			if (oSourceProduct == null) {
-				throw new Exception("LauncherMain.RasterGeometricResample: Source Product null");
-			}
-
-			// Terrain Operation
-			s_oLogger.debug("LauncherMain.RasterGeometricResample: RasterGeometricResample");
-			RasterGeometricResampling oRasterGeometricResample = new RasterGeometricResampling();
-			Product oResampledProduct = oRasterGeometricResample.getResampledProduct(oSourceProduct,
-					oParameter.getBandName());
-
-			if (oResampledProduct == null) {
-				throw new Exception("LauncherMain.RasterGeometricResample: RasterGeometricResample product null");
-			}
-
-			s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
-			String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly + "_resampled");
-
-			addProductToDbAndWorkspaceAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(),
-					oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE.name(), null);
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.RasterGeometricResample: exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			if (oProcessWorkspace != null)
-				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-
-			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.RASTERGEOMETRICRESAMPLE.name(),
-						oParameter.getWorkspace(), sError, oParameter.getExchange());
-
-		} finally {
-			s_oLogger.debug("LauncherMain.RasterGeometricResample: End");
-			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-		}
-	}
+	
 
 	public void executeMATLABProcessor(MATLABProcParameters oParameter) {
 		s_oLogger.debug("LauncherMain.executeMATLABProcessor: Start");
@@ -2654,6 +2359,32 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 	}
+	
+	/**
+	 * Execute a SNAP Workflow
+	 * 
+	 * @param oGraphParams
+	 * @throws Exception
+	 */
+	public void executeGraph(GraphParameter oGraphParams) throws Exception {
+
+		try {
+			WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, s_oSendToRabbit);
+			oGraphManager.execute();
+		} catch (Exception oEx) {
+			s_oLogger.error("ExecuteGraph Exception", oEx);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+
+			// P.Campanella 2018/03/30: handle exception and close the process
+			ProcessWorkspaceRepository oRepo = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oRepo.getProcessByProcessObjId(oGraphParams.getProcessObjId());
+			updateProcessStatus(oRepo, oProcessWorkspace, ProcessStatus.ERROR, 100);
+
+			if (s_oSendToRabbit != null)
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oGraphParams.getWorkspace(),
+						sError, oGraphParams.getExchange());
+		}
+	}	
 
 	/**
 	 * Adds a product to a Workspace. If it is already added it will not be

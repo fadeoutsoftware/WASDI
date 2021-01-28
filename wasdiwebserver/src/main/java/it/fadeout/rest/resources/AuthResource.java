@@ -2,7 +2,6 @@ package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;

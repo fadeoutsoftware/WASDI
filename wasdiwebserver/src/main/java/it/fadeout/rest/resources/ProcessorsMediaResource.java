@@ -32,7 +32,6 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.common.io.Files;
-import com.mchange.v1.util.DebugUtils;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;

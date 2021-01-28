@@ -2,7 +2,6 @@ package it.fadeout.rest.resources;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +23,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;

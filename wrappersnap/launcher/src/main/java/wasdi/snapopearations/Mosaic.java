@@ -573,7 +573,7 @@ public class Mosaic {
         	}
         	*/
         	// Save output
-			ProductIO.writeProduct(oOutputProduct, LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile, m_sOutputFileFormat, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
+			ProductIO.writeProduct(oOutputProduct, LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile, m_sOutputFileFormat, new WasdiProgressMonitor(m_oProcessRepository, m_oProcess));
 		} 
         catch (IOException e) {
 			m_oLogger.error("Mosaic.runMosaic: Exception writing output Product " + m_sOuptutFile);

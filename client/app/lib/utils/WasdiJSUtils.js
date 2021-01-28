@@ -143,28 +143,13 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "PRODUCT ADDED TO THE WORKSPACE<br>READY";
             break;
         case "PUBLISH":
-            sUserMessage = "PUBLISH DONE<br>READY";
+            sUserMessage = "LAYER PUBLISHED<br>READY";
             break;
         case "PUBLISHBAND":
             sUserMessage = "BAND PUBLISHED: " + oMessage.payload.bandName + "<br>PRODUCT: <br> " + oMessage.payload.productName + "<br>READY";
             break;
         case "UPDATEPROCESSES":
             console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());
-            break;
-        case "APPLYORBIT":
-            sUserMessage = "APPLY ORBIT COMPLETED<br>READY";
-            break;
-        case "CALIBRATE":
-            sUserMessage = "RADIOMETRIC CALIBRATE COMPLETED<br>READY";
-            break;
-        case "MULTILOOKING":
-            sUserMessage = "MULTILOOKING COMPLETED<br>READY";
-            break;
-        case "NDVI":
-            sUserMessage = "NDVI COMPLETED<br>READY";
-            break;
-        case "TERRAIN":
-            sUserMessage = "RANGE DOPPLER TERRAIN CORRECTION COMPLETED<br>READY";
             break;
         case "MOSAIC":
             sUserMessage = "MOSAIC COMPLETED<br>READY";

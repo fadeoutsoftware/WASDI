@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import org.nfs.orbits.CoverageTool.CoverageRequest;
 import org.nfs.orbits.CoverageTool.InterestArea;

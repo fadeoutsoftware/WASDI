@@ -11,32 +11,6 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.m_oController = this;
     this.m_oConstantService = oConstantsService;
 
-    /************************************ RADAR OPERATIONS ************************************/
-    this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-        return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
-    };
-
-    this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-
-        return this.Operation("radar/radiometricCalibration", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//calibrate
-    };
-    this.Multilooking = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-
-        return this.Operation("radar/multilooking", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//multilooking
-    };
-
-    /************************************ GEOMETRIC OPERATIONS ************************************/
-    this.RangeDopplerTerrainCorrection = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-
-        return this.Operation("geometric/rangeDopplerTerrainCorrection", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//terrain
-    };
-
-    /************************************ NDVI OPERATIONS ************************************/
-    this.NDVI = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-
-        return this.Operation("optical/ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//ndvi
-    };
-
     /************************************ Workflow **************************************************/
     this.postWorkFlow =  function(oFileXmlInput,sWorkspaceInput,sSourceInput,sDestinationInput){
 
@@ -107,32 +81,10 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
     };
 
-
-    this.runSaba = function (sFile, sWorkspaceId) {
-        return this.m_oHttp.get(this.APIURL + '/processing/saba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
-    }
-
-    this.publishSabaResult = function (sFile, sWorkspaceId) {
-        return this.m_oHttp.get(this.APIURL + '/processing/ddspublishsaba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
-    }
-
     this.getWPSList = function () {
         return this.m_oHttp.get(this.APIURL + '/processing/WPSlist');
     };
-
-    this.runListFlood = function (oListFlood,sWorkspaceId) {
-        return this.m_oHttp.post(this.APIURL + '/processing/asynchlistflood?workspaceId='+sWorkspaceId ,oListFlood);
-    };
-
-    this.runJRCWorkflow = function (oJRC,sWorkspaceId) {
-        return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest?workspaceId='+sWorkspaceId ,oJRC);
-    };
-    this.runJRCS2 = function (oJRC,sWorkspaceId) {
-        return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest3?workspaceId='+sWorkspaceId ,oJRC);
-    };
-    this.runJRCClassification = function (oJRC,sWorkspaceId) {
-        return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest2?workspaceId='+sWorkspaceId ,oJRC);
-    };
+    
     this.geometricMosaic = function(sWorkspaceId,sDestinationProductName,oMosaic){
         return this.m_oHttp.post(this.APIURL + '/processing/geometric/mosaic?sWorkspaceId='+sWorkspaceId
                                              +"&sDestinationProductName=" + sDestinationProductName ,oMosaic);

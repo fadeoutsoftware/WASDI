@@ -286,7 +286,7 @@ public class WasdiGraph {
 			
 			m_oLogger.info("WasdiGraph.execute: start graph");
 			
-			oProcessor.executeGraph(oContext, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
+			oProcessor.executeGraph(oContext, new WasdiProgressMonitor(m_oProcessRepository, m_oProcess));
 			
 			Product[] aoOutputs = oContext.getOutputProducts();
 			if (aoOutputs==null || aoOutputs.length==0) throw new Exception("No output created");

@@ -145,10 +145,6 @@ var MaskManagerController = (function() {
             "tanh(@)"
         ];
 
-        // this.m_oProduct = this.m_oExtras.product;
-        // this.m_oProductChecked={};
-        // // this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
-        // this.m_oGetParametersOperationService = oGetParametersOperationService;
         this.m_asBands = this.getBandList(this.m_oProduct);
 
         this.m_asShow_Tie_pointGrids = [
@@ -768,8 +764,6 @@ var MaskManagerController = (function() {
         'extras',
         '$timeout',
         'SnapOperationService'
-        // 'FilterService'
-        // 'GetParametersOperationService'
     ];
     return MaskManagerController;
 })();
