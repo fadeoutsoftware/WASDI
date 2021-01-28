@@ -70,6 +70,7 @@ import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.GraphSetting;
 import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.MosaicParameter;
+import wasdi.shared.parameters.MosaicSetting;
 import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.MultiSubsetSetting;
 import wasdi.shared.parameters.OperatorParameter;
@@ -98,6 +99,17 @@ public class ProcessingResources {
 	ServletConfig m_oServletConfig;
 
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
+	
+	@POST
+	@Path("geometric/mosaic")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("sDestinationProductName") String sDestinationProductName,
+			@QueryParam("sWorkspaceId") String sWorkspaceId, 
+			@QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
+		Utils.debugLog("ProcessingResources.Mosaic( Session: " + sSessionId + ", Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
+	}	
 
 	@POST
 	@Path("geometric/regrid")
