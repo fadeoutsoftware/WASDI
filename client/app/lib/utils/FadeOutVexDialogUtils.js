@@ -14,7 +14,6 @@ Import:
  <script>vex.defaultOptions.className = 'vex-theme-default'</script>
 * */
 
-//TODO TEST FUNCTIONS
 function utilsVexDialogConfirm(oMessage,oCallback)
 {
     if(utilsIsStrNullOrEmpty(oMessage))

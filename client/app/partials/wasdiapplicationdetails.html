@@ -199,7 +199,10 @@
                 <div class="col-12 col-md-6">
                     <div>Publication Date: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.publishDate)}}</span></div>
                     <div>Last Update: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span></div>
-                    <div>Purchased: <span class="text-green-wasdi">{{m_oController.m_oApplication.purchased}}</span></div>
+                    <!--div>Purchased: <span class="text-green-wasdi">{{m_oController.m_oApplication.purchased}}</span></div-->
+                    <div>Executions: <span class="text-green-wasdi">{{m_oController.m_oStats.runs}}</span></div>
+                    <div>Success rate: <span class="text-green-wasdi">{{m_oController.getStatSuccess()}}</span>%</div>
+                    <div>Medium Time [min]: <span class="text-green-wasdi">{{m_oController.m_oStats.mediumTime}}</span></div>
                 </div>
 
             </div>

@@ -8,7 +8,6 @@ package wasdi.shared.opensearch;
 
 import com.google.common.base.Preconditions;
 
-import wasdi.shared.opensearch.eodc.DiasQueryTranslatorEODC;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryViewModel;
 
@@ -20,7 +19,7 @@ import wasdi.shared.viewmodels.QueryViewModel;
  *
  */
 public abstract class DiasQueryTranslator {
-	
+
 	/**
 	 * token of offset
 	 */
@@ -53,16 +52,16 @@ public abstract class DiasQueryTranslator {
 	 * Token of sensor mode
 	 */
 	private static final String s_sSENSORMODE = "sensoroperationalmode:";
-	
+
 	protected String m_sParserConfigPath;
 	protected String m_sAppConfigPath;
-	
-	
+
+
 	public String translateAndEncode(String sQueryFromClient) {
 		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQueryFromClient));
 	}
-	
+
 	public void setParserConfigPath(String sParserConfigPath) {
 		if(null==sParserConfigPath) {
 			Utils.debugLog("DiasQueryTranslator.setParserConfigPath: warning: parser config path is null");
@@ -71,7 +70,7 @@ public abstract class DiasQueryTranslator {
 		}
 		this.m_sParserConfigPath = sParserConfigPath;
 	}
-	
+
 	public void setAppconfigPath(String sAppConfigPath) {
 		if(null==sAppConfigPath) {
 			Utils.debugLog("DiasQueryTranslator.setParserConfigPath: warning: app config path is null");
@@ -80,14 +79,14 @@ public abstract class DiasQueryTranslator {
 		}
 		this.m_sAppConfigPath = sAppConfigPath;
 	}
-	
+
 	/**
 	 * translates from WASDI query (OpenSearch) to <derived class> format
 	 * @param sQueryFromClient WASDI Query
 	 * @return Provider Query
 	 */
 	protected abstract String translate(String sQueryFromClient);
-	
+
 	/**
 	 * Encodes a Query 
 	 * @param sDecoded
@@ -100,7 +99,7 @@ public abstract class DiasQueryTranslator {
 		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
 		return sResult;
 	}
-	
+
 	/**
 	 * Ensure that the input query has right spaces
 	 * @param sInput
@@ -117,8 +116,9 @@ public abstract class DiasQueryTranslator {
 		sQuery = sQuery.replaceAll(" \\]", "\\]");
 		sQuery = sQuery.replaceAll("\\] ", "\\]");
 		sQuery = sQuery.replaceAll("POLYGON", "POLYGON ");
+		//remove space before and after colons
 		sQuery = sQuery.replaceAll("\\: ", "\\:");
-		sQuery = sQuery.replaceAll(" \\: ", "\\:");
+		sQuery = sQuery.replaceAll(" \\:", "\\:");
 
 		sQuery = sQuery.replaceAll("AND", " AND ");
 		sQuery = sQuery.trim().replaceAll(" +", " ");
@@ -126,28 +126,48 @@ public abstract class DiasQueryTranslator {
 		return sQuery;
 	}
 
+	protected String getFreeTextSearch(String sQuery) {
+		//0. footprint not at the beginning
+		//1. no footprint and beginPosition not at the beginning
+		String sFootprint = " AND ( footprint";
+		int iEndOfPrefix = sQuery.indexOf(sFootprint);
+		if(iEndOfPrefix < 0) {
+			//then maybe no footprint has been specified
+			iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
+		}
+		if(iEndOfPrefix < 0) {
+			//no free text, return
+			return null;
+		}
+		return sQuery.substring(0, iEndOfPrefix);
+	}
+	
+	protected String parseFreeText(String sQuery) {
+		return getFreeTextSearch(sQuery);
+	}
+
 	protected String convertRanges(String sQuery) {
 		return sQuery;
 	}
-	
-	
+
+
 	protected abstract String parseTimeFrame(String sQuery);
 	protected abstract String parseFootPrint(String sQuery);
-	
+
 	/**
 	 * Convert the textual WASDI client Query in a View Mode
 	 * @param sQuery
 	 * @return
 	 */
 	protected QueryViewModel parseWasdiClientQuery(String sQuery) {
-		
+
 		QueryViewModel oResult = new QueryViewModel();
-		
+
 		try {
-			
+
 			// Prepare the text that is uniform			
 			sQuery = prepareQuery(sQuery);
-			
+
 			// Try to get offset
 			int iOffset = -1;
 			try {
@@ -155,10 +175,10 @@ public abstract class DiasQueryTranslator {
 			} catch (Exception oE) {
 				Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse offset: " + oE);
 			}
-			
+
 			oResult.offset = iOffset;
-			
-			
+
+
 			// Try to get limit
 			int iLimit = 10;
 			try {
@@ -166,11 +186,11 @@ public abstract class DiasQueryTranslator {
 			} catch (Exception oE) {
 				Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse limit: " + oE);
 			}
-			
+
 			oResult.limit = iLimit;
-			
+
 			// Try to get footprint
-			
+
 			try {
 				if(sQuery.contains("footprint")) {
 					String sIntro = "( footprint:\"intersects ( POLYGON ( ( ";
@@ -210,7 +230,7 @@ public abstract class DiasQueryTranslator {
 								-180 <= dEast && 180 >= dEast &&
 								-180 <= dWest && 180 >= dWest
 								) {
-							
+
 							oResult.north = dNorth;
 							oResult.south = dSouth;
 							oResult.east = dEast;
@@ -230,8 +250,8 @@ public abstract class DiasQueryTranslator {
 			} catch (Exception oE) {
 				Utils.log("ERROR", "DiasQueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: " + oE);
 			}
-			
-			
+
+
 			// Try to get time filters
 			String[] asInterval = {null, null};
 
@@ -246,25 +266,25 @@ public abstract class DiasQueryTranslator {
 			parseInterval(sQuery, sKeyword, asInterval);
 			oResult.endFromDate = asInterval[0];
 			oResult.endToDate = asInterval[1];
-			
-			
+
+
 			// Try to get info about S1
 			parseSentinel1(sQuery, oResult);
-			
-			
+
+
 			// Try to get Info About S2
 			parseSentinel2(sQuery, oResult);
-			
+
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 		}
-		
-		
+
+
 		return oResult;
 	}
-	
-	
+
+
 	/**
 	 * Fills the Query View Model with S1 info
 	 * @param sQuery
@@ -273,11 +293,11 @@ public abstract class DiasQueryTranslator {
 	private void parseSentinel1(String sQuery, QueryViewModel oResult) {
 		try {
 			if(sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_SENTINEL_1)) {
-				
+
 				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_1);
-				
+
 				if(iStart >= 0) {
-					
+
 					iStart += s_sPLATFORMNAME_SENTINEL_1.length();
 					int iEnd = sQuery.indexOf(')', iStart);
 					if(iEnd < 0) {
@@ -286,9 +306,9 @@ public abstract class DiasQueryTranslator {
 						sQuery = sQuery.substring(iStart, iEnd);
 					}
 					sQuery = sQuery.trim();
-					
+
 					oResult.platformName = "Sentinel-1";
-					
+
 					//check for product type
 					try {
 						if(sQuery.contains(DiasQueryTranslator.s_sPRODUCTTYPE)) {
@@ -310,13 +330,13 @@ public abstract class DiasQueryTranslator {
 							}
 							String sType = sQuery.substring(iStart, iEnd);
 							sType = sType.trim();							
-							
+
 							oResult.productType = sType;
 						}
 					} catch (Exception oE) {
 						Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): error while parsing product type: " + oE);
 					}
-					
+
 					//check for product type
 					try {
 						if(sQuery.contains(DiasQueryTranslator.s_sSENSORMODE)) {
@@ -338,7 +358,7 @@ public abstract class DiasQueryTranslator {
 							}
 							String sMode = sQuery.substring(iStart, iEnd);
 							sMode = sMode.trim();							
-							
+
 							oResult.sensorMode = sMode;
 						}
 					} catch (Exception oE) {
@@ -369,9 +389,9 @@ public abstract class DiasQueryTranslator {
 							}
 							String sOrbit = sQuery.substring(iStart, iEnd);
 							int iOrbit = Integer.parseInt(sOrbit);
-							
+
 							oResult.relativeOrbit = iOrbit;
-							
+
 						} catch (Exception oE) {
 							Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery(" + sQuery + " ): error while parsing relative orbit: " + oE );
 						}
@@ -382,21 +402,21 @@ public abstract class DiasQueryTranslator {
 			Utils.debugLog("DiasQueryTranslatorEODC.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}		
 	}
-	
-	
+
+
 	/**
 	 * Fill the Query View Model with the S2 values
 	 * @param sQuery
 	 * @param oResult
 	 */
 	private void parseSentinel2(String sQuery, QueryViewModel oResult) {
-		
+
 		try {
 			if(sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_SENTINEL_2)) {
 				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_2);
-				
+
 				if(iStart >= 0) {
-					
+
 					iStart += s_sPLATFORMNAME_SENTINEL_2.length();
 					int iEnd = sQuery.indexOf(')', iStart);
 					if(iEnd < 0 ) {
@@ -404,26 +424,26 @@ public abstract class DiasQueryTranslator {
 					} else {
 						sQuery = sQuery.substring(iStart, iEnd);
 					}
-					
+
 					oResult.platformName = "Sentinel-2";
-	
+
 					//check for cloud coverage
 					try {
 						if(sQuery.contains(DiasQueryTranslator.s_sCLOUDCOVERPERCENTAGE)) {
 							iStart = sQuery.indexOf(s_sCLOUDCOVERPERCENTAGE);
-							
+
 							if(iStart >= 0) {
-								
+
 								iStart += s_sCLOUDCOVERPERCENTAGE.length();
 								iEnd = sQuery.indexOf(']', iStart);
 								String sSubQuery = sQuery.substring(iStart, iEnd);
-		
+
 								String[] asCloudLimits = sSubQuery.split(" TO ");
-		
+
 								//these variables could be omitted, but in this way we check we are reading numbers
 								double dLo = Double.parseDouble(asCloudLimits[0]);
 								double dUp = Double.parseDouble(asCloudLimits[1]);
-								
+
 								oResult.cloudCoverageFrom = dLo;
 								oResult.cloudCoverageTo = dUp;
 							}
@@ -437,7 +457,7 @@ public abstract class DiasQueryTranslator {
 			Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): " + oE);
 		}
 	}	
-	
+
 	/**
 	 * read a int from the query
 	 * @param sQuery
@@ -463,7 +483,7 @@ public abstract class DiasQueryTranslator {
 		}
 		return iTemp;
 	}
-	
+
 	/**
 	 * Parse Query text Interval
 	 * @param sQuery

@@ -62,6 +62,29 @@ public class WasdiFileUtils {
 		}
 	}
 
+	public static String getFileNameWithoutExtensionsAndTrailingDots(String sInputFile) {
+			if(Utils.isNullOrEmpty(sInputFile)) {
+				Utils.debugLog("Utils.GetFileNameExtension: input null or empty");
+				return sInputFile;
+			}
+			String sReturn = sInputFile;
+			
+			//remove trailing dots: filename....
+			while(sReturn.endsWith(".")) {
+				sReturn = sReturn.replaceAll("\\.$", "");
+			}
+			//remove two-letters, e.g., .gz, .7z
+			sReturn = sReturn.replaceAll("\\...$", "");			
+			//remove three-letters, e.g., .zip, .tar, .rar....
+			sReturn = sReturn.replaceAll("\\....", "");
+			
+			//again, remove trailing dots: filename...zip
+			while(sReturn.endsWith(".")) {
+				sReturn = sReturn.replaceAll("\\.$", "");
+			}
+			return sReturn;
+		}
+
 	public static JSONObject loadJsonFromFile(String sFileFullPath) {
 		Preconditions.checkNotNull(sFileFullPath);
 
@@ -85,8 +108,8 @@ public class WasdiFileUtils {
 	 * could lead to errors in path specifications. In particular 
 	 * Windows-based systems use the char '\' as file separator and
 	 * Unix Based systems use the char '/'.
-	 * With this method the system file separator is used and its initialization 
-	 * i done by the JVM
+	 * With this method the system file separator is used and its 
+	 * Initialisation is done by the JVM
 	 * @param sPathString
 	 * @return
 	 */

@@ -63,7 +63,6 @@ var EditorController = (function () {
             viewportWidth: 0,
             viewportHeight: 0
         };
-        // this.m_oImageMapDirectivePayload = {};
 
         this.m_iPanScalingValue = 1.5;
 
@@ -114,6 +113,8 @@ var EditorController = (function () {
         this.m_aoProductsLayersIn3DMapArentGeoreferenced = [];
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
+        // add the GeoSearch plugin bar
+        oMapService.initGeoSearchPluginForOpenStreetMap({"position":'bottomRight'});
         oMapService.removeLayersFromMap();
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
@@ -209,126 +210,14 @@ var EditorController = (function () {
 
             // --- Processor ---
             {
-                name: "",
-                icon: "icon-document-gear",
-                caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
-                onClick: "",
-                subMenu: [
-
-                    {
-                        name: "",// New Processor
-                        caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
-                        subMenu: [],
-                        onClick: this.openProcessorDialog,
-                        icon: "fa fa-lg fa-plus-square"
-                    },
-                    {
-                        name: "",// E DRIFT FOOD EVENT
-                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_EVENT",
-                        subMenu: [],
-                        onClick: this.open_eDriftFloodEventDialog,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//EDriftFloodAutomaticChainController
-                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
-                        subMenu: [],
-                        onClick: this.openEDriftFloodAutomaticChain,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//LIST FLOOD AREA DETECTION
-                        caption_i18n: "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
-                        subMenu: [],
-                        onClick: this.openListtFloodAreaDetectionDialog,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//EDriftCheckImagesAvailability
-                        caption_i18n: "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
-                        subMenu: [],
-                        onClick: this.openEDriftCheckImagesAvailability,
-                        icon: "fa fa-lg fa-rocket"
-                    },
-                    {
-                        name: "",//RASOR
-                        caption_i18n: "EDITOR_OPERATION_TITLE_RASOR",
-                        subMenu: [],
-                        onClick: this.openRasorDialog,
-                        icon: "fa fa-lg fa-users"
-                    },
-                    // --- WPS ---
-                    {
-                        name: "WPS",
-                        icon: "fa fa-tasks",
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_WPS",
-                        onClick: this.openWPSDialog,
-                        subMenu: []
-                    },
-                    {
-                        name: "Mosaic",
-                        icon: "fa fa-tasks",
-                        caption_i18n: "EDITOR_OPERATION_TITLE_MOSAIC",
-                        onClick: this.openMosaicDialog,
-                        subMenu: []
-                    }
-                ]
-            },
-            // --- Optical ---
-            {
-                name: "",
-                icon: "icon-eye",
-                caption_i18n: "EDITOR_TOOLTIP_ICON_EYE",
-                onClick: "",
-                subMenu: [
-                    {
-                        name: "",//range doppler terrain correction
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI",
-                        subMenu: [],
-                        onClick: this.openNDVIDialogInNavBar,
-                        icon: ""
-                    }
-                ]
-            },
-            // --- Radar ---
-            {
-                name: "",
-                icon: "icon-radar",
-                caption_i18n: "EDITOR_TOOLTIP_ICON_RADAR",
-                onClick: "",
-                subMenu: [
-                    {
-                        name: "",//apply orbit
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_ORBIT",
-                        subMenu: [],
-                        onClick: this.openApplyOrbitDialogInNavBar,
-                        icon: "icon-applyorbit-operations"
-                    },
-                    {
-                        name: "",//multilooking
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING",
-                        subMenu: [],
-                        onClick: this.openMultilookingDialogInNavBar,
-                        icon: "icon-multilooking-operations"
-                    },
-                    {
-                        name: "",// radiometric calibrate
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE",
-                        subMenu: [],
-                        onClick: this.openRadiometricCalibrationDialogInNavBar,
-                        icon: "icon-radiometriccalibrate-operations"
-                    },
-                    {
-                        name: "",//range doppler terrain correction
-                        caption_i18n: "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
-                        subMenu: [],
-                        onClick: this.rangeDopplerTerrainCorrectionDialogInNavBar,
-                        icon: "icon-range-doppler-terrain-correction-operations"
-                    }
-                ]
+                name: "",// New Processor
+                caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                subMenu: [],
+                onClick: this.openProcessorDialog,
+                icon: "fa fa-lg fa-plus-square"
             },
             {
-                name: "",//WAPPS
+                name: "",//Share
                 caption_i18n: "EDITOR_OPERATION_TITLE_SHARE",
                 subMenu: [],
                 onClick: this.openShareDialog,
@@ -1050,12 +939,6 @@ var EditorController = (function () {
         this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox = sBoundingBox;
         this.m_oUndoRedoBoundigBoxesZoom.actualLayerId = sLayerId;
 
-        // else
-        // {
-        //
-        //     // this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox  = sBoundingBox;
-        //     // this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType = sType;
-        // }
         return true;
     };
     /**
@@ -1409,13 +1292,11 @@ var EditorController = (function () {
             }
         }
 
-
         // Anyway, show the preview
 
         // Get Preview Dimension
         // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
         angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
-
 
         // Initialize the info for the Image Preview Directive
         this.m_oImagePreviewDirectivePayload.originalBandHeight = oBand.height;
@@ -1425,17 +1306,6 @@ var EditorController = (function () {
         this.m_oImagePreviewDirectivePayload.viewportHeight = oBand.height;
         this.m_oImagePreviewDirectivePayload.viewportWidth = oBand.width;
 
-        // The preview is available?
-        // if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
-        // {
-        // if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
-        // if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
-        //     // Yes call API also for preview
-        //     var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,
-        //                             widthImagePreview, heightImagePreview,oBand.colorManipulation);
-        // // Show it
-        // oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
-        // }
     };
 
     /**
@@ -1648,29 +1518,10 @@ var EditorController = (function () {
 
             //if the layers isn't georeferenced remove the Corresponding rectangle
             this.removeRedSquareIn3DMap(sLayerId);
-            // var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
-            // for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
-            // {
-            //
-            //     var sProductLayerId = "";
-            //     if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
-            //         utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
-            //     {
-            //         sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
-            //     }
-            //     if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
-            //     {
-            //         this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
-            //         utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
-            //         break;
-            //     }
-            // }
+
             //undo - redo
             this.removeActualBoundingBox(oBand.layerId);
             this.removeUndoBoundingBox(oBand.layerId);
-
-            // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-            // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
 
         // Deselect the node
@@ -1988,30 +1839,6 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openWorkflowDialog = function () {
-        var oController = this;
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/workflow_operation/WorkFlowView.html",
-            controller: "WorkFlowController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-            });
-        });
-
-        return true;
-    };
-
-    /**
-     *
-     * @returns {boolean}
-     */
     EditorController.prototype.openProcessorDialog = function (oWindow) {
         var oController;
         if (utilsIsObjectNullOrUndefined(oWindow) === true) {
@@ -2037,39 +1864,8 @@ var EditorController = (function () {
 
         return true;
     };
-    /**
-     *
-     * @returns {boolean}
-     */
-    EditorController.prototype.open_eDriftFloodEventDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/eDrift_Flood_Event_Dialog/eDrift_Flood_Event_DialogView.html",
-            controller: "eDriftFloodEventDialogController",
-            inputs: {
-                extras: {
-                    processor: null
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal({
-                backdrop: 'static',
-                keyboard: false
-            });
-            modal.close.then(function (oResult) {
 
 
-            });
-        });
-
-        return true;
-    };
     /**
      * openWPSDialog
      * @returns {boolean}
@@ -2127,7 +1923,6 @@ var EditorController = (function () {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -2185,132 +1980,19 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     WorkSpaceId: oController.m_oActiveWorkspace.workspaceId
-                    // products:oController.m_aoProducts,
-                    // workflowId:oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
         return true;
     };
 
-    /**
-     * getApplyOrbit
-     * @param oController
-     * @param sSourceFileName
-     * @param sDestinationFileName
-     * @param sWorkspaceId
-     * @param sOptions
-     * @param oFunctionSuccess
-     * @param oFunctionError
-     */
-    EditorController.prototype.getApplyOrbit = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
-    };
-    /**
-     * getMultilooking
-     * @param oController
-     * @param sSourceFileName
-     * @param sDestinationFileName
-     * @param sWorkspaceId
-     * @param sOptions
-     * @param oFunctionSuccess
-     * @param oFunctionError
-     */
-    EditorController.prototype.getMultilooking = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
-    };
-    /**
-     * getRadiometricCalibration
-     * @param oController
-     * @param sSourceFileName
-     * @param sDestinationFileName
-     * @param sWorkspaceId
-     * @param sOptions
-     * @param oFunctionSuccess
-     * @param oFunctionError
-     */
-    EditorController.prototype.getRadiometricCalibration = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
-    };
-    /**
-     * getRangeDopplerTerrainCorrection
-     * @param oController
-     * @param sSourceFileName
-     * @param sDestinationFileName
-     * @param sWorkspaceId
-     * @param sOptions
-     * @param oFunctionSuccess
-     * @param oFunctionError
-     */
-    EditorController.prototype.getRangeDopplerTerrainCorrection = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
-    };
 
-    EditorController.prototype.getNDVI = function (oController, sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions, oFunctionSuccess, oFunctionError) {
-        oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, sWorkspaceId, sOptions).success(oFunctionSuccess).error(oFunctionError);
-    };
-
-    /**
-     * openGenerateOperationDialog
-     * @param oOperation
-     * @param sName
-     * @param oOperationServerRequest
-     * @returns {boolean}
-     */
-    EditorController.prototype.openGenerateOperationDialog = function (oOperation, sName, oOperationServerRequest) {
-        if ((utilsIsObjectNullOrUndefined(oOperation) === true) || (utilsIsStrNullOrEmpty(sName) === true) ||
-            (utilsIsObjectNullOrUndefined(oOperationServerRequest) === true)) {
-            return false;
-        }
-        // oOperationServerRequest = this.m_oSnapOperationService.ApplyOrbit();
-        var oController = this;
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/generate_automatic_operation_dialog/GenerateAutomaticOperationDialogView.html",
-            controller: "GenerateAutomaticOperationDialogController",
-            inputs: {
-                extras: {
-                    getParameters: oOperation,
-                    products: oController.m_aoProducts,
-                    nameDialog: sName
-                    //     products:oController.m_aoProducts,
-                    //     workflowId:oController.m_oActiveWorkspace.workspaceId
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE " + sName.toUpperCase() + " OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-
-                if (oResult == "close")
-                    return false;
-
-                var iNumberOfProduct = oResult.length;
-                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
-                    var oFunctionSuccess = function (data) {
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                    };
-                    var oFunctionError = function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION " + sName.toUpperCase() + " DOESN'T WORK");
-                    }
-                    oOperationServerRequest(oController, oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options, oFunctionSuccess, oFunctionError);
-                }
-                return true;
-            });
-        });
-
-        return true;
-    }
     /**
      * Handle click on "show mask" from image editor
      */
@@ -2439,82 +2121,6 @@ var EditorController = (function () {
         });
     };
 
-    /**
-     * openListtFloodAreaDetectionDialog
-     * @param oWindow
-     */
-    EditorController.prototype.openListtFloodAreaDetectionDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/list_flood_area_detection/ListFloodAreaDetectionView.html",
-            controller: "ListFloodAreaDetectionController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-
-    EditorController.prototype.openEDriftCheckImagesAvailability = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/edrift_checkimagestool/edrift_checkimagestool.html",
-            controller: "EdriftCheckImagesTool",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-
-
-    EditorController.prototype.openEDriftFloodAutomaticChain = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/eDrift_flood_automatic_chain/EDriftFloodAutomaticChainView.html",
-            controller: "EDriftFloodAutomaticChainController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
 
     EditorController.prototype.openUploadFileDialog = function (oWindow) {
         var oController;
@@ -2540,307 +2146,7 @@ var EditorController = (function () {
         });
     };
 
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct, oWindow) {
 
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/apply_orbit_operation/ApplyOrbitDialog.html",
-            controller: "ApplyOrbitController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                    selectedProduct: oSelectedProduct
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-                if (oResult == "close")
-                    return false;
-                var iNumberOfProduct = oResult.length;
-                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
-                    // oController.m_oScope.Result = oResult;
-                    oController.m_oSnapOperationService.ApplyOrbit(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
-                        .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
-                    });
-                }
-
-                return true;
-            });
-        });
-
-        return true;
-    };
-
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openRasorDialog = function (oWindow) {
-
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/rasor/RasorWappDialog.html",
-            controller: "RasorWappController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-
-                return true;
-            });
-        });
-
-        return true;
-    };
-
-
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openApplyOrbitDialogInNavBar = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oWindow.openApplyOrbitDialog(null, oController);
-    }
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openRadiometricCalibrationDialog = function (oSelectedProduct, oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/radiometric_calibration_operation/RadiometricCalibrationDialog.html",
-            controller: "RadiometricCalibrationController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                    selectedProduct: oSelectedProduct
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE NDVI OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-                if (oResult == "close")
-                    return false;
-                var iNumberOfProduct = oResult.length;
-                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
-                    // oController.m_oScope.Result = oResult;
-                    oController.m_oSnapOperationService.Calibrate(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
-                        .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RADIOMETRIC CALIBRATION DOESN'T WORK");
-                    });
-                }
-                return true;
-            });
-        });
-
-        return true;
-    };
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openRadiometricCalibrationDialogInNavBar = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oWindow.openRadiometricCalibrationDialog(null, oController);
-    }
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openMultilookingDialog = function (oSelectedProduct, oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/multilooking_operation/MultilookingDialog.html",
-            controller: "MultilookingController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                    selectedProduct: oSelectedProduct
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE MULTILOOKING OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-                if (oResult == "close")
-                    return false;
-
-                var iNumberOfProduct = oResult.length;
-                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
-                    oController.m_oSnapOperationService.Multilooking(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId, oResult[[iIndexProduct]].options)
-                        .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
-                    });
-                }
-
-                return true;
-                // oController.m_oScope.Result = oResult;
-                // oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                //     .success(function (data) {
-                //
-                //     }).error(function (error) {
-                //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
-                // });
-                // return true;
-
-            });
-        });
-
-        return true;
-    };
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openMultilookingDialogInNavBar = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oWindow.openMultilookingDialog(null, oController);
-    }
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openNDVIDialog = function (oSelectedProduct, oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/NDVI_operation/NDVIDialog.html",
-            controller: "NDVIController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                    selectedProduct: oSelectedProduct
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE NDVI OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-                if (oResult == "close")
-                    return false;
-                var iNumberOfSelectedProducts = oResult.length;
-                for (var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts; iIndexSelectedProduct++) {
-                    var oProduct = oResult[iIndexSelectedProduct];
-                    oController.m_oSnapOperationService.NDVI(oProduct.sourceFileName, oProduct.destinationFileName, oController.m_oActiveWorkspace.workspaceId, oProduct.options)
-                        .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
-                    });
-                }
-                // oController.m_oScope.Result = oResult;
-                // oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                //     .success(function (data) {
-                //         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                //     }).error(function (error) {
-                //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
-                // });
-                return true;
-            });
-        });
-
-        return true;
-    };
-
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openNDVIDialogInNavBar = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oWindow.openNDVIDialog(null, oController);
-    }
     /**
      * When user right click on a product and choose 'Properties' a dialog
      * will be opened to show product properties
@@ -2869,58 +2175,6 @@ var EditorController = (function () {
 
         return true;
     };
-
-
-    /**
-     *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct, oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/range_doppler_terrain_correction_operation/RangeDopplerTerrainCorrectionDialog.html",
-            controller: "RangeDopplerTerrainCorrectionController",
-            inputs: {
-                extras: {
-                    products: oController.m_aoProducts,
-                    selectedProduct: oSelectedProduct
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-                if (utilsIsObjectNullOrUndefined(oResult) == true) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE RANGE DOPPLER TERRAIN CORRECTION OPTIONS ARE WRONG OR EMPTY!");
-                    return false;
-                }
-                if (oResult == "close")
-                    return false;
-
-                var iNumberOfProduct = oResult.length;
-                for (var iIndexProduct = 0; iIndexProduct < iNumberOfProduct; iIndexProduct++) {
-                    // oController.m_oScope.Result = oResult;
-                    oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
-                        .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RANGE DOPPLER TERRATIN CORRECTION DOESN'T WORK");
-                    });
-                }
-                return true;
-            });
-        });
-
-        return true;
-    };
-
 
     EditorController.prototype.openTransferToFtpDialog = function (oSelectedProduct, oWindow) {
 
@@ -2951,19 +2205,6 @@ var EditorController = (function () {
         return true;
     };
 
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.rangeDopplerTerrainCorrectionDialogInNavBar = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oWindow.rangeDopplerTerrainCorrectionDialog(null, oController);
-    }
     /**
      *
      * @param oSelectedBand
@@ -3023,7 +2264,6 @@ var EditorController = (function () {
 
 
     EditorController.prototype.openEditPanelDialog = function (oBand, oProduct) {
-        // if(utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
 
         var oController = this;
         var oFinalSelectedBand = oBand;
@@ -3338,28 +2578,7 @@ var EditorController = (function () {
 
         //processing product with the new color manipulation
     };
-    // EditorController.prototype.resetColourManipulation = function()
-    // {
-    //     //TODO REMOVE NEW BAND
-    //     this.removeBandImage(oBand)
-    //     //TODO ADD OLD BAND
-    //     this.addLayerMap2D(sLayerId);
-    // };
-    // EditorController.prototype.modifyColourManipulation = function(iMin,iMax,iAverage,sLayerId,oBand)
-    // {
-    //     //TODO REQUEST
-    //     //send iMin iMax iAverage to the server
-    //     //TODO REMOVE OLD BAND
-    //     this.removeBandImage(oBand)
-    //     //TODO ADD NEW BAND
-    //     this.addLayerMap2D(sLayerId);
-    // };
-    // EditorController.prototype.checkColorManipulationSliders = function(aoSlidersColors)
-    // {
-    //     this.minSliderColourManipulation(aoSlidersColors);
-    //     this.maxSliderColourManipulation(aoSlidersColors);
-    //     this.averageSliderColourManipulation(aoSlidersColors);
-    // };
+
 
     EditorController.prototype.minSliderColourManipulation = function (aoSlidersColors) {
         var iMaxValue = parseInt(aoSlidersColors[2].value);
@@ -3535,11 +2754,11 @@ var EditorController = (function () {
      */
     EditorController.prototype.openPublishedBandsInTree = function () {
 
-        var treeInst = $('#jstree').jstree(true);
-        var m = treeInst._model.data;
-        for (var i in m) {
-            if (!utilsIsObjectNullOrUndefined(m[i].original) && !utilsIsObjectNullOrUndefined(m[i].original.band) && m[i].original.band.bVisibleNow == true) {
-                $("#jstree").jstree("_open_to", m[i].id);
+        var oTreeInst = $('#jstree').jstree(true);
+        var oModelData = oTreeInst._model.data;
+        for (var iModel in oModelData) {
+            if (!utilsIsObjectNullOrUndefined(oModelData[iModel].original) && !utilsIsObjectNullOrUndefined(oModelData[iModel].original.band) && oModelData[iModel].original.band.bVisibleNow == true) {
+                $("#jstree").jstree("_open_to", oModelData[iModel].id);
             }
         }
     };
@@ -3643,62 +2862,6 @@ var EditorController = (function () {
 
                             oReturnValue =
                                 {
-                                    "Radar": {
-                                        "label": "Radar",
-                                        "action": false,
-                                        "icon": "radar-icon-context-menu-jstree",
-                                        "submenu":
-                                            {
-                                                //APPLY ORBIT
-                                                "ApplyOrbit": {
-                                                    "label": "Apply Orbit",
-                                                    "action": function (obj) {
-                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openApplyOrbitDialog(oFoundProduct);
-                                                    }
-                                                },
-                                                "Multilooking": {
-                                                    "label": "Multilooking",
-                                                    "action": function (obj) {
-                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openMultilookingDialog(oFoundProduct);
-                                                    }
-                                                },
-
-                                                "Range Doppler Terrain Correction": {
-                                                    "label": "Range Doppler Terrain Correction",
-                                                    "action": function (obj) {
-                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-
-                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFoundProduct);
-                                                    }
-                                                },
-
-                                                "Calibrate": {
-                                                    "label": "Calibrate",
-                                                    "action": function (obj) {
-                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openRadiometricCalibrationDialog(oFoundProduct);
-
-                                                    }
-                                                }
-                                            }
-                                    },
-                                    "Optical": {
-                                        "label": "Optical",
-                                        "action": false,
-                                        "icon": "optical-icon-context-menu-jstree",
-                                        "submenu":
-                                            {
-                                                "NDVI": {
-                                                    "label": "NDVI",
-                                                    "action": function (obj) {
-                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                                        if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openNDVIDialog(oFoundProduct);
-                                                    }
-                                                }
-                                            }
-                                    },
                                     "Workflow": {
                                         "label": "Workflow",
                                         "action": function (obj) {
@@ -3760,12 +2923,10 @@ var EditorController = (function () {
 
                                         "action": function (obj) {
 
-                                            utilsVexDialogConfirmWithCheckBox("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
-                                                var bDeleteFile = false;
-                                                var bDeleteLayer = false;
+                                            utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
                                                 if (value) {
-                                                    if (value.files == 'on') bDeleteFile = true;
-                                                    if (value.geoserver == 'on') bDeleteLayer = true;
+                                                    bDeleteFile = true;
+                                                    bDeleteLayer = true;
                                                     this.temp = $node.parents[1];
                                                     var that = this;
 
@@ -3788,72 +2949,6 @@ var EditorController = (function () {
                             //***************************** PRODUCT ********************************************
                             oReturnValue =
                                 {
-                                    "Radar": {
-                                        "label": "Radar",
-                                        "action": false,
-                                        "icon": "radar-icon-context-menu-jstree",
-                                        "submenu":
-                                            {
-                                                //APPLY ORBIT
-                                                "ApplyOrbit": {
-                                                    "label": "Apply Orbit",
-                                                    "action": function (obj) {
-                                                        var sSourceFileName = $node.original.fileName;
-                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
-
-                                                        if (utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openApplyOrbitDialog(oFindedProduct);
-
-                                                    }
-                                                },
-                                                "Multilooking": {
-                                                    "label": "Multilooking",
-                                                    "action": function (obj) {
-                                                        var sSourceFileName = $node.original.fileName;
-                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
-
-                                                        if (utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openMultilookingDialog(oFindedProduct);
-                                                    }
-                                                },
-
-                                                "Range Doppler Terrain Correction": {
-                                                    "label": "Range Doppler Terrain Correction",
-                                                    "action": function (obj) {
-                                                        var sSourceFileName = $node.original.fileName;
-                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
-
-                                                        if (utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
-                                                    }
-                                                },
-
-                                                "Calibrate": {
-                                                    "label": "Calibrate",
-                                                    "action": function (obj) {
-                                                        var sSourceFileName = $node.original.fileName;
-                                                        var oFound = oController.findProductByFileName(sSourceFileName);
-
-                                                        if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openRadiometricCalibrationDialog(oFound);
-
-                                                    }
-                                                }
-                                            }
-                                    },
-                                    "Optical": {
-                                        "label": "Optical",
-                                        "action": false,
-                                        "icon": "optical-icon-context-menu-jstree",
-                                        "submenu":
-                                            {
-                                                "NDVI": {
-                                                    "label": "NDVI",
-                                                    "action": function (obj) {
-                                                        var sSourceFileName = $node.original.fileName;
-                                                        var oFound = oController.findProductByFileName(sSourceFileName);
-
-                                                        if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openNDVIDialog(oFound);
-                                                    }
-                                                }
-                                            }
-                                    },
                                     "Workflow": {
                                         "label": "Workflow",
                                         "action": function (obj) {
@@ -3930,12 +3025,10 @@ var EditorController = (function () {
 
                                         "action": function (obj) {
 
-                                            utilsVexDialogConfirmWithCheckBox("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
-                                                var bDeleteFile = false;
-                                                var bDeleteLayer = false;
+                                            utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
                                                 if (value) {
-                                                    if (value.files == 'on') bDeleteFile = true;
-                                                    if (value.geoserver == 'on') bDeleteLayer = true;
+                                                    bDeleteFile = true;
+                                                    bDeleteLayer = true;
                                                     this.temp = $node;
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
@@ -4001,11 +3094,11 @@ var EditorController = (function () {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
 
-                oNode.band = oaBandsItems[iIndexBandsItems];//BAND
+                //BAND
+                oNode.band = oaBandsItems[iIndexBandsItems];
                 oNode.icon = "assets/icons/uncheck_20x20.png";
 
                 oNode.id = this.m_aoProducts[iIndexProduct].name + "_" + oaBandsItems[iIndexBandsItems].name;
-                //oNode.bVisibleNow = false;
                 oTree.core.data[iIndexProduct].children[1].children.push(oNode);
             }
 
@@ -4126,9 +3219,6 @@ var EditorController = (function () {
     };
 
     EditorController.prototype.deleteProductInNavigation = function(aoVisibleBands,oChildrenNode){
-        // // In georeferenced mode or not?
-        // if (this.m_bIsActiveGeoraphicalMode == true) {
-
 
         if( this.m_b2DMapModeOn === false){
             this.deleteProductInMap();
@@ -4164,6 +3254,7 @@ var EditorController = (function () {
         //reload product list
         this.getProductListByWorkspace();
     };
+
     EditorController.$inject = [
         '$scope',
         '$location',

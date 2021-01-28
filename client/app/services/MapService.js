@@ -359,19 +359,19 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
     };
 
     /**
-     * Init geo search plugin
+     * Init geo search plugin, the search bar for geographical reference on the map
+     * @param opt if present, the search bar is placed on the bottom right corner of the map.
+     * @references https://github.com/perliedman/leaflet-control-geocoder
      */
-    this.initGeoSearchPluginForOpenStreetMap = function()
+    this.initGeoSearchPluginForOpenStreetMap = function(opt)
     {
-        /*
-            https://github.com/perliedman/leaflet-control-geocoder
-        */
-
         var geocoder = L.Control.Geocoder.nominatim();
+        let sPosition = 'topleft';
 
+        if (opt){sPosition='bottomright'}
         L.Control.geocoder({
             geocoder: geocoder,
-            position:'topleft'
+            position: sPosition
         }).addTo(this.m_oWasdiMap);
     };
 
