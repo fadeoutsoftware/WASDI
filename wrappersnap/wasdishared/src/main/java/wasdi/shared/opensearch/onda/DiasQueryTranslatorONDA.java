@@ -193,23 +193,26 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		//did it contain an extension?
 		//if yes, don't append an asterisk, the response will be faster 
 		//if not, it may be a file without the tail: append a trailing asterisk
-		boolean bAddAsterisk = sOld.equals(sFreeText); 
+		boolean bAddAsterisk = false;
+		//actually, don't add asterisks to improve the performance
+		//bAddAsterisk = sOld.equals(sFreeText); 
 
 		//again, remove trailing asterisks ('*')
 		while(sFreeText.endsWith("*")) {
 			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
 		}
 		
-
-		if(bAddAsterisk) {
-			sFreeText += "*";
-		}
+		//for the sake of performance, do not add asterisks
+		//if(bAddAsterisk) {
+		//	sFreeText += "*";
+		//}
 
 		//add an asterisk in front, in case the string passed were missing the initial part
 		//(note: ONDA also work if the initial part is present)
-		if(!sFreeText.startsWith("*")) {
-			sFreeText = "*" + sFreeText;
-		}
+		//Actually, for the sake of performance, do not add asterisks
+		//if(!sFreeText.startsWith("*")) {
+		//	sFreeText = "*" + sFreeText;
+		//}
 
 		return sFreeText;
 	}
