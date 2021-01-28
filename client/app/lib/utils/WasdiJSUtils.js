@@ -575,7 +575,7 @@ function utilsConvertOperationToDescription(sOperation) {
         sDescription = "PUBLISH"
     }
     else if (sOperation == "GRAPH") {
-        sDescription = "INGEST"
+        sDescription = "WORKFLOW"
     }
     else if (sOperation == "DEPLOYPROCESSOR") {
         sDescription = "DEPLOY"
