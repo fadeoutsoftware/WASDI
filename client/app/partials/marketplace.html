@@ -229,8 +229,7 @@
                                     <span class="fa fa-star" ng-class="processor.score>2.25&&processor.score<2.75?'checked-half':processor.score>=2.75?'checked':''"></span>
                                     <span class="fa fa-star" ng-class="processor.score>3.25&&processor.score<3.75?'checked-half':processor.score>=3.75?'checked':''"></span>
                                     <span class="fa fa-star" ng-class="processor.score>4.25&&processor.score<4.75?'checked-half':processor.score>=4.75?'checked':''"></span>
-
-
+                                    &nbsp;{{ processor.votes}}
                                 </div>
                                 <div  class="price-tag shadow-sm">
                                     <span ng-if="processor.price>0">from € {{processor.price}}</span>

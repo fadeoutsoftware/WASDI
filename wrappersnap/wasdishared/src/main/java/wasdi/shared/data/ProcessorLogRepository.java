@@ -267,14 +267,16 @@ public class ProcessorLogRepository extends MongoRepository {
 	 */
     public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp) {
     	
+    	final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
+    	
 		if(null == sProcessWorkspaceId || iLo == null || iUp == null) {
-			throw new NullPointerException("ProcessorLogRepository.getLogsByWorkspaceIdInRange( " + sProcessWorkspaceId + ", " + iLo + ", " + iUp + " ): null argument passed");
+			Utils.debugLog("ProcessorLogRepository.getLogsByWorkspaceIdInRange( " + sProcessWorkspaceId + ", " + iLo + ", " + iUp + " ): null argument passed");
+			return aoReturnList;
 		}
 		if(iLo < 0 || iLo >iUp) {
-			throw new IllegalArgumentException("ProcessorLogRepository.getLogsByWorkspaceIdInRange: 0 <= "+iLo+" <= "+iUp+" is unverified");
+			Utils.debugLog("ProcessorLogRepository.getLogsByWorkspaceIdInRange: 0 <= "+iLo+" <= "+iUp+" range invalid or no logs available");
+			return aoReturnList;
 		}
-	
-        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
         
         try {
 			//MongoDB query is:

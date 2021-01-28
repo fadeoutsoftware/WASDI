@@ -493,6 +493,8 @@ public class ProcessorsResource  {
 				
 				// Get the reviews to compute the vote
 				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+				
+				int iVotes = 0;
 									
 				// If we have reviews
 				if (aoReviews != null) {
@@ -506,6 +508,8 @@ public class ProcessorsResource  {
 						
 						// Compute average
 						fScore /= aoReviews.size();
+						
+						iVotes = aoReviews.size();
 					}
 				}				
 				
@@ -560,6 +564,7 @@ public class ProcessorsResource  {
 								
 				// Set the score to the View Model
 				oAppListViewModel.setScore(fScore);
+				oAppListViewModel.setVotes(iVotes);
 				
 				aoRet.add(oAppListViewModel);
 			}

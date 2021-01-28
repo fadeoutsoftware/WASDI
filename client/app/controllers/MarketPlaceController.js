@@ -131,7 +131,7 @@ var MarketPlaceController = (function() {
         this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                oController.m_aoApplicationList = oController.setDefaultImages(data);
+                oController.m_aoApplicationList = oController.setDefaultImagesAndVotes(data);
             }
             else
             {
@@ -191,11 +191,11 @@ var MarketPlaceController = (function() {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 if (oController.m_oAppFilter.page == 0) {
-                    oController.m_aoApplicationList = oController.setDefaultImages(data);
+                    oController.m_aoApplicationList = oController.setDefaultImagesAndVotes(data);
                 }
                 else {
                     if (data.length>0) {
-                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImages(data));
+                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImagesAndVotes(data));
                     }
                 }
 
@@ -306,7 +306,7 @@ var MarketPlaceController = (function() {
      * @param aoProcessorList
      * @returns {*}
      */
-    MarketPlaceController.prototype.setDefaultImages = function(aoProcessorList)
+    MarketPlaceController.prototype.setDefaultImagesAndVotes = function(aoProcessorList)
     {
         if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
         {
@@ -319,6 +319,15 @@ var MarketPlaceController = (function() {
             if(utilsIsObjectNullOrUndefined(aoProcessorList[iIndexProcessor].imgLink))
             {
                 aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
+            }
+
+            if(utilsIsObjectNullOrUndefined(aoProcessorList[iIndexProcessor].votes)) {
+                if (aoProcessorList[iIndexProcessor].score>0) {
+                    aoProcessorList[iIndexProcessor].votes = 1;
+                }
+                else {
+                    aoProcessorList[iIndexProcessor].votes = 0;
+                }
             }
         }
         return aoProcessorList;
@@ -339,6 +348,10 @@ var MarketPlaceController = (function() {
 
             return  false;
         }
+    }
+
+    MarketPlaceController.prototype.getVotesText = function(oProcessor) {
+        
     }
 
     MarketPlaceController.$inject = [

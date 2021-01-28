@@ -64,12 +64,6 @@
 
                                 <li role="presentation" class="divider"></li>
 
-                                <li role="presentation" ng-click="m_oController.openDocumentatonCenter()">
-                                    <a role="menuitem" tabindex="-1" href="" >
-                                        <i class="fa fa-info fa-lg" aria-hidden="true"></i>
-                                        <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
-                                    </a>
-                                </li>
                                 <li role="presentation">
                                     <a role="menuitem" tabindex="-1" ng-click="m_oController.onClickLogOut()">
                                         <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i>
@@ -82,11 +76,11 @@
 
                     <ul class="nav navbar-nav navbar-right">
 
-                        <!-- OLD APPSTORE BUTTON-->
+                        <!-- APPSTORE BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.marketplace')}"  >
                             <a ng-click="m_oController.openMarketPlace();" href=""   >
-                                <i class="fa fa-archive" aria-hidden="true"></i>
-                                App Store <span class="badge badge-success">New</span>
+                                <i class="fa fa-rocket" aria-hidden="true"></i>
+                                App Store <!--span class="badge badge-success">New</span-->
                             </a>
                         </li>
 
@@ -94,7 +88,7 @@
                         <!-- HOME BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
                             <a ui-sref="root.workspaces" >
-                                <i class="fa fa-globe fa-lg" aria-hidden="true"></i>
+                                <i class="fa fa-floppy-o fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
                         </li>
@@ -115,11 +109,18 @@
                         <!-- EDITOR BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
                             <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
-                                <i class="fa fa-rocket fa-lg" aria-hidden="true"></i>
+                                <i class="fa fa-globe fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
-                        <!-- CATALOGUE BUTTON-->
+                        <!-- HELP BUTTON-->
+                        <li role="presentation" ng-click="m_oController.openDocumentatonCenter()">
+                            <a role="menuitem" tabindex="-1" href="" >
+                                <i class="fa fa-book fa-lg" aria-hidden="true"></i>
+                                <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
+                            </a>
+                        </li>
+
 
                     </ul>
                 </div>
