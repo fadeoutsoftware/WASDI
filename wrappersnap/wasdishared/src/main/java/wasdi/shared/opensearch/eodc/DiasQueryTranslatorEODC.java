@@ -40,6 +40,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 
 			if(!Utils.isNullOrEmpty(sQuery)) {
 				sTranslatedQuery = parseCommon(sQuery);
+				sTranslatedQuery += parseFreeText(sQuery);
 				sTranslatedQuery += parseFootPrint(sQuery);
 				sTranslatedQuery += parseTimeFrame(sQuery);
 				sTranslatedQuery += parseSentinel_1(sQuery);
@@ -343,6 +344,22 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 		}
 	}
 
+	@Override
+	protected String parseFreeText(String sQuery) {
+		String sResult = "";
+		try {
+			String sFreeText = getFreeTextSearch(sQuery);
+			if(!Utils.isNullOrEmpty(sFreeText)) {
+				sResult += "<ogc:PropertyIsEqualTo><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>";
+				sResult += sFreeText;
+				sResult += "</ogc:Literal></ogc:PropertyIsEqualTo>";
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslatorEODC.parseFreeText( " + sQuery + " ): " + oE);
+		}
+		return sResult;
+	}
+	
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#parseFootPrint(java.lang.String)
 	 */
