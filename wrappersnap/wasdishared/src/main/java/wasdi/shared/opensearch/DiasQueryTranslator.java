@@ -530,5 +530,48 @@ public abstract class DiasQueryTranslator {
 			asInterval[1] = asTimeQuery[1];
 		}
 	}
+	
+	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sQuery) {
+		/**
+		 *
+		 *     #Determine the satellite based on the satellite identifier in the product_name
+    if product_name[:2] == 'S1':
+        satellite = 'Sentinel-1'
+    elif product_name[:2] == 'S2':
+        satellite = 'Sentinel-2'
+    else:
+        print('Unknown Satellite')
+        exit(11)
+
+    #Determine the productType
+    if satellite == 'Sentinel-1':
+        if product_name[7:10] == 'RAW':
+            productType = product_name[7:10]
+        elif product_name[7:10] in ['SLC', 'GRD']:
+            productType = product_name[7:10]
+        elif product_name[7:10] == 'OCN':
+            productType = product_name[7:10]
+        else:
+            print('Not handled expression please report to support')
+            exit(12)
+    elif satellite == 'Sentinel-2':
+        if product_name[7:10] == 'L1C':
+            productType = product_name[7:10]
+        elif product_name[7:10] == 'L2A':
+            productType = product_name[7:10]
+        else:
+            print('Not handled expression please report to support')
+            exit(12)
+    #Construct the parent id from the Satellite and productType
+    parentId = parent_id(satellite, productType=productType)
+
+    #Construct the query_url using parent_id and product name
+    #https://collgs.lu/catalog/oseo/search?parentId=S1_SAR_GRD&uid=S1B_EW_GRDM_1SDH_20180513T194721_20180513T194821_010907_013F4E_44F2
+    query_str = '{0}parentId={1}&uid={2}'
+    query_url = query_str.format(search_base_url, parentId, product_name)
+    return query_url
+		 * 
+		 */
+	}
 
 }
