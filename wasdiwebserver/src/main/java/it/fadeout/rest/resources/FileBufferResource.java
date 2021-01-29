@@ -104,16 +104,10 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-//			if( sProductName != null && !sProductName.isEmpty() ){
-//				oParameter.setProductName(sProductName);
-//			} else {
-//				oParameter.setProductName(null);
-//			}
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
 			
-			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
 			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);

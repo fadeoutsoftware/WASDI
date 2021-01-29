@@ -116,8 +116,7 @@ public class Wasdi extends ResourceConfig {
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 
 		try {
-			Utils.s_iSessionValidityMinutes = Integer
-					.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
+			Utils.s_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
 			Utils.debugLog("-------Session Validity [minutes]: " + Utils.s_iSessionValidityMinutes);
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
@@ -401,6 +400,26 @@ public class Wasdi extends ResourceConfig {
 	}
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationId, null, sProductName, sSerializationPath, oParameter, sParentId);
+	}
+	
+	/**
+	 * Run Process: if the workspace of the operation is the actual node this function 
+	 * creates the process workspace entry that will be handled by the scheduler to run a process on a node.
+	 * If it is in another node, it routes the request to the destination node.
+	 * 
+	 * @param sUserId User requesting the operation
+	 * @param sSessionId User session
+	 * @param sOperationId Id of the Launcher Operation
+	 * @param sOperationSubId Sub Id of the Launcher Operation
+	 * @param sProductName Product name associated to the Process Workspace
+	 * @param sSerializationPath Node Serialisation Path 
+	 * @param oParameter Parameter associated to the operation
+	 * @param sParentId Id the the parent process
+	 * @return Primitive Result with the output status of the operation
+	 * @throws IOException
+	 */
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
 		
 		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
 			// Bad request
@@ -474,7 +493,7 @@ public class Wasdi extends ResourceConfig {
 				}
 				
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
-				Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
+				//Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
 				// call the API on the destination node 
 				String sResult = httpPost(sUrl, sPayload, getStandardHeaders(sSessionId));
