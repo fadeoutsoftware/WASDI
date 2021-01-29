@@ -126,7 +126,7 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 									iAbsoluteOrbit = Integer.parseInt(sAbsoluteOrbit);
 								}
 								catch (Exception oEx) {
-									Utils.debugLog("Exception converting EODC Result Relative Orbit: "  + oEx.toString()) ;
+									Utils.debugLog("DiasResponseTranslatorEODC.translateBatch: Exception converting EODC Result Relative Orbit: "  + oEx.toString()) ;
 								}
 								
 								if (iAbsoluteOrbit != -1) {
@@ -154,7 +154,7 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 					aoResults.add(oResViewModel);
 				}
 				catch (Exception oInnerEx) {
-					Utils.debugLog("Exception:" + oInnerEx.toString());
+					Utils.debugLog("DiasResponseTranslatorEODC.translateBatch: " + oInnerEx.toString());
 				}
 
 			}
@@ -162,9 +162,8 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 			Utils.debugLog("Conversion done");
 			
 		} 
-		catch (IOException e) {
-			
-			e.printStackTrace();
+		catch (IOException oE) {
+			Utils.debugLog("DiasResponseTranslatorEODC.translateBatch: outer exception: " + oE);
 		}
 		
 		return aoResults;
