@@ -185,7 +185,7 @@ var MarketPlaceController = (function() {
             this.m_oAppFilter.name = this.m_sNameFilter;
         }
 
-        oController.m_bWaiting = true;
+        oController.m_bWaiting = false;
 
         this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
@@ -357,7 +357,7 @@ var MarketPlaceController = (function() {
 
         }
         else {
-            
+
         }
     }
 
