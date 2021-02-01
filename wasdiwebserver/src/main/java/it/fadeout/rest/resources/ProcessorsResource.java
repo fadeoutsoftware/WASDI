@@ -1134,7 +1134,8 @@ public class ProcessorsResource  {
 			}
 			
 			if (!oProcessorToDelete.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.deleteProcessor: processor not of user " + oProcessorToDelete.getUserId());
+				Utils.debugLog("ProcessorsResource.deleteProcessor: processor not of user " + oUser.getUserId());
+				// TODO: here delete the sharing, if there is!!
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
