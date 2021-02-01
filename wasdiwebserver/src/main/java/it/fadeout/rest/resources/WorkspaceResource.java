@@ -253,6 +253,7 @@ public class WorkspaceResource {
 			oVM.setName(oWorkspace.getName());
 			oVM.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 			oVM.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
+			oVM.setNodeCode(oWorkspace.getNodeCode());
 
 			// If the workspace is on another node, copy the url to the view model
 			if (oWorkspace.getNodeCode().equals(Wasdi.s_sMyNodeCode) == false) {

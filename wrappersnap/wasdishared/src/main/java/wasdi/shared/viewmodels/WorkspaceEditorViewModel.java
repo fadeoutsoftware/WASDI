@@ -16,7 +16,8 @@ public class WorkspaceEditorViewModel {
 	private Date creationDate;
     private Date lastEditDate;
     private List<String> sharedUsers = new ArrayList<>();
-
+    private String nodeCode;
+    
     public String getWorkspaceId() {
         return workspaceId;
     }
@@ -72,5 +73,15 @@ public class WorkspaceEditorViewModel {
 	public void setApiUrl(String apiUrl) {
 		this.apiUrl = apiUrl;
 	}
+
+	public String getNodeCode() {
+		return nodeCode;
+	}
+
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+
+
 
 }
