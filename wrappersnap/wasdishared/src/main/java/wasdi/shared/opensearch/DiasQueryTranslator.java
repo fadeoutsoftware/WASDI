@@ -130,23 +130,53 @@ public abstract class DiasQueryTranslator {
 
 	protected String getFreeTextSearch(String sQuery) {
 		try {
-			// 0. footprint not at the beginning
-			// 1. no footprint and beginPosition not at the beginning
-			String sFootprint = " AND ( footprint";
-			int iEndOfPrefix = sQuery.indexOf(sFootprint);
-			if (iEndOfPrefix < 0) {
-				// then maybe no footprint has been specified
-				iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
+			int iEnd = sQuery.length();
+			
+			int iBeginPosition = sQuery.indexOf("beginPosition");
+			if(iBeginPosition >= 0) {
+				iEnd = iBeginPosition;
 			}
-			if (iEndOfPrefix < 0) {
-				// no free text, return
-				return null;
+			
+			int iEndPosition = sQuery.indexOf("endPosition");
+			if(iEndPosition >= 0 && iEndPosition < iEnd) {
+				iEnd = iEndPosition;
 			}
-			return sQuery.substring(0, iEndOfPrefix);
+			
+			int iFootprint = sQuery.indexOf("footprint");
+			if(iFootprint >= 0 && iFootprint < iEnd) {
+				iEnd = iFootprint;
+			}
+			
+			int iAnd = sQuery.indexOf("AND");
+			if(iAnd > 0 && iAnd < iEnd) {
+				iEnd = iAnd;
+			}
+			
+			int iBracket = sQuery.indexOf("(");
+			if(iBracket >= 0 && iBracket < iEnd) {
+				iEnd = iBracket;
+			}
+
+			int iSpace = sQuery.indexOf(" ");
+			if(iSpace > 0 && iSpace < iEnd) {
+				iEnd = iSpace;
+			}
+
+			if(iEnd == 0) {
+				return "";
+			}
+			
+			sQuery = sQuery.substring(0, iEnd);
+			
+			//remove leading and trailing spaces
+			sQuery = sQuery.trim();
+			
+			return sQuery;
+			
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslator.getFreeTextSearch( " + sQuery + " ): " + oE);
 		}
-		return null;
+		return "";
 	}
 
 	protected String parseFreeText(String sQuery) {
