@@ -132,17 +132,17 @@ public abstract class DiasQueryTranslator {
 		try {
 			// 0. footprint not at the beginning
 			// 1. no footprint and beginPosition not at the beginning
-			String sFootprint = " AND ( footprint";
-			int iEndOfPrefix = sQuery.indexOf(sFootprint);
-			if (iEndOfPrefix < 0) {
-				// then maybe no footprint has been specified
-				iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
-			}
-			if (iEndOfPrefix < 0) {
-				// no free text, return
-				return null;
-			}
-			return sQuery.substring(0, iEndOfPrefix);
+//			String sFootprint = " AND ( footprint";
+//			int iEndOfPrefix = sQuery.indexOf(sFootprint);
+//			if (iEndOfPrefix < 0) {
+//				// then maybe no footprint has been specified
+//				iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
+//			}
+//			if (iEndOfPrefix < 0) {
+//				// no free text, return
+//				return null;
+//			}
+//			return sQuery.substring(0, iEndOfPrefix);
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslator.getFreeTextSearch( " + sQuery + " ): " + oE);
 		}

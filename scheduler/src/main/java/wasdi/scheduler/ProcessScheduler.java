@@ -516,8 +516,10 @@ public class ProcessScheduler extends Thread {
 				// Filter on operation subtype if configured
 				if (m_asOperationTypes.size()==1) {
 					if (!Utils.isNullOrEmpty(m_sOperationSubType)) {
-						if (!aoInputList.get(iProcWs).getOperationSubType().equals(m_sOperationSubType)) {
-							aoInputList.remove(iProcWs);
+						if (aoInputList.get(iProcWs).getOperationSubType()!= null) {
+							if (!aoInputList.get(iProcWs).getOperationSubType().equals(m_sOperationSubType)) {
+								aoInputList.remove(iProcWs);
+							}							
 						}
 					}					
 				}

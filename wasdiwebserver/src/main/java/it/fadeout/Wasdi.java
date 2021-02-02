@@ -531,6 +531,7 @@ public class Wasdi extends ResourceConfig {
 				try {
 					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationId);
+					oProcess.setOperationSubType(sOperationSubId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
