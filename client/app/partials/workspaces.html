@@ -103,18 +103,14 @@
                             <div> Owner : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
                             <div> Node : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
                             <div><b> Last Update: {{m_oController.getLastTouchDate()}}</b></div>
-                            <div>Total files: {{m_oController.getProductList().length}}</div>
-                            <!--<div>Total number of processes executed in that ws : {{m_oController.m_iCountProcessWorkspace}}</div>-->
+                            <div>Total Files: {{m_oController.getProductList().length}}</div>
+                            <div>Processes Executed : {{m_oController.m_iCountProcessWorkspace}}</div>
                             <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)"> Workspace
                                 sharing :
                                 <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                     <li> {{shared}}</li>
                                 </div>
                             </div>
-
-
-
-
 
                             <div><b><h4>File list</h4></b></div>
 

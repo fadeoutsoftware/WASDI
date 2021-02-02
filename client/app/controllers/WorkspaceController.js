@@ -34,7 +34,7 @@ var WorkspaceController = (function () {
         this.m_oUfoPointer = null;
 
         this.m_oWorkspaceViewModel = null; // the model view of the selected workspace
-        this.m_iCountProcessWorkspace = 0;
+        this.m_iCountProcessWorkspace = null;
 
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
@@ -53,14 +53,13 @@ var WorkspaceController = (function () {
             $scope.m_oController.updatePositionsSatellites();
         }, 5000);
 
-        this.getCount = function () {
-            console.log("Controller " + this.m_oWorkspaceSelected.workspaceId)
-            return this.m_oProcessesLaunchedService.getProcessWorkspaceCountByWorkspace(this.m_oWorkspaceSelected.workspaceId);
-        }
 
         this.getLastTouchDate = function () {
-
-            return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
+            if (this.m_oWorkspaceViewModel === null) {
+                return "";
+            } else {
+                return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
+            }
 
         }
 
@@ -217,14 +216,14 @@ var WorkspaceController = (function () {
         var oWorkspaceId = oWorkspace.workspaceId;
 
         this.m_bIsVisibleFiles = true;
-
-/*        this.m_oProcessesLaunchedService.getProcessWorkspaceCountByWorkspace(oWorkspaceId).success(function (data, status) {
-            if (!utilsIsObjectNullOrUndefined(data)) {
-                console.log("count" + data);
-            }
+        this.m_oProcessesLaunchedService.getCountByWorkspace(oWorkspaceId).success(function (data, status) {
+            console.log("count (Should be equals to 1 )" + data);
+            m_iCountProcessWorkspace = data;
         }).error(function (data, status) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING PROCESS WORKSPACE COUNT");
-        });*/
+            console.log("Error in get count");
+            m_iCountProcessWorkspace = 0;
+        });
+
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).success(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {

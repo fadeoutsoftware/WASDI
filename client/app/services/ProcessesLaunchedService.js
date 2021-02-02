@@ -28,8 +28,8 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
          * @param sWorkspaceId the workspace Id to be searched
          * @returns {*}
          */
-        this.getProcessWorkspaceCountByWorkspace = function (sWorkspaceId) {
-            return this.m_oHttp.get(this.APIURL) + '/process/byws?sWorkspaceId='+sWorkSpaceId
+        this.getCountByWorkspace = function (sWorkspaceId) {
+            return this.m_oHttp.get((this.APIURL) + '/process/countbyws?sWorkspaceId='+sWorkspaceId);
         };
         /**
          * Load the last 5 processes of a workspace
