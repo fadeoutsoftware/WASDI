@@ -130,23 +130,53 @@ public abstract class DiasQueryTranslator {
 
 	protected String getFreeTextSearch(String sQuery) {
 		try {
-			// 0. footprint not at the beginning
-			// 1. no footprint and beginPosition not at the beginning
-			String sFootprint = " AND ( footprint";
-			int iEndOfPrefix = sQuery.indexOf(sFootprint);
-			if (iEndOfPrefix < 0) {
-				// then maybe no footprint has been specified
-				iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
+			int iEnd = sQuery.length();
+			
+			int iBeginPosition = sQuery.indexOf("beginPosition");
+			if(iBeginPosition >= 0) {
+				iEnd = iBeginPosition;
 			}
-			if (iEndOfPrefix < 0) {
-				// no free text, return
-				return null;
+			
+			int iEndPosition = sQuery.indexOf("endPosition");
+			if(iEndPosition >= 0 && iEndPosition < iEnd) {
+				iEnd = iEndPosition;
 			}
-			return sQuery.substring(0, iEndOfPrefix);
+			
+			int iFootprint = sQuery.indexOf("footprint");
+			if(iFootprint >= 0 && iFootprint < iEnd) {
+				iEnd = iFootprint;
+			}
+			
+			int iAnd = sQuery.indexOf("AND");
+			if(iAnd > 0 && iAnd < iEnd) {
+				iEnd = iAnd;
+			}
+			
+			int iBracket = sQuery.indexOf("(");
+			if(iBracket >= 0 && iBracket < iEnd) {
+				iEnd = iBracket;
+			}
+
+			int iSpace = sQuery.indexOf(" ");
+			if(iSpace > 0 && iSpace < iEnd) {
+				iEnd = iSpace;
+			}
+
+			if(iEnd == 0) {
+				return "";
+			}
+			
+			sQuery = sQuery.substring(0, iEnd);
+			
+			//remove leading and trailing spaces
+			sQuery = sQuery.trim();
+			
+			return sQuery;
+			
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslator.getFreeTextSearch( " + sQuery + " ): " + oE);
 		}
-		return null;
+		return "";
 	}
 
 	protected String parseFreeText(String sQuery) {
@@ -529,6 +559,49 @@ public abstract class DiasQueryTranslator {
 			asInterval[0] = asTimeQuery[0];
 			asInterval[1] = asTimeQuery[1];
 		}
+	}
+	
+	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sQuery) {
+		/**
+		 *
+		 *     #Determine the satellite based on the satellite identifier in the product_name
+    if product_name[:2] == 'S1':
+        satellite = 'Sentinel-1'
+    elif product_name[:2] == 'S2':
+        satellite = 'Sentinel-2'
+    else:
+        print('Unknown Satellite')
+        exit(11)
+
+    #Determine the productType
+    if satellite == 'Sentinel-1':
+        if product_name[7:10] == 'RAW':
+            productType = product_name[7:10]
+        elif product_name[7:10] in ['SLC', 'GRD']:
+            productType = product_name[7:10]
+        elif product_name[7:10] == 'OCN':
+            productType = product_name[7:10]
+        else:
+            print('Not handled expression please report to support')
+            exit(12)
+    elif satellite == 'Sentinel-2':
+        if product_name[7:10] == 'L1C':
+            productType = product_name[7:10]
+        elif product_name[7:10] == 'L2A':
+            productType = product_name[7:10]
+        else:
+            print('Not handled expression please report to support')
+            exit(12)
+    #Construct the parent id from the Satellite and productType
+    parentId = parent_id(satellite, productType=productType)
+
+    #Construct the query_url using parent_id and product name
+    #https://collgs.lu/catalog/oseo/search?parentId=S1_SAR_GRD&uid=S1B_EW_GRDM_1SDH_20180513T194721_20180513T194821_010907_013F4E_44F2
+    query_str = '{0}parentId={1}&uid={2}'
+    query_url = query_str.format(search_base_url, parentId, product_name)
+    return query_url
+		 * 
+		 */
 	}
 
 }
