@@ -96,6 +96,12 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 			}
 		}
 		
+		//add free text search, assuming it's the product id
+		if(!Utils.isNullOrEmpty(oWasdiQuery.freeTextSearch)) {
+			
+			sLSAQuery += "&uid=" + oWasdiQuery.freeTextSearch;
+		}
+		
 		String sBaseAddress = "https://collgs.lu/catalog/oseo/search?parentId=" + sParentId;
 		
 		sLSAQuery = sBaseAddress + sLSAQuery;
@@ -103,6 +109,7 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		return sLSAQuery;
 	}
 
+	
 	@Override
 	protected String parseTimeFrame(String sQuery) {
 		return null;
