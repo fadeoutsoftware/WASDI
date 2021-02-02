@@ -8,6 +8,8 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
 
+
+
     this.getWorkspacesInfoListByUser = function() {
         return this.m_oHttp.get(this.APIURL + '/ws/byuser');
     };
@@ -15,6 +17,11 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
     this.getWorkspaceEditorViewModel = function (sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/ws?sWorkspaceId='+sWorkspaceId);
     };
+
+/*    this.getProcessWorkspaceCountByWorkspace = function (sWorkspaceId) {
+        console.log(sWorkspaceId);
+        return this.m_oHttp.get(this.APIURL + '/countbyws?sWorkspaceId='+sWorkspaceId);
+    };*/
 
     this.createWorkspace = function (sName = null) {
 

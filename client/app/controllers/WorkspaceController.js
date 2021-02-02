@@ -31,6 +31,7 @@ var WorkspaceController = (function () {
         this.m_oUfoPointer = null;
 
         this.m_oWorkspaceViewModel = null; // the model view of the selected workspace
+        this.m_iCountProcessWorkspace = 0;
 
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
@@ -48,6 +49,16 @@ var WorkspaceController = (function () {
             console.log("Update Sat Position");
             $scope.m_oController.updatePositionsSatellites();
         }, 5000);
+
+        this.getCount = function () {
+            console.log("Controller " + this.m_oWorkspaceSelected.workspaceId)
+            return this.m_oWorkspaceService.getProcessWorkspaceCountByWorkspace(this.m_oWorkspaceSelected.workspaceId);
+        }
+
+        this.getLastTouchDate = function () {
+            return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
+
+        }
 
         /*
         * ANGULAR DOCS:
@@ -120,7 +131,6 @@ var WorkspaceController = (function () {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
         });
     }
-
 
 
     WorkspaceController.prototype.getWorkspaceInfoList = function () {
@@ -203,6 +213,16 @@ var WorkspaceController = (function () {
         var oWorkspaceId = oWorkspace.workspaceId;
 
         this.m_bIsVisibleFiles = true;
+
+/*        this.m_oWorkspaceService.getProcessWorkspaceCountByWorkspace(oWorkspaceId).success(function (data, status) {
+            if (!utilsIsObjectNullOrUndefined(data)) {
+                oController.m_iCountProcessWorkspace = data;
+                console.log("count" + data);
+            }
+        }).error(function (data, status) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE INFO");
+        });*/
+
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).success(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data;

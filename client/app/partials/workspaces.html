@@ -100,18 +100,22 @@
                         <!--LIST OF FILES-->
                         <div class="panel-group list-files " id="accordion" role="tablist" aria-multiselectable="true"
                              ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">
-                            <div> Workspace Owner : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <div> Owner : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <div> Node : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <div><b> Last Update: {{m_oController.getLastTouchDate()}}</b></div>
+                            <div>Total files: {{m_oController.getProductList().length}}</div>
+                            <!--<div>Total number of processes executed in that ws : {{m_oController.m_iCountProcessWorkspace}}</div>-->
                             <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)"> Workspace
                                 sharing :
                                 <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                     <li> {{shared}}</li>
                                 </div>
                             </div>
-                            <div>Node where the WS is hosted : WASDI_ONDA_1</div>
-                            <div>Total number of files: {{m_oController.getProductList().length}}</div>
-                            <div>Total number of processes executed in that ws : 101</div>
 
-                            <div><b> Last touch: 22/01/2021 22:01:15 CEST</b></div>
+
+
+
+
                             <div><b><h4>File list</h4></b></div>
 
 
