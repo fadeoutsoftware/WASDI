@@ -16,6 +16,7 @@ import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.opensearch.QueryTranslationParser;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
  * @author c.nattero
@@ -67,16 +68,15 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			//			}
 
 			sResult = "";
-			String sMission = "";
-			sMission = getMissionFromFreeText(sQueryFromClient);
+			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQueryFromClient);
 			
 			if(!oAppConf.has("missions")) {
-				//todo infer collection from free text
-				if(Utils.isNullOrEmpty(sMission)) {
+				//infer collection from free text
+				if(Utils.isNullOrEmpty(oQueryViewModel.platformName)) {
 					throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
 				} else {
 					//since mission is not specified in the query, add /search.json here
-					sResult += sMission + "/search.json?";
+					sResult += oQueryViewModel.platformName.replace("-", "") + "/search.json?";
 				}
 			}
 			//first things first: append mission name + /search.json? 
@@ -100,6 +100,9 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 					sResult += sLocalPart;
 				}
 			}
+			if(Utils.isNullOrEmpty(sResult)) {
+				sResult = oQueryViewModel.platformName.replace("-", "")+ "/search.json?";
+			}
 			sResult += parseFootPrint(sQuery);
 			sResult += parseTimeFrame(sQuery);
 			sResult += "&status=all";
@@ -107,34 +110,16 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 				sResult += "&timeliness=Fast-24h";
 			}
-			
-			sResult = sResult + parseFreeText(sQueryFromClient);
+			String sFree = parseFreeText(sQueryFromClient);
+			if(!Utils.isNullOrEmpty(sFree)) {
+				sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
+			}
 
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
 		}
 
 		return sResult;
-	}
-
-	private String getMissionFromFreeText(String sQueryFromClient) {
-		String sFreeText = getFreeTextSearch(sQueryFromClient);
-		if(Utils.isNullOrEmpty(sFreeText)) {
-			return sFreeText;
-		}
-		if(sFreeText.startsWith("S1A_") || sFreeText.startsWith("S1B_")) {
-			return "Sentinel1";
-		}
-		if(sFreeText.startsWith("S2A_") || sFreeText.startsWith("S2B_")) {
-			return "Sentinel2";
-		}
-		if(sFreeText.startsWith("S3A_") || sFreeText.startsWith("S3B_")) {
-			return "Sentinel3";
-		}
-		if(sFreeText.startsWith("LC08_")) {
-			return "Landsat8";
-		}
-		return null;
 	}
 
 	@Override
@@ -167,7 +152,6 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		if(bAddDot) {
 			sResult += ".";
 		}
-		sResult = "&productIdentifier=%25" + sResult + "%25";
 		return sResult;
 	}
 
