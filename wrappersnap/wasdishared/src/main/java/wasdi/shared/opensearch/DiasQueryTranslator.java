@@ -6,6 +6,8 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.Arrays;
+
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
@@ -131,27 +133,27 @@ public abstract class DiasQueryTranslator {
 	protected String getFreeTextSearch(String sQuery) {
 		try {
 			int iEnd = sQuery.length();
-			
+
 			int iBeginPosition = sQuery.indexOf("beginPosition");
 			if(iBeginPosition >= 0) {
 				iEnd = iBeginPosition;
 			}
-			
+
 			int iEndPosition = sQuery.indexOf("endPosition");
 			if(iEndPosition >= 0 && iEndPosition < iEnd) {
 				iEnd = iEndPosition;
 			}
-			
+
 			int iFootprint = sQuery.indexOf("footprint");
 			if(iFootprint >= 0 && iFootprint < iEnd) {
 				iEnd = iFootprint;
 			}
-			
+
 			int iAnd = sQuery.indexOf("AND");
 			if(iAnd > 0 && iAnd < iEnd) {
 				iEnd = iAnd;
 			}
-			
+
 			int iBracket = sQuery.indexOf("(");
 			if(iBracket >= 0 && iBracket < iEnd) {
 				iEnd = iBracket;
@@ -165,14 +167,14 @@ public abstract class DiasQueryTranslator {
 			if(iEnd == 0) {
 				return "";
 			}
-			
+
 			sQuery = sQuery.substring(0, iEnd);
-			
+
 			//remove leading and trailing spaces
 			sQuery = sQuery.trim();
-			
+
 			return sQuery;
-			
+
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslator.getFreeTextSearch( " + sQuery + " ): " + oE);
 		}
@@ -290,6 +292,11 @@ public abstract class DiasQueryTranslator {
 								"DiasQueryTranslatorEODC.parseWasdiClientQuery: could not complete footprint detection: "
 										+ oE);
 					}
+				}
+				
+				//no platform? see if we can infer it from the product name (provided it's not null)
+				if(Utils.isNullOrEmpty(oResult.platformName) && !Utils.isNullOrEmpty(oResult.freeTextSearch)){
+					reverseEngineerQueryFromProductName(oResult, oResult.freeTextSearch);
 				}
 			} catch (Exception oE) {
 				Utils.log("ERROR",
@@ -560,48 +567,37 @@ public abstract class DiasQueryTranslator {
 			asInterval[1] = asTimeQuery[1];
 		}
 	}
-	
-	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sQuery) {
-		/**
-		 *
-		 *     #Determine the satellite based on the satellite identifier in the product_name
-    if product_name[:2] == 'S1':
-        satellite = 'Sentinel-1'
-    elif product_name[:2] == 'S2':
-        satellite = 'Sentinel-2'
-    else:
-        print('Unknown Satellite')
-        exit(11)
 
-    #Determine the productType
-    if satellite == 'Sentinel-1':
-        if product_name[7:10] == 'RAW':
-            productType = product_name[7:10]
-        elif product_name[7:10] in ['SLC', 'GRD']:
-            productType = product_name[7:10]
-        elif product_name[7:10] == 'OCN':
-            productType = product_name[7:10]
-        else:
-            print('Not handled expression please report to support')
-            exit(12)
-    elif satellite == 'Sentinel-2':
-        if product_name[7:10] == 'L1C':
-            productType = product_name[7:10]
-        elif product_name[7:10] == 'L2A':
-            productType = product_name[7:10]
-        else:
-            print('Not handled expression please report to support')
-            exit(12)
-    #Construct the parent id from the Satellite and productType
-    parentId = parent_id(satellite, productType=productType)
-
-    #Construct the query_url using parent_id and product name
-    #https://collgs.lu/catalog/oseo/search?parentId=S1_SAR_GRD&uid=S1B_EW_GRDM_1SDH_20180513T194721_20180513T194821_010907_013F4E_44F2
-    query_str = '{0}parentId={1}&uid={2}'
-    query_url = query_str.format(search_base_url, parentId, product_name)
-    return query_url
-		 * 
-		 */
+	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sProductName) {
+		try {
+			if(Utils.isNullOrEmpty(sProductName)) {
+				Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: query is null or empty");
+			}
+			//mission
+			if(sProductName.startsWith("S1")) {
+				oQueryViewModel.platformName = "Sentinel-1";
+				
+				String[] asTypesA = {"RAW", "GRD", "SLC", "OCN"};
+				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
+					oQueryViewModel.productType=(sProductName.substring(7, 10));
+				} else {
+					Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
+				}
+			} else if (sProductName.startsWith("S2")) {
+				oQueryViewModel.platformName = "Sentinel-2";
+				String[] asTypesA = {"L1C", "L2A"};
+				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
+					oQueryViewModel.productType=(sProductName.substring(7, 10));
+				} else {
+					Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
+				}
+			}  else {
+				//todo add other platforms:
+				// Sentinel-3, Sentinel-5p, Landsat-8, ...
+				Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: " + oE);
+		}
 	}
-
 }
