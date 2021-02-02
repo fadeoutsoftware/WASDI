@@ -512,15 +512,16 @@ public class ProcessScheduler extends Thread {
 				if (!m_asOperationTypes.contains(aoInputList.get(iProcWs).getOperationType())) {
 					aoInputList.remove(iProcWs);
 				}
-				
-				// Filter on operation subtype if configured
-				if (m_asOperationTypes.size()==1) {
-					if (!Utils.isNullOrEmpty(m_sOperationSubType)) {
-						if (aoInputList.get(iProcWs).getOperationSubType()!= null) {
-							if (!aoInputList.get(iProcWs).getOperationSubType().equals(m_sOperationSubType)) {
-								aoInputList.remove(iProcWs);
-							}							
-						}
+				else {
+					// Filter on operation subtype if configured
+					if (m_asOperationTypes.size()==1) {
+						if (!Utils.isNullOrEmpty(m_sOperationSubType)) {
+							if (aoInputList.get(iProcWs).getOperationSubType()!= null) {
+								if (!aoInputList.get(iProcWs).getOperationSubType().equals(m_sOperationSubType)) {
+									aoInputList.remove(iProcWs);
+								}							
+							}
+						}					
 					}					
 				}
 			}
@@ -529,7 +530,7 @@ public class ProcessScheduler extends Thread {
 		}
 		catch (Exception oE) {
 			oE.printStackTrace();
-			return null;
+			return new ArrayList<ProcessWorkspace>();
 		}
 	}
 	
