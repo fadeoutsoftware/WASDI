@@ -3,12 +3,15 @@
  */
 
 var WorkspaceController = (function () {
-    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state, oProductService, oRabbitStompService, oGlobeService, $rootScope, oSatelliteService, $interval) {
+    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
+                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oSatelliteService,
+                                 $interval, oProcessesLaunchedService) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oAuthService = oAuthService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oConstantsService = oConstantsService;
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oScope.m_oController = this;
         this.m_aoWorkspaceList = [];
         this.m_bIsLoading = true;
@@ -52,10 +55,11 @@ var WorkspaceController = (function () {
 
         this.getCount = function () {
             console.log("Controller " + this.m_oWorkspaceSelected.workspaceId)
-            return this.m_oWorkspaceService.getProcessWorkspaceCountByWorkspace(this.m_oWorkspaceSelected.workspaceId);
+            return this.m_oProcessesLaunchedService.getProcessWorkspaceCountByWorkspace(this.m_oWorkspaceSelected.workspaceId);
         }
 
         this.getLastTouchDate = function () {
+
             return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
 
         }
@@ -214,19 +218,17 @@ var WorkspaceController = (function () {
 
         this.m_bIsVisibleFiles = true;
 
-/*        this.m_oWorkspaceService.getProcessWorkspaceCountByWorkspace(oWorkspaceId).success(function (data, status) {
+/*        this.m_oProcessesLaunchedService.getProcessWorkspaceCountByWorkspace(oWorkspaceId).success(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
-                oController.m_iCountProcessWorkspace = data;
                 console.log("count" + data);
             }
         }).error(function (data, status) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE INFO");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING PROCESS WORKSPACE COUNT");
         });*/
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).success(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data;
-                console.log(data);
             }
         }).error(function (data, status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE INFO");
@@ -610,7 +612,8 @@ var WorkspaceController = (function () {
         'GlobeService',
         '$rootScope',
         'SatelliteService',
-        '$interval'
+        '$interval',
+        'ProcessesLaunchedService'
     ];
     return WorkspaceController;
 })();
