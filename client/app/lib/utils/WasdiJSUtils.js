@@ -142,9 +142,6 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
         case "DOWNLOAD":
             sUserMessage = "PRODUCT ADDED TO THE WORKSPACE<br>READY";
             break;
-        case "PUBLISH":
-            sUserMessage = "LAYER PUBLISHED<br>READY";
-            break;
         case "PUBLISHBAND":
             sUserMessage = "BAND PUBLISHED: " + oMessage.payload.bandName + "<br>PRODUCT: <br> " + oMessage.payload.productName + "<br>READY";
             break;
@@ -551,10 +548,17 @@ function utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct){
 
 /**
  * Converts the WASDI Operation Code in a more user friendly description
- * @param {String} sOperation 
+ * @param {Object} oOperation 
  */
-function utilsConvertOperationToDescription(sOperation) {
-    var sDescription = sOperation;
+function utilsConvertOperationToDescription(oOperation) {
+    var sOperation = oOperation.operationType;
+    var sDescription = oOperation.operationType;
+
+    var sSubType = "";
+    
+    if (utilsIsStrNullOrEmpty(oOperation.operationSubType)==false) {
+        sSubType = " - " + oOperation.operationSubType;
+    }
 
     if (sOperation == "RUNPROCESSOR") {
         sDescription = "APP"
@@ -580,6 +584,8 @@ function utilsConvertOperationToDescription(sOperation) {
     else if (sOperation == "DEPLOYPROCESSOR") {
         sDescription = "DEPLOY"
     }
+
+    sDescription = sDescription + sSubType;
 
     return sDescription;
 }

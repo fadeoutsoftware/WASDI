@@ -94,7 +94,7 @@
                                 {{oProcess.operationDate}}
                             </td>
                             <td>
-                                {{m_oController.getOperationDescription(oProcess.operationType)}}
+                                {{m_oController.getOperationDescription(oProcess)}}
                             </td>
                             <td class="text"  title="{{oProcess.productName}}"  ><!--data-toggle="tooltip" data-placement="bottom"-->
                                 <span>{{oProcess.productName}}</span>
@@ -123,11 +123,9 @@
                                 </div>
                             </td>
                             <td class="over-icon" ng-click="m_oController.openErrorLogsDialog(oProcess)" >
-                                <div ng-show="oProcess.operationType === 'RUNIDL' || oProcess.operationType === 'RUNPROCESSOR'">
+                                <!--div ng-show="oProcess.operationType === 'RUNIDL' || oProcess.operationType === 'RUNPROCESSOR'"-->
                                     <i class="fa fa-file-text" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>
-
-                                </div>
-
+                                <!--/div-->
                             </td>
                         </tr>
 
