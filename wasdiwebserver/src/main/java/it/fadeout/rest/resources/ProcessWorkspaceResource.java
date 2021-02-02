@@ -48,6 +48,14 @@ public class ProcessWorkspaceResource {
 	ServletConfig m_oServletConfig;	
 
 	@GET
+	@Path("/countbyws")
+	public long getCountByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("sWorkspaceId") String sWorkspaceId) {
+		ProcessWorkspaceRepository pwr = new ProcessWorkspaceRepository();
+		return pwr.countByWorkspace(sWorkspaceId);
+	}
+	
+	@GET
 	@Path("/byws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
