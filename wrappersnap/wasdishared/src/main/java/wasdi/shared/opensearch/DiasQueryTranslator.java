@@ -231,7 +231,7 @@ public abstract class DiasQueryTranslator {
 			oResult.limit = iLimit;
 
 			// Try to get the free text search
-			String sFreeText = parseFreeText(sQuery);
+			String sFreeText = getFreeTextSearch(sQuery);
 			if (!Utils.isNullOrEmpty(sFreeText)) {
 				oResult.freeTextSearch = sFreeText;
 			}
@@ -591,9 +591,13 @@ public abstract class DiasQueryTranslator {
 				} else {
 					Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
+			} else if(sProductName.startsWith("S3A_") || sProductName.startsWith("S3B_")) {
+				oQueryViewModel.platformName = "Sentinel-3";
+			} else if(sProductName.startsWith("LC08_")) {
+				oQueryViewModel.platformName = "Landsat8";
 			}  else {
 				//todo add other platforms:
-				// Sentinel-3, Sentinel-5p, Landsat-8, ...
+				// Sentinel-5p, Copernicus-marine, Envisat, ...
 				Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
 			}
 		} catch (Exception oE) {
