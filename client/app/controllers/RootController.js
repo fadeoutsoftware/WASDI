@@ -738,6 +738,10 @@ var RootController = (function() {
     };
 
     RootController.prototype.openDocumentatonCenter = function () {
+
+        var oAudio = new Audio('assets/audio/R2D2a.wav');
+        oAudio.play();
+        
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
     }
 
