@@ -33,8 +33,9 @@ var WorkspaceController = (function () {
         this.m_oFakePosition = null;
         this.m_oUfoPointer = null;
 
+
         this.m_oWorkspaceViewModel = null; // the model view of the selected workspace
-        this.m_iCountProcessWorkspace = null;
+        this.m_iCountProcessWorkspace = null; // the count of processes executed in the selected workspace
 
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
@@ -218,10 +219,14 @@ var WorkspaceController = (function () {
         this.m_bIsVisibleFiles = true;
         this.m_oProcessesLaunchedService.getCountByWorkspace(oWorkspaceId).success(function (data, status) {
             console.log("count (Should be equals to 1 )" + data);
-            m_iCountProcessWorkspace = data;
+            if (data != null) {
+                if (data != undefined) {
+                    m_iCountProcessWorkspace = data.toString();
+                    console.log("actual value " + m_iCountProcessWorkspace);
+                }
+            }
         }).error(function (data, status) {
             console.log("Error in get count");
-            m_iCountProcessWorkspace = 0;
         });
 
 
@@ -384,6 +389,9 @@ var WorkspaceController = (function () {
 
     WorkspaceController.prototype.getProductList = function () {
         return this.m_aoProducts;
+    };
+    WorkspaceController.prototype.getProcessCount = function () {
+        return this.m_iCountProcessWorkspace;
     };
 
     WorkspaceController.prototype.isEmptyProductList = function () {
