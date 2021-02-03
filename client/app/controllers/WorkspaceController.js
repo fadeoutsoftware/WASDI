@@ -5,13 +5,12 @@
 var WorkspaceController = (function () {
     function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
                                  oProductService, oRabbitStompService, oGlobeService, $rootScope, oSatelliteService,
-                                 $interval, oProcessesLaunchedService) {
+                                 $interval) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oAuthService = oAuthService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oConstantsService = oConstantsService;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oScope.m_oController = this;
         this.m_aoWorkspaceList = [];
         this.m_bIsLoading = true;
@@ -49,24 +48,11 @@ var WorkspaceController = (function () {
         this.getTrackSatellite();
 
 
-
         this.m_oUpdatePositionSatellite = $interval(function () {
             console.log("Update Sat Position");
             $scope.m_oController.updatePositionsSatellites();
         }, 5000);
 
-
-        this.getLastTouchDate = function () {
-            if (this.m_oWorkspaceViewModel === null) {
-                return "";
-            } else {
-                return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
-            }
-        }
-
-        this.getCount= function (){
-            return this.m_Count;
-        }
 
         /*
         * ANGULAR DOCS:
@@ -91,6 +77,15 @@ var WorkspaceController = (function () {
             return false;
         }
     }
+
+    WorkspaceController.prototype.getLastTouchDate = function () {
+        if (this.m_oWorkspaceViewModel === null) {
+            return "";
+        } else {
+            return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
+        }
+    }
+
 
     WorkspaceController.prototype.moveTo = function (sPath) {
         this.m_oLocation.path(sPath);
@@ -221,14 +216,6 @@ var WorkspaceController = (function () {
         var oWorkspaceId = oWorkspace.workspaceId;
 
         this.m_bIsVisibleFiles = true;
-        this.m_oProcessesLaunchedService.getCountByWorkspace(oWorkspaceId).success(function (data, status) {
-            if (data != null && data != undefined) {
-                    this.m_Count = data;
-                    console.log("actual value " + this.m_Count);
-                }
-        }).error(function (data, status) {
-            console.log("Error in get count");
-        });
 
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).success(function (data, status) {
@@ -620,8 +607,7 @@ var WorkspaceController = (function () {
         'GlobeService',
         '$rootScope',
         'SatelliteService',
-        '$interval',
-        'ProcessesLaunchedService'
+        '$interval'
     ];
     return WorkspaceController;
 })();

@@ -17,8 +17,19 @@ public class WorkspaceEditorViewModel {
     private Date lastEditDate;
     private List<String> sharedUsers = new ArrayList<>();
     private String nodeCode;
+    private long processesCount;
     
-    public String getWorkspaceId() {
+
+
+	public long getProcessesCount() {
+		return processesCount;
+	}
+
+	public void setProcessesCount(long processesCount) {
+		this.processesCount = processesCount;
+	}
+
+	public String getWorkspaceId() {
         return workspaceId;
     }
 
