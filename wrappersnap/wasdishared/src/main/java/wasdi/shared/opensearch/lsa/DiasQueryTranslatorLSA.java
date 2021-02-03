@@ -1,5 +1,10 @@
 package wasdi.shared.opensearch.lsa;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.Date;
+
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryViewModel;
@@ -17,7 +22,11 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 				
 		// Set start and end date
 		String sTimeStart = oWasdiQuery.startFromDate.substring(0, 10);
-		String sTimeEnd = oWasdiQuery.endToDate.substring(0, 10);;
+		String sTimeEnd = oWasdiQuery.endToDate.substring(0, 10);
+		//increment the end day by one, because the upper limit is excluded:
+		//apparently LSA uses it as a <, not as a <=
+		sTimeEnd = LocalDate.parse(sTimeEnd).plusDays(1).toString();
+
 		
 		String sTimePeriod = "&timeStart=" + sTimeStart + "&timeEnd="+ sTimeEnd;
 		
