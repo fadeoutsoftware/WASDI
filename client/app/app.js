@@ -1,10 +1,14 @@
 'use strict';
+import angular from "angular/index";
+import ngRoute from "@uirouter/angularjs";
+
+import HomeController from "./controllers/HomeController";
+import WorkspaceController from "./controllers/WorkspaceController";
 
 // Declare app level module which depends on views, and components
 var wasdiApp = angular.module('wasdi', [
-    'ngRoute',
+    ngRoute,
     'ngAnimate',
-    'ui.router',//library alternative for router
     'pascalprecht.translate',
     'JSONedit',
     'directive.g+signin',

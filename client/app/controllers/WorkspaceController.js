@@ -605,3 +605,5 @@ var WorkspaceController = (function() {
     ];
     return WorkspaceController;
 }) ();
+
+module.exports = WorkspaceController;

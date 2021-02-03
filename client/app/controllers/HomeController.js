@@ -361,3 +361,6 @@ var HomeController = (function() {
 
     return HomeController;
 }) ();
+
+
+module.exports = HomeController;
