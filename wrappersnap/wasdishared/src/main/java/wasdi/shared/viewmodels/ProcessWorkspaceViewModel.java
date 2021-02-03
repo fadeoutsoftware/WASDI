@@ -7,7 +7,8 @@ public class ProcessWorkspaceViewModel {
 
     private String productName;
     private String operationType;
-    private String operationDate;
+    private String operationSubType;
+	private String operationDate;
     private String operationStartDate;
     private String operationEndDate;
     private String lastChangeDate;
@@ -122,6 +123,14 @@ public class ProcessWorkspaceViewModel {
 
 	public void setLastChangeDate(String lastChangeDate) {
 		this.lastChangeDate = lastChangeDate;
+	}
+
+    public String getOperationSubType() {
+		return operationSubType;
+	}
+
+	public void setOperationSubType(String operationSubType) {
+		this.operationSubType = operationSubType;
 	}
 
 }

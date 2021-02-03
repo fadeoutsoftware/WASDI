@@ -85,6 +85,16 @@ public class ProcessScheduler extends Thread {
 	 */
 	protected ArrayList<String> m_asOperationTypes = new ArrayList<String>();
 	
+	/**
+	 * Operation Subtype: it is single because, at least until now
+	 * the subtype filter is supported only for mono-type schedulers
+	 */
+	protected String m_sOperationSubType;
+	
+	/**
+	 * Parameter to slow down the scheduler special checks that will be
+	 * done only every m_iSometimesCounter cycles
+	 */
 	protected int m_iSometimesCounter = 30;
 	
 	public boolean init(String sSchedulerKey) {
@@ -139,6 +149,17 @@ public class ProcessScheduler extends Thread {
 				if (asTypes != null) {
 					for (String sType : asTypes) {
 						m_asOperationTypes.add(sType);
+					}
+					
+					// If there is only one type
+					if (asTypes.length == 1) {
+						// Read if there is a Subtype
+						String sOperationSubType = ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_OP_SUB_TYPE", "");
+						
+						if (!Utils.isNullOrEmpty(sOperationSubType)) {
+							// Save the subtype
+							m_sOperationSubType = sOperationSubType;
+						}
 					}
 				}
 				
@@ -487,8 +508,21 @@ public class ProcessScheduler extends Thread {
 		try {
 			for (int iProcWs = aoInputList.size()-1; iProcWs>=0; iProcWs--) {
 				
+				// Filter on scheduler operation types
 				if (!m_asOperationTypes.contains(aoInputList.get(iProcWs).getOperationType())) {
 					aoInputList.remove(iProcWs);
+				}
+				else {
+					// Filter on operation subtype if configured
+					if (m_asOperationTypes.size()==1) {
+						if (!Utils.isNullOrEmpty(m_sOperationSubType)) {
+							if (aoInputList.get(iProcWs).getOperationSubType()!= null) {
+								if (!aoInputList.get(iProcWs).getOperationSubType().equals(m_sOperationSubType)) {
+									aoInputList.remove(iProcWs);
+								}							
+							}
+						}					
+					}					
 				}
 			}
 			
@@ -496,7 +530,7 @@ public class ProcessScheduler extends Thread {
 		}
 		catch (Exception oE) {
 			oE.printStackTrace();
-			return null;
+			return new ArrayList<ProcessWorkspace>();
 		}
 	}
 	
@@ -701,6 +735,22 @@ public class ProcessScheduler extends Thread {
 	 */
 	public void addSupportedType(String sSupportedType) {
 		m_asOperationTypes.add(sSupportedType);
+	}
+	
+	/**
+	 * Get Operation SubType
+	 * @return
+	 */
+	public String getOperationSubType() {
+		return m_sOperationSubType;
+	}
+	
+	/**
+	 * Set Operation SubType
+	 * @param sOperationSubType
+	 */
+	public void setOperationSubType(String sOperationSubType) {
+		this.m_sOperationSubType = sOperationSubType;
 	}
 
 

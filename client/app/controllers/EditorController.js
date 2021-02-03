@@ -2752,7 +2752,9 @@ var EditorController = (function () {
         var oTreeInst = $('#jstree').jstree(true);
         var oModelData = oTreeInst._model.data;
         for (var iModel in oModelData) {
-            if (!utilsIsObjectNullOrUndefined(oModelData[iModel].original) && !utilsIsObjectNullOrUndefined(oModelData[iModel].original.band) && oModelData[iModel].original.band.bVisibleNow == true) {
+            if (!utilsIsObjectNullOrUndefined(oModelData[iModel].original) &&
+                !utilsIsObjectNullOrUndefined(oModelData[iModel].original.band) &&
+                oModelData[iModel].original.band.published == true) {
                 $("#jstree").jstree("_open_to", oModelData[iModel].id);
             }
         }
