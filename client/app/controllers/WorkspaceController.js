@@ -35,7 +35,7 @@ var WorkspaceController = (function () {
 
 
         this.m_oWorkspaceViewModel = null; // the model view of the selected workspace
-        this.m_iCountProcessWorkspace = null; // the count of processes executed in the selected workspace
+        this.m_Count = null; // the count of processes executed in the selected workspace
 
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
@@ -47,6 +47,7 @@ var WorkspaceController = (function () {
         this.m_oGlobeService.goHome();
 
         this.getTrackSatellite();
+
 
 
         this.m_oUpdatePositionSatellite = $interval(function () {
@@ -61,7 +62,10 @@ var WorkspaceController = (function () {
             } else {
                 return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
             }
+        }
 
+        this.getCount= function (){
+            return this.m_Count;
         }
 
         /*
@@ -218,13 +222,10 @@ var WorkspaceController = (function () {
 
         this.m_bIsVisibleFiles = true;
         this.m_oProcessesLaunchedService.getCountByWorkspace(oWorkspaceId).success(function (data, status) {
-            console.log("count (Should be equals to 1 )" + data);
-            if (data != null) {
-                if (data != undefined) {
-                    m_iCountProcessWorkspace = data.toString();
-                    console.log("actual value " + m_iCountProcessWorkspace);
+            if (data != null && data != undefined) {
+                    this.m_Count = data;
+                    console.log("actual value " + this.m_Count);
                 }
-            }
         }).error(function (data, status) {
             console.log("Error in get count");
         });
@@ -391,7 +392,7 @@ var WorkspaceController = (function () {
         return this.m_aoProducts;
     };
     WorkspaceController.prototype.getProcessCount = function () {
-        return this.m_iCountProcessWorkspace;
+        return this.m_Count;
     };
 
     WorkspaceController.prototype.isEmptyProductList = function () {
