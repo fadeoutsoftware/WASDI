@@ -53,6 +53,7 @@ import org.geotools.referencing.CRS;
 import org.quartz.xml.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
 import net.schmizz.sshj.SSHClient;
@@ -103,6 +104,7 @@ import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.RegridSetting;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
+import wasdi.shared.payload.DownloadPayload;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
@@ -145,6 +147,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Flag to know if update or not the progress of download operations in the database
 	 */
 	protected boolean m_bNotifyDownloadUpdateActive = true;
+	
+	/**
+	 * Process Workspace Logger
+	 */
+	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger;
+	
+	public static ObjectMapper s_oMapper = new ObjectMapper();
 
 	/**
 	 * WASDI Launcher Main Entry Point
@@ -377,13 +386,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			SystemUtils.init3rdPartyLibs(null);
 			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+			
+			try {
+				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
+				oFileHandler.setLevel(Level.ALL);
+				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+				oFileHandler.setFormatter(oSimpleFormatter);
+				SystemUtils.LOG.setLevel(Level.ALL);
+				SystemUtils.LOG.addHandler(oFileHandler);				
+			}
+			catch (Exception oLoggerException) {
+				s_oLogger.error("Launcher Main Constructor Exception creating log file handler: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oLoggerException));
+			}
 
-			FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
-			oFileHandler.setLevel(Level.ALL);
-			SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-			oFileHandler.setFormatter(oSimpleFormatter);
-			SystemUtils.LOG.setLevel(Level.ALL);
-			SystemUtils.LOG.addHandler(oFileHandler);
 			
 			// Flag to know if update the process workspace progress during download operations or not
 			String sNotifyDownloadUpdateActive = ConfigReader.getPropValue("DOWNLOAD_UPDATE_ACTIVE", "1");
@@ -414,9 +429,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		String sExchange = "";
 
 		try {
+			
+			// Create the base Parameter
 			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 			sWorkspace = oBaseParameter.getWorkspace();
 			sExchange = oBaseParameter.getExchange();
+			
+			// Create the process workspace logger
+			m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());
 		} catch (Exception e) {
 			String sError = "LauncherMain.executeOperation: Impossible to deserialize Operation Parameters: operation aborted";
 			if (s_oSendToRabbit != null)
@@ -651,7 +671,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		try {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			
 			s_oLogger.debug("LauncherMain.Download: Download Start");
+			m_oProcessWorkspaceLogger.log("Fetch Start - PROVIDER " + oParameter.getProvider());
 
 			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
 
@@ -687,6 +709,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Get the file name
 				String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
+				m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
 
 				DownloadedFile oAlreadyDownloaded = null;
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -754,10 +777,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						
 						if (iLastError > 0)
 							sError += ": query obtained HTTP Error Code " + iLastError;
+						
+						m_oProcessWorkspaceLogger.log(sError);
+						
 						throw new Exception(sError);
 					}
 					
 					oProviderAdapter.unsubscribe(this);
+					
+					m_oProcessWorkspaceLogger.log("Got File, try to read");
 
 					// Control Check for the file Name
 					sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
@@ -862,6 +890,21 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					s_oLogger.debug("LauncherMain.Download: Set process workspace state as done");
 
 					oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+					
+					m_oProcessWorkspaceLogger.log("Operation Completed");
+					m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
+					
+					DownloadPayload oDownloadPayload = new DownloadPayload();
+					oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
+					oDownloadPayload.setProvider(oParameter.getProvider());
+					
+					try {
+						String sPayload = s_oMapper.writeValueAsString(oDownloadPayload);
+						oProcessWorkspace.setPayload(sPayload);						
+					}
+					catch (Exception oPayloadEx) {
+						s_oLogger.error("LauncherMain.Download: payload exception: "+ oPayloadEx.toString());
+					}
 
 					s_oLogger.debug("LauncherMain.Download: Set process workspace passed");
 				} else {
