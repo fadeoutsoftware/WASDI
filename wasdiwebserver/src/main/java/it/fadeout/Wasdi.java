@@ -489,7 +489,14 @@ public class Wasdi extends ResourceConfig {
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
+					Utils.debugLog("Wasdi.runProcess: adding parent " + sParentId);
 					sUrl += "&parent=" + URLEncoder.encode(sParentId, java.nio.charset.StandardCharsets.UTF_8.toString());
+				}
+				
+				// Is there a subType?
+				if (!Utils.isNullOrEmpty(sOperationSubId)) {
+					Utils.debugLog("Wasdi.runProcess: adding sub type " + sOperationSubId);
+					sUrl += "&subtype=" + sOperationSubId;
 				}
 				
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
