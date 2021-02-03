@@ -994,12 +994,15 @@ public class ProcessingResources {
 	@Path("run")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, String sParameter) throws IOException {
-		//@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
+			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String sOperationSubType, String sParameter) throws IOException {
 		
-
+		if (Utils.isNullOrEmpty(sOperationSubType)) {
+			Utils.debugLog("ProsessingResources.runProcess: SUB TYPE NULL");
+			sOperationSubType= "";
+		}
+		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = ""; 
 		// Log intro
-		Utils.debugLog("ProsessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", Product: " + sProductName + ")");
+		Utils.debugLog("ProsessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId  + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		try {
@@ -1036,7 +1039,7 @@ public class ProcessingResources {
 			oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
