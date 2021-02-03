@@ -102,13 +102,13 @@
                              ng-show="m_oController.m_bIsOpenInfo">
                              <!--ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">-->
 
-                            <div> Owner : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
-                            <div> Node : {{m_oController.m_oWorkspaceViewModel.nodeCode}}</div>
-                            <div><b> Last Update: {{m_oController.getLastTouchDate()}}</b></div>
-                            <div>Total Files: {{m_oController.getProductList().length}}</div>
-                            <div>Processes Executed : {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
-                            <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)"> Workspace
-                                sharing :
+                            <div><span class="workspace-details-heading"> Owner</span> : {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <div><span class="workspace-details-heading"> Node</span> : {{m_oController.m_oWorkspaceViewModel.nodeCode}}</div>
+                            <div><span class="workspace-details-heading"> Last Update</span> : {{m_oController.getLastTouchDate()}}</b></div>
+                            <div><span class="workspace-details-heading">Total Files</span> : {{m_oController.getProductList().length}}</div>
+                            <div><span class="workspace-details-heading">Processes Executed</span> : {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
+                            <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
+                                <span class="workspace-details-heading">Workspace sharing</span> :
                                 <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                     <li> {{shared}}</li>
                                 </div>
