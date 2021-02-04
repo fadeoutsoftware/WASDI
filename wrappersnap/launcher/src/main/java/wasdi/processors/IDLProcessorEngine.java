@@ -277,22 +277,24 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
 			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
 				oWalk.map(Path::toFile).forEach(oFile->{
-					if(oFile.getName().equals(sProcessorName) && !oFile.isDirectory()) {
+					String sFileName = oFile.getName(); 
+					if(sFileName.equals(sProcessorName + ".pro") && !oFile.isDirectory()) {
 						oMyProcessorExists.set(true);
+						/*
 						try {
-							Files.move(new File(oFile.getCanonicalPath()).toPath(), new File(oFile.getCanonicalPath()+".pro").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+							Files.move(new File(oFile.getCanonicalPath()).toPath(), new File(oFile.getCanonicalPath()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 						} catch (IOException oE) {
 							LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor Error renaming processor file " + oE);
 							oMyProcessorExists.set(false);
 							
 						}
-						
+						*/
 					}
 				});
 			}
 			
 		    if (!oMyProcessorExists.get()) {
-		    	LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor" + sProcessorName + ".pro not present in processor " + sZipFileName);
+		    	LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor [" + sProcessorName + ".pro] not present in processor " + sZipFileName);
 		    	return false;
 		    }
 		    
