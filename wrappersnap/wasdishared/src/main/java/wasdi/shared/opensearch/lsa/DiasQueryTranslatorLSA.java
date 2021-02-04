@@ -44,11 +44,6 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 			sLSAQuery = sOffset + sLSAQuery;
 		}
 		
-		// Set the free text search -> assume it's a product name:
-		if(!Utils.isNullOrEmpty(oWasdiQuery.freeTextSearch)) {
-			sLSAQuery += "&" + oWasdiQuery.freeTextSearch; 
-		}
-		
 		// Set the Bbox
 		String sBbox="";
 		
@@ -107,7 +102,6 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		
 		//add free text search, assuming it's the product id
 		if(!Utils.isNullOrEmpty(oWasdiQuery.freeTextSearch)) {
-			
 			sLSAQuery += "&uid=" + oWasdiQuery.freeTextSearch;
 		}
 		
