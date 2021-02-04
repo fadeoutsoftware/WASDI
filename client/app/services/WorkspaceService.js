@@ -16,6 +16,8 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return this.m_oHttp.get(this.APIURL + '/ws?sWorkspaceId='+sWorkspaceId);
     };
 
+
+
     this.createWorkspace = function (sName = null) {
 
         let sRestPath = '/ws/create';

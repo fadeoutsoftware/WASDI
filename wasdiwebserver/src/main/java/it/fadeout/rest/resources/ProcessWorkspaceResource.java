@@ -47,6 +47,7 @@ public class ProcessWorkspaceResource {
 	@Context
 	ServletConfig m_oServletConfig;	
 
+	
 	@GET
 	@Path("/byws")
 	@Produces({ "application/xml", "application/json", "text/xml" })

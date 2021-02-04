@@ -745,8 +745,8 @@ var RootController = (function() {
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
     }
 
-    RootController.prototype.getOperationDescription = function(sOperation) {
-        return utilsConvertOperationToDescription(sOperation);
+    RootController.prototype.getOperationDescription = function(oOperation) {
+        return utilsConvertOperationToDescription(oOperation);
     }    
 
     /*********************************************************************/

@@ -71,6 +71,8 @@
     "WORKSPACES_LIST_OF_WORKFLOWS_TITLE":"List of Workflows",
     "WORKSPACES_NO_WORKSPACE":"You have no Workspaces yet",
 
+    "WORKSPACE_DETAILS_BOX": "Workspace details",
+
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch between 3D globe and 2D map",
     "EDITOR_TOOLTIP_HOME_2D":"Center of map",
