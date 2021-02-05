@@ -17,16 +17,6 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  */
 class TestDiasQueryTranslatorOnda {
-
-	/**
-	 * Test method for {@link wasdi.shared.opensearch.onda.DiasQueryTranslatorONDA#parseProductName(java.lang.String)}.
-	 */
-	@Test
-	void testParseFreeText() {
-		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
-		
-		assertEquals(null, oDQT.parseProductName(""));
-	}
 	
 	private static Stream<Arguments> provideValuePairs() {
 		String sProd = "S1B_IW_GRDH_1SDV_20210201T011057_20210201T011119_025406_0306AA_FA59";
@@ -61,7 +51,7 @@ class TestDiasQueryTranslatorOnda {
 	 */
 	@ParameterizedTest
 	@MethodSource("provideValuePairs")
-	void testGetFreeTextSearch(String sInput, String sExpected) {
+	void testQueryTranslation(String sInput, String sExpected) {
 		DiasQueryTranslatorONDA oDiasQueryTranslator = new DiasQueryTranslatorONDA();
 		assertEquals(sExpected, oDiasQueryTranslator.translate(sInput));
 	}
