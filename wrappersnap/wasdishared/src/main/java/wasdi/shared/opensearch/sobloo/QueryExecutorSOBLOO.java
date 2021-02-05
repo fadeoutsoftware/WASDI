@@ -144,7 +144,7 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	 */
 	@Override
 	protected String getCountUrl(String sQuery) {
-		Utils.debugLog("QueryExecutorSOBLOO.getCountUrl( " + sQuery + " )");
+		//Utils.debugLog("QueryExecutorSOBLOO.getCountUrl( " + sQuery + " )");
 		
 		Preconditions.checkNotNull(m_sAppConfigPath, "QueryExecutorSOBLOO.getCountUrl: app config path is null");
 		Preconditions.checkNotNull(m_sParserConfigPath, "QueryExecutorSOBLOO.getCountUrl: parser config path is null");
