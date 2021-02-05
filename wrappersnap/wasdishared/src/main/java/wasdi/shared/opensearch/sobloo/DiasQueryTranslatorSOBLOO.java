@@ -43,8 +43,8 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQuery);
 
 			sResult = "";
-			if(!Utils.isNullOrEmpty(oQueryViewModel.freeTextSearch)) {
-				sResult += "q=" + oQueryViewModel.freeTextSearch + "&";
+			if(!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+				sResult += "q=" + oQueryViewModel.productName + "&";
 			}
 			sResult += parseFootPrint(sQuery);
 			sResult += parseTimeFrame(sQuery);

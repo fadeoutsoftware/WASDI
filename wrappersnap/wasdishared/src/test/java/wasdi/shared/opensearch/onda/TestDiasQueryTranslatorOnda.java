@@ -16,13 +16,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 class TestDiasQueryTranslatorOnda {
 
 	/**
-	 * Test method for {@link wasdi.shared.opensearch.onda.DiasQueryTranslatorONDA#parseFreeText(java.lang.String)}.
+	 * Test method for {@link wasdi.shared.opensearch.onda.DiasQueryTranslatorONDA#parseProductName(java.lang.String)}.
 	 */
 	@Test
 	void testParseFreeText() {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		
-		assertEquals(null, oDQT.parseFreeText(""));
+		assertEquals(null, oDQT.parseProductName(""));
 	}
 
 	@ParameterizedTest
@@ -36,7 +36,7 @@ class TestDiasQueryTranslatorOnda {
 	final void testParseFreeText_fullNameWithoutExtensions(String sInputText) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		assertEquals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*", oDQT.parseFreeText(sInputText + sSuffix));
+		assertEquals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*", oDQT.parseProductName(sInputText + sSuffix));
 	}
 
 	@ParameterizedTest
@@ -56,7 +56,7 @@ class TestDiasQueryTranslatorOnda {
 	final void testParseFreeText_fullNameWithExtensions(String sInputText) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		assertEquals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423", oDQT.parseFreeText(sInputText + sSuffix));
+		assertEquals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423", oDQT.parseProductName(sInputText + sSuffix));
 	}
 	
 	@ParameterizedTest
@@ -69,7 +69,7 @@ class TestDiasQueryTranslatorOnda {
 	final void testParseFreeText_noHeadWithoutExtensions(String sInputText) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		assertEquals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*", oDQT.parseFreeText(sInputText + sSuffix));
+		assertEquals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423*", oDQT.parseProductName(sInputText + sSuffix));
 	}
 	
 	@ParameterizedTest
@@ -86,7 +86,7 @@ class TestDiasQueryTranslatorOnda {
 	final void testParseFreeText_noHeadWithExtensions(String sInputText) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		assertEquals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423", oDQT.parseFreeText(sInputText + sSuffix));
+		assertEquals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423", oDQT.parseProductName(sInputText + sSuffix));
 	}
 	
 	
@@ -100,7 +100,7 @@ class TestDiasQueryTranslatorOnda {
 	final void testParseFreeText_noTail(String sInputText) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		assertEquals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*", oDQT.parseFreeText(sInputText + sSuffix));
+		assertEquals("*S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*", oDQT.parseProductName(sInputText + sSuffix));
 	}
 	
 	
@@ -114,6 +114,6 @@ class TestDiasQueryTranslatorOnda {
 	final void testParseFreeText_noHeadNoTail(String sInputText) {
 		DiasQueryTranslatorONDA oDQT = new DiasQueryTranslatorONDA();
 		String sSuffix = " AND ( beginPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] AND endPosition:[2021-01-10T00:00:00.000Z TO 2021-01-12T23:59:59.999Z] )";
-		assertEquals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*", oDQT.parseFreeText(sInputText + sSuffix));
+		assertEquals("*_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D*", oDQT.parseProductName(sInputText + sSuffix));
 	}
 }

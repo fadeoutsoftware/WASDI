@@ -40,7 +40,7 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 
 			if(!Utils.isNullOrEmpty(sQuery)) {
 				sTranslatedQuery = parseCommon(sQuery);
-				sTranslatedQuery += parseFreeText(sQuery);
+				sTranslatedQuery += parseProductName(sQuery);
 				sTranslatedQuery += parseFootPrint(sQuery);
 				sTranslatedQuery += parseTimeFrame(sQuery);
 				sTranslatedQuery += parseSentinel_1(sQuery);
@@ -345,10 +345,10 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 	}
 
 	@Override
-	protected String parseFreeText(String sQuery) {
+	protected String parseProductName(String sQuery) {
 		String sResult = "";
 		try {
-			String sFreeText = getFreeTextSearch(sQuery);
+			String sFreeText = getProductName(sQuery);
 			if(!Utils.isNullOrEmpty(sFreeText)) {
 				sResult += "<ogc:PropertyIsEqualTo><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>";
 				sResult += sFreeText;

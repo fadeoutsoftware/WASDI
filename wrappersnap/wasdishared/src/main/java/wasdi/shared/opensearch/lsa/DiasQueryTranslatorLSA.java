@@ -101,8 +101,8 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		}
 		
 		//add free text search, assuming it's the product id
-		if(!Utils.isNullOrEmpty(oWasdiQuery.freeTextSearch)) {
-			sLSAQuery += "&uid=" + oWasdiQuery.freeTextSearch;
+		if(!Utils.isNullOrEmpty(oWasdiQuery.productName)) {
+			sLSAQuery += "&uid=" + oWasdiQuery.productName;
 		}
 		
 		String sBaseAddress = "https://collgs.lu/catalog/oseo/search?parentId=" + sParentId;

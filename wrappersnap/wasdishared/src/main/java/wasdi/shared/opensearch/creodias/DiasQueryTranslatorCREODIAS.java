@@ -110,7 +110,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 				sResult += "&timeliness=Fast-24h";
 			}
-			String sFree = parseFreeText(sQueryFromClient);
+			String sFree = parseProductName(sQueryFromClient);
 			if(!Utils.isNullOrEmpty(sFree)) {
 				sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
 			}
@@ -123,8 +123,8 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 	}
 
 	@Override
-	protected String parseFreeText(String sQuery) {
-		String sOld = getFreeTextSearch(sQuery);
+	protected String parseProductName(String sQuery) {
+		String sOld = getProductName(sQuery);
 
 		if(Utils.isNullOrEmpty(sOld)) {
 			return "";
@@ -257,7 +257,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		for (String sFreeText : asFullNameWO) {
 			String sQuery = sFreeText + sSuffix;
-			String sResult = oDQT.parseFreeText(sQuery); 
+			String sResult = oDQT.parseProductName(sQuery); 
 			if(!sResult.equals("S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423")) {
 				System.out.println("full name without extension: failed translating: " + sFreeText + ", got: " + sResult);
 			}
@@ -279,7 +279,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		for (String sFreeText : asFullNameW) {
 			String sQuery = sFreeText + sSuffix;
-			String sResult = oDQT.parseFreeText(sQuery); 
+			String sResult = oDQT.parseProductName(sQuery); 
 			if(!sResult.equals("S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.")) {
 				System.out.println("full name with extension: failed translating: " + sFreeText + ", got: " + sResult);
 			}
@@ -294,7 +294,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		for (String sFreeText : asNoHeadWO) {
 			String sQuery = sFreeText + sSuffix;
-			String sResult = oDQT.parseFreeText(sQuery); 
+			String sResult = oDQT.parseProductName(sQuery); 
 			if(!sResult.equals("_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423")) {
 				System.out.println("no head without: failed translating: " + sFreeText + ", got: " + sResult);
 			}
@@ -313,7 +313,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		for (String sFreeText : asNoHeadW) {
 			String sQuery = sFreeText + sSuffix;
-			String sResult = oDQT.parseFreeText(sQuery); 
+			String sResult = oDQT.parseProductName(sQuery); 
 			if(!sResult.equals("_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D_7423.")) {
 				System.out.println("no head with: failed translating: " + sFreeText + ", got: " + sResult);
 			}
@@ -328,7 +328,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 		for (String sFreeText : asNoTail) {
 			String sQuery = sFreeText + sSuffix;
-			String sResult = oDQT.parseFreeText(sQuery); 
+			String sResult = oDQT.parseProductName(sQuery); 
 			if(!sResult.equals("S1B_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D")) {
 				System.out.println("no tail: failed translating: " + sFreeText + ", got: " + sResult);
 			}
@@ -343,7 +343,7 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		};
 		for (String sFreeText : asNoHeadNoTail) {
 			String sQuery = sFreeText + sSuffix;
-			String sResult = oDQT.parseFreeText(sQuery); 
+			String sResult = oDQT.parseProductName(sQuery); 
 			if(!sResult.equals("_IW_GRDH_1SDV_20210112T053522_20210112T053547_025117_02FD7D")) {
 				System.out.println("no head, no tail: failed translating: " + sFreeText + ", got: " + sResult);
 			}

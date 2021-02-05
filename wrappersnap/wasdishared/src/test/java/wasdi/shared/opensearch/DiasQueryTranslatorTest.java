@@ -97,12 +97,12 @@ class DiasQueryTranslatorTest {
 	}
 
 	/**
-	 * Test method for {@link wasdi.shared.opensearch.DiasQueryTranslator#getFreeTextSearch(java.lang.String)}.
+	 * Test method for {@link wasdi.shared.opensearch.DiasQueryTranslator#getProductName(java.lang.String)}.
 	 */
 	@ParameterizedTest
 	@MethodSource("provideValuePairs")
 	void testGetFreeTextSearch(String sInput, String sExpected) {
-		assertEquals(sExpected, m_oDiasQueryTranslator.getFreeTextSearch(sInput));
+		assertEquals(sExpected, m_oDiasQueryTranslator.getProductName(sInput));
 	}
 
 }

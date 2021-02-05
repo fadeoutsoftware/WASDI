@@ -130,7 +130,7 @@ public abstract class DiasQueryTranslator {
 		return sQuery;
 	}
 
-	protected String getFreeTextSearch(String sQuery) {
+	protected String getProductName(String sQuery) {
 		try {
 			int iEnd = sQuery.length();
 
@@ -181,8 +181,8 @@ public abstract class DiasQueryTranslator {
 		return "";
 	}
 
-	protected String parseFreeText(String sQuery) {
-		return getFreeTextSearch(sQuery);
+	protected String parseProductName(String sQuery) {
+		return getProductName(sQuery);
 	}
 
 	protected String convertRanges(String sQuery) {
@@ -230,10 +230,10 @@ public abstract class DiasQueryTranslator {
 
 			oResult.limit = iLimit;
 
-			// Try to get the free text search
-			String sFreeText = getFreeTextSearch(sQuery);
+			// Try to get the product name
+			String sFreeText = getProductName(sQuery);
 			if (!Utils.isNullOrEmpty(sFreeText)) {
-				oResult.freeTextSearch = sFreeText;
+				oResult.productName = sFreeText;
 			}
 
 			// Try to get footprint
@@ -295,8 +295,8 @@ public abstract class DiasQueryTranslator {
 				}
 				
 				//no platform? see if we can infer it from the product name (provided it's not null)
-				if(Utils.isNullOrEmpty(oResult.platformName) && !Utils.isNullOrEmpty(oResult.freeTextSearch)){
-					reverseEngineerQueryFromProductName(oResult, oResult.freeTextSearch);
+				if(Utils.isNullOrEmpty(oResult.platformName) && !Utils.isNullOrEmpty(oResult.productName)){
+					reverseEngineerQueryFromProductName(oResult, oResult.productName);
 				}
 			} catch (Exception oE) {
 				Utils.log("ERROR",

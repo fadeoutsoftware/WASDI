@@ -38,7 +38,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 		//MAYBE refactor using QueryTranslationParser
 
-		sTmp = parseFreeText(sQuery);
+		sTmp = parseProductName(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			sResult += sTmp;
 		}
@@ -134,8 +134,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	}
 
 	@Override
-	protected String parseFreeText(String sQuery) {
-		String sFreeText = getFreeTextSearch(sQuery);
+	protected String parseProductName(String sQuery) {
+		String sFreeText = getProductName(sQuery);
 		if(Utils.isNullOrEmpty(sFreeText)) {
 			return null;
 		}
