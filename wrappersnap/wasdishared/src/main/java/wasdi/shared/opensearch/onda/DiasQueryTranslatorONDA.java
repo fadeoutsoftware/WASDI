@@ -36,7 +36,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		String sResult = new String("");
 		String sTmp = "";
 
-		//TODO refactor using QueryTranslationParser
+		//MAYBE refactor using QueryTranslationParser
 
 		sTmp = parseFreeText(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
