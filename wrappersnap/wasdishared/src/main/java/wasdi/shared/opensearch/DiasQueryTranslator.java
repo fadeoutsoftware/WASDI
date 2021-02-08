@@ -303,6 +303,27 @@ public abstract class DiasQueryTranslator {
 						"DiasQueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: "
 								+ oE);
 			}
+			
+			try {
+				//productType
+				if(sQuery.contains("producttype")) {
+					int iStart = sQuery.indexOf(":", sQuery.indexOf("producttype")) + 1;
+				
+					int iEnd = sQuery.length();
+					int iTemp = sQuery.indexOf(" ", iStart);
+					if(iTemp > 0 && iTemp < iEnd) {
+						iEnd = iTemp;
+					}
+					iTemp = sQuery.indexOf(")", iStart);
+					if(iTemp > 0 && iTemp < iEnd) {
+						iEnd = iTemp;
+					}
+					oResult.productType = sQuery.substring(iStart, iEnd);
+				}
+				
+			}catch (Exception oE) {
+				Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery: product type: " + oE);
+			}
 
 			// Try to get time filters
 			String[] asInterval = { null, null };
@@ -587,7 +608,7 @@ public abstract class DiasQueryTranslator {
 				oQueryViewModel.platformName = "Sentinel-2";
 				String[] asTypesA = {"L1C", "L2A"};
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
-					oQueryViewModel.productType=(sProductName.substring(7, 10));
+					oQueryViewModel.productType="S2MSI" + sProductName.substring(8, 10);
 				} else {
 					Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}

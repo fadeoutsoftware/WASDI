@@ -93,7 +93,13 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 				sParentId = "S2_MSIL2A";
 			}
 			else {
-				sParentId = "S2_" + oWasdiQuery.productType;
+				if(oWasdiQuery.productType.equals("S2MSI2A")) {
+					sParentId = "S2_MSIL2A";
+				} else if(oWasdiQuery.productType.equals("S2MSI1C")) {
+					sParentId = "S2_MSIL1C";
+				} else {	
+					sParentId = "S2_MSIL2A";
+				}
 			}
 		}
 		
