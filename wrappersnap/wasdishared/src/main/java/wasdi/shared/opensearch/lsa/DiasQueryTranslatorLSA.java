@@ -1,9 +1,6 @@
 package wasdi.shared.opensearch.lsa;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.Date;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
