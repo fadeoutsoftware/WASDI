@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.1
-; Last Update: 2021-01-18
+; IDL WASDI Lib Version 0.6.1.1
+; Last Update: 2021-02-06
 ;
 ; History
+; 0.6.1.1 - 2021-02-06
+;	Fixed Error in the SAVE FILE
+;
 ; 0.6.1 - 2021-01-18
 ;	Changed versioning to align to python
 ;	Added getProcessorPath
@@ -1758,7 +1761,7 @@ FUNCTION WASDISAVEFILE, sFileName
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 	
-	IF (isonserver EQ '0') THEN BEGIN
+	IF (isonserver EQ '1') THEN BEGIN
 
 		; API url
 		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
