@@ -122,9 +122,7 @@ var RootController = (function() {
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
-
                 // Set the number of running processes
-
                 $scope.m_oController.getSummary();
 
                 $scope.m_oController.m_oLastProcesses = $scope.m_oController.findLastProcess(aoProcessesRunning);
@@ -184,6 +182,7 @@ var RootController = (function() {
                 }
             }
             //$scope.m_oController.time++;
+            mytimeout = $timeout($scope.onTimeout, 1000)
 
         };
 
@@ -192,8 +191,7 @@ var RootController = (function() {
             return this.m_bIsOpenStatusBar;
         };
 
-
-
+        var mytimeout = $timeout($scope.onTimeout, 1000)
 
         this.getWorkspacesInfo();
         this.initTooltips();
@@ -509,8 +507,8 @@ var RootController = (function() {
 
     RootController.prototype.openImportPage = function () {
         var oController = this;
-
-        oController.m_oState.go("root.import", { });// workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+        // workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+        oController.m_oState.go("root.import", { });
     };
 
     RootController.prototype.activePageCss = function(oPage)
