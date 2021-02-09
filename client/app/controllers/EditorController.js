@@ -1987,6 +1987,37 @@ var EditorController = (function () {
         return true;
     };
 
+    /**
+     *
+     * @param oWindow
+     * @returns {boolean}
+     */
+    EditorController.prototype.openWorkspaceDetailsDialog = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/workspace_details/WorkspaceDetails.html",
+            controller: "WorkspaceDetails",
+            inputs: {
+                extras: {
+                    WorkSpaceId: oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+            });
+        });
+
+        return true;
+    };
+
 
     /**
      * Handle click on "show mask" from image editor
