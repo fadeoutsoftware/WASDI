@@ -12,13 +12,21 @@
 
             <div class="modal-body">
                 <div><span class="workspace-details-heading"> Owner :</span> {{m_oController.m_workspaceId}}</div>
+                <div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</div>
+                <div><span class="workspace-details-heading">Total Files :</span> {{m_oController.m_oCountProduct}}</div>
+                <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
+                    <span class="workspace-details-heading">Workspace sharing :</span>
+                    <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
+                        <li> {{shared}}</li>
+                    </div>
+                </div>
                 <!--<div><span class="workspace-details-heading" ng-hide="m_oEditorController.m_oWorkspaceViewModel.nodeCode == null"> Node:</span>{{m_oEditorController.m_oWorkspaceViewModel.nodeCode}}</div>
                 <div><span class="workspace-details-heading"> Last Update :</span> {{m_oEditorController.getLastTouchDate()}}</b></div>
                 <div><span class="workspace-details-heading">Total Files :</span> {{m_oEditorController.getProductList().length}}</div>
-                <div><span class="workspace-details-heading" ng-hide="m_oEditorController.m_oWorkspaceViewModel.processesCount == null">Processes Executed :</span> {{m_oEditorController.m_oWorkspaceViewModel.processesCount}}</div>
-                <div ng-hide="(m_oEditorController.m_oWorkspaceViewModel.sharedUsers.length==0)">
+                <div><span class="workspace-details-heading" ng-hide="m_oEditorController.m_oWorkspaceViewModel.processesCount == null">Processes Executed :</span> {{m_oEditorController.m_oWorkspaceViewModel.processesCount}}</div>-->
+           <!--     <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
                     <span class="workspace-details-heading">Workspace sharing :</span>
-                    <div ng-repeat="shared in m_oEditorController.m_oWorkspaceViewModel.sharedUsers">
+                    <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                         <li> {{shared}}</li>
                     </div>
                 </div>-->

@@ -179,6 +179,8 @@ var EditorController = (function () {
             // is outside of angular
             $scope.$digest();
         });
+
+        this.m_oWorkspaceViewModel =null;
     }
 
     /********************************************************* TRANSLATE SERVICE ********************************************************/
@@ -1148,7 +1150,7 @@ var EditorController = (function () {
     };
 
     /**
-     * Open a Workspace and relod it whe the page is reloaded
+     * Open a Workspace and reload it whe the page is reloaded
      * @param sWorkspaceId
      */
     EditorController.prototype.openWorkspace = function (sWorkspaceId) {
@@ -1999,13 +2001,26 @@ var EditorController = (function () {
         } else {
             oController = oWindow;
         }
+        // Before opening the modal window get the workspaceViewModel
+        oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oController.m_oActiveWorkspace.workspaceId)
+            .success(function (data, status) {
+            if (data != null) {
+                if (data != undefined) {
+               this.m_oWorkspaceViewModel = data;
+                }
+                };
+            }).error(function (data, status) {
+        });
 
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workspace_details/WorkspaceDetails.html",
             controller: "WorkspaceDetailsController",
             inputs: {
-                extras: {
-                    WorkSpaceId: oController.m_oActiveWorkspace.workspaceId
+                extras: {// in extras method are not evaluated <-> pass values
+                    WorkSpaceId: oController.m_oActiveWorkspace.workspaceId,
+                    WorkSpaceViewModel : oController.m_oActiveWorkspace,
+                    ProductCount : oController.m_aoProducts.length
+
                 }
             }
         }).then(function (modal) {
