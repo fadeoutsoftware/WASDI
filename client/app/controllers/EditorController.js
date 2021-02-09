@@ -2002,7 +2002,7 @@ var EditorController = (function () {
 
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workspace_details/WorkspaceDetails.html",
-            controller: "WorkspaceDetails",
+            controller: "WorkspaceDetailsController",
             inputs: {
                 extras: {
                     WorkSpaceId: oController.m_oActiveWorkspace.workspaceId
