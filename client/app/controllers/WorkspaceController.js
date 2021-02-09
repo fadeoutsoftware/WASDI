@@ -140,7 +140,7 @@ var WorkspaceController = (function () {
         return this.m_aoWorkspaceList;
     }
 
-    WorkspaceController.prototype.getWorkspaceModelView = function () {
+    WorkspaceController.prototype.getWorkspaceViewModel = function () {
         return this.m_oWorkspaceViewModel;
     };
 
