@@ -91,7 +91,7 @@ public class NodeRepository extends MongoRepository {
 	}
 	
 	/**
-	 * Get the fill nodes list
+	 * Get the full nodes list
 	 * @return List of all the nodes
 	 */
 	public List<Node> getNodesList() {
