@@ -5,20 +5,32 @@
 
 var WorkspaceDetailsController = (function () {
 
-    function WorkspaceDetailsController($scope, oExtras, oWorkspaceService) {
+    function WorkspaceDetailsController($scope, oExtras, oWorkspaceService, oNodeService) {
 
         /**
          * Angular Scope
          */
         this.m_oScope = $scope;
         /**
-         * Reference to this controller
-         */
-        this.m_oScope.m_oController = this;
-        /**
          * import the extras
          */
         this.m_oExtras = oExtras;
+        /**
+         * Injected Workspace service <-> Used to update the workspace Node
+         */
+        this.m_oWorkspaceService = oWorkspaceService;
+        /**
+         * Injected Node service <-> Get the list of nodes
+         */
+        this.m_oNodeService = oNodeService;
+
+
+        /**
+         * Reference to this controller
+         */
+        this.m_oScope.m_oController = this;
+
+
         /**
          * workspace id
          */
@@ -47,7 +59,9 @@ var WorkspaceDetailsController = (function () {
 
     WorkspaceDetailsController.$inject = [
         '$scope',
-        'extras'
+        'extras',
+        'WorkspaceService',
+        'NodeService'
     ];
     return WorkspaceDetailsController;
 })();
