@@ -66,7 +66,19 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			//				int iEnd = sQuery.indexOf(" TO ", iStart);
 			//				
 			//			}
-
+			String sCloud = "cloudcoverpercentage:[";
+			int iCloudStart = sQuery.indexOf(sCloud);
+			if(iCloudStart > 0) {
+				iCloudStart += sCloud.length();
+				iCloudStart = sQuery.indexOf("<", iCloudStart);
+				if(iCloudStart > 0) {
+					StringBuilder oBuilder = new StringBuilder();
+					oBuilder.append(sQuery.substring(0, iCloudStart));
+					oBuilder.append(",");
+					oBuilder.append(sQuery.substring(iCloudStart+1));
+					sQuery = oBuilder.toString();
+				}
+			}
 			sResult = "";
 			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQueryFromClient);
 			
