@@ -239,25 +239,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.setPrefix("[" + oProcessWorkspace.getProcessObjId() + "]");
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 			
-			// Snap Log
-			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "0");
-
-			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
-				String sSnapLogFolder = ConfigReader.getPropValue("SNAPLOGFOLDER",
-						"/usr/lib/wasdi/launcher/logs/snap.log");
-				try {
-					FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
-					// ConsoleHandler handler = new ConsoleHandler();
-					oFileHandler.setLevel(Level.ALL);
-					SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-					oFileHandler.setFormatter(oSimpleFormatter);
-					SystemUtils.LOG.setLevel(Level.ALL);
-					SystemUtils.LOG.addHandler(oFileHandler);
-				} catch (Exception oEx) {
-					System.out.println("Launcher Constructor: exception configuring log file " + oEx.toString());
-				}
-			}
-
 			// Set the process as running
 			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
 			oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
@@ -385,20 +366,45 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Config.instance().load();
 
 			SystemUtils.init3rdPartyLibs(null);
-			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
 			
-			try {
-				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
-				oFileHandler.setLevel(Level.ALL);
-				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-				oFileHandler.setFormatter(oSimpleFormatter);
-				SystemUtils.LOG.setLevel(Level.ALL);
-				SystemUtils.LOG.addHandler(oFileHandler);				
-			}
-			catch (Exception oLoggerException) {
-				s_oLogger.error("Launcher Main Constructor Exception creating log file handler: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oLoggerException));
-			}
+			// Snap Log
+			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "1");
 
+			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
+				
+				String sSnapLogLevel = ConfigReader.getPropValue("SNAPLOGLEVEL", "SEVERE");
+				String sSnapLogFile = ConfigReader.getPropValue("SNAPLOGFOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+				
+				s_oLogger.debug("SNAP Log file active with level " + sSnapLogLevel + " file: " + sSnapLogFile);
+				
+				Level oLogLevel = Level.SEVERE;
+				
+				try {
+					oLogLevel = Level.parse(sSnapLogLevel);
+				}
+				catch (Exception oEx) {
+					System.out.println("LauncherMain Constructor: exception configuring SNAP log file Level " + oEx.toString());
+				}
+				
+				try {
+					
+					SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+					
+					FileHandler oFileHandler = new FileHandler(sSnapLogFile, true);
+
+					oFileHandler.setLevel(oLogLevel);
+					oFileHandler.setFormatter(oSimpleFormatter);
+					
+					SystemUtils.LOG.setLevel(oLogLevel);
+					SystemUtils.LOG.addHandler(oFileHandler);
+					
+				} catch (Exception oEx) {
+					System.out.println("LauncherMain Constructor: exception configuring SNAP log file " + oEx.toString());
+				}
+			}
+			else {
+				s_oLogger.debug("SNAP Log file not active");
+			}
 			
 			// Flag to know if update the process workspace progress during download operations or not
 			String sNotifyDownloadUpdateActive = ConfigReader.getPropValue("DOWNLOAD_UPDATE_ACTIVE", "1");
@@ -3099,3 +3105,5 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 
 }
+
+
