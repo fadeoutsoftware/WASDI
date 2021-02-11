@@ -44,6 +44,10 @@ var WorkspaceDetailsController = (function () {
          * count of the products in the current workspace
          */
         this.m_oCountProduct = this.m_oExtras.ProductCount;
+        /**
+         * Computational Node list
+         */
+        //this.m_aoNodesList = this.m_oExtras.NodeList;
 
 
 
@@ -56,13 +60,6 @@ var WorkspaceDetailsController = (function () {
         } else {
             return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
         }
-    }
-    /**
-     * Method used to obtain the list of nodes from the DB
-     * @returns {*}
-     */
-    WorkspaceDetailsController.prototype.getNodesList = function () {
-        return this.m_oNodeService.getNodesList();
     }
 
     /**
