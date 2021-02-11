@@ -226,8 +226,12 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 						if (sType.equals("GRD")) {
 							sType = "%GRDH%";
 						}
+						//the following ones are not (yet?) supported by EODC
 						else if (sType.equals("SLC")) {
-							sType = "S1%\\_SLC%";
+							//sType = "S1%\\_SLC%";
+							sType = "%SLC%";
+						} else if(sType.equals("OCN")){
+							sType = "%OCN%";
 						}
 						
 						//<ogc:PropertyIsLike wildCard="%" singleChar="#" escapeChar="!"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>%GRDH%</ogc:Literal></ogc:PropertyIsLike>
