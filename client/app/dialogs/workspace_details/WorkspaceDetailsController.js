@@ -16,11 +16,11 @@ var WorkspaceDetailsController = (function () {
          */
         this.m_oExtras = oExtras;
         /**
-         * Injected Workspace service <-> Used to update the workspace Node
+         * Injected Workspace service <-> Used to update the workspace Node on opening of the dialog
          */
         this.m_oWorkspaceService = oWorkspaceService;
         /**
-         * Injected Node service <-> Get the list of nodes
+         * Injected Node service <-> Get the list of nodes on opening of the dialog
          */
         this.m_oNodeService = oNodeService;
 
@@ -47,7 +47,7 @@ var WorkspaceDetailsController = (function () {
         /**
          * Computational Node list
          */
-        //this.m_aoNodesList = this.m_oExtras.NodeList;
+        this.m_aoNodesList = this.m_oExtras.NodeList;
 
 
 
