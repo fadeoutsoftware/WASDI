@@ -61,7 +61,7 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 			int iFrom = oWasdiQuery.cloudCoverageFrom.intValue();
 			int iTo = oWasdiQuery.cloudCoverageTo.intValue();
 			
-			String sCloudCoverage = "&cloudCover=[" + iFrom + "," + iTo+"]"; 
+			String sCloudCoverage = "&cloudCover=" + iFrom + "," + iTo+""; 
 			sLSAQuery += sCloudCoverage;
 		}
 		
