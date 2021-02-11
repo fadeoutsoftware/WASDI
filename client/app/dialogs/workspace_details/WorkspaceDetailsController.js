@@ -49,18 +49,30 @@ var WorkspaceDetailsController = (function () {
          */
         this.m_aoNodesList = this.m_oExtras.NodeList;
 
+        /**
+         * Extract an array of strings from the node list
+         * @returns {*}
+         */
+        this.as_nodeCode = (this.m_aoNodesList.map(function (item) {return item['nodeCode']}).map(name =>({name})));
+
+        /**
+         * Extract an array of strings from the node list
+         * @returns {*}
+         */
+        this.as_cloudProvider = this.m_aoNodesList.map(function (item) {return item['cloudProvider']});
 
 
     } // end constructor
 
     WorkspaceDetailsController.prototype.getLastTouchDate = function () {
 
-                if (this.m_oWorkspaceViewModel === null) {
+        if (this.m_oWorkspaceViewModel === null) {
             return "";
         } else {
             return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
         }
     }
+
 
     /**
      * Methods that sets the node and post the updated ViewModel

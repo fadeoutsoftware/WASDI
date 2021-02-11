@@ -32,12 +32,13 @@
                         <li> {{shared}}</li>
                     </div>
                 </div>
-                <div>
-                    <span class="workspace-details-heading">Nodes list - make this a controller</span>
-                    <div ng-repeat="nodes in m_oController.m_aoNodesList">
-                        <li> <h1>{{nodes.nodeCode}}</h1></li>
-                    </div>
-                </div>
+                <wapdropdown list-of-values="m_oController.as_nodeCode"
+                             selected-value=""
+                             enable-search-filter="true"
+                             dropdown-name="NodeSelection"
+                             on-click-function=""
+                ></wapdropdown>
+
             </div>
 
         </div>
