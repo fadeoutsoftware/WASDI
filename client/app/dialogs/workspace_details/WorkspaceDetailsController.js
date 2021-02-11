@@ -25,7 +25,7 @@ var WorkspaceDetailsController = (function () {
         this.m_workspaceId = this.m_oExtras.WorkSpaceId;
 
         /**
-         * workspace view model
+         * workspace view model <-> WorkspaceEditorViewModel on the server
          */
         this.m_oWorkspaceViewModel = this.m_oExtras.WorkSpaceViewModel;
         /**
@@ -33,13 +33,6 @@ var WorkspaceDetailsController = (function () {
          */
         this.m_oCountProduct = this.m_oExtras.ProductCount;
 
-        // the workspace id passed through extras to the modal
-        // then, if ok, call the other methods from angular starting from here
-        // get WS viewmodel, date and co [...]
-
-        // This controller must implement the logic to change node
-        // all the other static parameters are passed to the model via extras
-        // (WorkspaceViewModel,
 
     } // end constructor
 
