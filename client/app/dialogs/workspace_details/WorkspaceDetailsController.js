@@ -46,6 +46,7 @@ var WorkspaceDetailsController = (function () {
         this.m_oCountProduct = this.m_oExtras.ProductCount;
 
 
+
     } // end constructor
 
     WorkspaceDetailsController.prototype.getLastTouchDate = function () {
@@ -56,6 +57,17 @@ var WorkspaceDetailsController = (function () {
             return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
         }
     }
+    /**
+     * Method used to obtain the list of nodes from the DB
+     * @returns {*}
+     */
+    WorkspaceDetailsController.prototype.getNodesList = function () {
+        return this.m_oNodeService.getNodesList();
+    }
+
+    /**
+     * Methods that sets the node and post the updated ViewModel
+     */
 
     WorkspaceDetailsController.$inject = [
         '$scope',
