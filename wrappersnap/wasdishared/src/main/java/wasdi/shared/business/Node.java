@@ -28,7 +28,7 @@ public class Node {
 	 */
 	private boolean active = true;
 	/**
-	 * Flag to know if the node is active or not
+	 * String that represents the cloud provider
 	 */
 	private String cloudProvider;
 	
