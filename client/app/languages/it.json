@@ -44,7 +44,7 @@
     "ROOT_VIEW_SUBTITLE":"Web Advanced Space Developer Interface",
     "ROOT_LABEL_NUMBER_OF_RUNNING_PROCESSES":"Running ",
     "ROOT_LABEL_NUMBER_OF_WAITING_PROCESSES":"Waiting ",
-    "ROOT_TABLE_HEAD_OPERATION_DATA":"Date",
+    "ROOT_TABLE_HEAD_OPERATION_DATA":"Created",
     "ROOT_TABLE_HEAD_TYPE_OF_OPERATION":"Operation",
     "ROOT_TABLE_HEAD_NAME":"Name",
     "ROOT_TABLE_HEAD_ID_USER":"User",
@@ -286,7 +286,7 @@
     "DIALOG_SFTP_UPLOAD_ADD_TO_WORKSPACE_BUTTON":"Add to workspace",
     "DIALOG_SFTP_UPLOAD_CLOSE_BUTTON":"Close",
 
-    "DIALOG_PROCESSES_LOGS_TITLE":"Processes Logs",
+    "DIALOG_PROCESSES_LOGS_TITLE":"Workspace Processes List",
 
     "DIALOG_WORKFLOW_TITLE":"Workflow",
     "DIALOG_WORKFLOW_INPUTFILE": "Select Input File: ",

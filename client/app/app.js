@@ -217,7 +217,7 @@ wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
 wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
 wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
-wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);
+wasdiApp.controller("WorkspaceProcessesList",WorkspaceProcessesList);
 wasdiApp.controller("SnakeController",SnakeController);
 wasdiApp.controller("CatalogController",CatalogController);
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
