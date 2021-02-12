@@ -25,7 +25,7 @@
                 <div class="col-v4-6 mb-4"
                      ng-repeat="workflow in m_oController.getMultipleInputWorkflow() | filter:searchText:strict">
                     <div class="pt-1 pb-3 px-3 h-100 app-item" style="margin-bottom: 15px;"
-                         ng-click="m_oController.m_oSelectedMultiInputWorkflow = workflow"
+                         ng-click="m_oController.selectedMultiInputWorkflow(workflow)"
                          ng-class="{'selectedWorkflow': m_oController.m_oSelectedMultiInputWorkflow  === workflow}">
                         <div class="row-v4">
                             <div class="col-v4-12">
@@ -86,32 +86,20 @@
                     </label>
                     <span>{{m_oController.m_oSelectedMultiInputWorkflow.description.replaceAll("_", " ")}}</span>
                 </div>
+
                 <div class="input-nodes"
                      ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
 
                          <span class="node-title">
-                             <h4>{{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_LABEL" | translate}} :</h4>
+                             <h4>{{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_LABEL" | translate}}</h4>
                          </span>
 
-                    <div class="dropdown my-dropdown">
-                        <button class="btn btn-default dropdown-toggle w-100" type="button"
-                                id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown" style="font-weight: 600;">
-                            Products
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu"
-                            aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
+                    <wapdropdown list-of-values="m_oController.m_aoProductsClass"
+                                 selected-value="m_oController.m_aoMultiInputSelectedProducts[node]"
+                                 enable-search-filter="true"
+                                 dropdown-name="m_oController.m_sWAPPdropdownname"
+                    ></wapdropdown>
 
-                            <li role="presentation">
-                                <a role="menuitem" tabindex="-1" href="" style="font-weight: 600;"
-                                   ng-repeat="product in m_oController.m_asProductsName"
-                                   ng-click="m_oController.addProductInputInNode(node,product)">
-                                    {{product}}
-                                </a>
-                            </li>
-
-                        </ul>
-                    </div>
                     <br>
                     <span class="selected-input">
                         <div ng-hide="$index === null">

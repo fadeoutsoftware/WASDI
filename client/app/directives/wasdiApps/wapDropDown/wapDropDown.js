@@ -37,6 +37,9 @@ angular.module('wasdi.wapDropDown', [])
                 scope.onClickValue = function(oSelectedValue){
                     scope.isSelectedValue = true;
                     scope.selectedValue = oSelectedValue;
+                    if (!utilsIsObjectNullOrUndefined(scope.onClickFunction)){
+                        scope.onClickFunction({oValue:oSelectedValue});
+                    }
                 }
 
                 scope.setDefaultSelectedValue = function(){
