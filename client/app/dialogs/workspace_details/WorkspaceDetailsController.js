@@ -49,18 +49,26 @@ var WorkspaceDetailsController = (function () {
          */
         this.m_aoNodesList = this.m_oExtras.NodeList;
 
-        /**
-         * Extract an array of strings from the node list
-         * @returns {*}
-         */
-        //this.m_asNodeCode = (this.m_aoNodesList.map(function (item) {return item['nodeCode']}).map(name =>({name})));
-        this.m_asNodeCode = this.m_aoNodesList.map(function (item) {return item['nodeCode']});
+        this.m_sCurrentNode = this.m_oExtras.WorkSpaceViewModel.nodeCode;
+
 
         /**
          * Extract an array of strings from the node list
          * @returns {*}
          */
-        this.m_asCloudProvider = this.m_aoNodesList.map(function (item) {return item['cloudProvider']});
+        //this.m_asNodeCode = (this.m_aoNodesList.map(function (item) {return item['nodeCode']}).map(name =>({name})));
+        this.m_asNodeCode = this.m_aoNodesList.map(function (item) {
+            return item['nodeCode']
+        });
+        this.m_asNodeCode.push("wasdi");
+
+        /**
+         * Extract an array of strings from the node list
+         * @returns {*}
+         */
+        this.m_asCloudProvider = this.m_aoNodesList.map(function (item) {
+            return item['cloudProvider']
+        }).push("wasdi");
 
 
     } // end constructor
@@ -71,6 +79,19 @@ var WorkspaceDetailsController = (function () {
             return "";
         } else {
             return new Date(this.m_oWorkspaceViewModel.lastEditDate).toString().replace("\"", "");
+        }
+    }
+
+    WorkspaceDetailsController.prototype.setNodeCode = function (node) {
+        this.m_sCurrentNode = node;
+    }
+    WorkspaceDetailsController.prototype.saveNodeCode = function () {
+        this.m_oWorkspaceViewModel.nodeCode = this.m_sCurrentNode;
+        if (null != this.m_oWorkspaceService.UpdateWorkspace(this.m_oWorkspaceViewModel)) {
+            utilsVexDialogAlertTop("Workspace Node updated");
+        }
+        else{
+            utilsVexDialogAlertTop("Something went wrong");
         }
     }
 
