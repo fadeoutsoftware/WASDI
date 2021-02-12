@@ -65,6 +65,26 @@ public class WorkspaceRepository extends  MongoRepository {
 
         return false;
     }
+    
+    /**
+     * Update the node of a workspace
+     * @param oWorkspace workspaceViewModel passed as input
+     * @return
+     */
+    public boolean updateWorkspaceNodeCode(Workspace oWorkspace) {
+
+        try {
+            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("nodeCode",oWorkspace.getNodeCode())));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     /**
      * 

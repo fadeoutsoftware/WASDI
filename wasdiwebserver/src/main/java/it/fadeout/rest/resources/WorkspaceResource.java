@@ -383,6 +383,8 @@ public class WorkspaceResource {
 		try {
 			// Create New Workspace
 			Workspace oWorkspace = new Workspace();
+			// Initialize repository
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
 			// Default values
 			oWorkspace.setCreationDate((double) oViewModel.getCreationDate().getTime());
@@ -391,7 +393,17 @@ public class WorkspaceResource {
 			oWorkspace.setUserId(oViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oViewModel.getWorkspaceId());
 
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			
+			// if present, the node code must be updated
+			if(oViewModel.getNodeCode() != null) {
+			oWorkspace.setNodeCode(oViewModel.getNodeCode());
+			oWorkspaceRepository.updateWorkspaceNodeCode(oWorkspace);
+			}
+			
+			
+			
+
+			
 			if (oWorkspaceRepository.updateWorkspaceName(oWorkspace)) {
 
 				PrimitiveResult oResult = new PrimitiveResult();
