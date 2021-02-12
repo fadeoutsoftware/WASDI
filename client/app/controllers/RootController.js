@@ -182,7 +182,7 @@ var RootController = (function() {
                 }
             }
             //$scope.m_oController.time++;
-            mytimeout = $timeout($scope.onTimeout, 1000)
+            oTimerTimeout = $timeout($scope.onTimeout, 1000)
 
         };
 
@@ -191,7 +191,7 @@ var RootController = (function() {
             return this.m_bIsOpenStatusBar;
         };
 
-        var mytimeout = $timeout($scope.onTimeout, 1000)
+        var oTimerTimeout = $timeout($scope.onTimeout, 1000)
 
         this.getWorkspacesInfo();
         this.initTooltips();
