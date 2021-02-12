@@ -48,7 +48,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 
 	@Override
 	public int executeCount(String sQuery) {
-		Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
+		//Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
 		if(null == sQuery) {
 			throw new NullPointerException("QueryExecutorCREODIAS.getCountURL: sQuery is null");
 		}
@@ -81,13 +81,13 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery> )");
+		//Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery> )");
 		return executeAndRetrieve(oQuery,true);
 	}
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
+		//Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
 		
 	
 //		String sUrl = "https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?startDate=2019-12-01T00:00:00Z&completionDate=2019-12-03T23:59:59Z&geometry=POLYGON((7.397874989401342+45.00475144371268,10.373746303074263+44.94785607558927,10.389830621260842+43.612039503172866,7.703504034412235+43.809704932512176,7.397874989401342+45.00475144371268))";

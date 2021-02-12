@@ -58,7 +58,7 @@ public abstract class QueryExecutor {
 	
 	public int executeCount(String sQuery) throws IOException {
 		try {
-			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
+			//Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
 			sQuery = encodeAsRequired(sQuery); 
 			String sUrl = getCountUrl(sQuery);
 			String sResponse = httpGetResults(sUrl, "count");
@@ -87,7 +87,7 @@ public abstract class QueryExecutor {
 	}
 	
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
+		//Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
 		if(null == oQuery) {
 			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
 			return null;
@@ -145,7 +145,7 @@ public abstract class QueryExecutor {
 	}
 
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
+		//Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
 		return executeAndRetrieve(oQuery,true);
 	}
 

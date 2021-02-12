@@ -75,6 +75,6 @@ public class QueryViewModel {
 	/**
 	 * Free text search, used when a specific product name is given
 	 */
-	public String freeTextSearch = null;
+	public String productName = null;
 
 }

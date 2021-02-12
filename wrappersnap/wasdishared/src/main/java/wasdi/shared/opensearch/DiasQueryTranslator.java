@@ -6,6 +6,8 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.Arrays;
+
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
@@ -128,29 +130,59 @@ public abstract class DiasQueryTranslator {
 		return sQuery;
 	}
 
-	protected String getFreeTextSearch(String sQuery) {
+	protected String getProductName(String sQuery) {
 		try {
-			// 0. footprint not at the beginning
-			// 1. no footprint and beginPosition not at the beginning
-//			String sFootprint = " AND ( footprint";
-//			int iEndOfPrefix = sQuery.indexOf(sFootprint);
-//			if (iEndOfPrefix < 0) {
-//				// then maybe no footprint has been specified
-//				iEndOfPrefix = sQuery.indexOf(" AND ( beginPosition");
-//			}
-//			if (iEndOfPrefix < 0) {
-//				// no free text, return
-//				return null;
-//			}
-//			return sQuery.substring(0, iEndOfPrefix);
+			int iEnd = sQuery.length();
+
+			int iBeginPosition = sQuery.indexOf("beginPosition");
+			if(iBeginPosition >= 0) {
+				iEnd = iBeginPosition;
+			}
+
+			int iEndPosition = sQuery.indexOf("endPosition");
+			if(iEndPosition >= 0 && iEndPosition < iEnd) {
+				iEnd = iEndPosition;
+			}
+
+			int iFootprint = sQuery.indexOf("footprint");
+			if(iFootprint >= 0 && iFootprint < iEnd) {
+				iEnd = iFootprint;
+			}
+
+			int iAnd = sQuery.indexOf("AND");
+			if(iAnd > 0 && iAnd < iEnd) {
+				iEnd = iAnd;
+			}
+
+			int iBracket = sQuery.indexOf("(");
+			if(iBracket >= 0 && iBracket < iEnd) {
+				iEnd = iBracket;
+			}
+
+			int iSpace = sQuery.indexOf(" ");
+			if(iSpace > 0 && iSpace < iEnd) {
+				iEnd = iSpace;
+			}
+
+			if(iEnd == 0) {
+				return "";
+			}
+
+			sQuery = sQuery.substring(0, iEnd);
+
+			//remove leading and trailing spaces
+			sQuery = sQuery.trim();
+
+			return sQuery;
+
 		} catch (Exception oE) {
 			Utils.debugLog("DiasQueryTranslator.getFreeTextSearch( " + sQuery + " ): " + oE);
 		}
-		return null;
+		return "";
 	}
 
-	protected String parseFreeText(String sQuery) {
-		return getFreeTextSearch(sQuery);
+	protected String parseProductName(String sQuery) {
+		return getProductName(sQuery);
 	}
 
 	protected String convertRanges(String sQuery) {
@@ -198,10 +230,10 @@ public abstract class DiasQueryTranslator {
 
 			oResult.limit = iLimit;
 
-			// Try to get the free text search
-			String sFreeText = parseFreeText(sQuery);
+			// Try to get the product name
+			String sFreeText = getProductName(sQuery);
 			if (!Utils.isNullOrEmpty(sFreeText)) {
-				oResult.freeTextSearch = sFreeText;
+				oResult.productName = sFreeText;
 			}
 
 			// Try to get footprint
@@ -261,10 +293,36 @@ public abstract class DiasQueryTranslator {
 										+ oE);
 					}
 				}
+				
+				//no platform? see if we can infer it from the product name (provided it's not null)
+				if(Utils.isNullOrEmpty(oResult.platformName) && !Utils.isNullOrEmpty(oResult.productName)){
+					reverseEngineerQueryFromProductName(oResult, oResult.productName);
+				}
 			} catch (Exception oE) {
 				Utils.log("ERROR",
 						"DiasQueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: "
 								+ oE);
+			}
+			
+			try {
+				//productType
+				if(sQuery.contains("producttype")) {
+					int iStart = sQuery.indexOf(":", sQuery.indexOf("producttype")) + 1;
+				
+					int iEnd = sQuery.length();
+					int iTemp = sQuery.indexOf(" ", iStart);
+					if(iTemp > 0 && iTemp < iEnd) {
+						iEnd = iTemp;
+					}
+					iTemp = sQuery.indexOf(")", iStart);
+					if(iTemp > 0 && iTemp < iEnd) {
+						iEnd = iTemp;
+					}
+					oResult.productType = sQuery.substring(iStart, iEnd);
+				}
+				
+			}catch (Exception oE) {
+				Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery: product type: " + oE);
 			}
 
 			// Try to get time filters
@@ -531,4 +589,40 @@ public abstract class DiasQueryTranslator {
 		}
 	}
 
+	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sProductName) {
+		try {
+			if(Utils.isNullOrEmpty(sProductName)) {
+				Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: query is null or empty");
+			}
+			//mission
+			if(sProductName.startsWith("S1")) {
+				oQueryViewModel.platformName = "Sentinel-1";
+				
+				String[] asTypesA = {"RAW", "GRD", "SLC", "OCN"};
+				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
+					oQueryViewModel.productType=(sProductName.substring(7, 10));
+				} else {
+					Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
+				}
+			} else if (sProductName.startsWith("S2")) {
+				oQueryViewModel.platformName = "Sentinel-2";
+				String[] asTypesA = {"L1C", "L2A"};
+				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
+					oQueryViewModel.productType="S2MSI" + sProductName.substring(8, 10);
+				} else {
+					Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
+				}
+			} else if(sProductName.startsWith("S3A_") || sProductName.startsWith("S3B_")) {
+				oQueryViewModel.platformName = "Sentinel-3";
+			} else if(sProductName.startsWith("LC08_")) {
+				oQueryViewModel.platformName = "Landsat8";
+			}  else {
+				//todo add other platforms:
+				// Sentinel-5p, Copernicus-marine, Envisat, ...
+				Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.reverseEngineerQueryFromProductName: " + oE);
+		}
+	}
 }

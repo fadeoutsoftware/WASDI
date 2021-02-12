@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.LauncherMain;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
@@ -143,6 +144,17 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			}
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			
+			try {
+				// TODO: Here probably the workspace id is the special one... need to find the right exchange
+				if (LauncherMain.s_oSendToRabbit != null) {
+					String sInfo = "Processor Deployed " + oProcessor.getName();
+					LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+				}							
+			}
+			catch (Exception oInnerEx) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception sending rabbit info message ", oInnerEx);
+			}
 			
 		}
 		catch (Exception oEx) {
