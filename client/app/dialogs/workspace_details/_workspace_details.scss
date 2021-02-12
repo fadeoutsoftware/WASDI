@@ -1,0 +1,81 @@
+.workspace-details
+{
+
+
+    /*CUSTOMIZE ELEMENT*/
+    .drop-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 35px !important;
+        cursor: pointer;
+        flex-direction: column;
+        height: auto !important;
+        width: auto !important;
+        margin: 16px;
+        color: darkgrey;
+        &:hover {
+            color: #929292;
+        }
+
+    }
+    .checkbox-after-input {
+        padding-top: 44px;
+    }
+
+  .modal-dialog
+  {
+
+    .modal-content
+    {
+      //HEADER
+      .modal-header
+      {
+
+      }
+      //BODY
+      .modal-body
+      {
+          span.workspace-details-heading {
+              color: #009036;
+              font-weight: bold;
+          }
+
+        label{
+          margin: 10px 0px 5px 0px;
+          color:$wasdi-green-logo;
+        }
+
+          .dropdown-menu-container .dropdown .btn .row .col-plr0 .text {
+              display: block;
+              width: 46vw;
+              overflow: hidden;
+              text-overflow: ellipsis;
+          }
+      }
+      //FOOTER
+
+    }
+  }
+}
+
+.addUIElementCommand {
+    //display: inline;
+    cursor: pointer;
+    background-color: $wasdiblue;
+    margin: 3px;
+    padding: 3px 5px;
+    color: white;
+    border-radius: 2px;
+    &:hover {
+        background-color: $darkwasdiblue;
+        &:after {
+            content: '>';
+            position: absolute;
+            right: 28px;
+        }
+    }
+}
+
+
+

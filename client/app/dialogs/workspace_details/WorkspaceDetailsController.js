@@ -53,13 +53,14 @@ var WorkspaceDetailsController = (function () {
          * Extract an array of strings from the node list
          * @returns {*}
          */
-        this.as_nodeCode = (this.m_aoNodesList.map(function (item) {return item['nodeCode']}).map(name =>({name})));
+        //this.m_asNodeCode = (this.m_aoNodesList.map(function (item) {return item['nodeCode']}).map(name =>({name})));
+        this.m_asNodeCode = this.m_aoNodesList.map(function (item) {return item['nodeCode']});
 
         /**
          * Extract an array of strings from the node list
          * @returns {*}
          */
-        this.as_cloudProvider = this.m_aoNodesList.map(function (item) {return item['cloudProvider']});
+        this.m_asCloudProvider = this.m_aoNodesList.map(function (item) {return item['cloudProvider']});
 
 
     } // end constructor
