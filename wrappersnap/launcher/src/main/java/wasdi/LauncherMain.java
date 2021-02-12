@@ -493,7 +493,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
-				
+				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.deploy(oParameter);
 			}
 				break;
@@ -504,6 +504,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.run(oParameter);
 			}
 				break;
@@ -513,6 +514,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.delete(oParameter);
 			}
 				break;
@@ -522,6 +524,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.redeploy(oParameter);
 			}			
 				break;
@@ -531,8 +534,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.libraryUpdate(oParameter);
-			}			
+			}
 				break;				
 			case RUNMATLAB: {
 				// Run Matlab Processor
@@ -2500,9 +2504,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			ProcessWorkspace oProcessWorkspace = oRepo.getProcessByProcessObjId(oGraphParams.getProcessObjId());
 			updateProcessStatus(oRepo, oProcessWorkspace, ProcessStatus.ERROR, 100);
 
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oGraphParams.getWorkspace(),
-						sError, oGraphParams.getExchange());
+			if (s_oSendToRabbit != null) {
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oGraphParams.getWorkspace(), sError, oGraphParams.getExchange());
+			}
+				
 		}
 	}	
 

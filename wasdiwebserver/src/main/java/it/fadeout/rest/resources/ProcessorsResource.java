@@ -111,7 +111,7 @@ public class ProcessorsResource  {
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
 											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout) throws Exception {
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
+		Utils.debugLog("ProcessorsResource.uploadProcessor( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
 		
 		PrimitiveResult oResult = new PrimitiveResult();

@@ -28,6 +28,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipExtractor;
@@ -67,10 +68,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 		try {
 			
+			processWorkspaceLog("Start Deploy of " + sProcessorName + " Type " + oParameter.getProcessorType());
+			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
 			
-			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			if (bFirstDeploy) {
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+				processWorkspaceLog("This is a first deploy of this app");
+			}
 
 			// First Check if processor exists
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);	
@@ -88,6 +94,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Check it
 			if (oProcessorZipFile.exists()==false) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
+				
+				processWorkspaceLog("Cannot find the processor file... something went wrong");
+				processWorkspaceLog(new EndMessageProvider().getBad());
+				
 				if (bFirstDeploy) {
 					oProcessorRepository.deleteProcessor(sProcessorId);
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -101,6 +111,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Unzip the processor (and check for entry point myProcessor.py)
 			if (!UnzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
+				
+				processWorkspaceLog("Error unzipping the processor");
+				processWorkspaceLog(new EndMessageProvider().getBad());
+				
 				if (bFirstDeploy) {
 					oProcessorRepository.deleteProcessor(sProcessorId);
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -123,9 +137,13 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: building image");
 			handleUnzippedProcessor(sProcessorFolder);
 			
+			processWorkspaceLog("Start building Image");
+			
 			// Create Docker Util and deploy the docker 
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath);
 			oDockerUtils.deploy();
+			
+			processWorkspaceLog("Image done, start the docker");
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
 			
@@ -137,6 +155,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			oDockerUtils.run(iProcessorPort);
 			
+			processWorkspaceLog("Application started");
+			
 			if (bFirstDeploy) {
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 				oProcessor.setPort(iProcessorPort);
@@ -146,18 +166,23 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
 			try {
-				// TODO: Here probably the workspace id is the special one... need to find the right exchange
+				// The workspace id is the special one... in the exchange there is the real id of the workspace where the user started the op
 				if (LauncherMain.s_oSendToRabbit != null) {
 					String sInfo = "Processor Deployed " + oProcessor.getName();
-					LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+					LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oParameter.getExchange(), sInfo,oProcessWorkspace.getWorkspaceId());
 				}							
 			}
 			catch (Exception oInnerEx) {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception sending rabbit info message ", oInnerEx);
 			}
 			
+			processWorkspaceLog(new EndMessageProvider().getGood());
+			
 		}
 		catch (Exception oEx) {
+			
+			processWorkspaceLog("There was an error... sorry...");
+			processWorkspaceLog(new EndMessageProvider().getBad());
 			
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
 			try {
