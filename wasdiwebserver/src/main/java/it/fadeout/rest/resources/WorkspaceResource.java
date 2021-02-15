@@ -270,6 +270,15 @@ public class WorkspaceResource {
 					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
 				}
 				
+				if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
+					oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+				}
+				else {
+					oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
+				}
+			}
+			else {
+				oVM.setCloudProvider("wasdi");
 			}
 
 			// Get Sharings
