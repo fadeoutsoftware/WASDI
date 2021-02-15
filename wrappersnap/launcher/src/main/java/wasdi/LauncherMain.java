@@ -95,6 +95,7 @@ import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
+import wasdi.shared.parameters.MosaicSetting;
 import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.MultiSubsetSetting;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -107,6 +108,8 @@ import wasdi.shared.parameters.SubsetSetting;
 import wasdi.shared.payload.DownloadPayload;
 import wasdi.shared.payload.FTPUploadPayload;
 import wasdi.shared.payload.IngestPayload;
+import wasdi.shared.payload.MosaicPayload;
+import wasdi.shared.payload.MultiSubsetPayload;
 import wasdi.shared.payload.PublishBandPayload;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
@@ -2111,6 +2114,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			}
+			
+			m_oProcessWorkspaceLogger.log("Starting multisubset");
 
 			String sSourceProduct = oParameter.getSourceProductName();
 			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
@@ -2118,6 +2123,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			int iTileCount = oSettings.getOutputNames().size();
 
 			if (iTileCount > 15) {
+				m_oProcessWorkspaceLogger.log("Sorry, no more than 15 tiles... " + new EndMessageProvider().getBad());
 				s_oLogger.error("LauncherMain.executeGDALMultiSubset: More than 15 tiles: it hangs, need to refuse");
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
 				return;
@@ -2136,24 +2142,30 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// Get the output name
 				String sOutputProduct = oSettings.getOutputNames().get(iTiles);
+				
+				m_oProcessWorkspaceLogger.log("Generating tile " + sOutputProduct);
 
 				// Check th bbox
 				if (oSettings.getLatNList().size() <= iTiles) {
+					m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
 					s_oLogger.debug("Lat N List does not have " + iTiles + " element. continue");
 					continue;
 				}
 
 				if (oSettings.getLatSList().size() <= iTiles) {
+					m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
 					s_oLogger.debug("Lat S List does not have " + iTiles + " element. continue");
 					continue;
 				}
 
 				if (oSettings.getLonEList().size() <= iTiles) {
+					m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
 					s_oLogger.debug("Lon E List does not have " + iTiles + " element. continue");
 					continue;
 				}
 
 				if (oSettings.getLonWList().size() <= iTiles) {
+					m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
 					s_oLogger.debug("Lon W List does not have " + iTiles + " element. continue");
 					continue;
 				}
@@ -2180,6 +2192,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				asArgs.add(oSettings.getLonEList().get(iTiles).toString());
 				asArgs.add(oSettings.getLatSList().get(iTiles).toString());
 				
+				m_oProcessWorkspaceLogger.log("Tile LonW= " + oSettings.getLonWList().get(iTiles).toString() + " LatN= " + oSettings.getLatNList().get(iTiles).toString() + " LonE=" + oSettings.getLonEList().get(iTiles).toString() + " LatS= " + oSettings.getLatSList().get(iTiles).toString());
+				
 				if (oSettings.getBigTiff()) {
 					asArgs.add("-co");
 					asArgs.add("BIGTIFF=YES");
@@ -2201,13 +2215,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// oProcessBuidler.redirectErrorStream(true);
 				oProcess = oProcessBuidler.start();
-
-				// BufferedReader oReader = new BufferedReader(new
-				// InputStreamReader(oProcess.getInputStream()));
-				// String sLine;
-				// while ((sLine = oReader.readLine()) != null)
-				// s_oLogger.debug("[gdal]: " + sLine);
-
+				
 				oProcess.waitFor();
 
 				File oTileFile = new File(getWorspacePath(oParameter) + sOutputProduct);
@@ -2216,9 +2224,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
 
 					s_oLogger.debug("LauncherMain.executeGDALMultiSubset done for index " + iTiles);
+					
+					m_oProcessWorkspaceLogger.log("adding output to the workspace");
 
-					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(),
-							oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false, false);
+					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false, false);
 
 					s_oLogger.debug("LauncherMain.executeGDALMultiSubset: product added to workspace");
 
@@ -2228,36 +2237,53 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				if (oProcessWorkspace != null) {
 					iProgress = iProgress + iStepPerTile;
-					if (iProgress > 100)
-						iProgress = 100;
-					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING,
-							iProgress);
+					if (iProgress > 100) iProgress = 100;
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, iProgress);
 				}
 
 			}
+			
+			m_oProcessWorkspaceLogger.log("All tiles done");
 
-			if (oProcessWorkspace != null)
+			if (oProcessWorkspace != null) {
 				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+				
+				try {
+					MultiSubsetPayload oMultiSubsetPayload = new MultiSubsetPayload();
+					oMultiSubsetPayload.setInputFile(sSourceProduct);
+					oMultiSubsetPayload.setOutputFiles(oSettings.getOutputNames().toArray(new String[0]));
+					
+					oProcessWorkspace.setPayload(s_oMapper.writeValueAsString(oMultiSubsetPayload));
+				}
+				catch (Exception oPayloadException) {
+					s_oLogger.error("Error creating operation payload: ", oPayloadException);
+				}
+			}
+				
 
 			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(),
-						oParameter.getWorkspace(), "Multisubset Done", oParameter.getExchange());
-		} catch (Exception oEx) {
-			s_oLogger.error("LauncherMain.executeGDALMultiSubset: exception "
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			if (oProcessWorkspace != null)
+				s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(), "Multisubset Done", oParameter.getExchange());
+		} 
+		catch (Exception oEx) {
+			
+			s_oLogger.error("LauncherMain.executeGDALMultiSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			
+			if (oProcessWorkspace != null) {
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			}
+				
 
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit != null)
-				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(),
-						oParameter.getWorkspace(), sError, oParameter.getExchange());
+			
+			if (s_oSendToRabbit != null) {
+				s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(),oParameter.getWorkspace(), sError, oParameter.getExchange());
+			}
+				
 
 		} finally {
 
 			String sProcWSId = "";
-			if (oProcessWorkspace != null)
-				sProcWSId = oProcessWorkspace.getProcessObjId();
+			if (oProcessWorkspace != null) sProcWSId = oProcessWorkspace.getProcessObjId();
 
 			s_oLogger.debug("LauncherMain.executeGDALMultiSubset: calling close Process Workspace");
 
@@ -2436,24 +2462,47 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			}
+			
+			m_oProcessWorkspaceLogger.log("Creating Mosaic Util");
 
 			Mosaic oMosaic = new Mosaic(oParameter, sBasePath);
-
-			// if (oMosaic.runMosaic()) {
+			// Set the proccess workspace logger
+			oMosaic.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+			
+			// Run the gdal mosaic
 			if (oMosaic.runGDALMosaic()) {
 				s_oLogger.debug("LauncherMain.executeMosaic done");
 				if (oProcessWorkspace != null) {
 					oProcessWorkspace.setProgressPerc(100);
 					oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 				}
+				
+				// Log here and to the user
+				s_oLogger.debug("LauncherMain.executeMosaic adding product to Workspace");				
+				m_oProcessWorkspaceLogger.log("Adding output file to the workspace");
 
-				s_oLogger.debug("LauncherMain.executeMosaic adding product to Workspace");
-
+				// Get the full path of the output
 				String sFileOutputFullPath = getWorspacePath(oParameter) + oParameter.getDestinationProductName();
-
+				
+				// And add it to the db
 				addProductToDbAndWorkspaceAndSendToRabbit(null, sFileOutputFullPath, oParameter.getWorkspace(),
 						oParameter.getWorkspace(), LauncherOperations.MOSAIC.toString(), null);
 
+				m_oProcessWorkspaceLogger.log("Done " + new EndMessageProvider().getGood());
+								
+				try {
+					// Create the payload
+					MosaicPayload oMosaicPayload = new MosaicPayload();					
+					// Get the settings
+					MosaicSetting oSettings = (MosaicSetting) oParameter.getSettings();
+					oMosaicPayload.setOutput(oParameter.getDestinationProductName());
+					oMosaicPayload.setInputs(oSettings.getSources().toArray(new String[0]));
+					oProcessWorkspace.setPayload(s_oMapper.writeValueAsString(oMosaicPayload));					
+				}
+				catch (Exception oPayloadException) {
+					s_oLogger.error("LauncherMain.executeMosaic: Exception creating operation payload: ", oPayloadException);
+				}
+				
 				s_oLogger.debug("LauncherMain.executeMosaic: product added to workspace");
 			} else {
 				// error
