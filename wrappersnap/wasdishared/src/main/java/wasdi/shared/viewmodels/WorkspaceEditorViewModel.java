@@ -18,8 +18,17 @@ public class WorkspaceEditorViewModel {
     private List<String> sharedUsers = new ArrayList<>();
     private String nodeCode;
     private long processesCount;
+    private String cloudProvider;
     
 
+
+	public String getCloudProvider() {
+		return cloudProvider;
+	}
+
+	public void setCloudProvider(String cloudProvider) {
+		this.cloudProvider = cloudProvider;
+	}
 
 	public long getProcessesCount() {
 		return processesCount;
