@@ -9,15 +9,14 @@ var PayloadDialogController = (function () {
         this.m_oScope.m_oController = this;
         this.m_oController = this;
         this.m_oExtras = oExtras;
+        this.m_sPayloadString="";
 
-        if (utilsIsObjectNullOrUndefined(oExtras.payload) ){
+        if (utilsIsObjectNullOrUndefined(oExtras.process.payload) ){
             this.m_sPayloadString = "No payload available for the selected process";
         }
         else{
-            this.m_sPayloadString = oExtras.payload;
+            this.m_sPayloadString = oExtras.process.payload;
         }
-        // 1 show payload -> use extras and set a field of this controller
-        // 2 copy payload -> use the same directive as button "copy payload"
     }
 
     PayloadDialogController.$inject = [

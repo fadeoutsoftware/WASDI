@@ -260,6 +260,32 @@ var WorkspaceProcessesList = (function() {
        return true;
     };
 
+    WorkspaceProcessesList.prototype.openPayloadDialog = function (oProcess){
+
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oProcess) === true)
+        {
+            return false;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
+            controller: "PayloadDialogController",
+            inputs: {
+                extras: {
+                    process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
+
+
     WorkspaceProcessesList.prototype.deleteProcess = function(oProcessInput)
     {
         this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
@@ -270,24 +296,7 @@ var WorkspaceProcessesList = (function() {
         return utilsConvertOperationToDescription(oOperation);
     };
 
-    WorkspaceProcessesList.prototype.openPayloadDialog = function (sPayload){
-        console.log("HERE");
-        var oController = this;
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
-            controller: "PayloadDialogController",
-            inputs: {
-               extras: {
-                    payload: sPayload.payload,
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function(oResult){
 
-            });
-        });
-    }
 
 
     WorkspaceProcessesList.$inject = [

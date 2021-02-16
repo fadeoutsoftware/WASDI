@@ -272,7 +272,7 @@
                                             <i class="fa fa-file-text" aria-hidden="true" title="Logs"
                                                data-placement="bottom" data-toggle="tooltip"></i>
                                         </button>
-                                        <button class="" ng-click="m_oController.openPayloadDialog(oProcess)" ng-hide="m_oController.oProcess.payload == null">
+                                        <button class="" ng-click="m_oController.openPayloadDialog(oProcess)" ng-hide="(oProcess.payload==null)">
                                             <!--TODO implement method to open a new modal Dialog-->
                                             <i class="fa fa-download" aria-hidden="true" title="Payload"
                                                data-placement="bottom" data-toggle="tooltip"></i>
