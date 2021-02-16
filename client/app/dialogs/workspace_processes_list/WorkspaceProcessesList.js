@@ -49,7 +49,7 @@ var WorkspaceProcessesList = (function() {
 
     WorkspaceProcessesList.prototype.comboStatusClick = function (sStatus) {
 
-        if (sStatus == "None") sStatus = "Status..."
+        if (sStatus == "None") sStatus = "Status...";
         this.m_oFilter.m_sStatus = sStatus;
     }
 
