@@ -270,6 +270,25 @@ var WorkspaceProcessesList = (function() {
         return utilsConvertOperationToDescription(oOperation);
     };
 
+    WorkspaceProcessesList.prototype.openPayloadDialog = function (sPayload){
+        console.log("HERE");
+        var oController = this;
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
+            controller: "PayloadInfoController",
+            inputs: {
+            /*    extras: {
+                    payload:,
+                }*/
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    }
+
 
     WorkspaceProcessesList.$inject = [
         '$scope',
