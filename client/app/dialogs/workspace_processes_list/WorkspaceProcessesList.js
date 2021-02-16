@@ -55,7 +55,7 @@ var WorkspaceProcessesList = (function() {
 
     WorkspaceProcessesList.prototype.comboTypeClick = function (sStatus) {
 
-        if (sStatus == "None") sStatus = "Type..."
+        if (sStatus == "None") sStatus = "Type...";
         this.m_oFilter.m_sType = sStatus;
     }
 
