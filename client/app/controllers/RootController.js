@@ -133,6 +133,8 @@ var RootController = (function() {
 
         });
 
+
+
         $scope.$on(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, function(event,data) {
 
             let intervalId = setInterval(function(){
@@ -199,6 +201,30 @@ var RootController = (function() {
     }
 
     /*********************************** METHODS **************************************/
+
+    RootController.prototype.openPayloadDialog = function (oProcess){
+
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oProcess) === true)
+        {
+            return false;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
+            controller: "PayloadDialogController",
+            inputs: {
+                extras: {
+                    process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
 
     RootController.prototype.initializeTimeCounter = function(aoProcessesRunning)
     {
@@ -739,13 +765,13 @@ var RootController = (function() {
 
         var oAudio = new Audio('assets/audio/R2D2a.wav');
         oAudio.play();
-        
+
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
     }
 
     RootController.prototype.getOperationDescription = function(oOperation) {
         return utilsConvertOperationToDescription(oOperation);
-    }    
+    }
 
     /*********************************************************************/
     RootController.$inject = [
