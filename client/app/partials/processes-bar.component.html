@@ -75,6 +75,7 @@
                             <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
                             <th>{{"ROOT_TABLE_HEAD_SIZE"|translate}}</th>
                             <th>{{"ROOT_TABLE_HEAD_OPERATION_DATA"|translate}}</th>
+                            <th>{{"ROOT_TABLE_HEAD_OPERATION_START"|translate}}</th>
                             <th>{{"ROOT_TABLE_HEAD_PROGRESS"|translate}} </th>
                             <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
                             <th></th>
@@ -104,6 +105,9 @@
                             </td>
                             <td>
                                 {{oProcess.operationDate}}
+                            </td>
+                            <td>
+                                {{oProcess.operationStartDate}}
                             </td>
                             <td>
                                 <!--{{oProcess.progressPerc}} %-->
