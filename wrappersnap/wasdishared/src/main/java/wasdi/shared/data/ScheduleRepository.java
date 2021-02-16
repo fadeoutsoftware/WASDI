@@ -4,6 +4,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import wasdi.shared.business.Schedule;
+import wasdi.shared.utils.Utils;
 
 public class ScheduleRepository extends MongoRepository {
 	
@@ -39,6 +40,8 @@ public class ScheduleRepository extends MongoRepository {
      * @return
      */
     public boolean deleteScheduleById(String sScheduleId) {
+    	
+    	if (Utils.isNullOrEmpty(sScheduleId)) return false;
 
         try {
             getCollection(m_sThisCollection).deleteOne(new Document("scheduleId", new ObjectId(sScheduleId)));

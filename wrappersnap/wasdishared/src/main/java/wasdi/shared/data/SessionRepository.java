@@ -153,6 +153,9 @@ public class SessionRepository extends MongoRepository {
      * @return
      */
     public boolean deleteSession(UserSession oSession) {
+    	
+    	if (oSession == null) return false;
+    	
         try {
             if (oSession == null || Utils.isNullOrEmpty(oSession.getSessionId()))
                 return true;

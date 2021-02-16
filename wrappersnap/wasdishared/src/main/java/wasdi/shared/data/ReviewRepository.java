@@ -41,6 +41,9 @@ public class ReviewRepository extends MongoRepository {
 	
 
     public int deleteReview(String sProcessorId, String sReviewId) {
+    	
+    	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
+    	if (Utils.isNullOrEmpty(sReviewId)) return 0;
 
 		BasicDBObject oCriteria = new BasicDBObject();
 		oCriteria.append("processorId", sProcessorId);

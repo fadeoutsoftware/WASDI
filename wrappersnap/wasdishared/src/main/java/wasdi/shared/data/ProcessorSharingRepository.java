@@ -12,6 +12,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.ProcessorSharing;
+import wasdi.shared.utils.Utils;
 
 /**
  * Processor Sharing Repository
@@ -187,6 +188,8 @@ public class ProcessorSharingRepository  extends  MongoRepository {
      * @return number of sharing deleted
      */
     public int deleteByProcessorId(String sProcessorId) {
+    	
+    	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
 
         try {
 
@@ -210,6 +213,8 @@ public class ProcessorSharingRepository  extends  MongoRepository {
      * @return Number of sharing deleted
      */
     public int deleteByUserId(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
 
         try {
 
@@ -234,6 +239,10 @@ public class ProcessorSharingRepository  extends  MongoRepository {
      * @return 1 if it was deleted, 0 if it did not exists
      */
     public int deleteByUserIdProcessorId(String sUserId, String sProcessorId) {
+    	
+    	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+    	
         try {
 
             DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.and(Filters.eq("userId", sUserId), Filters.eq("processorId", sProcessorId)));
