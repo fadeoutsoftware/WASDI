@@ -1,7 +1,7 @@
 /**
  * Created by a.corrado on 09/06/2017.
  */
-
+'use strict';
 var WorkspaceProcessesList = (function() {
 
     function WorkspaceProcessesList($scope, oClose, oProcessesLaunchedService,oConstantsService,oModalService,oProcessorService) {//,oExtras
@@ -51,30 +51,30 @@ var WorkspaceProcessesList = (function() {
 
         if (sStatus == "None") sStatus = "Status...";
         this.m_oFilter.m_sStatus = sStatus;
-    }
+    };
 
     WorkspaceProcessesList.prototype.comboTypeClick = function (sStatus) {
 
         if (sStatus == "None") sStatus = "Type...";
         this.m_oFilter.m_sType = sStatus;
-    }
+    };
 
     WorkspaceProcessesList.prototype.applyFilters = function () {
         this.resetCounters();
         this.m_aoProcessesLogs = [];
         this.getAllProcessesLogs();
-    }
+    };
 
     WorkspaceProcessesList.prototype.resetFilters = function () {
         this.resetCounters();
         this.m_aoProcessesLogs = [];
         this.m_oFilter.m_sType = "Type...";
-        this.m_oFilter.m_sStatus = "Status..."
-        this.m_oFilter.m_sName = ""
-        this.m_oFilter.m_sDate = ""
+        this.m_oFilter.m_sStatus = "Status...";
+        this.m_oFilter.m_sName = "";
+        this.m_oFilter.m_sDate = "";
 
-        this.getAllProcessesLogs()
-    }
+        this.getAllProcessesLogs();
+    };
 
     /**
      * getAllProcessesLogs
@@ -120,7 +120,7 @@ var WorkspaceProcessesList = (function() {
         });
 
         return true;
-    }
+    };
 
     WorkspaceProcessesList.prototype.calculateNextListOfProcess = function(){
         this.m_iFirstProcess = this.m_iFirstProcess + this.m_iNumberOfProcessForRequest;
@@ -130,7 +130,7 @@ var WorkspaceProcessesList = (function() {
     WorkspaceProcessesList.prototype.resetCounters = function() {
         this.m_iNumberOfProcessForRequest = 40;
         this.m_iFirstProcess = 0;
-    }
+    };
 
     WorkspaceProcessesList.prototype.getProcessDuration = function (oProcess) {
         //time by server
@@ -185,7 +185,7 @@ var WorkspaceProcessesList = (function() {
         }
 
         return sNumber;
-    }
+    };
 
     WorkspaceProcessesList.prototype.generateFile = function(sText)
     {
@@ -223,14 +223,14 @@ var WorkspaceProcessesList = (function() {
         }
 
         return sText;
-    }
+    };
     /**
      *
      */
     WorkspaceProcessesList.prototype.generateLogFile = function()
     {
         var sText = this.makeStringLogFile();
-        var oFile = this.generateFile(sText)
+        var oFile = this.generateFile(sText);
         return oFile;
     };
 
@@ -268,7 +268,7 @@ var WorkspaceProcessesList = (function() {
 
     WorkspaceProcessesList.prototype.getOperationDescription = function(oOperation) {
         return utilsConvertOperationToDescription(oOperation);
-    }
+    };
 
 
     WorkspaceProcessesList.$inject = [
