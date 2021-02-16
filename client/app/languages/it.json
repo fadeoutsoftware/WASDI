@@ -337,6 +337,7 @@
     "DIALOG_LIST_OF_WORKSPACES_HIDE_WORKFLOWS_BUTTON":"Hide workflows",
 
     "DIALOG_TITLE_WAPPS":"WASDI Apps",
+    "DIALOG_TITLE_PAYLOAD":"View Payload",
 
     "DIALOG_EDIT_USER":"Update user info",
     "DIALOG_EDIT_USER_OLD_PASSWORD":"Old password",

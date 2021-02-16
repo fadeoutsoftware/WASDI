@@ -275,11 +275,11 @@ var WorkspaceProcessesList = (function() {
         var oController = this;
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
-            controller: "PayloadInfoController",
+            controller: "PayloadDialogController",
             inputs: {
-            /*    extras: {
-                    payload:,
-                }*/
+               extras: {
+                    payload: sPayload.payload,
+                }
             }
         }).then(function (modal) {
             modal.element.modal();

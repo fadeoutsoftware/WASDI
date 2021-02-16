@@ -239,7 +239,7 @@ wasdiApp.controller("EditPanelController", EditPanelController);
 wasdiApp.controller("ProcessErrorLogsDialogController", ProcessErrorLogsDialogController);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
-wasdiApp.controller("PayloadInfoController", PayloadInfoController);
+wasdiApp.controller("PayloadDialogController", PayloadDialogController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);

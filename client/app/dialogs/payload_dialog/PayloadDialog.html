@@ -5,11 +5,13 @@
             <div class=" modal-header">
                 <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
                     <h4 class="modal-title ">
-                        {{"DIALOG_TITLE_WAPPS"|translate}}
+                        {{"DIALOG_TITLE_PAYLOAD"|translate}}
                     </h4>
                 </div>
                 <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
                 </div>
             </div>
             <!-- BODY -->
@@ -19,7 +21,45 @@
                         <ng-include src="'dialogs/wapps/app-list-item.html'"></ng-include>
                     </div>-->
                     <div class="col-v4">
-                        <ng-include src="'dialogs/payload_dialog/json-editor.html'"></ng-include>
+                        <div class="well h-100 m-0 d-flex flex-column">
+
+                            <div class="row-v4">
+                                <div class="col-v4-auto">
+                                    <label class="m-0">Payload:</label>
+                                </div>
+                                <div class="col-v4-auto ml-auto mr-2"></div>
+                                <div class="col-v4-auto">
+                                    <!--    <div class="btn-switch-square" ng-class="{'btn-switch&#45;&#45;on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
+                                             ng-click="m_oController.m_bIsJsonEditModeActive = !m_oController.m_bIsJsonEditModeActive">
+                                            <div class="square" ng-class="{'btn-switch-circle&#45;&#45;on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
+                                                 ng-click="m_oController.m_bIsJsonEditModeActive = m_oController.m_bIsJsonEditModeActive"></div>
+                                        </div>-->
+                                </div>
+                            </div>
+                            <div class="row-v4 d-flex flex-fill mt-3 mb-3">
+                                <div class="col-v4">
+                                    <!--Editor json-->
+                     <!--               <div class="jsonView" ng-show="m_oController.m_bIsJsonEditModeActive">
+                                        <json child="m_oController.myJson" default-collapsed="false"
+                                              type="object"></json>
+                                    </div>-->
+                                    <!--            <div class="jsonContainer" ng-show="m_oController.m_bIsJsonEditModeActive">
+                                                    {{m_oController.m_asPayload}}
+                                                </div>-->
+
+                                    <textarea class="form-control h-100" rows="5" id=""
+                                              style="font-family:'Courier New',sans-serif;font-size: 16px;"
+                                              ng-model="m_oController.dumbText">adsadsadasdas</textarea>
+                                </div>
+                            </div>
+
+                            <!--<div class="row-v4">
+                                <div class="col-v4 text-right">
+
+                                </div>
+                            </div>-->
+
+                        </div>
                     </div>
                 </div>
             </div>
