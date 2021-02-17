@@ -79,6 +79,8 @@
                             <th>{{"ROOT_TABLE_HEAD_PROGRESS"|translate}} </th>
                             <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
                             <th></th>
+                            <th></th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -128,8 +130,8 @@
                             <td class="over-icon" ng-click="m_oController.openErrorLogsDialog(oProcess)" >
                                 <i class="fa fa-file-text" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>
                             </td>
-                            <td class="over-icon" ng-click="m_oController.openPayloadDialog(oProcess)" ng-hide="(oProcess.payload==null)">
-                                <i class="fa fa-download" aria-hidden="true" title="Payload" data-placement="bottom" data-toggle="tooltip"></i>
+                            <td class="over-icon" ng-click="m_oController.openPayloadDialog(oProcess)" >
+                                <i class="fa fa-download" aria-hidden="true" title="Payload" data-placement="bottom" data-toggle="tooltip" ng-hide="(oProcess.payload==null)"></i>
                             </td>
                         </tr>
 
