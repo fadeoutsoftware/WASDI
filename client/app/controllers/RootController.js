@@ -110,9 +110,7 @@ var RootController = (function() {
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
-
                 // Set the number of running processes
-
                 $scope.m_oController.getSummary();
 
                 $scope.m_oController.m_oLastProcesses = $scope.m_oController.findLastProcess(aoProcessesRunning);
@@ -171,6 +169,7 @@ var RootController = (function() {
                 }
             }
             //$scope.m_oController.time++;
+            oTimerTimeout = $timeout($scope.onTimeout, 1000)
 
         };
 
@@ -179,8 +178,7 @@ var RootController = (function() {
             return this.m_bIsOpenStatusBar;
         };
 
-
-
+        var oTimerTimeout = $timeout($scope.onTimeout, 1000)
 
         this.getWorkspacesInfo();
         this.initTooltips();
@@ -507,8 +505,8 @@ var RootController = (function() {
 
     RootController.prototype.openImportPage = function () {
         var oController = this;
-
-        oController.m_oState.go("root.import", { });// workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+        // workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+        oController.m_oState.go("root.import", { });
     };
 
     RootController.prototype.activePageCss = function(oPage)
@@ -571,8 +569,8 @@ var RootController = (function() {
         var oController = this;
         // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
-            templateUrl: "dialogs/processes_logs/ProcessesLogsDialog.html",
-            controller: "ProcessesLogsController"
+            templateUrl: "dialogs/workspace_processes_list/WorkpsaceProcessesList.html",
+            controller: "WorkspaceProcessesList"
         }).then(function(modal) {
             modal.element.modal();
             modal.close.then(function(result) {
@@ -735,13 +733,17 @@ var RootController = (function() {
         }
     };
 
-    RootController.prototype.openDocumentationCenter = function () {
+    RootController.prototype.openDocumentatonCenter = function () {
+
+        var oAudio = new Audio('assets/audio/R2D2a.wav');
+        oAudio.play();
+
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
     }
 
-    RootController.prototype.getOperationDescription = function(sOperation) {
-        return utilsConvertOperationToDescription(sOperation);
-    }    
+    RootController.prototype.getOperationDescription = function(oOperation) {
+        return utilsConvertOperationToDescription(oOperation);
+    }
 
     /*********************************************************************/
     RootController.$inject = [
@@ -758,5 +760,4 @@ var RootController = (function() {
     ];
 
     return RootController;
-})
-();
+}) ();

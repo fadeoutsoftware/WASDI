@@ -10,7 +10,7 @@ import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.snapopearations.WasdiProgreeMonitor;
+import wasdi.snapopearations.WasdiProgressMonitor;
 
 /**
  * SNAP Product Write Utility
@@ -55,7 +55,7 @@ public class WasdiProductWriter  {
             writeOp.setClearCacheAfterRowWrite(false);
             writeOp.setIncremental(true);
             final OperatorExecutor executor = OperatorExecutor.create(writeOp);
-            executor.execute(new WasdiProgreeMonitor(m_oProcessWorkspaceRepository, m_oProcessWorkspace));        
+            executor.execute(new WasdiProgressMonitor(m_oProcessWorkspaceRepository, m_oProcessWorkspace));        
 
             return newFile.getAbsolutePath();
         }

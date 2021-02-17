@@ -64,7 +64,7 @@
             <div class="col-12 col-md-2 filter-side-bar">
                 <!--title large screen-->
                 <div class="d-none d-md-block title p-2 px-3 mb-2">
-                    <span class="fa fa-filter mr-2" style="cursor: pointer" aria-hidden="true"></span>FILTERS
+                    <span class="fa fa-filter mr-2" style="cursor: pointer" aria-hidden="true"></span>CATEGORY
                 </div>
                 <!--title mobile screen-->
                 <div class="d-block d-md-none title p-2 px-3 mb-4 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsebleFilter" aria-expanded="false" aria-controls="collapsebleFilter">
@@ -78,7 +78,7 @@
                 <div class="filter collapse" id="collapsebleFilter">
                     <!--category-->
                     <div class="category mt-1 mb-3">
-                        <div class="border-bottom py-1 mb-2 subtitle">CATEGORY</div>
+                        <!--div class="border-bottom py-1 mb-2 subtitle">CATEGORY</div-->
 
                         <div class="tag-container input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">
                             <input id="{{oCategory.id}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.categoryClicked(oCategory.id)">
@@ -96,10 +96,14 @@
 
                     <!--developer-->
                     <div class="developer mt-1 mb-3">
-                        <div class="border-bottom py-1 mb-2 subtitle">
+                        <div class="d-none d-md-block title p-2 px-3 mb-2">
+                            <span class="fa fa-code mr-2" style="cursor: pointer" aria-hidden="true"></span>DEVELOPER
+                        </div>
+        
+                        <!--div class="border-bottom py-1 mb-2 subtitle">
                             <span>DEVELOPER</span>
                             <span class="fas fa-meteor"></span>
-                        </div>
+                        </div-->
                         <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oPublisher in m_oController.m_aoPublishers">
                             <input id="{{oPublisher.publisher}}" type="checkbox" aria-label="Checkbox for following text input" ng-click="m_oController.publisherClicked(oPublisher.publisher)">
                             <label title="{{oPublisher.publisher}} - {{oPublisher.appCount}}" for="{{oPublisher.publisher}}">{{oPublisher.publisher}}<span class="italic">({{oPublisher.appCount}})</span></label>
@@ -108,7 +112,10 @@
 
                     <!--ratings-->
                     <div class="ratings mt-1 mb-3">
-                        <div class="border-bottom py-1 mb-2 subtitle">RATINGS</div>
+                        <!--div class="border-bottom py-1 mb-2 subtitle">RATINGS</div-->
+                        <div class="d-none d-md-block title p-2 px-3 mb-2">
+                            <span class="fa fa-star mr-2" style="cursor: pointer" aria-hidden="true"></span>RATINGS
+                        </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
                             <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked" ng-click="m_oController.rankingClicked(0)">
                             <label for="allstar">
@@ -175,8 +182,10 @@
 
                     <!--price-->
                     <div class="price mt-1 mb-3">
-                        <div class="border-bottom py-1 mb-2 subtitle">PRICE</div>
-
+                        <!--div class="border-bottom py-1 mb-2 subtitle">PRICE</div-->
+                        <div class="d-none d-md-block title p-2 px-3 mb-2">
+                            <span class="fa fa-dollar mr-2" style="cursor: pointer" aria-hidden="true"></span>PRICE
+                        </div>
                         <rzslider rz-slider-model="m_oController.m_oSlider.value" rz-slider-options="m_oController.m_oSlider.options"></rzslider>
                     </div>
                 </div>
@@ -220,8 +229,7 @@
                                     <span class="fa fa-star" ng-class="processor.score>2.25&&processor.score<2.75?'checked-half':processor.score>=2.75?'checked':''"></span>
                                     <span class="fa fa-star" ng-class="processor.score>3.25&&processor.score<3.75?'checked-half':processor.score>=3.75?'checked':''"></span>
                                     <span class="fa fa-star" ng-class="processor.score>4.25&&processor.score<4.75?'checked-half':processor.score>=4.75?'checked':''"></span>
-
-
+                                    &nbsp;{{ processor.votes}}
                                 </div>
                                 <div  class="price-tag shadow-sm">
                                     <span ng-if="processor.price>0">from € {{processor.price}}</span>

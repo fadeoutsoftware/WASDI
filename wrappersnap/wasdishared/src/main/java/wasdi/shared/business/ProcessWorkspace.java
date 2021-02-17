@@ -24,6 +24,10 @@ public class ProcessWorkspace {
      */
     private String operationType;
     /**
+     * Sub Type of the operation
+     */
+    private String operationSubType;
+	/**
      * Creation date of the operation
      */
     private String operationDate;
@@ -212,6 +216,14 @@ public class ProcessWorkspace {
 
 	public void setSubprocessPid(int subprocessPid) {
 		this.subprocessPid = subprocessPid;
+	}
+
+    public String getOperationSubType() {
+		return operationSubType;
+	}
+
+	public void setOperationSubType(String operationSubType) {
+		this.operationSubType = operationSubType;
 	}
 
 

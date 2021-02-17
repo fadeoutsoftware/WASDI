@@ -361,16 +361,16 @@ public class DiasResponseTranslatorONDA extends DiasResponseTranslator {
 						String sKey = null;
 						sKey = m_asOndaToSentinel.get(sMetaKey);
 						if(null == sKey) {
-							String sPrevious = oResult.getProperties().get(sMetaKey);
-							if(null!=sPrevious) {
-								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: sMetaKey : "+sPrevious);
-							}
+//							String sPrevious = oResult.getProperties().get(sMetaKey);
+//							if(null!=sPrevious) {
+//								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadataArray: sMetaKey : "+sPrevious);
+//							}
 							oResult.getProperties().put(sMetaKey, sMetaValue);
 						} else if( sKey.startsWith(m_sPropertyPrefix) ) {
 							String sTmpKey = sKey.substring( sKey.indexOf(m_sPropertyPrefix) + m_sPropertyPrefix.length() );
 							String sPrevious = oResult.getProperties().get(sTmpKey);
 							if(null!=sPrevious) {
-								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: sKey : "+sPrevious);
+								//Utils.debugLog("DiasResponseTranslatorONDA.parseMetadataArray: sKey : "+sPrevious);
 								if(sTmpKey.equals("size")) {
 									sMetaValue = Utils.getNormalizedSize(Double.parseDouble(sMetaValue));
 								}

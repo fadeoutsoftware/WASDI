@@ -38,13 +38,13 @@
     "ROOT_VIEW_NAV_BAR_LINK_WORKSPACES":"Workspaces",
     "ROOT_VIEW_NAV_BAR_LINK_SEARCH":"Plan",
     "ROOT_VIEW_NAV_BAR_LINK_CATALOG":"Catalog",
-    "ROOT_VIEW_LINK_HELP":"Help",
+    "ROOT_VIEW_LINK_HELP":"Docs",
     "ROOT_VIEW_LINK_LOG_OUT":"Log-out",
     "ROOT_VIEW_LABEL_USER":"User:",
     "ROOT_VIEW_SUBTITLE":"Web Advanced Space Developer Interface",
     "ROOT_LABEL_NUMBER_OF_RUNNING_PROCESSES":"Running ",
     "ROOT_LABEL_NUMBER_OF_WAITING_PROCESSES":"Waiting ",
-    "ROOT_TABLE_HEAD_OPERATION_DATA":"Date",
+    "ROOT_TABLE_HEAD_OPERATION_DATA":"Created",
     "ROOT_TABLE_HEAD_TYPE_OF_OPERATION":"Operation",
     "ROOT_TABLE_HEAD_NAME":"Name",
     "ROOT_TABLE_HEAD_ID_USER":"User",
@@ -70,6 +70,8 @@
     "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: Create your first ",
     "WORKSPACES_LIST_OF_WORKFLOWS_TITLE":"List of Workflows",
     "WORKSPACES_NO_WORKSPACE":"You have no Workspaces yet",
+
+    "WORKSPACE_DETAILS_BOX": "Workspace details",
 
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch between 3D globe and 2D map",
@@ -284,7 +286,7 @@
     "DIALOG_SFTP_UPLOAD_ADD_TO_WORKSPACE_BUTTON":"Add to workspace",
     "DIALOG_SFTP_UPLOAD_CLOSE_BUTTON":"Close",
 
-    "DIALOG_PROCESSES_LOGS_TITLE":"Processes Logs",
+    "DIALOG_PROCESSES_LOGS_TITLE":"Workspace Processes List",
 
     "DIALOG_WORKFLOW_TITLE":"Workflow",
     "DIALOG_WORKFLOW_INPUTFILE": "Select Input File: ",

@@ -27,8 +27,19 @@ public class Node {
 	 * Flag to know if the node is active or not
 	 */
 	private boolean active = true;
+	/**
+	 * String that represents the cloud provider
+	 */
+	private String cloudProvider;
 	
 	
+
+	public String getCloudProvider() {
+		return cloudProvider;
+	}
+	public void setCloudProvider(String cloudProvider) {
+		this.cloudProvider = cloudProvider;
+	}
 	public String getNodeGeoserverAddress() {
 		return nodeGeoserverAddress;
 	}
@@ -74,4 +85,5 @@ public class Node {
 	public void setActive(boolean bActive) {
 		this.active = bActive;
 	}
+
 }

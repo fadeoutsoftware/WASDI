@@ -15,6 +15,7 @@ import wasdi.shared.opensearch.QueryTranslationParser;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
  * @author c.nattero
@@ -39,8 +40,12 @@ public class DiasQueryTranslatorSOBLOO extends DiasQueryTranslator {
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
 			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
 			String sQuery = this.prepareQuery(sQueryFromClient);
+			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQuery);
 
 			sResult = "";
+			if(!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+				sResult += "q=" + oQueryViewModel.productName + "&";
+			}
 			sResult += parseFootPrint(sQuery);
 			sResult += parseTimeFrame(sQuery);
 

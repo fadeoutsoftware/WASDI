@@ -7,6 +7,7 @@ public class AppListViewModel {
 	private String imgLink;
 	private String publisher;
 	private Float score;
+	private Integer votes;
 	private String friendlyName;
 	private Float price;
 	private boolean isMine;
@@ -72,4 +73,12 @@ public class AppListViewModel {
 	public void setFriendlyName(String friendlyName) {
 		this.friendlyName = friendlyName;
 	}
+	
+	public Integer getVotes() {
+		return votes;
+	}
+	public void setVotes(Integer votes) {
+		this.votes = votes;
+	}
+
 }

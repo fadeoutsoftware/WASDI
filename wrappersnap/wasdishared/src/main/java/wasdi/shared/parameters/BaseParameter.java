@@ -75,13 +75,7 @@ public class BaseParameter {
 	public static BaseParameter getParameterFromOperationType(String sOperationType) {
 		BaseParameter oParam = null;
 		
-		if (sOperationType.equals(LauncherOperations.APPLYORBIT.name())) {
-			oParam = new ApplyOrbitParameter();
-		}
-		else if (sOperationType.equals(LauncherOperations.CALIBRATE.name())) {
-			oParam = new CalibratorParameter();
-		}
-		else if (sOperationType.equals(LauncherOperations.DELETEPROCESSOR.name())) {
+		if (sOperationType.equals(LauncherOperations.DELETEPROCESSOR.name())) {
 			oParam = new ProcessorParameter();
 		}
 		else if (sOperationType.equals(LauncherOperations.DEPLOYPROCESSOR.name())) {
@@ -89,9 +83,6 @@ public class BaseParameter {
 		}
 		else if (sOperationType.equals(LauncherOperations.DOWNLOAD.name())) {
 			oParam = new DownloadFileParameter();
-		}
-		else if (sOperationType.equals(LauncherOperations.FILTER.name())) {
-			oParam = new FilterParameter();
 		}
 		else if (sOperationType.equals(LauncherOperations.FTPUPLOAD.name())) {
 			oParam = new FtpUploadParameters();
@@ -105,23 +96,11 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.MOSAIC.name())) {
 			oParam = new MosaicParameter();
 		}
-		else if (sOperationType.equals(LauncherOperations.MULTILOOKING.name())) {
-			oParam = new MultilookingParameter();
-		}
 		else if (sOperationType.equals(LauncherOperations.MULTISUBSET.name())) {
 			oParam = new MultiSubsetParameter();
 		}
-		else if (sOperationType.equals(LauncherOperations.NDVI.name())) {
-			oParam = new NDVIParameter();
-		}
-		else if (sOperationType.equals(LauncherOperations.PUBLISH.name())) {
-			oParam = new PublishParameters();
-		}
 		else if (sOperationType.equals(LauncherOperations.PUBLISHBAND.name())) {
 			oParam = new PublishBandParameter();
-		}
-		else if (sOperationType.equals(LauncherOperations.RASTERGEOMETRICRESAMPLE.name())) {
-			oParam = new RasterGeometricResampleParameter();
 		}
 		else if (sOperationType.equals(LauncherOperations.REGRID.name())) {
 			oParam = new RegridParameter();
@@ -137,9 +116,6 @@ public class BaseParameter {
 		}
 		else if (sOperationType.equals(LauncherOperations.SUBSET.name())) {
 			oParam = new SubsetParameter();
-		}
-		else if (sOperationType.equals(LauncherOperations.TERRAIN.name())) {
-			oParam = new RangeDopplerGeocodingParameter();
 		}
 		else if (sOperationType.equals(LauncherOperations.UPDATEPROCESSES.name())) {
 			oParam = new ProcessorParameter();

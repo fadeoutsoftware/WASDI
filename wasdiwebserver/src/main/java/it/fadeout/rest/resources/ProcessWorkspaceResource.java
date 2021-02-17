@@ -47,6 +47,7 @@ public class ProcessWorkspaceResource {
 	@Context
 	ServletConfig m_oServletConfig;	
 
+	
 	@GET
 	@Path("/byws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -492,24 +493,26 @@ public class ProcessWorkspaceResource {
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
 			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				//oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			else {
-				//oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			
 			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
-				//oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 				oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			
-			//oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
-			//oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			oViewModel.setOperationType(oProcess.getOperationType());
+			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
+				oViewModel.setOperationSubType(oProcess.getOperationSubType());
+			}
+			else {
+				oViewModel.setOperationSubType("");
+			}
+			
 			oViewModel.setProductName(oProcess.getProductName());
 			oViewModel.setUserId(oProcess.getUserId());
 			oViewModel.setFileSize(oProcess.getFileSize());

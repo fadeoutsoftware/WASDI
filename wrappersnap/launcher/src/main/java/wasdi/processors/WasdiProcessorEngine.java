@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.net.io.Util;
 
 import wasdi.LauncherMain;
+import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -22,7 +23,7 @@ public abstract class WasdiProcessorEngine {
 	
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
-	
+	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
 	
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
 		
@@ -288,6 +289,32 @@ public abstract class WasdiProcessorEngine {
 			oEx.printStackTrace();
 			return "";
 		}		
+	}
+	
+	/**
+	 * Get the workspace logger
+	 * @return
+	 */
+	public ProcessWorkspaceLogger geProcessWorkspaceLogger() {
+		return m_oProcessWorkspaceLogger;
+	}
+
+	/**
+	 * Set the workspace logger
+	 * @param oProcessWorkspaceLogger
+	 */
+	public void setProcessWorkspaceLogger(ProcessWorkspaceLogger oProcessWorkspaceLogger) {
+		this.m_oProcessWorkspaceLogger = oProcessWorkspaceLogger;
+	}
+	
+	/**
+	 * Safe Processo
+	 * @param sLog
+	 */
+	protected void processWorkspaceLog(String sLog) {
+		if (m_oProcessWorkspaceLogger!=null) {
+			m_oProcessWorkspaceLogger.log(sLog);
+		}
 	}
 	
 }

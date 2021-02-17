@@ -26,7 +26,6 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SearchOrbitService',
     'wasdi.ResultsOfSearchService',
     'wasdi.SnapOperationService',
-    'wasdi.GetParametersOperationService',
     'wasdi.SatelliteService',
     'wasdi.CatalogService',
     'wasdi.PagesService',
@@ -36,6 +35,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.TreeService',
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
+    'wasdi.NodeService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -217,7 +217,7 @@ wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
 wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
 wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
-wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);
+wasdiApp.controller("WorkspaceProcessesList",WorkspaceProcessesList);
 wasdiApp.controller("SnakeController",SnakeController);
 wasdiApp.controller("CatalogController",CatalogController);
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
@@ -228,6 +228,7 @@ wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersControl
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
+wasdiApp.controller("WorkspaceDetailsController", WorkspaceDetailsController);
 wasdiApp.controller("WpsController", WpsController);
 wasdiApp.controller("WappsController", WappsController);
 wasdiApp.controller("EditUserController", EditUserController);

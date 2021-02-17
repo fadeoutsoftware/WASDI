@@ -11,7 +11,7 @@
 <!--LIST OF WORKFLOWS  -->
 <div class="modal-body d-flex flex-column">
     <div class="row-v4">
-        <div class="col-v4">
+        <div class="col-v4" style="height: 60vh;">
             <!------------------------------------- SEARCH BAR ------------------------------------->
             <div>
                 <input class="wasdi-input"
@@ -25,7 +25,7 @@
                 <div class="col-v4-6 mb-4"
                      ng-repeat="workflow in m_oController.getMultipleInputWorkflow() | filter:searchText:strict">
                     <div class="pt-1 pb-3 px-3 h-100 app-item" style="margin-bottom: 15px;"
-                         ng-click="m_oController.m_oSelectedMultiInputWorkflow = workflow"
+                         ng-click="m_oController.selectedMultiInputWorkflow(workflow)"
                          ng-class="{'selectedWorkflow': m_oController.m_oSelectedMultiInputWorkflow  === workflow}">
                         <div class="row-v4">
                             <div class="col-v4-12">
@@ -57,7 +57,7 @@
                             </h4>
                         </div>
                         <div>
-                            <span>{{workflow.description.replaceAll("_"," ")}}</span>
+                            <span>{{workflow.description.replaceAll("_", " ")}}</span>
                         </div>
 
                         <!--      <div>
@@ -73,52 +73,46 @@
         </div>
 
         <!--------------------   LAUNCH WORKFLOW DIALOG -------------------->
-        <div class="col-v4">
+        <div class="col-v4" style="height: 60vh;">
             <div class="well h-100 m-0 d-flex flex-column">
-                <h3> {{m_oController.m_oSelectedMultiInputWorkflow.name}} </h3>
-                <div>
-                    <label><strong ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">Owner:</strong>
-                    </label>
-                    <span> {{m_oController.m_oSelectedMultiInputWorkflow.userId}}</span>
+                <div class="row-v4">
+                    <div class="col-v4-8">
+                        <h3> {{m_oController.m_oSelectedMultiInputWorkflow.name}} </h3>
+                    </div>
+                    <div class=col-v4-4">
+                        <label><strong ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">Owner:</strong>
+                        </label>
+                        <span> {{m_oController.m_oSelectedMultiInputWorkflow.userId}}</span>
+                    </div>
                 </div>
                 <div>
                     <label> <strong ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">Description:</strong>
                     </label>
                     <span>{{m_oController.m_oSelectedMultiInputWorkflow.description.replaceAll("_", " ")}}</span>
                 </div>
+
                 <div class="input-nodes"
                      ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
+                    <div class="row-v4">
+                        <div class="node-title col-v4-2">
 
-                         <span class="node-title">
-                             <h4>{{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_LABEL" | translate}} :</h4>
-                         </span>
-
-                    <div class="dropdown my-dropdown">
-                        <button class="btn btn-default dropdown-toggle w-100" type="button"
-                                id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown" style="font-weight: 600;">
-                            Products
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu"
-                            aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
-
-                            <li role="presentation">
-                                <a role="menuitem" tabindex="-1" href="" style="font-weight: 600;"
-                                   ng-repeat="product in m_oController.m_asProductsName"
-                                   ng-click="m_oController.addProductInputInNode(node,product)">
-                                    {{product}}
-                                </a>
-                            </li>
-
-                        </ul>
+                            <h4>{{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_LABEL" | translate}}</h4>
+                        </div>
+                        <div class="node-title col-v4-10">
+                            <wapdropdown list-of-values="m_oController.m_aoProductsClass"
+                                         selected-value="m_oController.m_aoMultiInputSelectedProducts[node]"
+                                         enable-search-filter="true"
+                                         dropdown-name="m_oController.m_sWAPPdropdownname"
+                            ></wapdropdown>
+                        </div>
                     </div>
                     <br>
-                    <span class="selected-input">
-                        <div ng-hide="$index === null">
-                            {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_SELECTED" | translate}}
-                        </div>
-                            <label>{{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}</label>
-                             </span>
+                    <!--  <span class="selected-input">
+                          <div ng-hide="$index === null">
+                              {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_SELECTED" | translate}}
+                          </div>
+                              <label>{{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}</label>
+                               </span>-->
                     <br>
 
                 </div>

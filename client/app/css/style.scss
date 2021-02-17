@@ -33,9 +33,7 @@
 
 //directive css
 @import "../directives/tree_directive/tree";
-//$color_space: $wasdi-white;
-//@import "../directives/space_invaders/space_invaders";
-//@import "../directives/space_invaders_fixed/space_invaders_fixed";
+
 @import "../directives/multiselect/multiselect";
 //@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
 @import "../directives/multiselect_dropdown_menu/multiselect_dropdown_menu";
@@ -61,13 +59,14 @@
 @import "../dialogs/sftp_upload/sftp_upload";
 @import "../dialogs/delete_process/delete_process";
 @import "../dialogs/snake_dialog/snake_dialog";
-@import "../dialogs/processes_logs/processes_logs";
+@import "../dialogs/workspace_processes_list/workspace_processes";
 @import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
 @import "../dialogs/filter_band_operation/filter_band";
 @import "../dialogs/mask_manager/mask_manager";
 @import "../dialogs/import_advance_filters/import_advance_filters";
 @import "../dialogs/workflow_manager/workflow_manager";
+@import "../dialogs/workspace_details/workspace_details";
 @import "../dialogs/get_list_of_workspace_selected/get_list_of_workspaces_selected";
 @import "../dialogs/processor/processor";
 @import "../dialogs/wps_dialog/wps";

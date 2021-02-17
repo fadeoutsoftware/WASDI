@@ -279,8 +279,8 @@
          return true;
      };
 
-     ProcessErrorLogsDialogController.prototype.getOperationDescription = function(sOperation) {
-        return utilsConvertOperationToDescription(sOperation);
+     ProcessErrorLogsDialogController.prototype.getOperationDescription = function() {
+        return utilsConvertOperationToDescription(this.m_oProcess);
     }
 
      ProcessErrorLogsDialogController.$inject = [

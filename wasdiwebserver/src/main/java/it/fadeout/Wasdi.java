@@ -104,10 +104,10 @@ public class Wasdi extends ResourceConfig {
 	 * Credential Policy Utility class
 	 */
 	private static CredentialPolicy m_oCredentialPolicy;
-	
+
 	public static String s_sKeyCloakIntrospectionUrl = "";
 	public static String s_sClientId = "";
-	public static String s_sClientSecret = ""; 
+	public static String s_sClientSecret = "";
 	public static String s_KeyCloakUser = "";
 	public static String s_KeyCloakPw = "";
 	public static String s_KeyBearerSecret = "";
@@ -127,8 +127,7 @@ public class Wasdi extends ResourceConfig {
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 
 		try {
-			Utils.s_iSessionValidityMinutes = Integer
-					.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
+			Utils.s_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
 			Utils.debugLog("-------Session Validity [minutes]: " + Utils.s_iSessionValidityMinutes);
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
@@ -170,8 +169,8 @@ public class Wasdi extends ResourceConfig {
 		s_sClientSecret = getInitParameter("keycloak_clientSecret", null);
 		s_KeyCloakUser = getInitParameter("keycloak_admin", null);
 		s_KeyCloakPw = getInitParameter("keycloak_pw", null); // keycloak_brrrSecret
-		s_KeyBearerSecret = getInitParameter("keycloak_brrrSecret", null); // 
-		
+		s_KeyBearerSecret = getInitParameter("keycloak_brrrSecret", null); //
+
 		try {
 			// If this is not the main node
 			if (!s_sMyNodeCode.equals(Wasdi.s_sWASDINAME)) {
@@ -342,11 +341,11 @@ public class Wasdi extends ResourceConfig {
 			if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 				return null;
 			}
-	
+
 			String sUserId = null;
-			//todo validate token with JWT	
+			//todo validate token with JWT
 			//Utils.debugLog("Wasdi.getUserFromSession: Trying introspect...");
-			
+
 			String sPayload = "token=" + sSessionId;
 			Map<String,String> asHeaders = new HashMap<>();
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -355,14 +354,14 @@ public class Wasdi extends ResourceConfig {
 				JSONObject oJSON = new JSONObject(sResponse);
 				sUserId = oJSON.optString("preferred_username", null);
 			}
-	
+
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
 				User oUser = oUserRepo.getUser(sUserId);
 				return oUser;
 			} else {
 				//check session against DB
-				Utils.debugLog("Wasdi.getUserFromSession: introspect failed, checking against DB..."); 
+				Utils.debugLog("Wasdi.getUserFromSession: introspect failed, checking against DB...");
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				User oUser = null;
@@ -371,11 +370,12 @@ public class Wasdi extends ResourceConfig {
 				}
 				if(null!=oUserSession) {
 					sUserId = oUserSession.getUserId();
-				} 
+				}
 				if(!Utils.isNullOrEmpty(sUserId)){
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
 				}
+				//TODO delete session if it is no longer valid
 				return oUser;
 			}
 		} catch (Exception oE) {
@@ -439,9 +439,37 @@ public class Wasdi extends ResourceConfig {
 	}
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationId, null, sProductName, sSerializationPath, oParameter, sParentId);
+	}
+
+	/**
+	 * Run Process: if the workspace of the operation is the actual node this function
+	 * creates the process workspace entry that will be handled by the scheduler to run a process on a node.
+	 * If it is in another node, it routes the request to the destination node.
+	 *
+	 * @param sUserId User requesting the operation
+	 * @param sSessionId User session
+	 * @param sOperationId Id of the Launcher Operation
+	 * @param sOperationSubId Sub Id of the Launcher Operation
+	 * @param sProductName Product name associated to the Process Workspace
+	 * @param sSerializationPath Node Serialisation Path
+	 * @param oParameter Parameter associated to the operation
+	 * @param sParentId Id the the parent process
+	 * @return Primitive Result with the output status of the operation
+	 * @throws IOException
+	 */
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+
+		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+			// Bad request
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setIntValue(400);
+			oResult.setBoolValue(false);
+			return oResult;
+		}
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setIntValue(500);
-		
+
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
 		if(null == oUser) {
@@ -450,17 +478,10 @@ public class Wasdi extends ResourceConfig {
 			oResult.setBoolValue(false);
 			return oResult;
 		}
-
-		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
-			// Bad request
-			oResult.setIntValue(400);
-			oResult.setBoolValue(false);
-			return oResult;
-		}
 		
 		// Get the Ob Id
 		String sProcessObjId = oParameter.getProcessObjId();
-		
+
 		try {
 			
 			// Take the Workspace
@@ -508,11 +529,18 @@ public class Wasdi extends ResourceConfig {
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
+					Utils.debugLog("Wasdi.runProcess: adding parent " + sParentId);
 					sUrl += "&parent=" + URLEncoder.encode(sParentId, java.nio.charset.StandardCharsets.UTF_8.toString());
 				}
 				
+				// Is there a subType?
+				if (!Utils.isNullOrEmpty(sOperationSubId)) {
+					Utils.debugLog("Wasdi.runProcess: adding sub type " + sOperationSubId);
+					sUrl += "&subtype=" + sOperationSubId;
+				}
+
 				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
-				Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
+				//Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
 				// call the API on the destination node 
 				String sResult = httpPost(sUrl, sPayload, getStandardHeaders(sSessionId));
@@ -550,6 +578,7 @@ public class Wasdi extends ResourceConfig {
 				try {
 					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationId);
+					oProcess.setOperationSubType(sOperationSubId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
@@ -603,23 +632,21 @@ public class Wasdi extends ResourceConfig {
 	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders) {
 		return httpPost(sUrl, sPayload, asHeaders, null);
 	}
-	
+
 	/**
 	 * Standard http post utility function
 	 * @param sUrl url to call
-	 * @param sPayload payload of the post 
+	 * @param sPayload payload of the post
 	 * @param asHeaders headers dictionary
 	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
 	 * @return server response
 	 */
 	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
-		
+
 		try {
-			//Utils.debugLog("Wasdi.httpPost( " + sUrl + ", ... )");
-			
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			
+
 			if(!Utils.isNullOrEmpty(sAuth)) {
 				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
 				String sAuthHeaderValue = "Basic " + sEncodedAuth;
@@ -822,7 +849,7 @@ public class Wasdi extends ResourceConfig {
 		}
 		return "";
 	}
-	
+
 	
 	/**
 	 * Download a file on the local PC
@@ -939,6 +966,6 @@ public class Wasdi extends ResourceConfig {
 		
 		return null;
 	}
-	
-		
+
+
 }

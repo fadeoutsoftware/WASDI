@@ -12,6 +12,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.Utils;
 
 /**
  * Hello world!
@@ -50,10 +51,8 @@ public class WasdiScheduler
 		catch(Exception oEx)
 		{
 			//no log4j configuration
-			//System.err.println( "WasdiScheduler.main: Error Configuring log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
 			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
 			oEx.printStackTrace();
-//			System.exit(-1);
 		}
 		s_oLogger.info("main: Logger configured :-)\n");
 		
@@ -128,13 +127,24 @@ public class WasdiScheduler
 					
 					// Check if the type is already "free"
 					if (asWasdiOperationTypes.contains(sSupportedType) == false) {
-						// No: remove from the scheduler
-						s_oLogger.error("main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
-						oProcessScheduler.removeSupportedType(sSupportedType);
+						
+						if (Utils.isNullOrEmpty(oProcessScheduler.getOperationSubType())) {
+							// No: remove from the scheduler
+							s_oLogger.error("main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
+							oProcessScheduler.removeSupportedType(sSupportedType);							
+						}
+						else {
+							s_oLogger.info("main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
+						}
 					}
 					else {
+						String sSubTypeLog = "";
+						if (!Utils.isNullOrEmpty(oProcessScheduler.getOperationSubType())) {
+							sSubTypeLog = " SubType " + oProcessScheduler.getOperationSubType();
+						}
+						
 						// Yes: remove from the full list
-						s_oLogger.info("main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType);
+						s_oLogger.info("main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
 						asWasdiOperationTypes.remove(sSupportedType);
 					}
 				}

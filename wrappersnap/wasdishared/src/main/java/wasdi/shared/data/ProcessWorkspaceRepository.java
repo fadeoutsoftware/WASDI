@@ -292,7 +292,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     		oEx.printStackTrace();
 		}
     	
-    	return 0;
+    	return -1;
     }
     
     /**

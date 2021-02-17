@@ -30,6 +30,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -243,14 +244,18 @@ public class WorkspaceResource {
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 
-			// Get Workspace List
+			// Get requested workspace
 			Workspace oWorkspace = oWSRepository.getWorkspace(sWorkspaceId);
-
+			
 			oVM.setUserId(oWorkspace.getUserId());
 			oVM.setWorkspaceId(oWorkspace.getWorkspaceId());
 			oVM.setName(oWorkspace.getName());
 			oVM.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 			oVM.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
+			oVM.setNodeCode(oWorkspace.getNodeCode());
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oVM.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 
 
 			// If the workspace is on another node, copy the url to the view model
 			if (oWorkspace.getNodeCode().equals(Wasdi.s_sMyNodeCode) == false) {
@@ -263,6 +268,15 @@ public class WorkspaceResource {
 					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
 				}
 				
+				if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
+					oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+				}
+				else {
+					oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
+				}
+			}
+			else {
+				oVM.setCloudProvider("wasdi");
 			}
 
 			// Get Sharings
@@ -373,6 +387,8 @@ public class WorkspaceResource {
 		try {
 			// Create New Workspace
 			Workspace oWorkspace = new Workspace();
+			// Initialize repository
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
 			// Default values
 			oWorkspace.setCreationDate((double) oViewModel.getCreationDate().getTime());
@@ -381,7 +397,17 @@ public class WorkspaceResource {
 			oWorkspace.setUserId(oViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oViewModel.getWorkspaceId());
 
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			
+			// if present, the node code must be updated
+			if(oViewModel.getNodeCode() != null) {
+			oWorkspace.setNodeCode(oViewModel.getNodeCode());
+			oWorkspaceRepository.updateWorkspaceNodeCode(oWorkspace);
+			}
+			
+			
+			
+
+			
 			if (oWorkspaceRepository.updateWorkspaceName(oWorkspace)) {
 
 				PrimitiveResult oResult = new PrimitiveResult();

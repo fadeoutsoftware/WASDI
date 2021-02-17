@@ -12,7 +12,7 @@
 <!--LIST OF WORKFLOWS  -->
 <div class="modal-body d-flex flex-column">
     <div class="row-v4">
-        <div class="col-v4">
+        <div class="col-v4" style="height: 60vh;">
             <!------------------------------------- SEARCH BAR ------------------------------------->
             <div>
                 <input class="wasdi-input"
@@ -24,10 +24,10 @@
 
             <div class="row-v4 apps-list">
                 <!------------------------------------- WORKFLOWS TABLE ------------------------------------->
-                <div class="col-v4-6 mb-4"
-                     ng-repeat="workflow in m_oController.getMultipleInputWorkflow() | filter:searchText:strict">
+                <div class="col-v4-6 mb-4" ng-repeat="workflow in m_oController.getSingleInputWorkflow() | filter:searchText">
+                     <!--ng-repeat="workflow in m_oController.getMultipleInputWorkflow() | filter:searchText:strict"-->
                     <div class="pt-1 pb-3 px-3 app-item" style="margin-bottom: 15px;"
-                         ng-repeat="workflow in m_oController.getSingleInputWorkflow() | filter:searchText"
+
                          ng-class="{'selectedWorkflow': m_oController.m_oSelectedWorkflow  === workflow}"
                          ng-click="m_oController.selectBatchWorkflow(workflow)">
 
@@ -76,7 +76,7 @@
         </div>
 
         <!--------------------   LAUNCH WORKFLOW DIALOG -------------------->
-        <div class="col-v4">
+        <div class="col-v4" style="height: 60vh;">
             <div class="well h-100 m-0 d-flex flex-column">
                 <div class="" ng-hide="m_oController.m_oSelectedWorkflow == null">
                     <h3> {{m_oController.m_oSelectedWorkflow.name}} </h3>

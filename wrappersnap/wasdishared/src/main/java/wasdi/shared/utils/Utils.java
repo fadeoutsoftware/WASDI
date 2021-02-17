@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 // email, IP addresses (v4 and v6), domains and URL validators:
