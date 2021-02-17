@@ -13,6 +13,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.User;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by p.campanella on 21/10/2016.
@@ -131,6 +132,8 @@ public class UserRepository extends  MongoRepository{
      * @return
      */
     public boolean deleteUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return false;
 
         try {
 

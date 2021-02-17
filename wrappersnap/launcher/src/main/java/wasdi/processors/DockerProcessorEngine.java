@@ -28,6 +28,8 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.payload.DeleteProcessorPayload;
+import wasdi.shared.payload.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -161,6 +163,16 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 				oProcessor.setPort(iProcessorPort);
 				oProcessorRepository.updateProcessor(oProcessor);
+			}
+			
+			try {
+				DeployProcessorPayload oDeployPayload = new DeployProcessorPayload();
+				oDeployPayload.setProcessorName(sProcessorName);
+				oDeployPayload.setType(oParameter.getProcessorType());
+				oProcessWorkspace.setPayload(LauncherMain.s_oMapper.writeValueAsString(oDeployPayload));				
+			}
+			catch (Exception oPayloadException) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception creating payload ", oPayloadException);
 			}
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -602,14 +614,24 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorName = oParameter.getName();
 			String sProcessorId = oParameter.getProcessorID();
 			
+			processWorkspaceLog("Delete Processor " + sProcessorName + " ID: " + sProcessorId);
+			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
 			// Check processor
-			if (oProcessor == null) { 
-				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete: oProcessor is null [" + sProcessorId +"]");
-				return false;
+			if (oProcessor == null) {
+				processWorkspaceLog("Processor in the db is already null, try to delete docker and folder ");
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete: oProcessor in the db is already null [" + sProcessorId +"], try to delete docker and folder");
+				//return false;
 			}
+			else {
+				if (!oParameter.getUserId().equals(oProcessor.getUserId())) {
+					LauncherMain.s_oLogger.error("DockerProcessorEngine.delete: oProcessor is not of user [" + oParameter.getUserId() +"]. Exit");
+					return false;
+				}
+			}
+			
 			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
@@ -618,31 +640,52 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
 			
 			File oProcessorFolder = new File(sProcessorFolder);
-
+			
+			processWorkspaceLog("Delete Processor Docker");
 			
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
-			oDockerUtils.delete();
+			// Give the name of the processor to delete to be sure that it works also if oProcessor is already null
+			oDockerUtils.delete(sProcessorName);
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
 						
 			// delete the folder
-			
+			processWorkspaceLog("Delete Processor Folder");
 			FileUtils.deleteDirectory(oProcessorFolder);
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
 			
-			// delete the db entry
-			oProcessorRepository.deleteProcessor(oProcessor.getProcessorId());
+			if (oProcessor != null) {
+				// delete the db entry
+				oProcessorRepository.deleteProcessor(sProcessorId);				
+			}
 			
 			// Check and set the operation end-date
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 				oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-			}			
+			}
+			
+			try {
+				DeleteProcessorPayload oDeletePayload = new DeleteProcessorPayload();
+				oDeletePayload.setProcessorName(sProcessorName);
+				oDeletePayload.setProcessorId(sProcessorId);
+				oProcessWorkspace.setPayload(LauncherMain.s_oMapper.writeValueAsString(oDeletePayload));				
+			}
+			catch (Exception oPayloadException) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete Exception creating payload ", oPayloadException);
+			}
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			
+			processWorkspaceLog("Processor Deleted");
+			processWorkspaceLog(new EndMessageProvider().getGood());
 			
 			return true;
 		}
 		catch (Exception oEx) {
+			
+			processWorkspaceLog("There was an error deleting the processor");
+			processWorkspaceLog(new EndMessageProvider().getBad());
+			
 			LauncherMain.s_oLogger.error("DockerProcessorEngine.delete Exception", oEx);
 			try {
 				

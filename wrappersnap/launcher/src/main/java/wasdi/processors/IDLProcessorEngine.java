@@ -561,34 +561,35 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			// Check processor
 			if (oProcessor == null) { 
-				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is null [" + sProcessorId +"]. Exit");
-				return false;
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is already null in the db [" + sProcessorId +"]. Try to delete folder");
+			}
+			else {
+				if (!oParameter.getUserId().equals(oProcessor.getUserId())) {
+					LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is not of user [" + oParameter.getUserId() +"]. Exit");
+					return false;
+				}
 			}
 			
-			if (!oParameter.getUserId().equals(oProcessor.getUserId())) {
-				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is not of user [" + oParameter.getUserId() +"]. Exit");
-				return false;
-				
-			}
-			
-			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor " + oProcessor.getName() + " of User " + oProcessor.getUserId());
-			
-			// delete the folder
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor " + sProcessorName + " of User " + oParameter.getUserId());
 			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
 			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 			
+			// delete the folder
 			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
-			
 			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor Folder");
 			File oProcessorFolder = new File(sProcessorFolder);
 			FileUtils.deleteDirectory(oProcessorFolder);
+			
+			// Update the user
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
 			
-			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor Db Entry");
-			// delete the db entry
-			oProcessorRepository.deleteProcessor(oProcessor.getProcessorId());
+			if (oProcessor != null) { 
+				// delete the db entry
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor Db Entry");
+				oProcessorRepository.deleteProcessor(sProcessorId);				
+			}
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);			
 		}

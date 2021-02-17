@@ -19,6 +19,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.utils.Utils;
 
 /**
  * Downloaded File Repo
@@ -247,6 +248,8 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @return Number of deleted elements
      */
     public int deleteByFilePath(String sFilePath) {
+    	
+    	if (Utils.isNullOrEmpty(sFilePath)) return 0;
 
         try {
 

@@ -287,7 +287,7 @@
     "DIALOG_SFTP_UPLOAD_ADD_TO_WORKSPACE_BUTTON":"Add to workspace",
     "DIALOG_SFTP_UPLOAD_CLOSE_BUTTON":"Close",
 
-    "DIALOG_PROCESSES_LOGS_TITLE":"Processes Logs",
+    "DIALOG_PROCESSES_LOGS_TITLE":"Workspace Processes List",
 
     "DIALOG_WORKFLOW_TITLE":"Workflow",
     "DIALOG_WORKFLOW_INPUTFILE": "Select Input File: ",

@@ -209,14 +209,40 @@ public class DockerUtils {
 		return true;
 	}
 	
+	/**
+	 * Delete using Processor member variable
+	 * @return
+	 */
 	public boolean delete() {
+		if (m_oProcessor != null) {
+			return delete(m_oProcessor.getName(), m_oProcessor.getVersion());
+		}
+		else return false;
+	}
+	
+	/**
+	 * Delete using processor name and default "1" version
+	 * @param sProcessorName
+	 * @return
+	 */
+	public boolean delete(String sProcessorName) {
+		return delete(sProcessorName, "1");
+	}
+	
+	/**
+	 * Delete using processor name and processor version
+	 * @param sProcessorName
+	 * @param sVersion
+	 * @return
+	 */
+	public boolean delete(String sProcessorName, String sVersion) {
 		
 		try {
 			
 			// docker ps -a | awk '{ print $1,$2 }' | grep <imagename> | awk '{print $1 }' | xargs -I {} docker rm -f {}
 			// docker rmi -f <imagename>
 			
-			String sDockerName = "wasdi/"+m_oProcessor.getName()+":"+m_oProcessor.getVersion();
+			String sDockerName = "wasdi/"+sProcessorName+":"+sVersion;
 			
 			String sDeleteScriptFile = m_sProcessorFolder+"cleanwasdidocker.sh";			
 			File oDeleteScriptFile = new File(sDeleteScriptFile);

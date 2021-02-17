@@ -6,6 +6,9 @@
 ; Last Update: 2021-02-06
 ;
 ; History
+; 0.6.1.2 - 2021-02-15
+;	Fixed Error in the workspace url when it is on main node
+;
 ; 0.6.1.1 - 2021-02-06
 ;	Fixed Error in the SAVE FILE
 ;
@@ -839,7 +842,7 @@ FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
 	IF (N_ELEMENTS(asURLValues) GT 0) THEN BEGIN
 		sIpAddress = asURLValues[1]
 	ENDIF
-
+	
 	; return the found address or ""
 	RETURN, sIpAddress
   
@@ -975,24 +978,29 @@ END
 ; Open a  Workspace by name
 pro WASDIOPENWORKSPACE,workspacename
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  ; Set active Workspace and owner
-  activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
-  workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
-  workspaceurl = WASDIGETWORKSPACEURLBYWSID(activeworkspace)
-  print, workspaceurl
-    
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	; Set active Workspace and owner
+	activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
+	workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
+	workspaceurl = WASDIGETWORKSPACEURLBYWSID(activeworkspace)
+
+	IF workspaceurl EQ '' THEN BEGIN
+		workspaceurl=!NULL
+	ENDIF
 END
 
 ; Open a  Workspace by Id
 pro WASDIOPENWORKSPACEBYID, sWorkspaceId
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  ; Set active Workspace and owner
-  activeworkspace = sWorkspaceId
-  workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
-  workspaceurl = WASDIGETWORKSPACEURLBYWSID(activeworkspace)
-  ;print, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	; Set active Workspace and owner
+	activeworkspace = sWorkspaceId
+	workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
+	workspaceurl = WASDIGETWORKSPACEURLBYWSID(activeworkspace)
+	
+	IF workspaceurl EQ '' THEN BEGIN
+		workspaceurl=!NULL
+	ENDIF
     
 END
 
@@ -1764,7 +1772,7 @@ FUNCTION WASDISAVEFILE, sFileName
 	IF (isonserver EQ '1') THEN BEGIN
 
 		; API url
-		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace
+		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace+'&parent='+myprocid
 
 		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 

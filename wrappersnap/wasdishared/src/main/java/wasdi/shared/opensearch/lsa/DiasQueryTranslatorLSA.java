@@ -45,7 +45,9 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		String sBbox="";
 		
 		if (oWasdiQuery.north!=null && oWasdiQuery.south!=null && oWasdiQuery.east!=null && oWasdiQuery.west!=null) {
-			sBbox = "&box=" + oWasdiQuery.west + "," + oWasdiQuery.south + "," + oWasdiQuery.east + "," + oWasdiQuery.north;
+			// P.Campanella 16/02/2021: change geographic filter to avoid geoserver intersection bug.
+			//sBbox = "&box=" + oWasdiQuery.west + "," + oWasdiQuery.south + "," + oWasdiQuery.east + "," + oWasdiQuery.north;
+			sBbox = "&geometry=POLYGON((" + oWasdiQuery.west  +" " + oWasdiQuery.south + ", " + oWasdiQuery.east +" " + oWasdiQuery.south + ", " + oWasdiQuery.east + " " + oWasdiQuery.north + ", " + oWasdiQuery.west + " " + oWasdiQuery.north+ ", " + oWasdiQuery.west  +" " + oWasdiQuery.south + "))";
 		}
 		
 		sLSAQuery += sBbox;

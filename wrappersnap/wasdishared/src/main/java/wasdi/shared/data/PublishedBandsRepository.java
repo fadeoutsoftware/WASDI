@@ -13,6 +13,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by p.campanella on 17/11/2016.
@@ -143,6 +144,8 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public int deleteByProductName(String sProductName) {
+    	
+    	if (Utils.isNullOrEmpty(sProductName)) return 0;
 
         try {
 
@@ -167,6 +170,10 @@ public class PublishedBandsRepository extends MongoRepository {
      * @return
      */
     public int deleteByProductNameLayerId(String sProductName, String sLayerId) {
+    	
+    	if (Utils.isNullOrEmpty(sProductName)) return 0;
+    	if (Utils.isNullOrEmpty(sLayerId)) return 0;
+    	
 
         try {
 

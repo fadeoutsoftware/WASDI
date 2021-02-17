@@ -13,6 +13,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.utils.Utils;
 
 public class SnapWorkflowRepository extends  MongoRepository {
 	
@@ -156,6 +157,8 @@ public class SnapWorkflowRepository extends  MongoRepository {
      * Deletes a workflow
      */
     public boolean deleteSnapWorkflow(String sWorkflowId) {
+    	
+    	if (Utils.isNullOrEmpty(sWorkflowId)) return false;
 
         try {
 
@@ -182,6 +185,8 @@ public class SnapWorkflowRepository extends  MongoRepository {
      * @return
      */
     public int deleteSnapWorkflowByUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
 
         try {
 

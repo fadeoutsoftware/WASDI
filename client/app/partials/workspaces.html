@@ -101,20 +101,19 @@
                         <div class="panel-group list-files " id="accordion" role="tablist" aria-multiselectable="true"
                              ng-show="m_oController.m_bIsOpenInfo">
                              <!--ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">-->
-
-                            <div><span class="workspace-details-heading"> Owner :</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Node:</span>{{m_oController.m_oWorkspaceViewModel.nodeCode}}</div>
-                            <div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</b></div>
-                            <div><span class="workspace-details-heading">Total Files :</span> {{m_oController.getProductList().length}}</div>
+                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Cloud:</span> {{m_oController.m_oWorkspaceViewModel.cloudProvider}} &nbsp;-&nbsp;<span class="workspace-details-heading">Owner:</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <!--div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</b></div-->
+                            <div><span class="workspace-details-heading">Products:</span> {{m_oController.getProductList().length}}</div>
                             <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null">Processes Executed :</span> {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
                             <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
-                                <span class="workspace-details-heading">Workspace sharing :</span>
+                                <span class="workspace-details-heading">Shared with :</span>
                                 <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                     <li> {{shared}}</li>
                                 </div>
                             </div>
 
-                            <div><b><h4>File list</h4></b></div>
+                            <!--div><b><h4></h4></b></div-->
+                            <br>
 
 
                             <div class="panel panel-default" ng-repeat="product in m_oController.getProductList()">

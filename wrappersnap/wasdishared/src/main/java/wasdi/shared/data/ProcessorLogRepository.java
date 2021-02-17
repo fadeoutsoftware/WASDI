@@ -163,6 +163,8 @@ public class ProcessorLogRepository extends MongoRepository {
      */
     public boolean deleteLogsOlderThan(String sDate) {
     	
+    	if (Utils.isNullOrEmpty(sDate)) return false;
+    	
     	sDate = sDate + " 00:00:00";
     	
         BasicDBObject oLessThanQuery = new BasicDBObject("$lt", sDate);
