@@ -44,6 +44,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	 * @return Mongo obj id
 	 */
     public String insertProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+    	
+    	if (oProcessWorkspace == null) return "";
 
         try {
         	
@@ -67,6 +69,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	 * @param oProcessWorkspace Process Workpsace list to insert
 	 */
     public void insertProcessListWorkspace(List<ProcessWorkspace> aoProcessWorkspace) {
+    	
+    	if (aoProcessWorkspace == null) return;
 
         try {
         	
@@ -89,6 +93,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @return
      */
     public boolean deleteProcessWorkspace(String sId) {
+    	
+    	if (Utils.isNullOrEmpty(sId)) return false;
 
         try {
             getCollection(m_sThisCollection).deleteOne(new Document("_id", new ObjectId(sId)));
@@ -127,18 +133,41 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @return
      */
     public boolean deleteProcessWorkspaceByProcessObjId(String sProcessObjId) {
+    	
+    	if (!Utils.isNullOrEmpty(sProcessObjId)) {
+            try {
+                getCollection(m_sThisCollection).deleteOne(new Document("processObjId", sProcessObjId));
 
-        try {
-            getCollection(m_sThisCollection).deleteOne(new Document("processObjId", sProcessObjId));
+                return true;
 
-            return true;
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
+            } catch (Exception oEx) {
+                oEx.printStackTrace();
+            }    		
+    	}
 
         return false;
-    }    
+    }
+    
+    /**
+     * Delete Process Workspace by WASDI ID
+     * @param sProcessObjId
+     * @return
+     */
+    public boolean deleteProcessWorkspaceByWorkspaceId(String sWorkspaceId) {
+
+    	if(!Utils.isNullOrEmpty(sWorkspaceId)) {
+            try {
+                getCollection(m_sThisCollection).deleteMany(new Document("workspaceId", sWorkspaceId));
+
+                return true;
+
+            } catch (Exception oEx) {
+                oEx.printStackTrace();
+            }
+    	}
+
+        return false;
+    }        
 
     /**
      * Get List of Process Workspaces in a Workspace
@@ -292,7 +321,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     		oEx.printStackTrace();
 		}
     	
-    	return 0;
+    	return -1;
     }
     
     /**
@@ -896,26 +925,19 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param sProductName
      * @return
      */
-    public ProcessWorkspace getProcessByProductName(String sProductName) {
-        ProcessWorkspace oProcessWorkspace = null;
+    public ArrayList<ProcessWorkspace> getProcessByProductName(String sProductName) {
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("productName", sProductName)).first();
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.eq("productName", sProductName))
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
 
-            if (oWSDocument==null) return  null;
-
-            String sJSON = oWSDocument.toJson();
-            try {
-                oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
 
-        return oProcessWorkspace;
+        return aoReturnList;
     }
     
     /**

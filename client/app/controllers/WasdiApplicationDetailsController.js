@@ -13,9 +13,11 @@ var WasdiApplicationDetailsController = (function() {
      * @param oConstantsService
      * @param oAuthService
      * @param oProcessorService
+     * @param oModalService
+     * @param oProcessesLaunchedService
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessesLaunchedService) {
         /**
          * Angular Scope
          */
@@ -53,6 +55,11 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oModalService = oModalService;
 
         /**
+         * Process Workspaces service
+         */
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+
+        /**
          * Flat to decide to show or not more reviews link
          * @type {boolean}
          */
@@ -71,7 +78,7 @@ var WasdiApplicationDetailsController = (function() {
         this.m_asImages = [];
 
         /**
-         * Reviews Wrapper View Mode with the summary and the list of reviews
+         * Reviews Wrapper View Model with the summary and the list of reviews
          * @type {{avgVote: number, numberOfFiveStarVotes: number, numberOfOneStarVotes: number, reviews: [], numberOfFourStarVotes: number, numberOfTwoStarVotes: number, numberOfThreeStarVotes: number}}
          */
         this.m_oReviewsWrapper = {
@@ -107,6 +114,11 @@ var WasdiApplicationDetailsController = (function() {
          * @type {{}}
          */
         this.m_oApplication = {};
+
+        /**
+         * Application Statistics Object
+         */
+        this.m_oStats = {"done":0, "error":0, "runs":0, "stoppped":0, "uniqueUsers":0, "mediumTime":0};
 
         /**
          * Actual page of reviews
@@ -167,6 +179,22 @@ var WasdiApplicationDetailsController = (function() {
         },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
             oController.m_bWaiting=false;
+        });
+
+        /**
+         * Ask the list of Applications to the WASDI server
+         */
+        this.m_oProcessesLaunchedService.getProcessorStatistics(this.m_sSelectedApplication).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_oStats = data;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION STATS");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION STATS");
         });
 
         // Get the reviews
@@ -363,7 +391,18 @@ var WasdiApplicationDetailsController = (function() {
         },function () {
 
         });
+    }
 
+    WasdiApplicationDetailsController.prototype.getStatSuccess = function() {
+        let dPerc = 1.0;
+
+        if (this.m_oStats.runs>0) {
+            dPerc = this.m_oStats.done/this.m_oStats.runs;
+        }
+
+        dPerc *= 100;
+
+        return dPerc.toFixed(1);
     }
 
     WasdiApplicationDetailsController.$inject = [
@@ -373,7 +412,8 @@ var WasdiApplicationDetailsController = (function() {
         'AuthService',
         'ProcessorService',
         'ProcessorMediaService',
-        'ModalService'
+        'ModalService',
+        'ProcessesLaunchedService'
     ];
 
     return WasdiApplicationDetailsController;

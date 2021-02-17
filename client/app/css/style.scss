@@ -33,9 +33,7 @@
 
 //directive css
 @import "../directives/tree_directive/tree";
-//$color_space: $wasdi-white;
-//@import "../directives/space_invaders/space_invaders";
-//@import "../directives/space_invaders_fixed/space_invaders_fixed";
+
 @import "../directives/multiselect/multiselect";
 //@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
 @import "../directives/multiselect_dropdown_menu/multiselect_dropdown_menu";
@@ -46,7 +44,6 @@
 @import "../directives/Toggle/toggle_switch";
 @import "../directives/image_editor/image_editor_directive";
 @import "../directives/DropDownMenu/dropdown_menu";
-@import "../directives/to_do_list/to_do_list";
 @import "../directives/wasdiApps/wapDateTimePicker/wapDateTimePicker";
 @import "../directives/wasdiApps/wapProductList/wapProductList";
 @import "../directives/wasdiApps/wapProductsCombo/wapProductsCombo";
@@ -57,47 +54,32 @@
 @import "../dialogs/product_info/product_info";
 @import "../dialogs/get_capabilities_dialog/get_capabilities_dialog";
 @import "../dialogs/merge_products_dialog/merge_products_dialog";
-@import "../dialogs/apply_orbit_operation/apply_orbit";
-@import "../dialogs/radiometric_calibration_operation/radiometric_calibration";
-@import "../dialogs/multilooking_operation/multilooking";
-@import "../dialogs/range_doppler_terrain_correction_operation/range_doppler_terrain_correction";
 @import "../dialogs/product_editor_info/product_editor_info";
-@import "../dialogs/NDVI_operation/ndvi";
 @import "../dialogs/attributes_metadata_info/attributes_metadata";
 @import "../dialogs/sftp_upload/sftp_upload";
 @import "../dialogs/delete_process/delete_process";
 @import "../dialogs/snake_dialog/snake_dialog";
-@import "../dialogs/processes_logs/processes_logs";
-@import "../dialogs/workflow_operation/workflow";
-@import "../dialogs/add_product_catalog/add_product_catalog";
+@import "../dialogs/workspace_processes_list/workspace_processes";
 @import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
 @import "../dialogs/filter_band_operation/filter_band";
 @import "../dialogs/mask_manager/mask_manager";
 @import "../dialogs/import_advance_filters/import_advance_filters";
 @import "../dialogs/workflow_manager/workflow_manager";
+@import "../dialogs/workspace_details/workspace_details";
 @import "../dialogs/get_list_of_workspace_selected/get_list_of_workspaces_selected";
 @import "../dialogs/processor/processor";
 @import "../dialogs/wps_dialog/wps";
-@import "../dialogs/generate_automatic_operation_dialog/generate_automatic_operation_dialog";
 @import "../dialogs/wapps/wapps";
-@import "../dialogs/rasor/rasorwapp";
-@import "../dialogs/opera/operawapp";
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
-@import "../dialogs/list_flood_area_detection/list_flood_area_detection";
-@import "../dialogs/JRC_workflow/jrc_workflow";
 @import "../dialogs/image_editor/image-editor.component";
 @import "../dialogs/upload_file/upload_file";
-@import "../dialogs/JRC_classification/jrc_classification";
 @import "../dialogs/Import/import";
 @import "../dialogs/mosaic/mosaic";
 @import "../dialogs/edit_panel/edit_panel";
-@import "../dialogs/eDrift_flood_automatic_chain/edrift_flood_automatic_chain";
 @import "../dialogs/process_error_logs_dialog/process_error_logs_dialog";
-@import "../dialogs/edrift_checkimagestool/edrift_checkimagestool";
 @import "../dialogs/share_workspace/share_workspace";
-@import "../dialogs/eDrift_Flood_Event_Dialog/e_drift__flood__event__dialog";
 
 @import "buttons";
 

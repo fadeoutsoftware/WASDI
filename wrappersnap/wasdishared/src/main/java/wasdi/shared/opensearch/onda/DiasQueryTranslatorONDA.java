@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * @author c.nattero
@@ -19,43 +20,10 @@ import wasdi.shared.utils.Utils;
 public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 
-	public DiasQueryTranslatorONDA() {
-		/*
-		keyMapping.put("platformname", "name");
-		valueMapping.put("Sentinel-1", "S1*");
-		valueMapping.put("Sentinel-2", "S2*");
-		valueMapping.put("Sentinel-3", "S3*");
-
-		keyMapping.put("filename", "name");
-		keyMapping.put("producttype", "name");
-
-		valueMapping.put("SLC", "*SLC*");
-		valueMapping.put("GRD", "*GRD*");
-		valueMapping.put("GRD", "*GRD*");
-		valueMapping.put("S2MSI1C", "*S2MSI1C*");
-
-		keyMapping.put("timeliness", "timeliness");
-		valueMapping.put("Near Real Time", "NRT");
-		valueMapping.put("Short Time Critical", "STC");
-		valueMapping.put("Non Time Critical", "NTC");
-
-		//these can have only integer values
-		keyMapping.put("relativeorbitstart", "relativeOrbitNumber");
-		keyMapping.put("relativeorbitnumber", "relativeOrbitNumber");
-
-		keyMapping.put("sensoroperationalmode", "sensorOperationalMode");
-		keyMapping.put("cloudcoverpercentage", "cloudCoverPercentage");
-		 */
-
-	}
-
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
 	 * 
 	 * translates from WASDI query (OpenSearch) to OpenData format used by ONDA DIAS
-	 * 
-	 * https://github.com/fadeoutsoftware/WASDI/issues/18
-	 * 
 	 */
 	@Override
 	protected String translate(String sQueryFromClient) {
@@ -68,33 +36,41 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		String sResult = new String("");
 		String sTmp = "";
 
-		//TODO refactor using QueryTranslationParser
+		//MAYBE refactor using QueryTranslationParser
 
-		sTmp += parseSentinel1(sQuery);
+		sTmp = parseProductName(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
+			sResult += sTmp;
+		}
+
+		sTmp = parseSentinel1(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
+				sResult += " AND ";
+			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseSentinel2(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " OR ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
+				sResult += " AND ";
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseSentinel3(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " OR ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
+				sResult += " AND ";
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseEnvisat(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " OR ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
+				sResult += " AND ";
 			}
 			sResult += sTmp;
 		}
@@ -102,27 +78,18 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 		sTmp = parseLandsat(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " OR ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
+				sResult += " AND ";
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseCopernicusMarine(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " OR ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
+				sResult += " AND ";
 			}
 			sResult += sTmp;
-		}
-
-		String sAdditional = parseAdditionalQuery(sQuery);
-		if(!Utils.isNullOrEmpty(sAdditional)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult = "( " + sResult + " ) AND ";
-				//sResult += " OR ";
-			}
-			sResult += sAdditional;
 		}
 
 		if(!Utils.isNullOrEmpty(sResult)) {
@@ -131,7 +98,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 		String sTimeFrame = parseTimeFrame(sQuery);
 		if(!Utils.isNullOrEmpty(sTimeFrame)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
 				sResult += " AND ";
 			}
 			sResult += "( ( " + sTimeFrame +" ) )";
@@ -139,7 +106,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 		sTmp = parseFootPrint(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult)) {
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
 				sResult += " AND ";
 			}
 			sResult += sTmp;
@@ -159,11 +126,59 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			} else {
 				Utils.debugLog("DiasQueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");
 			}
-			
+
 		}
 
 
 		return sResult;
+	}
+
+	@Override
+	protected String parseProductName(String sQuery) {
+		String sFreeText = getProductName(sQuery);
+		if(Utils.isNullOrEmpty(sFreeText)) {
+			return null;
+		}
+
+
+		//remove leading asterisks ('*')
+		while(sFreeText.startsWith("*")) {
+			sFreeText = sFreeText.substring(1);
+		}
+		//remove trailing asterisks ('*')
+		while(sFreeText.endsWith("*")) {
+			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
+		}
+
+		String sOld = sFreeText;
+		sFreeText = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sFreeText);
+
+		//this is a heuristic to understand if the filename has its tail:
+		//did it contain an extension?
+		//if yes, don't append an asterisk, the response will be faster 
+		//if not, it may be a file without the tail: append a trailing asterisk
+		boolean bAddAsterisk = false;
+		//actually, don't add asterisks to improve the performance
+		//bAddAsterisk = sOld.equals(sFreeText); 
+
+		//again, remove trailing asterisks ('*')
+		while(sFreeText.endsWith("*")) {
+			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
+		}
+		
+		//for the sake of performance, do not add asterisks
+		//if(bAddAsterisk) {
+		//	sFreeText += "*";
+		//}
+
+		//add an asterisk in front, in case the string passed were missing the initial part
+		//(note: ONDA also work if the initial part is present)
+		//Actually, for the sake of performance, do not add asterisks
+		//if(!sFreeText.startsWith("*")) {
+		//	sFreeText = "*" + sFreeText;
+		//}
+
+		return sFreeText;
 	}
 
 	protected String parseCopernicusMarine(String sQuery) {
@@ -492,5 +507,4 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		}
 		return sFootprint;
 	}
-
 }

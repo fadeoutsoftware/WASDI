@@ -71,5 +71,10 @@ public class QueryViewModel {
 	 * Sensor mode
 	 */
 	public String sensorMode;
+	
+	/**
+	 * Free text search, used when a specific product name is given
+	 */
+	public String productName = null;
 
 }

@@ -1,5 +1,7 @@
 /**
  * Created by a.corrado on 18/01/2017.
+ * This Service points to [host]/wasdiwebserver/rest/process Rest API,
+ * which is related to the collection "processworkspace" in mongo DB
  */
 
 'use strict';
@@ -21,7 +23,14 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
     /* ATTENTION!!! THE ORDER OF TYPE PROCESS IS IMPORTANT !! */
     this.TYPE_OF_PROCESS=["DOWNLOAD","PUBLISHBAND","PUBLISH","UPDATEPROCESSES"];
 
-
+        /**
+         * Returns the count of processworkspace instances with the workspaceId passed as argument
+         * @param sWorkspaceId the workspace Id to be searched
+         * @returns {*}
+         */
+        this.getCountByWorkspace = function (sWorkspaceId) {
+            return this.m_oHttp.get((this.APIURL) + '/process/countbyws?sWorkspaceId='+sWorkspaceId);
+        };
         /**
          * Load the last 5 processes of a workspace
          * @param sWorkSpaceId
@@ -282,5 +291,11 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', 'M
             });
 
             return true;
+        };
+
+        this.getProcessorStatistics = function(sProcessorName)
+        {
+            let sUrl = this.APIURL;
+            return this.m_oHttp.get(sUrl + '/process/appstats?processorName='+sProcessorName);
         };
 }]);

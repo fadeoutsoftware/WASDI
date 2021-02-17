@@ -122,9 +122,7 @@ var RootController = (function() {
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
-
                 // Set the number of running processes
-
                 $scope.m_oController.getSummary();
 
                 $scope.m_oController.m_oLastProcesses = $scope.m_oController.findLastProcess(aoProcessesRunning);
@@ -134,6 +132,8 @@ var RootController = (function() {
             }
 
         });
+
+
 
         $scope.$on(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, function(event,data) {
 
@@ -184,6 +184,7 @@ var RootController = (function() {
                 }
             }
             //$scope.m_oController.time++;
+            oTimerTimeout = $timeout($scope.onTimeout, 1000)
 
         };
 
@@ -192,8 +193,7 @@ var RootController = (function() {
             return this.m_bIsOpenStatusBar;
         };
 
-
-
+        var oTimerTimeout = $timeout($scope.onTimeout, 1000)
 
         this.getWorkspacesInfo();
         this.initTooltips();
@@ -201,6 +201,30 @@ var RootController = (function() {
     }
 
     /*********************************** METHODS **************************************/
+
+    RootController.prototype.openPayloadDialog = function (oProcess){
+
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oProcess) === true)
+        {
+            return false;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
+            controller: "PayloadDialogController",
+            inputs: {
+                extras: {
+                    process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
 
     RootController.prototype.initializeTimeCounter = function(aoProcessesRunning)
     {
@@ -508,8 +532,8 @@ var RootController = (function() {
 
     RootController.prototype.openImportPage = function () {
         var oController = this;
-
-        oController.m_oState.go("root.import", { });// workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+        // workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+        oController.m_oState.go("root.import", { });
     };
 
     RootController.prototype.activePageCss = function(oPage)
@@ -559,21 +583,6 @@ var RootController = (function() {
 
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
-
-        // var oController = this;
-        // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        // this.m_oModalService.showModal({
-        //     templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
-        //     controller: "DeleteProcessController"
-        // }).then(function(modal) {
-        //     modal.element.modal();
-        //     modal.close.then(function(result) {
-        //         oController.m_oScope.Result = result ;
-        //
-        //         if(result === 'delete')
-        //             oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
-        //     });
-        // });
         this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
         return true;
     };
@@ -587,8 +596,8 @@ var RootController = (function() {
         var oController = this;
         // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
-            templateUrl: "dialogs/processes_logs/ProcessesLogsDialog.html",
-            controller: "ProcessesLogsController"
+            templateUrl: "dialogs/workspace_processes_list/WorkpsaceProcessesList.html",
+            controller: "WorkspaceProcessesList"
         }).then(function(modal) {
             modal.element.modal();
             modal.close.then(function(result) {
@@ -752,7 +761,15 @@ var RootController = (function() {
     };
 
     RootController.prototype.openDocumentatonCenter = function () {
+
+        var oAudio = new Audio('assets/audio/R2D2a.wav');
+        oAudio.play();
+
         this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
+    }
+
+    RootController.prototype.getOperationDescription = function(oOperation) {
+        return utilsConvertOperationToDescription(oOperation);
     }
 
     /*********************************************************************/

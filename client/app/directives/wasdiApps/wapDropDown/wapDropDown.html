@@ -3,7 +3,7 @@
         <button class="btn btn-default dropdown-btn dropdown-toggle" type="button" id="dropdownMenuDirective" data-toggle="dropdown">
             <div class="row">
                 <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11 col-plr0 text-left">
-                    <span ng-hide=" isSelectedValue === false" class="text">
+                    <span ng-hide=" isSelectedValue === false" class="text" style="font-weight: 600">
                         {{selectedValue.name }}
                     </span>
                     <span ng-show="isSelectedValue === false" class="text">
@@ -20,7 +20,7 @@
             <input class="form-control dropdown-input"  type="text" placeholder="Search..." ng-show="enableSearchFilter" ng-model="textFilter">
             <hr class="divider-line-style1">
             <li role="presentation" ng-repeat="value in listOfValues | filter:textFilter"> <!-- onClickFunction({sValue:value})  ng-click="changeSelectedValueOnClick(value)"-->
-                <a role="menuitem" href="" ng-click="onClickValue(value);onClickFunction( {oValue:value} )">
+                <a role="menuitem" href="" ng-click="onClickValue(value)" style="font-weight: 600">
                     {{value.name}}
                 </a>
             </li>

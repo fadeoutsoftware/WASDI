@@ -1,0 +1,54 @@
+.processes-logs-modal
+{
+  .modal-dialog
+  {
+    //width:95%;//100vw
+    //height: 90%;//100vh
+
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        //max-height: 750px;
+        max-height: 85vh;
+        //height: 90%;
+        overflow-y: auto;
+        overflow-x: auto;
+        //override my input tex
+        //.my-input-text{
+        //  width: 50%;
+        //}
+        .ellipsis{
+          max-width: 700px;
+        }
+
+        .loadIcon, .loading-files {
+            //width: 90%;
+            //padding: 0 15px;
+            margin-top: -250px;
+            padding-bottom: 25px;
+        }
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}

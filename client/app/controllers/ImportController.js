@@ -1538,11 +1538,6 @@ var ImportController = (function() {
         // Switch the Code
         switch(oMessage.messageCode) {
             case "DOWNLOAD":
-            case "APPLYORBIT":
-            case "CALIBRATE":
-            case "MULTILOOKING":
-            case "NDVI":
-            case "TERRAIN":
             case "GRAPH":
             case "INGEST":
             case "MOSAIC":

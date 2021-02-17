@@ -10,7 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.Provider;
@@ -23,7 +22,6 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
-import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
@@ -106,16 +104,10 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-//			if( sProductName != null && !sProductName.isEmpty() ){
-//				oParameter.setProductName(sProductName);
-//			} else {
-//				oParameter.setProductName(null);
-//			}
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
 			
-			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
 			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
@@ -125,66 +117,7 @@ public class FileBufferResource {
 		
 		oResult.setIntValue(500);
 		return oResult;
-	}	
-
-	
-	@GET
-	@Path("publish")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException
-	{
-		try {
-			
-			Utils.debugLog("FileBufferResource.Publish, session: " + sSessionId);
-
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
-
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-
-			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.Publish( " +
-						sSessionId + ", " +
-						sFileUrl + ", " + 
-						sWorkspaceId + ", " +
-						sParentProcessWorkspaceId + " ): session is not valid");
-						
-				return Response.status(401).build();
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
-
-			String sUserId = oUser.getUserId();
-			
-			String sProcessObjId = Utils.GetRandomName();
-			
-			PublishParameters oParameter = new PublishParameters();
-			oParameter.setQueue(sSessionId);
-			oParameter.setFileName(sFileUrl);
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISH.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
-			
-			if (oRes.getBoolValue()) {
-				return Response.ok().build();
-			}
-			else {
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			}
-			
-		} catch (IOException e) {
-			Utils.debugLog("DownloadResource.Publish: " + e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-		} catch (Exception e) {
-			Utils.debugLog("DownloadResource.Publish: " + e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-	}	
+	}
 
 	@GET
 	@Path("publishband")

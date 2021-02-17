@@ -14,6 +14,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Processor;
+import wasdi.shared.utils.Utils;
 
 public class ProcessorRepository extends  MongoRepository {
 	
@@ -167,6 +168,8 @@ public class ProcessorRepository extends  MongoRepository {
      * @return True or false in case of exception
      */
     public boolean deleteProcessor(String sProcessorId) {
+    	
+    	if (Utils.isNullOrEmpty(sProcessorId)) return false;
 
         try {
 
@@ -193,6 +196,8 @@ public class ProcessorRepository extends  MongoRepository {
      * @return Number of deleted processors
      */
     public int deleteProcessorByUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
 
         try {
 

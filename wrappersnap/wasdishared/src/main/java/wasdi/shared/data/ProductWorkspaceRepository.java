@@ -199,6 +199,8 @@ public class ProductWorkspaceRepository extends MongoRepository {
      * @return
      */
     public int deleteByWorkspaceId(String sWorkspaceId) {
+    	
+    	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
 
         try {
 
@@ -223,6 +225,9 @@ public class ProductWorkspaceRepository extends MongoRepository {
      * @return
      */
     public int deleteByProductNameWorkspace(String sProductName, String sWorkspaceId) {
+    	
+    	if (Utils.isNullOrEmpty(sProductName)) return 0;
+    	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
 
         try {
 
@@ -246,6 +251,8 @@ public class ProductWorkspaceRepository extends MongoRepository {
      * @return
      */
     public int deleteByProductName(String sProductName) {
+    	
+    	if (Utils.isNullOrEmpty(sProductName)) return 0;
 
         try {
 

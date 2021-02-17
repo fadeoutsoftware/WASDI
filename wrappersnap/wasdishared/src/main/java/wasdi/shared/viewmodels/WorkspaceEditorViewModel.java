@@ -16,8 +16,29 @@ public class WorkspaceEditorViewModel {
 	private Date creationDate;
     private Date lastEditDate;
     private List<String> sharedUsers = new ArrayList<>();
+    private String nodeCode;
+    private long processesCount;
+    private String cloudProvider;
+    
 
-    public String getWorkspaceId() {
+
+	public String getCloudProvider() {
+		return cloudProvider;
+	}
+
+	public void setCloudProvider(String cloudProvider) {
+		this.cloudProvider = cloudProvider;
+	}
+
+	public long getProcessesCount() {
+		return processesCount;
+	}
+
+	public void setProcessesCount(long processesCount) {
+		this.processesCount = processesCount;
+	}
+
+	public String getWorkspaceId() {
         return workspaceId;
     }
 
@@ -72,5 +93,15 @@ public class WorkspaceEditorViewModel {
 	public void setApiUrl(String apiUrl) {
 		this.apiUrl = apiUrl;
 	}
+
+	public String getNodeCode() {
+		return nodeCode;
+	}
+
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+
+
 
 }

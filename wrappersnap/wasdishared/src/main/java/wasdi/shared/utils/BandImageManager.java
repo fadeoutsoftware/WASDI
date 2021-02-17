@@ -92,7 +92,7 @@ public class BandImageManager {
 	
 	static {
 		
-		Utils.debugLog("BandImageManager.buildImage: laucnhing cached sources thread!");
+		Utils.debugLog("BandImageManager.buildImage: launching cached sources thread!");
 		
 		m_oCacheThread  = new Thread(new Runnable() {
 			

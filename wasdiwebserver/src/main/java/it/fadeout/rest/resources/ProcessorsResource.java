@@ -2,7 +2,6 @@ package it.fadeout.rest.resources;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +23,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -50,6 +47,7 @@ import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
+import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -114,7 +112,7 @@ public class ProcessorsResource  {
 											@QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample,
 											@QueryParam("public") Integer iPublic, @QueryParam("timeout") Integer iTimeout) throws Exception {
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
+		Utils.debugLog("ProcessorsResource.uploadProcessor( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + ", Version: " + sVersion + ", Description" 
 				+ sDescription + ", Type: " + sType + ", ParamsSample: " + sParamsSample + " )");
 		
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -493,6 +491,8 @@ public class ProcessorsResource  {
 				
 				// Get the reviews to compute the vote
 				List<Review> aoReviews = oReviewRepository.getReviews(oProcessor.getProcessorId());
+				
+				int iVotes = 0;
 									
 				// If we have reviews
 				if (aoReviews != null) {
@@ -506,6 +506,8 @@ public class ProcessorsResource  {
 						
 						// Compute average
 						fScore /= aoReviews.size();
+						
+						iVotes = aoReviews.size();
 					}
 				}				
 				
@@ -560,6 +562,7 @@ public class ProcessorsResource  {
 								
 				// Set the score to the View Model
 				oAppListViewModel.setScore(fScore);
+				oAppListViewModel.setVotes(iVotes);
 				
 				aoRet.add(oAppListViewModel);
 			}
@@ -1103,6 +1106,102 @@ public class ProcessorsResource  {
 
 	 }
 	
+	
+	/**
+	 * Deletes a processor on a distributed node. The API is different from the main one that can be called on the main server.
+	 * This version can be triggered when the Processor have been already deleted from the database so it must take in input also
+	 * the name and the type that the other API takes from the db.
+	 * This API triggers a local DELETEPROCESSOR operation 
+	 * @param sSessionId Valid user session
+	 * @param sProcessorId Id of the processor to delete 
+	 * @param sWorkspaceId Workspace Id: here is used only for the rabbit exchange
+	 * @param sProcessorName Name of the processor to delete
+	 * @param sProcessorType Type of the processor to delete
+	 * @return
+	 */
+	@GET
+	@Path("/nodedelete")
+	public Response nodeDeleteProcessor(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId,
+			@QueryParam("processorName") String sProcessorName,
+			@QueryParam("processorType") String sProcessorType) {
+		Utils.debugLog("ProcessorResources.nodeDeleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+		
+		try {
+			
+			// Check session
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			
+			// Take user
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			// Check user
+			if (oUser==null) {
+				Utils.debugLog("ProcessorResources.nodeDeleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// This API is allowed ONLY on computed nodes
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+
+			String sUserId = oUser.getUserId();
+			
+			// Schedule the process to delete the processor
+			String sProcessObjId = Utils.GetRandomName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+						
+			// Trigger the processor delete operation on this specific node
+			Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is a computing node, just execute Delete here");
+			
+			// Get the dedicated special workpsace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			
+			if (oWorkspace != null) {
+				
+				Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: Create Delete Processor operation in Workspace " + Wasdi.s_sLocalWorkspaceName);
+				
+				ProcessorParameter oProcessorParameter = new ProcessorParameter();
+				oProcessorParameter.setName(sProcessorName);
+				oProcessorParameter.setProcessorID(sProcessorId);
+				oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+				oProcessorParameter.setUserId(sUserId);
+				oProcessorParameter.setExchange(sWorkspaceId);
+				oProcessorParameter.setProcessObjId(sProcessObjId);
+				oProcessorParameter.setJson("{}");
+				oProcessorParameter.setProcessorType(sProcessorType);
+				oProcessorParameter.setSessionID(sSessionId);
+				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
+				
+				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), sProcessorName, sPath, oProcessorParameter);		
+			}
+			else {
+				Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");
+			}			
+			
+			return Response.ok().build();
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.nodeDeleteProcessor: " + oEx);
+			return Response.serverError().build();
+		}
+	}	
+	
+	/**
+	 * Delete a processor. The API must be called on the main server.
+	 * @param sSessionId
+	 * @param sProcessorId
+	 * @param sWorkspaceId
+	 * @return
+	 */
 	@GET
 	@Path("/delete")
 	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
@@ -1111,57 +1210,114 @@ public class ProcessorsResource  {
 		Utils.debugLog("ProcessorResources.deleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
+			// Check the session
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-
+			
+			// Check the user
 			if (oUser==null) {
 				Utils.debugLog("ProcessorResources.deleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// This API is allowed ONLY on the main node
+			if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
 
 			String sUserId = oUser.getUserId();
 			
-			Utils.debugLog("ProcessorsResource.deleteProcessor: get Processor");	
+			// Get the processor from the Db
+			Utils.debugLog("ProcessorsResource.deleteProcessor: get Processor");
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToDelete = oProcessorRepository.getProcessor(sProcessorId);
 			
+			// At the first call, it must exists
 			if (oProcessorToDelete == null) {
 				Utils.debugLog("ProcessorsResource.deleteProcessor: unable to find processor " + sProcessorId);
 				return Response.serverError().build();
 			}
 			
+			// Is the user requesting the owner of the processor?
 			if (!oProcessorToDelete.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.deleteProcessor: processor not of user " + oProcessorToDelete.getUserId());
+				Utils.debugLog("ProcessorsResource.deleteProcessor: processor not of user " + oUser.getUserId());
+				
+				// Is this a sharing?				
+				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				
+				if (oSharing != null) {
+					
+					// Delete the share
+					Utils.debugLog("ProcessorsResource.deleteProcessor: the processor wasd shared with " + oUser.getUserId() + ", delete the sharing");
+					oProcessorSharingRepository.deleteByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+					
+					return Response.ok().build();
+				}
+				
+				// No, so unauthorized
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
-			// Schedule the process to run the processor
-			
+			// Schedule the process to delete the processor
 			String sProcessObjId = Utils.GetRandomName();
-			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
-			ProcessorParameter oProcessorParameter = new ProcessorParameter();
-			oProcessorParameter.setName(oProcessorToDelete.getName());
-			oProcessorParameter.setProcessorID(oProcessorToDelete.getProcessorId());
-			oProcessorParameter.setWorkspace(sWorkspaceId);
-			oProcessorParameter.setUserId(sUserId);
-			oProcessorParameter.setExchange(sWorkspaceId);
-			oProcessorParameter.setProcessObjId(sProcessObjId);
-			oProcessorParameter.setJson("{}");
-			oProcessorParameter.setProcessorType(oProcessorToDelete.getType());
-			oProcessorParameter.setSessionID(sSessionId);
-			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			// Start a thread to update all the computing nodes
+			try {
+				Utils.debugLog("ProcessorsResource.deleteProcessor: this is the main node, starting Worker to delete Processor also on computing nodes");
+				
+				// Util to call the API on computing nodes
+				DeleteProcessorWorker oDeleteWorker = new DeleteProcessorWorker();
+				
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+				
+				oDeleteWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, oProcessorToDelete.getName(), oProcessorToDelete.getType());
+				oDeleteWorker.start();
+				
+				Utils.debugLog("ProcessorsResource.deleteProcessor: Worker started");						
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("ProcessorsResource.deleteProcessor: error starting UpdateWorker " + oEx.toString());
+			}
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.DELETEPROCESSOR.name(),oProcessorToDelete.getName(), sPath,oProcessorParameter);			
+			// Trigger the processor delete operation on this specific node
+			Utils.debugLog("ProcessorsResource.deleteProcessor: Scheduling Processor Delete Operation");
 			
-			if (oRes.getBoolValue()) {
-				return Response.ok().build();
+			// Get the dedicated special workpsace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			
+			if (oWorkspace != null) {
+				
+				Utils.debugLog("ProcessorsResource.deleteProcessor: Create Delete Processor operation in Workspace " + Wasdi.s_sLocalWorkspaceName);
+				
+				ProcessorParameter oProcessorParameter = new ProcessorParameter();
+				oProcessorParameter.setName(oProcessorToDelete.getName());
+				oProcessorParameter.setProcessorID(oProcessorToDelete.getProcessorId());
+				oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+				oProcessorParameter.setUserId(sUserId);
+				oProcessorParameter.setExchange(sWorkspaceId);
+				oProcessorParameter.setProcessObjId(sProcessObjId);
+				oProcessorParameter.setJson("{}");
+				oProcessorParameter.setProcessorType(oProcessorToDelete.getType());
+				oProcessorParameter.setSessionID(sSessionId);
+				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
+				
+				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), oProcessorToDelete.getName(), sPath, oProcessorParameter);		
 			}
 			else {
-				return Response.serverError().build();
+				Utils.debugLog("ProcessorsResource.deleteProcessor: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
+			
+			return Response.ok().build();
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessorResource.deleteProcessor: " + oEx);
@@ -1669,20 +1825,9 @@ public class ProcessorsResource  {
 			
 			// Take path
 			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-			if(!oDirFile.isDirectory()) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): directory " + oDirPath.toString() + " not found");
-				return Response.serverError().build();
-			}
-			
 			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
-			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
-			File oFile = oFilePath.toFile();
-			if(!oFile.exists()) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor( " + sSessionId + ", " + sProcessorId + " ): zip file not found");
-				return Response.status(Status.NOT_FOUND).build();
-			}
+			
+			File oFile = new File(sProcessorZipPath);
 			
 			return zipProcessor(oFile, oProcessor);			
 		} 

@@ -65,6 +65,26 @@ public class WorkspaceRepository extends  MongoRepository {
 
         return false;
     }
+    
+    /**
+     * Update the node of a workspace
+     * @param oWorkspace workspaceViewModel passed as input
+     * @return
+     */
+    public boolean updateWorkspaceNodeCode(Workspace oWorkspace) {
+
+        try {
+            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("nodeCode",oWorkspace.getNodeCode())));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     /**
      * 
@@ -184,6 +204,8 @@ public class WorkspaceRepository extends  MongoRepository {
      * @return
      */
     public boolean deleteWorkspace(String sWorkspaceId) {
+    	
+    	if (Utils.isNullOrEmpty(sWorkspaceId)) return false;
 
         try {
 
@@ -210,6 +232,8 @@ public class WorkspaceRepository extends  MongoRepository {
      * @return
      */
     public int deleteByUser(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
 
         try {
 

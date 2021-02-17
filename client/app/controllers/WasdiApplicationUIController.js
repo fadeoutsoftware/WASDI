@@ -517,7 +517,7 @@ var WasdiApplicationUIController = (function() {
      * User clicked on a hystorical run: open the workspace
      */
     WasdiApplicationUIController.prototype.historyClicked = function (sWorkspaceId) {
-
+        this.m_oConstantsService.setActiveWorkspace(null);
         this.m_oState.go("root.editor", { workSpace : sWorkspaceId });
     }
     /**

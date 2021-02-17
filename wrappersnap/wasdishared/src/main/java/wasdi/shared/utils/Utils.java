@@ -2,15 +2,10 @@ package wasdi.shared.utils;
 
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,13 +18,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.apache.commons.net.io.Util;
 // email, IP addresses (v4 and v6), domains and URL validators:
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -120,8 +113,7 @@ public class Utils {
 		String sReturn = sInputFileNameOnly;
 		
 		if(sInputFileNameOnly.contains(".")) {
-			int iLastDot = sInputFileNameOnly.lastIndexOf('.');
-			sReturn = sInputFileNameOnly.substring(0, iLastDot);
+			sReturn = sInputFileNameOnly.substring(0, sInputFileNameOnly.lastIndexOf('.'));
 		}
 
 		return sReturn;

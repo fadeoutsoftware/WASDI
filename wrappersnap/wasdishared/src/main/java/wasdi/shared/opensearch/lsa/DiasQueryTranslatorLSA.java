@@ -1,5 +1,7 @@
 package wasdi.shared.opensearch.lsa;
 
+import java.time.LocalDate;
+
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryViewModel;
@@ -17,7 +19,11 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 				
 		// Set start and end date
 		String sTimeStart = oWasdiQuery.startFromDate.substring(0, 10);
-		String sTimeEnd = oWasdiQuery.endToDate.substring(0, 10);;
+		String sTimeEnd = oWasdiQuery.endToDate.substring(0, 10);
+		//increment the end day by one, because the upper limit is excluded:
+		//apparently LSA uses it as a <, not as a <=
+		sTimeEnd = LocalDate.parse(sTimeEnd).plusDays(1).toString();
+
 		
 		String sTimePeriod = "&timeStart=" + sTimeStart + "&timeEnd="+ sTimeEnd;
 		
@@ -39,7 +45,9 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		String sBbox="";
 		
 		if (oWasdiQuery.north!=null && oWasdiQuery.south!=null && oWasdiQuery.east!=null && oWasdiQuery.west!=null) {
-			sBbox = "&box=" + oWasdiQuery.west + "," + oWasdiQuery.south + "," + oWasdiQuery.east + "," + oWasdiQuery.north;
+			// P.Campanella 16/02/2021: change geographic filter to avoid geoserver intersection bug.
+			//sBbox = "&box=" + oWasdiQuery.west + "," + oWasdiQuery.south + "," + oWasdiQuery.east + "," + oWasdiQuery.north;
+			sBbox = "&geometry=POLYGON((" + oWasdiQuery.west  +" " + oWasdiQuery.south + ", " + oWasdiQuery.east +" " + oWasdiQuery.south + ", " + oWasdiQuery.east + " " + oWasdiQuery.north + ", " + oWasdiQuery.west + " " + oWasdiQuery.north+ ", " + oWasdiQuery.west  +" " + oWasdiQuery.south + "))";
 		}
 		
 		sLSAQuery += sBbox;
@@ -55,7 +63,7 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 			int iFrom = oWasdiQuery.cloudCoverageFrom.intValue();
 			int iTo = oWasdiQuery.cloudCoverageTo.intValue();
 			
-			String sCloudCoverage = "&cloudCover=[" + iFrom + "," + iTo+"]"; 
+			String sCloudCoverage = "&cloudCover=" + iFrom + "," + iTo+""; 
 			sLSAQuery += sCloudCoverage;
 		}
 		
@@ -87,8 +95,19 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 				sParentId = "S2_MSIL2A";
 			}
 			else {
-				sParentId = "S2_" + oWasdiQuery.productType;
+				if(oWasdiQuery.productType.equals("S2MSI2A")) {
+					sParentId = "S2_MSIL2A";
+				} else if(oWasdiQuery.productType.equals("S2MSI1C")) {
+					sParentId = "S2_MSIL1C";
+				} else {	
+					sParentId = "S2_MSIL2A";
+				}
 			}
+		}
+		
+		//add free text search, assuming it's the product id
+		if(!Utils.isNullOrEmpty(oWasdiQuery.productName)) {
+			sLSAQuery += "&uid=" + oWasdiQuery.productName;
 		}
 		
 		String sBaseAddress = "https://collgs.lu/catalog/oseo/search?parentId=" + sParentId;
@@ -98,6 +117,7 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		return sLSAQuery;
 	}
 
+	
 	@Override
 	protected String parseTimeFrame(String sQuery) {
 		return null;

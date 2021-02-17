@@ -32,7 +32,6 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.common.io.Files;
-import com.mchange.v1.util.DebugUtils;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
@@ -664,10 +663,12 @@ public class ProcessorsMediaResource {
 		User oUser = getUser(sSessionId);
 		// Check the user session
 		if(oUser == null){
+			Utils.debugLog("ProcessorsMediaResource.addReview: invalid user");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if(oReviewViewModel == null ){
+			Utils.debugLog("ProcessorsMediaResource.addReview: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}		
 		
@@ -675,7 +676,24 @@ public class ProcessorsMediaResource {
 				
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
+			Utils.debugLog("ProcessorsMediaResource.addReview: invalid vote");
 			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		String sProcessorId = oReviewViewModel.getProcessorId();
+		
+		if (Utils.isNullOrEmpty(sProcessorId)) {
+			Utils.debugLog("ProcessorsMediaResource.addReview: invalid proc id");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if (oProcessor == null) {
+			Utils.debugLog("ProcessorsMediaResource.addReview: processor null " + sProcessorId);
+			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();

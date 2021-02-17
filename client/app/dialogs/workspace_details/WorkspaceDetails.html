@@ -1,0 +1,78 @@
+<div class="modal fade workspace-details">
+    <div class="modal-dialog modal-dialog-medium modal-wasdi">
+        <div class="modal-content ">
+
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title ">Workspace Details</h4>
+
+
+            </div>
+
+            <div class="modal-body" style="height: 50vh;">
+                <div class="row-v4">
+                    <div class="col-v4-8">
+                        <div><span class="workspace-details-heading"> Owner :</span>
+                            {{m_oController.m_oWorkspaceViewModel.userId}}
+                        </div>
+                        <div><span class="workspace-details-heading"
+                                   ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Node:</span>{{m_oController.m_oWorkspaceViewModel.nodeCode}}
+                        </div>
+                        <div><span class="workspace-details-heading"> Last Update :</span>
+                            {{m_oController.getLastTouchDate()}}
+                        </div>
+                        <div><span class="workspace-details-heading"> Workspace id :</span>
+                            {{m_oController.m_workspaceId}}
+                        </div>
+                        <div><span class="workspace-details-heading">Total Files :</span>
+                            {{m_oController.m_oCountProduct}}
+                        </div>
+                        <div><span class="workspace-details-heading"
+                                   ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null">Processes Executed :</span>
+                            {{m_oController.m_oWorkspaceViewModel.processesCount}}
+                        </div>
+                        <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
+                            <span class="workspace-details-heading">Workspace sharing :</span>
+                            <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
+                                <li> {{shared}}</li>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-v4-4">
+                        <div class="dropdown my-dropdown">
+                            <button class="btn btn-default dropdown-toggle w-100" type="button"
+                                    id="dropdownNodeSelection" data-toggle="dropdown" style="font-weight: 600;">
+                                {{m_oController.m_sCurrentNode}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu"
+                                aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
+
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" href="" style="font-weight: 600;"
+                                       ng-repeat="node in m_oController.m_asNodeCode"
+                                       ng-click="m_oController.setNodeCode(node)">
+                                        {{node}}
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="m_oController.saveNodeCode()" class="my-button"> <!--data-dismiss="modal"-->
+                    Save
+                </button>
+                <button type="button" ng-click="close()" class="my-button" data-dismiss="modal">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>

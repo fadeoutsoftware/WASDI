@@ -26,7 +26,6 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SearchOrbitService',
     'wasdi.ResultsOfSearchService',
     'wasdi.SnapOperationService',
-    'wasdi.GetParametersOperationService',
     'wasdi.SatelliteService',
     'wasdi.CatalogService',
     'wasdi.PagesService',
@@ -36,6 +35,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.TreeService',
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
+    'wasdi.NodeService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -51,7 +51,6 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ToggleSwitch',
     'wasdi.ImageEditorDirective',
     'wasdi.DropdownMenuDirective',
-    'wasdi.ToDoListDirective',
     'wasdi.wapTextBox',
     'wasdi.wapSelectArea',
     'wasdi.wapDateTimePicker',
@@ -214,20 +213,13 @@ wasdiApp.controller("OrbitInfoController",OrbitInfoController);
 wasdiApp.controller("ProductInfoController",ProductInfoController);
 wasdiApp.controller("GetCapabilitiesController",GetCapabilitiesController);
 wasdiApp.controller("MergeProductsController",MergeProductsController);
-wasdiApp.controller("ApplyOrbitController",ApplyOrbitController);
-wasdiApp.controller("RadiometricCalibrationController",RadiometricCalibrationController);
-wasdiApp.controller("MultilookingController",MultilookingController);
-wasdiApp.controller("NDVIController",NDVIController);
 wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
-wasdiApp.controller("RangeDopplerTerrainCorrectionController",RangeDopplerTerrainCorrectionController);
 wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
 wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
-wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);
-wasdiApp.controller("WorkFlowController",WorkFlowController);
+wasdiApp.controller("WorkspaceProcessesList",WorkspaceProcessesList);
 wasdiApp.controller("SnakeController",SnakeController);
 wasdiApp.controller("CatalogController",CatalogController);
-wasdiApp.controller("AddProductInCatalogController",AddProductInCatalogController);
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
 wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
 wasdiApp.controller("FilterBandController",FilterBandController);
@@ -236,28 +228,20 @@ wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersControl
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
+wasdiApp.controller("WorkspaceDetailsController", WorkspaceDetailsController);
 wasdiApp.controller("WpsController", WpsController);
-wasdiApp.controller("GenerateAutomaticOperationDialogController", GenerateAutomaticOperationDialogController);
 wasdiApp.controller("WappsController", WappsController);
-wasdiApp.controller("RasorWappController", RasorWappController);
-wasdiApp.controller("OperaWappController", OperaWappController);
 wasdiApp.controller("EditUserController", EditUserController);
 wasdiApp.controller("FTPController", FTPController);
-wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
-wasdiApp.controller("JRCWorkflowController", JRCWorkflowController);
 wasdiApp.controller("UploadController", UploadController);
-wasdiApp.controller("JRCS2Controller", JRCS2Controller);
 wasdiApp.controller("MosaicController", MosaicController);
 wasdiApp.controller("EditPanelController", EditPanelController);
-wasdiApp.controller("EDriftFloodAutomaticChainController", EDriftFloodAutomaticChainController);
 wasdiApp.controller("ProcessErrorLogsDialogController", ProcessErrorLogsDialogController);
-wasdiApp.controller("EdriftCheckImagesTool", EdriftCheckImagesTool);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
-wasdiApp.controller("eDriftFloodEventDialogController", eDriftFloodEventDialogController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
+wasdiApp.controller("PayloadDialogController", PayloadDialogController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
-wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);
 wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);
 
 

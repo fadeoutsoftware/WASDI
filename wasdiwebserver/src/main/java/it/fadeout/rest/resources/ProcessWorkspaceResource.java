@@ -35,6 +35,7 @@ import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.AppStatsViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
@@ -46,6 +47,7 @@ public class ProcessWorkspaceResource {
 	@Context
 	ServletConfig m_oServletConfig;	
 
+	
 	@GET
 	@Path("/byws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -333,6 +335,158 @@ public class ProcessWorkspaceResource {
 		return aoProcessList;
 	}
 	
+	
+	/**
+	 * Get Application statistic
+	 * @param sSessionId User Session 
+	 * @param sProcessorName Application name
+	 * @return AppStatsViewModel with the app statistics
+	 */
+	@GET
+	@Path("/appstats")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public AppStatsViewModel getApplicationStatistics(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
+		
+		Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Session: " + sSessionId + " )");
+		
+		AppStatsViewModel oReturnStats = new AppStatsViewModel();
+		oReturnStats.setApplicationName(sProcessorName);
+		
+		try {			
+			// Domain Check
+			if(Utils.isNullOrEmpty(sProcessorName)) {
+				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( " + sSessionId + ", " + sProcessorName + " ): invalid processor name, aborting");
+				return oReturnStats;
+			}
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if(null == oUser) {
+				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " ): invalid session, aborting");
+				return oReturnStats;
+			}
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " ): is valid, but userId is not (" + oUser.getUserId() + "), aborting");
+				return oReturnStats;
+			}
+			
+			// checks that processor is in db -> needed to avoid url injection from users 
+			ProcessorRepository oProcessRepository = new ProcessorRepository();
+			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
+				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
+				return oReturnStats;
+			}
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			List<ProcessWorkspace> aoProcess = oRepository.getProcessByProductName(sProcessorName);
+			
+			oReturnStats.setRuns(aoProcess.size());
+			
+			long lTotalDoneTime = 0;
+
+			// For each
+			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
+				
+				// Create View Model
+				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				
+				if (!oReturnStats.getUsers().contains(oProcess.getUserId())) {
+					oReturnStats.getUsers().add(oProcess.getUserId());
+				}
+				
+				try {
+					
+					if (oProcess.getStatus().equals(ProcessStatus.DONE.toString())) {
+						oReturnStats.setDone(oReturnStats.getDone()+1);
+						lTotalDoneTime += Utils.getProcessWorkspaceSecondsDuration(oProcess);
+					}
+					else if (oProcess.getStatus().equals(ProcessStatus.ERROR.toString())) {
+						oReturnStats.setError(oReturnStats.getError()+1);
+					}
+					else if(oProcess.getStatus().equals(ProcessStatus.STOPPED.toString())) {
+						oReturnStats.setStopped(oReturnStats.getStopped()+1);
+					}
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception generating History View Model " + oEx.toString());
+				}
+				
+			}
+			
+			
+			// The main node needs to query also the others
+			if (Wasdi.s_sMyNodeCode.equals("wasdi") ) {
+				
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+				
+				for (Node oNode : aoNodes) {
+					
+					if (oNode.getNodeCode().equals("wasdi")) continue;					
+					if (oNode.getActive() == false) continue;
+					
+					try {
+						String sUrl = oNode.getNodeBaseAddress();
+						
+						if (!sUrl.endsWith("/")) sUrl += "/";
+						
+						sUrl += "process/appstats?processorName="+sProcessorName;
+						
+						Map<String, String> asHeaders = new HashMap<String, String>();
+						asHeaders.put("x-session-token", sSessionId);
+						
+						Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
+						
+						
+						String sResponse = Wasdi.httpGet(sUrl, asHeaders);
+						
+						if (Utils.isNullOrEmpty(sResponse)==false) {
+							AppStatsViewModel oNodeStats = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<AppStatsViewModel>(){});
+							oReturnStats.setRuns(oReturnStats.getRuns() + oNodeStats.getRuns());
+							
+							oReturnStats.setDone(oReturnStats.getDone() + oNodeStats.getDone());
+							oReturnStats.setError(oReturnStats.getError() + oNodeStats.getError());
+							oReturnStats.setStopped(oReturnStats.getStopped() + oNodeStats.getStopped());
+							
+							// Add to the time the total time for this node
+							lTotalDoneTime += oNodeStats.getMediumTime()*oNodeStats.getDone()*60;
+							
+							for (String sUser : oNodeStats.getUsers()) {
+								if (!oReturnStats.getUsers().contains(sUser)) {
+									oReturnStats.getUsers().add(sUser);
+								}
+							}
+						}
+						
+					}
+					catch (Exception e) {
+						Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception contacting computing node: " + e.toString());
+					}
+				}
+				
+				oReturnStats.setUniqueUsers(oReturnStats.getUsers().size());
+				oReturnStats.getUsers().clear();
+			}
+			
+			long lMediumTime = 0L;
+			
+			if (oReturnStats.getDone()>0) {
+				lMediumTime = lTotalDoneTime/oReturnStats.getDone();
+			}
+			
+			oReturnStats.setMediumTime((int) (lMediumTime/60));			
+			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: error retrieving process " + oEx);
+		}
+
+		return oReturnStats;
+	}
+	
 
 
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
@@ -341,24 +495,26 @@ public class ProcessWorkspaceResource {
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
 			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				//oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			else {
-				//oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			
 			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
-				//oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 				oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			}
 			
-			//oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
-			//oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
 			oViewModel.setOperationType(oProcess.getOperationType());
+			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
+				oViewModel.setOperationSubType(oProcess.getOperationSubType());
+			}
+			else {
+				oViewModel.setOperationSubType("");
+			}
+			
 			oViewModel.setProductName(oProcess.getProductName());
 			oViewModel.setUserId(oProcess.getUserId());
 			oViewModel.setFileSize(oProcess.getFileSize());
