@@ -1021,12 +1021,11 @@ public class ProcessingResources {
 			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String sOperationSubType, String sParameter) throws IOException {
 
 		if (Utils.isNullOrEmpty(sOperationSubType)) {
-			Utils.debugLog("ProsessingResources.runProcess: SUB TYPE NULL");
 			sOperationSubType= "";
 		}
 		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
 		// Log intro
-		Utils.debugLog("ProsessingResources.runProcess( Session: " + sSessionId + ", Operation: " + sOperationId + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId  + ")");
+		Utils.debugLog("ProsessingResources.runProcess( Operation: " + sOperationId + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId  + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		try {
@@ -1064,32 +1063,7 @@ public class ProcessingResources {
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 
-			//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
-			UserSession oSession = new UserSession();
-			oSession.setUserId(sUserId);
-
-			Boolean bNew = false;
-			//store the keycloak access token instead, so we can retrieve the user and perform a further check
-			if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) {
-				sSessionId = UUID.randomUUID().toString();
-				bNew = true;
-			}
-			oSession.setSessionId(sSessionId);
-			oSession.setLoginDate((double) new Date().getTime());
-			oSession.setLastTouch((double) new Date().getTime());
-			
-			SessionRepository oSessionRepo = new SessionRepository();
-			Boolean bRet = false;
-			if(bNew) {
-				bRet = oSessionRepo.insertSession(oSession);
-			} else {
-				bRet = oSessionRepo.touchSession(oSession);
-			}
-			if (bRet) {
-				return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
-			} else {
-				throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
-			}
+			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 		}
 		catch (Exception oE) {
 			Utils.debugLog("ProcessingResources.runProcess: " + oE);

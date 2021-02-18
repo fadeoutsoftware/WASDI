@@ -9,8 +9,6 @@ public class ProcessorParameter extends BaseParameter {
 	private String processorID;
 	private String json;
 	private String processorType;
-	private String sessionID;
-	
 	public String getProcessorType() {
 		return processorType;
 	}
@@ -35,12 +33,7 @@ public class ProcessorParameter extends BaseParameter {
 	public void setProcessorID(String processorID) {
 		this.processorID = processorID;
 	}
-	public String getSessionID() {
-		return sessionID;
-	}
-	public void setSessionID(String sessionID) {
-		this.sessionID = sessionID;
-	}
+	
 	
 	
 	/**

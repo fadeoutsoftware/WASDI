@@ -568,6 +568,36 @@ public class Wasdi extends ResourceConfig {
 
 				if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
 				sPath = sPath + sProcessObjId;
+				
+				
+				//create a WASDI session here
+				
+				//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
+				UserSession oSession = new UserSession();
+				oSession.setUserId(sUserId);
+
+				Boolean bNew = false;
+				//store the keycloak access token instead, so we can retrieve the user and perform a further check
+				if (Utils.isNullOrEmpty(sParentId)) {
+					sSessionId = UUID.randomUUID().toString();
+					bNew = true;
+				}
+				oSession.setSessionId(sSessionId);
+				oSession.setLoginDate((double) new Date().getTime());
+				oSession.setLastTouch((double) new Date().getTime());
+				
+				SessionRepository oSessionRepo = new SessionRepository();
+				Boolean bRet = false;
+				if(bNew) {
+					bRet = oSessionRepo.insertSession(oSession);
+				} else {
+					bRet = oSessionRepo.touchSession(oSession);
+				}
+				if (bRet) {
+					oParameter.setSessionID(oSession.getSessionId());
+				} else {
+					throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
+				}
 
 				SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
