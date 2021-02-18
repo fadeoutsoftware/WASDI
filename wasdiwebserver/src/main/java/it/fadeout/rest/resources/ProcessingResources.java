@@ -1063,23 +1063,32 @@ public class ProcessingResources {
 			oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 
 			//maybe store original keycloak session id in WASDI DB, to keep more params, e.g., the user
 			UserSession oSession = new UserSession();
 			oSession.setUserId(sUserId);
 
+			Boolean bNew = false;
 			//store the keycloak access token instead, so we can retrieve the user and perform a further check
-			if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sSessionId = UUID.randomUUID().toString();
+			if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) {
+				sSessionId = UUID.randomUUID().toString();
+				bNew = true;
+			}
 			oSession.setSessionId(sSessionId);
 			oSession.setLoginDate((double) new Date().getTime());
 			oSession.setLastTouch((double) new Date().getTime());
+			
 			SessionRepository oSessionRepo = new SessionRepository();
-			Boolean bRet = oSessionRepo.insertSession(oSession);
-			if (bRet) {
-				return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			Boolean bRet = false;
+			if(bNew) {
+				bRet = oSessionRepo.insertSession(oSession);
 			} else {
-				throw new IllegalArgumentException("could not insert session in DB, aborting");
+				bRet = oSessionRepo.touchSession(oSession);
+			}
+			if (bRet) {
+				return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			} else {
+				throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
 			}
 		}
 		catch (Exception oE) {
