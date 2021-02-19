@@ -336,6 +336,7 @@ public class Wasdi extends ResourceConfig {
 	 * @return
 	 */
 	public static User getUserFromSession(String sSessionId) {
+		User oUser = null;
 		try {
 			// validate sSessionId
 			if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
@@ -344,46 +345,63 @@ public class Wasdi extends ResourceConfig {
 
 			String sUserId = null;
 			//todo validate token with JWT
-			//Utils.debugLog("Wasdi.getUserFromSession: Trying introspect...");
 
+			//introspect
 			String sPayload = "token=" + sSessionId;
 			Map<String,String> asHeaders = new HashMap<>();
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			String sResponse = httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
+			JSONObject oJSON = null;
 			if(!Utils.isNullOrEmpty(sResponse)) {
-				JSONObject oJSON = new JSONObject(sResponse);
+				oJSON = new JSONObject(sResponse);
+			}
+			if(null!=oJSON) {
 				sUserId = oJSON.optString("preferred_username", null);
 			}
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
-				User oUser = oUserRepo.getUser(sUserId);
+				oUser = oUserRepo.getUser(sUserId);
 				return oUser;
 			} else {
 				//check session against DB
 				Utils.debugLog("Wasdi.getUserFromSession: introspect failed, checking against DB...");
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
-				User oUser = null;
-				if(null!=oUserSession) {
-					Utils.debugLog("Wasdi.getUserFromSession: checking against DB failed: session is not valid");
-				}
-				if(null!=oUserSession) {
+				if(null==oUserSession) {
+					throw new NullPointerException("checking against DB failed: session " + sSessionId + " is not valid");
+				} else {
 					sUserId = oUserSession.getUserId();
 				}
 				if(!Utils.isNullOrEmpty(sUserId)){
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
+				} else {
+					throw new NullPointerException("User is null from WASDI session " + sSessionId );
 				}
-				//TODO delete session if it is no longer valid
-				return oUser;
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("WAsdi.getUserFromSession: something bad happened: " + oE);
 		}
 
-		// No Session, No User
-		return null;
+		return oUser;
+	}
+	
+
+	/**
+	 * Clear all the user expired sessions
+	 * @param oUser
+	 */
+	public static void clearUserExpiredSessions(User oUser) {
+		SessionRepository oSessionRepository = new SessionRepository();
+		List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oUser.getUserId());
+		for (UserSession oUserSession : aoEspiredSessions) {
+			//delete data base session
+			if (!oSessionRepository.deleteSession(oUserSession)) {
+
+				Utils.debugLog("AuthService.Login: Error deleting session.");
+			}
+		}
 	}
 
 	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {

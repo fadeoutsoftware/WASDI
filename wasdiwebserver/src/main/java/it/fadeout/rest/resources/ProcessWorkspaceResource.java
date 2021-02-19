@@ -630,10 +630,11 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session");
+				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session" + sSessionId);
 				return oSummaryViewModel;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session" + sSessionId);
 				return oSummaryViewModel;
 			}
 			
@@ -857,7 +858,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessById( ProcWsId: " + sProcessWorkspaceId + " ): invalid session");
+				Utils.debugLog("ProcessWorkspaceResource.GetProcessById( x-session-token: " + sSessionId + ", sProcessId: " + sProcessWorkspaceId + " ): invalid session");
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -954,7 +955,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById: invalid session" );
+				Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById: invalid session: " + sSessionId );
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {

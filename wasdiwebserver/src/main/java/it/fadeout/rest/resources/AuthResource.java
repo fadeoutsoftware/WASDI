@@ -137,7 +137,7 @@ public class AuthResource {
 					}
 					if(!Utils.isNullOrEmpty(sSessionId)) {
 						//get all expired sessions
-						clearUserExpiredSessions(oWasdiUser);
+						Wasdi.clearUserExpiredSessions(oWasdiUser);
 						oUserVM = new UserViewModel();
 						oUserVM.setName(oWasdiUser.getName());
 						oUserVM.setSurname(oWasdiUser.getSurname());
@@ -187,22 +187,6 @@ public class AuthResource {
 		return oUserVM;
 	}
 
-	/**
-	 * Clear all the user expired sessions
-	 * @param oUser
-	 */
-	//TODO remove, it's no longer relevant with keycloak
-	private void clearUserExpiredSessions(User oUser) {
-		SessionRepository oSessionRepository = new SessionRepository();
-		List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oUser.getUserId());
-		for (UserSession oUserSession : aoEspiredSessions) {
-			//delete data base session
-			if (!oSessionRepository.deleteSession(oUserSession)) {
-
-				Utils.debugLog("AuthService.Login: Error deleting session.");
-			}
-		}
-	}
 
 	@GET
 	@Path("/checksession")
