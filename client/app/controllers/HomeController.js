@@ -12,8 +12,6 @@ var HomeController = (function () {
         this.m_oAuthService = oAuthService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oState = oState;
-        this.m_oAuthServiceFacebook = oAuthServiceFacebook;
-        this.m_oAuthServiceGoogle = oAuthServiceGoogle;
         this.m_oAnchorService = $anchorScroll;
 
         this.m_sEmailToRecoverPassword = "";
