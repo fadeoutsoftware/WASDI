@@ -2014,11 +2014,11 @@ var EditorController = (function () {
         });*/
         // also, before opening get the node list
         oController.m_oNodeService.getNodesList()
-            .success(function (data, status) {
-                if (data != null && data != undefined) {
+            .then(function (data, status) {
+                if (data.data != null && data.data != undefined) {
                     oController.m_aoNodesList = [];
-                    for (var iIndex = 0; iIndex < data.length; iIndex++) {
-                        oController.m_aoNodesList.push(data[iIndex]);
+                    for (var iIndex = 0; iIndex < data.data.length; iIndex++) {
+                        oController.m_aoNodesList.push(data.data[iIndex]);
 
 
 
@@ -2042,8 +2042,8 @@ var EditorController = (function () {
                         });
                     });
                 }
-            }).error(function (data, status) {
-        });
+            },(function (data, status) {
+        }));
 
 
 
