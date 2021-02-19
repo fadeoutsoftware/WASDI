@@ -669,7 +669,7 @@ var RootController = (function() {
                 this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
                     if (utilsIsObjectNullOrUndefined(data) === false)
                     {
-                        oController.m_aoWorkspaces = data;
+                        oController.m_aoWorkspaces = data.data;
                     }
 
                 },(function (data,status) {
