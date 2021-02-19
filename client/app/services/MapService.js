@@ -21,9 +21,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
      */
     this.initTileLayer= function(){
 
-        this.m_oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        this.m_oOSMBasic = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
-                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+                '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
             maxZoom: 18,
             // this map option disables world wrapping. by default, it is false.
             continuousWorld: false,
@@ -33,7 +33,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
         this.m_oOpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             maxZoom: 17,
-            attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
         });
 
         this.m_oEsriWorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -143,9 +143,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
 
 
     this.initMapSingleton = function(sMapDiv) {
-        var oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var oOSMBasic = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
-                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+                '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
             maxZoom: 18,
             // this map option disables world wrapping. by default, it is false.
             continuousWorld: false,

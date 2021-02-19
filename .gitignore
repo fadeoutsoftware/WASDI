@@ -943,4 +943,6 @@ libraries/matlabwasdilib.zip
 libraries/idlwasdilib/run_edriftlistflood_archive.sh
 target/sonar/.sonar_lock
 target/sonar/report-task.txt
+client/app/environments/environment.js
+client/app/environments/secrets.js
 client/app/.vscode/tasks.json

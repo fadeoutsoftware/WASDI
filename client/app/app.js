@@ -7,7 +7,7 @@ var wasdiApp = angular.module('wasdi', [
     'ui.router',//library alternative for router
     'pascalprecht.translate',
     'JSONedit',
-    'directive.g+signin',
+//    'directive.g+signin',
 
     //WASDI SERVICES
     'wasdi.ConstantsService',
@@ -31,7 +31,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.PagesService',
     'wasdi.FilterService',
     'wasdi.ProcessorService',
-    'wasdi.AuthServiceGoogle',
+//    'wasdi.AuthServiceGoogle',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',

@@ -124,13 +124,13 @@ public class ProductResource {
 	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspace) {
 		try {
-			Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " )");
+			Utils.debugLog("ProductResource.GetByProductName(Product: " + sProductName + ", WS: " + sWorkspace + " )");
 
 			// Validate Session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " ): invalid session");
+				Utils.debugLog("ProductResource.GetByProductName: invalid session");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
@@ -156,7 +156,7 @@ public class ProductResource {
 				Utils.debugLog("ProductResource.GetByProductName: product not found");
 			}
 		}catch (Exception oE) {
-			Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " ): " + oE);
+			Utils.debugLog("ProductResource.GetByProductName( Product: " + sProductName + ", WS: " + sWorkspace + " ): " + oE);
 		}
 		return null;
 	}
@@ -167,8 +167,7 @@ public class ProductResource {
 	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 
-		Utils.debugLog("ProductResource.GetMetadataByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: "
-				+ sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.GetMetadataByProductName( Product: " + sProductName + ", WS: " + sWorkspaceId + " )");
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -264,11 +263,11 @@ public class ProductResource {
 	public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
-		Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.GetListByWorkspace( WS: " + sWorkspaceId + " )");
 		
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)){
-			Utils.debugLog("ProductResource.getListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
+			Utils.debugLog("ProductResource.getListByWorkspace(" + sWorkspaceId + "): workspace is null or empty");
 			return aoProductList;
 		}
 
@@ -276,7 +275,7 @@ public class ProductResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				Utils.debugLog("ProductResource.GetListByWorkspace: invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -364,11 +363,11 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
-		Utils.debugLog("ProductResource.getLightListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " )");
 		
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)) {
-			Utils.debugLog("ProductResource.getLightListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
+			Utils.debugLog("ProductResource.getLightListByWorkspace(" + sWorkspaceId + "): workspace is null or empty");
 			return aoProductList;
 		}
 
@@ -376,7 +375,7 @@ public class ProductResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.getLightListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				Utils.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " ): invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -418,7 +417,7 @@ public class ProductResource {
 	public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("ProductResource.getNamesByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.getNamesByWorkspace( WS: " + sWorkspaceId + " )");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -428,7 +427,7 @@ public class ProductResource {
 
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.getNamesByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				Utils.debugLog("ProductResource.getNamesByWorkspace( WS: " + sWorkspaceId + " ): invalid session");
 				return aoProductList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -475,7 +474,7 @@ public class ProductResource {
 	public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspace, ProductViewModel oProductViewModel) {
 
-		Utils.debugLog("ProductResource.UpdateProductViewModel( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... )");
+		Utils.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspace + ", ... )");
 
 
 		try {
@@ -483,7 +482,7 @@ public class ProductResource {
 			// Domain Check
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.UpdateProductViewModel( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... ): invalid session");
+				Utils.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspace + ", ... ): invalid session");
 				return Response.status(401).build();
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -536,12 +535,12 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
+	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user
 		if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
 			return Response.status(400).build();
 		}
 		
@@ -552,7 +551,7 @@ public class ProductResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
 			return Response.status(401).build();
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -568,7 +567,7 @@ public class ProductResource {
 
 		// If workspace is not found in DB returns bad request
 		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
+			Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
 			return Response.status(403).build();
 		}
 		// Take path
@@ -589,7 +588,7 @@ public class ProductResource {
 		byte[] ayBytes = new byte[1024];
 		
 		try (OutputStream oOutStream = new FileOutputStream(oOutputFilePath)) {
-			while ((iRead = oFileInputStream.read(ayBytes)) != -1) {
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
 				oOutStream.write(ayBytes, 0, iRead);
 			}
 			oOutStream.flush();
@@ -629,18 +628,18 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfilebylib")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFileByLib(@FormDataParam("file") InputStream oFileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " )");
+	public Response uploadFileByLib(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
 		// before any operation check that this is not an injection attempt from the user 
 		if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) { 
-			Utils.debugLog("ProductResource.uploadFileByLib( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
+			Utils.debugLog("ProductResource.uploadfile: Injection attempt from users");
 			return Response.status(400).build();
 		}
 		
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			Utils.debugLog("ProductResource.uploadFileByLib( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
+			Utils.debugLog("ProductResource.uploadfile: invalid session");
 			return Response.status(401).build();
 		}
 
@@ -654,7 +653,7 @@ public class ProductResource {
 		
 		// If workspace is not found in DB returns bad request
 		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
-			Utils.debugLog("ProductResource.uploadFileByLib( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
+			Utils.debugLog("ProductResource.uploadfile: invalid workspace");
 			return Response.status(403).build();
 		}
 
@@ -678,7 +677,7 @@ public class ProductResource {
 			byte[] ayBytes = new byte[1024];
 			
 			try (OutputStream oOutStream = new FileOutputStream(oOutputFilePath)) {
-				while ((iRead = oFileInputStream.read(ayBytes)) != -1) {
+				while ((iRead = fileInputStream.read(ayBytes)) != -1) {
 					oOutStream.write(ayBytes, 0, iRead);
 				}
 				oOutStream.flush();
@@ -688,7 +687,7 @@ public class ProductResource {
 			return Response.ok().build();			
 		}
 		catch (Exception e) {
-			Utils.debugLog("ProductResource.uploadFileByLib: " + e);
+			Utils.debugLog("ProductResource.uploadfile: " + e);
 			return Response.status(500).build();
 		}
 	}
@@ -700,16 +699,14 @@ public class ProductResource {
 			@QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
 		
-		Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
-				+ sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " )");
-		
+		Utils.debugLog("ProductResource.DeleteProduct( Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " )");
 
 		PrimitiveResult oReturn = new PrimitiveResult();
 		oReturn.setBoolValue(false);
 		
 		// before any operation check that this is not an injection attempt from the user 
 		if (sProductName.contains("/") || sProductName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
-			Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Product name: " + sProductName + " ): Injection attempt from users");
+			Utils.debugLog("ProductResource.uploadfile: Injection attempt from users");
 			oReturn.setIntValue(400);
 			return oReturn;
 		}
@@ -719,8 +716,7 @@ public class ProductResource {
 
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
-						+ sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " ): invalid session");
+				Utils.debugLog("ProductResource.DeleteProduct: invalid session");
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
@@ -740,7 +736,7 @@ public class ProductResource {
 			}
 			// If workspace is not found in DB returns bad request
 			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)){
-				String sMessage = "ProductResource.deleteProduct( InputStream, Session: " + sSessionId + ", WS: " + sWorkspaceId + ", ProductName: " + sProductName + " ): invalid workspace";
+				String sMessage = "ProductResource.deleteProduct: invalid workspace";
 				Utils.debugLog(sMessage);
 				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(403);

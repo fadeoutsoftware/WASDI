@@ -41,6 +41,7 @@ service('ConstantsService', [function () {
      * @type {string}
      */
     this.APIURL = this.URL + 'rest';
+    this.AUTHURL = environment.authUrl;
 
     /**
      * Logged User
@@ -129,6 +130,10 @@ service('ConstantsService', [function () {
         return this.APIURL;
     }
 
+    this.getAUTHURL = function(){
+        return this.AUTHURL;
+    };
+
     /**
      * Get session id (empty means no logged user)
      * @returns {string|string}
@@ -137,12 +142,26 @@ service('ConstantsService', [function () {
 
         if (this.m_oUser != null)
         {
+            //get the token
+            // var oAccessToken = window.localStorage.access_token;
+            // try {
+            //     var oDecoded = jwt.verify(oAccessToken);
+            // } catch (err){
+            //     //the token is no longer valid
+            //     if(err[""]=="TokenExpiredError") {
+            //         //TODO refresh the token, update both tokens and return the access token
+            //     }
+            // }
+            //decode the token
+            //var oDecodedToken = jwt_decode(oAccessToken);
+
+            //TODO  then return the access token
             if (angular.isDefined(this.m_oUser.sessionId))
                 return this.m_oUser.sessionId;
         }
 
         return "";
-    }
+    };
 
     /**
      * Pad a number with zeroes
@@ -175,11 +194,12 @@ service('ConstantsService', [function () {
      * Get the google client id
      * @returns {string}
      */
+    /*
     this.getClientIdGoogle=function()
     {
         return Secrets.GOOGLE_ID;
     }
-
+    */
     /**
      * Set active user
      * @param oUser
@@ -327,14 +347,13 @@ service('ConstantsService', [function () {
     this.logOut= function()
     {
         this.deleteCookie("oUser");
-        this.logOutGoogle();
-
         this.m_oUser = null;
     }
 
     /**
      * Logout from google
      */
+    /*
     this.logOutGoogle = function ()
     {
         try
@@ -363,10 +382,11 @@ service('ConstantsService', [function () {
             console.error("logOutGoogle(): ", e);
         }
     }
-
+    */
     /**
      * Goggle sign out
      */
+    /*
     this.googleSignOutAPI = function()
     {
         var auth2 = gapi.auth2.getAuthInstance();
@@ -374,7 +394,7 @@ service('ConstantsService', [function () {
             console.log('User signed out.');
         });
     };
-
+    */
 
     /**
      * Get WASDI OGC WMS Server address

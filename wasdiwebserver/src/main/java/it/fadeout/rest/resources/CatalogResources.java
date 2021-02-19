@@ -180,16 +180,15 @@ public class CatalogResources {
 			@QueryParam("workspace") String sWorkspace)
 	{			
 
-		Utils.debugLog("CatalogResources.DownloadEntryByName( Session: " + sSessionId + ", TokenSession: "+ sTokenSessionId + ", FileName: " + sFileName + ", Ws: " + sWorkspace);
+		Utils.debugLog("CatalogResources.DownloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspace);
 		
 		try {
-			
-			if (Utils.isNullOrEmpty(sSessionId)) sSessionId = sTokenSessionId;
-			
-			
-			Utils.debugLog("CatalogResources.DownloadEntryByName: call get user from session: " + sSessionId);
+						
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
 
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
 				Utils.debugLog("CatalogResources.DownloadEntryByName: user not authorized");

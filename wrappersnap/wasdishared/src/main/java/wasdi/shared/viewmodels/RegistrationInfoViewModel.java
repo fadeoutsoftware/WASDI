@@ -9,7 +9,8 @@ public class RegistrationInfoViewModel {
 	private String name;
 	private String surname;
     private String password;
-    private String googleIdToken;
+    private String googleIdToken = null;
+    private String optionalValidationToken = null;
    
     //singleton pattern
     private static  RegistrationInfoViewModel s_oInvalid;
@@ -56,6 +57,14 @@ public class RegistrationInfoViewModel {
 	}
 	public void setGoogleIdToken(String googleIdToken) {
 		this.googleIdToken = googleIdToken;
+	}
+
+	public String getOptionalValidationToken() {
+		return optionalValidationToken;
+	}
+
+	public void setOptionalValidationToken(String optionalValidationToken) {
+		this.optionalValidationToken = optionalValidationToken;
 	}
 	
 }

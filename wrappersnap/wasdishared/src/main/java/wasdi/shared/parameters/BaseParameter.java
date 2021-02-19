@@ -32,6 +32,11 @@ public class BaseParameter {
      */
     private String processObjId;
 
+	/**
+	 * sessionID of the user that launched the operation that needs this parameter
+	 */
+	private String sessionID;
+
     public String getProcessObjId() {
         return processObjId;
     }
@@ -140,5 +145,13 @@ public class BaseParameter {
 		}
 		
 		return oParam;
+	}
+	
+	
+	public String getSessionID() {
+		return sessionID;
+	}
+	public void setSessionID(String sessionID) {
+		this.sessionID = sessionID;
 	}
 }

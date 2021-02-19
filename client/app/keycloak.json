@@ -1,0 +1,8 @@
+{
+  "realm": "wasdi",
+  "auth-server-url": "https://test.wasdi.net/auth/",
+  "ssl-required": "external",
+  "resource": "wasdi_client",
+  "public-client": true,
+  "confidential-port": 0
+}

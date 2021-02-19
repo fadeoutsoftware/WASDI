@@ -27,14 +27,14 @@ public class SatelliteResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitename") String sSatname) {
 
-		Utils.debugLog("SatelliteResource.getSatelliteTrack( Session: " + sSessionId + ", Sat: " + sSatname + " )");
+		Utils.debugLog("SatelliteResource.getSatelliteTrack( Sat: " + sSatname + " )");
 
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
 		
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null==oUser) {
-				Utils.debugLog("SatelliteResource.getSatelliteTrack( Session: " + sSessionId + ", Sat: " + sSatname + " ): invalid session");
+				Utils.debugLog("SatelliteResource.getSatelliteTrack: invalid session");
 				return ret;
 			}
 			String satres = InstanceFinder.getOrbitSatsMap().get(sSatname);

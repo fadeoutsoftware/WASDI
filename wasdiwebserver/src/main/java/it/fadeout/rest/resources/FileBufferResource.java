@@ -63,12 +63,7 @@ public class FileBufferResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.Download( " + sSessionId + ", " +
-						sFileUrl + ", " +
-						sProvider + ", " +
-						sWorkspaceId + ", " +
-						sBoundingBox + ", " +
-						sParentProcessWorkspaceId + " ): session is not valid");
+				Utils.debugLog("FileBufferResource.Download(): session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -105,7 +100,7 @@ public class FileBufferResource {
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
@@ -130,7 +125,7 @@ public class FileBufferResource {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
-			Utils.debugLog("FileBufferResource.PublishBand, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.PublishBand");
 			
 			// Check Authentication
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
@@ -219,7 +214,7 @@ public class FileBufferResource {
 	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
 	{
-		Utils.debugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
+		Utils.debugLog("FileBufferResource.GetBandLayerId");
 		PrimitiveResult oReturnValue = null;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;

@@ -39,6 +39,9 @@ var WorkspaceController = (function () {
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
 
+        if(utilsIsObjectNullOrUndefined(oConstantsService.getUser())){
+            this.m_oState.go("home");
+        }
         this.fetchWorkspaceInfoList();
         this.m_oRabbitStompService.unsubscribe();
 

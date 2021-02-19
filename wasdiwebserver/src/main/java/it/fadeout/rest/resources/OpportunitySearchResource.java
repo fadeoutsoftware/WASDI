@@ -58,7 +58,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<CoverageSwathResultViewModel> search(@HeaderParam("x-session-token") String sSessionId,
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
-		Utils.debugLog("OpportunitySearchResource.Search( Session: " + sSessionId + ", ... )");
+		Utils.debugLog("OpportunitySearchResource.Search");
 
 		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
 
@@ -66,7 +66,7 @@ public class OpportunitySearchResource {
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog("OpportunitySearchResource.Search( " + sSessionId + ", ... ): invalid session");
+				Utils.debugLog("OpportunitySearchResource.Search: invalid session");
 				return aoCoverageSwathResultViewModels;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -344,10 +344,9 @@ public class OpportunitySearchResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null == oUser) {
-			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): invalid session");
+			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack: invalid session");
 		}
 
-		//Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 		SatelliteOrbitResultViewModel oReturnViewModel = new SatelliteOrbitResultViewModel();
 		try {
 			// set nfs properties download
@@ -387,10 +386,10 @@ public class OpportunitySearchResource {
 				for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
 					oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
 			} catch (Exception oE) {
-				Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): " + oE);
+				Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " ): " + oE);
+			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
 		}
 		return oReturnViewModel;
 	}
@@ -402,7 +401,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_XML)
 	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
 			@QueryParam("footPrint") String sFootPrint) {
-		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Session: " + sSessionId + ", Text: " + sText + ", Footprint: " + sFootPrint + " )");
+		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " )");
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -451,7 +450,7 @@ public class OpportunitySearchResource {
 
 			kml.setFeature(oPlacemark);
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Session: " + sSessionId + ", Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
+			Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
 		}
 
 		return kml;
@@ -467,8 +466,7 @@ public class OpportunitySearchResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null==oUser) {
-			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " +
-					sSessionId + ", " + sSatName + "): invalid session");
+			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): invalid session");
 		}
 
 		// Check if we have codes
@@ -526,7 +524,7 @@ public class OpportunitySearchResource {
 				aoRet.add(oPositionViewModel);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSessionId + ", " + sSatName + "): " + oE);
+			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): " + oE);
 		}
 
 		return aoRet;
@@ -539,13 +537,13 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(
 			@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " )");
+		Utils.debugLog("OpportunitySearchResource.getSatellitesResources");
 
 		ArrayList<SatelliteResourceViewModel> aaoReturnValue = new ArrayList<SatelliteResourceViewModel>();
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null==oUser) {
-				Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " ): invalid session");
+				Utils.debugLog("OpportunitySearchResource.getSatellitesResources: invalid session");
 				return aaoReturnValue;
 			}
 
@@ -577,7 +575,7 @@ public class OpportunitySearchResource {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getSatellitesResources( " + sSessionId + " ): " + oE);
+			Utils.debugLog("OpportunitySearchResource.getSatellitesResources: " + oE);
 		}
 		return aaoReturnValue;
 

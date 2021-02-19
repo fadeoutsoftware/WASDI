@@ -3,9 +3,11 @@
         <div class="login-top">
             <nav class="navbar navbar-inverse bg_bluewasdi">
                 <div class="container-fluid">
-                    <ul class="nav navbar-nav navbar-right">
-                        <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
-                            <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
+                    <ul class="nav navbar-nav navbar-right"> <!-- ng-click="m_oController.changeVisibilityLoginRegister('Login')"-->
+                        <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" >
+                            <a ng-click="m_oController.keycloakLogin()" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a>
+<!--                            <a href="https://test.wasdi.net/auth/realms/wasdi/protocol/openid-connect/auth?client_id=wasdi_client&response_mode=fragment&response_type=code&login=true&redirect_uri=#/home" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>-->
+<!--                            <a href="https://test.wasdi.net/auth/realms/wasdi/protocol/openid-connect/auth?client_id=wasdi_client&response_mode=fragment&response_type=code&login=true" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>-->
                         <li class="link-login pull-right  nav-item"> <a href="#enduser" class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">STORIES</a> </li>
                         <li class="link-login pull-right  nav-item"> <a href="#developer"  class="text-white" ng-click="m_oController.m_oAnchorService('developer')">ADVANCED</a> </li>
                         <li class="link-login pull-right  nav-item"> <a href="#eoexpert"  class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">BASIC</a> </li>
@@ -53,9 +55,9 @@
                 <br>
 
                 <!--GOOGLE BUTTON-->
-                <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>
+<!--                <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>-->
 
-                <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+<!--                <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>-->
 
                 <br>
                 <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">

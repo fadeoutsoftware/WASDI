@@ -74,28 +74,16 @@ var RootController = (function() {
         // then immediatly check rabbit connection state
         this.updateRabbitConnectionState(true);
 
-        /**
-         * Check user session
-         */
-        this.m_oAuthService.checkSession().then(function (data, status) {
-            if (data.data === null || data.data === undefined || data.data === '' || data.data.userId === ''  )
-            {
-
-                oController.m_oConstantsService.logOut();
-                oController.m_oState.go("home");
-            }
-            else
-            {
-                oController.m_oUser = oController.m_oConstantsService.getUser();
-            }
-        },function (data,status) {
-            utilsVexDialogAlertTop('ERROR IN CHECK ID SESSION');
-            oController.onClickLogOut();
-        });
-
         //if user is logged
-        if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))  this.m_oUser = this.m_oConstantsService.getUser();
-        else this.m_oState.go("login");
+        if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser())) {
+            try {
+                this.m_oUser = this.m_oConstantsService.getUser();
+            } catch (oE) {
+                console.log("RootController: could not retrieve username: " + oE);
+            }
+        }
+        //FIXME: state "login" not found
+        //else this.m_oState.go("login");
 
         this.m_sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
 
@@ -114,7 +102,7 @@ var RootController = (function() {
 
         this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
 
-        /*when ProccesLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
+        /*when ProcessLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
         $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
             // you could inspect the data to see
             if(data == true)
@@ -130,7 +118,6 @@ var RootController = (function() {
                 $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.initializeTimeCounter(aoProcessesRunning);
 
             }
-
         });
 
 
@@ -385,9 +372,20 @@ var RootController = (function() {
     {
         var _this = this;
 
+        try {
+            _this.m_oConstantsService.setActiveWorkspace(null);
+
+            _this.m_oConstantsService.logOut();
+            var oLogOutOptions = { redirectUri :"../#/home"}
+            oKeycloak.logout(oLogOutOptions);
+            //_this.m_oState.go("home");
+        }catch(e)
+        {
+        console.log("RootController - Exception " + e);
+        }
         //this.openLogoutModal();
-        this.m_oAuthService.logout()
-            .then(function (data, status) {
+        /*this.m_oAuthService.logout()
+            .success(function (data, status) {
                 if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
                 {
                     utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
@@ -411,7 +409,7 @@ var RootController = (function() {
                 _this.m_oConstantsService.logOut();
                 //_this.closeLogoutModal();
                 _this.m_oState.go("home");
-            });
+            });*/
 
 
     };

@@ -52,14 +52,14 @@ public class OpenSearchResource {
 	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
 			@QueryParam("providers") String sProviders) {
 
-		Utils.debugLog(s_sClassName + ".getProductsCount( Session: " + sSessionId + ", Query: " + sQuery + ", Providers: " + sProviders + " )");
+		Utils.debugLog(s_sClassName + ".getProductsCount( Query: " + sQuery + ", Providers: " + sProviders + " )");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return -1;
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".getProductsCount( Session: " + sSessionId + ", Query: " + sQuery + ", Providers: " + sProviders + " ): invalid session");
+				Utils.debugLog(s_sClassName + ".getProductsCount: invalid session");
 				return -1;
 			}
 	
@@ -139,14 +139,13 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		
-		Utils.debugLog(s_sClassName + ".search( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " +
+		Utils.debugLog(s_sClassName + ".search( Providers: " + sProviders + ", Query: " +
 				sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
 		
 		// Domain Check
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog(s_sClassName + ".search( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " +
-					sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " ): invalid session");
+			Utils.debugLog(s_sClassName + ".search: invalid session");
 			return null;
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -294,14 +293,14 @@ public class OpenSearchResource {
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
 	public ArrayList<SearchProviderViewModel> getSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog(s_sClassName + ".getSearchProviders( Session: " + sSessionId +" )");
+		Utils.debugLog(s_sClassName + ".getSearchProviders");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return null;
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".getSearchProviders( Session: " + sSessionId +" ): invalid session");
+				Utils.debugLog(s_sClassName + ".getSearchProviders: invalid session");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -341,7 +340,7 @@ public class OpenSearchResource {
 			@QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders,
 			ArrayList<String> asQueries) {
 
-		Utils.debugLog(s_sClassName + ".GetListProductsCount( Session: " + sSessionId + ", Query: " + sQuery + ", Providers: " + sProviders + ", Queries: " + asQueries + " )");
+		Utils.debugLog(s_sClassName + ".GetListProductsCount( Query: " + sQuery + ", Providers: " + sProviders + ", Queries: " + asQueries + " )");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog(s_sClassName + ".GetListProductsCount, session is null");
@@ -349,11 +348,11 @@ public class OpenSearchResource {
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+" is invalid");
+				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: invalid");
 				return -1;
 			}
 			if(null==asQueries || asQueries.size() <= 0) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+" of user " + oUser.getUserId() + ", asQueries is null");
+				Utils.debugLog(s_sClassName + ".GetListProductsCount, asQueries is null");
 				return -1;
 			}
 			int iCounter = 0;
@@ -390,18 +389,18 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
 
-		Utils.debugLog(s_sClassName + ".SearchList( Session: " + sSessionId + ", Providers: " + sProviders + ", Query: " + sQuery+
+		Utils.debugLog(s_sClassName + ".SearchList( Providers: " + sProviders + ", Query: " + sQuery+
 				", Offset: " + sOffset + ", Limit: " + sLimit + ", Sorted: " + sSortedBy + ", Order: " + sOrder + ", Queries: " + asQueries + " )");
 		try { 
 			
 			// Validate the User
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+" is invalid");
+				Utils.debugLog(s_sClassName + ".SearchList, session is invalid");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", session: "+sSessionId+", null userId");
+				Utils.debugLog(s_sClassName + ".SearchList, null userId");
 				return null;
 			}
 			if(Utils.isNullOrEmpty(sProviders)) {
