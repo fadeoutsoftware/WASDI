@@ -621,10 +621,17 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Check processor
 			if (oProcessor == null) {
-				processWorkspaceLog("Processor is null... " + new EndMessageProvider().getBad());
-				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete: oProcessor is null [" + sProcessorId +"]");
-				return false;
+				processWorkspaceLog("Processor in the db is already null, try to delete docker and folder ");
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.delete: oProcessor in the db is already null [" + sProcessorId +"], try to delete docker and folder");
+				//return false;
 			}
+			else {
+				if (!oParameter.getUserId().equals(oProcessor.getUserId())) {
+					LauncherMain.s_oLogger.error("DockerProcessorEngine.delete: oProcessor is not of user [" + oParameter.getUserId() +"]. Exit");
+					return false;
+				}
+			}
+			
 			
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
@@ -637,7 +644,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			processWorkspaceLog("Delete Processor Docker");
 			
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
-			oDockerUtils.delete();
+			// Give the name of the processor to delete to be sure that it works also if oProcessor is already null
+			oDockerUtils.delete(sProcessorName);
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
 						
@@ -646,8 +654,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			FileUtils.deleteDirectory(oProcessorFolder);
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
 			
-			// delete the db entry
-			oProcessorRepository.deleteProcessor(oProcessor.getProcessorId());
+			if (oProcessor != null) {
+				// delete the db entry
+				oProcessorRepository.deleteProcessor(sProcessorId);				
+			}
 			
 			// Check and set the operation end-date
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
@@ -667,7 +677,6 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 			
 			processWorkspaceLog("Processor Deleted");
-			
 			processWorkspaceLog(new EndMessageProvider().getGood());
 			
 			return true;

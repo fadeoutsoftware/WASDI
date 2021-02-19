@@ -181,6 +181,8 @@ public class WorkspaceSharingRepository extends  MongoRepository{
      * @return
      */
     public int deleteByWorkspaceId(String sWorkspaceId) {
+    	
+    	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
 
         try {
 
@@ -204,6 +206,8 @@ public class WorkspaceSharingRepository extends  MongoRepository{
      * @return
      */
     public int deleteByUserId(String sUserId) {
+    	
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
 
         try {
 
@@ -228,6 +232,10 @@ public class WorkspaceSharingRepository extends  MongoRepository{
      * @return
      */
     public int deleteByUserIdWorkspaceId(String sUserId, String sWorkspaceId) {
+    	
+    	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
+    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+    	
         try {
 
             DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.and(Filters.eq("userId", sUserId), Filters.eq("workspaceId", sWorkspaceId)));

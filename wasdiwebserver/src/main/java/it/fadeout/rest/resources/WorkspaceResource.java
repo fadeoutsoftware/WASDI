@@ -24,6 +24,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
@@ -31,6 +32,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -595,6 +597,21 @@ public class WorkspaceResource {
 				// Delete also the sharings, it is deleted by the owner..
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+				
+				
+				// Get all the process-workspaces of this workspace
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				List<ProcessWorkspace> aoWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId);
+				
+				// Delete all the logs
+				ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+				
+				for (ProcessWorkspace oProcessWorkspace : aoWorkspaceProcessesList) {
+					oProcessorLogRepository.deleteLogsByProcessWorkspaceId(oProcessWorkspace.getProcessObjId());
+				}
+				
+				// Delete all the process-workspaces
+				oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
 
 				return Response.ok().build();
 			} else

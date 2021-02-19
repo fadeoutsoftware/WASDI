@@ -44,6 +44,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	 * @return Mongo obj id
 	 */
     public String insertProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+    	
+    	if (oProcessWorkspace == null) return "";
 
         try {
         	
@@ -67,6 +69,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	 * @param oProcessWorkspace Process Workpsace list to insert
 	 */
     public void insertProcessListWorkspace(List<ProcessWorkspace> aoProcessWorkspace) {
+    	
+    	if (aoProcessWorkspace == null) return;
 
         try {
         	
@@ -89,6 +93,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @return
      */
     public boolean deleteProcessWorkspace(String sId) {
+    	
+    	if (Utils.isNullOrEmpty(sId)) return false;
 
         try {
             getCollection(m_sThisCollection).deleteOne(new Document("_id", new ObjectId(sId)));
@@ -127,18 +133,41 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @return
      */
     public boolean deleteProcessWorkspaceByProcessObjId(String sProcessObjId) {
+    	
+    	if (!Utils.isNullOrEmpty(sProcessObjId)) {
+            try {
+                getCollection(m_sThisCollection).deleteOne(new Document("processObjId", sProcessObjId));
 
-        try {
-            getCollection(m_sThisCollection).deleteOne(new Document("processObjId", sProcessObjId));
+                return true;
 
-            return true;
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
+            } catch (Exception oEx) {
+                oEx.printStackTrace();
+            }    		
+    	}
 
         return false;
-    }    
+    }
+    
+    /**
+     * Delete Process Workspace by WASDI ID
+     * @param sProcessObjId
+     * @return
+     */
+    public boolean deleteProcessWorkspaceByWorkspaceId(String sWorkspaceId) {
+
+    	if(!Utils.isNullOrEmpty(sWorkspaceId)) {
+            try {
+                getCollection(m_sThisCollection).deleteMany(new Document("workspaceId", sWorkspaceId));
+
+                return true;
+
+            } catch (Exception oEx) {
+                oEx.printStackTrace();
+            }
+    	}
+
+        return false;
+    }        
 
     /**
      * Get List of Process Workspaces in a Workspace

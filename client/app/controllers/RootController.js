@@ -120,6 +120,8 @@ var RootController = (function() {
             }
         });
 
+
+
         $scope.$on(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, function(event,data) {
 
             let intervalId = setInterval(function(){
@@ -186,6 +188,30 @@ var RootController = (function() {
     }
 
     /*********************************** METHODS **************************************/
+
+    RootController.prototype.openPayloadDialog = function (oProcess){
+
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oProcess) === true)
+        {
+            return false;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/payload_dialog/PayloadDialog.html",
+            controller: "PayloadDialogController",
+            inputs: {
+                extras: {
+                    process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
 
     RootController.prototype.initializeTimeCounter = function(aoProcessesRunning)
     {
