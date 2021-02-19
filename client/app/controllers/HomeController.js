@@ -66,6 +66,7 @@ var HomeController = (function () {
         } else {
             this.m_bVisualizeLink = true;
         }
+    }
 
     HomeController.prototype.checkKeycloakAuthStatus = function(oController) {
         console.log("HomeController KC_INIT_DONE")
