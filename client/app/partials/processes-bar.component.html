@@ -130,8 +130,10 @@
                             <td class="over-icon" ng-click="m_oController.openErrorLogsDialog(oProcess)" >
                                 <i class="fa fa-file-text" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>
                             </td>
-                            <td class="over-icon" ng-click="m_oController.openPayloadDialog(oProcess)" >
-                                <i class="fa fa-database" aria-hidden="true" title="Payload" data-placement="bottom" data-toggle="tooltip" ng-hide="(oProcess.payload==null)"></i>
+                            <td class="over-icon" >
+                                <i class="fa fa-database" aria-hidden="true" title="Payload" data-placement="bottom" data-toggle="tooltip"
+                                   ng-hide="(oProcess.payload==null)"
+                                   ng-click="m_oController.openPayloadDialog(oProcess)" ></i>
                             </td>
                         </tr>
 
