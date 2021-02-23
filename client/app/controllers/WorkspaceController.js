@@ -221,13 +221,13 @@ var WorkspaceController = (function () {
         this.m_bIsVisibleFiles = true;
 
 
-        this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).success(function (data, status) {
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data;
             }
-        }).error(function (data, status) {
+        },(function (data, status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE INFO");
-        });
+        }));
 
         this.m_oProductService.getProductLightListByWorkspace(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data.data)) {
