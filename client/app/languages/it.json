@@ -7,6 +7,7 @@
     "LOGIN_PLACEHOLDER_PASSWORD":"Password",
     "LOGIN_CHECK_BOX_LABEL":"Remember me",
     "LOGIN_BUTTON_SIGN_IN":"Sign in",
+    "LOGIN_BUTTON_SIGN_IN_2":"Sign in with WASDI Login 2.0",
     "LOGIN_LINK_FORGOT_PASSWORD":"Forgot your password?",
     "LOGIN_WRITE":"Web Advanced Space Developer Interface",
     "LOGIN_LINK_FORM":"LOGIN",
