@@ -105,77 +105,79 @@ public class AuthResource {
 
 			UserRepository oUserRepository = new UserRepository();
 
-			User oWasdiUser = oUserRepository.getUser(oLoginInfo.getUserId());
+			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
 
-			if( oWasdiUser == null ) {
-				Utils.debugLog("AuthResource.Login: User Id Not availalbe " + oLoginInfo.getUserId());
+			if( oUser == null ) {
+				Utils.debugLog("AuthResource.Login: user not found: " + oLoginInfo.getUserId() + ", aborting");
 				return UserViewModel.getInvalid();
 			}
 
 
-			if(!m_oCredentialPolicy.satisfies(oWasdiUser)) {
-				Utils.debugLog("AuthResource.Login: Wasdi user does not satisfy Credential Policy " + oLoginInfo.getUserId());
+			if(!m_oCredentialPolicy.satisfies(oUser)) {
+				Utils.debugLog("AuthResource.Login: Wasdi user " + oUser.getUserId() + " does not satisfy Credential Policy, aborting");
 				return UserViewModel.getInvalid();
 			}
 
-			if(null != oWasdiUser.getValidAfterFirstAccess()) {
+			if(null == oUser.getValidAfterFirstAccess()) {
+				// this is to fix legacy users for which confirmation has never been activated
+				Utils.debugLog("AuthResource.Login: hotfix: legacy wasdi user " + oUser.getUserId() + " did not have the 'valid after first access' flag, setting its value to true");
+				oUser.setValidAfterFirstAccess(true);
+			}
 
-				if(oWasdiUser.getValidAfterFirstAccess() ) {
+			if(!oUser.getValidAfterFirstAccess() ) {
+				Utils.debugLog("AuthResource.Login: user " + oUser.getUserId() + " tried to access but never validated her/his account. Aborting" );
+				return UserViewModel.getInvalid(); 
+			}
 
-					//authenticate against keycloak
-					String sAuthResult = keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
-					String sSessionId = null;
-					//DecodedJWT oJwt = null;
-					if(!Utils.isNullOrEmpty(sAuthResult)) {
-						//for now, generate a session UUID as usual 
-						sSessionId = UUID.randomUUID().toString();
+			//authenticate against keycloak
+			String sAuthResult = keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
+			String sSessionId = null;
 
-						//MAYBE, in the future, we could use a (modified?) JWT. Not as it is, since it would invalidate the expiration check mechanism.
-						//JSONObject oJson = new JSONObject(sAuthResult);
-						//sSessionId = oJson.optString("access_token", null);
-						//oJwt = JWT.decode(sSessionId);
-					}
-					if(!Utils.isNullOrEmpty(sSessionId)) {
-						//get all expired sessions
-						Wasdi.clearUserExpiredSessions(oWasdiUser);
-						oUserVM = new UserViewModel();
-						oUserVM.setName(oWasdiUser.getName());
-						oUserVM.setSurname(oWasdiUser.getSurname());
-						oUserVM.setUserId(oWasdiUser.getUserId());
-						oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
+			Boolean bLoginSuccess = false;
 
-						UserSession oSession = new UserSession();
-						oSession.setUserId(oWasdiUser.getUserId());
+			if(!Utils.isNullOrEmpty(sAuthResult)) { 
+				bLoginSuccess = true;
 
-						//store the keycloak access token instead, so we can retrieve the user and perform a further check
-						oSession.setSessionId(sSessionId);
-						oSession.setLoginDate((double) new Date().getTime());
-						oSession.setLastTouch((double) new Date().getTime());
-
-						oWasdiUser.setLastLogin((new Date()).toString());
-						oUserRepository.updateUser(oWasdiUser);
-
-						SessionRepository oSessionRepo = new SessionRepository();
-						Boolean bRet = oSessionRepo.insertSession(oSession);
-						if (!bRet) {
-							return oUserVM;
-						}
-						oUserVM.setSessionId(sSessionId);
-
-						Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
-					} else {
-
-						Utils.debugLog("AuthService.Login: access failed");
-					}	
-				} else {
-
-					Utils.debugLog("AuthService.Login: registration not validated yet");
-				}
+				//MAYBE, in the future, we could use a (modified?) JWT. Not as it is, since it would invalidate the expiration check mechanism.
+				//JSONObject oJson = new JSONObject(sAuthResult);
+				//sSessionId = oJson.optString("access_token", null);
+				//oJwt = JWT.decode(sSessionId);
 			} else {
-
-				Utils.debugLog("AuthService.Login: registration flag is null");
+				bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oUser.getPassword() );
 			}
+			
+			if(null!=bLoginSuccess && bLoginSuccess) {
+				//todo ensure a unique session 
+				sSessionId = UUID.randomUUID().toString();
+				
+				//get all expired sessions
+				Wasdi.clearUserExpiredSessions(oUser);
+				oUserVM = new UserViewModel();
+				oUserVM.setName(oUser.getName());
+				oUserVM.setSurname(oUser.getSurname());
+				oUserVM.setUserId(oUser.getUserId());
+				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 
+				UserSession oSession = new UserSession();
+				oSession.setUserId(oUser.getUserId());
+				oSession.setSessionId(sSessionId);
+				oSession.setLoginDate((double) new Date().getTime());
+				oSession.setLastTouch((double) new Date().getTime());
+
+				oUser.setLastLogin((new Date()).toString());
+				oUserRepository.updateUser(oUser);
+
+				SessionRepository oSessionRepo = new SessionRepository();
+				Boolean bRet = oSessionRepo.insertSession(oSession);
+				if (!bRet) {
+					return oUserVM;
+				}
+				oUserVM.setSessionId(sSessionId);
+
+				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
+			} else {
+				Utils.debugLog("AuthService.Login: access failed");
+			}
 		}
 		catch (Exception oEx) {
 
@@ -718,6 +720,7 @@ public class AuthResource {
 				//create new user
 				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
 				oNewUser.setDefaultNode("wasdi");
+				oNewUser.setValidAfterFirstAccess(true);
 
 				PrimitiveResult oResult = null;
 				if(oUserRepository.insertUser(oNewUser)) {
@@ -1161,7 +1164,7 @@ public class AuthResource {
 		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
 
 		String sPayload = "client_id=";
-		sPayload += m_oServletConfig.getInitParameter("keycloak_client");
+		sPayload += m_oServletConfig.getInitParameter("keycloak_confidentialClient");
 		sPayload += "&grant_type=password&username=" + sUser;
 		sPayload += "&password=" + sPassword;
 		Map<String, String> asHeaders = new HashMap<>();
