@@ -72,59 +72,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         window.localStorage.access_token = token['access_token']
         window.localStorage.refresh_token = token['refresh_token']
     }
-//todo remove
-/*
-    function getUser() {
-        var token = getTokenObj()
 
-        if (token) {
-
-            var data = jwt_decode(token['access_token']);
-
-            var hats = []
-            var backendApplicationName = applicationName + '_api'
-            if (backendApplicationName in data['resource_access']) {
-                var roles = data['resource_access'][backendApplicationName]['roles'];
-                console.log(roles)
-                roles.forEach(function (role) {
-                    hats.push({
-                        'id': role,
-                        'descr': role,
-                        //todo check: is this relevant to WASDI?
-                        'domain': { //TODO: define role domain (realm setting?)
-                            lone: 6,
-                            lonw: 15,
-                            lats: 32,
-                            latn: 50
-                        }
-                    })
-                })
-            }
-            acSession.user = {
-                'id': data['preferred_username'],
-                'name': data['name'],
-                'email': data['email'],
-                'avatar': '', //TODO: manage avatars (user attribute in keycloack?)
-                'hats': hats,
-            }
-
-            acSession.authenticated = true
-
-            if (acSession.user.hats.length>0) {
-                if (!setLastHat()) {
-                    //if not set previously used hat, set the first one
-                    setHat(acSession.user.hats[0])
-                }
-            }
-            synch_time();
-
-            console.log(acSession.user)
-
-        } else {
-            resetSession();
-        }
-    }
-*/
     this.login = function(oCredentials) {
 
         let sParams = 'client_id=' + m_sAuthClientId + '&grant_type=password&username=' + oCredentials.userId + '&password=' + oCredentials.userPassword
@@ -139,6 +87,11 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         // return this.m_oHttp.post(this.AUTHURL + '/auth/login', oCredentials);
         //return this.m_oHttp.post('http://localhost:8080/wasdiwebserver/rest//auth/login',oCredentials);
     };
+
+    this.legacyLogin = function(oCredentials) {
+        return this.m_oHttp.post(this.APIURL + '/auth/login', oCredentials);
+    };
+
 
     /**
      * logout

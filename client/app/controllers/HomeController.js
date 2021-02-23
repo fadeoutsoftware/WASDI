@@ -124,7 +124,7 @@ var HomeController = (function () {
         oLoginInfo.userId = oController.m_sUserName;
         oLoginInfo.userPassword = oController.m_sUserPassword;
         this.m_oConstantsService.setUser(null);
-        this.m_oAuthService.login(oLoginInfo).then(
+        this.m_oAuthService.legacyLogin(oLoginInfo).then(
             function (data,status) {
                 oController.callbackLogin(data.data, status,oController)
             },function (data,status) {
@@ -136,7 +136,10 @@ var HomeController = (function () {
 
 
     HomeController.prototype.callbackLogin = function (data, status, oController) {
-
+/*two mode callback login:
+* 1- set SessionId directly with response data (Legacy)
+* 2- Decode the token to obtain the fields (KC) <- Implemented down here
+* **/
         console.log('AUTH: token obtained')
         console.log(data)
 
@@ -145,26 +148,37 @@ var HomeController = (function () {
         // var validitySeconds = data['expires_in'] - 30
         // data['myexpires'] = new Date(now.getTime() + validitySeconds * 1000)
         // console.log('AUTH: token obtained. Expires at ' + data['myexpires'])
+        if (data.hasOwnProperty("sessionId")){
+            let oUser = {};
+            oUser.userId = data.userId;
+            oUser.authProvider = "wasdi";
+            oUser.name = data.name;
+            oUser.surname = data.surname;
+            oUser.sessionId = data.sessionId;
+            oController.m_oConstantsService.setUser(oUser);//set user
+            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
 
-        window.localStorage.access_token = data['access_token']
-        window.localStorage.refresh_token = data['refresh_token']
+        }
+        else {
+            window.localStorage.access_token = data['access_token']
+            window.localStorage.refresh_token = data['refresh_token']
 
-        var oDecodedToken = jwt_decode(data['access_token']);
+            var oDecodedToken = jwt_decode(data['access_token']);
 
-        console.log(oDecodedToken)
+            //console.log(oDecodedToken)
+            let oUser = {};
+            oUser.userId = oDecodedToken.preferred_username;
+            oUser.name = oDecodedToken.given_name;
+            oUser.surname = oDecodedToken.family_name;
+            oUser.authProvider = "wasdi";
+            oUser.link;
+            oUser.description;
+            oUser.sessionId = data['access_token'];
+            oUser.refreshToken = data['refresh_token'];
 
-        let oUser = {}
-        oUser.userId = oDecodedToken.preferred_username;
-        oUser.name = oDecodedToken.given_name;
-        oUser.surname = oDecodedToken.family_name;
-        oUser.authProvider = "wasdi";
-        oUser.link;
-        oUser.description;
-        oUser.sessionId = data['access_token'];
-        oUser.refreshToken = data['refresh_token'];
-
-        oController.m_oConstantsService.setUser(oUser);//set user
-        oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
+            oController.m_oConstantsService.setUser(oUser);//set user
+            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
+        }
 
     }
 
