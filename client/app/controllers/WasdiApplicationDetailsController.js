@@ -184,7 +184,7 @@ var WasdiApplicationDetailsController = (function() {
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessesLaunchedService.getProcessorStatistics(this.m_sSelectedApplication).success(function (data) {
+        this.m_oProcessesLaunchedService.getProcessorStatistics(this.m_sSelectedApplication).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_oStats = data;
@@ -193,9 +193,9 @@ var WasdiApplicationDetailsController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION STATS");
             }
-        }).error(function (error) {
+        },(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION STATS");
-        });
+        }));
 
         // Get the reviews
         this.refreshReviews();
