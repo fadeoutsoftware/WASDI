@@ -97,8 +97,6 @@ public class AuthResource {
 			return UserViewModel.getInvalid();
 		}
 
-		UserViewModel oUserVM = UserViewModel.getInvalid();
-
 		try {
 
 			Utils.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
@@ -124,69 +122,62 @@ public class AuthResource {
 				oUser.setValidAfterFirstAccess(true);
 			}
 
-			if(!oUser.getValidAfterFirstAccess() ) {
-				Utils.debugLog("AuthResource.Login: user " + oUser.getUserId() + " tried to access but never validated her/his account. Aborting" );
-				return UserViewModel.getInvalid(); 
-			}
+//			if(!oUser.getValidAfterFirstAccess() ) {
+//				Utils.debugLog("AuthResource.Login: user " + oUser.getUserId() + " tried to access but never validated her/his account. Aborting" );
+//				return UserViewModel.getInvalid(); 
+//			}
 
 			//authenticate against keycloak
 			String sAuthResult = keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			String sSessionId = null;
 
-			Boolean bLoginSuccess = false;
+			boolean bLoginSuccess = false;
 
 			if(!Utils.isNullOrEmpty(sAuthResult)) { 
 				bLoginSuccess = true;
-
-				//MAYBE, in the future, we could use a (modified?) JWT. Not as it is, since it would invalidate the expiration check mechanism.
-				//JSONObject oJson = new JSONObject(sAuthResult);
-				//sSessionId = oJson.optString("access_token", null);
-				//oJwt = JWT.decode(sSessionId);
 			} else {
 				bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oUser.getPassword() );
 			}
 			
-			if(null!=bLoginSuccess && bLoginSuccess) {
-				//todo ensure a unique session 
-				sSessionId = UUID.randomUUID().toString();
-				
-				//get all expired sessions
-				Wasdi.clearUserExpiredSessions(oUser);
-				oUserVM = new UserViewModel();
-				oUserVM.setName(oUser.getName());
-				oUserVM.setSurname(oUser.getSurname());
-				oUserVM.setUserId(oUser.getUserId());
-				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
+			if(bLoginSuccess) {
+				oUser.setLastLogin((new Date()).toString());
+				oUserRepository.updateUser(oUser);
 
+				Wasdi.clearUserExpiredSessions(oUser);
 				UserSession oSession = new UserSession();
 				oSession.setUserId(oUser.getUserId());
+				//todo ensure a unique session 
+				sSessionId = UUID.randomUUID().toString();
 				oSession.setSessionId(sSessionId);
 				oSession.setLoginDate((double) new Date().getTime());
 				oSession.setLastTouch((double) new Date().getTime());
 
-				oUser.setLastLogin((new Date()).toString());
-				oUserRepository.updateUser(oUser);
-
 				SessionRepository oSessionRepo = new SessionRepository();
-				Boolean bRet = oSessionRepo.insertSession(oSession);
-				if (!bRet) {
-					return oUserVM;
+				if (!oSessionRepo.insertSession(oSession)) {
+					return UserViewModel.getInvalid();
 				}
+				
+				//populate view model
+				UserViewModel oUserVM = new UserViewModel();
+				oUserVM.setName(oUser.getName());
+				oUserVM.setSurname(oUser.getSurname());
+				oUserVM.setUserId(oUser.getUserId());
+				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 				oUserVM.setSessionId(sSessionId);
 
 				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
+				
+				return oUserVM;
 			} else {
 				Utils.debugLog("AuthService.Login: access failed");
 			}
 		}
 		catch (Exception oEx) {
-
 			Utils.debugLog("AuthService.Login: Error");
 			oEx.printStackTrace();
-
 		}
 
-		return oUserVM;
+		return UserViewModel.getInvalid();
 	}
 
 

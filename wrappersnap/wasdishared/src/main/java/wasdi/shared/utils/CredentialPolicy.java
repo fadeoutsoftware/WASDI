@@ -121,17 +121,10 @@ public class CredentialPolicy {
 		if(isNullOrEmpty(sAuthServiceProvider)) {
 			return false;
 		} else {
-			String sGoogle = new String("google");
-			if(sAuthServiceProvider.toLowerCase().equals(sGoogle.toLowerCase())) {
-				return true;
-			} else {
-				String sWasdi = new String("wasdi");
-				if(sAuthServiceProvider.toLowerCase().equals(sWasdi.toLowerCase())) {
-					return true;
-				} else {
-					return false;
-				}
-			}
+			return( sAuthServiceProvider.toLowerCase().equals("wasdi") ||
+					sAuthServiceProvider.toLowerCase().equals("keycloak") ||
+					sAuthServiceProvider.toLowerCase().equals("google")
+			);
 		}
 	}
 
@@ -206,24 +199,26 @@ public class CredentialPolicy {
 		if(null==oUser) {
 			throw new NullPointerException();
 		}
-		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(validAuthServiceProvider(oUser.getAuthServiceProvider())) {
 			return true;
-		} else if(!validUserId(oUser.getUserId())) {
-			return false;
-		} else if( !validName(oUser.getName())) {
-			return false;
-		} else if( !validSurname(oUser.getSurname())) {
-			return false;
-		} else if( !validPassword(oUser.getPassword())) {
-			return false;
-		} else if( !validValidAfterFirstAccess(oUser.getValidAfterFirstAccess())) {
-			return false;
-		} else if( !validFirstAccessUUID(oUser.getFirstAccessUUID())) {
-			return false;
-		} else {
-			return true;
 		}
+		return false;
+		
+//		} else if(!validUserId(oUser.getUserId())) {
+//			return false;
+//		} else if( !validName(oUser.getName())) {
+//			return false;
+//		} else if( !validSurname(oUser.getSurname())) {
+//			return false;
+//		} else if( !validPassword(oUser.getPassword())) {
+//			return false;
+//		} else if( !validValidAfterFirstAccess(oUser.getValidAfterFirstAccess())) {
+//			return false;
+//		} else if( !validFirstAccessUUID(oUser.getFirstAccessUUID())) {
+//			return false;
+//		} else {
+//			return true;
+//		}
 	}
 
 	public Boolean satisfies(RegistrationInfoViewModel oRInfo) {
