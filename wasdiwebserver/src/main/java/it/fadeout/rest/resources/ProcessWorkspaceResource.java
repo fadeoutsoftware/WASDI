@@ -623,18 +623,22 @@ public class ProcessWorkspaceResource {
 	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.GetSummary()");
-		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
 		try {
+			if(Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("ProcessWorkspaceResource.GetSummary: session is null");
+				return oSummaryViewModel;
+			}
+			
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session" + sSessionId);
+				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
 				return oSummaryViewModel;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session" + sSessionId);
+				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
 				return oSummaryViewModel;
 			}
 			

@@ -109,15 +109,20 @@ public class WorkspaceResource {
 	public ArrayList<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
 		Utils.debugLog("WorkspaceResource.GetListByUser()");
+		
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<WorkspaceListInfoViewModel> aoWSList = new ArrayList<>();
 
 		try {
+			if(Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("WorkspaceResource.GetListByUser: null session");
+				return aoWSList;
+			}
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("WorkspaceResource.GetListByUser(): invalid session");
+				Utils.debugLog("WorkspaceResource.GetListByUser: invalid session: " + sSessionId);
 				return aoWSList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
