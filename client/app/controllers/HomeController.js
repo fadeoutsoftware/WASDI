@@ -195,7 +195,7 @@ var HomeController = (function () {
      */
 
     HomeController.prototype.keycloakLogin = function (){
-        console.log("Home Controller - OKEYCLOAK login invoked");
+        /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.login();
     }
 

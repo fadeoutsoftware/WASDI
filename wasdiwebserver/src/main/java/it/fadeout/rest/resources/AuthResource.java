@@ -1161,7 +1161,7 @@ public class AuthResource {
 		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
 
 		String sPayload = "client_id=";
-		sPayload += m_oServletConfig.getInitParameter("keycloak_client");
+		sPayload += m_oServletConfig.getInitParameter("keycloak_confidentialClient");
 		sPayload += "&grant_type=password&username=" + sUser;
 		sPayload += "&password=" + sPassword;
 		Map<String, String> asHeaders = new HashMap<>();
