@@ -850,17 +850,17 @@ public class AuthResource {
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult changeUserPassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChPasswViewModel) {
+	public PrimitiveResult changePassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChangePasswordViewModel) {
 
 		Utils.debugLog("AuthService.ChangeUserPassword"  );
 
 		//input validation
-		if(null == oChPasswViewModel) {
+		if(null == oChangePasswordViewModel) {
 			Utils.debugLog("AuthService.ChangeUserPassword: invalid input");
 			return PrimitiveResult.getInvalid();
 		}
 
-		if(!m_oCredentialPolicy.satisfies(oChPasswViewModel)) {
+		if(!m_oCredentialPolicy.satisfies(oChangePasswordViewModel)) {
 			Utils.debugLog("AuthService.ChangeUserPassword: invalid input\n");
 			return PrimitiveResult.getInvalid();
 		}
@@ -876,13 +876,13 @@ public class AuthResource {
 			}
 
 			String sOldPassword = oUserId.getPassword();
-			Boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChPasswViewModel.getCurrentPassword().toCharArray(), sOldPassword);
+			Boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChangePasswordViewModel.getCurrentPassword().toCharArray(), sOldPassword);
 
 			if( !bPasswordCorrect ) {
 				Utils.debugLog("Wrong current password for user " + oUserId);
 				return oResult;
 			} else {
-				oUserId.setPassword(m_oPasswordAuthentication.hash(oChPasswViewModel.getNewPassword().toCharArray()));
+				oUserId.setPassword(m_oPasswordAuthentication.hash(oChangePasswordViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();
 				oUR.updateUser(oUserId);
 				oResult = new PrimitiveResult();
