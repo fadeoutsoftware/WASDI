@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -40,6 +41,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
+import it.fadeout.services.KeycloakService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
@@ -63,6 +65,9 @@ public class AuthResource {
 
 	@Context
 	ServletConfig m_oServletConfig;
+	
+	@Inject
+	KeycloakService m_oKeycloakService;
 
 	/**
 	 * Authentication Helper
@@ -128,7 +133,7 @@ public class AuthResource {
 //			}
 
 			//authenticate against keycloak
-			String sAuthResult = keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
+			String sAuthResult = m_oKeycloakService.keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			String sSessionId = null;
 
 			boolean bLoginSuccess = false;
@@ -632,57 +637,14 @@ public class AuthResource {
 				return oResult;
 			} else {
 				//no, it's a new user! :)
-				//let's check it's a legit one (against kc) 
+				//let's check it's a legit one (against kc)  
 
 				//first: authenticate on keycloak as admin and get the token
-
-				//URL
-				String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
-				if(!sAuthUrl.endsWith("/")) {
-					sAuthUrl += "/";
-				}
-				sAuthUrl += "realms/master/protocol/openid-connect/token";
-				//payload
-				String sPayload = "client_id=admin-cli" +
-						"&grant_type=client_credentials" +
-						"&client_secret=" + m_oServletConfig.getInitParameter("keycloak_CLI_Secret");
-				//headers
-				Map<String, String> asHeaders = new HashMap<>();
-				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-				//POST -> authenticate on keycloak 
-				String sAuthResult = Wasdi.httpPost(sAuthUrl, sPayload, asHeaders);
-				if(Utils.isNullOrEmpty(sAuthResult)) {
-					throw new RuntimeException("could not login into keycloak");
-				}
-				//read response and get token
-				JSONObject oJson = new JSONObject(sAuthResult);
-				if( null == oJson||
-						!oJson.has("access_token") ||							
-						Utils.isNullOrEmpty(oJson.optString("access_token", null))
-						) {
-					throw new NullPointerException("Missing access token");
-				}
-				String sKcTokenId = "";
-				sKcTokenId = oJson.optString("access_token", null);
-				if(Utils.isNullOrEmpty(sKcTokenId)) {
-					throw new NullPointerException("Token id null or empty");
-				}
-				Utils.debugLog("AuthResource.userRegistration: admin token obtained :-)");
-
+				String sKcTokenId = m_oKeycloakService.getKeycloakAdminCliToken();
+				
 				// second: check the user exists on keycloak
-
-				// build keycloak API URL
-				String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
-				if(!sUrl.endsWith("/")) {
-					sUrl += "/";
-				}
-				sUrl += "admin/realms/wasdi/users?username=";
-				sUrl += oRegistrationInfoViewModel.getUserId();
-				Utils.debugLog("AuthResource.userRegistration: about to post to " + sUrl);
-				asHeaders.clear();
-				asHeaders.put("Authorization", "Bearer " + sKcTokenId);
-				String sBody = Wasdi.httpGet(sUrl, asHeaders);
-				User oNewUser = new User();
+				String sBody = m_oKeycloakService.getUserDataFromKeycloak(sKcTokenId, oRegistrationInfoViewModel.getUserId());
+				
 
 				JSONArray oJsonArray = new JSONArray(sBody);
 				if(oJsonArray.length() < 1 ) {
@@ -693,6 +655,7 @@ public class AuthResource {
 					throw new IllegalStateException("Returned JSON array has more than 1 element");
 				}
 				JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
+				User oNewUser = new User();
 				if(oJsonResponse.has("firstName")) {
 					oNewUser.setName(oJsonResponse.optString("firstName", null));
 				}
@@ -732,9 +695,7 @@ public class AuthResource {
 					throw new RuntimeException(sMessage);
 				}
 			}
-		}
-		catch(Exception oE)
-		{
+		} catch(Exception oE) {
 			Utils.debugLog("AuthResource.userRegistration: " + oE + ", aborting");
 		}
 
@@ -865,35 +826,40 @@ public class AuthResource {
 			return PrimitiveResult.getInvalid();
 		}
 
-		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		try {
 			//validity is automatically checked		
 			User oUserId = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				Utils.debugLog("Null user from session id (does the user exist?)");
-				return oResult;
+				return PrimitiveResult.getInvalid();
 			}
 
 			String sOldPassword = oUserId.getPassword();
-			Boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChangePasswordViewModel.getCurrentPassword().toCharArray(), sOldPassword);
+			boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChangePasswordViewModel.getCurrentPassword().toCharArray(), sOldPassword);
 
 			if( !bPasswordCorrect ) {
 				Utils.debugLog("Wrong current password for user " + oUserId);
-				return oResult;
+				return PrimitiveResult.getInvalid();
 			} else {
+				//todo create new user in keycloak
+				//todo set the user without need for email confirmation
+				//todo set new password for newly created user in keycloak
+				
+				
+				
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChangePasswordViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();
 				oUR.updateUser(oUserId);
-				oResult = new PrimitiveResult();
+				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setBoolValue(true);
+				return oResult;
 			}
-		} catch(Exception e) {
-			Utils.debugLog("AuthService.ChangeUserPassword: Exception");
-			e.printStackTrace();
+		} catch(Exception oE) {
+			Utils.debugLog("AuthService.ChangeUserPassword: " + oE);
 		}
 
-		return oResult;
+		return PrimitiveResult.getInvalid();
 
 	} 	
 
@@ -1148,21 +1114,6 @@ public class AuthResource {
 			return null;
 		}
 		return oUser;	
-	}
-
-	private String keyCloakLogin(String sUser, String sPassword) {
-		//authenticate against keycloak
-		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
-
-		String sPayload = "client_id=";
-		sPayload += m_oServletConfig.getInitParameter("keycloak_confidentialClient");
-		sPayload += "&grant_type=password&username=" + sUser;
-		sPayload += "&password=" + sPassword;
-		Map<String, String> asHeaders = new HashMap<>();
-		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-		String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
-
-		return sAuthResult;
 	}
 
 }
