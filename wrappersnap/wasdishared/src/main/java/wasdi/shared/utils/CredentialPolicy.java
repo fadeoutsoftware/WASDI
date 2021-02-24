@@ -221,7 +221,7 @@ public class CredentialPolicy {
 				validPassword(oRInfo.getPassword())));
 	}
 
-	public Boolean satisfies(ChangeUserPasswordViewModel oChangeUserPassword) {
+	public boolean satisfies(ChangeUserPasswordViewModel oChangeUserPassword) {
 		if(null == oChangeUserPassword) {
 			throw new NullPointerException();
 		}
