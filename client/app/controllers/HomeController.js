@@ -140,14 +140,14 @@ var HomeController = (function () {
 * 1- set SessionId directly with response data (Legacy)
 * 2- Decode the token to obtain the fields (KC) <- Implemented down here
 * **/
-        console.log('AUTH: token obtained')
-        console.log(data)
+        /*console.log('AUTH: token obtained')
+        console.log(data)*/
 
         if (!oController) oController = this;
-        // var now = new Date();
-        // var validitySeconds = data['expires_in'] - 30
-        // data['myexpires'] = new Date(now.getTime() + validitySeconds * 1000)
-        // console.log('AUTH: token obtained. Expires at ' + data['myexpires'])
+        if ((data.hasOwnProperty("sessionId")) && data.sessionId == null) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
+            return;
+        }
         if (data.hasOwnProperty("sessionId")){
             let oUser = {};
             oUser.userId = data.userId;
