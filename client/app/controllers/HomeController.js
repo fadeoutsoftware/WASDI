@@ -212,6 +212,10 @@ var HomeController = (function () {
         /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.login();
     }
+    HomeController.prototype.keycloakRegister = function (){
+        /*console.log("Home Controller - OKEYCLOAK login invoked");*/
+        oKeycloak.register();
+    }
 
     /**
      * signingUser
