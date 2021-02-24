@@ -128,14 +128,6 @@ public class CredentialPolicy {
 		}
 	}
 
-	private Boolean validValidAfterFirstAccess(Boolean bValid ) {
-		if (null == bValid) {
-			return false;
-		} else {
-			//the flag is valid whether it is both true or false
-			return true;
-		}
-	}
 
 	public Boolean validFirstAccessUUID(String sUUID) {
 		if(isNullOrEmpty(sUUID)) {
@@ -199,10 +191,8 @@ public class CredentialPolicy {
 		if(null==oUser) {
 			throw new NullPointerException();
 		}
-		if(validAuthServiceProvider(oUser.getAuthServiceProvider())) {
-			return true;
-		}
-		return false;
+		return validAuthServiceProvider(oUser.getAuthServiceProvider());
+
 		
 //		} else if(!validUserId(oUser.getUserId())) {
 //			return false;
@@ -225,27 +215,16 @@ public class CredentialPolicy {
 		if(null == oRInfo) {
 			throw new NullPointerException();
 		}
-		if(validGoogleIdToken(oRInfo.getGoogleIdToken())) {
-			return true;
-		} else if(!validUserId(oRInfo.getUserId())) {
-			return false;
-		} else if(!validEmail(oRInfo.getUserId())) {
-			return false;
-		}else if(!validPassword(oRInfo.getPassword())) {
-			return false;
-		} else {
-			return true;
-		}
+		return(validGoogleIdToken(oRInfo.getGoogleIdToken()) || (
+				validUserId(oRInfo.getUserId()) &&
+				validEmail(oRInfo.getUserId()) &&
+				validPassword(oRInfo.getPassword())));
 	}
 
 	public Boolean satisfies(ChangeUserPasswordViewModel oChangeUserPassword) {
 		if(null == oChangeUserPassword) {
 			throw new NullPointerException();
 		}
-		if(validPassword(oChangeUserPassword.getCurrentPassword()) && validPassword(oChangeUserPassword.getNewPassword())) {
-			return true;
-		} else {
-			return false;
-		}
+		return(validPassword(oChangeUserPassword.getCurrentPassword()) && validPassword(oChangeUserPassword.getNewPassword()));
 	}
 }
