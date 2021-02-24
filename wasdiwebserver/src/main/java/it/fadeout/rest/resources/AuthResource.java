@@ -856,12 +856,12 @@ public class AuthResource {
 
 		//input validation
 		if(null == oChangePasswordViewModel) {
-			Utils.debugLog("AuthService.ChangeUserPassword: invalid input");
+			Utils.debugLog("AuthService.ChangeUserPassword: ChangeUserPasswordViewModel is null, aborting");
 			return PrimitiveResult.getInvalid();
 		}
 
 		if(!m_oCredentialPolicy.satisfies(oChangePasswordViewModel)) {
-			Utils.debugLog("AuthService.ChangeUserPassword: invalid input\n");
+			Utils.debugLog("AuthService.ChangeUserPassword: invalid input");
 			return PrimitiveResult.getInvalid();
 		}
 
