@@ -6,6 +6,9 @@
 ; Last Update: 2021-02-06
 ;
 ; History
+; 0.6.1.3 - 2021-02-19
+;	Added optional style to SAVE FILE
+;
 ; 0.6.1.2 - 2021-02-15
 ;	Fixed Error in the workspace url when it is on main node
 ;
@@ -1765,7 +1768,7 @@ END
 
 
 ; Adds a new product to the Workspace in WASDI
-FUNCTION WASDISAVEFILE, sFileName
+FUNCTION WASDISAVEFILE, sFileName, sStyle
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
 	
@@ -1773,6 +1776,10 @@ FUNCTION WASDISAVEFILE, sFileName
 
 		; API url
 		UrlPath = '/wasdiwebserver/rest/catalog/upload/ingestinws?file='+sFileName+'&workspace='+activeworkspace+'&parent='+myprocid
+		
+		IF (sStyle NE !NULL) THEN BEGIN
+			UrlPath = UrlPath + '&style='+sStyle
+		END
 
 		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
