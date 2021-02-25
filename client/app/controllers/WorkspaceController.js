@@ -448,10 +448,9 @@ var WorkspaceController = (function () {
                         .then(function () {
                             oController.deselectWorskpace();
                             oController.fetchWorkspaceInfoList();
-                        })
-                        .error(function () {
+                        },(function () {
                             console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
-                        });
+                        }));
                 },(function () {
                     console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
                 }));
