@@ -295,7 +295,7 @@ var ProcessorController = (function() {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
                 }
 
-            }).error(function (error) {
+            },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
             });
 
