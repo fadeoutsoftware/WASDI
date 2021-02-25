@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import it.fadeout.Wasdi;
 import wasdi.shared.utils.Utils;
 
-public class KeycloakService {
+public class KeycloakService implements AuthProviderService {
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -19,9 +19,9 @@ public class KeycloakService {
 	private static final String s_sACCESS_TOKEN = "access_token";
 
 	//just to hide the implicit one
-	private KeycloakService() {}
+	//private KeycloakService() {}
 
-	public String getKeycloakAdminCliToken() {
+	public String getToken() {
 		try {
 			String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
 			String sCliSecret = m_oServletConfig.getInitParameter("keycloak_CLI_Secret");
@@ -63,7 +63,7 @@ public class KeycloakService {
 		return null;
 	}
 
-	public String getUserDataFromKeycloak(String sKcTokenId, String sUserId) {
+	public String getUserData(String sKcTokenId, String sUserId) {
 		// build keycloak API URL
 		String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
 		if(!sUrl.endsWith("/")) {
@@ -78,12 +78,14 @@ public class KeycloakService {
 		return Wasdi.httpGet(sUrl, asHeaders);
 	}
 
-	public String keyCloakLogin(String sUser, String sPassword) {
+	@Override
+	public String login(String sUser, String sPassword) {
 		//authenticate against keycloak
 		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
 
 		String sPayload = "client_id=";
 		sPayload += m_oServletConfig.getInitParameter("keycloak_confidentialClient");
+		sPayload += "&client_secret=" + m_oServletConfig.getInitParameter("keycloak_clientSecret");
 		sPayload += "&grant_type=password&username=" + sUser;
 		sPayload += "&password=" + sPassword;
 		Map<String, String> asHeaders = new HashMap<>();

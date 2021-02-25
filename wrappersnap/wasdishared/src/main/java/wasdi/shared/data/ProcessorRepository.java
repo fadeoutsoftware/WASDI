@@ -262,4 +262,28 @@ public class ProcessorRepository extends  MongoRepository {
 		updateProcessor(oProcessor);
 	}
 	
+	
+	public long countProcessors() {
+		return countProcessors(false);
+	}
+	
+	public long countProcessors(boolean bPublicOnly) {
+		return countProcessors(false,  bPublicOnly);
+	}
+	
+	public long countProcessors(boolean bInAppStoreOnly, boolean bPublicOnly) {
+		
+        try {
+        	//todo manage cases
+        	
+        	return getCollection(m_sThisCollection).count();
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        
+		return -1l;
+	}
+	
 }

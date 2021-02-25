@@ -4,9 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -41,7 +39,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
-import it.fadeout.services.KeycloakService;
+import it.fadeout.services.AuthProviderService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
@@ -67,7 +65,7 @@ public class AuthResource {
 	ServletConfig m_oServletConfig;
 	
 	@Inject
-	KeycloakService m_oKeycloakService;
+	AuthProviderService m_oKeycloakService;
 
 	/**
 	 * Authentication Helper
@@ -133,7 +131,7 @@ public class AuthResource {
 //			}
 
 			//authenticate against keycloak
-			String sAuthResult = m_oKeycloakService.keyCloakLogin(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
+			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			String sSessionId = null;
 
 			boolean bLoginSuccess = false;
@@ -178,8 +176,7 @@ public class AuthResource {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("AuthService.Login: Error");
-			oEx.printStackTrace();
+			Utils.debugLog("AuthService.Login: " + oEx);
 		}
 
 		return UserViewModel.getInvalid();
@@ -640,10 +637,10 @@ public class AuthResource {
 				//let's check it's a legit one (against kc)  
 
 				//first: authenticate on keycloak as admin and get the token
-				String sKcTokenId = m_oKeycloakService.getKeycloakAdminCliToken();
+				String sKcTokenId = m_oKeycloakService.getToken();
 				
 				// second: check the user exists on keycloak
-				String sBody = m_oKeycloakService.getUserDataFromKeycloak(sKcTokenId, oRegistrationInfoViewModel.getUserId());
+				String sBody = m_oKeycloakService.getUserData(sKcTokenId, oRegistrationInfoViewModel.getUserId());
 				
 
 				JSONArray oJsonArray = new JSONArray(sBody);
