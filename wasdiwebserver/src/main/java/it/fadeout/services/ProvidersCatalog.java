@@ -17,7 +17,7 @@ public interface ProvidersCatalog {
     /**
      * Retrieve the default provider for a node
      * @param sNode name of the node
-     * @return requested privider if any
+     * @return requested provider if any
      */
     Provider getDefaultProvider(String sNode);
 
