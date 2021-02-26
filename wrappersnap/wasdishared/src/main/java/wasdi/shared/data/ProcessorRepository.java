@@ -8,6 +8,7 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
@@ -261,28 +262,53 @@ public class ProcessorRepository extends  MongoRepository {
 		oProcessor.setUpdateDate( (double) oDate.getTime());
 		updateProcessor(oProcessor);
 	}
-	
-	
+
 	public long countProcessors() {
-		return countProcessors(false);
+		return getCollection(m_sThisCollection).count();
 	}
 	
 	public long countProcessors(boolean bPublicOnly) {
-		return countProcessors(false,  bPublicOnly);
+		return countProcessors(false, bPublicOnly);
 	}
 	
 	public long countProcessors(boolean bInAppStoreOnly, boolean bPublicOnly) {
-		
-        try {
-        	//todo manage cases
-        	
-        	return getCollection(m_sThisCollection).count();
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        
+		try {
+			BasicDBObject oQuery = new BasicDBObject();
+			
+			BasicDBObject oPublicOnlyQuery = null;
+			if(bPublicOnly) {
+				oPublicOnlyQuery = new BasicDBObject("isPublic", 1);
+				
+			}
+			
+			BasicDBObject oInStoreOnlyQuery = null;
+			if(bInAppStoreOnly) {
+				oInStoreOnlyQuery = new BasicDBObject("showInStore", true);
+			}
+			
+			if(null==oPublicOnlyQuery && null==oInStoreOnlyQuery) {
+				return getCollection(m_sThisCollection).count();
+			}
+			
+			if(null!=oPublicOnlyQuery && null==oInStoreOnlyQuery) {
+				return getCollection(m_sThisCollection).count(oPublicOnlyQuery);
+			}
+			
+			if(null==oPublicOnlyQuery && null!=oInStoreOnlyQuery) {
+				return getCollection(m_sThisCollection).count(oInStoreOnlyQuery);
+			}
+			
+			if(null!=oPublicOnlyQuery && null!=oInStoreOnlyQuery) {
+				List<BasicDBObject> aoAndList = new ArrayList<>();
+				aoAndList.add(oPublicOnlyQuery);
+				aoAndList.add(oInStoreOnlyQuery);
+				oQuery.put("$and", aoAndList);
+				return getCollection(m_sThisCollection).count(oQuery);
+			}
+	
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessorRepository.countProcessors( " + bInAppStoreOnly + ", " + bPublicOnly + " ): " + oE);
+		}
 		return -1l;
 	}
 	
