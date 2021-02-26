@@ -73,7 +73,8 @@
                 <!-- NEW WASDI LOGIN  -->
                 <br><hr><br>
 
-                <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()">
+                <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()"
+                        ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     {{"LOGIN_BUTTON_SIGN_IN_2"|translate}}
                 </button>
 
