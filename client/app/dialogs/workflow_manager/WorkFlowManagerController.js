@@ -203,7 +203,7 @@ var WorkFlowManagerController = (function () {
         }
         var oController = this;
         this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId, oObjectWorkFlow).then(function (data) {
-            if (utilsIsObjectNullOrUndefined(data.data) === false && data.boolValue === true) {
+            if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 oController.cleanAllExecuteWorkflowFields();
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN EXECUTE WORKFLOW,");
