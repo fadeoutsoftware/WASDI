@@ -223,7 +223,7 @@ var WorkspaceController = (function () {
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
-                oController.m_oWorkspaceViewModel = data;
+                oController.m_oWorkspaceViewModel = data.data;
             }
         },(function (data, status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE INFO");
