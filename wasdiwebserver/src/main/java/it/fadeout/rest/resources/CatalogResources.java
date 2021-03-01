@@ -661,7 +661,7 @@ public class CatalogResources {
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId) {
+	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -725,6 +725,7 @@ public class CatalogResources {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			oParameter.setStyle(sStyle);
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));

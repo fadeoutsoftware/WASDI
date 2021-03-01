@@ -298,4 +298,46 @@ public class DownloadedFilesRepository extends MongoRepository {
         return aoReturnList;    	
     }
     
+    
+    /**
+     * Search files
+     * @param oDateFrom start date
+     * @param oDateTo end date
+     * @param sFreeText free text to search in name
+     * @param sCategory category
+     * @return list of entries found
+     */
+    public List<DownloadedFile> getByWorkspace(String sWorkspaceId) {
+    	final List<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
+    	List<Bson> aoFilters = new ArrayList<Bson>();
+    	
+    	
+    	if (sWorkspaceId!=null && !sWorkspaceId.isEmpty()) {
+    		Document oRegQuery = new Document();
+    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId+"/"));
+    		oRegQuery.append("$options", "i");
+    		Document oFindQuery = new Document();
+    		oFindQuery.append("filePath", oRegQuery);
+    		aoFilters.add(oFindQuery);
+    	}
+    	    	
+    	Bson filter = Filters.and(aoFilters);
+    	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection(m_sThisCollection).find() : getCollection(m_sThisCollection).find(filter);
+    	
+    	aoDocs.forEach(new Block<Document>() {
+            public void apply(Document oDocument) {
+                String sJson = oDocument.toJson();
+                try {
+                    DownloadedFile oDownloadedFile = s_oMapper.readValue(sJson, DownloadedFile.class);
+                    aoFiles.add(oDownloadedFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    	
+		return aoFiles;
+    }    
+    
 }

@@ -2058,8 +2058,6 @@ var EditorController = (function () {
         }));
 
 
-
-
         return true;
     };
 

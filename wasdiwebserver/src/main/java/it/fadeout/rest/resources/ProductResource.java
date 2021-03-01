@@ -290,15 +290,18 @@ public class ProductResource {
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+			//List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+			
+			List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
 
-			Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoProductWorkspace.size());
+			Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoDownloadedFiles.size());
 
 			// For each
-			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
+			for (int iProducts = 0; iProducts < aoDownloadedFiles.size(); iProducts++) {
 
 				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+				//DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+				DownloadedFile oDownloaded = aoDownloadedFiles.get(iProducts);
 
 				// Add View model to return list
 				if (oDownloaded != null) {
@@ -309,33 +312,32 @@ public class ProductResource {
 						GeorefProductViewModel oGeoRefProductViewModel = new GeorefProductViewModel(oProductViewModel);
 						oGeoRefProductViewModel.setBbox(oDownloaded.getBoundingBox());
 
-						if (oGeoRefProductViewModel.getBandsGroups() != null) {
-							ArrayList<BandViewModel> aoBands = oGeoRefProductViewModel.getBandsGroups().getBands();
-
-							if (aoBands != null) {
-								for (int iBands = 0; iBands < aoBands.size(); iBands++) {
-
-									BandViewModel oBand = aoBands.get(iBands);
-
-									if (oBand != null) {
-										PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oGeoRefProductViewModel.getName(), oBand.getName());
-
-										if (oPublishBand != null) {
-											oBand.setPublished(true);
-											oBand.setLayerId(oPublishBand.getLayerId());
-											oBand.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
-											oBand.setGeoserverUrl(oPublishBand.getGeoserverUrl());
-											
-										} 
-										else {
-											oBand.setPublished(false);
-										}
-									}
-
-								}
-							}
-
-						}
+//						if (oGeoRefProductViewModel.getBandsGroups() != null) {
+//							ArrayList<BandViewModel> aoBands = oGeoRefProductViewModel.getBandsGroups().getBands();
+//
+//							if (aoBands != null) {
+//								for (int iBands = 0; iBands < aoBands.size(); iBands++) {
+//
+//									BandViewModel oBand = aoBands.get(iBands);
+//
+//									if (oBand != null) {
+//										PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oGeoRefProductViewModel.getName(), oBand.getName());
+//
+//										if (oPublishBand != null) {
+//											oBand.setPublished(true);
+//											oBand.setLayerId(oPublishBand.getLayerId());
+//											oBand.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
+//											oBand.setGeoserverUrl(oPublishBand.getGeoserverUrl());
+//											
+//										} 
+//										else {
+//											oBand.setPublished(false);
+//										}
+//									}
+//
+//								}
+//							}
+//						}
 
 						oGeoRefProductViewModel.setMetadata(null);
 						aoProductList.add(oGeoRefProductViewModel);
@@ -345,9 +347,7 @@ public class ProductResource {
 					}
 
 				} else {
-					Utils.debugLog("ProductResource.GetListByWorkspace: WARNING: the product "
-							+ aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId
-							+ " but is not a Downloaded File");
+					//Utils.debugLog("ProductResource.GetListByWorkspace: WARNING: the product " + aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId + " but is not a Downloaded File");
 				}
 			}
 		} catch (Exception oEx) {
