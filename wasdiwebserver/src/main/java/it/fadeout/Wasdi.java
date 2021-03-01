@@ -365,7 +365,7 @@ public class Wasdi extends ResourceConfig {
 				return oUser;
 			} else {
 				//check session against DB
-				Utils.debugLog("Wasdi.getUserFromSession: introspect failed, checking against DB...");
+				
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				if(null==oUserSession) {
