@@ -2004,43 +2004,55 @@ var EditorController = (function () {
         } else {
             oController = oWindow;
         }
-        // Before opening the modal window get the workspaceViewModel
-/*        oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oController.m_oActiveWorkspace.workspaceId)
-            .success(function (data, status) {
-                if (data != null && data != undefined) {
-                    oController.m_oWorkspaceViewModel = data;
+/*        // Before opening the modal window get the workspaceViewModel
+        oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oController.m_oActiveWorkspace.workspaceId)
+            .then(function (data, status) {
+                if (data.data != null && data.data != undefined) {
+                    oController.m_oActiveWorkspace = data.data;
                 }
-            }).error(function (data, status) {
-        });*/
+            }, function (data, status) {
+            });*/
         // also, before opening get the node list
         oController.m_oNodeService.getNodesList()
             .then(function (data, status) {
                 if (data.data != null && data.data != undefined) {
                     oController.m_aoNodesList = [];
-                    for (var iIndex = 0; iIndex < data.data.length; iIndex++) {
-                        oController.m_aoNodesList.push(data.data[iIndex]);
-
-
-
+                    for (var iIndex = 0; iIndex < data.length; iIndex++) {
+                        oController.m_aoNodesList.push(data[iIndex]);
                     }
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/workspace_details/WorkspaceDetails.html",
-                        controller: "WorkspaceDetailsController",
-                        inputs: {
-                            extras: {// in extras method are not evaluated <-> pass values
-                                WorkSpaceId: oController.m_oActiveWorkspace.workspaceId,
-                                WorkSpaceViewModel : oController.m_oActiveWorkspace,
-                                ProductCount : oController.m_aoProducts.length,
-                                NodeList : oController.m_aoNodesList
-
+                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oController.m_oActiveWorkspace.workspaceId)
+                        .then(function (data, status) {
+                            if (data.data != null && data.data != undefined) {
+                                oController.m_oActiveWorkspace = data.data;
                             }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal();
-                        modal.close.then(function (oResult) {
 
+                            oController.m_oModalService.showModal({
+                                templateUrl: "dialogs/workspace_details/WorkspaceDetails.html",
+                                controller: "WorkspaceDetailsController",
+                                inputs: {
+                                    extras: {// in extras method are not evaluated <-> pass values
+                                        WorkSpaceId: oController.m_oActiveWorkspace.workspaceId,
+                                        WorkSpaceViewModel: oController.m_oActiveWorkspace,
+                                        ProductCount: oController.m_aoProducts.length,
+                                        NodeList: oController.m_aoNodesList
+
+                                    }
+                                }
+                            }).then(function (modal) {
+                                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oController.m_oActiveWorkspace.workspaceId)
+                                    .then(function (data, status) {
+                                        if (data.data != null && data.data != undefined) {
+                                            oController.m_oActiveWorkspace = data.data;
+                                        }
+                                    }, function (data, status) {
+                                    });
+                                modal.element.modal();
+                                modal.close.then(function (oResult) {
+
+                                });
+                            });
+                        }, function (data, status) {
                         });
-                    });
                 }
             },(function (data, status) {
         }));
