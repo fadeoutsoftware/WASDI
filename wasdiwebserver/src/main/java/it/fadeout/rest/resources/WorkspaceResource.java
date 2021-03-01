@@ -24,6 +24,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -31,6 +32,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -249,11 +251,11 @@ public class WorkspaceResource {
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
+			
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-
+			
 			// Get requested workspace
 			Workspace oWorkspace = oWSRepository.getWorkspace(sWorkspaceId);
-			
 			oVM.setUserId(oWorkspace.getUserId());
 			oVM.setWorkspaceId(oWorkspace.getWorkspaceId());
 			oVM.setName(oWorkspace.getName());
@@ -263,24 +265,23 @@ public class WorkspaceResource {
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oVM.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 
-
 			// If the workspace is on another node, copy the url to the view model
-			if (oWorkspace.getNodeCode().equals(Wasdi.s_sMyNodeCode) == false) {
+			if (oWorkspace.getNodeCode().equals("wasdi") == false) {
 				// Get the Node
-				wasdi.shared.data.NodeRepository oNodeRepository = new wasdi.shared.data.NodeRepository();
-				String sNodeCode = oWorkspace.getNodeCode();
-				wasdi.shared.business.Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
-				
+				NodeRepository oNodeRepository = new NodeRepository();
+				String sNodeCode = oWorkspace.getNodeCode(); 
+				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
 					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+					
+					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
+						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+					}
+					else {
+						oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
+					}
 				}
-				
-				if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
-					oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
-				}
-				else {
-					oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
-				}
+			
 			}
 			else {
 				oVM.setCloudProvider("wasdi");
@@ -289,21 +290,18 @@ public class WorkspaceResource {
 			// Get Sharings
 			List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository
 					.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
-
 			// Add Sharings to View Model
 			if (aoSharings != null) {
 				for (int iSharings = 0; iSharings < aoSharings.size(); iSharings++) {
 					if (oVM.getSharedUsers() == null) {
 						oVM.setSharedUsers(new ArrayList<String>());
 					}
-
 					oVM.getSharedUsers().add(aoSharings.get(iSharings).getUserId());
 				}
 			}
 		} catch (Exception oEx) {
 			Utils.debugLog( "WorkspaceResource.getWorkspaceEditorViewModel: " + oEx);
 		}
-
 		return oVM;
 	}
 
