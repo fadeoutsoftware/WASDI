@@ -102,6 +102,14 @@ public class WorkspaceEditorViewModel {
 		this.nodeCode = nodeCode;
 	}
 
+	@Override
+	public String toString() {
+		return "WorkspaceEditorViewModel [workspaceId=" + workspaceId + ", name=" + name + ", userId=" + userId
+				+ ", apiUrl=" + apiUrl + ", creationDate=" + creationDate + ", lastEditDate=" + lastEditDate
+				+ ", sharedUsers=" + sharedUsers + ", nodeCode=" + nodeCode + ", processesCount=" + processesCount
+				+ ", cloudProvider=" + cloudProvider + "]";
+	}
+
 
 
 }

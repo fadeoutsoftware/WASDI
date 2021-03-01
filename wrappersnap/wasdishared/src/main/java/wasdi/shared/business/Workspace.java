@@ -79,4 +79,10 @@ public class Workspace {
     public void setLastEditDate(Double lastEditDate) {
         this.lastEditDate = lastEditDate;
     }
+
+	@Override
+	public String toString() {
+		return "Workspace [workspaceId=" + workspaceId + ", name=" + name + ", userId=" + userId + ", creationDate="
+				+ creationDate + ", lastEditDate=" + lastEditDate + ", nodeCode=" + nodeCode + "]";
+	}
 }
