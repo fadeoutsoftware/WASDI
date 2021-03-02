@@ -114,10 +114,10 @@ public class AuthResource {
 			}
 
 
-			if(!m_oCredentialPolicy.satisfies(oUser)) {
+			/*if(!m_oCredentialPolicy.satisfies(oUser)) {
 				Utils.debugLog("AuthResource.Login: Wasdi user " + oUser.getUserId() + " does not satisfy Credential Policy, aborting");
 				return UserViewModel.getInvalid();
-			}
+			}*/
 
 			if(null == oUser.getValidAfterFirstAccess()) {
 				// this is to fix legacy users for which confirmation has never been activated
