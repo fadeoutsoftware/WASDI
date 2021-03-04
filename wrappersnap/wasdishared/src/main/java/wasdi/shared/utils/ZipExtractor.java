@@ -88,6 +88,14 @@ public class ZipExtractor {
 					iEntries++; // count also a directory creation as an entry
 					continue;
 				}
+				else {
+					
+					File oFile = new File(sName);
+					if (!oFile.getParentFile().exists()) {
+						s_oLogger.info(m_sLoggerPrefix + "unzip: Creating directory " + oFile.getParent());
+						oFile.getParentFile().mkdirs();
+					}
+				}
 				FileOutputStream oFos = new FileOutputStream(sName);
 				try (BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
 					while (lTotal + BUFFER <= m_lToobigtotal &&
@@ -137,7 +145,7 @@ public class ZipExtractor {
 	 */
 	public ZipExtractor(String sLoggerPrefix) {
 		if(!Utils.isNullOrEmpty(sLoggerPrefix)) {
-			this.m_sLoggerPrefix = sLoggerPrefix + " - " + this.m_sLoggerPrefix;
+			this.m_sLoggerPrefix = sLoggerPrefix + " - [" + this.m_sLoggerPrefix + "]";
 		}
 	}
 

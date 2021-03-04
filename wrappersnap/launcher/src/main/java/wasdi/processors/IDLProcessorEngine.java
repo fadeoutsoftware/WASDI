@@ -116,6 +116,17 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 					oProcessorRepository.deleteProcessor(sProcessorId);
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				}
+				
+				try {
+					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: delete processor folder " + sProcessorFolder);
+					// If it did not work, clean the folder also
+					File oFolder = new File(sProcessorFolder);
+					oFolder.delete();					
+				}
+				catch (Exception oDelEx) {
+					LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor: error deleting processor folder after bad unzip");
+				}
+				
 				return false;
 			}
 		    
@@ -248,27 +259,25 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 	public boolean UnzipProcessor(String sProcessorFolder, String sProcessorName, String sZipFileName, String sProcessObjId) {
 		try {
 			Path oDirPath = Paths.get(sProcessorFolder);
+			
 			if(!Files.isDirectory(oDirPath)) {
-				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + sProcessorFolder +
-						" is not a valid directory, aborting");
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + sProcessorFolder + " is not a valid directory, aborting");
 				return false;
 			}
 
 			if(sZipFileName.contains("/") || sZipFileName.contains("\\") || !sZipFileName.endsWith(".zip") ) {
-				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + sZipFileName +
-						" is not a valid zip file name, aborting" );
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + sZipFileName + " is not a valid zip file name, aborting" );
 				return false;
 			}
 			
 			// file name dentro dir esista
 			Path oFilePath = Paths.get(sZipFileName);
+			
 			File oProcessorZipFile = oDirPath.resolve(oFilePath).toAbsolutePath().normalize().toFile();
 			if(!oProcessorZipFile.exists()) {
-				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + oDirPath.resolve(oFilePath).toAbsolutePath().normalize().toString() +
-						" not found on file system, aborting" );
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor: " + oDirPath.resolve(oFilePath).toAbsolutePath().normalize().toString() + " not found on file system, aborting" );
 				return false;
 			}
-			
 						
 			ZipExtractor oZipExtractor = new ZipExtractor(sProcessObjId);
 			oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
@@ -280,15 +289,6 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 					String sFileName = oFile.getName(); 
 					if(sFileName.equals(sProcessorName + ".pro") && !oFile.isDirectory()) {
 						oMyProcessorExists.set(true);
-						/*
-						try {
-							Files.move(new File(oFile.getCanonicalPath()).toPath(), new File(oFile.getCanonicalPath()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-						} catch (IOException oE) {
-							LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor Error renaming processor file " + oE);
-							oMyProcessorExists.set(false);
-							
-						}
-						*/
 					}
 				});
 			}
