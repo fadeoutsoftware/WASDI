@@ -475,6 +475,16 @@ select {
 }
 
 /*===============================*/
+/*=========SIDE BAR ==============*/
+/*===============================*/
+
+.sidebar-wrapper {
+    //direction: rtl; removed because it cause issues on child components
+    height: calc(100vh - 155px);
+    overflow: auto;
+}
+
+/*===============================*/
 /*=========APPS LIST==============*/
 /*===============================*/
 
