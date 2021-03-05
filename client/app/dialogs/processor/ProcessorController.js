@@ -23,7 +23,7 @@ var ProcessorController = (function() {
          * Input processor base data
          * @type {null}
          */
-        this.m_oInputProcessor = this.m_oExtras.processor;
+        this.m_oInputProcessor = this.m_oExtras.processor.data;
         /**
          * Workpsace service
          */
