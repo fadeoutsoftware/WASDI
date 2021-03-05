@@ -530,7 +530,7 @@ public class WorkspaceResource {
 
 									try {
 										// delete published band on database
-										oPublishRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+										oPublishRepository.deleteByProductNameLayerId(sProductName, oPublishedBand.getLayerId());
 									} catch (Exception oEx) {
 										Utils.debugLog("WorkspaceResource.DeleteWorkspace: error deleting published band on data base " + oEx.toString());
 									}

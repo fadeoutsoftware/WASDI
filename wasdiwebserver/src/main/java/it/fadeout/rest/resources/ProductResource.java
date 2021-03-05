@@ -749,22 +749,20 @@ public class ProductResource {
 			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			String sFilePath = sDownloadPath + sProductName;
 			
-			Utils.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);
-
-			// P.Campanella:20190724: try to fix the bug that pub bands are not deleted.
-			// Here the name has the extension. In the db the reference to the product is without
-			// Try to split the extension
-			String sProductNameWithoutExtension = Utils.getFileNameWithoutLastExtension(sProductName);
-			
+			Utils.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);			
 			
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			List<PublishedBand> aoPublishedBands = null;
 			
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sDownloadPath + sProductName);
+			
+			
 			// Get the list of published bands
 			if (bDeleteFile || bDeleteLayer) {
 				// Get all bands files
-				aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(sProductNameWithoutExtension);
+				aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oDownloadedFile.getProductViewModel().getName());
 			}
 
 			// get files that begin with the product name
@@ -821,10 +819,7 @@ public class ProductResource {
 					Utils.debugLog("ProductResource.DeleteProduct: No File to delete ");
 				}
 			}
-			
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sDownloadPath + sProductName);
-			
+						
 			if (bDeleteLayer) {
 				
 				// Delete layerId on Geoserver
