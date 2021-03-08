@@ -41,7 +41,7 @@ public class NodeResource {
 			return null;			
 		}
 		
-		// get list of all nodes
+		// get list of all active nodes
 		NodeRepository oNodeRepository = new NodeRepository();
 		List<Node> asNodes = oNodeRepository.getNodesList();
 	
@@ -52,6 +52,7 @@ public class NodeResource {
 		List<NodeViewModel> aoNodeViewModelList = new ArrayList<>();
 		
 		for (Node node:asNodes) {
+			if (node.getActive()) { // checks whether the node is active 
 			NodeViewModel oNodeViewModel = new NodeViewModel();
 			
 			if (node.getCloudProvider()!=null) {
@@ -62,6 +63,7 @@ public class NodeResource {
 			}
 			oNodeViewModel.setNodeCode(node.getNodeCode());
 			aoNodeViewModelList.add(oNodeViewModel);
+			}
 		}
 
 		return aoNodeViewModelList;
