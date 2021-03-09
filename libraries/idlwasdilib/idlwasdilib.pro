@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.1.4
-; Last Update: 2021-03-04
+; IDL WASDI Lib Version 0.6.1.5
+; Last Update: 2021-03-08
 ;
 ; History
+; 0.6.1.5 - 2021-03-08
+;	Fixed default for support to https
+;
 ; 0.6.1.4 - 2021-03-04
 ;	Added support to https
 ;
@@ -246,7 +249,7 @@ FUNCTION WASDIHTTPGET, sUrlPath, sHostName
 	sSchemaToUse = urlschema
 	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
 	END ELSE BEGIN
 		sSchemaToUse = wsurlschema
 	END
@@ -312,7 +315,7 @@ FUNCTION WASDIHTTPGETNOJSON, sUrlPath, sHostName
 	sSchemaToUse = urlschema
 	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
 	END ELSE BEGIN
 		sSchemaToUse = wsurlschema
 	END
@@ -368,16 +371,14 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 	sSchemaToUse = urlschema
 	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
 	END ELSE BEGIN
-		sSchemaToUse = wsurlschema
+		IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+			sHostName = baseurl
+		END ELSE BEGIN
+			sSchemaToUse = wsurlschema
+		END		
 	END
-	
-	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END ELSE BEGIN
-		sSchemaToUse = wsurlschema
-	END		
 
 	sessioncookie = token
 
@@ -435,16 +436,14 @@ FUNCTION WASDIHTTPDELETE, sUrlPath, sHostName
 	sSchemaToUse = urlschema
 	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
 	END ELSE BEGIN
-		sSchemaToUse = wsurlschema
-	END
-	
-	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END ELSE BEGIN
-		sSchemaToUse = wsurlschema
-	END		
+		IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+			sHostName = baseurl
+		END ELSE BEGIN
+			sSchemaToUse = wsurlschema
+		END
+	END	
 
 	CATCH, iErrorStatus 
 
@@ -1149,13 +1148,13 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 	sSchemaToUse = urlschema
 	
 	IF (sUrlAddress EQ !NULL) THEN BEGIN
-		sUrlAddress = '217.182.93.57'
+		sUrlAddress = baseurl
 	END ELSE BEGIN
 		sSchemaToUse = wsurlschema
 	END
 	
 	IF (STRLEN(sUrlAddress) EQ 0) THEN BEGIN
-		sUrlAddress = '217.182.93.57'
+		sUrlAddress = baseurl
 	END ELSE BEGIN
 		sSchemaToUse = wsurlschema
 	END			
@@ -2531,16 +2530,15 @@ FUNCTION WASDIHTTPPOSTFILE, sUrlPath, sFileName, sHostName
 	sSchemaToUse = urlschema
 	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
 	END ELSE BEGIN
-		sSchemaToUse = wsurlschema
+		IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+			sHostName = baseurl
+		END ELSE BEGIN
+			sSchemaToUse = wsurlschema
+		END	
 	END
 	
-	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END ELSE BEGIN
-		sSchemaToUse = wsurlschema
-	END	
 
 	sessioncookie = token
 
