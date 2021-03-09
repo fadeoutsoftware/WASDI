@@ -24,7 +24,7 @@
         var oController = this;
 
         $scope.close = function(result) {
-
+            console.log("process_error_logs_dialog: close function")
             // Make sure that the interval is destroyed too
             oController.stopTick(oController);
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -130,7 +130,9 @@
      };
 
      ProcessErrorLogsDialogController.prototype.stopTick=function(oController) {
+        console.log("process_error_logs_dialog: stopTick")
          if (angular.isDefined(oController.m_oTick)) {
+            console.log("process_error_logs_dialog: m_oTick is defined")
              oController.m_oInterval.cancel(oController.m_oTick);
              oController.m_oTick = undefined;
          }
@@ -194,8 +196,6 @@
         {
             return false;
         }
-
-
     };
 
      ProcessErrorLogsDialogController.prototype.getCountLogsANDLogsCallback = function(data, status,oController)
