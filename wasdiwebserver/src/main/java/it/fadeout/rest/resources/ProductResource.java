@@ -295,6 +295,8 @@ public class ProductResource {
 			List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoDownloadedFiles.size());
+			
+			ArrayList<String> asAddedFiles = new ArrayList<String>();
 
 			// For each
 			for (int iProducts = 0; iProducts < aoDownloadedFiles.size(); iProducts++) {
@@ -305,6 +307,11 @@ public class ProductResource {
 
 				// Add View model to return list
 				if (oDownloaded != null) {
+					
+					if (asAddedFiles.contains(oDownloaded.getFilePath())) {
+						Utils.debugLog("ProductResource.GetListByWorkspace: " + oDownloaded.getFilePath() + " is a duplicate entry");
+						continue;
+					}
 
 					ProductViewModel oProductViewModel = oDownloaded.getProductViewModel();
 
@@ -341,6 +348,7 @@ public class ProductResource {
 
 						oGeoRefProductViewModel.setMetadata(null);
 						aoProductList.add(oGeoRefProductViewModel);
+						asAddedFiles.add(oDownloaded.getFilePath());
 
 					} else {
 						Utils.debugLog("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");
