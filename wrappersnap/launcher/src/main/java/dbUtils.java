@@ -111,6 +111,7 @@ public class dbUtils {
 	        System.out.println("\t1 - List products with broken files");
 	        System.out.println("\t2 - Delete products with broken files");
 	        System.out.println("\t3 - Clear S1 S2 published bands");
+	        System.out.println("\t4 - Clean by not existing ProcessWorkspace");
 	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
@@ -181,6 +182,28 @@ public class dbUtils {
 	        else if (sInputString.equals("3")) {
 	        	System.out.println("Clean S1 and S2 published bands");
 	        	cleanPublishedBands();
+	        }
+	        else if (sInputString.equals("4")) {
+	        	
+	        	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+				List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getList();
+				
+				System.out.println("Found " + aoDownloadedFiles.size() + " Downloaded Files");
+				
+				for (DownloadedFile oDownloadedFile : aoDownloadedFiles) {
+					String sPath = oDownloadedFile.getFilePath();
+					
+					List<ProductWorkspace> aoAreThere = oProductWorkspaceRepository.getProductWorkspaceListByPath(sPath);
+					
+					if (aoAreThere.size()==0) {
+						System.out.println("File " + sPath + " not in ProductWorkspace: delete");
+						oDownloadedFilesRepository.deleteByFilePath(sPath);
+					}
+				}	 
+				
+				System.out.println("All downloaded files cleaned");
+				
 	        }
 	        else if (sInputString.equals("x")) {
 	        	return;
