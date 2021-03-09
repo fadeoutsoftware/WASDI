@@ -121,7 +121,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 					LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: delete processor folder " + sProcessorFolder);
 					// If it did not work, clean the folder also
 					File oFolder = new File(sProcessorFolder);
-					oFolder.delete();					
+					FileUtils.deleteDirectory(oFolder);
 				}
 				catch (Exception oDelEx) {
 					LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor: error deleting processor folder after bad unzip");
@@ -287,15 +287,15 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
 				oWalk.map(Path::toFile).forEach(oFile->{
 					String sFileName = oFile.getName(); 
-					if(sFileName.equals(sProcessorName + ".pro") && !oFile.isDirectory()) {
+					if(sFileName.toLowerCase().equals(sProcessorName + ".pro") && !oFile.isDirectory()) {
 						oMyProcessorExists.set(true);
 					}
 				});
 			}
 			
 		    if (!oMyProcessorExists.get()) {
-		    	LauncherMain.s_oLogger.error("IDLProcessorEngine.UnzipProcessor [" + sProcessorName + ".pro] not present in processor " + sZipFileName);
-		    	return false;
+		    	LauncherMain.s_oLogger.warn("IDLProcessorEngine.UnzipProcessor [" + sProcessorName + ".pro] not present in processor " + sZipFileName);
+		    	//return false;
 		    }
 		    
 		    try {
@@ -338,12 +338,15 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			// Check if the processor is avaialbe on the node
 			if (!isProcessorOnNode(oParameter)) {
 				
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.run: processor not available on node: download it");
+				
 				ProcessorRepository oProcessorRepository = new ProcessorRepository();
 				
 				Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 				String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
 				
 				if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
+					LauncherMain.s_oLogger.error("IDLProcessorEngine.run: processor downloaded, start local deploy");
 					deploy(oParameter, false);
 				}
 				else {

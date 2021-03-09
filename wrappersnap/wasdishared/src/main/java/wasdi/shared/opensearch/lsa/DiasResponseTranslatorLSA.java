@@ -106,6 +106,36 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 						}
 					}
 				}
+				else if (sTitle.startsWith("S2")) {
+					// Split the title
+					String [] asTitleParts = sTitle.split("_");
+					
+					// Safe check
+					if (asTitleParts != null) {
+						
+						if (asTitleParts.length >= 7) {
+							
+							// Get the relative orbit
+							String sRelativeOrbit = asTitleParts[4];
+							
+							sRelativeOrbit = sRelativeOrbit.substring(1);
+							
+							// Cast to int
+							int iRelativeOrbit = -1;
+							try {
+								iRelativeOrbit = Integer.parseInt(sRelativeOrbit);
+							}
+							catch (Exception oEx) {
+								Utils.debugLog("Exception converting LSA Result Relative Orbit: "  + oEx.toString()) ;
+							}
+							
+							if (iRelativeOrbit != -1) {
+								// Set the relative orbit to the WASDI View Model
+								oResult.getProperties().put("relativeorbitnumber", ""+iRelativeOrbit);
+							}
+						}
+					}					
+				}
 				
 				// Set platform
 				oResult.getProperties().put("platform", sTitle.substring(0, 3));

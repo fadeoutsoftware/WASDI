@@ -27,12 +27,33 @@ import org.apache.log4j.Logger;
  * @see <a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-16131">CVE-2018-16131</a>
  */
 public class ZipExtractor {
-	// These parameters must be instantiated using configurations values
+	
+	/**
+	 * These parameters must be instantiated using configurations values
+	 */
 	static final int BUFFER = 512;
-	long m_lToobigtotal = 1024L * 1024L * 1024L; // Max size of unzipped total Data, 1 GB
-	long m_lToobigsingle = 1024L * 1024L * 512L; // Max size of unzipped total Data, 512 MB
-	int m_lToomany = 1024; // Maximum number of files that can be extracted
-	String m_sLoggerPrefix = "ZipExtractor."; 
+	/**
+	 * Max size of unzipped total Data, 1 GB
+	 */
+	//long m_lToobigtotal = 1024L * 1024L * 1024L;
+	long m_lToobigtotal = 0L;
+	/**
+	 * Max size of single unzipped Data, 512 MB
+	 */
+	//long m_lToobigsingle = 1024L * 1024L * 512L;
+	long m_lToobigsingle = 0L;
+	/**
+	 * Maximum number of files that can be extracted
+	 */
+	//int m_lToomany = 1024;
+	int m_lToomany = 0;
+	/**
+	 * Logger prefix
+	 */
+	String m_sLoggerPrefix = "ZipExtractor.";
+	/**
+	 * Static logger reference
+	 */
 	static Logger s_oLogger = Logger.getLogger(ZipExtractor.class);
 
 
@@ -51,14 +72,19 @@ public class ZipExtractor {
 	 * @throws java.io.IOException Throws IO exception in case the zip file is not founded
 	 */
 	public String unzip(String sFilename, String sPath) throws java.io.IOException {
+		
 		FileInputStream oFis = new FileInputStream(WasdiFileUtils.fixPathSeparator(sFilename));
+		
 		ZipEntry oEntry;
 		int iEntries = 0;
 		long lTotal = 0;
 		long lSingle = 0;
+		
 		int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
+		
 		String sTemp = "tmp-" + iRandom + File.separator;
 		String sTempPath = WasdiFileUtils.fixPathSeparator(sPath);
+		
 		if(!sTempPath.endsWith(File.separator)) {
 			sTempPath += File.separator;
 		}
@@ -72,13 +98,17 @@ public class ZipExtractor {
 		}
 
 		try (ZipInputStream oZis = new ZipInputStream(new BufferedInputStream(oFis))) {
+			
 			while ((oEntry = oZis.getNextEntry()) != null) {
+				
 				s_oLogger.info(m_sLoggerPrefix + "Extracting: " + oEntry);
 				int iCount;
+				
 				byte[] ayData = new byte[BUFFER];
 				// Write the files to the disk, but ensure that the filename is valid,
 				// and that the file is not insanely big
 				String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
+				
 				// Random used to mitigate attacks
 				if (oEntry.isDirectory()) {
 					s_oLogger.info(m_sLoggerPrefix + "unzip: Creating directory " + sName);
@@ -89,41 +119,46 @@ public class ZipExtractor {
 					continue;
 				}
 				else {
-					
 					File oFile = new File(sName);
 					if (!oFile.getParentFile().exists()) {
 						s_oLogger.info(m_sLoggerPrefix + "unzip: Creating directory " + oFile.getParent());
 						oFile.getParentFile().mkdirs();
 					}
 				}
+				
 				FileOutputStream oFos = new FileOutputStream(sName);
+				
 				try (BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
-					while (lTotal + BUFFER <= m_lToobigtotal &&
-							lSingle + BUFFER <= m_lToobigsingle &&
-							(iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
+					
+					//while (lTotal + BUFFER <= m_lToobigtotal && lSingle + BUFFER <= m_lToobigsingle && (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
+					while ( (lTotal + BUFFER <= m_lToobigtotal || m_lToobigtotal==0) && (lSingle + BUFFER <= m_lToobigsingle || m_lToobigsingle == 0) && (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
 						oDest.write(ayData, 0, iCount);
 						lTotal += iCount;
 						lSingle += iCount;
 					}
+					
 					oDest.flush();
 					oZis.closeEntry();
 					iEntries++;
-					if (lSingle + BUFFER > m_lToobigsingle) {
+					
+					if ( (lSingle + BUFFER > m_lToobigsingle) && (m_lToobigsingle>0)) {
 						cleanTempDir(sTempPath, sTemp);
 						s_oLogger.error(m_sLoggerPrefix + "unzip: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 						throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 					}
-					if (lTotal + BUFFER > m_lToobigtotal) {
+					if ( (lTotal + BUFFER > m_lToobigtotal) && (m_lToobigtotal>0)) {
 						cleanTempDir(sTempPath, sTemp);
 						s_oLogger.error(m_sLoggerPrefix + "unzip: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 						throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 					}
-					if (iEntries > m_lToomany) {
+					if ( (iEntries > m_lToomany) && (m_lToomany>0)) {
 						cleanTempDir(sTempPath, sTemp);
 						s_oLogger.error(m_sLoggerPrefix + "unzip: Too many files inside the archive. The limit is "+m_lToomany);
 						throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
 					}
-					lSingle = 0; // resets single file byte-counter
+					
+					// resets single file byte-counter
+					lSingle = 0; 
 				}
 			}
 			/// IF everything went well cp temp content to original folder (overwrite it's fine) and delete temp dir
