@@ -320,6 +320,7 @@ public class dbUtils {
 	        System.out.println("\t3 - Redeploy");
 	        System.out.println("\t4 - Fix Processor Creation/Update date");
 	        System.out.println("\t5 - Update db UI from local ui.json files");
+	        System.out.println("\t6 - Force Lib Update for all");
 	        System.out.println("\tx - Back");
 	        System.out.println("");
 	        
@@ -478,6 +479,32 @@ public class dbUtils {
 	        			}
 	        		}
 	        	}
+	        }
+	        else if (sInputString.equals("6")) {
+	        	ProcessorRepository oProcessorRepository = new ProcessorRepository();
+	        	List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+	        	
+	        	System.out.println("Found " + aoProcessors.size() + " Processors");
+	        	
+	        	Date oNow = new Date();
+	        	
+	        	for (Processor oProcessor : aoProcessors) {
+	        		
+	        		String sProcessorName = oProcessor.getName();
+	        		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+	        		String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+	        		File oProcessorFolder = new File(sProcessorPath);
+	        		
+	        		if (oProcessorFolder.exists()) {
+	        			
+	        			System.out.println("Processor " + sProcessorName + " present in the node");
+	        			
+	        		}
+	        		else {
+	        			System.out.println("Processor " + sProcessorName + " NOT present in the node, JUMP");
+	        		}
+	        	}
+	        	
 	        }
 		}
 		catch (Exception oEx) {
