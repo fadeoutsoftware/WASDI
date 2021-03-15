@@ -24,6 +24,7 @@ import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -184,26 +185,26 @@ public class dbUtils {
 	        	cleanPublishedBands();
 	        }
 	        else if (sInputString.equals("4")) {
-	        	
+
 	        	ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 				List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getList();
-				
+
 				System.out.println("Found " + aoDownloadedFiles.size() + " Downloaded Files");
-				
+
 				for (DownloadedFile oDownloadedFile : aoDownloadedFiles) {
 					String sPath = oDownloadedFile.getFilePath();
-					
+
 					List<ProductWorkspace> aoAreThere = oProductWorkspaceRepository.getProductWorkspaceListByPath(sPath);
-					
+
 					if (aoAreThere.size()==0) {
 						System.out.println("File " + sPath + " not in ProductWorkspace: delete");
 						oDownloadedFilesRepository.deleteByFilePath(sPath);
 					}
-				}	 
-				
+				}
+
 				System.out.println("All downloaded files cleaned");
-				
+
 	        }
 	        else if (sInputString.equals("x")) {
 	        	return;
@@ -483,28 +484,32 @@ public class dbUtils {
 	        else if (sInputString.equals("6")) {
 	        	ProcessorRepository oProcessorRepository = new ProcessorRepository();
 	        	List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
-	        	
+
 	        	System.out.println("Found " + aoProcessors.size() + " Processors");
-	        	
+
 	        	Date oNow = new Date();
-	        	
+
 	        	for (Processor oProcessor : aoProcessors) {
-	        		
+
 	        		String sProcessorName = oProcessor.getName();
 	        		String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
 	        		String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
 	        		File oProcessorFolder = new File(sProcessorPath);
-	        		
+
 	        		if (oProcessorFolder.exists()) {
-	        			
+
 	        			System.out.println("Processor " + sProcessorName + " present in the node");
-	        			
+
+	        			if (oProcessor.getType() == ProcessorTypes.IDL) {
+
+	        			}
+
 	        		}
 	        		else {
 	        			System.out.println("Processor " + sProcessorName + " NOT present in the node, JUMP");
 	        		}
 	        	}
-	        	
+
 	        }
 		}
 		catch (Exception oEx) {

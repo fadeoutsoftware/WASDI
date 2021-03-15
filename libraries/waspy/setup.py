@@ -15,13 +15,13 @@ with io.open("README.md", "r", encoding="utf8") as oFh:
 
 setuptools.setup(
     name="wasdi",
-    version="0.6.1",
+    version="0.6.2",
     author="FadeOut Software",
     author_email="info@fadeout.biz",
     description="The Wasdi Python library",
     long_description=sLong_description,
     long_description_content_type="text/markdown",
-    url="http://www.wasdi.net",
+    url="https://www.wasdi.net",
     packages=setuptools.find_packages(),
     install_requires = [
         'requests', 

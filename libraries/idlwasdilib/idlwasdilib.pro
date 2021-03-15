@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.1.5
-; Last Update: 2021-03-08
+; IDL WASDI Lib Version 0.6.2
+; Last Update: 2021-03-10
 ;
 ; History
+; 0.6.2 - 2021-03-10
+;	moved to https
+;
 ; 0.6.1.5 - 2021-03-08
 ;	Fixed default for support to https
 ;
@@ -74,9 +77,9 @@ PRO STARTWASDI, sConfigFilePath
 	workspaceurl = ''
 	token = ''
 	myprocid = ''
-	baseurl='217.182.93.57'
-	urlschema='http'
-	wsurlschema='http'
+	baseurl='www.wasdi.net'
+	urlschema='https'
+	wsurlschema='https'
 	parametersfilepath='./parameters.txt'
 	downloadactive = '1'
 	isonserver = '0'

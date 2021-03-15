@@ -73,7 +73,7 @@ public class WasdiLib {
 	/**
 	 * Data Base Url
 	 */
-	private String m_sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest";
+	private String m_sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
 	
 	/**
 	 * Flag to know if we are on the real server
@@ -373,7 +373,7 @@ public class WasdiLib {
 			m_sUser = ConfigReader.getPropValue("USER", "");
 			m_sPassword = ConfigReader.getPropValue("PASSWORD", "");
 			m_sBasePath = ConfigReader.getPropValue("BASEPATH", "");
-			m_sBaseUrl = ConfigReader.getPropValue("BASEURL", "http://www.wasdi.net/wasdiwebserver/rest");
+			m_sBaseUrl = ConfigReader.getPropValue("BASEURL", "https://www.wasdi.net/wasdiwebserver/rest");
 			m_sSessionId = ConfigReader.getPropValue("SESSIONID","");
 			m_sActiveWorkspace = ConfigReader.getPropValue("WORKSPACEID","");
 			m_sParametersFilePath = ConfigReader.getPropValue("PARAMETERSFILEPATH","./parameters.txt");

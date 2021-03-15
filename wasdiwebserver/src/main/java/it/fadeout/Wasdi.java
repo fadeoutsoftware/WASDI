@@ -914,7 +914,7 @@ public class Wasdi extends ResourceConfig {
 			
 			String sBaseUrl = sNodeUrl;
 			
-			if (Utils.isNullOrEmpty(sNodeUrl)) { sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest"; }
+			if (Utils.isNullOrEmpty(sNodeUrl)) { sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest"; }
 
 		    String sUrl = sBaseUrl + "/processing/downloadgraph?workflowId="+sWorkflowId;
 		    
