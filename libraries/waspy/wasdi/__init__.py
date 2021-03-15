@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.1
-Last Update: 18/11/2020
+Version 0.6.2
+Last Update: 10/03/2021
 
 Tested with: Python 2.7, Python 3.7
 
@@ -84,7 +84,7 @@ m_bVerbose = True
 m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
-m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
+m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 
 

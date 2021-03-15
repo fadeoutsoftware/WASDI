@@ -29,7 +29,7 @@ public class Trigger {
 	/**
 	 * Default Base Url
 	 */
-	String m_sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest/";
+	String m_sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest/";
 	/**
 	 * Static Logger that references the "Trigger" logger
 	 */
@@ -45,7 +45,7 @@ public class Trigger {
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 			// Read base path and url
 			m_sBasePath = ConfigReader.getPropValue("BASE_PATH", "/data/wasdi/");
-			m_sBaseUrl = ConfigReader.getPropValue("BASE_URL", "http://www.wasdi.net/wasdiwebserver/rest/");
+			m_sBaseUrl = ConfigReader.getPropValue("BASE_URL", "https://www.wasdi.net/wasdiwebserver/rest/");
 		} 
 		catch (Throwable oEx) {
 			oEx.printStackTrace();

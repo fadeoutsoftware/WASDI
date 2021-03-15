@@ -2,10 +2,19 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.1.1
-; Last Update: 2021-02-06
+; IDL WASDI Lib Version 0.6.2
+; Last Update: 2021-03-10
 ;
 ; History
+; 0.6.2 - 2021-03-10
+;	moved to https
+;
+; 0.6.1.5 - 2021-03-08
+;	Fixed default for support to https
+;
+; 0.6.1.4 - 2021-03-04
+;	Added support to https
+;
 ; 0.6.1.3 - 2021-02-19
 ;	Added optional style to SAVE FILE
 ;
@@ -46,131 +55,133 @@
 ;--------------------------------------------------------------------------------------------------------------------------
 
 PRO STARTWASDI, sConfigFilePath
-  ; Define a set of shared variables
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	; Define a set of shared variables
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
   
-  IF (sConfigFilePath EQ !NULL) THEN BEGIN
-	print, 'Config File null, return'
-	RETURN
-  END
-  
-  ; Open the Config File
-  openr,lun,sConfigFilePath, /GET_LUN
-  
-  print, 'Start Wasdi: config file path = ', sConfigFilePath
-
-  ; Initialize Shared Variables
-  basepath='/data/wasdi/'
-  user = ''
-  password = ''
-  activeworkspace = ''
-  workspaceowner = ''
-  workspaceurl = ''
-  token = ''
-  myprocid = ''
-  baseurl='217.182.93.57'
-  parametersfilepath='./parameters.txt'
-  downloadactive = '1'
-  isonserver = '0'
-  verbose = '0'
-  params = DICTIONARY()
-
-  sConfigFileLine = ''
-  
-  ; Read the config.properties file
-  WHILE NOT EOF(lun) DO BEGIN & $
-  
-    READF, lun, sConfigFileLine & $
-    asKeyValue = STRSPLIT(sConfigFileLine,'=',/EXTRACT)
-	
-	CASE asKeyValue[0] OF
-		'USER': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					user = asKeyValue[1]
-				END
-			END
-		'PASSWORD': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					password = asKeyValue[1]
-				END
-			END
-		'SESSIONID': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					token = asKeyValue[1]
-				END
-			END
-		'WORKSPACE': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					activeworkspace = asKeyValue[1]
-				END
-			END
-		'BASEPATH': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					basepath = asKeyValue[1]
-				END
-			END
-		'MYPROCID': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					myprocid = asKeyValue[1]
-				END
-			END
-		'BASEURL': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					baseurl = asKeyValue[1]
-				END
-			END
-		'PARAMETERSFILEPATH': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					parametersfilepath = asKeyValue[1]
-				END
-			END
-		'DOWNLOADACTIVE': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					downloadactive = asKeyValue[1]
-				END
-			END
-		'ISONSERVER': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					isonserver = asKeyValue[1]
-				END
-			END
-		'VERBOSE': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					verbose = asKeyValue[1]
-				END
-			END	
-		'UPLOADACTIVE': BEGIN
-				IF n_elements(asKeyValue) gt 1 THEN BEGIN
-					uploadactive = asKeyValue[1]
-				END
-			END					
-		ELSE: print, 'Config.properties invalid row: ', asKeyValue[0]
+	IF (sConfigFilePath EQ !NULL) THEN BEGIN
+		print, 'Config File null, return'
+		RETURN
 	END
+  
+	; Open the Config File
+	openr,lun,sConfigFilePath, /GET_LUN
+
+	print, 'Start Wasdi: config file path = ', sConfigFilePath
+
+	; Initialize Shared Variables
+	basepath='/data/wasdi/'
+	user = ''
+	password = ''
+	activeworkspace = ''
+	workspaceowner = ''
+	workspaceurl = ''
+	token = ''
+	myprocid = ''
+	baseurl='www.wasdi.net'
+	urlschema='https'
+	wsurlschema='https'
+	parametersfilepath='./parameters.txt'
+	downloadactive = '1'
+	isonserver = '0'
+	verbose = '0'
+	params = DICTIONARY()
+
+	sConfigFileLine = ''
+
+	; Read the config.properties file
+	WHILE NOT EOF(lun) DO BEGIN & $
+  
+		READF, lun, sConfigFileLine & $
+		asKeyValue = STRSPLIT(sConfigFileLine,'=',/EXTRACT)
+		
+		CASE asKeyValue[0] OF
+			'USER': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						user = asKeyValue[1]
+					END
+				END
+			'PASSWORD': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						password = asKeyValue[1]
+					END
+				END
+			'SESSIONID': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						token = asKeyValue[1]
+					END
+				END
+			'WORKSPACE': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						activeworkspace = asKeyValue[1]
+					END
+				END
+			'BASEPATH': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						basepath = asKeyValue[1]
+					END
+				END
+			'MYPROCID': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						myprocid = asKeyValue[1]
+					END
+				END
+			'BASEURL': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						baseurl = asKeyValue[1]
+					END
+				END
+			'PARAMETERSFILEPATH': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						parametersfilepath = asKeyValue[1]
+					END
+				END
+			'DOWNLOADACTIVE': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						downloadactive = asKeyValue[1]
+					END
+				END
+			'ISONSERVER': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						isonserver = asKeyValue[1]
+					END
+				END
+			'VERBOSE': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						verbose = asKeyValue[1]
+					END
+				END	
+			'UPLOADACTIVE': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						uploadactive = asKeyValue[1]
+					END
+				END					
+			ELSE: print, 'Config.properties invalid row: ', asKeyValue[0]
+		END
 	
-  ENDWHILE
-  
-  ; Close the config file and free the file unit
-  FREE_LUN, lun  
-  
-  REFRESHPARAMETERS
-  
-  print, 'call to init Wasdi'
-  
-  INITWASDI,user,password,basepath,token,myprocid
-  
-  IF (activeworkspace EQ !NULL) OR (STRLEN(activeworkspace) LE 1) THEN BEGIN
-    print, 'Workspace not set'
-  END ELSE BEGIN
-	WASDIOPENWORKSPACE, activeworkspace
-	print, 'Workspace ', activeworkspace, ' opened'
-  END 
-  
-  print, 'Wasdi initialized, welcome to space'
+	ENDWHILE
+
+	; Close the config file and free the file unit
+	FREE_LUN, lun  
+
+	REFRESHPARAMETERS
+
+	print, 'call to init Wasdi'
+
+	INITWASDI,user,password,basepath,token,myprocid
+
+	IF (activeworkspace EQ !NULL) OR (STRLEN(activeworkspace) LE 1) THEN BEGIN
+		print, 'Workspace not set'
+	END ELSE BEGIN
+		WASDIOPENWORKSPACE, activeworkspace
+		print, 'Workspace ', activeworkspace, ' opened'
+	END 
+
+	print, 'Wasdi initialized, welcome to space'
       
 END
 
 PRO REFRESHPARAMETERS
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner 
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	print, 'Wasdi configuration read, try to read params'
 
@@ -225,7 +236,7 @@ END
 ; IDL HTTP GET Function Utility
 FUNCTION WASDIHTTPGET, sUrlPath, sHostName
 	
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sUrlPath EQ !NULL) THEN BEGIN
 		print, 'Url Path is null, return'
@@ -238,8 +249,12 @@ FUNCTION WASDIHTTPGET, sUrlPath, sHostName
 		sessioncookie = token
 	END 
 	
+	sSchemaToUse = urlschema
+	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
+	END ELSE BEGIN
+		sSchemaToUse = wsurlschema
 	END
 
 	CATCH, iErrorStatus 
@@ -260,7 +275,7 @@ FUNCTION WASDIHTTPGET, sUrlPath, sHostName
 	oUrl = OBJ_NEW('IDLnetUrl')
 
 	; This is an http transaction
-	oUrl->SetProperty, URL_SCHEME = 'http'
+	oUrl->SetProperty, URL_SCHEME = sSchemaToUse
 
 	; Use the http server string
 	oUrl->SetProperty, URL_HOSTNAME = sHostName
@@ -287,7 +302,7 @@ END
 ; IDL HTTP GET Function Utility that DOES NOT CONVERT IN JSON
 FUNCTION WASDIHTTPGETNOJSON, sUrlPath, sHostName
 	
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sUrlPath EQ !NULL) THEN BEGIN
 		print, 'Url Path is null, return'
@@ -300,8 +315,12 @@ FUNCTION WASDIHTTPGETNOJSON, sUrlPath, sHostName
 		sessioncookie = token
 	END 
 	
+	sSchemaToUse = urlschema
+	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
+		sHostName = baseurl
+	END ELSE BEGIN
+		sSchemaToUse = wsurlschema
 	END
 
 	CATCH, iErrorStatus 
@@ -322,7 +341,7 @@ FUNCTION WASDIHTTPGETNOJSON, sUrlPath, sHostName
 	oUrl = OBJ_NEW('IDLnetUrl')
 
 	; This is an http transaction
-	oUrl->SetProperty, URL_SCHEME = 'http'
+	oUrl->SetProperty, URL_SCHEME = sSchemaToUse
 
 	; Use the http server string
 	oUrl->SetProperty, URL_HOSTNAME = sHostName
@@ -345,20 +364,24 @@ END
 ; IDL HTTP POST UTILITY FUNCTION
 FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sUrlPath EQ !NULL) THEN BEGIN
 		print, 'Url Path is null, return'
 		RETURN, !NULL
 	END
 	
-	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END	
+	sSchemaToUse = urlschema
 	
-	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END		
+	IF (sHostName EQ !NULL) THEN BEGIN
+		sHostName = baseurl
+	END ELSE BEGIN
+		IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+			sHostName = baseurl
+		END ELSE BEGIN
+			sSchemaToUse = wsurlschema
+		END		
+	END
 
 	sessioncookie = token
 
@@ -366,7 +389,7 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 	oUrl = OBJ_NEW('IDLnetUrl')
 
 	; This is an http transaction
-	oUrl->SetProperty, URL_SCHEME = 'http'
+	oUrl->SetProperty, URL_SCHEME = sSchemaToUse
 
 	; Use the http server string
 	oUrl->SetProperty, URL_HOSTNAME = sHostName
@@ -400,7 +423,7 @@ END
 ; IDL HTTP GET Function Utility
 FUNCTION WASDIHTTPDELETE, sUrlPath, sHostName
 	
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sUrlPath EQ !NULL) THEN BEGIN
 		print, 'Url Path is null, return'
@@ -413,9 +436,17 @@ FUNCTION WASDIHTTPDELETE, sUrlPath, sHostName
 		sessioncookie = token
 	END 
 	
+	sSchemaToUse = urlschema
+	
 	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END
+		sHostName = baseurl
+	END ELSE BEGIN
+		IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+			sHostName = baseurl
+		END ELSE BEGIN
+			sSchemaToUse = wsurlschema
+		END
+	END	
 
 	CATCH, iErrorStatus 
 
@@ -435,7 +466,7 @@ FUNCTION WASDIHTTPDELETE, sUrlPath, sHostName
 	oUrl = OBJ_NEW('IDLnetUrl')
 
 	; This is an http transaction
-	oUrl->SetProperty, URL_SCHEME = 'http'
+	oUrl->SetProperty, URL_SCHEME = sSchemaToUse
 
 	; Use the http server string
 	oUrl->SetProperty, URL_HOSTNAME = sHostName
@@ -461,11 +492,7 @@ END
 
 ;Utility method to get value of a key in a ordered hash
 FUNCTION GETVALUEBYKEY, jsonResult, sKey
-	
-	;IF (jsonResult EQ !NULL) THEN BEGIN
-	;	RETURN, !NULL
-	;END
-	
+		
 	IF (sKey EQ !NULL) THEN BEGIN
 		RETURN, !NULL
 	END
@@ -581,7 +608,7 @@ END
 ; Method Used to login in wasdi. Do not need to call, is called in the Init
 FUNCTION WASDILOGIN,wuser,wpassword
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; Path of login API
 	UrlPath = '/wasdiwebserver/rest/auth/login'
@@ -600,14 +627,14 @@ END
 ; Method Used to login in wasdi with the User Session
 FUNCTION WASDICHECKSESSION,sessionId
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sessionId EQ !NULL) THEN BEGIN
 		RETURN, !NULL
 	END
 
 	; Path of Check Session API
-	UrlPath = '/wasdiwebserver/rest/auth/checksession'
+	UrlPath = '/wasdiwebserver/rest/auth/checksession'	
 
 	; Send post request
 	serverJSONResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -625,7 +652,7 @@ END
 PRO INITWASDI,sUser,sPassword,sBasePath,sSessionId,sMyProdId
 
 	; Define a set of shared variables
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	basepath = sBasePath
 	user = sUser
@@ -665,7 +692,7 @@ END
 ; Get the status of a WASDI Process
 FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API URL
 	UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
@@ -682,7 +709,7 @@ END
 
 FUNCTION WASDIWAITPROCESS, sProcessID
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	sStatus=' '
 	
@@ -706,7 +733,7 @@ END
 
 FUNCTION WASDIWAITPROCESSES, asProcessIDs
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	sStatus=''
 	
@@ -780,7 +807,7 @@ END
 ; Changes the workpsaceowner shared variable
 FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	workspaceId = "";
 
@@ -818,7 +845,7 @@ END
 ; Get the URL of a Workspace
 FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	ownerUserId = "";
 	
@@ -843,7 +870,9 @@ FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
 	sIpAddress = ''
 	
 	IF (N_ELEMENTS(asURLValues) GT 0) THEN BEGIN
+		wsurlschema = STRMID(asURLValues[0],0,STRLEN(asURLValues[0])-1)
 		sIpAddress = asURLValues[1]
+		print, 'WS URL SCHEMA = ', wsurlschema, ' IP ', sIpAddress
 	ENDIF
 	
 	; return the found address or ""
@@ -855,8 +884,8 @@ END
 ; Get the owner of a Workspace
 FUNCTION WASDIGETWORKSPACEOWNERBYWSID, workspaceid
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
-
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	ownerUserId = "";
 	
 	; API URL
@@ -893,7 +922,7 @@ END
 ; Check if a product exists already. returns 1 if exists, 0 if not
 FUNCTION WASDICHECKPRODUCTEXISTS, filename
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	workspaceId = "";
 
@@ -927,7 +956,7 @@ END
 ; Check if a product exists already. returns 1 if exists, 0 if not
 FUNCTION WASDIGETPRODUCTBBOX, filename
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	workspaceId = "";
 
@@ -955,7 +984,7 @@ END
 ; Delete product
 FUNCTION WASDIDELETEPRODUCT, filename
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	workspaceId = activeworkspace;
 
@@ -981,7 +1010,8 @@ END
 ; Open a  Workspace by name
 pro WASDIOPENWORKSPACE,workspacename
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	; Set active Workspace and owner
 	activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
 	workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
@@ -995,7 +1025,8 @@ END
 ; Open a  Workspace by Id
 pro WASDIOPENWORKSPACEBYID, sWorkspaceId
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	; Set active Workspace and owner
 	activeworkspace = sWorkspaceId
 	workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(activeworkspace)
@@ -1010,107 +1041,96 @@ END
 ; Get the list of products in a WS. Takes the name in input gives in output an array of string with on element for each file
 FUNCTION WASDIGETPRODUCTSBYWORKSPACE,workspacename
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
-  
-  WASDIOPENWORKSPACE, workspacename
-  
-  workspaceid = activeworkspace
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+workspaceid
+	WASDIOPENWORKSPACE, workspacename
 
-  ; Get the list of products
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-  
-  ; Create the output array
-  asProductsNames = []
+	workspaceid = activeworkspace
 
-  ; Convert JSON in a String Array
-  FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
+	; API url
+	UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+workspaceid
 
-    oProduct = wasdiResult[i]
-    sFileName = GETVALUEBYKEY(oProduct, 'fileName')
-    asProductsNames=[asProductsNames,sFileName]
+	; Get the list of products
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
-  ENDFOR
+	; Create the output array
+	asProductsNames = []
 
-  ; Return the array
-  RETURN, asProductsNames
+	; Convert JSON in a String Array
+	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
+		oProduct = wasdiResult[i]
+		sFileName = GETVALUEBYKEY(oProduct, 'fileName')
+		asProductsNames=[asProductsNames,sFileName]
+	ENDFOR
+
+	; Return the array
+	RETURN, asProductsNames
 END
 
 ; Get the list of products in a WS. Takes the name in input gives in output an array of string with on element for each file
 FUNCTION WASDIGETACTIVEWORKSPACEPRODUCTS
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/product/namesbyws?sWorkspaceId='+activeworkspace
+	; API url
+	UrlPath = '/wasdiwebserver/rest/product/namesbyws?sWorkspaceId='+activeworkspace
 
-  ; Get the list of products
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-  
-  iResults = n_elements(wasdiResult)
-  
-  IF iResults GT 0 THEN BEGIN  
-	  ; Create the output array
-	  asProductsNames = STRARR(iResults)
+	; Get the list of products
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
-	  ; Convert JSON in a String Array
-	  FOR i=0,iResults-1 DO BEGIN
+	iResults = n_elements(wasdiResult)
 
-		;oProduct = wasdiResult[i]
-		;sFileName = GETVALUEBYKEY(oProduct, 'fileName')
-		;sFileName = oProduct['fileName']
-		
-		;asProductsNames[i]=sFileName
-		asProductsNames[i]=wasdiResult[i]
+	IF iResults GT 0 THEN BEGIN  
+		; Create the output array
+		asProductsNames = STRARR(iResults)
 
-	  ENDFOR
-  END ELSE BEGIN
-	asProductsNames = []
-  END
-  
-  ; Return the array
-  RETURN, asProductsNames
-   
+		; Convert JSON in a String Array
+		FOR i=0,iResults-1 DO BEGIN
+	  
+			asProductsNames[i]=wasdiResult[i]
+		ENDFOR
+	END ELSE BEGIN
+		asProductsNames = []
+	END
+	
+	; Return the array
+	RETURN, asProductsNames
 END
 
 ; Obtain the local full path of a EO File
 FUNCTION WASDIGETFULLPRODUCTPATH, sProductName
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; be sure to end the base path with /
-  IF (not(  (basepath.charAt(strlen(basepath)-1) EQ '\') OR (basepath.charAt(strlen(basepath)-1) EQ '/'))) THEN BEGIN
-    basepath = basepath + '/'
-  END
+	; be sure to end the base path with /
+	IF (not(  (basepath.charAt(strlen(basepath)-1) EQ '\') OR (basepath.charAt(strlen(basepath)-1) EQ '/'))) THEN BEGIN
+		basepath = basepath + '/'
+	END
 
-  ; compose the full path
-  ;sFullPath = basepath + user +'/' + activeworkspace + '/' +  sProductName
-  sFullPath = basepath + workspaceowner +'/' + activeworkspace + '/' +  sProductName
+	; compose the full path
+	sFullPath = basepath + workspaceowner +'/' + activeworkspace + '/' +  sProductName
   
   
-  IF (isonserver EQ '0') THEN BEGIN
-	IF (downloadactive EQ '1') THEN BEGIN
-		result = FILE_TEST(sFullPath)
-		
-		IF (result NE '1') THEN BEGIN
-			sOnlyPath = basepath + workspaceowner +'/' + activeworkspace
-			FILE_MKDIR, sOnlyPath
-			print, 'WASDI File not present in local PC. Starting Autodownload'
-			WASDIDOWNLOADFILE, sProductName, sFullPath
-			print, 'WASDI File Downloaded'
+	IF (isonserver EQ '0') THEN BEGIN
+		IF (downloadactive EQ '1') THEN BEGIN
+			result = FILE_TEST(sFullPath)
+			IF (result NE '1') THEN BEGIN
+				sOnlyPath = basepath + workspaceowner +'/' + activeworkspace
+				FILE_MKDIR, sOnlyPath
+				print, 'WASDI File not present in local. Starting Autodownload'
+				WASDIDOWNLOADFILE, sProductName, sFullPath
+				print, 'WASDI File Downloaded'
+			END
 		END
 	END
-  END
 
-  RETURN, sFullPath
+	RETURN, sFullPath
 END
 
 ; Donwloads a File from WASDI
 PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	IF (token EQ !NULL) OR (STRLEN(token) LE 1) THEN BEGIN
 		sessioncookie = ''
@@ -1128,13 +1148,20 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 	
 	sUrlAddress = workspaceurl
 	
-	IF (sUrlAddress EQ !NULL) THEN BEGIN
-		sUrlAddress = '217.182.93.57'
-	ENDIF
+	sSchemaToUse = urlschema
 	
-	IF (sUrlAddress EQ '') THEN BEGIN
-		sUrlAddress = '217.182.93.57'
-	ENDIF	
+	IF (sUrlAddress EQ !NULL) THEN BEGIN
+		sUrlAddress = baseurl
+	END ELSE BEGIN
+		sSchemaToUse = wsurlschema
+	END
+	
+	IF (STRLEN(sUrlAddress) EQ 0) THEN BEGIN
+		sUrlAddress = baseurl
+	END ELSE BEGIN
+		sSchemaToUse = wsurlschema
+	END			
+	
 	
 	print, 'WASDIDOWNLOADFILE sUrlAddress = ', sUrlAddress
 
@@ -1142,7 +1169,7 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 	oUrl = OBJ_NEW('IDLnetUrl')
 
 	; This is an http transaction
-	oUrl->SetProperty, URL_SCHEME = 'http'
+	oUrl->SetProperty, URL_SCHEME = urlschema
 
 	; Use the http server string
 	oUrl->SetProperty, URL_HOSTNAME = sUrlAddress
@@ -1165,38 +1192,38 @@ END
 ; Get the base path to use to save generated files
 pro WASDIGETSAVEPATH, sFullPath
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; be sure to end the base path with /
-  IF (not(  (basepath.charAt(strlen(basepath)-1) eq '\') or (basepath.charAt(strlen(basepath)-1) eq '/'))) THEN BEGIN
-    basepath = basepath + '/'
-  ENDIF
+	; be sure to end the base path with /
+	IF (not(  (basepath.charAt(strlen(basepath)-1) eq '\') or (basepath.charAt(strlen(basepath)-1) eq '/'))) THEN BEGIN
+		basepath = basepath + '/'
+	ENDIF
 
-  ; compose the full path
-  ;sFullPath = basepath + user +'/' + activeworkspace + '/'
-  sFullPath = basepath + workspaceowner +'/' + activeworkspace + '/'
+	; compose the full path
+	sFullPath = basepath + workspaceowner +'/' + activeworkspace + '/'
 
 END
 
 ; Get the list of available workflows
 FUNCTION WASDIGETWORKFLOWS
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/processing/getgraphsbyusr'
+	; API url
+	UrlPath = '/wasdiwebserver/rest/processing/getgraphsbyusr'
 
-  ; Call API
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+	; Call API
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
-  RETURN, wasdiResult
+	RETURN, wasdiResult
 END
 
 
 ; Execute a SNAP xml Workflow in WASDI
 FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow, iAsynch
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	sessioncookie = token
 
 	;get the list of workflows
@@ -1319,7 +1346,8 @@ END
 ; Execute a WASDI PROCESSOR
 FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	sessioncookie = token
 
 	; API url
@@ -1366,7 +1394,8 @@ END
 ; Create a Mosaic from a list of input images
 FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+  
   sessioncookie = token
 
 
@@ -1448,7 +1477,8 @@ END
 ; Create a Subset from an image
 FUNCTION WASDISUBSET, sInputFile, sOutputFile, sLatN, sLonW, sLatS, sLonE
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	sessioncookie = token
 
 
@@ -1513,7 +1543,8 @@ END
 ; Create a Subset from an image
 FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asLonE
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	sessioncookie = token
 
 
@@ -1585,7 +1616,8 @@ END
 ;
 FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage 
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+  
   sessioncookie = token
 
   ; API url
@@ -1674,52 +1706,54 @@ END
 ; Import EO Image in WASDI
 FUNCTION WASDIIMPORTEOIMAGE, oEOImage
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/filebuffer/download'
-  
-  sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
-  sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sessioncookie = token
 
-  ; Create a new url object
-  oUrl = OBJ_NEW('IDLnetUrl')
-  sEncodedLink = oUrl->URLEncode(sFileLink)
-  sEncodedBB = oUrl->URLEncode(sBoundingBox)
-  
-  sProvider = "ONDA"
+	; API url
+	UrlPath = '/wasdiwebserver/rest/filebuffer/download'
 
-  sQuery = "sFileUrl=" + sEncodedLink + "&sProvider="+sProvider+"&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
-  
-  UrlPath = UrlPath + '?' + sQuery
-  
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-   
-  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-  
-  sProcessID = ''
-  
-  ; get the process id
-  IF sResponse then BEGIN
-    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
-    sProcessID=sValue
-  ENDIF
-  
-  sStatus = "ERROR"
-  
-  ; Wait for the process to finish
-  IF sProcessID ne '' then BEGIN
-    sStatus = WASDIWAITPROCESS(sProcessID)
-  ENDIF  
-  
-  RETURN, wasdiResult
+	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
+	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+	sEncodedLink = oUrl->URLEncode(sFileLink)
+	sEncodedBB = oUrl->URLEncode(sBoundingBox)
+
+	sProvider = "ONDA"
+
+	sQuery = "sFileUrl=" + sEncodedLink + "&sProvider="+sProvider+"&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+
+	UrlPath = UrlPath + '?' + sQuery
+
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse then BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID ne '' then BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF  
+
+	RETURN, wasdiResult
 END
 
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	sMyProcId = myprocid
 
 	sPerc = STRING(iPerc)
@@ -1740,7 +1774,7 @@ END
 ; Update the progress of this own process
 PRO WASDILOG, sLog
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	sTimestamp = SYSTIME()
 	print, '[', myprocid, '] - ', sTimestamp,': ', sLog
@@ -1754,23 +1788,23 @@ END
 ; Update the status of a WASDI Process
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API URL
-  UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+iPerc
-  wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
-  
-  ; get the output status
-  sUpdatedStatus = GETVALUEBYKEY(wasdiResult, 'status')
-  
-  RETURN, sUpdatedStatus
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+iPerc
+	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
+
+	; get the output status
+	sUpdatedStatus = GETVALUEBYKEY(wasdiResult, 'status')
+
+	RETURN, sUpdatedStatus
 END
 
 
 ; Adds a new product to the Workspace in WASDI
 FUNCTION WASDISAVEFILE, sFileName, sStyle
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (isonserver EQ '1') THEN BEGIN
 
@@ -1812,7 +1846,7 @@ END
 ;Get a Parameter stored in the parameters file 
 FUNCTION WASDIGETPARAMETER, sParameterName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	iKeyExists = params.HasKey(sParameterName)
 	
@@ -1829,21 +1863,24 @@ END
 ;Add a Parameter to the parameters dictionary. It changes it if already there
 PRO WASDIADDPARAMETER, sParameterName, sParameterValue
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	params[sParameterName] = sParameterValue
 	
 END
 
 ; Get the full parameters Dictionary
 FUNCTION WASDIGETPARAMETERSDICT
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl	
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	RETURN, params
 END
 
 ;Get a Parameter stored in the parameters file 
 FUNCTION WASDIGETPROCESSORPATH
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	oResult = SCOPE_TRACEBACK(/STRUCTURE)
 	;get path of running source code the last is -1 before -2 ...
 	oStack = oResult[-2]
@@ -1854,159 +1891,159 @@ END
 
 ; get the verbose flag. Should be '0' or '1'
 FUNCTION WASDIGETVERBOSE
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, verbose
 END
 
 ; Set the verbose flag. Please use '0' or '1'
 PRO WASDISETVERBOSE, sVerbose
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	verbose = sVerbose
 END
 
 ; Get the wasdi user
 FUNCTION WASDIGETUSER
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, user
 END
 
 ; Set the wasdi user
 PRO WASDISETUSER, sUser
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	user = sUser
 END
 
 ; Get the wasdi password
 FUNCTION WASDIGETPASSWORD
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, password
 END
 
 ; Set the wasdi password
 PRO WASDISETPASSWORD, sPassword
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	password = sPassword
 END
 
 ; Get the wasdi session Id
 FUNCTION WASDIGETSESSIONID
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, token
 END
 
 ; Set the wasdi Session Id
 PRO WASDISETSESSIONID, sSessionId
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	token = sSessionId
 END
 
 ; Get the parameters file path
 FUNCTION WASDIGETPARAMETERSFILEPATH
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, parametersfilepath
 END
 
 ; Set the parameters file path
 PRO WASDISETPARAMETERSFILEPATH, sParametersFilePath
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	parametersfilepath = sParametersFilePath
 END
 
 ; Get Base Path
 FUNCTION WASDIGETBASEPATH
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, basepath
 END
 
 ; Set Base Path
 PRO WASDISETBASEPATH, sBasePath
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	basepath = sBasePath
 END
 
 ; Get Base Url
 FUNCTION WASDIGETBASEURL
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, baseurl
 END
 
 ; Set Base Url
 PRO WASDISETBASEURL, sBaseUrl
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	baseurl = sBaseUrl
 END
 
 ; Get Is On Server
 FUNCTION WASDIGETISONSERVER
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, isonserver
 END
 
 ; Set Is On Server
 PRO WASDISETISONSERVER, sIsOnserver
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	isonserver = sIsOnserver
 END
 
 ; Get Download Active
 FUNCTION WASDIGETDOWNLOADACTIVE
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, downloadactive
 END
 
 ; Set Download Active
 PRO WASDISETDOWNLOADACTIVE, sDownloadActive
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	downloadactive = sDownloadActive
 END
 
 ; Get Upload Active
 FUNCTION WASDIGETUPLOADACTIVE
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, uploadactive
 END
 
 ; Set Upload Active
 PRO WASDISETUPLOADACTIVE, sUploadActive
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	uploadactive = sUploadActive
 END
 
 ; Get Proc Id
 FUNCTION WASDIGETPROCID
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, myprocid
 END
 
 ; Set Proc Id
 PRO WASDISETPROCID, sProcId
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	myprocid = sProcId
 END
 
 
 ; Get Active Workspace Id
 FUNCTION WASDIGETACTIVEWORKSPACEID
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, activeworkspace
 END
 
 ; Set  Active Workspace Id
 PRO WASDISETACTIVEWORKSPACEID, sActiveWorkspaceId
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	activeworkspace = sActiveWorkspaceId
 END
 
 
 ; Get Workspace URL
 FUNCTION WASDIGETWORKSPACEURL
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	RETURN, workspaceurl
 END
 
 ; Set  Workspace URL
 PRO WASDISETWORKSPACEURL, sWorkspaceUrl
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	workspaceurl = sWorkspaceUrl
 END
 
@@ -2023,70 +2060,70 @@ END
 ; Create a new Workspace. Name can be !NULL or a valid string.
 FUNCTION WASDICREATEWORKSPACE, sName
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/ws/create'
-  
-  IF (sName NE !NULL) THEN BEGIN
-	 UrlPath = UrlPath + "?name=" + sName
-  END
-  
-  ; Create a new url object
-  oUrl = OBJ_NEW('IDLnetUrl')
-  
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-   
-  sResponse = GETVALUEBYKEY(wasdiResult, 'stringValue')
-    
-  RETURN, sResponse
+	sessioncookie = token
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/ws/create'
+
+	IF (sName NE !NULL) THEN BEGIN
+		UrlPath = UrlPath + "?name=" + sName
+	END
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'stringValue')
+
+	RETURN, sResponse
 END
 
 
 ; Deletes a Workspace. Takes the Workspace Id in input
 FUNCTION WASDIDELETEWORKSPACE, sWorkspaceId
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  
-  IF (sWorkspaceId EQ !NULL) THEN BEGIN
-	RETURN, 0
-  END
-  
-  sActualWorkspaceId = activeworkspace
-  
-  WASDIOPENWORKSPACEBYID, sWorkspaceId
-  
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/ws/delete?sWorkspaceId=' + sWorkspaceId +'&bDeleteLayer=true&bDeleteFile=true'
-  
-  ; Create a new url object
-  oUrl = OBJ_NEW('IDLnetUrl')
-  
-  sToDeleteUrlNode = WASDIGETWORKSPACEURLBYWSID(sWorkspaceId)
-  
-  IF (sToDeleteUrlNode EQ "") THEN BEGIN
+	IF (sWorkspaceId EQ !NULL) THEN BEGIN
+		RETURN, 0
+	END
+
+	sActualWorkspaceId = activeworkspace
+
+	WASDIOPENWORKSPACEBYID, sWorkspaceId
+
+	sessioncookie = token
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/ws/delete?sWorkspaceId=' + sWorkspaceId +'&bDeleteLayer=true&bDeleteFile=true'
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+
+	sToDeleteUrlNode = WASDIGETWORKSPACEURLBYWSID(sWorkspaceId)
+
+	IF (sToDeleteUrlNode EQ "") THEN BEGIN
 	sToDeleteUrlNode = !NULL
-  END
-  
-  wasdiResult = WASDIHTTPDELETE(UrlPath, sToDeleteUrlNode)
-   
-  WASDIOPENWORKSPACEBYID, sActualWorkspaceId
-  
-  IF (wasdiResult EQ !NULL) THEN BEGIN
-	RETURN, 0
-  END
-  
-  RETURN, 1
+	END
+
+	wasdiResult = WASDIHTTPDELETE(UrlPath, sToDeleteUrlNode)
+
+	WASDIOPENWORKSPACEBYID, sActualWorkspaceId
+
+	IF (wasdiResult EQ !NULL) THEN BEGIN
+		RETURN, 0
+	END
+
+	RETURN, 1
 END
 
 ; Get the owner of a Workspace by the workspace name
 FUNCTION WASDIGETWORKSPACEOWNERBYNAME, sName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	ownerUserId = "";
 	
@@ -2124,37 +2161,37 @@ END
 ; Get the list of products in a WS. Takes the workspace Id in input gives in output an array of string with on element for each file. Note: it opens the new workspace!!
 FUNCTION WASDIGETPRODUCTSBYWORKSPACEID, sWorkspaceId
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  
-  WASDIOPENWORKSPACEBYID, sWorkspaceId
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+sWorkspaceId
+	WASDIOPENWORKSPACEBYID, sWorkspaceId
 
-  ; Get the list of products
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-  
-  ; Create the output array
-  asProductsNames = []
+	; API url
+	UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+sWorkspaceId
 
-  ; Convert JSON in a String Array
-  FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
+	; Get the list of products
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
 
-    oProduct = wasdiResult[i]
-    sFileName = GETVALUEBYKEY(oProduct, 'fileName')
-    asProductsNames=[asProductsNames,sFileName]
+	; Create the output array
+	asProductsNames = []
 
-  ENDFOR
+	; Convert JSON in a String Array
+	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
 
-  ; Return the array
-  RETURN, asProductsNames
+		oProduct = wasdiResult[i]
+		sFileName = GETVALUEBYKEY(oProduct, 'fileName')
+		asProductsNames=[asProductsNames,sFileName]
+
+	ENDFOR
+
+	; Return the array
+	RETURN, asProductsNames
 END
 
 
 ;Get Local File Path. If the file exists and needed the file will be automatically downloaded.
 ;Returns the full local path where to read or write sFile
 FUNCTION WASDIGETPATH, sFile
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (WASDICHECKPRODUCTEXISTS(sFile) EQ 1) THEN BEGIN
 		RETURN, WASDIGETFULLPRODUCTPATH(sFile)
@@ -2170,7 +2207,7 @@ END
 ; iPerc: new Percentage.-1 By default, means no change percentage. Use a value between 0 and 100 to set it.
 ; return: the updated status as a String or '' if there was any problem
 FUNCTION WASDIUPDATESTATUS, sStatus, iPerc
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (isonserver EQ 0) THEN BEGIN
 		RETURN, ""
@@ -2187,7 +2224,7 @@ END
 ;return: the updated status as a String or '' if there was any problem
 FUNCTION WASDISETPROCESSPAYLOAD, sProcessId, data
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	;Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')  
@@ -2211,7 +2248,7 @@ END
 ;return: the updated status as a String or '' if there was any problem
 FUNCTION WASDISETPAYLOAD, data
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	RETURN, WASDISETPROCESSPAYLOAD(myprocid, data)
 END
@@ -2222,7 +2259,7 @@ END
 ;return: the processor payload if present, "" otherwise
 FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sProcessId EQ !NULL) THEN BEGIN
 		RETURN, ""
@@ -2241,7 +2278,7 @@ END
 
 FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sProcessId EQ !NULL) THEN BEGIN
 		RETURN, ""
@@ -2263,7 +2300,7 @@ END
 ;return: the updated status as a String or '' if there was any problem
 FUNCTION WASDISETSUBPID, sProcessId, iSubPid
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sProcessId EQ !NULL) THEN BEGIN
 		RETURN, ""
@@ -2286,43 +2323,45 @@ END
 ; ASYNCH Import EO Image in WASDI
 FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/filebuffer/download'
-  
-  sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
-  sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sessioncookie = token
 
-  ; Create a new url object
-  oUrl = OBJ_NEW('IDLnetUrl')
-  sEncodedLink = oUrl->URLEncode(sFileLink)
-  sEncodedBB = oUrl->URLEncode(sBoundingBox)
+	; API url
+	UrlPath = '/wasdiwebserver/rest/filebuffer/download'
 
-  sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
-  
-  UrlPath = UrlPath + '?' + sQuery
-  
-  wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-   
-  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-  
-  sProcessID = ''
-  
-  ; get the process id
-  IF sResponse then BEGIN
-    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
-    sProcessID=sValue
-  ENDIF
-  
-  RETURN, sProcessID
+	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
+	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+	sEncodedLink = oUrl->URLEncode(sFileLink)
+	sEncodedBB = oUrl->URLEncode(sBoundingBox)
+
+	sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+
+	UrlPath = UrlPath + '?' + sQuery
+
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse then BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	RETURN, sProcessID
 END
 
 ; Execute a WASDI PROCESSOR
 FUNCTION WASDIEXECUTEPROCESSOR, sProcessorName, aoParameters
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
 	sessioncookie = token
 
 	; API url
@@ -2377,7 +2416,8 @@ END
 ; Create a Mosaic from a list of input images
 FUNCTION WASDIASYNCHMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+  
   sessioncookie = token
 
 
@@ -2451,7 +2491,7 @@ END
 ; Adds a new product to the Workspace in WASDI
 FUNCTION WASDIASYNCHADDFILETOWASDI, sFileName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (isonserver EQ '0') THEN BEGIN
 
@@ -2483,20 +2523,25 @@ END
 ; IDL HTTP POST UTILITY FUNCTION
 FUNCTION WASDIHTTPPOSTFILE, sUrlPath, sFileName, sHostName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (sUrlPath EQ !NULL) THEN BEGIN
 		print, 'Url Path is null, return'
 		RETURN, !NULL
 	END
 	
-	IF (sHostName EQ !NULL) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END	
+	sSchemaToUse = urlschema
 	
-	IF (STRLEN(sHostName) EQ 0) THEN BEGIN
-		sHostName = '217.182.93.57'
-	END		
+	IF (sHostName EQ !NULL) THEN BEGIN
+		sHostName = baseurl
+	END ELSE BEGIN
+		IF (STRLEN(sHostName) EQ 0) THEN BEGIN
+			sHostName = baseurl
+		END ELSE BEGIN
+			sSchemaToUse = wsurlschema
+		END	
+	END
+	
 
 	sessioncookie = token
 
@@ -2504,7 +2549,7 @@ FUNCTION WASDIHTTPPOSTFILE, sUrlPath, sFileName, sHostName
 	oUrl = OBJ_NEW('IDLnetUrl')
 
 	; This is an http transaction
-	oUrl->SetProperty, URL_SCHEME = 'http'
+	oUrl->SetProperty, URL_SCHEME = sSchemaToUse
 
 	; Use the http server string
 	oUrl->SetProperty, URL_HOSTNAME = sHostName
@@ -2540,7 +2585,7 @@ END
 ; Adds a new product to the Workspace in WASDI
 FUNCTION WASDIUPLOADFILE, sFileName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API url
 	UrlPath = '/wasdiwebserver/rest/product/uploadfilebylib?workspace='+activeworkspace+'&name='+sFileName
@@ -2560,21 +2605,22 @@ END
 ;return: execution status as an array of  STRINGs, one for each product in input. Can be CREATED, DONE, ERROR, STOPPED, WAITING, READY
 FUNCTION WASDIIMPORTPRODUCTLIST, aoEOImages
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  sessioncookie = token
-  
-  IF (aoEOImages EQ !NULL) THEN BEGIN
-	RETURN, 'ERROR'
-  END
-  
-  asProcesses = []
-  
-  FOREACH oImage, aoEOImages DO BEGIN
-	sProcessId = WASDIASYNCHIMPORTEOIMAGE(oImage)
-	asProcesses = [asProcesses, sProcessId] 
-  END
-  
-  RETURN, WASDIWAITPROCESSES(asProcesses)
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+
+	sessioncookie = token
+
+	IF (aoEOImages EQ !NULL) THEN BEGIN
+		RETURN, 'ERROR'
+	END
+
+	asProcesses = []
+
+	FOREACH oImage, aoEOImages DO BEGIN
+		sProcessId = WASDIASYNCHIMPORTEOIMAGE(oImage)
+		asProcesses = [asProcesses, sProcessId] 
+	END
+
+	RETURN, WASDIWAITPROCESSES(asProcesses)
 END
 
 ;Asynch Import a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
@@ -2583,21 +2629,22 @@ END
 ;return: array of the ProcessId of the Download Operations. An element can be "ERROR" if there was any problem
 FUNCTION WASDIASYNCHIMPORTPRODUCTLIST, aoEOImages
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
-  sessioncookie = token
-  
-  IF (aoEOImages EQ !NULL) THEN BEGIN
-	RETURN, 'ERROR'
-  END
-  
-  asProcesses = []
-  
-  FOREACH oImage, aoEOImages DO BEGIN
-	sProcessId = WASDIASYNCHIMPORTEOIMAGE(oImage)
-	asProcesses = [asProcesses, sProcessId] 
-  END
-  
-  RETURN, asProcesses
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
+	sessioncookie = token
+
+	IF (aoEOImages EQ !NULL) THEN BEGIN
+		RETURN, 'ERROR'
+	END
+
+	asProcesses = []
+
+	FOREACH oImage, aoEOImages DO BEGIN
+		sProcessId = WASDIASYNCHIMPORTEOIMAGE(oImage)
+		asProcesses = [asProcesses, sProcessId] 
+	END
+
+	RETURN, asProcesses
 END
 
 
@@ -2607,7 +2654,7 @@ END
 ;return: status. An empty string is returned in case of failure    
 FUNCTION WASDICOPYFILETOSFTP, sFileName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 
 	; API url
@@ -2642,7 +2689,7 @@ END
 ;sName: Name filter. The name meaning depends by the operation type. None by default. For RUNPROCESSOR, RUNIDL and RUNMATLAB is the name of the application
 FUNCTION WASDIGETPROCESSESBYWORKSPACE, iStartIndex, iEndIndex, sStatus, sOperationType, sName
 
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
 	IF (iStartIndex EQ !NULL) THEN BEGIN
 		iStartIndex = 0
