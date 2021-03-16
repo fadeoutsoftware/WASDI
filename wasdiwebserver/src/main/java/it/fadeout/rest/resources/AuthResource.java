@@ -194,7 +194,8 @@ public class AuthResource {
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
+		//if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null ) {
 			Utils.debugLog("AuthResource.CheckSession: invalid session");
 			return UserViewModel.getInvalid();
 		}

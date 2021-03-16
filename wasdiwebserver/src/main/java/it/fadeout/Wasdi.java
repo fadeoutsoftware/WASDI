@@ -345,19 +345,25 @@ public class Wasdi extends ResourceConfig {
 
 			String sUserId = null;
 			//todo validate token with JWT
+			
+			try  {
+				//introspect
+				String sPayload = "token=" + sSessionId;
+				Map<String,String> asHeaders = new HashMap<>();
+				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+				String sResponse = httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
+				JSONObject oJSON = null;
+				if(!Utils.isNullOrEmpty(sResponse)) {
+					oJSON = new JSONObject(sResponse);
+				}
+				if(null!=oJSON) {
+					sUserId = oJSON.optString("preferred_username", null);
+				}				
+			}
+			catch (Exception oKeyEx) {
+				Utils.debugLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+			}
 
-			//introspect
-			String sPayload = "token=" + sSessionId;
-			Map<String,String> asHeaders = new HashMap<>();
-			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-			String sResponse = httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
-			JSONObject oJSON = null;
-			if(!Utils.isNullOrEmpty(sResponse)) {
-				oJSON = new JSONObject(sResponse);
-			}
-			if(null!=oJSON) {
-				sUserId = oJSON.optString("preferred_username", null);
-			}
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();

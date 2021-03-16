@@ -837,7 +837,7 @@ var ImportController = (function() {
                 // oProduct.isDisabledToDoDownload = false;
             };
         }
-        this.m_oFileBufferService.download(sUrl,sWorkspaceId,sBounds,oProvider).then(oCallback).error(oError);
+        this.m_oFileBufferService.download(sUrl,sWorkspaceId,sBounds,oProvider).then(oCallback, oError);
     };
 
     ImportController.prototype.openSelectWorkspaceDialog = function(oCallback){

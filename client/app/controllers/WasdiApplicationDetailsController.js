@@ -377,7 +377,7 @@ var WasdiApplicationDetailsController = (function() {
                 controller: "ProcessorController",
                 inputs: {
                     extras: {
-                        processor:data
+                        processor:data.data
                     }
                 }
             }).then(function (modal) {

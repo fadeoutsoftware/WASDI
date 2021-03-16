@@ -178,8 +178,8 @@ var WasdiApplicationUIController = (function() {
                 // Create all the components
                 oController.m_aoViewElements = oController.generateViewElements(data.data);
 
-                if (!utilsIsObjectNullOrUndefined(data.renderAsStrings)) {
-                    if (data.renderAsStrings === true) {
+                if (!utilsIsObjectNullOrUndefined(data.data.renderAsStrings)) {
+                    if (data.data.renderAsStrings === true) {
                         oController.m_bRenderAsStrings = true;
                     }
                 }
@@ -626,7 +626,7 @@ var WasdiApplicationUIController = (function() {
                 controller: "ProcessorController",
                 inputs: {
                     extras: {
-                        processor:data
+                        processor:data.data
                     }
                 }
             }).then(function (modal) {

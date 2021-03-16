@@ -191,7 +191,7 @@ public class CredentialPolicy {
 		if(null==oUser) {
 			throw new NullPointerException();
 		}
-		return validAuthServiceProvider(oUser.getAuthServiceProvider());
+		return true;//validAuthServiceProvider(oUser.getAuthServiceProvider());
 
 		
 //		} else if(!validUserId(oUser.getUserId())) {
