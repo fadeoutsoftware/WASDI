@@ -634,6 +634,7 @@ public class AuthResource {
 				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
 				return oResult;
 			} else {
+				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " is a new user");
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
 
