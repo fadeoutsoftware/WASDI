@@ -29,7 +29,7 @@ public class KeycloakService implements AuthProviderService {
 			if(!sAuthUrl.endsWith("/")) {
 				sAuthUrl += "/";
 			}
-			sAuthUrl += "realms/wasdi/protocol/openid-connect/token";
+			sAuthUrl += "realms/master/protocol/openid-connect/token";
 			//payload
 			String sPayload = "client_id=admin-cli" +
 					"&grant_type=client_credentials" +
