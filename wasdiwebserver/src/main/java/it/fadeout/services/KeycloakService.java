@@ -29,7 +29,7 @@ public class KeycloakService implements AuthProviderService {
 			if(!sAuthUrl.endsWith("/")) {
 				sAuthUrl += "/";
 			}
-			sAuthUrl += "realms/master/protocol/openid-connect/token";
+			sAuthUrl += "realms/wasdi/protocol/openid-connect/token";
 			//payload
 			String sPayload = "client_id=admin-cli" +
 					"&grant_type=client_credentials" +
@@ -38,6 +38,7 @@ public class KeycloakService implements AuthProviderService {
 			Map<String, String> asHeaders = new HashMap<>();
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
+			Utils.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl + ", " + sPayload);
 			String sAuthResult = Wasdi.httpPost(sAuthUrl, sPayload, asHeaders);
 			if(Utils.isNullOrEmpty(sAuthResult)) {
 				throw new RuntimeException("could not login into keycloak");
@@ -55,10 +56,10 @@ public class KeycloakService implements AuthProviderService {
 			if(Utils.isNullOrEmpty(sKcTokenId)) {
 				throw new NullPointerException("Token id null or empty");
 			}
-			Utils.debugLog("AuthResource.getKeycloakAdminCliToken: admin token obtained :-)");
+			Utils.debugLog("KeycloakService.getKeycloakAdminCliToken: admin token obtained :-)");
 			return sKcTokenId;
 		} catch (Exception oE) {
-			Utils.debugLog("AuthResource.getKeycloakAdminCliToken: " + oE);
+			Utils.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);
 		}
 		return null;
 	}
@@ -71,7 +72,7 @@ public class KeycloakService implements AuthProviderService {
 		}
 		sUrl += "admin/realms/wasdi/users?username=";
 		sUrl += sUserId;
-		Utils.debugLog("AuthResource.userRegistration: about to post to " + sUrl);
+		Utils.debugLog("KeycloakService.userRegistration: about to GET to " + sUrl);
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.clear();
 		asHeaders.put("Authorization", "Bearer " + sKcTokenId);
