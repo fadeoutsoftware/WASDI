@@ -89,9 +89,15 @@ public class DockerUtils {
 					oBuildScriptWriter.close();
 				}
 			}
+			
+			// Wait a little bit to let the file be written
+			Thread.sleep(2000);
 						
 			// Make it executable
 			Runtime.getRuntime().exec("chmod u+x "+sBuildScriptFile);
+			
+			// And wait a little bit to make the chmod done
+			Thread.sleep(2000);
 			
 			// Run the script
 			WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
