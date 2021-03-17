@@ -571,6 +571,8 @@ public class OpenSearchResource {
 						//TODO change into config method
 						sDownloadProtocol, sGetMetadata,
 						sParserConfigPath, sAppConfigPath);
+				
+				oExecutor.init();
 			}
 		} catch (Exception oE) {
 			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);

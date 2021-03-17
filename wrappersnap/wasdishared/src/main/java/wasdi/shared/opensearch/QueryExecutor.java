@@ -54,7 +54,9 @@ public abstract class QueryExecutor {
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
 
-
+	public void init() {
+		return;
+	}
 	
 	public int executeCount(String sQuery) throws IOException {
 		try {

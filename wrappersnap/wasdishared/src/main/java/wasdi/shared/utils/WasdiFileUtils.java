@@ -89,9 +89,7 @@ public class WasdiFileUtils {
 		Preconditions.checkNotNull(sFileFullPath);
 
 		JSONObject oJson = null;
-		try(
-				FileReader oReader = new FileReader(sFileFullPath);
-				){
+		try(FileReader oReader = new FileReader(sFileFullPath);){
 			
 			JSONTokener oTokener = new JSONTokener(oReader);
 			oJson = new JSONObject(oTokener);

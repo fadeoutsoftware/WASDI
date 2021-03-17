@@ -7,6 +7,18 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryViewModel;
 
 public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
+	
+	private boolean m_bEnableFast24 = true;
+
+	public boolean getEnableFast24() {
+		return m_bEnableFast24;
+	}
+
+
+	public void setEnableFast24(boolean bEnableFast24) {
+		this.m_bEnableFast24 = bEnableFast24;
+	}
+
 
 	@Override
 	protected String translate(String sQueryFromClient) {
@@ -63,7 +75,7 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 			int iFrom = oWasdiQuery.cloudCoverageFrom.intValue();
 			int iTo = oWasdiQuery.cloudCoverageTo.intValue();
 			
-			String sCloudCoverage = "&cloudCover=" + iFrom + "," + iTo+""; 
+			String sCloudCoverage = "&cloudCover=%5B" + iFrom + "," + iTo+"%5D"; 
 			sLSAQuery += sCloudCoverage;
 		}
 		
@@ -78,31 +90,35 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		// S2_MSIL1C, S2_MSIL2A
 		String sParentId = "";		
 		
-		if (oWasdiQuery.platformName.equals("Sentinel-1")) {
-			if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {
-				sParentId = "S1_SAR_GRD";
-			}
-			else {
-				sParentId = "S1_SAR_" + oWasdiQuery.productType;
-			}
-			
-			if (sParentId.contains("GRD")) {
-				sParentId += "&processingMode=Fast-24h";
-			}
-		}
-		else if (oWasdiQuery.platformName.equals("Sentinel-2")) {
-			if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {
-				sParentId = "S2_MSIL2A";
-			}
-			else {
-				if(oWasdiQuery.productType.equals("S2MSI2A")) {
-					sParentId = "S2_MSIL2A";
-				} else if(oWasdiQuery.productType.equals("S2MSI1C")) {
-					sParentId = "S2_MSIL1C";
-				} else {	
-					sParentId = "S2_MSIL2A";
+		if (oWasdiQuery.platformName != null) {
+			if (oWasdiQuery.platformName.equals("Sentinel-1")) {
+				if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {
+					sParentId = "S1_SAR_GRD";
+				}
+				else {
+					sParentId = "S1_SAR_" + oWasdiQuery.productType;
+				}
+				
+				if (sParentId.contains("GRD")) {
+					if (m_bEnableFast24) {
+						sParentId += "&processingMode=Fast-24h";
+					}
 				}
 			}
+			else if (oWasdiQuery.platformName.equals("Sentinel-2")) {
+				if (Utils.isNullOrEmpty(oWasdiQuery.productType)) {
+					sParentId = "S2_MSIL2A";
+				}
+				else {
+					if(oWasdiQuery.productType.equals("S2MSI2A")) {
+						sParentId = "S2_MSIL2A";
+					} else if(oWasdiQuery.productType.equals("S2MSI1C")) {
+						sParentId = "S2_MSIL1C";
+					} else {	
+						sParentId = "S2_MSIL2A";
+					}
+				}
+			}			
 		}
 		
 		//add free text search, assuming it's the product id

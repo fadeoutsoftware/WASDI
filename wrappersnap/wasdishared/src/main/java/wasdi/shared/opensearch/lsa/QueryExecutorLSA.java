@@ -13,10 +13,12 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.parser.Parser;
 import org.apache.abdera.parser.ParserOptions;
+import org.json.JSONObject;
 
 import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public class QueryExecutorLSA extends QueryExecutor {
@@ -32,7 +34,23 @@ public class QueryExecutorLSA extends QueryExecutor {
 		m_sProvider=s_sClassName;
 		this.m_oQueryTranslator = new DiasQueryTranslatorLSA();
 		this.m_oResponseTranslator = new DiasResponseTranslatorLSA();
-	}	
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+		
+		try {
+			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			boolean bEnableFast24 = oAppConf.getBoolean("enableFast24");
+			
+			((DiasQueryTranslatorLSA)m_oQueryTranslator).setEnableFast24(bEnableFast24);
+			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("QueryExecutorLSA.init(): exception reading parser config file " + m_sParserConfigPath);
+		}
+	}
 	
 
 	@Override
