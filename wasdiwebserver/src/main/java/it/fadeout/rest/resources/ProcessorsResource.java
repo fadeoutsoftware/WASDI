@@ -1833,11 +1833,13 @@ public class ProcessorsResource  {
 
 			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
 			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
+			
 			File oFile = oFilePath.toFile();
-			if(!oFile.exists()) {
-				Utils.debugLog("ProcessorsResource.downloadProcessor: zip file not found");
-				return Response.status(Status.NOT_FOUND).build();
-			}
+			
+//			if(!oFile.exists()) {
+//				Utils.debugLog("ProcessorsResource.downloadProcessor: zip file not found");
+//				return Response.status(Status.NOT_FOUND).build();
+//			}
 			
 			return zipProcessor(oFile, oProcessor);			
 		} 
