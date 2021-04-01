@@ -37,11 +37,14 @@ public class UpdateProcessorFilesWorker extends Thread {
 			if (oNode.getActive() == false) continue;
 			
 			try {
+				
+				File oFile = new File(m_sFilePath);
+				
 				String sUrl = oNode.getNodeBaseAddress();
 				
 				if (!sUrl.endsWith("/")) sUrl += "/";
 				
-				sUrl += "processors/updatefiles?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId;
+				sUrl += "processors/updatefiles?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&file=" + oFile.getName();
 				
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);

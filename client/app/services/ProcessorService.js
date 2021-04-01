@@ -188,14 +188,14 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param oBody
      * @returns {*}
      */
-    this.updateProcessorFiles = function (sWorkspaceId, sProcessorId, oBody) {
+    this.updateProcessorFiles = function (sFileName, sProcessorId, oBody) {
 
         var oOptions = {
             transformRequest: angular.identity,
             headers: {'Content-Type': undefined}
         };
 
-        return this.m_oHttp.post(this.APIURL + '/processors/updatefiles?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody ,oOptions);
+        return this.m_oHttp.post(this.APIURL + '/processors/updatefiles?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId) + '&file='+encodeURI(sFileName),oBody ,oOptions);
     };
 
     /**

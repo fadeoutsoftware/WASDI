@@ -1581,7 +1581,8 @@ public class ProcessorsResource  {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspace") String sWorkspaceId) {
+			@QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("file") String sInputFileName) {
 
 		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
 		try {
@@ -1636,18 +1637,26 @@ public class ProcessorsResource  {
 				return Response.serverError().build();
 			}
 			
+			String sFileName = sProcessorId + ".zip";
+			
+			if (!Utils.isNullOrEmpty(sInputFileName)) {
+				sFileName = sInputFileName; 
+			}
+			
 			// Create file
-			java.nio.file.Path oFilePath = oDirPath.resolve(java.nio.file.Paths.get(sProcessorId + ".zip")).toAbsolutePath().normalize();
+			java.nio.file.Path oFilePath = oDirPath.resolve(java.nio.file.Paths.get(sFileName)).toAbsolutePath().normalize();
+			
 			File oProcessorFile = oFilePath.toFile();
+			
 			if(oProcessorFile.exists()) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sProcessorId + ".zip exists. Deleting it...");
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sFileName + " exists. Deleting it...");
 				try {
 					if(!oProcessorFile.delete()) {
-						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip exists. aborting");
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sFileName + " exists. aborting");
 						return Response.serverError().build();
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip due to: " + oE + ", aborting");
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sFileName + " due to: " + oE + ", aborting");
 					return Response.serverError().build();
 				}
 			}
@@ -1666,9 +1675,17 @@ public class ProcessorsResource  {
 				oOutputStream.close();				
 			}
 			
-			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
+			boolean bOk = true;
 			
-			if (unzipProcessor(oProcessorFile, sSessionId, sProcessorId)) {
+			if (sFileName.toLowerCase().endsWith(".zip")) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
+				bOk = unzipProcessor(oProcessorFile, sSessionId, sProcessorId);
+			}
+			else {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: simple not zipped file");
+			}
+			
+			if (bOk) {
 				
 				oProcessorRepository.updateProcessorDate(oProcessorToUpdate);
 				
