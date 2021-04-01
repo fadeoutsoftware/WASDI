@@ -1,6 +1,5 @@
 package it.fadeout.threads;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,7 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.Utils;
 
-public class DeleteProcessorWorker extends Thread  {
+public class RedeployProcessorWorker extends Thread  {
 	List<Node> m_aoNodes;
 	String m_sSessionId;
 	String m_sWorkspaceId;
@@ -29,7 +28,7 @@ public class DeleteProcessorWorker extends Thread  {
 	@Override
 	public void run() {
 		
-		Utils.debugLog("DeleteProcessorWorker.run: start nodes delete for processor " + m_sProcessorId);
+		Utils.debugLog("RedeployProcessorWorker.run: start nodes redeploy for processor " + m_sProcessorId);
 		
 		for (Node oNode : m_aoNodes) {
 			
@@ -42,23 +41,23 @@ public class DeleteProcessorWorker extends Thread  {
 				
 				if (!sUrl.endsWith("/")) sUrl += "/";
 				
-				sUrl += "processors/nodedelete?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&processorName="+m_sProcessorName+"&processorType="+m_sProcessorType;
+				sUrl += "processors/redeploy?processorId="+m_sProcessorId+"&workspaceId="+m_sWorkspaceId;
 				
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
 				
-				Utils.debugLog("DeleteProcessorWorker.run: calling url: " + sUrl);
+				Utils.debugLog("RedeployProcessorWorker.run: calling url: " + sUrl);
 				
 				Wasdi.httpGet(sUrl, asHeaders);
 				
-				Utils.debugLog("DeleteProcessorWorker.run: deleted on node " + oNode.getNodeCode());
+				Utils.debugLog("RedeployProcessorWorker.run: redeployed on node " + oNode.getNodeCode());
 				
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("DeleteProcessorWorker.run: Exception " + oEx.toString());
+				Utils.debugLog("RedeployProcessorWorker.run: Exception " + oEx.toString());
 			}
 		}
 				
-		Utils.debugLog("DeleteProcessorWorker.run: distribuited delete done");
+		Utils.debugLog("RedeployProcessorWorker.run: distribuited redeploy done");
 	}
 }
