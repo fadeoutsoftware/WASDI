@@ -235,7 +235,7 @@ var WorkspaceProcessesList = (function() {
         return oFile;
     };
 
-    WorkspaceProcessesList.prototype.openErrorLogsDialog = function(oProcess)
+    WorkspaceProcessesList.prototype.openProcessorLogsDialog = function(oProcess)
     {
 
         var oController = this;
@@ -245,15 +245,20 @@ var WorkspaceProcessesList = (function() {
            return false;
        }
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
-            controller: "ProcessErrorLogsDialogController",
+            templateUrl: "dialogs/processor_logs_dialog/ProcessorLogsView.html",
+            controller: "ProcessorLogsController",
             inputs: {
                 extras: {
                      process:oProcess,
                 }
             }
         }).then(function (modal) {
-            modal.element.modal();
+            //modal.element.modal();
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+              });
+                          
             modal.close.then(function(oResult){
 
             });

@@ -128,16 +128,16 @@
                     <ul class="nav nav-tabs">
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 0}"
                             ng-click="m_oController.setActiveTab(0)">
-                            <a href="">Navigation</a>
+                            <a href=""><i class="fa fa-globe" ></i>&nbsp;Navigation</a>
                         </li>
-                        <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
+                        <!--li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
                             ng-click="m_oController.setActiveTab(1)" ng-show="(m_oController.m_oActiveBand !== null)">
                             <a href="">{{"EDITOR_COLOUR_MANIPULATION_TITLE" | translate}}</a>
                         </li>
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 2}"
                             ng-click="m_oController.setActiveTab(2)">
                             <a href="">Preview</a>
-                        </li>
+                        </li-->
                     </ul>
                 </div>
 
@@ -176,7 +176,7 @@
 
                     </div>
                     <!---------------------- TAB 1 COLOURS------------------>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="(m_oController.m_iActiveMapPanelTab === 1) &&
+                    <!--div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="(m_oController.m_iActiveMapPanelTab === 1) &&
                                                                                 (m_oController.m_oActiveBand !== null)">
                         <div class="row histogram-container">
                             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
@@ -263,12 +263,12 @@
                             </div>
                         </div>
 
-                    </div>
+                    </div-->
 
                     <!----------------------------------------------- TAB 2  PREVIEW---------------------------------------------->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container"
+                    <!--div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container"
                          ng-show="m_oController.m_iActiveMapPanelTab === 2">
-                        <div><!--class="col-xs-12 col-sm-12 col-md-12 col-lg-12"-->
+                        <div>
                             <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage"
                                           url-image="m_oController.m_sPreviewUrlSelectedBand"
                                           body="m_oController.m_oImagePreviewDirectivePayload"
@@ -277,7 +277,7 @@
                             </imagepreview>
 
                         </div>
-                    </div>
+                    </div-->
                 </div>
             </div>
         </div>
@@ -286,12 +286,12 @@
         <div class="col-v4-8 map-column">
             <div class="map-container" id="mapcontainer">
                 <div class="btn-group btn-group-left" role="group">
-                    <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic"
+                    <!--button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic"
                             ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();"
                             data-toggle="tooltip"
                             data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"
                             ng-disabled="!(m_oController.m_bIsLoadedViewBandImage === true || m_oController.m_bIsEditorZoomingOnExistingImage)">
-                    </button>
+                    </button-->
                     <!--TEST-->
 
                 </div>

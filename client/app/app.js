@@ -236,7 +236,7 @@ wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("UploadController", UploadController);
 wasdiApp.controller("MosaicController", MosaicController);
 wasdiApp.controller("EditPanelController", EditPanelController);
-wasdiApp.controller("ProcessErrorLogsDialogController", ProcessErrorLogsDialogController);
+wasdiApp.controller("ProcessorLogsController", ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);

@@ -704,7 +704,7 @@ var RootController = (function() {
         return sReturnValue;
     };
 
-    RootController.prototype.openErrorLogsDialog = function(oProcess)
+    RootController.prototype.openProcessorLogsDialog = function(oProcess)
     {
 
         var oController = this;
@@ -714,8 +714,8 @@ var RootController = (function() {
             return false;
         }
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
-            controller: "ProcessErrorLogsDialogController",
+            templateUrl: "dialogs/processor_logs/ProcessorLogsView.html",
+            controller: "ProcessorLogsController",
             inputs: {
                 extras: {
                     process:oProcess,
@@ -750,7 +750,7 @@ var RootController = (function() {
         }
 
         if( process != null){
-            oController.openErrorLogsDialog(process);
+            oController.openProcessorLogsDialog(process);
             return true;
         }else{
             console.error("Cannot find process ID " + processId + " in the processes list")
