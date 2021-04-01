@@ -169,16 +169,16 @@ public class WasdiLib {
 
 	/**
 	 * Set Active Workspace
-	 * @param sActiveWorkspace
+	 * @param sNewActiveWorkspaceId
 	 */
-	public void setActiveWorkspace(String sActiveWorkspace) {
+	public void setActiveWorkspace(String sNewActiveWorkspaceId) {
 		
-		if (!sActiveWorkspace.equals(m_sActiveWorkspace)) {
-			this.m_sActiveWorkspace = sActiveWorkspace;
+		if (!sNewActiveWorkspaceId.equals(m_sActiveWorkspace)) {
+			this.m_sActiveWorkspace = sNewActiveWorkspaceId;
 			
 			if (m_sActiveWorkspace != null) {
 				if (!m_sActiveWorkspace.equals("")) {
-					m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sActiveWorkspace);
+					m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sNewActiveWorkspaceId);
 				}
 			}
 		}
