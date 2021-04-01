@@ -1995,6 +1995,43 @@ public class WasdiLib {
 		return importProduct(sFileUrl, "");
 	}
 	
+	
+	/**
+	 * Import a Product from a Provider in WASDI.
+	 * @param sFileUrl Direct link of the product
+	 * @param sBoundingBox Bounding Box of the product
+	 * @return status of the Import process
+	 */
+	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
+		String sReturn = "ERROR";
+		
+		try {
+			// Encode link and bb
+			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
+			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
+			
+			// Generate the Url
+		    String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider=ONDA&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
+		    
+		    // Call the server
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+		    
+		    // Read the Primitive Result response
+		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+		    // Check if the process was ok
+		    if ( ((Boolean)aoJSONMap.get("boolValue")) == true) {
+		    	// Take the process id
+		    	sReturn = (String) aoJSONMap.get("stringValue"); 
+		    }
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		
+		return sReturn;
+	}
+	
 	/**
 	 * Import a Product from a Provider in WASDI.
 	 * @param sFileUrl Direct link of the product
