@@ -682,7 +682,9 @@ public class AuthResource {
 					oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oNewUser.getUserId());
-					//notifyNewUserInWasdi(oNewUser, true);
+					
+					notifyNewUserInWasdi(oNewUser, true);
+					
 					oResult.setIntValue(200);
 					oResult.setStringValue("Welcome to space");
 					return oResult;
@@ -690,7 +692,9 @@ public class AuthResource {
 					//insert failed: log, mail and throw
 					String sMessage = "could not insert new user " + oNewUser.getUserId() + " in DB";
 					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", throwing");
-					//notifyNewUserInWasdi(oNewUser, false);
+					
+					notifyNewUserInWasdi(oNewUser, false);
+					
 					throw new RuntimeException(sMessage);
 				}
 			}

@@ -7,6 +7,7 @@
                 </button>
                 <h4 class="modal-title ">
                     <!--<img class="snap-logo" src="assets/wasdi/SnapLogo.jpg" alt="SnapLogo">-->
+                    <i class="fa fa-cogs" aria-hidden="true"></i>&nbsp;
                     <a href="http://step.esa.int/main/toolboxes/snap/" target="_blank" style="color: white"
                        rel="noopener noreferrer">{{"DIALOG_WORKFLOW_MANAGER_TITLE" | translate}}</a>
                 </h4>
@@ -21,6 +22,7 @@
                             ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
                             ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
                             <a href="" role="tab" data-toggle="tab">
+                                <i class="fa fa-play" aria-hidden="true"></i>&nbsp;
                                 {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
                             </a>
                         </li>
@@ -28,6 +30,7 @@
                             ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'"
                             ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
                             <a href="" role="tab" data-toggle="tab">
+                                <i class="fa fa-forward" aria-hidden="true"></i>&nbsp;
                                 {{"DIALOG_WORKFLOW_MANAGER_TAB_BATCH_WORKFLOW" | translate}}
 
                             </a>
@@ -35,6 +38,7 @@
                         <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
                             ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
                             <a href="" role="tab" data-toggle="tab">
+                                <i class="fa fa-cloud-upload" aria-hidden="true"></i>&nbsp;
                                 {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
                             </a>
                         </li>
