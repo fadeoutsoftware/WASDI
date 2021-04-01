@@ -325,6 +325,8 @@ var WasdiApplicationUIController = (function() {
                 //let oPayload = { processId: data.data.processingIdentifier };
                 //oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
 
+                oController.m_oConstantsService.setActiveWorkspace(null);
+
                 // Move to the editor
                 oController.m_oState.go("root.editor", { workSpace : oWorkspace.workspaceId });
             }
