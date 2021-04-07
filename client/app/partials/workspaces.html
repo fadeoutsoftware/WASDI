@@ -38,18 +38,18 @@
                 <table class="table table-hover" id="TableWorkspacesList" aria-label="WS List table"
                        ng-show="m_oController.getWorkspaceInfoList().length > 0 && (m_oController.m_bIsLoading === false)">
                     <thead>
-                    <th>#</th>
-                    <th>{{"WORKSPACES_THEAD_WORKSPACES" | translate}}</th>
-                    <th>{{"WORKSPACES_THEAD_OWNER" | translate}}</th>
+                    <th ">&nbsp;</th>
+                    <th ng-click="m_oController.changeSorting('workspaceName')">{{"WORKSPACES_THEAD_WORKSPACES" | translate}}&nbsp;<i class="fa fa-sort-asc" aria-hidden="true" ng-show="m_oController.showArrow('workspaceName', false)"></i><i class="fa fa-sort-desc" aria-hidden="true" ng-show="m_oController.showArrow('workspaceName', true)"></i></th>
+                    <th ng-click="m_oController.changeSorting('ownerUserId')">{{"WORKSPACES_THEAD_OWNER" | translate}}&nbsp;<i class="fa fa-sort-asc" aria-hidden="true" ng-show="m_oController.showArrow('ownerUserId', false)"></i><i class="fa fa-sort-desc" aria-hidden="true" ng-show="m_oController.showArrow('ownerUserId', true)"></th>
                     <th></th>
                     <th></th>
                     </thead>
-                    <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"
+                    <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace | orderBy:m_oController.sort.column:m_oController.sort.descending"
                         class="workspaces-list-item"
                         ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}">
                         <td ng-click="m_oController.loadProductList(oWSListItem)">
-                            {{$index + 1}}
-                        </td>
+                            &nbsp;
+                        </td-->
                         <td ng-click="m_oController.loadProductList(oWSListItem)">
                             <span class="ellipsis">
                                 {{oWSListItem.workspaceName}}
@@ -89,7 +89,7 @@
             <div class="files-list-wrapper flex-grow-1">
                 <form>
                     <fieldset class="my-input-text fieldset-list-files">
-                        <legend><h3>{{"WORKSPACE_DETAILS_BOX" | translate}}</h3></legend>
+                        <legend><h3>&nbsp;<i class="fa fa-floppy-o fa-lg text-blu-wasdi" aria-hidden="true" style="font-size: 1em;"></i>&nbsp;{{"WORKSPACE_DETAILS_BOX" | translate}}&nbsp;</h3></legend>
                         <!-- LOADING ICON -->
                         <div class="loading-files"
                              ng-show="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">
@@ -101,12 +101,12 @@
                         <div class="panel-group list-files " id="accordion" role="tablist" aria-multiselectable="true"
                              ng-show="m_oController.m_bIsOpenInfo">
                              <!--ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">-->
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Cloud:</span> {{m_oController.m_oWorkspaceViewModel.cloudProvider}} &nbsp;-&nbsp;<span class="workspace-details-heading">Owner:</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"><i class="fa fa-cloud text-blu-wasdi" st></i>&nbsp;Cloud:</span> {{m_oController.m_oWorkspaceViewModel.cloudProvider}} &nbsp;-&nbsp;<span class="workspace-details-heading"><img src="assets/img/placeholder/user-placeholder-blu.png" style="width: 16px">&nbsp;Owner:</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
                             <!--div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</b></div-->
-                            <div><span class="workspace-details-heading">Products:</span> {{m_oController.getProductList().length}}</div>
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null">Processes Executed :</span> {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
+                            <div><span class="workspace-details-heading"><i class="fa fa-globe text-blu-wasdi" ></i>&nbsp;Products:</span> {{m_oController.getProductList().length}}</div>
+                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null"><i class="fa fa-rocket text-blu-wasdi" ></i>&nbsp;Processes Executed :</span> {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
                             <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
-                                <span class="workspace-details-heading">Shared with :</span>
+                                <span class="workspace-details-heading"><i class="fa fa-share-alt text-blu-wasdi" ></i>&nbsp;Shared with :</span>
                                 <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                     <li> {{shared}}</li>
                                 </div>

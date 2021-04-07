@@ -187,7 +187,7 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oProcessesLaunchedService.getProcessorStatistics(this.m_sSelectedApplication).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                oController.m_oStats = data;
+                oController.m_oStats = data.data;
             }
             else
             {

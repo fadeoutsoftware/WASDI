@@ -73,6 +73,19 @@
         font-family: $wasdi-font-web;
     }
 
+    //Blue Color
+    .text-blu-wasdi {
+        color: $wasdi-blue-logo;
+    }
+
+    .sort-true {
+
+    }
+
+    .sort-false {
+        
+    }
+
     //TABLE WORKSPACES
     //.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
     //  background-color: #44536C;
@@ -116,26 +129,6 @@
 
                 background-color: #44536C;
                 color: white;
-                //
-                //// COLOR OVER A TD
-                //.over-color {
-                //    background-color: $wasdi-white !important;
-                //    color: $wasdi-blue-logo !important;
-                //    border-top: none;
-                //
-                //    &:not(.disabled) {
-                //        &:hover {
-                //            background-color: $wasdi-grey !important;
-                //            cursor: pointer;
-                //            color:$wasdi-over-icon !important;
-                //            i:hover {
-                //
-                //                //background-color:white;
-                //                color: $wasdi-over-icon;
-                //            }
-                //        }
-                //    }
-                //}
             }
         }
     }
@@ -164,17 +157,6 @@
         //height: $wasdi-max-height-workspaces;
         height: $wasdi-heigth-panel-workspaces-page;
 
-        //@media screen and (max-width: 1600px) and (min-width: 1500px) {
-        //  height: 34vh;
-        //}
-        //@media screen and (max-width: 1400px) and (min-width: 1300px)
-        //{
-        //  height: 30vh;
-        //}
-        //@media screen and (max-width: 1300px) and (min-width: 1200px)
-        //{
-        //  height: 40vh;
-        //}
 
         .list-files {
             height: $wasdi-heigth-workspace-list;

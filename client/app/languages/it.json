@@ -64,7 +64,7 @@
     "WORKSPACES_BUTTON_NEW_WORKSPACE":"New Workspace",
     "WORKSPACES_TOOLTIP_EDITOR":"Edit",
     "WORKSPACES_TOOLTIP_INFO":"Info",
-    "WORKSPACES_THEAD_WORKSPACES":"Workspaces",
+    "WORKSPACES_THEAD_WORKSPACES":"Workspace",
     "WORKSPACES_THEAD_OWNER":"Owner",
     "WORKSPACES_LABEL_NO_RESULTS":"No results",
     "WORKSPACES_TOOLTIP_DELETE":"Delete workspace",
@@ -73,7 +73,7 @@
     "WORKSPACES_LIST_OF_WORKFLOWS_TITLE":"List of Workflows",
     "WORKSPACES_NO_WORKSPACE":"You have no Workspaces yet",
 
-    "WORKSPACE_DETAILS_BOX": "Workspace details",
+    "WORKSPACE_DETAILS_BOX": "Properties",
 
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch between 3D globe and 2D map",
@@ -296,7 +296,7 @@
     "DIALOG_WORKFLOW_DROP_OR_CLICK":"Drag and drop SNAP workflow XML here or click to upload",
     "DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED":"File Drag/Drop is not supported for this browser",
 
-    "DIALOG_WORKFLOW_MANAGER_TITLE":"Snap Workflow",
+    "DIALOG_WORKFLOW_MANAGER_TITLE":"Snap Workflows",
     "DIALOG_WORKFLOW_MANAGER_TABLE_NAME":"Name",
     "DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION":"Description",
     "DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW":"Upload",
