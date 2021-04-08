@@ -1716,16 +1716,18 @@ public class ProcessorsResource  {
 				}
 				else {
 					
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
-					
-					// Computational Node: delete the zip file after update
-					try {
-						if (!oProcessorFile.delete()) {
-							Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
+					if (oProcessorFile.getName().toUpperCase().endsWith(".ZIP")) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
+						
+						// Computational Node: delete the zip file after update
+						try {
+							if (!oProcessorFile.delete()) {
+								Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
+							}
 						}
-					}
-					catch (Exception oEx) {
-						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
+						catch (Exception oEx) {
+							Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
+						}						
 					}
 				}
 				

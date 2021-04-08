@@ -195,6 +195,15 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
             headers: {'Content-Type': undefined}
         };
 
+        var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace();
+
+        if (utilsIsObjectNullOrUndefined(sWorkspaceId) == false) {
+            sWorkspaceId = sWorkspaceId.workspaceId;
+        }
+        else {
+            sWorkspaceId = "-";
+        }        
+
         return this.m_oHttp.post(this.APIURL + '/processors/updatefiles?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId) + '&file='+encodeURI(sFileName),oBody ,oOptions);
     };
 
@@ -244,12 +253,13 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.redeployProcessor = function(sProcessorId){
 
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        // var sUrl = this.APIURL;
-        // if (oWorkspace.apiUrl != null) {
-        //     sUrl = oWorkspace.apiUrl;
-        // }
+        var sWorkspaceId = "-";
 
-        return this.m_oHttp.get(this.APIURL + '/processors/redeploy?processorId=' + sProcessorId + "&workspaceId=" + oWorkspace.workspaceId);
+        if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
+            sWorkspaceId = sWorkspaceId.workspaceId;
+        }
+
+        return this.m_oHttp.get(this.APIURL + '/processors/redeploy?processorId=' + sProcessorId + "&workspaceId=" + sWorkspaceId);
     };
 
     /**

@@ -245,7 +245,7 @@ var WorkspaceProcessesList = (function() {
            return false;
        }
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/processor_logs_dialog/ProcessorLogsView.html",
+            templateUrl: "dialogs/processor_logs/ProcessorLogsView.html",
             controller: "ProcessorLogsController",
             inputs: {
                 extras: {

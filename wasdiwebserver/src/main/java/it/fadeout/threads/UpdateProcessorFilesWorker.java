@@ -64,15 +64,18 @@ public class UpdateProcessorFilesWorker extends Thread {
 		File oZipFile = new File(m_sFilePath);
 		
 		if (oZipFile.exists()) {
-			try {
-				Utils.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
-				if (!oZipFile.delete()) {
-					Utils.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
+			
+			if (oZipFile.getName().toUpperCase().endsWith(".ZIP")) {
+				try {
+					Utils.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
+					if (!oZipFile.delete()) {
+						Utils.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
+					}
 				}
-			}
-			catch (Exception oEx) {
-				Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
-			}
+				catch (Exception oEx) {
+					Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
+				}
+			}			
 		}
 		
 		Utils.debugLog("UpdateProcessorFilesWorker.run: distribuited update done");
