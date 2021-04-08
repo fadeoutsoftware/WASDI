@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,12 +29,14 @@ import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
 import org.esa.snap.core.util.SystemUtils;
@@ -60,6 +63,7 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 public class Wasdi extends ResourceConfig {
@@ -790,6 +794,46 @@ public class Wasdi extends ResourceConfig {
 		if(!oFile.exists()) {
 			throw new IOException("Wasdi.httpPostFile: file not found");
 		}
+		
+		String sZippedFile = null;
+		
+		if (!oFile.getName().toUpperCase().equals("ZIP")) {
+			
+			Utils.debugLog("Wasdi.httpPostFile: File not zipped, zip it");
+			
+			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
+			
+			String sTemp = "tmp-" + iRandom + File.separator;
+			String sTempPath = WasdiFileUtils.fixPathSeparator(oFile.getParentFile().getPath());
+			
+			if(!sTempPath.endsWith(File.separator)) {
+				sTempPath += File.separator;
+			}
+			sTempPath += sTemp;
+			
+			Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
+			if (oPath.toFile().mkdir()) {
+				Utils.debugLog("Wasdi.httpPostFile: Temporary directory created");
+			} else {
+				throw new IOException("Wasdi.httpPostFile: Can't create temporary dir " + sTempPath);
+			}
+			
+			sZippedFile = sTempPath+iRandom + ".zip";
+			
+			File oZippedFile = new File(sTempPath+iRandom + ".zip");
+			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
+			WasdiFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+			
+			oOutZipStream.close();
+			
+			String sOldFileName = oFile.getName();
+			
+			oFile = new File(sZippedFile);
+			
+			sUrl = sUrl.replace(sOldFileName, oFile.getName());
+			
+			sFileName = oFile.getName();
+		}
 
 		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
 		try(FileInputStream oInputStream = new FileInputStream(oFile)){
@@ -859,9 +903,17 @@ public class Wasdi extends ResourceConfig {
 				throw oE;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName +
-					", ...): could not open file due to: " + oE + ", aborting");
+			Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
 			throw oE;
+		}
+		
+		if (!Utils.isNullOrEmpty(sZippedFile)) {
+			try {
+				FileUtils.deleteDirectory(new File(sZippedFile).getParentFile());
+			}
+			catch (Exception oE) {
+				Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
+			}			
 		}
 	}
 

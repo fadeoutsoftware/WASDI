@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
 public class WasdiFileUtils {
 
 	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
-	public void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
+	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
 		try {
 			//			if (oFileToZip.isHidden()) {
 			//				return;

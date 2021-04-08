@@ -139,7 +139,7 @@ public class DockerUtils {
 			
 			// Check if it is already done:
 			
-			if (!oRunFile.exists()) {
+			if (!oRunFile.exists() || oRunFile.length() == 0L) {
 								
 				// Command
 				asArgs.add(sCommand);
@@ -253,7 +253,7 @@ public class DockerUtils {
 			String sDeleteScriptFile = m_sProcessorFolder+"cleanwasdidocker.sh";			
 			File oDeleteScriptFile = new File(sDeleteScriptFile);
 			
-			if (!oDeleteScriptFile.exists()) {
+			if (!oDeleteScriptFile.exists() || oDeleteScriptFile.length() == 0L) {
 				try (BufferedWriter oDeleteScriptWriter = new BufferedWriter(new FileWriter(oDeleteScriptFile))) {
 					if(oDeleteScriptWriter != null) {
 						LauncherMain.s_oLogger.debug("DockerUtils.delete: Creating "+sDeleteScriptFile+" file");

@@ -29,15 +29,29 @@
             <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                  ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                  accept="application/zip"
-                 ngf-pattern="'.zip'">
+                 ngf-pattern="'.zip'" ng-show="m_oController.m_bEditMode==false">
                 <i class="fa fa-file-archive-o fa-4x mb-4" aria-hidden="true"></i>
                 <span>Drag and Drop here the .zip file with your WASDI App or click to browse.</span>
 
                 <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
             </div>
 
+            <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
+                 ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+                  ng-show="m_oController.m_bEditMode">
+                <i class="fa fa-file-archive-o fa-4x mb-4" aria-hidden="true"></i>
+                <span>Drag and Drop here the .zip or single file to update your WASDI App or click to browse.</span>
+
+                <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+            </div>
+
+
+
             <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
         </div>
+
+        
+
         <div ng-show="!m_oController.showDragAndDrop()">
             <br>File Update not available for this Application Type
             <br>
