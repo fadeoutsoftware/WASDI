@@ -119,7 +119,25 @@ public class WasdiLib {
 	 * Path of the Parameters file
 	 */
 	private String m_sParametersFilePath = "";
+
+	/*
+	 * Default data provider to be used for search and import operations 
+	 */
+	private String m_sDefaultProvider = "ONDA";
 	
+	
+	public String getDefaultProvider() {
+		return m_sDefaultProvider;
+	}
+
+	public void setDefaultProvider(String sProvider) {
+		if(sProvider==null || sProvider.isEmpty()) {
+			System.out.println("WasdiLib.setDefaultProvider: the provider cannot be null or empty, aborting");
+		} else {
+			this.m_sDefaultProvider = sProvider;
+		}
+	}
+
 	/**
 	 * Self constructor. If there is a config file initilizes the class members
 	 */
@@ -1913,7 +1931,7 @@ public class WasdiLib {
 		}
 		
 		String sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"; 
-		sQuery = "sQuery=" + URLEncoder.encode(sQuery) + "&offset=0&limit=10&providers=ONDA";
+		sQuery = "sQuery=" + URLEncoder.encode(sQuery) + "&offset=0&limit=10&providers=" + getDefaultProvider();
 		
 		
 		try {
@@ -2010,8 +2028,8 @@ public class WasdiLib {
 			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 			
-			// Generate the Url
-		    String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider=ONDA&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
+			String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider="+
+					getDefaultProvider() +"&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
 		    
 		    // Call the server
 		    String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2021,7 +2039,7 @@ public class WasdiLib {
 		    
 		    // Check if the process was ok
 		    if ( ((Boolean)aoJSONMap.get("boolValue")) == true) {
-		    	// Take the process id
+		    	// get the process id
 		    	sReturn = (String) aoJSONMap.get("stringValue"); 
 		    }
 		}
@@ -2048,7 +2066,8 @@ public class WasdiLib {
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 			
 			// Generate the Url
-		    String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider=ONDA&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
+		    String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider=" + getDefaultProvider()
+		    		+ "&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
 		    
 		    // Call the server
 		    String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2058,7 +2077,7 @@ public class WasdiLib {
 		    
 		    // Check if the process was ok
 		    if ( ((Boolean)aoJSONMap.get("boolValue")) == true) {
-		    	// Take the process id
+		    	// get the process id
 		    	String sProcessId = (String) aoJSONMap.get("stringValue");
 		    	// Wait for the operation to finish
 		    	sReturn = waitProcess(sProcessId);
