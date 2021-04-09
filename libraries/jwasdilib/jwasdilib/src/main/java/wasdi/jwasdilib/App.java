@@ -1,6 +1,7 @@
 package wasdi.jwasdilib;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -21,7 +22,8 @@ public class App
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
         
-        oLib.init("C:\\Temp\\wasdi\\JMatLibTest\\config.properties");
+        String sWorkingDirectory = System.getProperty("user.dir");
+        oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "config.properties");
         
         //testConnection(oLib);
     //    testDownload(oLib);
@@ -33,11 +35,12 @@ public class App
 //        testBaseLib(oLib);
         
         //testUploadFileDUMMYIMAGE(oLib);
-        testMosaic(oLib);
+//        testMosaic(oLib);
         //testSearch(oLib);
 //        testSubset(oLib);
         
-
+        testImport(oLib);
+        
         System.out.println("JWasdiLib Test Done");
         
     }
@@ -238,6 +241,12 @@ public class App
     	System.out.println(sResult);
     	sResult = oLib.getFullProductPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6_ApplyOrbit.dim");
     	System.out.println(sResult);
+    }
+    
+    public static void testImport(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	System.out.println("Found " + aoFound.size() + " products");
+    	oLib.importProduct(aoFound.get(0));
     }
     
 }
