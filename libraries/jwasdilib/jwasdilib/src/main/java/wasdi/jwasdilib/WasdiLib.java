@@ -2014,22 +2014,29 @@ public class WasdiLib {
 	}
 	
 	
+	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
+		return asynchImportProduct(sFileUrl, sBoundingBox, null);
+	}
+	
 	/**
 	 * Import a Product from a Provider in WASDI.
 	 * @param sFileUrl Direct link of the product
 	 * @param sBoundingBox Bounding Box of the product
 	 * @return status of the Import process
 	 */
-	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
+	public String asynchImportProduct(String sFileUrl, String sBoundingBox, String sProvider) {
 		String sReturn = "ERROR";
 		
 		try {
+			if(sProvider== null || sProvider.isEmpty()) {
+				sProvider = getDefaultProvider();
+			}
 			// Encode link and bb
 			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 			
 			String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider="+
-					getDefaultProvider() +"&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
+					sProvider +"&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
 		    
 		    // Call the server
 		    String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2050,38 +2057,22 @@ public class WasdiLib {
 		return sReturn;
 	}
 	
+	public String importProduct(String sFileUrl, String sBoundingBox) {
+		return importProduct(sFileUrl, sBoundingBox, null);
+	}
+	
 	/**
 	 * Import a Product from a Provider in WASDI.
 	 * @param sFileUrl Direct link of the product
 	 * @param sBoundingBox Bounding Box of the product
 	 * @return status of the Import process
 	 */
-	public String importProduct(String sFileUrl, String sBoundingBox) {
+	public String importProduct(String sFileUrl, String sBoundingBox, String sProvider) {
 		String sReturn = "ERROR";
 		
 		try {
-			
-			// Encode link and bb
-			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
-			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
-			
-			// Generate the Url
-		    String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider=" + getDefaultProvider()
-		    		+ "&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
-		    
-		    // Call the server
-		    String sResponse = httpGet(sUrl, getStandardHeaders());
-		    
-		    // Read the Primitive Result response
-		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
-		    
-		    // Check if the process was ok
-		    if ( ((Boolean)aoJSONMap.get("boolValue")) == true) {
-		    	// get the process id
-		    	String sProcessId = (String) aoJSONMap.get("stringValue");
-		    	// Wait for the operation to finish
-		    	sReturn = waitProcess(sProcessId);
-		    }
+			String sProcessId = asynchImportProduct(sFileUrl, sBoundingBox, sProvider);
+			sReturn = waitProcess(sProcessId);
 		    
 		    // Return the status of the import WASDI process
 			return sReturn;
