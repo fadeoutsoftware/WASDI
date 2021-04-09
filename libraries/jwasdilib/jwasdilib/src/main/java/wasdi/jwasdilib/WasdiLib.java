@@ -742,6 +742,27 @@ public class WasdiLib {
 		}
 	}
 	
+	/**
+	 * Get the URL of a workspace from the workspace Id
+	 * @param sWorkspaceId Id Of the Workspace
+	 * @return Url of the distribuited node of the Workspace
+	 */
+	public String getWorkspaceUrlByWsId(String sWorkspaceId) {
+		try {
+			String sUrl = m_sBaseUrl + "/ws?sWorkspaceId=" + sWorkspaceId;
+		    
+			// Get all the Workspaces
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+		    Map<String, Object> oJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+		    return (String) oJSONMap.get("apiUrl");
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}		
+	}
+	
 	
 	/**
 	 * Open a workspace
@@ -754,6 +775,14 @@ public class WasdiLib {
 		
 		m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName);
 		m_sWorkspaceOwner = getWorkspaceOwnerByName(sWorkspaceName);
+		m_sWorkspaceBaseUrl = getWorkspaceUrlByWsId(m_sActiveWorkspace);
+		
+		if (m_sWorkspaceBaseUrl == null) m_sWorkspaceBaseUrl = "";
+		
+		if (m_sWorkspaceBaseUrl.isEmpty()) {
+			m_sWorkspaceBaseUrl = m_sBaseUrl;
+		}
+		
 		return m_sActiveWorkspace;
 	}
 	
