@@ -1,6 +1,6 @@
- var ProcessErrorLogsDialogController = (function() {
+ var ProcessorLogsController = (function() {
 
-    function ProcessErrorLogsDialogController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,
+    function ProcessorLogsController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,
                                               oProcessorService,$interval, oProcessesLaunchedService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -24,7 +24,7 @@
         var oController = this;
 
         $scope.close = function(result) {
-            console.log("process_error_logs_dialog: close function")
+            console.log("processor_logs: close function")
             // Make sure that the interval is destroyed too
             oController.stopTick(oController);
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -51,12 +51,12 @@
         });
     }
     /*************** METHODS ***************/
-    ProcessErrorLogsDialogController.prototype.sortBy = function(propertyName) {
+    ProcessorLogsController.prototype.sortBy = function(propertyName) {
         this.m_bSortReverse = (this.m_sSortByColum === propertyName) ? !this.m_bSortReverse : false;
         this.m_sSortByColum = propertyName;
     };
 
-     ProcessErrorLogsDialogController.prototype.getProcessWorkspaceId = function() {
+    ProcessorLogsController.prototype.getProcessWorkspaceId = function() {
          if (this.m_oProcess.processObjId != null) {
              return this.m_oProcess.processObjId;
          }
@@ -65,7 +65,7 @@
          }
      };
 
-     ProcessErrorLogsDialogController.prototype.getProcessorType = function() {
+     ProcessorLogsController.prototype.getProcessorType = function() {
          if (this.m_oProcess.operationType != null) {
              return this.m_oProcess.operationType;
          }
@@ -74,7 +74,7 @@
          }
      };
 
-     ProcessErrorLogsDialogController.prototype.getProcessorName = function() {
+     ProcessorLogsController.prototype.getProcessorName = function() {
          if (this.m_oProcess.productName != null) {
              return this.m_oProcess.productName;
          }
@@ -83,7 +83,7 @@
          }
      };
 
-     ProcessErrorLogsDialogController.prototype.getProcessorStatus = function() {
+     ProcessorLogsController.prototype.getProcessorStatus = function() {
          if (this.m_oProcess.status != null) {
              return this.m_oProcess.status;
          }
@@ -93,7 +93,7 @@
      };
 
 
-     ProcessErrorLogsDialogController.prototype.getPayload = function() {
+     ProcessorLogsController.prototype.getPayload = function() {
          if (this.m_oProcess.payload != null) {
              utilsVexDialogBigAlertTop(this.m_oProcess.payload,null);
          }
@@ -102,7 +102,7 @@
          }
      };
 
-     ProcessErrorLogsDialogController.prototype.copyPayload = function() {
+     ProcessorLogsController.prototype.copyPayload = function() {
 
          if (this.m_oProcess.payload != null) {
              // Create new element
@@ -129,16 +129,16 @@
          }
      };
 
-     ProcessErrorLogsDialogController.prototype.stopTick=function(oController) {
-        console.log("process_error_logs_dialog: stopTick")
+     ProcessorLogsController.prototype.stopTick=function(oController) {
+        console.log("processor_logs: stopTick")
          if (angular.isDefined(oController.m_oTick)) {
-            console.log("process_error_logs_dialog: m_oTick is defined")
+            console.log("processor_logs: m_oTick is defined")
              oController.m_oInterval.cancel(oController.m_oTick);
              oController.m_oTick = undefined;
          }
      }
 
-     ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
+     ProcessorLogsController.prototype.startTick=function(sStatus){
         if( ( utilsIsStrNullOrEmpty(sStatus) === true ) || ( sStatus !== "RUNNING" ) )
         {
             return undefined;
@@ -161,7 +161,7 @@
         return oTick;
     }
 
-    ProcessErrorLogsDialogController.prototype.isCaretIconVisible = function(sColumnName,sCaretName)
+    ProcessorLogsController.prototype.isCaretIconVisible = function(sColumnName,sCaretName)
     {
         if(utilsIsStrNullOrEmpty(sColumnName) === true || utilsIsStrNullOrEmpty(sCaretName) === true)
         {
@@ -198,7 +198,7 @@
         }
     };
 
-     ProcessErrorLogsDialogController.prototype.getCountLogsANDLogsCallback = function(data, status,oController)
+    ProcessorLogsController.prototype.getCountLogsANDLogsCallback = function(data, status,oController)
      {
          if (data != null)
          {
@@ -218,7 +218,7 @@
          }
      }
 
-     ProcessErrorLogsDialogController.prototype.getLogsCount = function(oProcessObjId, oCallback)
+     ProcessorLogsController.prototype.getLogsCount = function(oProcessObjId, oCallback)
      {
          if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
          {
@@ -247,7 +247,7 @@
      };
 
 
-     ProcessErrorLogsDialogController.prototype.getPaginatedLogs = function(oProcessObjId, iStartRow, iEndRow)
+     ProcessorLogsController.prototype.getPaginatedLogs = function(oProcessObjId, iStartRow, iEndRow)
      {
          if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
          {
@@ -279,11 +279,11 @@
          return true;
      };
 
-     ProcessErrorLogsDialogController.prototype.getOperationDescription = function() {
+     ProcessorLogsController.prototype.getOperationDescription = function() {
         return utilsConvertOperationToDescription(this.m_oProcess);
     }
 
-     ProcessErrorLogsDialogController.$inject = [
+    ProcessorLogsController.$inject = [
         '$scope',
         'close',
         'extras',
@@ -294,5 +294,5 @@
         '$interval',
         'ProcessesLaunchedService'
     ];
-    return ProcessErrorLogsDialogController;
+    return ProcessorLogsController;
 })();

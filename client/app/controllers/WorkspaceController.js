@@ -39,6 +39,11 @@ var WorkspaceController = (function () {
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
 
+        this.sort = {
+            column: '',
+            descending: false
+        };        
+
         if(utilsIsObjectNullOrUndefined(oConstantsService.getUser())){
             this.m_oState.go("home");
         }
@@ -596,6 +601,34 @@ var WorkspaceController = (function () {
         }
 
     };
+    
+    WorkspaceController.prototype.changeSorting = function(column) {
+
+        var sort = this.sort;
+
+        if (sort.column == column) {
+            sort.descending = !sort.descending;
+        } else {
+            sort.column = column;
+        }
+    };
+        
+    WorkspaceController.prototype.selectedCls = function(column) {
+        return column == this.sort.column && 'sort-' + this.sort.descending;
+    };    
+
+
+    WorkspaceController.prototype.showArrow = function(sColumn, bDescending) {
+        
+        if (sColumn == this.sort.column) {
+            if (bDescending == this.sort.descending) {
+                return true;
+            }
+        }
+        
+        return false;
+    };    
+
 
     WorkspaceController.$inject = [
         '$scope',

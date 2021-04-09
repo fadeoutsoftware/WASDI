@@ -48,6 +48,7 @@ import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
+import it.fadeout.threads.RedeployProcessorWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -1366,6 +1367,35 @@ public class ProcessorsResource  {
 					Utils.debugLog("ProcessorsResource.redeployProcessor: processor shared with user " + oUser.getUserId());
 				}
 			}
+			
+			
+			if (Wasdi.s_sMyNodeCode == "wasdi") {
+				// Start a thread to update all the computing nodes
+				try {
+					Utils.debugLog("ProcessorsResource.redeployProcessor: this is the main node, starting Worker to redeploy Processor also on computing nodes");
+					
+					// Util to call the API on computing nodes
+					RedeployProcessorWorker oRedeployWorker = new RedeployProcessorWorker();
+					
+					NodeRepository oNodeRepo = new NodeRepository();
+					List<Node> aoNodes = oNodeRepo.getNodesList();
+					
+					oRedeployWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, oProcessorToReDeploy.getName(), oProcessorToReDeploy.getType());
+					oRedeployWorker.start();
+					
+					Utils.debugLog("ProcessorsResource.redeployProcessor: Worker started");						
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessorsResource.redeployProcessor: error starting UpdateWorker " + oEx.toString());
+				}				
+			}
+			
+			// Trigger the processor delete operation on this specific node
+			Utils.debugLog("ProcessorsResource.redeployProcessor: Scheduling Processor Redeploy Operation");
+			
+			// Get the dedicated special workpsace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);			
 
 			// Schedule the process to run the processor
 			
@@ -1376,7 +1406,7 @@ public class ProcessorsResource  {
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToReDeploy.getName());
 			oProcessorParameter.setProcessorID(oProcessorToReDeploy.getProcessorId());
-			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
 			oProcessorParameter.setProcessObjId(sProcessObjId);
@@ -1399,6 +1429,7 @@ public class ProcessorsResource  {
 			return Response.serverError().build();
 		}
 	}
+	
 	@GET
 	@Path("/libupdate")
 	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
@@ -1550,7 +1581,8 @@ public class ProcessorsResource  {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspace") String sWorkspaceId) {
+			@QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("file") String sInputFileName) {
 
 		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
 		try {
@@ -1605,18 +1637,26 @@ public class ProcessorsResource  {
 				return Response.serverError().build();
 			}
 			
+			String sFileName = sProcessorId + ".zip";
+			
+			if (!Utils.isNullOrEmpty(sInputFileName)) {
+				sFileName = sInputFileName; 
+			}
+			
 			// Create file
-			java.nio.file.Path oFilePath = oDirPath.resolve(java.nio.file.Paths.get(sProcessorId + ".zip")).toAbsolutePath().normalize();
+			java.nio.file.Path oFilePath = oDirPath.resolve(java.nio.file.Paths.get(sFileName)).toAbsolutePath().normalize();
+			
 			File oProcessorFile = oFilePath.toFile();
+			
 			if(oProcessorFile.exists()) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sProcessorId + ".zip exists. Deleting it...");
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file " + sFileName + " exists. Deleting it...");
 				try {
 					if(!oProcessorFile.delete()) {
-						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip exists. aborting");
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sFileName + " exists. aborting");
 						return Response.serverError().build();
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sProcessorId + ".zip due to: " + oE + ", aborting");
+					Utils.debugLog("ProcessorsResource.updateProcessorFiles: Could not delete existing processor file " + sFileName + " due to: " + oE + ", aborting");
 					return Response.serverError().build();
 				}
 			}
@@ -1635,9 +1675,17 @@ public class ProcessorsResource  {
 				oOutputStream.close();				
 			}
 			
-			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
+			boolean bOk = true;
 			
-			if (unzipProcessor(oProcessorFile, sSessionId, sProcessorId)) {
+			if (sFileName.toLowerCase().endsWith(".zip")) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
+				bOk = unzipProcessor(oProcessorFile, sSessionId, sProcessorId);
+			}
+			else {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: simple not zipped file");
+			}
+			
+			if (bOk) {
 				
 				oProcessorRepository.updateProcessorDate(oProcessorToUpdate);
 				
@@ -1668,16 +1716,18 @@ public class ProcessorsResource  {
 				}
 				else {
 					
-					Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
-					
-					// Computational Node: delete the zip file after update
-					try {
-						if (!oProcessorFile.delete()) {
-							Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
+					if (oProcessorFile.getName().toUpperCase().endsWith(".ZIP")) {
+						Utils.debugLog("ProcessorsResource.updateProcessorFiles: this is a computing node, delete local zip file");
+						
+						// Computational Node: delete the zip file after update
+						try {
+							if (!oProcessorFile.delete()) {
+								Utils.debugLog("ProcessorsResource.updateProcessorFiles: can't delete local zip file on computing node");
+							}
 						}
-					}
-					catch (Exception oEx) {
-						Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
+						catch (Exception oEx) {
+							Utils.debugLog("ProcessorsResource.updateProcessorFiles: error deleting zip " + oEx);
+						}						
 					}
 				}
 				
@@ -1945,7 +1995,7 @@ public class ProcessorsResource  {
 					lLength += oTempFile.length();
 				}
 			}
-			oResponseBuilder.header("Content-Length", lLength);
+			//oResponseBuilder.header("Content-Length", lLength);
 			Utils.debugLog("ProcessorsResource.zipProcessor: done");
 			return oResponseBuilder.build();
 		} catch (Exception oE) {

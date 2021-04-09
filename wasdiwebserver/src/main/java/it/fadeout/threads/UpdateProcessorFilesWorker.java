@@ -37,11 +37,14 @@ public class UpdateProcessorFilesWorker extends Thread {
 			if (oNode.getActive() == false) continue;
 			
 			try {
+				
+				File oFile = new File(m_sFilePath);
+				
 				String sUrl = oNode.getNodeBaseAddress();
 				
 				if (!sUrl.endsWith("/")) sUrl += "/";
 				
-				sUrl += "processors/updatefiles?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId;
+				sUrl += "processors/updatefiles?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&file=" + oFile.getName();
 				
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
@@ -61,15 +64,18 @@ public class UpdateProcessorFilesWorker extends Thread {
 		File oZipFile = new File(m_sFilePath);
 		
 		if (oZipFile.exists()) {
-			try {
-				Utils.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
-				if (!oZipFile.delete()) {
-					Utils.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
+			
+			if (oZipFile.getName().toUpperCase().endsWith(".ZIP")) {
+				try {
+					Utils.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
+					if (!oZipFile.delete()) {
+						Utils.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
+					}
 				}
-			}
-			catch (Exception oEx) {
-				Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
-			}
+				catch (Exception oEx) {
+					Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
+				}
+			}			
 		}
 		
 		Utils.debugLog("UpdateProcessorFilesWorker.run: distribuited update done");

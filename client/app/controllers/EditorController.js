@@ -190,22 +190,6 @@ var EditorController = (function () {
     /********************************************************* TRANSLATE SERVICE ********************************************************/
     EditorController.prototype.generateDefaultNavBarMenu = function () {
         this.m_aoNavBarMenu = [
-            // --- Workflow ---
-            {
-                name: "",
-                icon: "fa fa-file-code-o",
-                caption_i18n: "EDITOR_OPERATION_TITLE_WORKFLOW",
-                subMenu: [],
-                onClick: this.openWorkflowManagerDialog
-            },
-            // --- Import ---
-            {
-                name: "",
-                icon: "fa fa-upload",
-                caption_i18n: "EDITOR_OPERATION_TITLE_IMPORT",
-                subMenu: [],
-                onClick: this.openImportsDialog
-            },
             {
                 name: "",//WAPPS
                 caption_i18n: "EDITOR_OPERATION_TITLE_WAPPS",
@@ -213,7 +197,22 @@ var EditorController = (function () {
                 onClick: this.openWappsDialog,
                 icon: "fa fa-lg fa-rocket"
             },
-
+            // --- Workflow ---
+            {
+                name: "",
+                icon: "fa fa-cogs",
+                caption_i18n: "EDITOR_OPERATION_TITLE_WORKFLOW",
+                subMenu: [],
+                onClick: this.openWorkflowManagerDialog
+            },
+            // --- Import ---
+            {
+                name: "",
+                icon: "fa fa-cloud-upload",
+                caption_i18n: "EDITOR_OPERATION_TITLE_IMPORT",
+                subMenu: [],
+                onClick: this.openImportsDialog
+            },
             // --- Processor ---
             {
                 name: "",// New Processor

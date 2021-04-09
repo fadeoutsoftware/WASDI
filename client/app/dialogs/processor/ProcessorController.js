@@ -398,7 +398,9 @@ var ProcessorController = (function() {
              var oBody = new FormData();
              oBody.append('file', this.m_oFile[0]);
 
-             this.m_oProcessorService.updateProcessorFiles("", oController.m_oInputProcessor.processorId, oBody).then(function (data) {
+             var sFileName = oSelectedFile.name;
+
+             this.m_oProcessorService.updateProcessorFiles(sFileName, oController.m_oInputProcessor.processorId, oBody).then(function (data) {
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR FILES UPDATED");
                  utilsVexCloseDialogAfter(4000,oDialog);
              },function (error) {
