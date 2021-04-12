@@ -1171,6 +1171,37 @@ public class WasdiLib {
 			return "";
 		}	  
 	}
+	
+	/**
+	 * Get the status of a List of WASDI processes 
+	 * @param sProcessId Process Id
+	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 */
+	public String getProcessesStatus(List<String> asIds) {
+		try {
+			
+			String sIds = "[";
+			for (String sId : asIds) {
+				sIds += sId + ",";
+			}
+			//remove last comma
+			sIds = sIds.substring(0, sIds.length()-1);
+			sIds += "]";
+			
+		    String sUrl = getWorkspaceBaseUrl() + "/process/statusbyid";		    
+		    String sResponse = httpPost(sUrl, sIds, getStandardHeaders());
+		    
+		    
+		    //todo map response
+		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+			return aoJSONMap.get("status").toString();			
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}	  
+	}
 
 	/**
 	 *  Update the status of the current process
@@ -1304,6 +1335,43 @@ public class WasdiLib {
 		waitForResume();
 		
 		return sStatus;
+	}
+	
+	
+	/**
+	 * Wait for a collection of processes to finish
+	 * @param sProcessId
+	 * @return
+	 */
+	public List<String> waitProcesses(List<String> asIds) {
+		
+		
+		updateStatus("WAITING");
+		
+		List<String> asStatus = new ArrayList<String>();
+		boolean bDone = false;
+		while(!bDone) {
+			bDone = true;
+							
+					
+			String sResult = getProcessesStatus(asIds);
+			
+			
+			for (String sStatus : asStatus) {
+				if( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
+					bDone = false;
+				}
+			}
+			if(!bDone) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}		
+		waitForResume();
+		return asStatus;
 	}
 	
 	/**
