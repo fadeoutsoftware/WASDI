@@ -2262,6 +2262,24 @@ public class WasdiLib {
 	}
 
 	
+	/**
+	 * Imports a list of product asynchronously
+	 * @param aoProductsToImport
+	 * @return a list of String containing the WASDI process ids of all the imports 
+	 */
+	public List<String> importProductListWithMaps(List<Map<String, Object>> aoProductsToImport){
+		return waitProcesses(asynchImportProductListWithMaps(aoProductsToImport));
+	}
+	
+	/**
+	 * Imports a list of product asynchronously
+	 * @param aoProductsToImport
+	 * @return a list of String containing the WASDI process ids of all the imports 
+	 */
+	public List<String> importProductList(List<String> asProductsToImport){
+		return waitProcesses(asynchImportProductList(asProductsToImport));
+	}
+	
 	/***
 	 * Make a Subset (tile) of an input image in a specified Lat Lon Rectangle
 	 * @param sInputFile Name of the input file
