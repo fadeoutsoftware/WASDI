@@ -1350,18 +1350,18 @@ public class WasdiLib {
 		while(!bDone) {
 			bDone = true;
 			sResult = getProcessesStatus(asIds);
-			//"ERROR" -> ERROR
-			sResult.replace("\"", "");
+			
+
 			String[] asStatus = sResult
 					.substring(1,sResult.length()-1) //remove leading "[" and trailing "]"
 					.split(",");		//split and get the statuses
+			
 			for (String sStatus : asStatus) {
-				sStatus = sStatus.toUpperCase().trim();
+				sStatus = sStatus.toUpperCase().trim().substring(1,sStatus.length()-1);
 				if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
 					bDone = false;
 					//then at least one needs to be waited for
 					try {
-						System.out.println("waiting");
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -1374,7 +1374,7 @@ public class WasdiLib {
 		waitForResume();
 		String[] asStatus = sResult.substring(1,sResult.length()-1).split(",");
 		for (String sStatus : asStatus) {
-			asResults.add(sStatus);
+			asResults.add(sStatus.toUpperCase().trim().substring(1,sStatus.length()-1));
 		}
 		return asResults;
 	}
