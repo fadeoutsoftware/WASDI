@@ -23,6 +23,6 @@ function sStatus=wSubset(Wasdi, sInputFile, sOutputFile, dLatN, dLonW, dLatS, dL
    
    sStatus = Wasdi.subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE);
    
-   disp(['Mosaic Status: ' sStatus]);
+   disp(['Subset Status: ' sStatus]);
    
 end
