@@ -2344,6 +2344,44 @@ public class WasdiLib {
 		}		
 	}
 	
+
+	/**
+	 * Write one row of Log
+	 * @param sLogRow text to log
+	 */
+	public void wasdiLog(String sLogRow) {
+		
+		if (m_bIsOnServer) {
+			try {
+				
+				// Check minimun input values
+				if (sLogRow == null) {
+					log("Log line null");
+					return;
+				}
+
+				if (sLogRow.equals("")) {
+					log("Log line empty");
+					return;
+				}
+				
+				String sWorkspaceUrl = getWorkspaceBaseUrl();
+
+				// Build API URL
+			    String sUrl = sWorkspaceUrl + "/processors/logs/add?processworkspace="+getMyProcId();
+			    		    
+			    // Call the API
+			    httpPost(sUrl, sLogRow, getStandardHeaders());
+			}
+			catch (Exception oEx) {
+				oEx.printStackTrace();
+			}					
+		}
+		else {
+			log(sLogRow);
+		}
+	}	
+	
 	/**
 	 * Get the processor Path
 	 * @return
