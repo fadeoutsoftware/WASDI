@@ -2143,7 +2143,22 @@ public class WasdiLib {
 		return importProduct(sFileUrl, "");
 	}
 	
+	/**
+	 * Import a Product from a Provider in WASDI asynchronously.
+	 * @param sFileUrl Direct link of the product
+	 * @return status of the Import process
+	 */
+	public String asynchImportProduct(String sFileUrl) {
+		return asynchImportProduct(sFileUrl, "");
+	}
 	
+	
+	/**
+	 * Import a Product from a Provider in WASDI asynchronously.
+	 * @param sFileUrl Direct link of the product
+	 * @param sBoundingBox bounding box
+	 * @return
+	 */
 	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
 		return asynchImportProduct(sFileUrl, sBoundingBox, null);
 	}
@@ -2219,13 +2234,29 @@ public class WasdiLib {
 	 * @param aoProductsToImport
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
-	public List<String> asynchImportProductList(List<Map<String, Object>> aoProductsToImport){
+	public List<String> asynchImportProductListWithMaps(List<Map<String, Object>> aoProductsToImport){
 		if(null==aoProductsToImport) {
 			return null;
 		}
 		List<String> asIds = new ArrayList<String>(aoProductsToImport.size());
 		for (Map<String, Object> oProduct : aoProductsToImport) {
 			asIds.add(asynchImportProduct(oProduct));
+		}
+		return asIds;
+	}
+	
+	/**
+	 * Imports a list of product asynchronously
+	 * @param aoProductsToImport
+	 * @return a list of String containing the WASDI process ids of all the imports 
+	 */
+	public List<String> asynchImportProductList(List<String> asProductsToImport){
+		if(null==asProductsToImport) {
+			return null;
+		}
+		List<String> asIds = new ArrayList<String>(asProductsToImport.size());
+		for (String sProductUrl: asProductsToImport) {
+			asIds.add(asynchImportProduct(sProductUrl));
 		}
 		return asIds;
 	}
