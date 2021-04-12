@@ -1182,7 +1182,7 @@ public class WasdiLib {
 			
 			String sIds = "[";
 			for (String sId : asIds) {
-				sIds += sId + ",";
+				sIds += "\"" + sId + "\"" + ",";
 			}
 			//remove last comma
 			sIds = sIds.substring(0, sIds.length()-1);
@@ -1191,11 +1191,7 @@ public class WasdiLib {
 		    String sUrl = getWorkspaceBaseUrl() + "/process/statusbyid";		    
 		    String sResponse = httpPost(sUrl, sIds, getStandardHeaders());
 		    
-		    
-		    //todo map response
-		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
-		    
-			return aoJSONMap.get("status").toString();			
+		    return sResponse;			
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -1348,30 +1344,39 @@ public class WasdiLib {
 		
 		updateStatus("WAITING");
 		
-		List<String> asStatus = new ArrayList<String>();
+		String sResult ="";
 		boolean bDone = false;
+		List<String> asResults = new ArrayList<String>(asIds.size());
 		while(!bDone) {
 			bDone = true;
-							
-					
-			String sResult = getProcessesStatus(asIds);
-			
-			
+			sResult = getProcessesStatus(asIds);
+			//"ERROR" -> ERROR
+			sResult.replace("\"", "");
+			String[] asStatus = sResult
+					.substring(1,sResult.length()-1) //remove leading "[" and trailing "]"
+					.split(",");		//split and get the statuses
 			for (String sStatus : asStatus) {
-				if( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
+				sStatus = sStatus.toUpperCase().trim();
+				if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
 					bDone = false;
-				}
-			}
-			if(!bDone) {
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+					//then at least one needs to be waited for
+					try {
+						System.out.println("waiting");
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					//we should break now and check their new status
+					break;
 				}
 			}
 		}		
 		waitForResume();
-		return asStatus;
+		String[] asStatus = sResult.substring(1,sResult.length()-1).split(",");
+		for (String sStatus : asStatus) {
+			asResults.add(sStatus);
+		}
+		return asResults;
 	}
 	
 	/**
