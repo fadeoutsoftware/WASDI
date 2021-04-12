@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,13 +40,29 @@ public class App
         //testSearch(oLib);
 //        testSubset(oLib);
         
-        testImport(oLib);
+        //testImport(oLib);
+        testWaitProcesses(oLib);
         
         System.out.println("JWasdiLib Test Done");
         
     }
     
-    public static void testConnection(WasdiLib oLib) {
+    private static void testWaitProcesses(WasdiLib oLib) {
+    	String sProcName = "hellotest";
+    	Map<String,Object> asParams = new HashMap<>();
+    	asParams.put("NAME", "Playmobil");
+    	int iReps = 5;
+    	List<String> asIds = new ArrayList<String>(iReps);
+    	for(int i = 0; i < iReps; i++) {
+    		String sId = oLib.asynchExecuteProcessor(sProcName, asParams);
+    		asIds.add(sId);
+    	}
+    			
+		oLib.waitProcesses(asIds);
+		
+	}
+
+	public static void testConnection(WasdiLib oLib) {
     	try {
     		
     		//request
