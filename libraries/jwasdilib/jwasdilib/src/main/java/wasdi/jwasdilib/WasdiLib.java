@@ -2080,6 +2080,34 @@ public class WasdiLib {
 	
 	
 	/**
+	 * Import a Product from a Provider in WASDI asynchronously.
+	 * 
+	 * @param oProduct Product Map JSON representation as returned by searchEOImage
+	 * @return status of the Import process
+	 */
+	public String asynchImportProduct(Map<String, Object> oProduct) {
+		String sReturn = "ERROR";
+		
+		try {
+			// Get URL And Bounding Box from the JSON representation
+			String sFileUrl = getFoundProductLink(oProduct);
+			String sBoundingBox = "";
+			
+			if (oProduct.containsKey("footprint")) {
+				sBoundingBox = oProduct.get("footprint").toString();
+			}
+			
+			return asynchImportProduct(sFileUrl, sBoundingBox);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		
+		return sReturn;
+	}
+	
+	
+	/**
 	 * Import a Product from a Provider in WASDI.
 	 * 
 	 * @param oProduct Product Map JSON representation as returned by searchEOImage
@@ -2184,6 +2212,23 @@ public class WasdiLib {
 		}
 		
 		return sReturn;
+	}
+	
+	/**
+	 * Imports a list of product asynchronously
+	 * @param aoProductsToImport
+	 * @return a list of String containing the WASDI process ids of all the imports 
+	 */
+	public List<String> asynchImportProductList(List<Map<String, Object>> aoProductsToImport){
+		if(null==aoProductsToImport) {
+			return null;
+		}
+		List<String> asIds = new ArrayList<String>(aoProductsToImport.size());
+		for (Map<String, Object> map : aoProductsToImport) {
+			asynchI
+			asIds.add(asynchImportProduct(aoProductsToImport));
+		}
+		return asIds;
 	}
 
 	
