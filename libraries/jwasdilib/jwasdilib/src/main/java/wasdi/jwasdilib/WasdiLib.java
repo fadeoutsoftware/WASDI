@@ -2224,9 +2224,8 @@ public class WasdiLib {
 			return null;
 		}
 		List<String> asIds = new ArrayList<String>(aoProductsToImport.size());
-		for (Map<String, Object> map : aoProductsToImport) {
-			asynchI
-			asIds.add(asynchImportProduct(aoProductsToImport));
+		for (Map<String, Object> oProduct : aoProductsToImport) {
+			asIds.add(asynchImportProduct(oProduct));
 		}
 		return asIds;
 	}
