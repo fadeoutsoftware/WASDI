@@ -108,7 +108,7 @@ public class WasdiLib {
 	/**
 	 * Params dictionary
 	 */
-	private HashMap<String, String> m_aoParams = new HashMap<String, String>();
+	private Map<String, String> m_aoParams = new HashMap<String, String>();
 	
 	/**
 	 * Utility paramters reader
@@ -318,7 +318,7 @@ public class WasdiLib {
 	 * Get Params HashMap
 	 * @return Params Dictionary
 	 */
-	public HashMap<String, String> getParams() {
+	public Map<String, String> getParams() {
 		return m_aoParams;
 	}
 
@@ -567,7 +567,7 @@ public class WasdiLib {
 			
 			String sUrl = m_sBaseUrl + "/auth/checksession";
 			
-			HashMap<String, String> aoHeaders = new HashMap<String, String>();
+			Map<String, String> aoHeaders = new HashMap<String, String>();
 			aoHeaders.put("x-session-token", sSessionID);
 			aoHeaders.put("Content-Type", "application/json");
 			
@@ -594,7 +594,7 @@ public class WasdiLib {
 
 			String sPayload = "{\"userId\":\"" + m_sUser + "\",\"userPassword\":\"" + m_sPassword + "\" }";
 			
-			HashMap<String, String> aoHeaders = new HashMap<String, String>();
+			Map<String, String> aoHeaders = new HashMap<String, String>();
 			
 			aoHeaders.put("Content-Type", "application/json");
 			
@@ -612,8 +612,8 @@ public class WasdiLib {
 	 * Get the standard headers for a WASDI call
 	 * @return
 	 */
-	protected HashMap<String, String> getStandardHeaders() {
-		HashMap<String, String> aoHeaders = new HashMap<String, String>();
+	protected Map<String, String> getStandardHeaders() {
+		Map<String, String> aoHeaders = new HashMap<String, String>();
 		aoHeaders.put("x-session-token", m_sSessionId);
 		aoHeaders.put("Content-Type", "application/json");
 		
@@ -624,8 +624,8 @@ public class WasdiLib {
 	 * Get the headers for a Streming POST call
 	 * @return
 	 */
-	protected HashMap<String, String> getStreamingHeaders() {
-		HashMap<String, String> aoHeaders = new HashMap<String, String>();
+	protected Map<String, String> getStreamingHeaders() {
+		Map<String, String> aoHeaders = new HashMap<String, String>();
 		aoHeaders.put("x-session-token", m_sSessionId);
 		aoHeaders.put("Content-Type", "multipart/form-data");
 		
@@ -793,7 +793,7 @@ public class WasdiLib {
 	 */
 	public List <String> getProductsByWorkspace(String sWorkspaceName) {
 		 
-		ArrayList<String> asProducts = new ArrayList<String>();
+		List<String> asProducts = new ArrayList<String>();
 		try {
 			
 			openWorkspace(sWorkspaceName);
@@ -821,7 +821,7 @@ public class WasdiLib {
 	 */
 	public List <String> getProductsByActiveWorkspace() {
 		 
-		ArrayList<String> asProducts = new ArrayList<String>();
+		List<String> asProducts = new ArrayList<String>();
 		try {
 			
 			String sUrl = m_sBaseUrl + "/product/byws?sWorkspaceId=" + m_sActiveWorkspace;
@@ -1631,13 +1631,13 @@ public class WasdiLib {
 		    oMosaicSetting.setOutputFormat(sOutputFormat);
 
 		    
-		    oMosaicSetting.setSources((ArrayList<String>) asInputFiles);
+		    oMosaicSetting.setSources((List<String>) asInputFiles);
 		    oMosaicSetting.setSouthBound(dSouthBound);
 		    oMosaicSetting.setUpdateMode(bUpdateMode);
 		    
 		    oMosaicSetting.setVariableExpressions(new ArrayList<String>());
 		    
-		    ArrayList<String> asVariableNames = new ArrayList<>();
+		    List<String> asVariableNames = new ArrayList<>();
 		    
 		    for (String sVariable : asBands) {
 		    	asVariableNames.add(sVariable);
@@ -2178,7 +2178,7 @@ public class WasdiLib {
 	 * @param aoParams Dictionary of Params
 	 * @return ProcessWorkspace Id
 	 */
-	public String asynchExecuteProcessor(String sProcessorName, HashMap<String, Object> aoParams) {
+	public String asynchExecuteProcessor(String sProcessorName, Map<String, Object> aoParams) {
 		
 		try {
 			// Initialize
@@ -2511,7 +2511,7 @@ public class WasdiLib {
 		    
 		    String sOutputFilePath = "";
 		    
-		    HashMap<String, String> asHeaders = getStandardHeaders();
+		    Map<String, String> asHeaders = getStandardHeaders();
 			
 			try {
 				URL oURL = new URL(sUrl);
