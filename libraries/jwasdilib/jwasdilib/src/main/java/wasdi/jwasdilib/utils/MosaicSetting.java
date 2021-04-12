@@ -1,6 +1,7 @@
 package wasdi.jwasdilib.utils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MosaicSetting {
 
@@ -29,9 +30,9 @@ public class MosaicSetting {
 	
 	String outputFormat = "GeoTIFF";
 	
-	ArrayList<String> sources = new ArrayList<>();
-	ArrayList<String> variableNames = new ArrayList<>();
-	ArrayList<String> variableExpressions = new ArrayList<>();
+	List<String> sources = new ArrayList<>();
+	List<String> variableNames = new ArrayList<>();
+	List<String> variableExpressions = new ArrayList<>();
 	
 	public String getCrs() {
 		return crs;
@@ -117,22 +118,22 @@ public class MosaicSetting {
 	public void setCombine(String combine) {
 		this.combine = combine;
 	}
-	public ArrayList<String> getSources() {
+	public List<String> getSources() {
 		return sources;
 	}
-	public void setSources(ArrayList<String> sources) {
+	public void setSources(List<String> sources) {
 		this.sources = sources;
 	}
-	public ArrayList<String> getVariableNames() {
+	public List<String> getVariableNames() {
 		return variableNames;
 	}
-	public void setVariableNames(ArrayList<String> variableNames) {
+	public void setVariableNames(List<String> variableNames) {
 		this.variableNames = variableNames;
 	}
-	public ArrayList<String> getVariableExpressions() {
+	public List<String> getVariableExpressions() {
 		return variableExpressions;
 	}
-	public void setVariableExpressions(ArrayList<String> variableExpressions) {
+	public void setVariableExpressions(List<String> variableExpressions) {
 		this.variableExpressions = variableExpressions;
 	}
 	
