@@ -23,15 +23,11 @@ require('./node_modules/angularjs-slider/dist/rzslider.min.js');
 require('./node_modules/jstree/src/jstree.contextmenu.js');
 require('./node_modules/angular-modal-service/dst/angular-modal-service.min.js');
 
+// new method to solve global variables issue
 
 import showdow from './node_modules/showdown/dist/showdown.js';
 
 global.showdown = showdow;
-
-
-
-
-// new method to solve global variables issue
 
 import Plotly from './node_modules/plotly.js/dist/plotly.min.js';
 

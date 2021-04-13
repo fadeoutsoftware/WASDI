@@ -1,0 +1,6 @@
+{
+  "name": "sockjs-client",
+  "version": "0.3.4",
+  "main": "./sockjs.js",
+  "license": "MIT"
+}

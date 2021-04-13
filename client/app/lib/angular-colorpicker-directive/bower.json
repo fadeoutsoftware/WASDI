@@ -1,0 +1,15 @@
+{
+  "name": "angular-colorpicker-directive",
+  "authors": [
+    "Alberto Pujante <alberplz@gmail.com>"
+  ],
+  "description": "AnguarJS color picker directive with no dependencies required",
+  "main": [
+            "js/color-picker.js",
+            "css/color-picker.css"
+	],
+  "ignore": [
+    "node_modules"
+  ],
+  "licence": "MIT"
+}

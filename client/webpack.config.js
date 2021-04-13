@@ -78,7 +78,7 @@ module.exports = {
                 test: /\.css$/i,
                 use: ["style-loader", "css-loader"],
             },
-            {
+            {// Fonts assets
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
                 use: [
                     {
@@ -90,7 +90,7 @@ module.exports = {
                     }
                 ]
             },
-            {
+            {// Images assets
                 test: /\.(png|gif|TTF|jpg|JPG)(\?v=\d+\.\d+\.\d+)?$/,
                 use: [
                     {
