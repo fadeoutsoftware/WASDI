@@ -41,13 +41,21 @@ public class App
 //        testSubset(oLib);
         
         //testImport(oLib);
-        testWaitProcesses(oLib);
+        //testWaitProcesses(oLib);
+        testImportProductList(oLib);
+        testHello(oLib);
+        
         
         System.out.println("JWasdiLib Test Done");
         
     }
     
-    private static void testWaitProcesses(WasdiLib oLib) {
+    private static void testHello(WasdiLib oLib) {
+		System.out.println(oLib.hello());
+		
+	}
+
+	private static void testWaitProcesses(WasdiLib oLib) {
     	String sProcName = "hellotest";
     	Map<String,Object> asParams = new HashMap<>();
     	asParams.put("NAME", "Playmobil");
@@ -266,4 +274,9 @@ public class App
     	oLib.importProduct(aoFound.get(0));
     }
     
+    public static void testImportProductList(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	System.out.println("Found " + aoFound.size() + " products");
+    	oLib.importProductListWithMaps(aoFound.subList(0, 2));
+    }
 }
