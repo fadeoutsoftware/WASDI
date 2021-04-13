@@ -20,6 +20,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +104,7 @@ public class WasdiLib {
 	/**
 	 * Flag to set if the lib has to be verbose or not
 	 */
-	private Boolean m_bVerbose = false;
+	private Boolean m_bVerbose = true;
 
 	/**
 	 * Params dictionary
@@ -123,7 +124,7 @@ public class WasdiLib {
 	/*
 	 * Default data provider to be used for search and import operations 
 	 */
-	private String m_sDefaultProvider = "ONDA";
+	private String m_sDefaultProvider = "LSA";
 	
 	
 	public String getDefaultProvider() {
@@ -1198,6 +1199,25 @@ public class WasdiLib {
 			return "";
 		}	  
 	}
+	
+	/**
+	 * Get the status of a List of WASDI processes 
+	 * @param sProcessId Process Id
+	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 */
+	public List<String> getProcessesStatusAsList(List<String> asIds) {
+		//List<String> asStatus =
+		String sStatus = getProcessesStatus(asIds);
+		
+		
+		sStatus = sStatus
+				//get rid of opening and trailing square brackets 
+				.substring(1, sStatus.length()-1)
+				//"DONE" -> DONE
+				.replaceAll("\"", "");
+
+		return new ArrayList<String>(Arrays.asList(sStatus.split(",")));
+	}
 
 	/**
 	 *  Update the status of the current process
@@ -1340,28 +1360,21 @@ public class WasdiLib {
 	 * @return
 	 */
 	public List<String> waitProcesses(List<String> asIds) {
-		
-		
 		updateStatus("WAITING");
 		
 		String sResult ="";
 		boolean bDone = false;
-		List<String> asResults = new ArrayList<String>(asIds.size());
 		while(!bDone) {
-			bDone = true;
-			sResult = getProcessesStatus(asIds);
-			
+			bDone = true;	
 
-			String[] asStatus = sResult
-					.substring(1,sResult.length()-1) //remove leading "[" and trailing "]"
-					.split(",");		//split and get the statuses
+			List<String> asStatus = getProcessesStatusAsList(asIds);
 			
 			for (String sStatus : asStatus) {
-				sStatus = sStatus.toUpperCase().trim().substring(1,sStatus.length()-1);
 				if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
 					bDone = false;
 					//then at least one needs to be waited for
 					try {
+						log("waitProcesses: sleep");
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -1372,11 +1385,8 @@ public class WasdiLib {
 			}
 		}		
 		waitForResume();
-		String[] asStatus = sResult.substring(1,sResult.length()-1).split(",");
-		for (String sStatus : asStatus) {
-			asResults.add(sStatus.toUpperCase().trim().substring(1,sStatus.length()-1));
-		}
-		return asResults;
+		
+		return getProcessesStatusAsList(asIds);
 	}
 	
 	/**
@@ -2078,14 +2088,18 @@ public class WasdiLib {
 	}
 	
 	
+	public String asynchImportProduct(Map<String, Object> oProduct) {
+		return asynchImportProduct(oProduct, null);
+	}
 	
 	/**
 	 * Import a Product from a Provider in WASDI asynchronously.
 	 * 
 	 * @param oProduct Product Map JSON representation as returned by searchEOImage
+	 * @param sProvider the provider of choice. If null, the default provider will be used
 	 * @return status of the Import process
 	 */
-	public String asynchImportProduct(Map<String, Object> oProduct) {
+	public String asynchImportProduct(Map<String, Object> oProduct, String sProvider) {
 		String sReturn = "ERROR";
 		
 		try {
@@ -2097,7 +2111,7 @@ public class WasdiLib {
 				sBoundingBox = oProduct.get("footprint").toString();
 			}
 			
-			return asynchImportProduct(sFileUrl, sBoundingBox);
+			return asynchImportProduct(sFileUrl, sBoundingBox, sProvider);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -2977,4 +2991,57 @@ public class WasdiLib {
 		this.m_sWorkspaceBaseUrl = m_sWorkspaceBaseUrl;
 	}
 	
+	public String hello() {
+		try {
+			return httpGet(getBaseUrl() + "/wasdi/hello",getStandardHeaders());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+/*
+	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix) {
+		importAndPreprocess(aoProductsToImport, sWorkflow, sPreProcSuffix, null);
+	}
+	
+	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix, String sProvider) {
+		if(null==aoProductsToImport) {
+			wasdiLog("The list of products to be imported is null, aborting");
+			return;
+		}
+		if(sProvider==null || sProvider.isEmpty()) {
+			sProvider = getDefaultProvider();
+		}
+		
+		//start downloads
+		List<String> asDownloadIds = asynchImportProductListWithMaps(aoProductsToImport);
+		
+		List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
+		for (String sDownloadId : asDownloadIds) {
+			asWorkflowIds.add("");
+		}
+		
+		//now check the download status and start as many workflows as possible
+		
+		boolean bWaiting = true;
+		while(bWaiting) {
+			bWaiting = false;
+			List<String> asDownloadStatuses = getProcessesStatusAsList(asDownloadIds);
+			List<String> asWorkflowStatuses = getProcessesStatusAsList(asWorkflowIds);
+			
+			for(int i = 0; i < aoProductsToImport.size(); i++) {
+				if(asDownloadStatuses.get(i).equals("DONE")) {
+					String sInputFile = 
+					
+					asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflowName)
+					//todo mark as "NEXT"
+					asDownloadStatuses
+				}
+			}
+		}
+		
+		
+	}
+*/
 }
