@@ -1,25 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
-var asControllerList = ["./app/controllers/HomeController.js",
-    "./app/controllers/EditorController.js",
-    "./app/controllers/CatalogController.js",
-    "./app/controllers/ImportController.js",
-    "./app/controllers/MarketPlaceController.js",
-    "./app/controllers/RootController.js",
-    "./app/controllers/SearchOrbitController.js",
-    "./app/controllers/ValidateUserController.js",
-    "./app/controllers/WasdiApplicationDetailsController.js",
-    "./app/controllers/WasdiApplicationUIController.js",
-    "./app/controllers/WorkspaceController.js",
-];
-// This part contains the search service
-var asSearchService = ["./app/services/search/advanced-filter-service.js",
-    "./app/services/search/advanced-search-service.js",
-    "./app/services/search/search-service.js",
-    "./app/services/search/light-search-service.js"
-];
-
 
 module.exports = {
     mode: 'production',
@@ -136,7 +117,7 @@ module.exports = {
         })
     ],
     optimization: {
-        runtimeChunk: 'single',
+
     },
 }
 ;

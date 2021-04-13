@@ -239,7 +239,7 @@ wasdiApp.controller("FTPController", window.FTPController);
 wasdiApp.controller("UploadController", window.UploadController);
 wasdiApp.controller("MosaicController", window.MosaicController);
 wasdiApp.controller("EditPanelController", window.EditPanelController);
-wasdiApp.controller("ProcessErrorLogsDialogController", window.ProcessErrorLogsDialogController);
+wasdiApp.controller("ProcessorLogsController", window.ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", window.ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
