@@ -115,22 +115,22 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                {from: "./app/assets", to: "./app/assets"},
-                {from: "./app/config", to: "./app/config"},
-                {from: "./app/css", to: "./app/css"},
+                {from: "./app/assets", to: "./assets"},
+                {from: "./app/config", to: "./config"},
+                {from: "./app/css", to: "./css"},
                 /*{from: "./app/controllers", to: "./app/controllers"},*/
-                {from: "./app/dialogs", to: "./app/dialogs"},
-                {from: "./app/directives", to: "./app/directives"},
-                {from: "./app/fonts", to: "./app/fonts"},
-                {from: "./app/environments", to: "./app/environments"},
+                {from: "./app/dialogs", to: "./dialogs"},
+                {from: "./app/directives", to: "./directives"},
+                {from: "./app/fonts", to: "./fonts"},
+                {from: "./app/environments", to: "./environments"},
 
-                {from: "./app/languages", to: "./app/languages"},
-                {from: "./app/models", to: "./app/models"},
-                {from: "./app/partials", to: "./app/partials"},
-                {from: "./app/lib", to: "./app/lib"},
-                {from: "./app/keycloak.json", to: "./app/keycloak.json"},
-                {from: "./app/services", to: "./app/services"},
-                {from: "./app/favicon.ico", to: "./app/favicon.ico"},
+                {from: "./app/languages", to: "./languages"},
+                {from: "./app/models", to: "./models"},
+                {from: "./app/partials", to: "./partials"},
+                {from: "./app/lib", to: "./lib"},
+                {from: "./app/keycloak.json", to: "./keycloak.json"},
+                {from: "./app/services", to: "./services"},
+                {from: "./app/favicon.ico", to: "./favicon.ico"},
 
             ],
         })
