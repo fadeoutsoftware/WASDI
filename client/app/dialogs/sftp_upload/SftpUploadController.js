@@ -194,3 +194,4 @@ var SftpUploadController = (function() {
     ];
     return SftpUploadController;
 })();
+window.SftpUploadController =  SftpUploadController;

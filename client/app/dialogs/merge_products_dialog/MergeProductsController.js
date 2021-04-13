@@ -256,3 +256,4 @@ var MergeProductsController = (function() {
     ];
     return MergeProductsController;
 })();
+window.MergeProductsController = MergeProductsController;

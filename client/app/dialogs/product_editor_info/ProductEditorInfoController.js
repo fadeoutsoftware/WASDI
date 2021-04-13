@@ -81,3 +81,4 @@ var ProductEditorInfoController = (function() {
     ];
     return ProductEditorInfoController;
 })();
+window.ProductEditorInfoController = ProductEditorInfoController;
