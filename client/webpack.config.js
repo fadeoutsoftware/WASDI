@@ -1,23 +1,23 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
-var asControllerList = ["./controllers/HomeController.js",
-    "./controllers/EditorController.js",
-    "./controllers/CatalogController.js",
-    "./controllers/ImportController.js",
-    "./controllers/MarketPlaceController.js",
-    "./controllers/RootController.js",
-    "./controllers/SearchOrbitController.js",
-    "./controllers/ValidateUserController.js",
-    "./controllers/WasdiApplicationDetailsController.js",
-    "./controllers/WasdiApplicationUIController.js",
-    "./controllers/WorkspaceController.js",
+var asControllerList = ["./app/controllers/HomeController.js",
+    "./app/controllers/EditorController.js",
+    "./app/controllers/CatalogController.js",
+    "./app/controllers/ImportController.js",
+    "./app/controllers/MarketPlaceController.js",
+    "./app/controllers/RootController.js",
+    "./app/controllers/SearchOrbitController.js",
+    "./app/controllers/ValidateUserController.js",
+    "./app/controllers/WasdiApplicationDetailsController.js",
+    "./app/controllers/WasdiApplicationUIController.js",
+    "./app/controllers/WorkspaceController.js",
 ];
 // This part contains the search service
-var asSearchService = ["./services/search/advanced-filter-service.js",
-    "./services/search/advanced-search-service.js",
-    "./services/search/search-service.js",
-    "./services/search/light-search-service.js"
+var asSearchService = ["./app/services/search/advanced-filter-service.js",
+    "./app/services/search/advanced-search-service.js",
+    "./app/services/search/search-service.js",
+    "./app/services/search/light-search-service.js"
 ];
 
 
@@ -44,7 +44,7 @@ module.exports = {
         // this entry report the modules that use factory() so that
         // must be declared after app.js
         search: {
-            import: './services/search/searchServices.js',
+            import: './app/services/search/searchServices.js',
             dependOn: ['app']
 
         },
@@ -56,7 +56,7 @@ module.exports = {
         },
         bundle: './index.js',
         /*    services: {
-                import: './services.js'
+                import: './app/services.js'
             },
 
             controllers: {
@@ -115,22 +115,22 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                {from: "./assets", to: "./assets"},
-                {from: "./config", to: "./config"},
-                {from: "./css", to: "./css"},
-                /*{from: "./controllers", to: "./controllers"},*/
-                {from: "./dialogs", to: "./dialogs"},
-                {from: "./directives", to: "./directives"},
-                {from: "./fonts", to: "./fonts"},
-                {from: "./environments", to: "./environments"},
+                {from: "./app/assets", to: "./app/assets"},
+                {from: "./app/config", to: "./app/config"},
+                {from: "./app/css", to: "./app/css"},
+                /*{from: "./app/controllers", to: "./app/controllers"},*/
+                {from: "./app/dialogs", to: "./app/dialogs"},
+                {from: "./app/directives", to: "./app/directives"},
+                {from: "./app/fonts", to: "./app/fonts"},
+                {from: "./app/environments", to: "./app/environments"},
 
-                {from: "./languages", to: "./languages"},
-                {from: "./models", to: "./models"},
-                {from: "./partials", to: "./partials"},
-                {from: "./lib", to: "./lib"},
-                {from: "./keycloak.json", to: "./keycloak.json"},
-                {from: "./services", to: "./services"},
-                {from: "./favicon.ico", to: "./favicon.ico"},
+                {from: "./app/languages", to: "./app/languages"},
+                {from: "./app/models", to: "./app/models"},
+                {from: "./app/partials", to: "./app/partials"},
+                {from: "./app/lib", to: "./app/lib"},
+                {from: "./app/keycloak.json", to: "./app/keycloak.json"},
+                {from: "./app/services", to: "./app/services"},
+                {from: "./app/favicon.ico", to: "./app/favicon.ico"},
 
             ],
         })

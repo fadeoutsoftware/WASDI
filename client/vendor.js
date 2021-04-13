@@ -1,11 +1,11 @@
-require('./lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.js');
-require('./lib/leafletbetterWMS/L.TileLayer.BetterWMS.js');
-require('./lib/leafletControlCustomMaster/Leaflet.Control.Custom.js');
-require('./lib/stringUtils/removeSpaces.js');
+require('./app/lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.js');
+require('./app/lib/leafletbetterWMS/L.TileLayer.BetterWMS.js');
+require('./app/lib/leafletControlCustomMaster/Leaflet.Control.Custom.js');
+require('./app/lib/stringUtils/removeSpaces.js');
 
-require('./lib/enum/ProductsProviders.js'); // also unused?
+require('./app/lib/enum/ProductsProviders.js'); // also unused?
 
-require('./assets/slider-appdetails/js/lightslider.js');
+require('./app/assets/slider-appdetails/js/lightslider.js');
 require('./node_modules/leaflet-draw/dist/leaflet.draw.js');
 require('./node_modules/jwt-decode/build/jwt-decode.min.js');
 
