@@ -786,3 +786,4 @@ var RootController = (function() {
 
     return RootController;
 }) ();
+window.RootController = RootController;

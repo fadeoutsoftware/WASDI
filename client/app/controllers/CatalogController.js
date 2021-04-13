@@ -626,3 +626,4 @@ var CatalogController = (function() {
 
     return CatalogController;
 }) ();
+window.CatalogController = CatalogController;

@@ -65,3 +65,4 @@ var ValidateUserController  = (function() {
 
     return ValidateUserController;
 })();
+window.ValidateUserController = ValidateUserController;

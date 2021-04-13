@@ -418,3 +418,4 @@ var WasdiApplicationDetailsController = (function() {
 
     return WasdiApplicationDetailsController;
 }) ();
+window.WasdiApplicationDetailsController = WasdiApplicationDetailsController;

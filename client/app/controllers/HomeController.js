@@ -369,3 +369,4 @@ var HomeController = (function () {
 
     return HomeController;
 })();
+window.HomeController = HomeController;
