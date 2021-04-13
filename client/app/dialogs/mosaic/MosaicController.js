@@ -2,8 +2,6 @@
  * Created by a.corrado on 16/06/2017.
  */
 
-
-
 var MosaicController = (function() {
 
     function MosaicController($scope, oClose,oExtras,oSnapOperationService,oConstantsService) {
@@ -115,3 +113,4 @@ var MosaicController = (function() {
     ];
     return MosaicController;
 })();
+window.MosaicController = MosaicController;

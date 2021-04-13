@@ -1287,3 +1287,4 @@ var EditPanelController = (function() {
     ];
     return EditPanelController;
 })();
+window.EditPanelController = EditPanelController;

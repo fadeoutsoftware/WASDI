@@ -173,3 +173,4 @@ var EditUserController = (function() {
     ];
     return EditUserController ;
 })();
+window.EditUserController= EditUserController;

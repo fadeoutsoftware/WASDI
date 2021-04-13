@@ -296,3 +296,4 @@
     ];
     return ProcessorLogsController;
 })();
+window.ProcessorLogsController = ProcessorLogsController;

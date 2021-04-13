@@ -79,3 +79,4 @@ var UploadFileController = (function() {
     ];
     return UploadFileController;
 })();
+window.UploadFileController = UploadFileController;

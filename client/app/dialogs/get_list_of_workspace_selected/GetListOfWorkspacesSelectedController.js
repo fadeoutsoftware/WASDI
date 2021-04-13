@@ -274,3 +274,4 @@ var GetListOfWorkspacesController = (function() {
     ];
     return GetListOfWorkspacesController;
 })();
+window.GetListOfWorkspacesController =  GetListOfWorkspacesController;

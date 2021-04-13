@@ -450,3 +450,4 @@ var ImageEditorController = (function() {
     ];
     return ImageEditorController;
 })();
+window.ImageEditorController = ImageEditorController;

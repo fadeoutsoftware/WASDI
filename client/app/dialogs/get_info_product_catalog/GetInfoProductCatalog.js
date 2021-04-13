@@ -299,3 +299,4 @@ var GetInfoProductCatalogController = (function() {
     ];
     return GetInfoProductCatalogController;
 })();
+window.GetInfoProductCatalogController = GetInfoProductCatalogController;

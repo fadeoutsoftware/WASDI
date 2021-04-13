@@ -2,8 +2,6 @@
  * Created by a.corrado on 24/05/2017.
  */
 
-
-
 var UploadController = (function() {
 
     function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService) {
@@ -255,3 +253,4 @@ var UploadController = (function() {
     ];
     return UploadController;
 })();
+window.UploadController = UploadController;

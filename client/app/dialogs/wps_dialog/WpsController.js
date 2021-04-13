@@ -235,3 +235,4 @@ var WpsController = (function() {
     ];
     return WpsController;
 })();
+window.WpsController = WpsController;

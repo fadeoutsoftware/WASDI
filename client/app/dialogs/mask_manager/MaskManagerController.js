@@ -767,3 +767,4 @@ var MaskManagerController = (function() {
     ];
     return MaskManagerController;
 })();
+window.MaskManagerController = MaskManagerController;

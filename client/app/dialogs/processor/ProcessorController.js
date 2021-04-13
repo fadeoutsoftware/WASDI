@@ -755,3 +755,4 @@ var ProcessorController = (function() {
     ];
     return ProcessorController;
 })();
+ window.ProcessorController = ProcessorController;

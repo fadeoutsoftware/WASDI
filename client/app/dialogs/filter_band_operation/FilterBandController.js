@@ -411,3 +411,4 @@ var FilterBandController = (function() {
     ];
     return FilterBandController;
 })();
+window.FilterBandController=FilterBandController;
