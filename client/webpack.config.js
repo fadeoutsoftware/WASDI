@@ -22,7 +22,7 @@ var asSearchService = ["./app/services/search/advanced-filter-service.js",
 
 
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     entry: {
         // in this file are required all dependencies from external source
         // served through node_modules or libs
