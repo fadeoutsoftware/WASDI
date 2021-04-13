@@ -90,10 +90,9 @@ var WorkspaceDetailsController = (function () {
         if (null != this.m_oWorkspaceService.UpdateWorkspace(this.m_oWorkspaceViewModel)) {
             var oDialog = utilsVexDialogAlertBottomRightCorner('WORKSPACE NODE UPDATED<br>READY');
             utilsVexCloseDialogAfter(4000, oDialog);
-        }
-        else{
+        } else {
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR UPDATING WORKSPACE NODE');
-            utilsVexCloseDialogAfter(10000, oDialog);            
+            utilsVexCloseDialogAfter(10000, oDialog);
         }
     }
 
@@ -110,3 +109,4 @@ var WorkspaceDetailsController = (function () {
     ];
     return WorkspaceDetailsController;
 })();
+window.WorkspaceDetailsController = WorkspaceDetailsController;
