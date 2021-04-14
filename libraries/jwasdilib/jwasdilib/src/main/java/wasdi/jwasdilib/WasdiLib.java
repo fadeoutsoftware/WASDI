@@ -3017,26 +3017,39 @@ public class WasdiLib {
 		List<String> asDownloadIds = asynchImportProductListWithMaps(aoProductsToImport);
 		
 		//prepare for preprocessing
+		List<String> asDownloadStatuses = null;
 		List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
 		for (String sDownloadId : asDownloadIds) {
 			asWorkflowIds.add("");
 		}
+		List<String> asWorkflowStatuses = new ArrayList<String>(asDownloadIds.size());
+		for (String sWorkflowStatus : asWorkflowStatuses) {
+			asWorkflowStatuses.add("");
+		}
 		
-		//now check the download status and start as many workflows as possible
 		
-		boolean bWaiting = true;
-		while(bWaiting) {
-			bWaiting = false;
-			List<String> asDownloadStatuses = getProcessesStatusAsList(asDownloadIds);
-			List<String> asWorkflowStatuses = getProcessesStatusAsList(asWorkflowIds);
-			
-			for(int i = 0; i < aoProductsToImport.size(); i++) {
-				if(asDownloadStatuses.get(i).equals("DONE")) {
-//					String sInputFile = 
-//					
-//					asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflowName)
-//					//todo mark as "NEXT"
-//					asDownloadStatuses
+		boolean bDownloading = true;
+		boolean bKeepGoing = true;
+		while(bKeepGoing) {
+			bKeepGoing = false;
+			if(bDownloading) {
+				//update status of downloads
+				asDownloadStatuses = getProcessesStatusAsList(asDownloadIds);
+				bDownloading = false;
+				for (String sStatus : asDownloadStatuses) {
+					if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
+						bDownloading = true;
+					}
+				}
+			}
+			//now check the download status and start as many workflows as possible
+			for(int i = 0; i < asDownloadIds.size(); ++i) {
+				if(!bDownloading ||asDownloadStatuses.get(i).equals("DONE")) {
+					//download complete
+					if(!asWorkflowIds.get(i).equals("")) {
+					//then workflow must be started
+						String[] asInputFileName = new String[] {aoProductsToImport.get(i).get("")}; 
+						String sWorkflowId = executeWorkflow(asInputFileName, asOutputFileName, sWorkflowName)
 				}
 			}
 		}
