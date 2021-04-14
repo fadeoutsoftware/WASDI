@@ -3000,7 +3000,6 @@ public class WasdiLib {
 		return null;
 	}
 	
-/*
 	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix) {
 		importAndPreprocess(aoProductsToImport, sWorkflow, sPreProcSuffix, null);
 	}
@@ -3017,6 +3016,7 @@ public class WasdiLib {
 		//start downloads
 		List<String> asDownloadIds = asynchImportProductListWithMaps(aoProductsToImport);
 		
+		//prepare for preprocessing
 		List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
 		for (String sDownloadId : asDownloadIds) {
 			asWorkflowIds.add("");
@@ -3032,16 +3032,15 @@ public class WasdiLib {
 			
 			for(int i = 0; i < aoProductsToImport.size(); i++) {
 				if(asDownloadStatuses.get(i).equals("DONE")) {
-					String sInputFile = 
-					
-					asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflowName)
-					//todo mark as "NEXT"
-					asDownloadStatuses
+//					String sInputFile = 
+//					
+//					asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflowName)
+//					//todo mark as "NEXT"
+//					asDownloadStatuses
 				}
 			}
 		}
 		
 		
 	}
-*/
 }
