@@ -119,9 +119,9 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 			sResult += parseTimeFrame(sQuery);
 			sResult += "&status=all";
 
-			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
-				sResult += "&timeliness=Fast-24h";
-			}
+//			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
+//				sResult += "&timeliness=Fast-24h";
+//			}
 			String sFree = parseProductName(sQueryFromClient);
 			if(!Utils.isNullOrEmpty(sFree)) {
 				sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
