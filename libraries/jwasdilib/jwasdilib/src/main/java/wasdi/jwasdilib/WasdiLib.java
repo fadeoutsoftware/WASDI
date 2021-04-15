@@ -1188,7 +1188,7 @@ public class WasdiLib {
 			//remove last comma
 			sIds = sIds.substring(0, sIds.length()-1);
 			sIds += "]";
-			
+
 		    String sUrl = getWorkspaceBaseUrl() + "/process/statusbyid";		    
 		    String sResponse = httpPost(sUrl, sIds, getStandardHeaders());
 		    
@@ -1372,15 +1372,17 @@ public class WasdiLib {
 			for (String sStatus : asStatus) {
 				if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
 					bDone = false;
-					//then at least one needs to be waited for
-					try {
-						log("waitProcesses: sleep");
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
 					//we should break now and check their new status
 					break;
+				}
+			}
+			if(!bDone) {
+				//then at least one needs to be waited for
+				try {
+					log("waitProcesses: sleep");
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 		}		
@@ -1398,9 +1400,9 @@ public class WasdiLib {
 		
 		if (!m_bIsOnServer) return;
 		
-		updateStatus("READY");
-		
-		String sStatus = "";
+		String sStatus = "READY";
+		updateStatus(sStatus);
+
 		while ( ! (sStatus.equals("RUNNING"))) {
 			sStatus = getProcessStatus(getMyProcId());
 			try {
@@ -2087,7 +2089,7 @@ public class WasdiLib {
 		return oProduct.get("link").toString();
 	}
 	
-	
+
 	public String asynchImportProduct(Map<String, Object> oProduct) {
 		return asynchImportProduct(oProduct, null);
 	}
@@ -3000,6 +3002,22 @@ public class WasdiLib {
 		return null;
 	}
 	
+	String getProductName(Map<String, Object> oProduct) {
+		String sResult = null;
+		try {
+			sResult = (String)oProduct.get("title");
+			if(sResult.startsWith("S1")|| sResult.startsWith("S2")) {
+				if(!sResult.toLowerCase().endsWith(".zip")) {
+					sResult += ".zip";
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return sResult;
+		
+	}
+
 	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix) {
 		importAndPreprocess(aoProductsToImport, sWorkflow, sPreProcSuffix, null);
 	}
@@ -3018,42 +3036,93 @@ public class WasdiLib {
 		
 		//prepare for preprocessing
 		List<String> asDownloadStatuses = null;
-		List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
-		for (String sDownloadId : asDownloadIds) {
-			asWorkflowIds.add("");
-		}
-		List<String> asWorkflowStatuses = new ArrayList<String>(asDownloadIds.size());
-		for (String sWorkflowStatus : asWorkflowStatuses) {
-			asWorkflowStatuses.add("");
-		}
 		
+		final String sNotStartedYet = "NOT STARTED YET";
+		
+		//DOWNLOAD
+		List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
+		//WORKFLOW
+		List<String> asWorkflowStatuses = new ArrayList<String>(asDownloadIds.size());
+				
+		//init lists by marking process not started
+		for(int i = 0; i < aoProductsToImport.size(); ++i) {
+			asWorkflowIds.add(sNotStartedYet);
+			asWorkflowStatuses.add(sNotStartedYet);
+		}
 		
 		boolean bDownloading = true;
-		boolean bKeepGoing = true;
-		while(bKeepGoing) {
-			bKeepGoing = false;
+		boolean bRunningWorkflow = true;
+		boolean bAllWorkflowsStarted = false;
+		while(bRunningWorkflow || bDownloading) {
+
+			//DOWNLOADS
 			if(bDownloading) {
+				bDownloading = false;
 				//update status of downloads
 				asDownloadStatuses = getProcessesStatusAsList(asDownloadIds);
-				bDownloading = false;
 				for (String sStatus : asDownloadStatuses) {
 					if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
 						bDownloading = true;
 					}
 				}
-			}
-			//now check the download status and start as many workflows as possible
-			for(int i = 0; i < asDownloadIds.size(); ++i) {
-				if(!bDownloading ||asDownloadStatuses.get(i).equals("DONE")) {
-					//download complete
-					if(!asWorkflowIds.get(i).equals("")) {
-					//then workflow must be started
-						String[] asInputFileName = new String[] {aoProductsToImport.get(i).get("")}; 
-						String sWorkflowId = executeWorkflow(asInputFileName, asOutputFileName, sWorkflowName)
+				if(!bDownloading) {
+					wasdiLog("importAndPreprocess: completed all downloads");
+				} else {
+					log("importAndPreprocess: downloads not completed yet");
 				}
 			}
+			
+			//WORKFLOWS
+			bRunningWorkflow = false;
+			bAllWorkflowsStarted = true;
+			for(int i = 0; i < asDownloadIds.size(); ++i) {
+				//check the download status and start as many workflows as possible
+				if(asDownloadStatuses.get(i).equals("DONE")) {
+					//download complete
+					if(asWorkflowIds.get(i).equals(sNotStartedYet)) {
+					//then workflow must be started
+						String sInputName = getProductName(aoProductsToImport.get(i));
+						if(null==sInputName || sInputName.equals("")) {
+							wasdiLog("importAndPreprocess: WARNING: input name for " + i + "th product could not be retrieved, skipping");
+							asWorkflowIds.set(i, "ERROR "+i);
+							asWorkflowStatuses.set(i, "ERROR");
+						} else {
+							String[] asInputFileName = new String[] {sInputName};
+							String sOutputName = sInputName + sPreProcSuffix;
+							String[] asOutputFileName = new String[] {sOutputName};
+							String sWorkflowId = asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflow);
+							wasdiLog("importAndPreprocess: started " + i + "th workflow with id " + sWorkflowId + " -> " + sOutputName);
+							asWorkflowIds.set(i, sWorkflowId);
+							bRunningWorkflow = true;
+						}
+					} else {
+						//check the status of the workflow
+						String sStatus = getProcessStatus(asWorkflowIds.get(i));
+						if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
+							bRunningWorkflow = true;
+						}
+						asWorkflowStatuses.set(i, sStatus);
+					}
+				} else if(asDownloadStatuses.get(i).equals("STOPPED")) {
+					asWorkflowIds.set(i, "STOPPED");
+				} else if(asDownloadStatuses.get(i).equals("ERROR")) {
+					asWorkflowIds.set(i, "ERROR");
+				}
+				if(asWorkflowIds.get(i).equals(sNotStartedYet)) {
+					bAllWorkflowsStarted = false;
+				}
+			}
+			if(bAllWorkflowsStarted) {
+				break;
+			}
+			try {
+				log("importAndPreprocess: sleep");
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
-		
-		
+		waitProcesses(asWorkflowIds);
+		wasdiLog("importAndPreprocess: complete :-)");
 	}
 }

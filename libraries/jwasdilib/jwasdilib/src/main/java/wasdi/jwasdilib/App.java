@@ -27,6 +27,8 @@ public class App
         oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "config.properties");
         
         //testConnection(oLib);
+        
+        testHello(oLib);
     //    testDownload(oLib);
         //testAutomaticUpload(oLib);
         
@@ -42,11 +44,14 @@ public class App
         
         //testImport(oLib);
         //testWaitProcesses(oLib);
-        testImportProductList(oLib);
-        testHello(oLib);
+        //testImportProductList(oLib);
+        
+        
+        testImportAndPreprocess(oLib);
         
         
         System.out.println("JWasdiLib Test Done");
+        oLib.updateStatus("DONE");
         
     }
     
@@ -278,5 +283,11 @@ public class App
     	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importProductListWithMaps(aoFound.subList(0, 2));
+    }
+    
+    public static void testImportAndPreprocess(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	System.out.println("Found " + aoFound.size() + " products");
+    	oLib.importAndPreprocess(aoFound.subList(0, 2), "ndvi", "_ndvi.tif");
     }
 }
