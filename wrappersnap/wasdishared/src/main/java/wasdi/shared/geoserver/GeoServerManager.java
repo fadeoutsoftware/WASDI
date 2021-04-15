@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 
+import org.apache.log4j.Logger;
+
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
@@ -125,29 +127,35 @@ public class GeoServerManager {
     }
 
 
-    public boolean publishStandardGeoTiff(String sStoreName, File oGeotiffFile, String sEpsg, String sStyle)
+    public boolean publishStandardGeoTiff(String sStoreName, File oGeotiffFile, String sEpsg, String sStyle, Logger oLogger)
             throws FileNotFoundException {
-
+    	
     	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
     	if (oLayer != null) removeLayer(sStoreName);
 
     	if (sStyle == null || sStyle.isEmpty()) sStyle = "raster";
     	    	
     	if (sStoreName == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: Store Name is null");
+    		oLogger.error("GeoServerManager.publishStandardGeoTiff: Store Name is null");
     	}
     	
     	if (oGeotiffFile == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
+    		oLogger.error("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
     	}
         
     	if (sEpsg == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
+    		oLogger.error("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
     	}
-    	    	
-        boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,sStyle);
+    	
+        boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED, sStyle);
+        boolean bExistsCoverageStore = m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName);
+        boolean bExistsCoverage= m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName);
         
-        if (bRes && m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName) && m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName)) {
+        oLogger.error("GeoServerManager.publishStandardGeoTiff: bRes = " + bRes);
+        oLogger.error("GeoServerManager.publishStandardGeoTiff: existsCoveragestore = " + bExistsCoverageStore);
+        oLogger.error("GeoServerManager.publishStandardGeoTiff: existsCoverage = " + bExistsCoverage);
+        
+        if (bRes && bExistsCoverageStore && bExistsCoverage) {
         	GSCoverageEncoder oCe = new GSCoverageEncoder();
             oCe.setEnabled(true); //abilito il coverage
             oCe.setSRS(sEpsg);

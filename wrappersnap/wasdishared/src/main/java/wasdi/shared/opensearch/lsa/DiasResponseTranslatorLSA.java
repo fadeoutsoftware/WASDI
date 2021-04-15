@@ -53,6 +53,8 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 
 				QueryResultViewModel oResult = new QueryResultViewModel();
 				
+				String sSummary = "";
+				
 				oResult.setProvider("LSA");
 				//retrive the title
 				String sTitle = oEntry.getTitle();
@@ -105,6 +107,8 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 							}
 						}
 					}
+					
+					sSummary = "Satellite: Sentinel-1";
 				}
 				else if (sTitle.startsWith("S2")) {
 					// Split the title
@@ -134,7 +138,9 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 								oResult.getProperties().put("relativeorbitnumber", ""+iRelativeOrbit);
 							}
 						}
-					}					
+					}
+					
+					sSummary = "Satellite: Sentinel-2";
 				}
 				
 				// Set platform
@@ -197,10 +203,24 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 							}
 						}
 						else if (sName.equals("{http://purl.org/dc/elements/1.1/}date")) {
-							oResult.setSummary(oElement.getText());
+							
+							String sDate = oElement.getText();
+							
+							
+							if (!Utils.isNullOrEmpty(sDate)) {
+								String asParts[] = sDate.split("/");
+								if (asParts != null) {
+									if (asParts.length>0) {
+										sSummary += ", Date: " + asParts[0];
+									}
+								}
+							}
+							
 						}
 					}
 				}
+				
+				oResult.setSummary(sSummary);
 				
 				aoResults.add(oResult);
 			} 

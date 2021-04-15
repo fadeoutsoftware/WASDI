@@ -820,6 +820,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					File oProductFile = new File(sFileName);
 					Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
+					
+					if (oVM != null) {
+						// Snap set the name of geotiff files as geotiff: let replace with the file name
+						if (oVM.getName().equals("geotiff")) {
+							oVM.setName(oVM.getFileName());
+						}						
+					}
+					
 					// Save Metadata
 					//oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
 					
@@ -1699,7 +1707,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.PublishBandImage: to " + sOutputFilePath + " [LayerId] = " + sLayerId);
 
 			// Check if is already a .tif image
-			if ((sFile.endsWith(".tif") || sFile.endsWith(".tiff")) == false) {
+			if ((sFile.toLowerCase().endsWith(".tif") || sFile.toLowerCase().endsWith(".tiff")) == false) {
 
 				// Check if it is a S2
 				if (oProduct.getProductType().startsWith("S2")
@@ -1768,10 +1776,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
 			// Ok publish
-			s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
-
-			GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"),
-					ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
+			GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
 
 			Publisher oPublisher = new Publisher();
 
@@ -1782,7 +1787,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oPublisher.m_lMaxMbTiffPyramid = 1024L;
 			}
 
-			s_oLogger.debug("Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId);
+			s_oLogger.debug("LauncherMain.PublishBandImage: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId);
 			sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);
 
 			s_oLogger.debug("Obtained sLayerId = " + sLayerId);

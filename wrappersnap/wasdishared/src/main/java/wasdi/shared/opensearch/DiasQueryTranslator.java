@@ -54,6 +54,11 @@ public abstract class DiasQueryTranslator {
 	 * Token of sensor mode
 	 */
 	private static final String s_sSENSORMODE = "sensoroperationalmode:";
+	/**
+	 * Token of VIIRS Product type
+	 */
+	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";
+	
 
 	protected String m_sParserConfigPath;
 	protected String m_sAppConfigPath;
@@ -199,7 +204,7 @@ public abstract class DiasQueryTranslator {
 	 * @param sQuery
 	 * @return
 	 */
-	protected QueryViewModel parseWasdiClientQuery(String sQuery) {
+	public QueryViewModel parseWasdiClientQuery(String sQuery) {
 
 		QueryViewModel oResult = new QueryViewModel();
 
@@ -345,6 +350,9 @@ public abstract class DiasQueryTranslator {
 
 			// Try to get Info About S2
 			parseSentinel2(sQuery, oResult);
+			
+			// Try get Info about VIIRS
+			parseVIIRS(sQuery, oResult);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
@@ -531,6 +539,66 @@ public abstract class DiasQueryTranslator {
 			Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): " + oE);
 		}
 	}
+	
+	
+	/**
+	 * Fills the Query View Model with S1 info
+	 * 
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseVIIRS(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_VIIRS)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_VIIRS);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_VIIRS.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = "VIIRS";
+
+					// check for product type
+					try {
+						if (sQuery.contains(DiasQueryTranslator.s_sPRODUCTTYPE)) {
+							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find product type");
+							}
+							iStart += s_sPRODUCTTYPE.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								// the types can be VIIRS_1d_composite, VIIRS_5d_composite all 18 letters
+								iEnd = iStart + 18;
+							}
+							String sType = sQuery.substring(iStart, iEnd);
+							sType = sType.trim();
+
+							oResult.productType = sType;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslatorEODC.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+		}
+	}	
 
 	/**
 	 * read a int from the query

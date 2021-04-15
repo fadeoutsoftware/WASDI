@@ -16,6 +16,7 @@ import wasdi.shared.opensearch.eodc.QueryExecutorEODC;
 import wasdi.shared.opensearch.lsa.QueryExecutorLSA;
 import wasdi.shared.opensearch.onda.QueryExecutorONDA;
 import wasdi.shared.opensearch.sobloo.QueryExecutorSOBLOO;
+import wasdi.shared.opensearch.viirs.QueryExecutorVIIRS;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 
@@ -40,6 +41,7 @@ public class QueryExecutorFactory {
 		aoMap.put("EODC", QueryExecutorEODC::new);
 		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
 		aoMap.put("LSA", QueryExecutorLSA::new);
+		aoMap.put("VIIRS", QueryExecutorVIIRS::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		Utils.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
@@ -49,7 +51,9 @@ public class QueryExecutorFactory {
 	}
 
 	private QueryExecutor supply(String sProvider) {
-		Utils.debugLog("QueryExecutorFactory.QueryExecutor( "+sProvider+" )");
+		
+		//Utils.debugLog("QueryExecutorFactory.QueryExecutor( "+sProvider+" )");
+		
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {
 			Supplier<QueryExecutor> oSupplier = s_aoExecutors.get(sProvider);
@@ -64,8 +68,8 @@ public class QueryExecutorFactory {
 
 	public QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials,
 			String sDownloadProtocol, String sGetMetadata, String sParserConfigPath, String sAppConfigPath) {
-		Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + ", <credentials>, " +
-				sDownloadProtocol + ", " + sGetMetadata + " )...");
+		
+		//Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + ", <credentials>, " + sDownloadProtocol + ", " + sGetMetadata + " )...");
 		QueryExecutor oExecutor = null;
 
 		try {

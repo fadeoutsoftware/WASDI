@@ -347,6 +347,19 @@
             "indexname": "productMainClass",
             "indexvalue": "Copernicus-marine",
             "filters": []
+        },
+        {
+            "name": "Viirs",
+            "indexname": "platformname",
+            "indexvalue": "VIIRS",
+            "filters": [  {
+                "indexname": "producttype",
+                "indexlabel": "Product",
+                "indexvalues":"VIIRS_1d_composite|VIIRS_5d_composite",
+                "regex": ".*",
+                "indexvalue":"VIIRS_1d_composite"
+
+            }]
         }
     ],
     "orbitsearch":{
