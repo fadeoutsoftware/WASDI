@@ -7,21 +7,32 @@
 package wasdi.shared.opensearch.eodc;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
 import org.json.JSONObject;
 
 import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
  * @author c.nattero
  *
  */
 public class QueryExecutorEODC extends QueryExecutor {
+	
+	public QueryExecutorEODC() {
+		m_oQueryTranslator = new DiasQueryTranslatorEODC();
+		m_oResponseTranslator = new DiasResponseTranslatorEODC();
+		
+		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL2);		
+	}
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
@@ -109,7 +120,13 @@ public class QueryExecutorEODC extends QueryExecutor {
 	public int executeCount(String sQuery) throws IOException {
 		try {
 			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
-			//sQuery = encodeAsRequired(sQuery); 
+			
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			
+			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+				return 0;
+			}			
+			
 			String sUrl = getCountUrl(sQuery);
 
 			
@@ -121,9 +138,8 @@ public class QueryExecutorEODC extends QueryExecutor {
 			}
 			//we do not need results now, just the count
 			sQuery += "&limit=0";
-
-			DiasQueryTranslatorEODC oEODC = new DiasQueryTranslatorEODC();
-			String sTranslatedQuery = oEODC.translate(sQuery);
+			
+			String sTranslatedQuery = ((DiasQueryTranslatorEODC)m_oQueryTranslator).translate(sQuery);
 			sTranslatedQuery = sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
 			
 			Utils.debugLog("EODC Payload:");
@@ -148,7 +164,12 @@ public class QueryExecutorEODC extends QueryExecutor {
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 
-		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return new ArrayList<QueryResultViewModel>();
+		}
+		
 		String sResult = null;
 		String sUrl = null;
 		try {
@@ -234,20 +255,6 @@ public class QueryExecutorEODC extends QueryExecutor {
 	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		DiasResponseTranslatorEODC oEODC = new DiasResponseTranslatorEODC();
 		return oEODC.translateBatch(sJson, bFullViewModel, "file");
-	}
-
-
-	public static void main(String[] args) {
-		QueryExecutorEODC oEODC = new QueryExecutorEODC();
-		int iResults = -2;
-		try {
-			iResults = oEODC.executeCount("( footprint:\"intersects(POLYGON((92.36417183697604 12.654592055231863,92.36417183697604 26.282214356266774,99.48157676962991 26.282214356266774,99.48157676962991 12.654592055231863,92.36417183697604 12.654592055231863)))\" ) AND ( beginPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] AND endPosition:[2019-05-01T00:00:00.000Z TO 2020-04-27T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:33)&providers=ONDA");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(iResults);
-
 	}
 }
 

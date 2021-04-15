@@ -1,7 +1,9 @@
 package wasdi.shared.opensearch;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.i18n.templates.Template;
@@ -14,6 +16,8 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 public class QueryExecutorSENTINEL extends QueryExecutor {
 
@@ -25,6 +29,11 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 	public QueryExecutorSENTINEL() {
 		Utils.debugLog(s_sClassName);
 		m_sProvider = "SENTINEL";
+		m_oQueryTranslator = new DiasQueryTranslator();
+		
+		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
 	}
 	
 	@Override
@@ -44,16 +53,21 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		//Utils.debugLog("QueryExecutorSENTINEL.getCountUrl( " + sQuery + " )");
-		//return "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=" + sQuery;
-		//return "https://scihub.copernicus.eu/dhus/odata/v1/Products/$count?$filter=" + sQuery;
 		return "https://scihub.copernicus.eu/dhus/search?q=" + sQuery; 
-		//return "https://scihub.copernicus.eu/dhus/odata/v1/Products/$count?$filter=startswith(Name,'S2')"; 
 	}
 
 	@Override
 	public int executeCount(String sQuery) {
 		try {
+			
+			
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			
+			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+				return 0;
+			}
+			
+			
 			Utils.debugLog(s_sClassName + ".executeCount ( " + sQuery + " )");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 			String sUrl = getSearchUrl(oQuery);
@@ -109,5 +123,17 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 			Utils.debugLog(s_sClassName + "executeCount: " + oE);
 		}
 		return -1;
+	}
+	
+	@Override
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return new ArrayList<QueryResultViewModel>();
+		}
+		
+		return super.executeAndRetrieve(oQuery, bFullViewModel);
 	}
 }

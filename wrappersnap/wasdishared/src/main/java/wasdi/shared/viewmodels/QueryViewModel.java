@@ -76,5 +76,10 @@ public class QueryViewModel {
 	 * Free text search, used when a specific product name is given
 	 */
 	public String productName = null;
+	
+	/**
+	 * Timeliness (ie Sentinel 3 filter)
+	 */
+	public String timeliness = "";
 
 }

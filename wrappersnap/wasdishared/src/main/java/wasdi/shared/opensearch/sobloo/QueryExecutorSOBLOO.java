@@ -8,6 +8,7 @@ package wasdi.shared.opensearch.sobloo;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
@@ -16,9 +17,11 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
  * @author c.nattero
@@ -40,6 +43,10 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 		
 		this.m_sUser = null;
 		this.m_sPassword = null;
+		
+		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
 	}
 
 	@Override
@@ -83,6 +90,12 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Preconditions.checkNotNull(this.m_sAppConfigPath, "QueryExecutorSOBLOO.executeAndRetrieve: app config path is null");
 		Preconditions.checkNotNull(this.m_sParserConfigPath, "QueryExecutorSOBLOO.executeAndRetrieve: parser config path is null");
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return new ArrayList<QueryResultViewModel>();
+		}		
 		
 //		this.m_oQueryTranslator.setParserConfigPath(this.m_sParserConfigPath);
 //		this.m_oQueryTranslator.setAppconfigPath(this.m_sAppConfigPath);
@@ -187,6 +200,13 @@ public class QueryExecutorSOBLOO extends QueryExecutor {
 	public int executeCount(String sQuery) throws IOException {
 		m_sUser = null;
 		m_sPassword = null;
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return 0;
+		}
+		
 		return super.executeCount(sQuery);
 	}
 

@@ -14,9 +14,11 @@ import org.apache.abdera.i18n.templates.Template;
 import org.json.JSONObject;
 
 import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
  * @author c.nattero
@@ -32,6 +34,10 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		m_sProvider=s_sClassName;
 		this.m_oQueryTranslator = new DiasQueryTranslatorCREODIAS();
 		this.m_oResponseTranslator = new DiasResponseTranslatorCREODIAS();
+		
+		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
 	}
 	
 	@Override
@@ -54,6 +60,13 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		}
 		int iResult = -1;
 		try {
+			
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			
+			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+				return 0;
+			}			
+			
 			String sUrl = getCountUrl(sQuery);
 			String sResult = null;
 			try {
@@ -87,10 +100,13 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		//Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery>, " + bFullViewModel + " )");
 		
-	
-//		String sUrl = "https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?startDate=2019-12-01T00:00:00Z&completionDate=2019-12-03T23:59:59Z&geometry=POLYGON((7.397874989401342+45.00475144371268,10.373746303074263+44.94785607558927,10.389830621260842+43.612039503172866,7.703504034412235+43.809704932512176,7.397874989401342+45.00475144371268))";
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return new ArrayList<QueryResultViewModel>();
+		}
+		
 		String sUrl = getSearchUrl(oQuery);
 		
 		String sResult = httpGetResults(sUrl, "count");

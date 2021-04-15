@@ -16,10 +16,12 @@ import org.apache.abdera.parser.ParserOptions;
 import org.json.JSONObject;
 
 import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 public class QueryExecutorLSA extends QueryExecutor {
 	
@@ -34,6 +36,9 @@ public class QueryExecutorLSA extends QueryExecutor {
 		m_sProvider=s_sClassName;
 		this.m_oQueryTranslator = new DiasQueryTranslatorLSA();
 		this.m_oResponseTranslator = new DiasResponseTranslatorLSA();
+		
+		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
 	}
 	
 	@Override
@@ -75,6 +80,12 @@ public class QueryExecutorLSA extends QueryExecutor {
 	public int executeCount(String sQuery) throws IOException {
 		
 		int iCount = 0;
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return 0;
+		}
 		
 		String sLSAQuery = m_oQueryTranslator.translateAndEncode(sQuery);
 		
@@ -148,6 +159,12 @@ public class QueryExecutorLSA extends QueryExecutor {
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		
 		ArrayList<QueryResultViewModel> aoReturnList = new ArrayList<QueryResultViewModel>();
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return aoReturnList;
+		}		
 		
 		try {
 			

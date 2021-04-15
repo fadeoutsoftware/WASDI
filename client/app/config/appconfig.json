@@ -343,7 +343,7 @@
             ]
         },
         {
-            "name": "Marine",
+            "name": "CMEMS",
             "indexname": "productMainClass",
             "indexvalue": "Copernicus-marine",
             "filters": []
