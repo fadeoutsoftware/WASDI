@@ -26,7 +26,7 @@ module.exports = {
         // must be declared after app.js
         search: {
             import: './app/services/search/searchServices.js',
-            dependOn: ['app']
+            dependOn: ['app','bundle']
 
         },
 
@@ -35,22 +35,9 @@ module.exports = {
             dependOn: ['vendor']
 
         },
+        // Bundle entry contains CSS loaded throught style loader and
+        // WASDI Services
         bundle: './index.js',
-        /*    services: {
-                import: './app/services.js'
-            },
-
-            controllers: {
-                import: asControllerList,
-                dependOn: ['services'],
-            },
-
-
-
-            searchservices: {
-                import: asSearchService, // this are the factory methods that relies on wasdi module
-                dependOn: 'app'
-            },*/
 
     },
     module: {
@@ -58,6 +45,11 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: ["style-loader", "css-loader"],
+            },
+            // sass
+            {
+                test: /\.scss$/i,
+                use: ["style-loader", "css-loader", "sass-loader"],
             },
             {// Fonts assets
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
@@ -98,26 +90,27 @@ module.exports = {
             patterns: [
                 {from: "./app/assets", to: "./assets"},
                 {from: "./app/config", to: "./config"},
-                {from: "./app/css", to: "./css"},
-                /*{from: "./app/controllers", to: "./app/controllers"},*/
                 {from: "./app/dialogs", to: "./dialogs"},
                 {from: "./app/directives", to: "./directives"},
-                {from: "./app/fonts", to: "./fonts"},
+                /*{from: "./app/fonts", to: "./fonts"},*/
                 {from: "./app/environments", to: "./environments"},
-
                 {from: "./app/languages", to: "./languages"},
                 {from: "./app/models", to: "./models"},
                 {from: "./app/partials", to: "./partials"},
                 {from: "./app/lib", to: "./lib"},
                 {from: "./app/keycloak.json", to: "./keycloak.json"},
-                {from: "./app/services", to: "./services"},
+                /*{from: "./app/services", to: "./services"},*/
                 {from: "./app/favicon.ico", to: "./favicon.ico"},
 
             ],
         })
     ],
     optimization: {
-
+        runtimeChunk: 'single',
+        // minimization reduce the ./dist folder footprint of just a mere 3 MB over 45MB
+        // but generates some error for modules created using facototy() from angular
+        // so for production mode is now disabled
+        minimize: false
     },
 }
 ;
