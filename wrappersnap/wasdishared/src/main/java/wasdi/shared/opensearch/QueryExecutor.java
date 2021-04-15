@@ -165,8 +165,6 @@ public abstract class QueryExecutor {
 		if(null!=oCredentials) {
 			setUser(oCredentials.getUser());
 			setPassword(oCredentials.getPassword());
-		} else {
-			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
 		}
 
 	}

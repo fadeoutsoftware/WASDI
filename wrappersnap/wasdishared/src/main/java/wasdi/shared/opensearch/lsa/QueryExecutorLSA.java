@@ -78,6 +78,8 @@ public class QueryExecutorLSA extends QueryExecutor {
 		
 		String sLSAQuery = m_oQueryTranslator.translateAndEncode(sQuery);
 		
+		if (Utils.isNullOrEmpty(sLSAQuery)) return 0;
+		
 		if (!m_bAuthenticated) {
 			LSAHttpUtils.authenticate(m_sUser, m_sPassword);
 			m_bAuthenticated = true;
@@ -155,6 +157,8 @@ public class QueryExecutorLSA extends QueryExecutor {
 			if (!sQuery.contains("&limit")) sQuery += "&limit=" + oQuery.getLimit();
 			
 			String sLSAQuery = m_oQueryTranslator.translateAndEncode(sQuery);
+			
+			if (Utils.isNullOrEmpty(sLSAQuery)) return aoReturnList;
 			
 			if (!m_bAuthenticated) {
 				LSAHttpUtils.authenticate(m_sUser, m_sPassword);
