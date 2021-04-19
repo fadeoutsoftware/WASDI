@@ -220,18 +220,18 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseLandsat(String sQuery) {
 		String sResult = "";
 		if(sQuery.contains("Landsat")) {
-			sResult += "( platformName:Landsat-* AND name:*";
+			sResult += "( platformName:Landsat-*";
 			int iStart = sQuery.indexOf("Landsat");
 			if(sQuery.substring(iStart).contains("L1T")) {
-				sResult+="L1T*";
+				sResult+=" AND name:*L1T*";
 			} else if(sQuery.substring(iStart).contains("L1G")) {
-				sResult+="L1G*";
+				sResult+=" AND name:*L1G*";
 			} else if(sQuery.substring(iStart).contains("L1GT")) {
-				sResult+="L1GT*";
+				sResult+=" AND name:*L1GT*";
 			} else if(sQuery.substring(iStart).contains("L1GS")) {
-				sResult+="L1GS*";
+				sResult+=" AND name:*L1GS*";
 			} else if(sQuery.substring(iStart).contains("L1TP")) {
-				sResult+="L1TP*";
+				sResult+=" AND name:*L1TP*";
 			}
 			sResult += " )";
 

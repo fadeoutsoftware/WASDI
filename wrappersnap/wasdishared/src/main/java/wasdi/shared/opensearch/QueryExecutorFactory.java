@@ -34,7 +34,6 @@ public class QueryExecutorFactory {
 
 		aoMap.put("ONDA", QueryExecutorONDA::new);
 		aoMap.put("SENTINEL", QueryExecutorSENTINEL::new);
-		aoMap.put("MATERA", QueryExecutorMATERA::new);
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
 		aoMap.put("FEDEO", QueryExecutorFEDEO::new);
 		aoMap.put("SOBLOO", QueryExecutorSOBLOO::new);
