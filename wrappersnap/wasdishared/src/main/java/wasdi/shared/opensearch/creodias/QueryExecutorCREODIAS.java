@@ -38,6 +38,8 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
 		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
 		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
+		m_asSupportedPlatforms.add(Platforms.LANDSAT8);
+		m_asSupportedPlatforms.add(Platforms.ENVISAT);
 	}
 	
 	@Override
@@ -54,10 +56,9 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 
 	@Override
 	public int executeCount(String sQuery) {
-		//Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
-		if(null == sQuery) {
-			throw new NullPointerException("QueryExecutorCREODIAS.getCountURL: sQuery is null");
-		}
+		
+		if(sQuery == null) return 0;
+		
 		int iResult = -1;
 		try {
 			
@@ -94,7 +95,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-		//Utils.debugLog("QueryExecutorCREODIAS.executeAndRetrieve( <oQuery> )");
+		
 		return executeAndRetrieve(oQuery,true);
 	}
 

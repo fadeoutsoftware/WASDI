@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryTranslationParser;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -25,17 +26,7 @@ import wasdi.shared.viewmodels.QueryViewModel;
 public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 
 	private static final String SCLOUDCOVERPERCENTAGE = "cloudcoverpercentage";
-
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
-	 */
-	//	@Override
-	//	public String translate(String sQuery) {
-	//		// TODO translate and return the url string
-	//		//already added prefix: https://finder.creodias.eu/resto/api/collections/
-	//		return "Sentinel1/search.json?startDate=2019-12-01T00:00:00Z&completionDate=2019-12-03T23:59:59Z&geometry=POLYGON((7.397874989401342+45.00475144371268,10.373746303074263+44.94785607558927,10.389830621260842+43.612039503172866,7.703504034412235+43.809704932512176,7.397874989401342+45.00475144371268))";
-	//	}
-
+	
 	//TODO check it, it is taken from sobloo
 
 	/* (non-Javadoc)
@@ -106,10 +97,16 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 						iEnd = sQuery.length();
 					}
 					String sQueryPart = sQuery.substring(iStart, iEnd).trim();
-					//note: we do not check if the parser configuration contains the required mission: we want the QueryTranslationParser to throw an exception and die
-					QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
-					String sLocalPart = oParser.parse(sQueryPart); 
-					sResult += sLocalPart;
+					
+					try {
+						QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
+						String sLocalPart = oParser.parse(sQueryPart); 
+						sResult += sLocalPart;						
+					}
+					catch (Exception oQueryException) {
+						// Try to continue
+					}
+
 				}
 			}
 			if(Utils.isNullOrEmpty(sResult)) {
