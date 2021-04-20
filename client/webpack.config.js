@@ -117,7 +117,7 @@ module.exports = {
     optimization: {
         runtimeChunk: 'single',
         // minimization reduce the ./dist folder footprint of just a mere 3 MB over 45MB
-        // but generates some error for modules created using facototy() from angular
+        // but generates some error for modules created using factory() from angular
         // so for production mode is now disabled
         minimize: false
     },
