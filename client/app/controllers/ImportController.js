@@ -196,6 +196,8 @@ var ImportController = (function() {
 
             oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
             oController.m_oScope.$apply();
+
+            oController.updateMissionSelection(0);
         });
 
 

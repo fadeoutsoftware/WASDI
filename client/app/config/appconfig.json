@@ -105,6 +105,7 @@
             "name": "S1",
             "indexname": "platformname",
             "indexvalue": "Sentinel-1",
+            "selected": true,
             "filters": [
                 {
                     "indexname": "filename",
@@ -343,7 +344,7 @@
             ]
         },
         {
-            "name": "Marine",
+            "name": "CMEMS",
             "indexname": "productMainClass",
             "indexvalue": "Copernicus-marine",
             "filters": []

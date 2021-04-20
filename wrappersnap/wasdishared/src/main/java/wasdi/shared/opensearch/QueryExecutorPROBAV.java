@@ -41,6 +41,9 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	QueryExecutorPROBAV(){
 		Utils.debugLog("QueryExecutorPROBAV");
 		m_sProvider = "PROBAV";
+		m_oQueryTranslator = new DiasQueryTranslator();
+		
+		m_asSupportedPlatforms.add(Platforms.PROVAV);
 	}
 
 	@Override

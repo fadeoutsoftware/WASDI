@@ -8,14 +8,17 @@ package wasdi.shared.opensearch.onda;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.abdera.i18n.templates.Template;
 
 import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
  * @author c.nattero
@@ -32,6 +35,15 @@ public class QueryExecutorONDA extends QueryExecutor {
 		m_sProvider="ONDA";
 		this.m_oQueryTranslator = new DiasQueryTranslatorONDA();
 		this.m_oResponseTranslator = new DiasResponseTranslatorONDA();
+		
+		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
+		
+		m_asSupportedPlatforms.add(Platforms.ENVISAT);
+		m_asSupportedPlatforms.add(Platforms.LANDSAT8);
+		m_asSupportedPlatforms.add(Platforms.COPERNICUS_MARINE);
+		
 	}
 
 	/* (non-Javadoc)
@@ -125,25 +137,17 @@ public class QueryExecutorONDA extends QueryExecutor {
 	}
 
 
-//	@Override
-//	public int executeCount(String sQuery) throws IOException {
-//		Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " )");
-//		String sUrl = getCountUrl(sQuery);
-//		int iResult = 0;
-//		String sResult = "0";
-//		try {
-//			sResult = httpGetResults(sUrl, "count");
-//			if(null!=sResult) {
-//				iResult = Integer.parseInt(sResult);
-//			} else {
-//				iResult = -1;
-//			}
-//		} catch (Exception oE) {
-//			Utils.debugLog(s_sClassName + ".executeCount( " + sQuery + " ): " + oE.getMessage());
-//			iResult = -1;
-//		}
-//		return iResult;
-//	}
+	@Override
+	public int executeCount(String sQuery) throws IOException {
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return 0;
+		}
+		
+		return super.executeCount(sQuery);
+	}
 
 
 	/**
@@ -158,7 +162,13 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog(s_sClassName + ".executeAndRetrieve(" + oQuery + ", " + bFullViewModel + ")");
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+		
+		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
+			return new ArrayList<QueryResultViewModel>();
+		}		
+		
 		String sResult = null;
 		String sUrl = null;
 		try {

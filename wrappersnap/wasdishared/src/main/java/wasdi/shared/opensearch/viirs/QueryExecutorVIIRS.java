@@ -21,6 +21,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 
 import wasdi.shared.opensearch.PaginatedQuery;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
@@ -37,6 +38,8 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		m_sProvider=s_sClassName;
 		this.m_oQueryTranslator = new DiasQueryTranslatorVIIRS();
 		this.m_oResponseTranslator = new DiasResponseTranslatorVIIRS();
+		
+		m_asSupportedPlatforms.add(Platforms.VIIRS);
 	}
 
 	@Override
@@ -99,11 +102,13 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		
 		// arse the query
 		QueryViewModel oVIIRSQuery = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+		
+		if (m_asSupportedPlatforms.contains(oVIIRSQuery.platformName) == false) {
+			return 0;
+		}
+		
 		ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
-		
-		if (Utils.isNullOrEmpty(oVIIRSQuery.platformName)) return 0;
-		if (oVIIRSQuery.platformName.equals("VIIRS") == false) return 0;
-		
+				
 		long lStart = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.startFromDate);
 		long lEnd  = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.endToDate);
 		
@@ -139,15 +144,15 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		
 		// Parse the query
 		QueryViewModel oVIIRSQuery = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
-		if (Utils.isNullOrEmpty(oVIIRSQuery.platformName)) return aoResults;
-		if (oVIIRSQuery.platformName.equals("VIIRS") == false) return aoResults;
+		
+		if (m_asSupportedPlatforms.contains(oVIIRSQuery.platformName) == false) {
+			return aoResults;
+		}
 		
 		ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 		
 		long lStart = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.startFromDate);
 		long lEnd  = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.endToDate);
-		
-		long lDiffInMillies = Math.abs(lEnd - lStart);
 	    
 	    String sOffset = oQuery.getOffset();
 	    String sLimit = oQuery.getLimit();
@@ -193,7 +198,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	    			
 	    			String sFileName = "RIVER-FLDglobal-composite1_";
 	    			
-	    			
+	    			if (oVIIRSQuery.productType.equals("VIIRS_5d_composite")) {
+	    				sFileName = "RIVER-FLDglobal-composite_";
+	    			}
 	    			
 	    			sFileName += oDateFormat.format(oActualDay);
 	    			sFileName += "_000000";
