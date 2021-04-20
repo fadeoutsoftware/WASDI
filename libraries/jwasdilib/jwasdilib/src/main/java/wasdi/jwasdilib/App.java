@@ -52,18 +52,28 @@ public class App
         //testCreateWorkspace(oLib);
         //testDeleteWorkspace(oLib);
         
-        testGetProcessesByWorkspace(oLib);
+        //testGetProcessesByWorkspace(oLib);
+        //testGetProductsByWorkspace(oLib);
+
+        //testGetPayload(oLib);
+
+        testgetProductBbox(oLib);
         
         
         System.out.println("JWasdiLib Test Done");
         oLib.updateStatus("DONE");
         
-    }
-    
+    }    
+
+
+
+	private static void testGetProductsByWorkspace(WasdiLib oLib) {
+		List<String> asProductsByName = oLib.getProductsByWorkspace("TESTLIB");
+		System.out.println(asProductsByName.size());
+	}
 
 	private static void testHello(WasdiLib oLib) {
 		System.out.println(oLib.hello());
-		
 	}
 
 	private static void testWaitProcesses(WasdiLib oLib) {
@@ -310,5 +320,20 @@ public class App
     private static void testGetProcessesByWorkspace(WasdiLib oLib) {
     	System.out.println(oLib.getProcessesByWorkspace(0, 20, null, null, null));
     }
+    
+    private static void testGetPayload(WasdiLib oLib) {
+    	String sProcessObjId = oLib.getProcessesByWorkspace(0, 20, null, null, null).get(0).get("processObjId"); 
+    	System.out.println(oLib.getProcessorPayloadAsJSON(sProcessObjId));
+    	
+    	Map<String, Object> oPayload = oLib.getProcessorPayload(sProcessObjId);
+    	System.out.println(oPayload);
+		
+	}
+    
+    
+    private static void testgetProductBbox(WasdiLib oLib) {
+		System.out.println(oLib.getProductBbox(oLib.getProductsByActiveWorkspace().get(0));
+		
+	}
 
 }

@@ -31,12 +31,18 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.net.io.Util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 
+/**
+ * @author c.nattero
+ *
+ */
 public class WasdiLib {
 
 	protected static ObjectMapper s_oMapper = new ObjectMapper();
@@ -267,6 +273,14 @@ public class WasdiLib {
 		this.m_bDownloadActive = bDownloadActive;
 	}
 
+	public Boolean getUploadActive() {
+		return m_bUploadActive;
+	}
+
+	public void setUploadActive(Boolean m_bUploadActive) {
+		this.m_bUploadActive = m_bUploadActive;
+	}
+
 	/**
 	 * Set Base Path
 	 * @return
@@ -412,7 +426,7 @@ public class WasdiLib {
 			String sUploadactive = ConfigReader.getPropValue("UPLOADACTIVE", "1");
 
 			if (sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
-				m_bUploadActive = false;
+				setUploadActive(false);
 			}
 
 			String sIsOnServer = ConfigReader.getPropValue("ISONSERVER", "0");
@@ -793,13 +807,19 @@ public class WasdiLib {
 	 * @return List of Strings representing the product names
 	 */
 	public List <String> getProductsByWorkspace(String sWorkspaceName) {
-
+		return getProductsByWorkspaceId(getWorkspaceIdByName(sWorkspaceName));
+	}
+	
+	/**
+	 * Get a List of the products in a Workspace
+	 * @param sWorkspaceId Workspace ID
+	 * @return List of Strings representing the product names
+	 */
+	public List <String> getProductsByWorkspaceId(String sWorkspaceId) {
 		List<String> asProducts = new ArrayList<String>();
 		try {
 
-			openWorkspace(sWorkspaceName);
-
-			String sUrl = m_sBaseUrl + "/product/byws?sWorkspaceId=" + m_sActiveWorkspace;
+			String sUrl = m_sBaseUrl + "/product/byws?sWorkspaceId=" + sWorkspaceId;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
@@ -814,7 +834,7 @@ public class WasdiLib {
 			oEx.printStackTrace();
 			return asProducts;
 		}
-	}
+	} 
 
 	/**
 	 * Get a List of the products in the active Workspace
@@ -1477,7 +1497,7 @@ public class WasdiLib {
 			Boolean bFileExists = oFile.exists();			
 
 			if (m_bIsOnServer == false) {
-				if(m_bUploadActive) {
+				if(getUploadActive()) {
 					if(bFileExists) {
 						if(!fileExistsOnWasdi(sFileName)) {
 							System.out.println("Remote file Missing. Start WASDI upload. Please wait");
@@ -3222,7 +3242,12 @@ public class WasdiLib {
 		}
 		return sReturn;
 	}
-
+	
+	/**
+	 * Deletes the workspace given its ID
+	 * @param sWorkspaceId the unique ID of the workspace 
+	 * @return the ID of the workspace as a String if succesful, empty string otherwise
+	 */
 	public String deleteWorkspace(String sWorkspaceId) {
 		String sResult = null;
 		if(null==sWorkspaceId || sWorkspaceId.isEmpty()) {
@@ -3285,5 +3310,76 @@ public class WasdiLib {
 		
 		return null;
 	}
+	
 
+	/**
+	 * Gets the processor payload as a map
+	 * @param sProcessObjId the ID of the processor
+	 * @return
+	 */
+	public Map<String, Object> getProcessorPayload(String sProcessObjId){
+		if(null==sProcessObjId || sProcessObjId.isEmpty()) {
+			log("internalGetProcessorPayload: the processor ID is null or empty");
+		}
+		try {
+			return s_oMapper.readValue(getProcessorPayloadAsJSON(sProcessObjId), new TypeReference<Map<String,Object>>(){});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * retrieves the payload of a processor formatted as a JSON string
+	 * @param sProcessObjId the ID of the processor 
+	 * @return the payload as a JSON string, or null if error occurred
+	 */
+	public String getProcessorPayloadAsJSON(String sProcessObjId) {
+		if(null==sProcessObjId || sProcessObjId.isEmpty()) {
+			log("internalGetProcessorPayload: the processor ID is null or empty");
+		}
+		
+		try {
+			StringBuilder oUrl = new StringBuilder()
+					.append(getWorkspaceBaseUrl())
+					.append("/process/payload")
+					.append("?processObjId=").append(sProcessObjId);
+			return httpGet(oUrl.toString(), getStandardHeaders());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String getProductBbox(String sFileName) {
+		if(null==sFileName || sFileName.isEmpty()) {
+			log("getProductBBOX: file name is null or empty, aborting");
+			return null;
+		}
+		String sResponse = null;
+		try {
+			StringBuilder oUrl = new StringBuilder()
+					.append(getBaseUrl())
+					.append("/product/byname?sProductName=").append(sFileName)
+					.append("&workspace=").append(getActiveWorkspace());
+			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		Map<String,Object> aoResponse = null;
+		try {
+			aoResponse = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			return (String)aoResponse.get("bbox");
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 }
