@@ -31,9 +31,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.net.io.Util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.jwasdilib.utils.MosaicSetting;
@@ -197,15 +195,10 @@ public class WasdiLib {
 	 * @param sNewActiveWorkspaceId
 	 */
 	public void setActiveWorkspace(String sNewActiveWorkspaceId) {
+		this.m_sActiveWorkspace = sNewActiveWorkspaceId;
 
-		if (!sNewActiveWorkspaceId.equals(m_sActiveWorkspace)) {
-			this.m_sActiveWorkspace = sNewActiveWorkspaceId;
-
-			if (m_sActiveWorkspace != null) {
-				if (!m_sActiveWorkspace.equals("")) {
-					m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sNewActiveWorkspaceId);
-				}
-			}
+		if (m_sActiveWorkspace != null && !m_sActiveWorkspace.equals("")) {
+			m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sNewActiveWorkspaceId);
 		}
 	}
 
