@@ -332,7 +332,7 @@ public class App
     
     
     private static void testgetProductBbox(WasdiLib oLib) {
-		System.out.println(oLib.getProductBbox(oLib.getProductsByActiveWorkspace().get(0));
+		System.out.println(oLib.getProductBbox(oLib.getProductsByActiveWorkspace().get(0)));
 		
 	}
 
