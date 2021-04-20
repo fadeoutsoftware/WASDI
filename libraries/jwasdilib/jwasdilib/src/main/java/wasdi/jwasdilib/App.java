@@ -28,7 +28,7 @@ public class App
         
         //testConnection(oLib);
         
-        testHello(oLib);
+        //testHello(oLib);
     //    testDownload(oLib);
         //testAutomaticUpload(oLib);
         
@@ -47,7 +47,12 @@ public class App
         //testImportProductList(oLib);
         
         
-        testImportAndPreprocess(oLib);
+//        testImportAndPreprocess(oLib);
+        
+        //testCreateWorkspace(oLib);
+        //testDeleteWorkspace(oLib);
+        
+        testGetProcessesByWorkspace(oLib);
         
         
         System.out.println("JWasdiLib Test Done");
@@ -55,7 +60,8 @@ public class App
         
     }
     
-    private static void testHello(WasdiLib oLib) {
+
+	private static void testHello(WasdiLib oLib) {
 		System.out.println(oLib.hello());
 		
 	}
@@ -290,4 +296,19 @@ public class App
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importAndPreprocess(aoFound.subList(0, 2), "ndvi", "_ndvi.tif");
     }
+    
+    private static String s_sWorkspaceName = "testWorkspaceCreationFromJWasdiLib";
+
+    private static void testCreateWorkspace(WasdiLib oLib) {
+		System.out.println(oLib.createWorkspace(s_sWorkspaceName, ""));
+	}
+    
+    private static void testDeleteWorkspace(WasdiLib oLib) {
+    	System.out.println(oLib.deleteWorkspace(oLib.getWorkspaceIdByName(s_sWorkspaceName)));
+	}
+    
+    private static void testGetProcessesByWorkspace(WasdiLib oLib) {
+    	System.out.println(oLib.getProcessesByWorkspace(0, 20, null, null, null));
+    }
+
 }
