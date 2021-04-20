@@ -3,6 +3,14 @@ const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 module.exports = {
+    // MODE :
+    // "prodution" must be used to prepare the package for deploy
+
+    // "development" must be used for development and debug purpose
+    // adding devtools filed initialized with, for instance, "eval-source-map"
+    // allows the developer to have the source bundled, available in the
+    // Chrome debugger. That it does its making a mapping of the original sources
+    // and allows step debugging, directly in the browser.
     mode: 'development',
     devtool : "eval-source-map",
     entry: {
