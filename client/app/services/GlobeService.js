@@ -58,7 +58,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, oGlobeOptions);
 
                 // Select OpenLayers and Cesium DEM Terrain by default
-                this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedImagery  = this.m_oWasdiGlobe.baseLayerPicker.viewModel.imageryProviderViewModels[9];
+                this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedImagery  = this.m_oWasdiGlobe.baseLayerPicker.viewModel.imageryProviderViewModels[6];
                 this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedTerrain = this.m_oWasdiGlobe.baseLayerPicker.viewModel.terrainProviderViewModels[1];
 
                 this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;

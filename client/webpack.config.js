@@ -3,7 +3,8 @@ const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-    mode: 'production',
+    mode: 'development',
+    devtool : "eval-source-map",
     entry: {
         // in this file are required all dependencies from external source
         // served through node_modules or libs
