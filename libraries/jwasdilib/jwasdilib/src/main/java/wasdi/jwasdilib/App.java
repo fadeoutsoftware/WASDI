@@ -60,6 +60,8 @@ public class App
         //testgetProductBbox(oLib);
         
         testCopyFileToSftp(oLib);
+        //todo complete and uncomment
+        //testMultisubset(oLib);
         
         
         System.out.println("JWasdiLib Test Done");
@@ -340,4 +342,17 @@ public class App
     	System.out.println(oLib.copyFileToSftp(oLib.getProductsByActiveWorkspace().get(0)));
     }
 
+    
+    private static void testMultisubset(WasdiLib oLib) {
+    	String sInputFile = oLib.copyFileToSftp(oLib.getProductsByActiveWorkspace().get(0));
+    	//todo populate
+    	List<String> asOutputFiles = null;
+    	List<Double> adLatN = null;
+    	List<Double> adLonW = null;
+    	List<Double> adLatS = null;
+    	List<Double> adLonE = null;
+    	
+    	oLib.multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE);
+    }
+    
 }

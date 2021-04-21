@@ -31,12 +31,18 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.net.io.Util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 
+/**
+ * @author c.nattero
+ *
+ */
 /**
  * @author c.nattero
  *
@@ -771,18 +777,20 @@ public class WasdiLib {
 		}		
 	}
 
-
+	
 	/**
-	 * Open a workspace
-	 * @param sWorkspaceName Workspace name to open
-	 * @return WorkspaceId as a String, '' if there is any error
+	 * Opens a workspace given its ID
+	 * @param sWorkspaceId the ID of the workspace
+	 * @return the workspace ID if opened successfully, empty string otherwise
 	 */
-	public String openWorkspace(String sWorkspaceName) {
-
-		log("Open Workspace " + sWorkspaceName);
-
-		m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName);
-		m_sWorkspaceOwner = getWorkspaceOwnerByName(sWorkspaceName);
+	public String openWorkspaceById(String sWorkspaceId) {
+		if(null==sWorkspaceId || sWorkspaceId.isEmpty()) {
+			log("openWorkspaceById: invalid workspace ID, aborting");
+			return "";
+		}
+		setActiveWorkspace(sWorkspaceId);
+		
+		m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sWorkspaceId);
 		m_sWorkspaceBaseUrl = getWorkspaceUrlByWsId(m_sActiveWorkspace);
 
 		if (m_sWorkspaceBaseUrl == null) m_sWorkspaceBaseUrl = "";
@@ -792,6 +800,18 @@ public class WasdiLib {
 		}
 
 		return m_sActiveWorkspace;
+
+	}
+
+	/**
+	 * Open a workspace
+	 * @param sWorkspaceName Workspace name to open
+	 * @return WorkspaceId as a String, empty string if there is any error
+	 */
+	public String openWorkspace(String sWorkspaceName) {
+
+		log("Open Workspace " + sWorkspaceName);
+		return openWorkspaceById(getWorkspaceIdByName(sWorkspaceName));
 	}
 
 	/**
@@ -1426,7 +1446,23 @@ public class WasdiLib {
 		}
 	}
 
-
+	
+	/**
+	 * Sets the payload of current process 
+	 * @param sData the payload as a String. JSON format recommended  
+	 */
+	public void setPayload(String sData) {
+		if(null==sData || sData.isEmpty()) {
+			log("setPayload: null or empty payload, aborting");
+			return;
+		}
+		if(getIsOnServer()) {
+			setProcessPayload(getMyProcId(), sData);
+		} else {
+			log("setPayload: " + sData);
+		}
+	}
+	
 	/**
 	 * Adds output payload to a process
 	 * @param sProcessId
@@ -3437,4 +3473,181 @@ public class WasdiLib {
 		
 		return null;
 	}
+	
+	/**
+	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL. Assumes big tiff format by default
+	 * @param sInputFile Input file
+	 * @param asOutputFiles Array of Output File Names
+	 * @param adLatN Array of Latitude north of the subset
+	 * @param adLonW Array of Longitude west of the subset
+	 * @param adLatS Array of Latitude South of the subset
+	 * @param adLonE Array of Longitude Est of the subset
+	 * @return
+	 */
+	public String multiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE) {
+		return waitProcess(asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE));
+	}
+
+	/**
+	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL
+	 * @param sInputFile Input file
+	 * @param asOutputFiles Array of Output File Names
+	 * @param adLatN Array of Latitude north of the subset
+	 * @param adLonW Array of Longitude west of the subset
+	 * @param adLatS Array of Latitude South of the subset
+	 * @param adLonE Array of Longitude Est of the subset
+	 * @param bBigTiff whether to use the bigtiff format, for files bigger than 4 GB
+	 * @return
+	 */
+	public String multiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE, boolean bBigTiff) {
+		return waitProcess(asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff));
+	}
+	
+	/**
+	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL. Assumes big tiff format by default
+	 * @param sInputFile Input file
+	 * @param asOutputFiles Array of Output File Names
+	 * @param adLatN Array of Latitude north of the subset
+	 * @param adLonW Array of Longitude west of the subset
+	 * @param adLatS Array of Latitude South of the subset
+	 * @param adLonE Array of Longitude Est of the subset
+	 * @return
+	 */
+	public String asynchMultiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE) {
+		return asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, true); 
+	}
+	
+	/**
+	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL
+	 * @param sInputFile Input file
+	 * @param asOutputFiles Array of Output File Names
+	 * @param adLatN Array of Latitude north of the subset
+	 * @param adLonW Array of Longitude west of the subset
+	 * @param adLatS Array of Latitude South of the subset
+	 * @param adLonE Array of Longitude Est of the subset
+	 * @param bBigTiff whether to use the bigtiff format, for files bigger than 4 GB
+	 * @return
+	 */
+	public String asynchMultiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE, boolean bBigTiff) {
+		if(null==sInputFile || sInputFile.isEmpty()) {
+			log("multisubset: input file null or empty, aborting");
+			return null;
+		}
+		if(null==asOutputFiles || asOutputFiles.size() <= 0) {
+			log("multisubset: output files null or empty, aborting");
+			return null;
+		}
+		if(null==adLatN || adLatN.size() <= 0) {
+			log("multisubset: adLatN null or empty, aborting");
+			return null;
+		}
+		if(null==adLonW|| adLonW.size() <= 0) {
+			log("multisubset: adLonW null or empty, aborting");
+			return null;
+		}
+		if(null==adLatS || adLatS.size() <= 0) {
+			log("multisubset: adLatS null or empty, aborting");
+			return null;
+		}
+		if(null==adLonE|| adLonE.size() <= 0) {
+			log("multisubset: adLonE null or empty, aborting");
+			return null;
+		}
+		
+		StringBuilder oUrl = null;
+		try {
+			oUrl = new StringBuilder()
+					.append(getBaseUrl())
+					.append("/processing/geometric/multisubset?sSourceProductName=").append(sInputFile)
+					.append("&sDestinationProductName=").append(sInputFile)
+					.append("&sWorkspaceId=").append(getActiveWorkspace());
+			
+			if(getIsOnServer()) {
+				oUrl = oUrl.append("&parent=").append(getMyProcId());
+			}
+		} catch (Exception oE) {
+			log("multisubset: could not prepare URL due to " + oE + ", aborting");
+			return null;
+		}
+		
+		Map<String, Object> aoPayload = null;
+		try {
+			aoPayload = new HashMap<>();
+			aoPayload.put("outputNames", asOutputFiles);
+			aoPayload.put("latNList", adLatN);
+			aoPayload.put("lonWList", adLonW);
+			aoPayload.put("latSList", adLatS);
+			aoPayload.put("lonEList", adLonE);
+			
+			if(bBigTiff) {
+				aoPayload.put("bigTiff", true);
+			}
+		} catch (Exception oE) {
+			log("multisubset: could not populate payload due to " + oE + ", aborting");
+			return null;
+		}
+		
+		String sPayload = null;
+		try {
+			s_oMapper.writeValueAsString(aoPayload);
+		} catch (Exception oE) {
+			log("multisubset: could not serialize payload due to " + oE + ", aborting");
+			return null;
+		}
+		
+		String sResponse = null;
+		try {
+			sResponse = httpPost(oUrl.toString(), sPayload, getStandardHeaders());
+		} catch (Exception oE) {
+			log("multisubset: post did not succeed due to " + oE + ", aborting");
+			return null;
+		}
+		
+		try {
+			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+			return (String)aoJSONMap.get("stringvalue");
+		} catch (Exception oE) {
+			log("multisubset: response parsing failed due to " + oE + ", aborting");
+		}
+		
+		return null;		
+	}
+
+	
+	/**
+	 * Sets the sub pid
+	 * @param sProcessId the process ID
+	 * @param iSubPid the subPid of the process
+	 * @return the updated status of the processs
+	 */
+	public String setSubPid(String sProcessId, int iSubPid) {
+		if(null==sProcessId || sProcessId.isEmpty()) {
+			log("setSubPid: process ID null or empty, aborting");
+			return "";
+		}
+
+		String sResponse = null;
+		try {
+			StringBuilder oUrl = new StringBuilder()
+				.append(getWorkspaceBaseUrl())
+				.append("/process/setsubpid?")
+				.append("sProcessId=").append(sProcessId)
+				.append("subpid").append(iSubPid);
+		
+			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
+		} catch (Exception oE) {
+			log("setSubPid: could not HTTP GET due to " + oE + ", aborting");
+			return "";
+		}
+		
+		Map<String, Object> aoJSONMap = null;
+		try {
+			aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+			return (String)aoJSONMap.get("status");
+		} catch (Exception oE) {
+			log("setSubPid: could not parse server response due to: " + oE + ", aborting");
+		}
+		return "";
+	}
+	
 }
