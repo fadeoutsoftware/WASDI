@@ -57,7 +57,9 @@ public class App
 
         //testGetPayload(oLib);
 
-        testgetProductBbox(oLib);
+        //testgetProductBbox(oLib);
+        
+        testCopyFileToSftp(oLib);
         
         
         System.out.println("JWasdiLib Test Done");
@@ -330,10 +332,12 @@ public class App
 		
 	}
     
-    
     private static void testgetProductBbox(WasdiLib oLib) {
 		System.out.println(oLib.getProductBbox(oLib.getProductsByActiveWorkspace().get(0)));
-		
 	}
+    
+    private static void testCopyFileToSftp(WasdiLib oLib) {
+    	System.out.println(oLib.copyFileToSftp(oLib.getProductsByActiveWorkspace().get(0)));
+    }
 
 }

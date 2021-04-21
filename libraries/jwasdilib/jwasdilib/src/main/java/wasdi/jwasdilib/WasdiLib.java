@@ -802,7 +802,7 @@ public class WasdiLib {
 	public List <String> getProductsByWorkspace(String sWorkspaceName) {
 		return getProductsByWorkspaceId(getWorkspaceIdByName(sWorkspaceName));
 	}
-	
+
 	/**
 	 * Get a List of the products in a Workspace
 	 * @param sWorkspaceId Workspace ID
@@ -1344,7 +1344,7 @@ public class WasdiLib {
 	/**
 	 * Wait for a process to finish
 	 * @param sProcessId
-	 * @return
+	 * @return the process status
 	 */
 	public String waitProcess(String sProcessId) {
 
@@ -2367,7 +2367,7 @@ public class WasdiLib {
 		}		
 	}
 
-	
+
 	/**
 	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
 	 * @param sProcessorName the name of the processor
@@ -2377,7 +2377,7 @@ public class WasdiLib {
 	public String executeProcessor(String sProcessorName, Map<String, Object> aoParams) {
 		return waitProcess(asynchExecuteProcessor(sProcessorName, aoParams));
 	}
-	
+
 	/**
 	 * Execute a WASDI processor in Asynch way
 	 * @param sProcessorName Processor Name
@@ -2407,7 +2407,7 @@ public class WasdiLib {
 		}
 
 	}
-	
+
 	/**
 	 * Executes a synchronous process, i.e., runs the process and waits for it to complete
 	 * @param sProcessorName the name of the processor
@@ -2804,7 +2804,7 @@ public class WasdiLib {
 			if (sFileName.equals("")) {
 				System.out.println("sFileName must not be empty");
 			}
-			
+
 			String sUrl = getWorkspaceBaseUrl() + "/catalog/downloadbyname?filename="+sFileName+"&workspace="+m_sActiveWorkspace;
 
 			String sOutputFilePath = "";
@@ -3235,7 +3235,7 @@ public class WasdiLib {
 		}
 		return sReturn;
 	}
-	
+
 	/**
 	 * Deletes the workspace given its ID
 	 * @param sWorkspaceId the unique ID of the workspace 
@@ -3249,8 +3249,8 @@ public class WasdiLib {
 		}
 		try {
 			StringBuilder oUrlBuilder = new StringBuilder()
-			.append(getBaseUrl()).append("/ws/delete?sWorkspaceId=").append(sWorkspaceId)
-			.append("&bDeleteLayer=").append(true).append("&bDeleteFile=").append(true);
+					.append(getBaseUrl()).append("/ws/delete?sWorkspaceId=").append(sWorkspaceId)
+					.append("&bDeleteLayer=").append(true).append("&bDeleteFile=").append(true);
 
 			sResult = httpDelete(oUrlBuilder.toString(), getStandardHeaders());
 
@@ -3260,7 +3260,7 @@ public class WasdiLib {
 		return sResult;
 	}
 
-	
+
 	/**
 	 * Get a paginated list of processes in the active workspace 
 	 * @param iStartIndex start index of the process (0 by default is the last one)
@@ -3271,7 +3271,7 @@ public class WasdiLib {
 	 * @return a list of process IDs
 	 */
 	public List<Map<String, String>> getProcessesByWorkspace(int iStartIndex, Integer iEndIndex, String sStatus, String sOperationType, String sNamePattern){
-		
+
 		try {
 			iStartIndex = Math.max(0, iStartIndex);
 			StringBuilder oUrl = new StringBuilder()
@@ -3291,19 +3291,19 @@ public class WasdiLib {
 			if(null!=sNamePattern && !sNamePattern.isEmpty()) {
 				oUrl = oUrl.append("namePattern").append(sNamePattern);
 			}
-			
+
 			String sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 			List<Map<String, String>> aoProcesses = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,String>>>(){});			
 			return aoProcesses;
-			
-			
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 
 	/**
 	 * Gets the processor payload as a map
@@ -3321,8 +3321,8 @@ public class WasdiLib {
 		}
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * retrieves the payload of a processor formatted as a JSON string
 	 * @param sProcessObjId the ID of the processor 
@@ -3332,7 +3332,7 @@ public class WasdiLib {
 		if(null==sProcessObjId || sProcessObjId.isEmpty()) {
 			log("internalGetProcessorPayload: the processor ID is null or empty");
 		}
-		
+
 		try {
 			StringBuilder oUrl = new StringBuilder()
 					.append(getWorkspaceBaseUrl())
@@ -3371,6 +3371,68 @@ public class WasdiLib {
 			return (String)aoResponse.get("bbox");
 		}catch (Exception e) {
 			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Copy a file from a workspace to the WASDI user's SFTP Folder in a synchronous way
+	 * @param sFileName the filename to move to the SFTP folder
+	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
+	 */
+	public String copyFileToSftp(String sFileName) {
+		return waitProcess(asynchCopyFileToSftp(sFileName));
+	}
+	
+
+	/**
+	 * Copy a file from a workspace to the WASDI user's SFTP Folder in asynchronous way
+	 * @param sFileName the filename to move to the SFTP folder
+	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
+	 */
+	public String asynchCopyFileToSftp(String sFileName) {
+		if(null==sFileName || sFileName.isEmpty()) {
+			log("asynchCopyFileToSftp: invalid file name, aborting");
+			return null;
+		}
+		
+		//upload file if it is not on WASDI yet
+		try {
+			if(getUploadActive()) {
+				String sPath = getSavePath() + File.separator + sFileName;
+				if(!fileExistsOnWasdi(sFileName)) {
+					log("asynchCopyFileToSftp: file " + sFileName + " is not on WASDI yet, uploading...");
+					uploadFile(sFileName);
+				}
+			}
+		} catch (Exception oE) {
+			log("asynchCopyFileToSftp: upload failed due to: " + oE + ", aborting");
+			return null;
+		}
+		
+		String sResponse = null;
+		try {
+			StringBuilder oUrl = new StringBuilder()
+					.append(getWorkspaceBaseUrl())
+					.append("/catalog/copytosfpt?file=").append(sFileName)
+					.append("&workspace=").append(getActiveWorkspace());
+	
+			if(getIsOnServer()) {
+				oUrl = oUrl.append("&parent=").append(getMyProcId());
+			}
+			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
+		} catch (Exception oE) {
+			log("asynchCopyFileToSftp: could not HTTP GET to /catalog/copytosfpt due to: " + oE + ", aborting");
+			return null;
+		}
+		
+		try {
+			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+			String sProcessId = aoJSONMap.get("stringValue").toString();
+			return sProcessId;
+		} catch (Exception oE) {
+			log("asynchCopyFileToSftp: could not parse response due to: " + oE + ", aborting");
 		}
 		
 		return null;
