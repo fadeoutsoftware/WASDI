@@ -879,10 +879,10 @@ public class WasdiLib {
 			String sFullPath = m_sBasePath;
 
 			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") ) ){
-				sFullPath +="/";
+				sFullPath +=File.separator;
 			}
 
-			sFullPath = sFullPath +m_sWorkspaceOwner + "/" + m_sActiveWorkspace + "/" + sProductName;
+			sFullPath = sFullPath +m_sWorkspaceOwner + File.separator + m_sActiveWorkspace + File.separator + sProductName;
 			File oFile = new File(sFullPath);
 			Boolean bFileExists = oFile.exists();
 
@@ -1040,11 +1040,11 @@ public class WasdiLib {
 		try {
 			String sFullPath = m_sBasePath;
 
-			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") ) ){
-				sFullPath +="/";
+			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") || !sFullPath.endsWith(File.separator)) ){
+				sFullPath += File.separator;
 			}
 
-			sFullPath = sFullPath +m_sWorkspaceOwner + "/" + m_sActiveWorkspace + "/";
+			sFullPath = sFullPath +m_sWorkspaceOwner + File.separator + m_sActiveWorkspace + File.separator;
 
 			return sFullPath;
 		}
@@ -2534,7 +2534,7 @@ public class WasdiLib {
 			StackTraceElement[] aoStackTrace = new Throwable().getStackTrace();
 			File oFile = new File(getClass().getClassLoader().getResource(aoStackTrace[1].getClassName().replace('.', '/') + ".class").toURI());
 
-			return oFile.getParent()+ "/";
+			return oFile.getParent()+ File.separator;
 		}
 		catch (Exception oEx) {
 			System.out.println("Exception in get Processor Path " + oEx.toString());
@@ -2899,8 +2899,8 @@ public class WasdiLib {
 	private void unzip(String sAttachmentName, String sPath) {
 		ZipFile oZipFile = null;
 		try {
-			if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
-				sPath+="/";
+			if(!sPath.endsWith("/") && !sPath.endsWith("\\") && !sPath.endsWith(File.separator)) {
+				sPath+=File.separator;
 			}
 			String sZipFilePath = sPath+sAttachmentName;
 			//create directories first, otherwise there's no place to write the files
