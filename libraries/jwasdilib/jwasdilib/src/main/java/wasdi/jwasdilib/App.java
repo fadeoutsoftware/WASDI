@@ -22,9 +22,11 @@ public class App
     {
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
-        
+                
         String sWorkingDirectory = System.getProperty("user.dir");
-        oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "config.properties");
+        oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
+
+      
         
         //testConnection(oLib);
         
@@ -347,20 +349,69 @@ public class App
     	String sInputFile = oLib.getProductsByActiveWorkspace().get(0);
     	
     	String sBbox = oLib.getProductBbox(sInputFile);
-    	String[] asBbox = sBbox.substring(1, sBbox.length()-1).split(",");
+    	String[] asBbox = sBbox.split(",");
+
+    	List<Double> adBbox = new ArrayList<Double>(asBbox.length);
+    	for (String sCoord : asBbox) {
+			adBbox.add(Double.parseDouble(sCoord));
+		}
+
+    	double dN = adBbox.get(0);
+    	double dS = adBbox.get(0);
+    	double dE = adBbox.get(1);
+    	double dW = adBbox.get(1);
+    	
+    	for(int i=0; i<9; ++i) {
+    		if(i%2 == 0) {
+    			//EVEN: North and South
+	    		if(dN < adBbox.get(i)) {
+	    			dN = adBbox.get(i);
+	    		}
+	    		if(dS > adBbox.get(i)) {
+	    			dS = adBbox.get(i);
+	    		}
+    		} else {
+    			//ODD: East and West
+    			if(dE < adBbox.get(i)) {
+    				dE = adBbox.get(i);
+    			}
+    			if(dW > adBbox.get(i)) {
+    				dW = adBbox.get(i);
+    			}
+    		}
+    	}
+    	
+    	//Very well, now get two squares:
+    	double dNS = dN - dS;
+    	double dEW = dE - dW;
+    	
+    	double dTop = dNS/2 + dNS/4;
+    	double dBottom = dNS/2 - dNS/4;
+    	double dLeft = dEW/2 - dEW/4;
+    	double dRight = dEW/2 + dEW/4;
+    	
     	
     	//todo populate
-    	List<String> asOutputFiles = new ArrayList<String>(2);
+    	List<String> asOutputFiles = new ArrayList<>(0);
     	asOutputFiles.add("left.tif");
     	asOutputFiles.add("right.tif");
     	
-    	List<Double> adLatN = new ArrayList<Double>(2);
-    	adLatN.add(Double.parseDouble(asBbox[0]));
+    	List<Double> adLatN = new ArrayList<>(2);
+    	List<Double> adLatS = new ArrayList<>(2);
+    	List<Double> adLonW = new ArrayList<>(2);
+    	List<Double> adLonE = new ArrayList<>(2);
     	
+    	//first tile
+    	adLatN.add(dTop);
+    	adLatS.add((dTop - dBottom)/2);
+    	adLonW.add(dLeft);
+    	adLonE.add((dRight - dLeft)/2);
     	
-    	List<Double> adLonW = new ArrayList<Double>(2);
-    	List<Double> adLatS = new ArrayList<Double>(2);
-    	List<Double> adLonE = new ArrayList<Double>(2);
+    	//second tile
+    	adLatN.add((dTop - dBottom)/2);
+    	adLatS.add(dBottom);
+    	adLonW.add((dRight - dLeft)/2);
+    	adLonE.add(dRight);
     	
     	oLib.multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE);
     }
