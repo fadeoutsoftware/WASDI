@@ -3018,8 +3018,8 @@ public class WasdiLib {
 	}
 
 	/**
-	 * 
-	 * @param sFileName
+	 * Uploads and ingest a file in WASDI
+	 * @param sFileName the name of the file to upload
 	 */
 	public void uploadFile(String sFileName) 
 	{
@@ -3589,7 +3589,7 @@ public class WasdiLib {
 		
 		String sPayload = null;
 		try {
-			s_oMapper.writeValueAsString(aoPayload);
+			sPayload = s_oMapper.writeValueAsString(aoPayload);
 		} catch (Exception oE) {
 			log("multisubset: could not serialize payload due to " + oE + ", aborting");
 			return null;
@@ -3605,7 +3605,7 @@ public class WasdiLib {
 		
 		try {
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
-			return (String)aoJSONMap.get("stringvalue");
+			return (String)aoJSONMap.get("stringValue");
 		} catch (Exception oE) {
 			log("multisubset: response parsing failed due to " + oE + ", aborting");
 		}
@@ -3649,5 +3649,7 @@ public class WasdiLib {
 		}
 		return "";
 	}
+
+	
 	
 }
