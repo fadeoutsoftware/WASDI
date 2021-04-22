@@ -480,7 +480,7 @@ var WorkspaceController = (function () {
 
             this.m_oSatelliteService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
 
-                if (utilsIsObjectNullOrUndefined(response) === false) {
+                if (utilsIsObjectNullOrUndefined(response) === false && response.data.code != null) {
                     var oData = response.data;
 
                     if (utilsIsObjectNullOrUndefined(oData) === false) {
@@ -553,7 +553,7 @@ var WorkspaceController = (function () {
         var oController = this;
 
         this.m_oSatelliteService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
-            if (utilsIsObjectNullOrUndefined(response) === false) {
+            if (utilsIsObjectNullOrUndefined(response) === false && reponse.data.length > 0) {
                 var oData = response.data;
                 if (utilsIsObjectNullOrUndefined(oData) === false) {
                     for (var iSatellites = 0; iSatellites < oData.length; iSatellites++) {
@@ -571,7 +571,7 @@ var WorkspaceController = (function () {
                 }
             }
         }, function errorCallback(response) {
-        });
+        }).catch(angular.noop);
 
         return true;
     };
