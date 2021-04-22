@@ -518,6 +518,7 @@ public class OpportunitySearchResource {
 
 				} catch (Exception e) {
 					Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
+					e.printStackTrace();
 					continue;
 				}
 
@@ -525,6 +526,7 @@ public class OpportunitySearchResource {
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): " + oE);
+			oE.printStackTrace();
 		}
 
 		return aoRet;

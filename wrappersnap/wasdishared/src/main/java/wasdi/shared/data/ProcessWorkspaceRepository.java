@@ -76,6 +76,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	
         	List<Document> aoDocs = new ArrayList<>();
         	for (ProcessWorkspace oProcessWorkspace : aoProcessWorkspace) {
+        		// Initialize the Last State Change Date
+        		oProcessWorkspace.setLastStateChangeDate(Utils.getFormatDate(new Date()));
         		String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
                 Document oDocument = Document.parse(sJSON);
                 aoDocs.add(oDocument);
@@ -852,6 +854,35 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }    
     
+    
+    /**
+     * Get the list of processes in a specific state in a specific node
+     * @param sProcessStatus status of the process
+     * @param sComputingNodeCode computing node
+     * @return
+     */        
+    public List<ProcessWorkspace> getProcessesForSchedulerNode(String sComputingNodeCode, String sOrderBy) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
+            		Filters.and(
+            				Filters.ne("status", "DONE"),
+            				Filters.ne("status", "ERROR"),
+            				Filters.ne("status", "STOPPED"),
+            				Filters.eq("nodeCode", sComputingNodeCode)
+            				)
+            		)
+            		.sort(new Document(sOrderBy, -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }    
     
     
     /**
