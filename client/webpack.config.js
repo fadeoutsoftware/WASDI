@@ -11,8 +11,8 @@ module.exports = {
     // allows the developer to have the source bundled, available in the
     // Chrome debugger. That it does its making a mapping of the original sources
     // and allows step debugging, directly in the browser.
-    mode: 'development',
-    devtool : "eval-source-map",
+    mode: 'production',
+    //devtool : "eval-source-map",
     entry: {
         // in this file are required all dependencies from external source
         // served through node_modules or libs
