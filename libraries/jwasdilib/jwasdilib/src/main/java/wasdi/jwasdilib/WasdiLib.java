@@ -1502,7 +1502,8 @@ public class WasdiLib {
 	public void refreshParameters() {
 		m_oParametersReader.refresh();
 	}
-
+	
+	
 	/**
 	 * Private version of the add file to wasdi function.
 	 * Adds a generated file to current open workspace
@@ -1511,6 +1512,18 @@ public class WasdiLib {
 	 * @return
 	 */
 	protected String internalAddFileToWASDI(String sFileName, Boolean bAsynch) {
+		return internalAddFileToWASDI(sFileName, bAsynch, null);
+	}
+
+	/**
+	 * Private version of the add file to wasdi function.
+	 * Adds a generated file to current open workspace
+	 * @param sFileName File Name to add to the open workspace
+	 * @param bAsynch true if the process has to be asynch, false to wait for the result
+	 * @param sStyle name of a valid WMS style
+	 * @return
+	 */
+	protected String internalAddFileToWASDI(String sFileName, Boolean bAsynch, String sStyle) {
 		try {
 
 			if (sFileName == null) {
@@ -1547,6 +1560,9 @@ public class WasdiLib {
 			}
 
 			String sUrl = getWorkspaceBaseUrl() + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
+			if(null!=sStyle && !sStyle.isEmpty()) {
+				sUrl += "&style=" + sStyle;
+			}
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -1562,6 +1578,26 @@ public class WasdiLib {
 		}		
 	}
 
+	/**
+	 * Adds a generated file to current open workspace in a synchronous way
+	 * @param sFileName File Name to add to the open workspace
+	 * @param sStyle name of a valid WMS style
+	 * @return
+	 */
+	public String addFileToWASDI(String sFileName, String sStyle) {
+		return internalAddFileToWASDI(sFileName, false, sStyle);
+	}
+	
+	/**
+	 * Adds a generated file to current open workspace in asynchronous way
+	 * @param sFileName File Name to add to the open workspace
+	 * @param sStyle name of a valid WMS style
+	 * @return
+	 */
+	public String asynchAddFileToWASDI(String sFileName, String sStyle) {
+		return internalAddFileToWASDI(sFileName, true, sStyle);
+	}
+	
 	/**
 	 * Ingest a new file in the Active WASDI Workspace waiting for the result
 	 * The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
@@ -3649,7 +3685,22 @@ public class WasdiLib {
 		}
 		return "";
 	}
-
 	
-	
+	public void printStatus() {
+		log("wasdi: user: " + getUser());
+		log("wasdi: password: ***********************");
+		log("wasdi: session id: " + getSessionId());
+		log("wasdi: active workspace id: " + getActiveWorkspace());
+		log("wasdi: workspace owner: " + m_sWorkspaceOwner);
+		log("wasdi: base path: " + getBasePath() );
+		log("wasdi: is on server: " + getIsOnServer() );
+		log("wasdi: download active: " + getDownloadActive() );
+		log("wasdi: upload active: " + getUploadActive() );
+		log("wasdi: verbose: " + getVerbose() );
+		log("wasdi: parameters file path: " + getParametersFilePath());
+		log("wasdi: params: " + getParams() );
+		log("wasdi: proc id: " + getMyProcId() );
+		log("wasdi: base url: " + getBaseUrl() );
+		log("wasdi: workspace base URL: " + getWorkspaceBaseUrl() );
+	}
 }

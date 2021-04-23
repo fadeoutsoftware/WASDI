@@ -26,6 +26,7 @@ public class App
         String sWorkingDirectory = System.getProperty("user.dir");
         oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
 
+        oLib.printStatus();
       
         
         //testConnection(oLib);
@@ -61,9 +62,8 @@ public class App
 
         //testgetProductBbox(oLib);
         
-        testCopyFileToSftp(oLib);
-        //todo complete and uncomment
-        testMultisubset(oLib);
+        //testCopyFileToSftp(oLib);
+        //testMultisubset(oLib);
         
         
         System.out.println("JWasdiLib Test Done");
