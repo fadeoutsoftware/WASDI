@@ -4,15 +4,19 @@ const path = require("path");
 
 module.exports = {
     // MODE :
-    // "prodution" must be used to prepare the package for deploy
+    // "production" must be used to prepare the package for deploy
+    mode: 'production',
 
     // "development" must be used for development and debug purpose
-    // adding devtools filed initialized with, for instance, "eval-source-map"
+    // adding devtools initialized with "eval-source-map"
     // allows the developer to have the source bundled, available in the
-    // Chrome debugger. That it does its making a mapping of the original sources
-    // and allows step debugging, directly in the browser.
+    // Chrome debugger.
+    // With this options enabled a mapping of the original sources are
+    // bundled and allow step debugging, directly in the browser.
+    /*
     mode: 'production',
-    //devtool : "eval-source-map",
+    devtool : "eval-source-map",
+     */
     entry: {
         // in this file are required all dependencies from external source
         // served through node_modules or libs
@@ -101,14 +105,12 @@ module.exports = {
                 {from: "./app/config", to: "./config"},
                 {from: "./app/dialogs", to: "./dialogs"},
                 {from: "./app/directives", to: "./directives"},
-                /*{from: "./app/fonts", to: "./fonts"},*/
                 {from: "./app/environments", to: "./environments"},
                 {from: "./app/languages", to: "./languages"},
                 {from: "./app/models", to: "./models"},
                 {from: "./app/partials", to: "./partials"},
                 {from: "./app/lib", to: "./lib"},
                 {from: "./app/keycloak.json", to: "./keycloak.json"},
-                /*{from: "./app/services", to: "./services"},*/
                 {from: "./app/favicon.ico", to: "./favicon.ico"},
 
             ],
