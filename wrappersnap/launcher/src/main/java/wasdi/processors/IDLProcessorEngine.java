@@ -79,7 +79,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -331,7 +331,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			// Get My Own Process Workspace
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 						
@@ -551,7 +551,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 
 		try {
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -623,7 +623,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		
 		try {
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			

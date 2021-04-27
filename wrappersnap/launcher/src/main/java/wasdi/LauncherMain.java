@@ -163,6 +163,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Object mapper to convert Java - JSON
 	 */
 	public static ObjectMapper s_oMapper = new ObjectMapper();
+	
+	protected static ProcessWorkspace s_oProcessWorkspace;
 
 	/**
 	 * WASDI Launcher Main Entry Point
@@ -217,8 +219,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			System.exit(-1);
 		}
 
-		ProcessWorkspace oProcessWorkspace = null;
-
 		try {
 
 			// Set Rabbit Factory Params
@@ -234,24 +234,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Deserialize the parameter referring the base class
 			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
+			s_oProcessWorkspace= oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
 
-			if (oProcessWorkspace == null) {
+			if (s_oProcessWorkspace == null) {
 				s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Exit");
 				System.exit(-1);
 			}
 
 			// Set the process object id
-			s_oLogger.setPrefix("[" + oProcessWorkspace.getProcessObjId() + "]");
+			s_oLogger.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 			
 			// Set the process as running
 			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
-			oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
-			oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
-			oProcessWorkspace.setPid(getProcessId());
+			s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
+			s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+			s_oProcessWorkspace.setPid(getProcessId());
 
-			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
+			if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
 				s_oLogger.error("LauncherMain: ERROR setting ProcessWorkspace start date and RUNNING STATE");
 			} else {
 				s_oLogger.debug("LauncherMain: RUNNING state and operationStartDate updated");
@@ -277,11 +277,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
-				if (oProcessWorkspace != null) {
-					oProcessWorkspace.setProgressPerc(100);
-					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-					if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
+				if (s_oProcessWorkspace != null) {
+					s_oProcessWorkspace.setProgressPerc(100);
+					s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+					if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
 						s_oLogger.debug(
 								"LauncherMain FINAL catch: Error during process update (terminated) " + sParameter);
 					}
@@ -296,24 +296,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Final Check of the Process Workspace Status
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
-			if (oProcessWorkspace != null) {
+			if (s_oProcessWorkspace != null) {
 
 				// Read again the process workspace
-				oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+				s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(s_oProcessWorkspace.getProcessObjId());
 
-				s_oLogger.error("Launcher Main FINAL: process status [" + oProcessWorkspace.getProcessObjId() + "]: " + oProcessWorkspace.getStatus());
+				s_oLogger.error("Launcher Main FINAL: process status [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
 
-				if (oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())
-						|| oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())
-						|| oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())
-						|| oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
+				if (s_oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())
+						|| s_oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())
+						|| s_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())
+						|| s_oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
 
-					s_oLogger.error("Launcher Main FINAL: process status not closed [" + oProcessWorkspace.getProcessObjId() + "]: " + oProcessWorkspace.getStatus());
-					s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + oProcessWorkspace.getProcessObjId() + "]");
+					s_oLogger.error("Launcher Main FINAL: process status not closed [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
+					s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + s_oProcessWorkspace.getProcessObjId() + "]");
 
-					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+					s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
-					if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
+					if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
 						s_oLogger.debug("LauncherMain FINAL : Error during process update (terminated) " + sParameter);
 					}
 				}
@@ -497,6 +497,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+				oEngine.setProcessWorkspace(s_oProcessWorkspace);
 				oEngine.deploy(oParameter);
 			}
 				break;
@@ -508,6 +509,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+				oEngine.setProcessWorkspace(s_oProcessWorkspace);
 				oEngine.run(oParameter);
 			}
 				break;
@@ -518,6 +520,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+				oEngine.setProcessWorkspace(s_oProcessWorkspace);
 				oEngine.delete(oParameter);
 			}
 				break;
@@ -528,6 +531,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+				oEngine.setProcessWorkspace(s_oProcessWorkspace);
 				oEngine.redeploy(oParameter);
 			}			
 				break;
@@ -538,6 +542,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+				oEngine.setProcessWorkspace(s_oProcessWorkspace);
 				oEngine.libraryUpdate(oParameter);
 			}
 				break;				
@@ -682,7 +687,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		String sFileName = "";
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
@@ -973,7 +978,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Preconditions.checkNotNull(oParam.getProcessObjId(), "null ProcessObjId");
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParam.getProcessObjId());
+			ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 			try {
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 				if (null == oProcessWorkspace) {
@@ -1207,7 +1212,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 			if (oProcessWorkspace != null) {
@@ -1421,7 +1426,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 			if (oProcessWorkspace != null) {
@@ -1547,7 +1552,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		String sLayerId = "";
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 
@@ -1913,8 +1918,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public void executeMATLABProcessor(MATLABProcParameters oParameter) {
 		s_oLogger.debug("LauncherMain.executeMATLABProcessor: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 
@@ -1994,8 +1998,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		s_oLogger.debug("LauncherMain.executeSubset: Start");
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 
@@ -2112,7 +2115,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		s_oLogger.debug("LauncherMain.executeGDALMultiSubset: Start");
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 
@@ -2309,8 +2312,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		s_oLogger.debug("LauncherMain.executeGDALRegrid: Start");
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository
-				.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 
@@ -2459,7 +2461,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("LauncherMain.executeMosaic: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+		ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 		try {
 			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
@@ -2547,7 +2549,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public void executeGraph(GraphParameter oGraphParams) throws Exception {
 
 		try {
-			WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, s_oSendToRabbit, m_oProcessWorkspaceLogger);
+			WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, s_oSendToRabbit, m_oProcessWorkspaceLogger, s_oProcessWorkspace);
 			oGraphManager.execute();
 		} catch (Exception oEx) {
 			s_oLogger.error("ExecuteGraph Exception", oEx);
@@ -3184,7 +3186,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			String sProductName = oReadMetadataParameter.getProductName();
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+			ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 			
 			if (oProcessWorkspace == null) {
 				s_oLogger.error("readMetadata: Impossible to find the process workspace, exit");

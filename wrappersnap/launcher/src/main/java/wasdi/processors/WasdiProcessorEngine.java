@@ -14,6 +14,7 @@ import org.apache.commons.net.io.Util;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -24,6 +25,7 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
+	protected ProcessWorkspace m_oProcessWorkspace= null;
 	
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
 		
@@ -308,7 +310,7 @@ public abstract class WasdiProcessorEngine {
 	}
 	
 	/**
-	 * Safe Processo
+	 * Safe Process Log
 	 * @param sLog
 	 */
 	protected void processWorkspaceLog(String sLog) {
@@ -316,5 +318,22 @@ public abstract class WasdiProcessorEngine {
 			m_oProcessWorkspaceLogger.log(sLog);
 		}
 	}
+	
+	/**
+	 * Get the reference to the process workspace
+	 * @return
+	 */
+	public ProcessWorkspace getProcessWorkspace() {
+		return m_oProcessWorkspace;
+	}
+
+	/**
+	 * Set the reference to the process workspace
+	 * @param oProcessWorkspace
+	 */
+	public void setProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+		this.m_oProcessWorkspace = oProcessWorkspace;
+	}
+
 	
 }
