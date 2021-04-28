@@ -31,7 +31,7 @@ public class App
         
         //testConnection(oLib);
         
-        //testHello(oLib);
+        testHello(oLib);
     //    testDownload(oLib);
         //testAutomaticUpload(oLib);
         
