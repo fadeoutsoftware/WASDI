@@ -946,3 +946,4 @@ target/sonar/report-task.txt
 client/app/environments/environment.js
 client/app/environments/secrets.js
 client/app/.vscode/tasks.json
+/docs/build/
