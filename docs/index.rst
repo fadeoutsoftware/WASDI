@@ -1,6 +1,6 @@
 
 
-TRTDs documentation center
+WASDI documentation center
 ====================================
 
 .. toctree::
