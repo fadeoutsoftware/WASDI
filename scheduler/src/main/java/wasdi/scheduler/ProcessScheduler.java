@@ -417,7 +417,7 @@ public class ProcessScheduler {
 			List<ProcessWorkspace> aoWaitingReadyList = getReadyList(aoReadyList);
 			aoWaitingReadyList.addAll(getWaitingList(aoWaitingList));
 			
-			// For each ready and waiting process check pid and timeout
+			// For each ready and waiting process check pid
 			for (ProcessWorkspace oWaitingReadyPws : aoWaitingReadyList) {
 				
 				// All processes in waiting o ready are anyway started so they can be removed from the launched list
