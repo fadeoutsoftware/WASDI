@@ -408,6 +408,7 @@ public class WasdiLib {
 			m_sBaseUrl = ConfigReader.getPropValue("BASEURL", "https://www.wasdi.net/wasdiwebserver/rest");
 			m_sSessionId = ConfigReader.getPropValue("SESSIONID","");
 			m_sActiveWorkspace = ConfigReader.getPropValue("WORKSPACEID","");
+			m_sMyProcId = ConfigReader.getPropValue("MYPROCID","");
 			m_sParametersFilePath = ConfigReader.getPropValue("PARAMETERSFILEPATH","./parameters.txt");
 			String sVerbose = ConfigReader.getPropValue("VERBOSE","");
 			if (sVerbose.equals("1") || sVerbose.toUpperCase().equals("TRUE")) {
