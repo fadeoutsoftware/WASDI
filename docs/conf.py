@@ -61,6 +61,6 @@ import os
 
 os.system("echo --- HOT FIX for Javasphinx library ---")
 os.system("echo --- overwriting domain.py with the fixed version ---")
-os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/testreadthedocsbymena/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py")
+os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py")
 
 
