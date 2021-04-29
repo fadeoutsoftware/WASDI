@@ -792,9 +792,11 @@ public class WasdiLib {
 		setActiveWorkspace(sWorkspaceId);
 		
 		m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sWorkspaceId);
-		m_sWorkspaceBaseUrl = getWorkspaceUrlByWsId(m_sActiveWorkspace);
+		setWorkspaceBaseUrl(getWorkspaceUrlByWsId(m_sActiveWorkspace));
 
-		if (m_sWorkspaceBaseUrl == null) m_sWorkspaceBaseUrl = "";
+		if (m_sWorkspaceBaseUrl == null) {
+			setWorkspaceBaseUrl("");
+		}
 
 		if (m_sWorkspaceBaseUrl.isEmpty()) {
 			m_sWorkspaceBaseUrl = m_sBaseUrl;
