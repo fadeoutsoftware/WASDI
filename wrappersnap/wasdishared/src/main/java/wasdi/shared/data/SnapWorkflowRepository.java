@@ -13,6 +13,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.utils.Utils;
 
 public class SnapWorkflowRepository extends  MongoRepository {
@@ -66,13 +67,18 @@ public class SnapWorkflowRepository extends  MongoRepository {
     /**
      * Get all the workflows that can be accessed by UserId
      * @param sUserId
-     * @return List of private workflows of users plus all the public ones
+     * @return List of private workflows of users plus all the public ones plus the the ones shared with the user
      */
     public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {
 
         final ArrayList<SnapWorkflow> aoReturnList = new ArrayList<SnapWorkflow>();
         try {
-
+        	// find sharings by userId
+        	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+        	List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
+        	
+        	// fetch snapworflows using the ids in the sharings 
+        	// append the to return list 
         	Bson oOrFilter = Filters.or(new Document("userId", sUserId),new Document("isPublic", true));
         	
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oOrFilter);
