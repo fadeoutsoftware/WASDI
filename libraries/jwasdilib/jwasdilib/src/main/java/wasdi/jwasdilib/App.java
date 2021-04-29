@@ -1,10 +1,12 @@
 package wasdi.jwasdilib;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +22,16 @@ public class App
     {
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
-        
-        oLib.init("C:\\Temp\\wasdi\\JMatLibTest\\config.properties");
+                
+        String sWorkingDirectory = System.getProperty("user.dir");
+        oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
+
+        oLib.printStatus();
+      
         
         //testConnection(oLib);
+        
+        testHello(oLib);
     //    testDownload(oLib);
         //testAutomaticUpload(oLib);
         
@@ -33,16 +41,63 @@ public class App
 //        testBaseLib(oLib);
         
         //testUploadFileDUMMYIMAGE(oLib);
-        testMosaic(oLib);
+//        testMosaic(oLib);
         //testSearch(oLib);
 //        testSubset(oLib);
         
-
-        System.out.println("JWasdiLib Test Done");
+        //testImport(oLib);
+        //testWaitProcesses(oLib);
+        //testImportProductList(oLib);
         
-    }
-    
-    public static void testConnection(WasdiLib oLib) {
+        
+//        testImportAndPreprocess(oLib);
+        
+        //testCreateWorkspace(oLib);
+        //testDeleteWorkspace(oLib);
+        
+        //testGetProcessesByWorkspace(oLib);
+        //testGetProductsByWorkspace(oLib);
+
+        //testGetPayload(oLib);
+
+        //testgetProductBbox(oLib);
+        
+        //testCopyFileToSftp(oLib);
+        //testMultisubset(oLib);
+        
+        
+        System.out.println("JWasdiLib Test Done");
+        oLib.updateStatus("DONE");
+        
+    }    
+
+
+
+	private static void testGetProductsByWorkspace(WasdiLib oLib) {
+		List<String> asProductsByName = oLib.getProductsByWorkspace("TESTLIB");
+		System.out.println(asProductsByName.size());
+	}
+
+	private static void testHello(WasdiLib oLib) {
+		System.out.println(oLib.hello());
+	}
+
+	private static void testWaitProcesses(WasdiLib oLib) {
+    	String sProcName = "hellotest";
+    	Map<String,Object> asParams = new HashMap<>();
+    	asParams.put("NAME", "Playmobil");
+    	int iReps = 5;
+    	List<String> asIds = new ArrayList<String>(iReps);
+    	for(int i = 0; i < iReps; i++) {
+    		String sId = oLib.asynchExecuteProcessor(sProcName, asParams);
+    		asIds.add(sId);
+    	}
+    			
+		oLib.waitProcesses(asIds);
+		
+	}
+
+	public static void testConnection(WasdiLib oLib) {
     	try {
     		
     		//request
@@ -238,6 +293,127 @@ public class App
     	System.out.println(sResult);
     	sResult = oLib.getFullProductPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6_ApplyOrbit.dim");
     	System.out.println(sResult);
+    }
+    
+    public static void testImport(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	System.out.println("Found " + aoFound.size() + " products");
+    	oLib.importProduct(aoFound.get(0));
+    }
+    
+    public static void testImportProductList(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	System.out.println("Found " + aoFound.size() + " products");
+    	oLib.importProductListWithMaps(aoFound.subList(0, 2));
+    }
+    
+    public static void testImportAndPreprocess(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	System.out.println("Found " + aoFound.size() + " products");
+    	oLib.importAndPreprocess(aoFound.subList(0, 2), "ndvi", "_ndvi.tif");
+    }
+    
+    private static String s_sWorkspaceName = "testWorkspaceCreationFromJWasdiLib";
+
+    private static void testCreateWorkspace(WasdiLib oLib) {
+		System.out.println(oLib.createWorkspace(s_sWorkspaceName, ""));
+	}
+    
+    private static void testDeleteWorkspace(WasdiLib oLib) {
+    	System.out.println(oLib.deleteWorkspace(oLib.getWorkspaceIdByName(s_sWorkspaceName)));
+	}
+    
+    private static void testGetProcessesByWorkspace(WasdiLib oLib) {
+    	System.out.println(oLib.getProcessesByWorkspace(0, 20, null, null, null));
+    }
+    
+    private static void testGetPayload(WasdiLib oLib) {
+    	String sProcessObjId = oLib.getProcessesByWorkspace(0, 20, null, null, null).get(0).get("processObjId"); 
+    	System.out.println(oLib.getProcessorPayloadAsJSON(sProcessObjId));
+    	
+    	Map<String, Object> oPayload = oLib.getProcessorPayload(sProcessObjId);
+    	System.out.println(oPayload);
+		
+	}
+    
+    private static void testgetProductBbox(WasdiLib oLib) {
+		System.out.println(oLib.getProductBbox(oLib.getProductsByActiveWorkspace().get(0)));
+	}
+    
+    private static void testCopyFileToSftp(WasdiLib oLib) {
+    	System.out.println(oLib.copyFileToSftp(oLib.getProductsByActiveWorkspace().get(0)));
+    }
+
+    
+    private static void testMultisubset(WasdiLib oLib) {
+    	String sInputFile = oLib.getProductsByActiveWorkspace().get(0);
+    	
+    	String sBbox = oLib.getProductBbox(sInputFile);
+    	String[] asBbox = sBbox.split(",");
+
+    	List<Double> adBbox = new ArrayList<Double>(asBbox.length);
+    	for (String sCoord : asBbox) {
+			adBbox.add(Double.parseDouble(sCoord));
+		}
+
+    	double dN = adBbox.get(0);
+    	double dS = adBbox.get(0);
+    	double dE = adBbox.get(1);
+    	double dW = adBbox.get(1);
+    	
+    	for(int i=0; i<9; ++i) {
+    		if(i%2 == 0) {
+    			//EVEN: North and South
+	    		if(dN < adBbox.get(i)) {
+	    			dN = adBbox.get(i);
+	    		}
+	    		if(dS > adBbox.get(i)) {
+	    			dS = adBbox.get(i);
+	    		}
+    		} else {
+    			//ODD: East and West
+    			if(dE < adBbox.get(i)) {
+    				dE = adBbox.get(i);
+    			}
+    			if(dW > adBbox.get(i)) {
+    				dW = adBbox.get(i);
+    			}
+    		}
+    	}
+    	
+    	//Very well, now get two squares:
+    	double dNS = dN - dS;
+    	double dEW = dE - dW;
+    	
+    	double dTop = dNS/2 + dNS/4;
+    	double dBottom = dNS/2 - dNS/4;
+    	double dLeft = dEW/2 - dEW/4;
+    	double dRight = dEW/2 + dEW/4;
+    	
+    	
+    	//todo populate
+    	List<String> asOutputFiles = new ArrayList<>(0);
+    	asOutputFiles.add("left.tif");
+    	asOutputFiles.add("right.tif");
+    	
+    	List<Double> adLatN = new ArrayList<>(2);
+    	List<Double> adLatS = new ArrayList<>(2);
+    	List<Double> adLonW = new ArrayList<>(2);
+    	List<Double> adLonE = new ArrayList<>(2);
+    	
+    	//first tile
+    	adLatN.add(dTop);
+    	adLatS.add((dTop - dBottom)/2);
+    	adLonW.add(dLeft);
+    	adLonE.add((dRight - dLeft)/2);
+    	
+    	//second tile
+    	adLatN.add((dTop - dBottom)/2);
+    	adLatS.add(dBottom);
+    	adLonW.add((dRight - dLeft)/2);
+    	adLonE.add(dRight);
+    	
+    	oLib.multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE);
     }
     
 }
