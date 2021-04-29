@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 
@@ -41,6 +42,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WorkspacePolicy;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -830,5 +832,37 @@ public class WorkspaceResource {
 		return oResult;
 
 	}
-
+	
+	@GET
+	@Path("wsnamebyid")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getWorkspaceNameById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId ) {
+		//check input data
+		if(Utils.isNullOrEmpty(sSessionId)) {
+			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: session is null or empty, aborting");
+			return Response.status(Status.UNAUTHORIZED).entity("x-session-token is null or empty").build();
+		}
+		if(Utils.isNullOrEmpty(sWorkspaceId)) {
+			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: workspace is null or empty, aborting");
+			return Response.status(Status.BAD_REQUEST).entity("workspaceId is null or empty").build();
+		}
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if(null==oUser) {
+			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: session is invalid, aborting");
+			return Response.status(Status.UNAUTHORIZED).entity("x-session-token is invalid").build();
+		}
+		if(Utils.isNullOrEmpty(oUser.getUserId())) {
+			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: user from session is null or empty, aborting");
+			return Response.status(Status.UNAUTHORIZED).entity("x-session-token is invalid").build();
+		}
+		
+		//check the user can access the workspace
+		if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: user cannot access workspace info, aborting");
+			return Response.status(Status.FORBIDDEN).build();
+		}
+		
+		
+		return Response.status(400).build();
+	} 
 }
