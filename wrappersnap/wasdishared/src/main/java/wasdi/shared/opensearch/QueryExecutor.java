@@ -37,6 +37,7 @@ import org.apache.commons.net.io.Util;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.QueryViewModel;
 
 public abstract class QueryExecutor {
 
@@ -53,6 +54,8 @@ public abstract class QueryExecutor {
 	
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
+	
+	protected ArrayList<String> m_asSupportedPlatforms = new ArrayList<String>();
 
 	public void init() {
 		return;
@@ -77,6 +80,10 @@ public abstract class QueryExecutor {
 			return -1;
 		}
 	}
+	
+	public ArrayList<String> getSupportedPlatforms() {
+		return m_asSupportedPlatforms;
+	}
 
 	/**
 	 * @param sUrl
@@ -95,6 +102,7 @@ public abstract class QueryExecutor {
 			return null;
 		}
 		try {
+			
 			String sUrl = getSearchUrl(oQuery );
 
 			//create abdera client
@@ -165,8 +173,6 @@ public abstract class QueryExecutor {
 		if(null!=oCredentials) {
 			setUser(oCredentials.getUser());
 			setPassword(oCredentials.getPassword());
-		} else {
-			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
 		}
 
 	}
@@ -283,29 +289,26 @@ public abstract class QueryExecutor {
 			}
 
 			//retrieve the icon
-			oLink = oEntry.getLink("icon");			
+			oLink = oEntry.getLink("icon");
+			
 			if (oLink != null) {
-				//				Utils.debugLog("QueryExecutor.buildResultViewModel: Icon Link: " + oLink.getHref().toString());
 
 				try {
 					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-					//					Utils.debugLog("QueryExecutor.buildResultViewModel: Response Got from the client");
+
 					if (oImageResponse.getType() == ResponseType.SUCCESS) {
-						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Success: saving image preview");
+
 						InputStream oInputStreamImage = oImageResponse.getInputStream();
 						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 						ByteArrayOutputStream bas = new ByteArrayOutputStream();
 						ImageIO.write(oImage, "png", bas);
 						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Image Saved");
 					}				
 				}
 				catch (Exception e) {
 					Utils.debugLog("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
 				}					
-			} else {
-				Utils.debugLog("QueryExecutor.buildResultViewModel: Link Not Available" );
-			}
+			} 
 			aoResults.add(oResult);
 		} 
 		Utils.debugLog("QueryExecutor.buildResultViewModel: Search Done: found " + aoResults.size() + " results");

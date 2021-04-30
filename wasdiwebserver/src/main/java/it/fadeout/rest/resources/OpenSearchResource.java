@@ -172,27 +172,6 @@ public class OpenSearchResource {
 			if (sOrder == null) {
 				sOrder = "asc";
 			}
-				
-			// Query the result count for each provider
-			Map<String, Integer> aiCounterMap = null;
-			
-			try {
-				Utils.debugLog(s_sClassName + ".Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
-				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
-			} 
-			catch (NumberFormatException oNumberFormatException) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oNumberFormatException);
-				return null;
-			} 
-			catch (Exception oException) {
-				Utils.debugLog(s_sClassName + ".search: caught Exception: " + oException);
-				return null;
-			}
-			
-			if (aiCounterMap == null) {
-				Utils.debugLog(s_sClassName + ".search: aiCounterMap is null ");
-				return null;				
-			}
 			
 			// Get the number of elements per page
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
@@ -221,19 +200,26 @@ public class OpenSearchResource {
 				return null;
 			}
 			
+			// Query the result count for each provider
+			Map<String, Integer> aiCounterMap = new HashMap<>();
+			
+
+			try {
+				String asProviders[] = sProviders.split(",|;");
+				for (String sProvider : asProviders) {
+					Integer iProviderCountResults = iLimit;
+					aiCounterMap.put(sProvider, iProviderCountResults);
+				}
+			} catch (Exception oE) {
+				Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+			}
 			
 			// For each provider
 			for (Entry<String, Integer> oEntry : aiCounterMap.entrySet()) {
 				
 				// Get the provider and the total count of its results
 				String sProvider = oEntry.getKey();
-				int iCount = oEntry.getValue();
 				
-				if (iCount < iOffset) {
-					// We have finished 
-					continue;
-				}
-								
 				String sCurrentLimit = "" + iLimit;
 				
 				int iCurrentOffset = Math.max(0, iOffset);

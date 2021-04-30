@@ -47,10 +47,11 @@ public class DockerUtils {
 	 * @param sProcessorFolder Processor Folder
 	 * @param sWorkingRootPath WASDI Working path
 	 */
-	public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWorkingRootPath) {
+	public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWorkingRootPath, String sTomcatUser) {
 		m_oProcessor = oProcessor;
 		m_sProcessorFolder = sProcessorFolder;
 		m_sWorkingRootPath = sWorkingRootPath;
+		m_sUser = sTomcatUser;
 	}
 	
 	/**

@@ -28,7 +28,11 @@ public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 		
 		// Convert the WASDI Query in the view model
 		QueryViewModel oWasdiQuery = parseWasdiClientQuery(sQueryFromClient);
-				
+		
+		if (!Utils.isNullOrEmpty(oWasdiQuery.platformName)) {
+			if (oWasdiQuery.platformName.equals("Sentinel-1") == false && oWasdiQuery.platformName.equals("Sentinel-2") == false && oWasdiQuery.platformName.isEmpty() == false) return "";
+		}
+		
 		// Set start and end date
 		String sTimeStart = oWasdiQuery.startFromDate.substring(0, 10);
 		String sTimeEnd = oWasdiQuery.endToDate.substring(0, 10);

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.QueryResultViewModel;
 import wasdi.shared.viewmodels.QueryViewModel;
 
 /**
@@ -20,7 +21,7 @@ import wasdi.shared.viewmodels.QueryViewModel;
  * @author c.nattero
  *
  */
-public abstract class DiasQueryTranslator {
+public class DiasQueryTranslator {
 
 	/**
 	 * token of offset
@@ -35,17 +36,49 @@ public abstract class DiasQueryTranslator {
 	 */
 	private static final String s_sCLOUDCOVERPERCENTAGE = "cloudcoverpercentage:[";
 	/**
+	 * Token of S1 platform
+	 */
+	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";	
+	/**
 	 * Token of S2 platform
 	 */
 	private static final String s_sPLATFORMNAME_SENTINEL_2 = "platformname:Sentinel-2";
 	/**
-	 * Token of S1 platform
+	 * Token of S3 platform
 	 */
-	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
+	private static final String s_sPLATFORMNAME_SENTINEL_3 = "platformname:Sentinel-3";	
+	/**
+	 * Token of Landsat platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT = "platformname:Landsat-*";
+	/**
+	 * Token of Landsat platform
+	 */
+	private static final String s_sPLATFORMNAME_PROBAV = "platformname:Proba-V";
+	/**
+	 * Token of Envisat platform
+	 */
+	private static final String s_sPLATFORMNAME_ENVISAT = "platformname:Envisat";
+	/**
+	 * Token of Copernicus Marine platform
+	 */
+	private static final String s_sPLATFORMNAME_COPERNICUS_MARINE = "productMainClass:Copernicus-marine";
+	/**
+	 * Token of VIIRS platform
+	 */
+	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";	
 	/**
 	 * Token of product type
 	 */
 	private static final String s_sPRODUCTTYPE = "producttype:";
+	/**
+	 * Token of Landsat product type
+	 */
+	private static final String s_sLANDSATPRODUCTTYPE = "name:";
+	/**
+	 * Token of Proba-V Collection
+	 */
+	private static final String s_sPROBAVCOLLECTION = "collection:";
 	/**
 	 * Token of the relative orbit
 	 */
@@ -54,6 +87,16 @@ public abstract class DiasQueryTranslator {
 	 * Token of sensor mode
 	 */
 	private static final String s_sSENSORMODE = "sensoroperationalmode:";
+	/**
+	 * Token of timeliness
+	 */
+	private static final String s_s_TIMELINESS = "timeliness:";
+	/**
+	 * Token of Landsat product type
+	 */
+	private static final String s_sENVISATORBITDIRECTION= "orbitDirection:";
+	
+	
 
 	protected String m_sParserConfigPath;
 	protected String m_sAppConfigPath;
@@ -87,7 +130,18 @@ public abstract class DiasQueryTranslator {
 	 * @param sQueryFromClient WASDI Query
 	 * @return Provider Query
 	 */
-	protected abstract String translate(String sQueryFromClient);
+	protected String translate(String sQueryFromClient) {
+		return "";
+	}
+	
+	protected String parseTimeFrame(String sQuery) {
+		return "";
+	}
+
+	protected String parseFootPrint(String sQuery) {
+		return "";
+	}
+	
 
 	/**
 	 * Encodes a Query
@@ -188,18 +242,14 @@ public abstract class DiasQueryTranslator {
 	protected String convertRanges(String sQuery) {
 		return sQuery;
 	}
-
-	protected abstract String parseTimeFrame(String sQuery);
-
-	protected abstract String parseFootPrint(String sQuery);
-
+	
 	/**
 	 * Convert the textual WASDI client Query in a View Mode
 	 * 
 	 * @param sQuery
 	 * @return
 	 */
-	protected QueryViewModel parseWasdiClientQuery(String sQuery) {
+	public QueryViewModel parseWasdiClientQuery(String sQuery) {
 
 		QueryViewModel oResult = new QueryViewModel();
 
@@ -289,8 +339,7 @@ public abstract class DiasQueryTranslator {
 
 					} catch (Exception oE) {
 						Utils.log("ERROR",
-								"DiasQueryTranslatorEODC.parseWasdiClientQuery: could not complete footprint detection: "
-										+ oE);
+								"DiasQueryTranslator.parseWasdiClientQuery: could not complete footprint detection: " + oE);
 					}
 				}
 				
@@ -345,6 +394,24 @@ public abstract class DiasQueryTranslator {
 
 			// Try to get Info About S2
 			parseSentinel2(sQuery, oResult);
+			
+			// Try get Info about VIIRS
+			parseVIIRS(sQuery, oResult);
+			
+			// Try to get info about Landsat
+			parseLandsat(sQuery, oResult);
+			
+			// Try to get Info about ProbaV
+			parseProbaV(sQuery, oResult);
+			
+			// Try to get Info about Sentinel 3
+			parseSentinel3(sQuery, oResult);
+			
+			// Try to get info about Envisat
+			parseEnvisat(sQuery, oResult);
+			
+			// Try to get info about Copernicus Marine
+			parseCopernicusMarine(sQuery, oResult);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
@@ -376,7 +443,7 @@ public abstract class DiasQueryTranslator {
 					}
 					sQuery = sQuery.trim();
 
-					oResult.platformName = "Sentinel-1";
+					oResult.platformName = Platforms.SENTINEL1;
 
 					// check for product type
 					try {
@@ -471,7 +538,7 @@ public abstract class DiasQueryTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("DiasQueryTranslatorEODC.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+			Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
 
@@ -497,41 +564,401 @@ public abstract class DiasQueryTranslator {
 						sQuery = sQuery.substring(iStart, iEnd);
 					}
 
-					oResult.platformName = "Sentinel-2";
+					oResult.platformName = Platforms.SENTINEL2;
 
 					// check for cloud coverage
+					parseCloudCoverage(sQuery, oResult);
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.parseSentinel_2( " + sQuery + " ): " + oE);
+		}
+	}
+	
+	/**
+	 * Parse Cloud Coverage
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseCloudCoverage(String sQuery, QueryViewModel oResult) {
+		
+		int iStart = 0;
+		int iEnd = 0;
+		
+		// check for cloud coverage
+		try {
+			if (sQuery.toLowerCase().contains(DiasQueryTranslator.s_sCLOUDCOVERPERCENTAGE)) {
+				iStart = sQuery.toLowerCase().indexOf(s_sCLOUDCOVERPERCENTAGE);
+
+				if (iStart >= 0) {
+
+					iStart += s_sCLOUDCOVERPERCENTAGE.length();
+					iEnd = sQuery.indexOf(']', iStart);
+					String sSubQuery = sQuery.substring(iStart, iEnd);
+
+					String[] asCloudLimits = sSubQuery.split(" TO ");
+
+					// these variables could be omitted, but in this way we check we are reading
+					// numbers
+					double dLo = Double.parseDouble(asCloudLimits[0]);
+					double dUp = Double.parseDouble(asCloudLimits[1]);
+
+					oResult.cloudCoverageFrom = dLo;
+					oResult.cloudCoverageTo = dUp;
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.parseCloudCoverage( " + sQuery + " ): could not parse cloud coverage: " + oE);
+		}
+		
+	}
+	
+	
+	/**
+	 * Fills the Query View Model with S1 info
+	 * 
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseVIIRS(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_VIIRS)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_VIIRS);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_VIIRS.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.VIIRS;
+
+					// check for product type
 					try {
-						if (sQuery.contains(DiasQueryTranslator.s_sCLOUDCOVERPERCENTAGE)) {
-							iStart = sQuery.indexOf(s_sCLOUDCOVERPERCENTAGE);
-
-							if (iStart >= 0) {
-
-								iStart += s_sCLOUDCOVERPERCENTAGE.length();
-								iEnd = sQuery.indexOf(']', iStart);
-								String sSubQuery = sQuery.substring(iStart, iEnd);
-
-								String[] asCloudLimits = sSubQuery.split(" TO ");
-
-								// these variables could be omitted, but in this way we check we are reading
-								// numbers
-								double dLo = Double.parseDouble(asCloudLimits[0]);
-								double dUp = Double.parseDouble(asCloudLimits[1]);
-
-								oResult.cloudCoverageFrom = dLo;
-								oResult.cloudCoverageTo = dUp;
+						if (sQuery.contains(DiasQueryTranslator.s_sPRODUCTTYPE)) {
+							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find product type");
 							}
+							iStart += s_sPRODUCTTYPE.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								// the types can be VIIRS_1d_composite, VIIRS_5d_composite all 18 letters
+								iEnd = iStart + 18;
+							}
+							String sType = sQuery.substring(iStart, iEnd);
+							sType = sType.trim();
+
+							oResult.productType = sType;
 						}
 					} catch (Exception oE) {
-						Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_2( " + sQuery
-								+ " ): could not parse cloud coverage: " + oE);
+						Utils.debugLog("DiasQueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
 					}
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("DiasQueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): " + oE);
+			Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
+	
+	
+	/**
+	 * Parse Landsat filters
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseLandsat(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_LANDSAT)) {
 
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_LANDSAT);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_LANDSAT.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.LANDSAT8;
+
+					// check for product type
+					try {
+						if (sQuery.contains(s_sLANDSATPRODUCTTYPE)) {
+							iStart = sQuery.indexOf(s_sLANDSATPRODUCTTYPE);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find product type");
+							}
+							iStart += s_sLANDSATPRODUCTTYPE.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								// the types can be of three or four letters
+								iEnd = iStart + 4;
+							}
+							String sType = sQuery.substring(iStart, iEnd);
+							sType = sType.trim();
+
+							oResult.productType = sType;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseLandsat( " + sQuery
+								+ " ): error while parsing product type: " + oE);
+					}
+					
+					parseCloudCoverage(sQuery, oResult);
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.parseLandsat( " + sQuery + " ): " + oE);
+		}
+	}
+	
+	private void parseProbaV(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_PROBAV)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_PROBAV);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_PROBAV.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.PROVAV;
+
+					// check for product type
+					try {
+						if (sQuery.contains(s_sPROBAVCOLLECTION)) {
+							iStart = sQuery.indexOf(s_sPROBAVCOLLECTION);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find product type");
+							}
+							iStart += s_sPROBAVCOLLECTION.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								// the types can be of different letters, try this medium if we are lucky
+								iEnd = iStart + 42;
+							}
+							String sType = sQuery.substring(iStart, iEnd);
+							sType = sType.trim();
+
+							oResult.productType = sType;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseProbaV( " + sQuery
+								+ " ): error while parsing product type: " + oE);
+					}
+					
+					parseCloudCoverage(sQuery, oResult);
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.parseProbaV( " + sQuery + " ): " + oE);
+		}
+	}	
+	
+	
+	private void parseSentinel3(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_SENTINEL_3)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_3);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_SENTINEL_3.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.SENTINEL3;
+
+					// check for product type
+					try {
+						if (sQuery.contains(DiasQueryTranslator.s_sPRODUCTTYPE)) {
+							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find product type");
+							}
+							iStart += s_sPRODUCTTYPE.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								// the types can be OCN, GRD, SLC, all of three letters
+								iEnd = iStart + 3;
+							}
+							String sType = sQuery.substring(iStart, iEnd);
+							sType = sType.trim();
+
+							oResult.productType = sType;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					}
+
+					// check for product type
+					try {
+						if (sQuery.contains(DiasQueryTranslator.s_s_TIMELINESS)) {
+							iStart = sQuery.indexOf(s_s_TIMELINESS);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find sensor mode");
+							}
+							iStart += s_s_TIMELINESS.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = iStart + 12;
+							}
+							String sTimeliness = sQuery.substring(iStart, iEnd);
+							sTimeliness = sTimeliness.trim();
+
+							oResult.timeliness = sTimeliness;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+		}
+	}
+	
+	/**
+	 * Parse Envisat
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseEnvisat(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_ENVISAT)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_ENVISAT);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_ENVISAT.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.ENVISAT;
+
+					// check for product type
+					try {
+						if (sQuery.contains(s_sENVISATORBITDIRECTION)) {
+							iStart = sQuery.indexOf(s_sENVISATORBITDIRECTION);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find orbit direction");
+							}
+							iStart += s_sENVISATORBITDIRECTION.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = iStart + 9;
+							}
+							String sType = sQuery.substring(iStart, iEnd);
+							sType = sType.trim();
+
+							oResult.productType = sType;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+		}
+	}	
+
+	
+	/**
+	 * Parse Copernicus Marine
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseCopernicusMarine(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_COPERNICUS_MARINE)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_COPERNICUS_MARINE);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_COPERNICUS_MARINE.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.COPERNICUS_MARINE;
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+		}
+	}	
 	/**
 	 * read a int from the query
 	 * 

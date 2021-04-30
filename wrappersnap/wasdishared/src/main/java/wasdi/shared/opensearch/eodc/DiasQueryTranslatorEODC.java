@@ -203,47 +203,6 @@ public class DiasQueryTranslatorEODC extends DiasQueryTranslator {
 
 				//check for product type
 				try {
-					/*
-					if(sQuery.contains(DiasQueryTranslatorEODC.s_sPRODUCTTYPE)) {
-						iStart = sQuery.indexOf(s_sPRODUCTTYPE);
-						if(iStart < 0 ) {
-							throw new IllegalArgumentException("Could not find product type");
-						}
-						iStart += s_sPRODUCTTYPE.length();
-						iEnd = sQuery.indexOf(" AND ", iStart);
-						if(iEnd < 0) {
-							iEnd = sQuery.indexOf(')', iStart);
-						}
-						if(iEnd < 0) {
-							iEnd = sQuery.indexOf(' ', iStart);
-						}
-						if(iEnd < 0) {
-							//the types can be OCN, GRD, SLC, all of three letters
-							iEnd = iStart + 3;
-						}
-						String sType = sQuery.substring(iStart, iEnd);
-						sType = sType.trim();
-
-
-
-
-						if (sType.equals("GRD")) {
-							sType = "%GRDH%";
-						}
-						//the following ones are not (yet?) supported by EODC
-//						else if (sType.equals("SLC")) {
-//							//sType = "S1%\\_SLC%";
-//							sType = "%SLC%";
-//						} else if(sType.equals("OCN")){
-//							sType = "%OCN%";
-//						}
-
-
-						//<ogc:PropertyIsLike wildCard="%" singleChar="#" escapeChar="!"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>%GRDH%</ogc:Literal></ogc:PropertyIsLike>
-						sSentinel1Query += "<ogc:PropertyIsLike wildCard=\"%\" singleChar=\"#\" escapeChar=\"!\"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>";
-						sSentinel1Query += sType;
-						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsLike>";
-					}*/
 					//ask for GRD by default, since it's the only type they support, at least so far
 					sSentinel1Query += "<ogc:PropertyIsLike wildCard=\"%\" singleChar=\"#\" escapeChar=\"!\"><ogc:PropertyName>apiso:Identifier</ogc:PropertyName><ogc:Literal>";
 					sSentinel1Query += "%GRDH%";

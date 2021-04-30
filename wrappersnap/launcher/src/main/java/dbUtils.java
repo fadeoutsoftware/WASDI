@@ -395,8 +395,9 @@ public class dbUtils {
 		        
 		        String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
 		        String sDockerTemplatePath = ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH");
+		        String sTomcatUser = ConfigReader.getPropValue("TOMCAT_USER", "tomcat8");
 		        
-		        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath);
+		        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath, sTomcatUser);
 		        
 		        ProcessorParameter oParameter = new ProcessorParameter();
 		        

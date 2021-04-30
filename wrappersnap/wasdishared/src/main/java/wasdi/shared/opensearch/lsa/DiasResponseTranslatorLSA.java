@@ -1,8 +1,14 @@
 package wasdi.shared.opensearch.lsa;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Element;
@@ -11,6 +17,10 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.parser.Parser;
 import org.apache.abdera.parser.ParserOptions;
+import org.apache.abdera.protocol.Response.ResponseType;
+import org.apache.abdera.protocol.client.AbderaClient;
+import org.apache.abdera.protocol.client.ClientResponse;
+import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
@@ -27,6 +37,16 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 			
 			// Parse results with abdera
 			Abdera oAbdera = new Abdera();
+			
+			AbderaClient oClient = new AbderaClient(oAbdera);
+			oClient.setConnectionTimeout(15000);
+			oClient.setSocketTimeout(40000);
+			oClient.setConnectionManagerTimeout(20000);
+			oClient.setMaxConnectionsTotal(200);
+			oClient.setMaxConnectionsPerHost(50);
+	
+			// get default request option
+			RequestOptions oOptions = oClient.getDefaultRequestOptions();			
 			
 			Parser oParser = oAbdera.getParser();
 			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
@@ -53,6 +73,8 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 
 				QueryResultViewModel oResult = new QueryResultViewModel();
 				
+				String sSummary = "";
+				
 				oResult.setProvider("LSA");
 				//retrive the title
 				String sTitle = oEntry.getTitle();
@@ -63,6 +85,8 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 					
 					// Split the title
 					String [] asTitleParts = sTitle.split("_");
+					
+					String sMode = "";
 					
 					// Safe check
 					if (asTitleParts != null) {
@@ -103,8 +127,16 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 								// Set the relative orbit to the WASDI View Model
 								oResult.getProperties().put("relativeorbitnumber", ""+iRelativeOrbit);
 							}
+							
+							sMode = " Instrument: SAR-C SAR, Mode: "+  asTitleParts[1];
+							
+							oResult.getProperties().put("sensoroperationalmode", asTitleParts[1]);
 						}
 					}
+					
+					sSummary = "Satellite: Sentinel-1, " + sMode;
+					
+					
 				}
 				else if (sTitle.startsWith("S2")) {
 					// Split the title
@@ -134,7 +166,9 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 								oResult.getProperties().put("relativeorbitnumber", ""+iRelativeOrbit);
 							}
 						}
-					}					
+					}
+					
+					sSummary = "Satellite: Sentinel-2, Mode: MSI, Instrument: INS-NOBS";
 				}
 				
 				// Set platform
@@ -149,10 +183,34 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 				List<Link> aoLinks = oEntry.getLinks();
 				
 				for (Link oLink : aoLinks) {
+					
 					if (oLink.getTitle().contains("Source package download")) {
 						String sLink = "https://collgs.lu/" + oLink.getHref().toString();
 						oResult.setLink(sLink);
-						break;
+					}
+					
+					if (bFullViewModel) {
+						if (oLink.getTitle().contains("Quicklook")) {
+							
+							if (oLink != null) {
+
+								try {
+									ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+		
+									if (oImageResponse.getType() == ResponseType.SUCCESS) {
+		
+										InputStream oInputStreamImage = oImageResponse.getInputStream();
+										BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+										ByteArrayOutputStream bas = new ByteArrayOutputStream();
+										ImageIO.write(oImage, "png", bas);
+										oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
+									}				
+								}
+								catch (Exception e) {
+									Utils.debugLog("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
+								}					
+							} 
+						}						
 					}
 				}
 
@@ -197,10 +255,24 @@ public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 							}
 						}
 						else if (sName.equals("{http://purl.org/dc/elements/1.1/}date")) {
-							oResult.setSummary(oElement.getText());
+							
+							String sDate = oElement.getText();
+							
+							
+							if (!Utils.isNullOrEmpty(sDate)) {
+								String asParts[] = sDate.split("/");
+								if (asParts != null) {
+									if (asParts.length>0) {
+										sSummary += ", Date: " + asParts[0];
+									}
+								}
+							}
+							
 						}
 					}
 				}
+				
+				oResult.setSummary(sSummary);
 				
 				aoResults.add(oResult);
 			} 

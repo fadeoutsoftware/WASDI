@@ -174,12 +174,12 @@ public class LSAHttpUtils {
 			}
 			
 
-			Utils.debugLog("QueryExecutorLSA.httpPostResults: Sending 'POST' request to URL : " + sUrl);
+			//Utils.debugLog("QueryExecutorLSA.httpPostResults: Sending 'POST' request to URL : " + sUrl);
 
 			lStart = System.nanoTime();
 			try {
 				int iResponseCode =  oConnection.getResponseCode();
-				Utils.debugLog("QueryExecutorLSA.httpGetResults: Response Code : " + iResponseCode);
+				//Utils.debugLog("QueryExecutorLSA.httpGetResults: Response Code : " + iResponseCode);
 				String sResponseExtract = null;
 				if(iResponseCode == 200) {
 					InputStream oInputStream = oConnection.getInputStream();
@@ -193,7 +193,7 @@ public class LSAHttpUtils {
 					String sNewUrl = oConnection.getHeaderField("Location");
 					String sCookies = oConnection.getHeaderField("Set-Cookie");
 					
-					Utils.debugLog("QueryExecutorLSA.httpPostResults: redirect to " + sNewUrl);
+					//Utils.debugLog("QueryExecutorLSA.httpPostResults: redirect to " + sNewUrl);
 					
 					oConnection = (HttpURLConnection) new URL(sNewUrl).openConnection();
 					

@@ -5,10 +5,23 @@ import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.utils.Utils;
 
 public class ProcessorParameter extends BaseParameter {
+	/**
+	 * Name of the processor
+	 */
 	private String name;
+	/**
+	 * Processor Id
+	 */
 	private String processorID;
+	/**
+	 * Json with the parameters
+	 */
 	private String json;
+	/**
+	 * Processor Type
+	 */
 	private String processorType;
+	
 	public String getProcessorType() {
 		return processorType;
 	}

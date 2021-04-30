@@ -9,6 +9,7 @@ public class QueryExecutorFEDEO extends QueryExecutor {
 	QueryExecutorFEDEO(){
 		Utils.debugLog("QueryExecutorFEDEO");
 		m_sProvider = "FEDEO";
+		m_oQueryTranslator = new DiasQueryTranslator();
 	}
 	
 	@Override
