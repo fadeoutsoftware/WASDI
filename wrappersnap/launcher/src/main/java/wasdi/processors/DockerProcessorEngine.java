@@ -37,8 +37,8 @@ import wasdi.shared.utils.ZipExtractor;
 
 public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
-	public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
-		super(sWorkingRootPath, sDockerTemplatePath);
+	public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
+		super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 	}
 	
 	/**
@@ -142,7 +142,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			processWorkspaceLog("Start building Image");
 			
 			// Create Docker Util and deploy the docker 
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 			oDockerUtils.deploy();
 			
 			processWorkspaceLog("Image done, start the docker");
@@ -407,7 +407,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 				String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;
 				
-				DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath, m_sTomcatUser);
 				
 				oDockerUtils.run();
 				
@@ -643,7 +643,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			processWorkspaceLog("Delete Processor Docker");
 			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath, m_sTomcatUser);
 			// Give the name of the processor to delete to be sure that it works also if oProcessor is already null
 			oDockerUtils.delete(sProcessorName);
 			
@@ -755,7 +755,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);			
 			
 			// Create utils
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath, m_sTomcatUser);
 			
 			// Delete the image
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: delete the container");

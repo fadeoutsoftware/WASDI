@@ -49,6 +49,14 @@ public class LSAProviderAdapter extends ProviderAdapter {
 				Utils.debugLog("LSAProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 			
+			try {
+				int iMsSleep = (int) ( (Math.random()*5000.0) + 5000.0 );
+				Thread.sleep(iMsSleep);
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("LSAProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+			}
+			
 			iAttemp ++;
 		}
 		
