@@ -261,7 +261,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			}
 		    if (!oMyProcessorExists.get()) {
 		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
-		    	return false;
+		    	//return false;
 		    }
 		    
 		    try {
