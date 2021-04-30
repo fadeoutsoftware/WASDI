@@ -163,6 +163,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Object mapper to convert Java - JSON
 	 */
 	public static ObjectMapper s_oMapper = new ObjectMapper();
+	
+	/**
+	 * System tomcat user
+	 */
+	private String m_sTomcatUser = "tomcat8";
 
 	/**
 	 * WASDI Launcher Main Entry Point
@@ -346,6 +351,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+			
+			m_sTomcatUser = ConfigReader.getPropValue("TOMCAT_USER", "tomcat8");
 
 			// Read this node code
 			LauncherMain.s_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
@@ -495,7 +502,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
+						m_sTomcatUser);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.deploy(oParameter);
 			}
@@ -506,7 +514,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
+						m_sTomcatUser);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.run(oParameter);
 			}
@@ -516,7 +525,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
+						m_sTomcatUser);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.delete(oParameter);
 			}
@@ -526,7 +536,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
+						m_sTomcatUser);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.redeploy(oParameter);
 			}			
@@ -536,7 +547,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
+						m_sTomcatUser);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.libraryUpdate(oParameter);
 			}

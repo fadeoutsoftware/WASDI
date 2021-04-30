@@ -49,8 +49,8 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
     }
 
 	
-	public IDLProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
-		super(sWorkingRootPath,sDockerTemplatePath);
+	public IDLProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
+		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		
 		
 		m_sDockerTemplatePath = sDockerTemplatePath;		

@@ -24,30 +24,32 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
+	protected String m_sTomcatUser = "tomcat8";
 	
-	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
+	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
 			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
 		}
 		
 		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON27_SNAP)) {
-			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
+			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.IDL)) {
-			return new IDLProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
+			return new IDLProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
-			return new UbuntuPython37ProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
+			return new UbuntuPython37ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else {
-			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath);
+			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
 	}
 	
-	public WasdiProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
+	public WasdiProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		m_sWorkingRootPath = sWorkingRootPath;
 		m_sDockerTemplatePath = sDockerTemplatePath;
+		m_sTomcatUser = sTomcatUser;
 	}
 	
 	/**

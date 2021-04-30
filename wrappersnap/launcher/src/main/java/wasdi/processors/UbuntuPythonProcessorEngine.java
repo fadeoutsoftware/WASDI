@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class UbuntuPythonProcessorEngine extends DockerProcessorEngine {
 
-	public UbuntuPythonProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
-		super(sWorkingRootPath, sDockerTemplatePath);
+	public UbuntuPythonProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
+		super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		
 		m_sDockerTemplatePath = sDockerTemplatePath;		
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
