@@ -208,8 +208,8 @@ def run(processId):
 		wasdi.wasdiLog("wasdiProcessorServer RUN " + processId)
 		
 		sLocalPath = "/home/wasdi/"
-		sParamFilePath = sLocalPath + "config.properties"
-		sConfigFilePath = sLocalPath + "param.properties"
+		sConfigFilePath = sLocalPath + "config.properties"
+		sParamFilePath = sLocalPath + "param.properties"
 		
 		# Write Config file:
 		oConfigFile = open(sConfigFilePath, "w+")
@@ -231,7 +231,7 @@ def run(processId):
 		#Write Params:
 		oParamsFile = open(sParamFilePath, "w+")
 		for sKey in parameters:
-			oParamsFile.write(sKey+"=" + str(parameters[sKey]))
+			oParamsFile.write(sKey+"=" + str(parameters[sKey])+"\r\n")
 		oParamsFile.close()
 		
 		oProcess = subprocess.Popen(["octave", "myProcessor.m", sConfigFilePath])

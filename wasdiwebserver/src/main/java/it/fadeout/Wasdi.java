@@ -253,7 +253,7 @@ public class Wasdi extends ResourceConfig {
 				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
 				// Leave this at "no user"
 				oWorkspace.setWorkspaceId(Utils.GetRandomName());
-				oWorkspace.setNodeCode(Wasdi.s_sWASDINAME);
+				oWorkspace.setNodeCode(Wasdi.s_sMyNodeCode);
 				
 				// Insert in the db
 				oWorkspaceRepository.insertWorkspace(oWorkspace);
