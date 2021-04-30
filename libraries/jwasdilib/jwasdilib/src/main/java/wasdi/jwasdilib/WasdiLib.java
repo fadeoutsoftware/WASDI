@@ -473,7 +473,7 @@ public class WasdiLib {
 					}
 				}
 				else {
-					m_sWorkspaceOwner = getWorkspaceOwnerByWSId(m_sActiveWorkspace);
+					openWorkspaceById(m_sActiveWorkspace);					
 					log("Active workspace set " + m_sActiveWorkspace);
 				}
 
@@ -1033,8 +1033,8 @@ public class WasdiLib {
 				Map<String, Object> oJSONMap = s_oMapper.readValue(sMessage, new TypeReference<Map<String,Object>>(){});
 
 				if (oJSONMap != null) {
-					if (oJSONMap.containsKey("BooleanValue")) {
-						return (boolean) oJSONMap.get("BooleanValue");
+					if (oJSONMap.containsKey("boolValue")) {
+						return (boolean) oJSONMap.get("boolValue");
 					}
 				}
 
