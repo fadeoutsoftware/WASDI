@@ -36,7 +36,7 @@ public abstract class WasdiProcessorEngine {
 			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.IDL)) {
-			return new IDLProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
+			return new IDL2ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
 			return new UbuntuPython37ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);

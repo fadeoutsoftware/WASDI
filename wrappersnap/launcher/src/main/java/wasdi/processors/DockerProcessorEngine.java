@@ -145,6 +145,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 			oDockerUtils.deploy();
 			
+			onAfterDeploy(sProcessorFolder);
+			
 			processWorkspaceLog("Image done, start the docker");
 			
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
@@ -223,6 +225,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 	protected abstract void handleUnzippedProcessor(String sProcessorFolder);
 	
+	protected void onAfterDeploy(String sProcessorFolder) {
+		
+	}
+	
 	/**
 	 * Unzip the processor
 	 * @param sProcessorFolder
@@ -250,19 +256,21 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
 				return false;
 			}
+			
 			//check myProcessor exists:
-			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
-			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
-				oWalk.map(Path::toFile).forEach(oFile->{
-					if(oFile.getName().equals("myProcessor.py")) {
-						oMyProcessorExists.set(true);
-					}
-				});
-			}
-		    if (!oMyProcessorExists.get()) {
-		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
-		    	//return false;
-		    }
+			// This class is generic. to use this code we need before to adapt it to run with all the different processor types
+//			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
+//			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
+//				oWalk.map(Path::toFile).forEach(oFile->{
+//					if(oFile.getName().equals("myProcessor.py")) {
+//						oMyProcessorExists.set(true);
+//					}
+//				});
+//			}
+//		    if (!oMyProcessorExists.get()) {
+//		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
+//		    	//return false;
+//		    }
 		    
 		    try {
 			    // Remove the zip?
