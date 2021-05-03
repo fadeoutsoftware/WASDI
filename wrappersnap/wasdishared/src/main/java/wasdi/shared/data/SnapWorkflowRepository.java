@@ -78,14 +78,15 @@ public class SnapWorkflowRepository extends  MongoRepository {
         	List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
         	SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 
-        	// fetch snapworflows using the ids in the sharings 
-        	// prepend them the to return list 
+        	// fetch snapworkflows using the ids in the sharings 
+        	// if they're not public, prepend them the to return list
         	
         	for (WorkflowSharing wfs : aoWorkflowSharing) {
+        		SnapWorkflow ocurWorkflow = oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId());
+        		if(!ocurWorkflow.getIsPublic()) {
         		aoReturnList.add(oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId()));
+        		}
         	}
-        	
-        	
         	
         	Bson oOrFilter = Filters.or(new Document("userId", sUserId),new Document("isPublic", true));
         	
