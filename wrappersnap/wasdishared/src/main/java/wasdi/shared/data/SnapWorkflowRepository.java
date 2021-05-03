@@ -67,7 +67,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
     /**
      * Get all the workflows that can be accessed by UserId
      * @param sUserId
-     * @return List of private workflows of users plus all the public ones plus the the ones shared with the user
+     * @return List of private workflows of users plus all the public ones plus the ones shared with the user
      */
     public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {
 
@@ -76,9 +76,17 @@ public class SnapWorkflowRepository extends  MongoRepository {
         	// find sharings by userId
         	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
         	List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
-        	
+        	SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+
         	// fetch snapworflows using the ids in the sharings 
-        	// append the to return list 
+        	// prepend them the to return list 
+        	
+        	for (WorkflowSharing wfs : aoWorkflowSharing) {
+        		aoReturnList.add(oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId()));
+        	}
+        	
+        	
+        	
         	Bson oOrFilter = Filters.or(new Document("userId", sUserId),new Document("isPublic", true));
         	
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oOrFilter);
