@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,9 +64,11 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.WorkflowSharingRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.BaseParameter;
@@ -282,24 +285,37 @@ public class ProcessingResources {
 		}
 
 		String sUserId = oUser.getUserId();
-
+		
+		// find sharings by userId
+    	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+    	List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
+    	// create a support list with workflows id
+    	HashSet<String> aoUniqueIds = new HashSet();
+    	for (WorkflowSharing wfs : aoWorkflowSharing) {
+    		aoUniqueIds.add(wfs.getWorkflowId());
+    	}
+    
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 		ArrayList<SnapWorkflowViewModel> aoRetWorkflows = new ArrayList<>();
 		try {
 
 			List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.getSnapWorkflowPublicAndByUser(sUserId);
 
-			for (int i = 0; i < aoDbWorkflows.size(); i++) {
+			for (SnapWorkflow oCurWF :aoDbWorkflows) {
 				SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
-				oVM.setName(aoDbWorkflows.get(i).getName());
-				oVM.setDescription(aoDbWorkflows.get(i).getDescription());
-				oVM.setWorkflowId(aoDbWorkflows.get(i).getWorkflowId());
-				oVM.setOutputNodeNames(aoDbWorkflows.get(i).getOutputNodeNames());
-				oVM.setInputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
-				oVM.setPublic(aoDbWorkflows.get(i).getIsPublic());
-				oVM.setUserId(aoDbWorkflows.get(i).getUserId());
-				oVM.setNodeUrl(aoDbWorkflows.get(i).getNodeUrl());
+				oVM.setName(oCurWF.getName());
+				oVM.setDescription(oCurWF.getDescription());
+				oVM.setWorkflowId(oCurWF.getWorkflowId());
+				oVM.setOutputNodeNames(oCurWF.getOutputNodeNames());
+				oVM.setInputNodeNames(oCurWF.getInputNodeNames());
+				oVM.setPublic(oCurWF.getIsPublic());
+				oVM.setUserId(oCurWF.getUserId());
+				oVM.setNodeUrl(oCurWF.getNodeUrl());
+				
+				// check if it was shared, if so, set shared with me to true
+				oVM.setSharedWithMe(aoUniqueIds.contains(oCurWF.getWorkflowId()));
 				aoRetWorkflows.add(oVM);
+				
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " ): " + oE);
