@@ -401,7 +401,22 @@ var WorkFlowManagerController = (function () {
     };
 
     WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
-        utilsVexDialogAlertTop("TO BE IMPLEMENTED");
+        var oController = this;
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/workflow_manager/WorkflowView.html",
+            controller: "",
+            inputs: {
+                extras: {
+                    workflow:oWorkflow
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
     }
 
 
