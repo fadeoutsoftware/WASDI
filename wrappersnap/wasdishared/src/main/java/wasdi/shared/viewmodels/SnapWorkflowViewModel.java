@@ -9,6 +9,9 @@ public class SnapWorkflowViewModel {
 	private boolean isPublic;
 	private String userId;
 	private String nodeUrl;
+	// This field should be initialized before return the view model checking in the workflow sharing
+	// through the repositories 
+	private boolean sharedWithMe = false;
 
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
 	private ArrayList<String> inputFileNames = new ArrayList<>();
@@ -79,4 +82,11 @@ public class SnapWorkflowViewModel {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+	public boolean isSharedWithMe() {
+		return sharedWithMe;
+	}
+	public void setSharedWithMe(boolean sharedWithMe) {
+		this.sharedWithMe = sharedWithMe;
+	}
+	
 }
