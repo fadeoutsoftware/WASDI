@@ -1,7 +1,12 @@
 package wasdi.shared.viewmodels;
 
 import java.util.ArrayList;
-
+/**
+ * View model class to pass data from SnapWorkflow to UI 
+ * aka Graph, Workflows
+ * @author marco
+ *
+ */
 public class SnapWorkflowViewModel {
 	private String workflowId;
 	private String name;
@@ -11,6 +16,7 @@ public class SnapWorkflowViewModel {
 	private String nodeUrl;
 	// This field should be initialized before return the view model checking in the workflow sharing
 	// through the repositories 
+	// default value to false;
 	private boolean sharedWithMe = false;
 
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
@@ -18,8 +24,25 @@ public class SnapWorkflowViewModel {
 	
 	private ArrayList<String> outputNodeNames = new ArrayList<>();
 	private ArrayList<String> outputFileNames = new ArrayList<>();
-
-	
+ 
+	//Default constructor
+	public SnapWorkflowViewModel() {};
+	// Parameterized constructor with all fields except sharing  
+	public SnapWorkflowViewModel(String workflowId, String name, String description, boolean isPublic, String userId,
+			String nodeUrl, ArrayList<String> inputNodeNames, ArrayList<String> inputFileNames,
+			ArrayList<String> outputNodeNames, ArrayList<String> outputFileNames) {
+		super();
+		this.workflowId = workflowId;
+		this.name = name;
+		this.description = description;
+		this.isPublic = isPublic;
+		this.userId = userId;
+		this.nodeUrl = nodeUrl;
+		this.inputNodeNames = inputNodeNames;
+		this.inputFileNames = inputFileNames;
+		this.outputNodeNames = outputNodeNames;
+		this.outputFileNames = outputFileNames;
+	}
 	public String getNodeUrl() {
 		return nodeUrl;
 	}

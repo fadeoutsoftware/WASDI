@@ -2,7 +2,9 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -65,20 +67,20 @@ public class SnapWorkflowRepository extends  MongoRepository {
     }
 
     /**
-     * Get all the workflows that can be accessed by UserId
+     * Get all the workflow that can be accessed by UserId
      * @param sUserId
-     * @return List of private workflows of users plus all the public ones plus the ones shared with the user
+     * @return List of private workflow of users plus all the public ones plus the ones shared with the user
      */
     public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {
-
-        final ArrayList<SnapWorkflow> aoReturnList = new ArrayList<SnapWorkflow>();
+    	// migrated to set in order to avoid redundancy
+        final HashSet<SnapWorkflow> aoReturnList = new HashSet<SnapWorkflow>();
         try {
         	// find sharings by userId
         	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
         	List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
         	SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 
-        	// fetch snapworkflows using the ids in the sharings 
+        	// fetch snapworkflows using the ids in the sharing 
         	// if they're not public, prepend them the to return list
         	
         	for (WorkflowSharing wfs : aoWorkflowSharing) {
@@ -110,7 +112,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
             oEx.printStackTrace();
         }
 
-        return aoReturnList;
+        return new ArrayList<SnapWorkflow>(aoReturnList);
     }
     
     /**
