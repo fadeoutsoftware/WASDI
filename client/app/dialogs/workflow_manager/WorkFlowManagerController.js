@@ -405,7 +405,7 @@ var WorkFlowManagerController = (function () {
         var oController = this;
 
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/workflow_manager/WorkflowView.html",
+            templateUrl: "dialogs/workflow_edit/WorkflowView.html",
             controller: "WorkflowController",
             inputs: {
                 extras: {

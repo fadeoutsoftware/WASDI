@@ -1,0 +1,52 @@
+<div class="container-fluid-v4">
+    <!------------------------------ FILENAME ------------------------------>
+
+
+    <div class="row-v4">
+        <div class="col-v4">
+            <div class="form-v4-group">
+                <label class="">Name</label>
+                <input type="text" name="name"  class="form-v4-control-plaintext wasdi-input" required="required" ng-model="m_oController.m_oWorkflow.workflowName">
+            </div>
+            <div class="form-v4-group">
+                <label for="comment">Description:</label>
+                <textarea class="form-control wasdi-input not-resizable" rows="5" id="comment"maxlength="150" ng-model="m_oController.m_oWorkflow.workflowDescription"></textarea>
+            </div>
+            <div class="form-v4-group">
+                <i class="fa fa-square-o " aria-hidden="true"
+                   ng-hide = "m_oController.m_oWorkflowFileData.isPublic === true"
+                   ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
+                <i class="fa fa-check-square-o " aria-hidden="true"
+                   ng-hide="m_oController.m_oWorkflowFileData.isPublic === false"
+                   ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
+                <span>Set workflow public</span>
+            </div>
+        </div>
+
+        <div class="col-v4">
+            <!--<div class="drag-and-drop h-100">
+                {{"DIALOG_WORKFLOW_DROP_OR_CLICK"|translate}}
+                <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
+                     ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+                     accept="text/xml"
+                     ngf-pattern="'text/xml'">
+                    &lt;!&ndash;&ndash;&gt;
+                    <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+                    <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
+                </div>-->
+            </div>
+
+            <div class="loadIcon" ng-show="m_oController.isUploadingWorkflow">
+                <invader></invader>
+            </div>
+        </div>
+    </div>
+    <div class="row-v4 mt-5">
+        <div class="col-v4 text-center">
+            <button class = "btn btn-primary btn-lg btn-wasdi" ng-click="m_oController.uploadUserGraphOnServer()" ng-show="m_oController.isUploadedNewWorkFlow()">Upload file</button>
+        </div>
+    </div>
+
+
+
+</div>
