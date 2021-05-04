@@ -6,12 +6,13 @@
 
 var WorkFlowManagerController = (function () {
 
-    function WorkFlowManagerController($scope, oClose, oExtras, oSnapOperationService, oConstantsService, oHttp) {
+    function WorkFlowManagerController($scope, oClose, oExtras, oSnapOperationService, oConstantsService, oHttp, oModalService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oModalService = oModalService;
         this.m_oFile = null;
         this.m_aoProducts = this.m_oExtras.products;
 
@@ -405,7 +406,7 @@ var WorkFlowManagerController = (function () {
 
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_manager/WorkflowView.html",
-            controller: "",
+            controller: "WorkflowController",
             inputs: {
                 extras: {
                     workflow:oWorkflow
@@ -470,7 +471,9 @@ var WorkFlowManagerController = (function () {
         'extras',
         'SnapOperationService',
         'ConstantsService',
-        '$http'
+        '$http',
+        'ModalService',
+
     ];
     return WorkFlowManagerController;
 })();
