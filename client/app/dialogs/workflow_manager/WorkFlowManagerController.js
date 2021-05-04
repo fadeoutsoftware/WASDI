@@ -400,6 +400,11 @@ var WorkFlowManagerController = (function () {
         return true;
     };
 
+    WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
+        utilsVexDialogAlertTop("TO BE IMPLEMENTED");
+    }
+
+
     WorkFlowManagerController.prototype.openDeleteWorkflowDialog = function (oWorkflow) {
         if (utilsIsObjectNullOrUndefined(oWorkflow) === true) {
             return false;

@@ -29,13 +29,18 @@
                          ng-class="{'selectedWorkflow': m_oController.m_oSelectedMultiInputWorkflow  === workflow}">
                         <div class="row-v4">
                             <div class="col-v4-12">
-                                <button ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false"
-                                        class="wapps-button "
+                                <!--/* */-->
+                                <button ng-show="m_oController.isTheOwnerOfWorkflow(workflow) || workflow.sharedWithMe"
+                                        class="wapps-button"
                                         ng-click="m_oController.downloadWorkflow(workflow)">
                                     <em class="fa fa-download"></em>
                                 </button>
-                                <!--<button ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false" class="wapps-button " ng-click="m_oController.editClick(processor)"><em class="fa fa-pencil"></em></button>-->
-                                <button ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false"
+                                <button ng-show="m_oController.isTheOwnerOfWorkflow(workflow) || workflow.sharedWithMe"
+                                        class="wapps-button"
+                                        ng-click="m_oController.openEditWorkflowDialog(workflow)">
+                                    <em class="fa fa-pencil"></em>
+                                </button>
+                                <button ng-show="m_oController.isTheOwnerOfWorkflow(workflow)"
                                         class="wapps-button"
                                         ng-click="m_oController.openDeleteWorkflowDialog(workflow)">
                                     <em class="fa fa-times"></em>
