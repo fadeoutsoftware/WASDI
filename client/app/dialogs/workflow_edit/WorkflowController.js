@@ -1,7 +1,7 @@
 
 var WorkflowController = (function() {
 
-    function WorkflowController($scope,oExtras) {
+    function WorkflowController($scope,oExtras,oConstantsService) {
 
         /**
          * Angular Scope
@@ -11,6 +11,8 @@ var WorkflowController = (function() {
          * Reference to the controller
          */
         this.m_oScope.m_oController = this;
+
+        this.m_oConstantService = oConstantsService;
         /**
          * First tab visualized
          * @type {string}
@@ -31,9 +33,14 @@ var WorkflowController = (function() {
          */
         this.m_sUserEmail ="";
     }
+
+    WorkflowController.prototype.iAmTheOwner = function (){
+        return (this.m_oConstantService.getUser().userId === this.m_oWorkflow.userId) ;
+    }
     WorkflowController.$inject = [
         '$scope',
-        'extras'
+        'extras',
+        'ConstantsService'
         ]
 
 
