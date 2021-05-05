@@ -504,11 +504,11 @@ var WasdiApplicationUIController = (function () {
      * The combobox assign a value with name and id structure. This function invoke the original function
      * by extracting the original value.
      */
-    WasdiApplicationUIController.prototype.selectedWorkspaceCombo = function (selectedValue) {
+    WasdiApplicationUIController.prototype.selectedWorkspaceCombo = function (oValue) {
         // Before calling the selectedWorkspace directive search or the corresponding
         // workspace object from m_oController.m_aoWorkspaceList.
-        if (utilsIsObjectNullOrUndefined(selectedValue) === false) {
-            let oWorkspace = this.m_aoWorkspaceList.find(ws => ws.workspaceName === selectedValue.name);
+        if (utilsIsObjectNullOrUndefined(oValue) === false) {
+            let oWorkspace = this.m_aoWorkspaceList.find(ws => ws.workspaceName === oValue.name);
             this.selectedWorkspace(oWorkspace);
         }
 
