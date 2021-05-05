@@ -1,7 +1,7 @@
 
 var WorkflowController = (function() {
 
-    function WorkflowController($scope) {
+    function WorkflowController($scope,oExtras) {
 
         /**
          * Angular Scope
@@ -13,7 +13,14 @@ var WorkflowController = (function() {
         this.m_oScope.m_oController = this;
 
         this.m_sSelectedTab = "Base";
+
+        this.m_oExtras = oExtras;
     }
+    WorkflowController.$inject = [
+        '$scope',
+        'extras'
+        ]
+
 
     return WorkflowController;
 })();
