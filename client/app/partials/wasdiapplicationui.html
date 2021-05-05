@@ -44,14 +44,27 @@
                                 </label>
 
                                 <!--MOSTRA SOLO SE SELEZIONATO-->
+
+
+
                                 <div class="dropdown" ng-show="workspaceChose == 'open'">
-                                    <button class="dropdown-toggle dropdown-workspace" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+
+
+                                    <!-- <button class="dropdown-toggle dropdown-workspace" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <div class="open-workspace-label">{{m_oController.m_oSelectedWorkspace === null ? "Select Workspace" : m_oController.m_oSelectedWorkspace.workspaceName}} </div>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <div class="dropdown-workspace-item" ng-repeat="oWorkspace in m_oController.m_aoWorkspaceList" ng-click="m_oController.selectedWorkspace(oWorkspace)">
-                                            {{oWorkspace.workspaceName}}</div>
-                                    </div>
+                                    </button> -->
+
+                                    <dropdownmenudirective  list-of-values="m_oController.m_aoWorkspaceListForDirective"
+                                                            selected-value="m_oController.m_oSelectedWorkspaceForDirective"
+                                                            on-click-function="m_oController.selectedWorkspaceCombo(oValue)"
+                                                            enable-search-filter="true"
+                                                            dropdown-name="'Select workspace'"></dropdownmenudirective>
+
+                                    <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                     <div class="dropdown-workspace-item" ng-repeat="oWorkspace in m_oController.m_aoWorkspaceList" ng-click="m_oController.selectedWorkspace(oWorkspace)">
+                                           {{oWorkspace.workspaceName}}</div>
+                                   </div>-->
                                 </div>
 
                             </div>
