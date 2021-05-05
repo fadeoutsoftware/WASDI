@@ -30,8 +30,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 .. toctree::
    :maxdepth: 1
    :caption: Develop on WASDI:
-
+   PythonTutorial.rst
+   WasdiTutorial.rst
    Developer.rst
+   
 
 
 Search
