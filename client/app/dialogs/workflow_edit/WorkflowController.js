@@ -11,6 +11,8 @@ var WorkflowController = (function() {
          * Reference to the controller
          */
         this.m_oScope.m_oController = this;
+
+        this.m_sSelectedTab = "Base";
     }
 
     return WorkflowController;
