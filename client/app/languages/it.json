@@ -413,5 +413,8 @@
     "DIALOG_PROCESSOR_TAB_SHARE": "Share",
     "DIALOG_PROCESSOR_TAB_UI": "UI",
 
+    "DIALOG_WORKFLOW_TAB_BASE": "Workflow",
+    "DIALOG_WORKFLOW_TAB_SHARE": "Share",
+
     "DIALOG_PAYLOAD_COPY": "Copy payload"
 }
