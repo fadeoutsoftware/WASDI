@@ -10,19 +10,14 @@ Wasdi Web Platform access and basic usage
 =========================================
 The home page of WASDI is reachable at the address:
 
-
 http://www.wasdi.net/
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage11.png
 
 
-The first step needed is to create a new user. WASDI supports two kind of logins:
-
-* WASDI Login
-
-* Google Login
-
-
+WASDI Login
+------------------------------------------
+[TODO fix]
 The user can access using his own google account without the need of any registration, just clicking on Login and then selecting Sign In with Google
 
 
