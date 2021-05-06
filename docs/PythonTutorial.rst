@@ -4,26 +4,26 @@
    contain the root `toctree` directive.
 .. _PythonTutorial:
 
-
-
-
 Setup
 =====
 Open PyCharm and start a new project.
 
-.. image:: _static/python_tutorial_images/OpenPyCharmAndStartANewProject.png
+.. image:: _static/python_tutorial_images/openPyCharmAndStartANewProject.png
 
 Call it "Advanced Python Tutorial" (or however you wish, just remember to be coherent). You may wish to create a new virtual environment (here we derive it from Python 3.8). Uncheck the option for creating a "main.py" welcome script (or, at least, remember to delete it later on).
 
-.. image:: _static/python_tutorial_images/CreateNewProject.png
+.. image:: _static/python_tutorial_images/createNewProject.png
+
 Let's install the library we need. In the terminal write:
 
 .. code-block:: python 
   
    pip install wasdi
+   
 and press enter
 
-.. image:: _static/python_tutorial_images/PipInstallWasdi.png
+.. image:: _static/python_tutorial_images/pipInstallWasdi.png
+
 hint: if you previously installed wasdi, you may wish to update it by adding the --upgrade flag, i.e.:
 
 .. code-block:: python
@@ -37,16 +37,20 @@ Now we need to create these two fundamental files (right click on the AdvancedPy
 * myProcessor.py: create a python file, then call it myProcessor.py
 * config.json: create a file, then call it config.json (PyCharm will recognize automatically it's a JSON file)
 
-.. image:: _static/python_tutorial_images/CreatePythonFile.png
+.. image:: _static/python_tutorial_images/createPythonFile.png
+
 Create python file
 
-.. image:: _static/python_tutorial_images/CreateMyProcessor_py.png
+.. image:: _static/python_tutorial_images/createMyProcessor_py.png
+
 Create myProcessor.py
 
-.. image:: _static/python_tutorial_images/CreateFile.png
+.. image:: _static/python_tutorial_images/createFile.png
+
 Create a file
 
-.. image:: _static/python_tutorial_images/CreateConfig_json.png
+.. image:: _static/python_tutorial_images/createConfig_json.png
+
 Create config.json
 
 Next, point your browser to wasdi.net, log in, make sure you see the workspaces page (otherwise click on the workspaces menu) and create a new workspace. Call it somehow, e.g., "AdvancedTutorialTest" (or however you want, just remember it and be coherent later on). Leave the browser open on that page, we’ll need it later on.
@@ -64,6 +68,7 @@ Let's begin by editing the config.json file. It's a JSON file, containing the us
    "PASSWORD": "your password here",
    "WORKSPACE": "AdvancedTutorialTest"
  }
+ 
 NOTE: please, keep this file for yourself. You should never give this file to anyone else, and you do not need to upload to WASDI, as we'll see later on. You just need this file in your project for working with the WASDI python library.
 
 Now, open myProcessor.py, create a main and a method called run. The latter is required for WASDI to work (more on that later on).
@@ -92,13 +97,14 @@ The main method will initiate the WASDI library and call the run method:
 	   
 As you can see, we call wasdi.init and pass the relative path of the config file to it.
 
-.. image:: _static/python_tutorial_images/Wasdi_init.png
+.. image:: _static/python_tutorial_images/wasdi_init.png
+
 Let's debug to see the effects of this. Note: if a file main.py was created automatically for you, remember to define another debug configuration. The easiest way to do so is by right clicking on your code and select Debug 'myProcessor.py'.
 
-.. image:: _static/python_tutorial_images/HelloWASDIWorldDebug0.png
-.
+.. image:: _static/python_tutorial_images/helloWASDIWorldDebug0.png
 
-.. image:: _static/python_tutorial_images/HelloWASDIWorldDebug1.png
+.. image:: _static/python_tutorial_images/helloWASDIWorldDebug1.png
+
 If the setup is correct so far, we should see the output from the wasdi library that shows the initialization has gone well. Let's see it more in details:
 
 .. code-block:: python
@@ -178,9 +184,10 @@ More config info, which are fine
 
  [INFO] waspy.printStatus: session is valid :-)
 
-This is good
+ This is good
 
  Process finished with exit code 0
+ 
 And the debug finishes
 
 WASDI Hello World
@@ -193,20 +200,22 @@ Now let's try to call a WASDI API. There's a hello world API just for these test
    sHello = wasdi.hello()
    print(sHello)
    
-.. image:: _static/python_tutorial_images/Wasdi_hello.png
+.. image:: _static/python_tutorial_images/wasdi_hello.png
 
 Basically, the method wasdi.hello wraps a call to WASDI hello world API and returns the response, which we print on the next line, getting the following result:
 
 .. code-block:: JSON
  
  {"boolValue":null,"doubleValue":null,"intValue":null,"stringValue":"Hello Wasdi!!"}
+ 
 So that's our first WASDI processor: we demonstrated we can authenticate and call an API using code.
 
 Introducing parameters
 ----------------------
 Now we'll see how WASDI lets you handle the parameters for your processor. Let's create a new file called parameters.json (Right click on the project, New -> File, name it parameters.json)
 
-.. image:: _static/python_tutorial_images/CreateParameters_json.png
+.. image:: _static/python_tutorial_images/createParameters_json.png
+
 That’s another JSON file where the developer can set and/or simulate inputs for his processor. The idea is that WASDI processors can manipulate satellite images fed in input to create added-value products to be output. Parameters are those variables needed by the developer to retrieve input data and/or generate output data.
 
 In the tutorial we are going to see some typical examples: the area of interest, the type of satellite data, a date or interval of dates. These parameters are defined in the file params.json During the development and the debug of the processor, the developer must write her/his input in this file. It’s like a dictionary: this way, the programmer decides what are the parameters and their syntax, and by assigning them a value she/he can test them.
@@ -224,6 +233,7 @@ We also need to edit the config.json file to specify that we want to use paramet
 .. code-block:: python
 
   "PARAMETERSFILEPATH": "./parameters.json"
+  
 (please check that the JSON is valid, check especially your commas).
 
 Now edit the run method and change it as follows:
@@ -233,19 +243,23 @@ Now edit the run method and change it as follows:
  def run():
    sName = wasdi.getParameter('NAME')
    wasdi.wasdiLog(f'Welcome to the {sName}')
+   
 During the initialization, parameters are read from the specified file.
 
 wasdi.getParameter is the method for reading a single parameter, and a default value can be specified.
 
-.. image:: _static/python_tutorial_images/Wasdi_getParameter.png
+.. image:: _static/python_tutorial_images/wasdi_getParameter.png
+
 wasdi.wasdiLog is the utility for logging a line. It's a print, locally, but when executed on the cloud, it prints a long line on the user interface.
 
-.. image:: _static/python_tutorial_images/Wasdi_wasdiLog.png
+.. image:: _static/python_tutorial_images/wasdi_wasdiLog.png
+
 Let's debug it and we're going to see, after the initialization output, the following line:
 
 .. code-block:: python
 
   Welcome to the advanced python tutorial
+  
 Parameters can be of any type supported by the JSON format. When the processor will be deployed, the final user, or third party systems will be able to run it passing these parameters.
 
 A more meaningful example
@@ -352,7 +366,8 @@ The code reads, validates and manipulates the parameters.
 
 updateStatus is another primitive: it allows to update the process status and the progress (percent) of its execution.
 
-.. image:: _static/python_tutorial_images/Wasdi_updateStatus.png
+.. image:: _static/python_tutorial_images/wasdi_updateStatus.png
+
 Each WASDI process has a status among the following:
 
 * CREATED: a newly created process, waiting to be executed
@@ -368,7 +383,6 @@ Let's run it and, if everything is properly set, we will see the usual output, b
 .. code-block:: python
 
    [INFO] waspy.printStatus: parameters file path: .\parameters.json
-...
 
 .. code-block:: python
 
@@ -395,7 +409,8 @@ Add the following lines to the run method to search for EO images
 
 The method searcheEOimages allows filtering for area of interest (bounding box), mission, product type, orbit number, sensor operational mode and cloud coverage (when applicable to the data type). A more advanced usage allows to specify the provider to use, but that’s beyond the scope of this tutorial.
 
-.. image:: _static/python_tutorial_images/Wasdi_searchEOImages.png
+.. image:: _static/python_tutorial_images/wasdi_searchEOImages.png
+
 The method returns a list of objects, one per image. Each of these object is in turn a dictionary, describing the image: it contains every propriety returned by the search, such as, for example:
 
 * footprint
@@ -407,7 +422,7 @@ The method returns a list of objects, one per image. Each of these object is in 
 
 There are many more, and we can see them debugging the code. Please note that the number and type of these parameters depends on the data provider.
 
-.. image:: _static/python_tutorial_images/Wasdi_searchEOImages_results.png
+.. image:: _static/python_tutorial_images/wasdi_searchEOImages_results.png
 
 Step 3: import EO images in the workspace
 -----------------------------------------
@@ -438,7 +453,8 @@ Here we check, for each image, if it is not yet in the workspace. It's not stric
 
 The method wasdi.getProductsByActiveWorkspace returns a string array with the names of files in the workspace.
 
-.. image:: _static/python_tutorial_images/Wasdi_getProductsByActiveWorkspace.png
+.. image:: _static/python_tutorial_images/wasdi_getProductsByActiveWorkspace.png
+
 To compare the search results with the files in the workspace we need to obtain the file name. This can depend on the provider and on the image type but, for instance, with every Sentinel image it's easily reproduced with:
 
 .. code-block:: python
@@ -447,13 +463,15 @@ To compare the search results with the files in the workspace we need to obtain 
 
 Next, wasdi.importProductList allows to import a batch of images from the specified provider.
 
-.. image:: _static/python_tutorial_images/Wasdi_importProductList.png
+.. image:: _static/python_tutorial_images/wasdi_importProductList.png
+
 WASDI will take control of the process and handle the task by queuing the requests in the background. The entire operation runs in the cloud. It will take a while, and during that time you will not be able to control the debugger. However, if you get back to your browser (did you remember to leave it open on the workspace editor?) you will be able to check the status of the operation.
 
-.. image:: _static/python_tutorial_images/Downloading0.png
+.. image:: _static/python_tutorial_images/downloading0.png
+
 If you clic on the list icon in the bottom right corner of the screen, you can also view details for each operation in progress:
 
-.. image:: _static/python_tutorial_images/Downloading1.png
+.. image:: _static/python_tutorial_images/downloading1.png
 
 Step 4: create an 8-bit RGB GeoTIFF out of a Sentinel-2 image
 -------------------------------------------------------------
@@ -516,12 +534,14 @@ You noticed the call to wasdi.getPath: those are very important lines, since it'
 
 Note: in general, downloading file is not what we want and, once the processor will be deployed on the cloud, it is not going to happen any more: we will thus be able to process also large batches of EO data. However, as long as we are developing, we need to download some images, just to check that everything works as we expect it to work. The WASDI python library is smart enough to understande whether the code is running on our PC or in the cloud, and change behavior transparently and automatically.
 
-.. image:: _static/python_tutorial_images/Wasdi.getPath.png
+.. image:: _static/python_tutorial_images/wasdi.getPath.png
+
 The call to addFileToWasdi is worth a mention too. The method adds the file entry to the WASDI system so that it can be accessed and further used by WASDI. Again, this call has a double way of working: on the cloud, it simply adds the product to the WASDI data collection; when executed locally, the library realizes automatically that the file is missing on the platform and uploads.
 
 Note: we do not like uploads either. However we decided to implement this functionality because being able to test our processor from end to end to is fundamental. So, uploads will take place only during development, whereas they will not be necessary when the processor will run on the cloud.
 
-.. image:: _static/python_tutorial_images/Wasdi_addFileToWasdi.png
+.. image:: _static/python_tutorial_images/wasdi_addFileToWasdi.png
+
 Next, we need to create the following two methods that we wish to call:
 
 * extractBands
@@ -620,12 +640,14 @@ We're almost done! Add the remaining part to myProcessor.py:
    
 Here we set a payload for the processor. The payload consists of the output parameters, i.e., a dictionary that can be retrieved later in form of a JSON object.
 
-.. image:: _static/python_tutorial_images/Wasdi_setPayload.png
+.. image:: _static/python_tutorial_images/wasdi_setPayload.png
+
 To retrieve that payload you can use wasdi.getProcessorPayloadAsJson and pass the processID as argument. You can obtain the process ID from the UI or programmatically: it's given in output when launching another processor. Finally, we set the status to DONE before closing the processing.
 
 Once the processor is done, we can go to the web UI and open the final result:
 
-.. image:: _static/python_tutorial_images/ShowBands.png
+.. image:: _static/python_tutorial_images/showBands.png
+
 To wrap up, you can download the complete code from here: 
 `myProcessor.py <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/myProcessor.py>`_
 
@@ -645,7 +667,7 @@ Parameters are in this form:
 
 .. code-block:: JSON
 
-   ```json
+   json
    {
    "BBOX": "45.9,8.5,45.7,8.7",
    "MAXCLOUD": "50",
@@ -653,7 +675,7 @@ Parameters are in this form:
    "SEARCHDAYS": "20",
    "PROVIDER": "ONDA"
    }
-   ```
+   
 
 where:
 
@@ -674,24 +696,30 @@ Now go to the folder containing your processor, create a zip file containing onl
 
 * `myProcessor.py <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/myProcessor.py>`_
 * `readme.md <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/readme.md>`_
+
 Pay attention: parameters.json is not necessary, and it is definitely safer not to add config.json
 
 Let us stress the latter once more: do not include config.json in the zip!
 
-.. image:: _static/python_tutorial_images/CreateZip0.png
+.. image:: _static/python_tutorial_images/createZip0.png
+
 You may call the zip file advancedPythonTutorial.zip if you need a suggestion, but the name really makes no difference.
 
 Note: in a more realistic situation, your processor would probably consist of several files, directory and additional ancillary data (e.g., a DTM); in such a case, be sure to:
 
 * make the run method in myProcessor.py the entry point
 * include every relevant file in the zip archive
-.. image:: _static/python_tutorial_images/CreateZip1.png
+
+.. image:: _static/python_tutorial_images/createZip1.png
+
 Now go to the WASDI web UI, make sure you are in editing mode (i.e., you have a workspace open). Clic the Processor menu, clic New WASDI app.
 
-.. image:: _static/python_tutorial_images/Deploy0.png
+.. image:: _static/python_tutorial_images/deploy0.png
+
 A dialog opens:
 
-.. image:: _static/python_tutorial_images/Deploy1.png
+.. image:: _static/python_tutorial_images/deploy1.png
+
 In the dialog:
 
 * give your processor a name (e.g., advancedpythontutorial). It must be one small case string
@@ -701,25 +729,28 @@ In the dialog:
 * paste the content of your parameters.json into the JSON sample
 * make sure you uncheck the Make Application Public box (yes, it's definitely a nice processor, but we are going to have plenty of copies of it... ;-) )
 
-.. image:: _static/python_tutorial_images/Deploy3.png
-* drag and drop your newly created zip file into the area for download
+.. image:: _static/python_tutorial_images/deploy3.png
 
-.. image:: _static/python_tutorial_images/Deploy4.png
+drag and drop your newly created zip file into the area for download
+
+.. image:: _static/python_tutorial_images/deploy4.png
+
 Are you done? Click Apply!
 
 The processor is uploaded to WASDI and automatically deployed. Give it a moment and then click on WASDI Apps. Start writing the name of the processor to search for it.
 
-.. image:: _static/python_tutorial_images/SearchForYourProcessor0.png
+.. image:: _static/python_tutorial_images/searchForYourProcessor0.png
+
 Select it, and your JSON demo will be displayed. From here you can run it!
 
-.. image:: _static/python_tutorial_images/SearchForYourProcessor1.png
+.. image:: _static/python_tutorial_images/searchForYourProcessor1.png
 
 Turn the processor into an app on the marketplace
 =================================================
 Well, well, you did great! Now it's time to let others use your processor (in a not too distant future, you will even be able to monetize your processor by selling its usage): enter the WASDI app store!
 
 Go back to the apps, search for advancedpythontutorial, select it, and clic on the pencil icon to edit its properties.
-.. image:: _static/python_tutorial_images/EditYourApp.png
+.. image:: _static/python_tutorial_images/editYourApp.png
 
 Edit your app
 You will see that the dialog has some more other than the one we took care of. Now, we are going to see all of them in details:
@@ -734,7 +765,7 @@ Processor tab
 -------------
 We already discussed its usage, but there are still some tweaks we can do here. If you ever needed to edito,one or more of the files involved, simply make a zip containing just the files you need to modify, drag and drop it as usual, and click apply. Of course, you can always change any other propriety you wish, from here. Moreover, there are three cases in which you wish to click the Force refresh button:
 
-.. image:: _static/python_tutorial_images/ForceRefresh.png
+.. image:: _static/python_tutorial_images/forceRefresh.png
 
 * you added new pip packages. If you wish to use other packages, you need to write them down, one per line, in a text file called pip.txt. Add the file to the zip and deploy it
 * you need additional system packages installed. If you need to install additional packages using apt (your code runs on a Ubuntu distro), add a text file called packages.txt and list the packages you need, one per line. As in the previous case: add the file to the zip and deploy it
@@ -743,22 +774,26 @@ We already discussed its usage, but there are still some tweaks we can do here. 
 Store
 -----
 
-.. image:: _static/python_tutorial_images/AppStore.png
+.. image:: _static/python_tutorial_images/appStore.png
+
 Here it's where you can choose to show your application on the marketplace. You can give it a more friendly name, add a link and an email address for the users to reach out to support, add prices for the on demand and subscription-based usage modes, write a longer and nicer description, flag some categories, and, above all, flag the box to show your application on the app store!
 
 Media
 -----
-.. image:: _static/python_tutorial_images/Media.png
+.. image:: _static/python_tutorial_images/media.png
+
 Here you can add a logo and an image for your application
 
 Share
 -----
-.. image:: _static/python_tutorial_images/ShareApp.png
+.. image:: _static/python_tutorial_images/shareApp.png
+
 You can add a user to your application. Think of a colleague: you both will be able to contribute to the same processor.
 
 UI
 --
 .. image:: _static/python_tutorial_images/UI0.png
+
 This is where magic happens again: the WASDI interface generator! Using a JSON you can describe a web user interface, which will generated automatically for you. You can fiddle around and you will learn how to use, but let's make the UI for our processor together.
 
 * Click to put the cursors inside the curly brackets, before "tabs", then click Render As Strings
@@ -827,21 +862,25 @@ The app store
 =============
 Now go to the app store, and try to use your app from there. To find it, you can filter using your user, or search using the name.
 
-.. image:: _static/python_tutorial_images/AppStoreMarketplace.png
+.. image:: _static/python_tutorial_images/appStoreMarketplace.png
+
 Once you opened the app presentation page,
 
-.. image:: _static/python_tutorial_images/AppInTheAppStore0.png
+.. image:: _static/python_tutorial_images/appInTheAppStore0.png
 
 The app in the store
 open the application to test it for real.
 
-.. image:: _static/python_tutorial_images/AppInTheAppStore1.png
+.. image:: _static/python_tutorial_images/appInTheAppStore1.png
+
 There you can see the interface you just described. Use it, and to see if it works as expected
 
-.. image:: _static/python_tutorial_images/AppUI.png
+.. image:: _static/python_tutorial_images/appUI.png
+
 before running the processor, you can also check the JSON that will be generated automatically with the parameters your processor need:
 
-.. image:: _static/python_tutorial_images/InputJson.png
+.. image:: _static/python_tutorial_images/inputJson.png
+
 Feel free to play with your processor and tweak it.
 
 Delete your app
@@ -853,12 +892,12 @@ Are you done? Here you are two sad facts:
 
 We cannot change the second, but we can solve the first by deleting the processor: got to the editor (i.e., open a workspace), search for your app in the WASDI apps menu, clic on the x symbol to delete the app
 
-.. image:: _static/python_tutorial_images/DeleteProcessor.png
+.. image:: _static/python_tutorial_images/deleteProcessor.png
 
 That's how you delete a processor
 Clic OK to confirm that you want to delete it
 
-.. image:: _static/python_tutorial_images/ConfirmProcessorDeletion.png
+.. image:: _static/python_tutorial_images/confirmProcessorDeletion.png
 
 
 Confirm processor deletion
@@ -866,4 +905,3 @@ That's it, now you know how to manage the entire lifecycle of a WASDI app!
 
 Have fun, and `let us know your thoughts <http://fadeout.it/#contact>`_
 
-Retrieved from "http://www.wasdi.net/index.php?title=WASDI_python_tutorial&oldid=838"
