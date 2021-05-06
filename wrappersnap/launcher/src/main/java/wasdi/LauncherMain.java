@@ -504,6 +504,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
 						m_sTomcatUser);
+				oEngine.setParameter(oParameter);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.deploy(oParameter);
 			}
@@ -516,6 +517,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
 						m_sTomcatUser);
+				oEngine.setParameter(oParameter);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.run(oParameter);
 			}
@@ -527,6 +529,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
 						m_sTomcatUser);
+				oEngine.setParameter(oParameter);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.delete(oParameter);
 			}
@@ -538,6 +541,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
 						m_sTomcatUser);
+				oEngine.setParameter(oParameter);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.redeploy(oParameter);
 			}			
@@ -549,6 +553,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
 						ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
 						m_sTomcatUser);
+				oEngine.setParameter(oParameter);
 				oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 				oEngine.libraryUpdate(oParameter);
 			}
