@@ -1,27 +1,30 @@
 
-
 WASDI : Web Advanced Space Developer Interface
 ==================================================
 
+WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers). 
 
+WASDI allows researchers to gather satellite data, in particular the Sentinel ones, display them on-line, run algorithms, displaying and evaluating the results, and allows to share these projects among different users.
 
-Intro
+The results of the calculations will then be available for download, allowing local further processing, or published directly through the Web.
+
+Web Users
 -----------------
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-
-
-
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Web Users:
+   :maxdepth: 2
+   :caption: WebUsers:
 
    WebUser.rst
    AdvancedUser.rst
    Developer.rst
-   PythonTutorial.rst
    WasdiTutorial.rst
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Advanced:
+   
+   PythonTutorial.rst
    
 
 
