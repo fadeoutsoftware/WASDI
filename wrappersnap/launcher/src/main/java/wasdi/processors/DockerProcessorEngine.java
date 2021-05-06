@@ -123,6 +123,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				}
 				return false;
 			}
+			
+			onAfterUnzipProcessor(sProcessorFolder);
 		    
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: copy container image template");
@@ -137,7 +139,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 			// Generate the image
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: building image");
-			handleUnzippedProcessor(sProcessorFolder);
+			onAfterCopyTemplate(sProcessorFolder);
 			
 			processWorkspaceLog("Start building Image");
 			
@@ -219,12 +221,27 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		return true;
 	}
 	
-	protected abstract void handleRunCommand(String sCommand, ArrayList<String> asArgs);
-
-	protected abstract void handleBuildCommand(String sCommand, ArrayList<String> asArgs);
-
-	protected abstract void handleUnzippedProcessor(String sProcessorFolder);
 	
+	/**
+	 * Called after the unzip of the processor
+	 * @param sProcessorFolder
+	 */
+	protected void onAfterUnzipProcessor(String sProcessorFolder) {
+		
+	}
+	
+	/**
+	 * Called after the template is copied in the processor folder
+	 * @param sProcessorFolder
+	 */
+	protected void onAfterCopyTemplate(String sProcessorFolder) {
+		
+	}
+	
+	/**
+	 * Called after the deploy is done
+	 * @param sProcessorFolder
+	 */
 	protected void onAfterDeploy(String sProcessorFolder) {
 		
 	}
@@ -837,9 +854,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
 			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-			
-			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
-			
+						
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
 			
 			// Call localhost:port

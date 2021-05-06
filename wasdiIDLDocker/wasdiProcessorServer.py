@@ -245,7 +245,7 @@ def run(processId):
 			oParamsFile.write(sKey+"=" + str(parameters[sKey])+"\r\n")
 		oParamsFile.close()
 		
-		oProcess = subprocess.Popen(["runProcessor.sh"])
+		oProcess = subprocess.Popen([sLocalPath+"runProcessor.sh"])
 		
 		wasdi.wasdiLog("wasdiProcessorServer Process Started with local pid "  + str(oProcess.pid))
 		#Update the server with the subprocess pid

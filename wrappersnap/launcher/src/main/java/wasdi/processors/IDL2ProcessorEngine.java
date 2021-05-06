@@ -3,7 +3,8 @@ package wasdi.processors;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.ArrayList;
+
+import com.google.common.io.Files;
 
 import wasdi.LauncherMain;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -18,32 +19,34 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 		m_sDockerTemplatePath += "idl";		
 	}
 
+	/**
+	 * After copy template, overwrite call_idl, wasdi_wrapper e run processor
+	 */
 	@Override
-	protected void handleRunCommand(String sCommand, ArrayList<String> asArgs) {
-
-	}
-
-	@Override
-	protected void handleBuildCommand(String sCommand, ArrayList<String> asArgs) {
-
-	}
-
-	@Override
-	protected void handleUnzippedProcessor(String sProcessorFolder) {
-
-	}
-
-	@Override
-	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
+	protected void onAfterCopyTemplate(String sProcessorFolder) {
 		
-		String sProcessorName = oParameter.getName();
+		// Docker local processor folder
+		String sLocalProcessorFolder = "/home/wasdi/";
 		
-		// Set the processor path
-		String sDownloadRootPath = m_sWorkingRootPath;
-		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
+		String sProcessorName = m_oParameter.getName();
 		
-		String sProcessorFolder = sDownloadRootPath+ "processors" + File.separator + sProcessorName + File.separator;
-		String sLocalProcessorFolder = "/home/wasdi/"; 
+		// Node processor folder
+		File oProcessorFolder = new File(sProcessorFolder);
+		
+		// Do we have the mpfit lib to include?
+		boolean bAddLibraryFit = false;
+		
+		if (oProcessorFolder.exists()) {
+			File [] aoFiles = oProcessorFolder.listFiles();
+			
+			for (File oFile : aoFiles) {
+				if (!oFile.isDirectory()) continue;
+				if (oFile.getName().equals("mpfit")) {
+					bAddLibraryFit = true;
+					break;
+				}
+			}
+		}
 		
 		try {
 			// Prepare file names
@@ -58,12 +61,23 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 				if(null!= oCallIdlWriter) {
 					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.DeployProcessor: Creating call_idl.pro file");
 					
+					if (bAddLibraryFit) {
+						oCallIdlWriter.write("!PATH = EXPAND_PATH('<IDL_DEFAULT>:+" + sLocalProcessorFolder + "mpfit')");
+						oCallIdlWriter.newLine();						
+					}
+					
 					oCallIdlWriter.write(".r " + sLocalProcessorFolder + "idlwasdilib.pro");
 					oCallIdlWriter.newLine();
 					oCallIdlWriter.write("STARTWASDI, '"+sLocalProcessorFolder+"config.properties'");
 					oCallIdlWriter.newLine();
 					oCallIdlWriter.write(".r "+sLocalProcessorFolder + sProcessorName + ".pro");
 					oCallIdlWriter.newLine();
+					
+					if (bAddLibraryFit) {
+						oCallIdlWriter.write(".compile mpcurvefit");
+						oCallIdlWriter.newLine();						
+					}
+					
 					oCallIdlWriter.write(".r "+sLocalProcessorFolder + "wasdi_wrapper.pro");
 					oCallIdlWriter.newLine();
 					oCallIdlWriter.write("CALLWASDI");
@@ -87,6 +101,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					oWasdiWrapperWriter.newLine();				
 					oWasdiWrapperWriter.write("\tIF (Error_status NE 0L) THEN BEGIN");
 					oWasdiWrapperWriter.newLine();
+					oWasdiWrapperWriter.write("\t\tstatus=WASDIUPDATESTATUS('ERROR', -1)");
+					oWasdiWrapperWriter.newLine();									
 					oWasdiWrapperWriter.write("\t\tWASDILOG, 'Error message: ' + !ERROR_STATE.MSG");
 					oWasdiWrapperWriter.newLine();				
 					oWasdiWrapperWriter.write("\t\tEXIT");
@@ -94,6 +110,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					oWasdiWrapperWriter.write("\tENDIF");
 					oWasdiWrapperWriter.newLine();				
 					oWasdiWrapperWriter.write("\t"+sProcessorName);
+					oWasdiWrapperWriter.newLine();				
+					oWasdiWrapperWriter.write("\tstatus=WASDIUPDATESTATUS('DONE', -1)");
 					oWasdiWrapperWriter.newLine();				
 					oWasdiWrapperWriter.write("END");
 					oWasdiWrapperWriter.newLine();				
@@ -132,10 +150,6 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 		} catch (Exception e) {
 			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.deploy: Exception Creating Files :"+e.toString());
 		}
-		
-		LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.deploy: call super Docker Proc Engine deploy method");
-		
-		return super.deploy(oParameter, bFirstDeploy);
 	}
 	
 	@Override
@@ -149,8 +163,45 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			oFile.delete();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
+			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: "+e.toString());
 		}
 	}
 
+	
+	@Override
+	public boolean libraryUpdate(ProcessorParameter oParameter) {
+		
+		try {
+			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: move lib in the processor folder");
+			
+			// Get the lib path
+			String sLibFilePath = m_sDockerTemplatePath;
+			
+			if (!sLibFilePath.endsWith(File.separator)) {
+				sLibFilePath += File.separator;
+			}
+			
+			// Get the processor Path
+			String sDestinationFilePath = m_sWorkingRootPath;
+			if (!sDestinationFilePath.endsWith(File.separator)) {
+				sDestinationFilePath+=File.separator;
+			}
+			
+			sDestinationFilePath = sDestinationFilePath+ "processors" + File.separator + m_oParameter.getName() + File.separator;
+			
+			File oLibFile = new File(sLibFilePath+"idlwasdilib.pro");
+			File oDestinationFile = new File(sDestinationFilePath+"idlwasdilib.pro");
+			
+			// Copy the lib
+			Files.copy(oLibFile, oDestinationFile);
+			
+			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: call super implementation to update the docker");
+			
+			return super.libraryUpdate(oParameter);
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
+			return false;
+		}
+	}
 }
