@@ -8,24 +8,44 @@ WASDI allows researchers to gather satellite data, in particular the Sentinel on
 
 The results of the calculations will then be available for download, allowing local further processing, or published directly through the Web.
 
-Web Users
------------------
+Getting Started with WASDI
+---------------------------
+WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources !
+
+This :doc:`basic tutorial </WebUser>`  will help to acquire the main concepts and use WASDI for your EO research.
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: WebUsers:
+   :hidden:
+   :caption: Getting started
 
-   WebUser.rst
-   AdvancedUser.rst
-   Developer.rst
    WasdiTutorial.rst
 
+Programming tutorials
+---------------------------
+Unleash the real power of WASDI, uploading your application and run it on EO images on the fly!
+Wasdi supports several programming languages:
+
+* **Python 2.7**
+* **Python 3.7**
+* **IDL 3.7.2**
+* **Octave 6x**
+
+
+A good starting point, for the development of WASDI applications is the :doc:`python tutorial </PythonTutorial>`
+
 .. toctree::
    :maxdepth: 2
-   :caption: Advanced:
-   
+   :hidden:
+   :caption: Programming
    PythonTutorial.rst
-   
+
+
+
+Reference center
+---------------------------
+WASDI allows users and developer to interact though **libraries** and **APIs**
 
 
 Search
