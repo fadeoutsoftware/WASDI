@@ -73,7 +73,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			processWorkspaceLog("Start Deploy of " + sProcessorName + " Type " + oParameter.getProcessorType());
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			if (bFirstDeploy) {
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
@@ -323,7 +323,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Get Repo and Process Workspace
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			
 			// Check workspace folder
@@ -631,7 +631,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -748,7 +748,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 						
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -834,7 +834,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 

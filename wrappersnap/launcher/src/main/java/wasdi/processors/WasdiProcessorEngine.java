@@ -14,6 +14,7 @@ import org.apache.commons.net.io.Util;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -24,18 +25,10 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
-	protected String m_sTomcatUser = "tomcat8";
 	ProcessorParameter m_oParameter;
+	protected ProcessWorkspace m_oProcessWorkspace= null;
 	
-	/**
-	 * Static Engine factory
-	 * @param sType Type of the Engine
-	 * @param sWorkingRootPath Wasdi working dir
-	 * @param sDockerTemplatePath Docker templates dir
-	 * @param sTomcatUser Tomcat User
-	 * @return
-	 */
-	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
+	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
 			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
@@ -317,6 +310,22 @@ public abstract class WasdiProcessorEngine {
 	}
 	
 	/**
+	 * Get the reference to the process workspace
+	 * @return
+	 */
+	public ProcessWorkspace getProcessWorkspace() {
+		return m_oProcessWorkspace;
+	}
+
+	/**
+	 * Set the reference to the process workspace
+	 * @param oProcessWorkspace
+	 */
+	public void setProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+		this.m_oProcessWorkspace = oProcessWorkspace;
+	}
+
+	/**
 	 * Get the associated ProcessorParameter
 	 * @return
 	 */
@@ -331,6 +340,5 @@ public abstract class WasdiProcessorEngine {
 	public void setParameter(ProcessorParameter oParameter) {
 		this.m_oParameter = oParameter;
 	}
-
 	
 }
