@@ -102,9 +102,11 @@ import wasdi.shared.viewmodels.ColorManipulationViewModel;
 import wasdi.shared.viewmodels.MaskViewModel;
 import wasdi.shared.viewmodels.MathMaskViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.ProcessorSharingViewModel;
 import wasdi.shared.viewmodels.ProductMaskViewModel;
 import wasdi.shared.viewmodels.RangeMaskViewModel;
 import wasdi.shared.viewmodels.SnapWorkflowViewModel;
+import wasdi.shared.viewmodels.WorkflowSharingViewModel;
 import wasdi.shared.viewmodels.WpsViewModel;
 
 @Path("/processing")
@@ -523,6 +525,56 @@ public class ProcessingResources {
 
 		return oResult;
 	}
+	
+	@GET
+	@Path("share/byworkflow")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public List<WorkflowSharingViewModel> getEnableUsersSharedWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
+		ArrayList<WorkflowSharingViewModel> oResult = new ArrayList<WorkflowSharingViewModel>();
+	
+		Utils.debugLog("ProcessingResource.getEnableUsersSharedWorkflow(  Workflow : " + sWorkflowId +" )");
+
+		// Validate Session
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+	
+		
+
+		if (oOwnerUser == null) {
+			Utils.debugLog("ProcessingResource.shareProcessor( Session: " + sSessionId + ", Workflow: " + sWorkflowId + "): invalid session");
+		
+			return oResult;
+		}
+
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		
+			return oResult;
+		}
+		
+		try {
+			
+			// Check if the processor exists and is of the user calling this API
+			SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
+			SnapWorkflow oValidateWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
+			
+			if (oValidateWorkflow == null) {
+				
+				return oResult;		
+			}
+			
+			if (!oValidateWorkflow.getUserId().equals(oOwnerUser.getUserId())) {
+				
+				return oResult;				
+			}
+		}catch (Exception oEx) {
+			Utils.debugLog("Processing.getEnableUsersSharedWorkflow: " + oEx);
+			return oResult;
+		}
+		
+		
+		return oResult;	
+		
+	}
+	
 		
 		
 	

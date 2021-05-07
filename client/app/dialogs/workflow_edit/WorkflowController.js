@@ -1,7 +1,7 @@
 
 var WorkflowController = (function() {
 
-    function WorkflowController($scope,oExtras,oConstantsService) {
+    function WorkflowController($scope,oExtras,oConstantsService,oSnapOperationService) {
 
         /**
          * Angular Scope
@@ -13,6 +13,7 @@ var WorkflowController = (function() {
         this.m_oScope.m_oController = this;
 
         this.m_oConstantService = oConstantsService;
+        this.m_oSnapOperationService = oSnapOperationService;
         /**
          * First tab visualized
          * @type {string}
@@ -38,7 +39,7 @@ var WorkflowController = (function() {
         this.m_aoEnabledUsers = [{userId:"me"} , {userId:"myself"} , {userId:"Id"}];
     }
     WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId){
-
+        this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId,oUserId);
     }
 
 
@@ -48,7 +49,8 @@ var WorkflowController = (function() {
     WorkflowController.$inject = [
         '$scope',
         'extras',
-        'ConstantsService'
+        'ConstantsService',
+        'SnapOperationService'
         ]
 
 
