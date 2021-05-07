@@ -2825,17 +2825,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
 				oProductViewModel = oReadProduct.getProductViewModel();
 
-				// P.Campanella 20200126: ma non sarebbe forse pi� corretto il contrario?!?
-				if (oProductViewModel.getMetadata() != null) {
-					if (bAsynchMetadata) {
-						// Asynch Metadata Save
-						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
-						oProductViewModel.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
-					} else {
-						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
-						oProductViewModel.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
-					}
-				}
+//				P.Campanella 20210506: try to trust in metadata on demand				
+//				// P.Campanella 20200126: ma non sarebbe forse pi� corretto il contrario?!?
+//				if (oProductViewModel.getMetadata() != null) {
+//					if (bAsynchMetadata) {
+//						// Asynch Metadata Save
+//						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
+//						oProductViewModel.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
+//					} else {
+//						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
+//						oProductViewModel.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
+//					}
+//				}
+				
 
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
 			}
