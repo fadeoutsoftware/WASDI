@@ -71,6 +71,20 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     {
         return this.m_oHttp.get(this.APIURL + '/processing/productcolormanipulation?file=' + sFile + "&band=" + sBand + "&workspaceId=" + sWorkspaceId + "&accurate=" + bAccurate);
     };
+    /************************************ SHARINGS **************************************************/
+    this.addWorkflowSharing = function(sWorkspaceId,sUserId){
+        // x-session ?_?
+
+    }
+
+    this.deleteWorkflowSharing = function(sWorkspaceId,sUserId){
+        // x-session ?_?
+
+    }
+
+
+
+
     /************************************ OTHERS **************************************************/
 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
@@ -84,7 +98,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.getWPSList = function () {
         return this.m_oHttp.get(this.APIURL + '/processing/WPSlist');
     };
-    
+
     this.geometricMosaic = function(sWorkspaceId,sDestinationProductName,oMosaic){
         return this.m_oHttp.post(this.APIURL + '/processing/geometric/mosaic?sWorkspaceId='+sWorkspaceId
                                              +"&sDestinationProductName=" + sDestinationProductName ,oMosaic);

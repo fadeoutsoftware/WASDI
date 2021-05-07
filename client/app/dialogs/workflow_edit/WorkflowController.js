@@ -32,7 +32,15 @@ var WorkflowController = (function() {
          * @type {string}
          */
         this.m_sUserEmail ="";
+        /**
+         * Field with list of active sharing
+         */
+        this.m_aoEnabledUsers = [{userId:"me"} , {userId:"myself"} , {userId:"Id"}];
     }
+    WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId){
+
+    }
+
 
     WorkflowController.prototype.iAmTheOwner = function (){
         return (this.m_oConstantService.getUser().userId === this.m_oWorkflow.userId) ;

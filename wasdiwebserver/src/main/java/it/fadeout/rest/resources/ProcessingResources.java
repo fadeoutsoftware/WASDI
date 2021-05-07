@@ -337,9 +337,10 @@ public class ProcessingResources {
 
 	/**
 	 * Delete a workflow from id
+	 * If invoked from an user that's not the owner the sharing is removed instead
 	 * 
-	 * @param sSessionId
-	 * @param sWorkflowId
+	 * @param sSessionId from the session id the user is extracted
+	 * @param sWorkflowId Unique identified of the workflow to delete
 	 * @return
 	 */
 	@GET
