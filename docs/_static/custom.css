@@ -40,4 +40,8 @@ body {
     background: #43516A;
 }
 
+dt {
+    display: inline-block !important;
+}
+
 
