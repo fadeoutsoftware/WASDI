@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -59,15 +61,22 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.bc.ceres.binding.PropertyContainer;
 
 import it.fadeout.Wasdi;
+import it.fadeout.mercurius.business.Message;
+import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.business.WpsProvider;
+import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkflowSharingRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
@@ -387,6 +396,136 @@ public class ProcessingResources {
 		}
 		return Response.ok().build();
 	}
+	
+	/**
+	 * Method to add a sharing of a selected Workflow
+	 * @param sSessionId current session Id
+	 * @param sWorkflowId The workflow to be shared 
+	 * @param sUserId The user that will receive the access to the Workflow through the sharing
+	 * @return Primitive result with boolean vale to true if the operation was done, false instead 
+	 */
+	@PUT
+	@Path("share/add")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult shareWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
+		
+		Utils.debugLog("ProcessingResource.shareProcessor(  Workflow : " + sWorkflowId + ", User: " + sUserId + " )");
+
+		// Validate Session
+		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+
+		if (oOwnerUser == null) {
+			Utils.debugLog("ProcessingResource.shareProcessor( Session: " + sSessionId + ", Workflow: " + sWorkflowId + ", User: " + sUserId + " ): invalid session");
+			oResult.setStringValue("Invalid session.");
+			return oResult;
+		}
+
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		try {
+			
+			// Check if the processor exists and is of the user calling this API
+			SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
+			SnapWorkflow oValidateWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
+			
+			if (oValidateWorkflow == null) {
+				oResult.setStringValue("Invalid processor");
+				return oResult;		
+			}
+			
+			if (!oValidateWorkflow.getUserId().equals(oOwnerUser.getUserId())) {
+				oResult.setStringValue("Unauthorized");
+				return oResult;				
+			}
+			
+			// Check the destination user
+			UserRepository oUserRepository = new UserRepository();
+			User oDestinationUser = oUserRepository.getUser(sUserId);
+			
+			if (oDestinationUser == null) {
+				oResult.setStringValue("Unauthorized");
+				return oResult;				
+			}
+			
+			// Check if has been already shared
+			WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+			
+			if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
+				oResult.setStringValue("Already shared");
+				return oResult;					
+			}
+			
+			// Create and insert the sharing
+			WorkflowSharing oWorkflowSharing= new WorkflowSharing();
+			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
+			oWorkflowSharing.setOwnerId(oOwnerUser.getUserId());
+			oWorkflowSharing.setUserId(sUserId);
+			oWorkflowSharing.setWorkflowId(sWorkflowId);
+			oWorkflowSharing.setShareDate((double) oTimestamp.getTime());
+			oWorkflowSharingRepository.insertWorkflowSharing(oWorkflowSharing);
+			
+			Utils.debugLog("ProcessingResource.shareWorkflow: Workflow" + sWorkflowId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			
+			try {
+				String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+				
+				if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+					Utils.debugLog("ProcessingResource.shareWorkflow: sMercuriusAPIAddress is null");
+				}
+				else {
+					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+					Message oMessage = new Message();
+					
+					String sTitle = "Workflow " + oValidateWorkflow.getName() + " Shared";
+					
+					oMessage.setTilte(sTitle);
+					
+					String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+					if (sSender==null) {
+						sSender = "wasdi@wasdi.net";
+					}
+					
+					oMessage.setSender(sSender);
+					
+					String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the Workflow: " + oValidateWorkflow.getName();
+									
+					oMessage.setMessage(sMessage);
+			
+					Integer iPositiveSucceded = 0;
+									
+					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
+					
+					Utils.debugLog("Processing.shareWorkflow: notification sent with result " + iPositiveSucceded);
+				}
+					
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("Processing.shareWorkflow: notification exception " + oEx.toString());
+			}				
+			
+		} catch (Exception oEx) {
+			Utils.debugLog("Processing.shareWorkflow: " + oEx);
+
+			oResult.setStringValue("Error in save proccess");
+			oResult.setBoolValue(false);
+
+			return oResult;
+		}	
+
+		oResult.setStringValue("Done");
+		oResult.setBoolValue(true);
+
+		return oResult;
+	}
+		
+		
+	
+	
 
 	/**
 	 * Executes a workflow from a file stream
