@@ -19,7 +19,7 @@ var WappsController = (function() {
         this.m_oProcessorService = oProcessorService;
         this.m_aoProcessorList = [];
         this.m_bIsJsonEditModeActive = false;
-        this.myJson = {};
+        this.m_sJson = {};
         this.m_sMyJsonString = "";
         this.m_oModalService = oModalService;
         this.m_oConstantsService = oConstantsService;
@@ -78,10 +78,19 @@ var WappsController = (function() {
     WappsController.prototype.selectProcessor = function(processor)
     {
         this._selectedProcessor = processor;
-        this.myJson = {};
+        this.m_sJson = {};
 
         if (!utilsIsStrNullOrEmpty(processor.paramsSample)) {
             this.m_sMyJsonString = decodeURIComponent(processor.paramsSample);
+
+            try {
+                var oParsed = JSON.parse(this.m_sMyJsonString);
+                sPrettyPrint = JSON.stringify(oParsed, null, 2);
+                this.m_sMyJsonString = sPrettyPrint;
+            }
+            catch (oError) {
+
+            }
         }
         else {
             this.m_sMyJsonString = "";
@@ -109,7 +118,7 @@ var WappsController = (function() {
 
         let sJSON = null;
         if(this.m_bIsJsonEditModeActive == true){
-            sJSON = this.myJson;
+            sJSON = this.m_sJson;
         }else{
             sJSON = this.m_sMyJsonString;
         }
@@ -271,7 +280,7 @@ var WappsController = (function() {
 
     WappsController.prototype.collapsePanels = function()
     {
-        this.myJson = {};
+        this.m_sJson = {};
         this.m_sMyJsonString = "";
         utilsCollapseBootstrapPanels();
     };

@@ -256,6 +256,15 @@ var ProcessorController = (function() {
             this.m_sProcessorId = this.m_oInputProcessor.processorId;
             this.m_iMinuteTimeout = this.m_oInputProcessor.minuteTimeout;
 
+            try {
+                var oParsed = JSON.parse(this.m_sJSONSample);
+                sPrettyPrint = JSON.stringify(oParsed, null, 2);
+                this.m_sJSONSample = sPrettyPrint;
+            }
+            catch (oError) {
+
+            }
+
             // Get the list of Enabled users for sharing
             this.getListOfEnableUsers(this.m_sProcessorId)
 

@@ -12,7 +12,7 @@
             <img src={{processor.imgLink}} alt="Image">
         </div>
         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" data-toggle="collapse" href="#RunProcessorPanel{{$index}}"
-             ng-click="m_oController.myJson={}; m_oController.collapsePanels()"
+             ng-click="m_oController.m_sJson={}; m_oController.collapsePanels()"
              aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}">
             <label>
                 {{processor.processorName}}
@@ -56,17 +56,17 @@
                         </label>
                         <!--Editor json-->
                         <div class="jsonView" ng-show="m_oController.m_bIsJsonEditModeActive">
-                            <json child="m_oController.myJson" default-collapsed="false" type="object"></json>
+                            <json child="m_oController.m_sJson" default-collapsed="false" type="object"></json>
                         </div>
                         <div class="jsonContainer" ng-show="m_oController.m_bIsJsonEditModeActive">
-                            {{m_oController.myJson}}
+                            {{m_oController.m_sJson}}
                         </div>
 
                         <textarea class="form-control" rows="5" id="" ng-model="m_oController.m_sMyJsonString"
                                   ng-hide="m_oController.m_bIsJsonEditModeActive"></textarea>
 
                         <button type="button"
-                                ng-click="m_oController.runProcessor(processor.processorName, m_oController.myJson)"
+                                ng-click="m_oController.runProcessor(processor.processorName, m_oController.m_sJson)"
                                 class="my-button" ng-show="m_oController.m_bIsJsonEditModeActive">
                             Run
                             <i class="fa fa-play" aria-hidden="true"></i>
