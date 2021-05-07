@@ -22,7 +22,8 @@ public class ConfigReader {
     	s_sConfigFilePath = sConfigPath;
     }
 
-    private static void loadPropValues() throws IOException {
+    @SuppressWarnings("unchecked")
+	private static void loadPropValues() throws IOException {
 
         InputStream oInputStream = null;
         

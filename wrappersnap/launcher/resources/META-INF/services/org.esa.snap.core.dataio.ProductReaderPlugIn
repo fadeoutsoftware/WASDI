@@ -175,7 +175,7 @@ org.esa.s2tbx.dataio.s2.ortho.plugins.Sentinel2L1CProduct_Multi_UTM60S_ReaderPlu
 org.esa.s2tbx.dataio.rapideye.RapidEyeL1ReaderPlugin
 org.esa.s2tbx.dataio.rapideye.RapidEyeL3ReaderPlugin
 
-org.esa.s2tbx.dataio.jp2.JP2ProductReaderPlugin
+#org.esa.s2tbx.dataio.jp2.JP2ProductReaderPlugin
 
 org.esa.s2tbx.dataio.gdal.reader.plugins.BTDriverProductReaderPlugIn
 org.esa.s2tbx.dataio.gdal.reader.plugins.GS7BGDriverProductReaderPlugIn

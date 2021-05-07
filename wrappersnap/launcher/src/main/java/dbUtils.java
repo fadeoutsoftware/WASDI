@@ -455,8 +455,6 @@ public class dbUtils {
 	        	
 	        	System.out.println("Found " + aoProcessors.size() + " Processors");
 	        	
-	        	Date oNow = new Date();
-	        	
 	        	for (Processor oProcessor : aoProcessors) {
 	        		
 	        		String sProcessorName = oProcessor.getName();
@@ -487,8 +485,6 @@ public class dbUtils {
 	        	List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
 
 	        	System.out.println("Found " + aoProcessors.size() + " Processors");
-
-	        	Date oNow = new Date();
 
 	        	for (Processor oProcessor : aoProcessors) {
 

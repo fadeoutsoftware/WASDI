@@ -21,6 +21,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 
+	@SuppressWarnings("unchecked")
 	public PROBAVProviderAdapter() {
 		super();
 

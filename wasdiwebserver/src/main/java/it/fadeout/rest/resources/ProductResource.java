@@ -39,7 +39,6 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -285,12 +284,7 @@ public class ProductResource {
 			Utils.debugLog("ProductResource.GetListByWorkspace: products for " + sWorkspaceId);
 
 			// Create repo
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-
-			// Get Product List
-			//List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 			
 			List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
 
@@ -302,7 +296,6 @@ public class ProductResource {
 			for (int iProducts = 0; iProducts < aoDownloadedFiles.size(); iProducts++) {
 
 				// Get the downloaded file
-				//DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
 				DownloadedFile oDownloaded = aoDownloadedFiles.get(iProducts);
 
 				// Add View model to return list

@@ -52,7 +52,7 @@ public class Proofs_BandImage {
 		img = manager.buildImageWithMasks(raster, d, vp, false);				
 		ImageIO.write(img, "jpg", new File(outPath));
 		
-		manager.quit();
+		BandImageManager.quit();
 	}
 	
 	@SuppressWarnings("unused")
@@ -82,7 +82,7 @@ public class Proofs_BandImage {
 		
 		System.out.println("createRGB: Saved in " + (System.currentTimeMillis() - lStartTime) + " ms");
 		
-		oManager.quit();
+		BandImageManager.quit();
 	}
 	
 }

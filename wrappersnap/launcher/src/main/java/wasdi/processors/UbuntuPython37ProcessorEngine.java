@@ -1,7 +1,5 @@
 package wasdi.processors;
 
-import java.util.ArrayList;
-
 public class UbuntuPython37ProcessorEngine extends DockerProcessorEngine {
 
 	public UbuntuPython37ProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
@@ -13,18 +11,4 @@ public class UbuntuPython37ProcessorEngine extends DockerProcessorEngine {
 		
 	}
 
-	@Override
-	protected void handleRunCommand(String sCommand, ArrayList<String> asArgs) {
-		
-	}
-
-	@Override
-	protected void handleBuildCommand(String sCommand, ArrayList<String> asArgs) {
-		
-	}
-
-	@Override
-	protected void handleUnzippedProcessor(String sProcessorFolder) {
-		
-	}
 }

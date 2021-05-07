@@ -746,28 +746,6 @@ public class BandImageManager {
 		
         return oRenderedImage;
 	}
-	
-	  private static class MyLayerContext implements LayerContext {
-
-	        private final Product product;
-	        private final Layer rootLayer;
-
-	        public MyLayerContext(Product product, Layer rootLayer) {
-	            this.product = product;
-	            this.rootLayer = rootLayer;
-	        }
-
-	        @Override
-	        public Object getCoordinateReferenceSystem() {
-	            return product.getSceneGeoCoding().getMapCRS();
-	        }
-
-	        @Override
-	        public Layer getRootLayer() {
-	            return rootLayer;
-	        }
-	    }
-	
 
     private static BufferedImageRendering createRendering(BufferedImage bufferedImage, MultiLevelModel multiLevelModel) {
     	

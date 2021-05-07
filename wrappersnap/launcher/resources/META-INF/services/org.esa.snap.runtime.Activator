@@ -1,4 +1,3 @@
-org.esa.s2tbx.dataio.gdal.activator.GDALPlugInActivator
+org.esa.lib.gdal.activator.GDALPlugInActivator
 org.esa.s2tbx.dataio.cache.S2CacheActivator
 org.esa.s2tbx.biophysical.BiophysicalActivator
-org.esa.s2tbx.dataio.openjpeg.OpenJPEGActivator

@@ -29,6 +29,7 @@ public class DiasResponseTranslatorEODC extends DiasResponseTranslator {
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasResponseTranslator#translateBatch(java.lang.String, boolean, java.lang.String)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sJson, boolean bFullViewModel, String sDownloadProtocol) {
 		

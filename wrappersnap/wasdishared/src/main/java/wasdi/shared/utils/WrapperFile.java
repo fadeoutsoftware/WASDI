@@ -11,6 +11,11 @@ import org.apache.commons.io.FilenameUtils;
 
 public class WrapperFile  extends File  {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3976820120016533898L;
+
 	public WrapperFile(String paramString) {
 		super(paramString);
 
