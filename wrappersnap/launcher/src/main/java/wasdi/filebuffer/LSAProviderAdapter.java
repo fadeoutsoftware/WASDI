@@ -50,7 +50,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			}
 			
 			try {
-				int iMsSleep = (int) ( (Math.random()*5000.0) + 5000.0 );
+				int iMsSleep = (int) ( (Math.random()*15000.0) + 10000.0 );
 				Thread.sleep(iMsSleep);
 			}
 			catch (Exception oEx) {
