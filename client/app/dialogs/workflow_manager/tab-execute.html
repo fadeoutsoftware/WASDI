@@ -40,7 +40,7 @@
                                         ng-click="m_oController.openEditWorkflowDialog(workflow)">
                                     <em class="fa fa-pencil"></em>
                                 </button>
-                                <button ng-show="m_oController.isTheOwnerOfWorkflow(workflow)"
+                                <button ng-show="m_oController.isTheOwnerOfWorkflow(workflow) || workflow.sharedWithMe"
                                         class="wapps-button"
                                         ng-click="m_oController.openDeleteWorkflowDialog(workflow)">
                                     <em class="fa fa-times"></em>

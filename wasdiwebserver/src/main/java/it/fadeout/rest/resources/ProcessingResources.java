@@ -352,11 +352,20 @@ public class ProcessingResources {
 
 			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 			SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
-
 			if (oWorkflow == null) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			if (oWorkflow.getUserId().equals(sUserId) == false) return Response.status(Status.UNAUTHORIZED).build();
-
-			// Get Download Path
+			// check if the current user is the owner of the workflow 
+			if (oWorkflow.getUserId().equals(sUserId) == false) {
+				WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+				// check if the current user has a sharing of the workflow
+				if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
+					oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
+					Utils.debugLog("ProcessingResource.deleteWorkflow: Deleted sharing between user "+ sUserId + " and workflow "+ oWorkflow.getName() );
+					return Response.ok().build();
+				}
+				// not the owner && no sharing with you. You have no power here !
+				return Response.status(Status.FORBIDDEN).build();
+			}
+			// Get Download Path on the current WASDI instance
 			String sBasePath = Wasdi.getDownloadPath(m_oServletConfig);
 			sBasePath += "workflows/";
 			String sWorkflowFilePath = sBasePath + oWorkflow.getWorkflowId() + ".xml";
@@ -371,7 +380,6 @@ public class ProcessingResources {
 			} else {
 				Utils.debugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
 			}
-
 			oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessingResources.deleteWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + " ): " + oE);
@@ -1096,7 +1104,7 @@ public class ProcessingResources {
 
 
 	/**
-	 * Get the paramter Object for a specific Launcher Operation
+	 * Get the parameter Object for a specific Launcher Operation
 	 * 
 	 * @param oOperation
 	 * @return
