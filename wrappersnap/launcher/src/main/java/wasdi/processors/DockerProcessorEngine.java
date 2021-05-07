@@ -310,6 +310,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	/**
 	 * Run a Docker Processor
 	 */
+	@SuppressWarnings("unchecked")
 	public boolean run(ProcessorParameter oParameter) {
 		
 		LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: start");

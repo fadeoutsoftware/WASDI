@@ -50,7 +50,6 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
-import org.quartz.xml.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -913,9 +912,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
 
 				sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
-				WasdiProductReader oReadProduct = new WasdiProductReader();
-				Product oProduct = oReadProduct.readSnapProduct(new File(sFileName), null);
-				s_oLogger.debug("Test reading product");
 			}
 
 			if (Utils.isNullOrEmpty(sFileName)) {
@@ -1008,11 +1004,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					
 					m_oProcessWorkspaceLogger.log("FTP server name not plausible " + oParam.getFtpServer());
 					
-					throw new ValidationException("FTP server name \"" + oParam.getFtpServer() + "\" not plausible");
+					throw new Exception("FTP server name \"" + oParam.getFtpServer() + "\" not plausible");
 				}
 				if(!Utils.isPortNumberPlausible(oParam.getPort())){
 					m_oProcessWorkspaceLogger.log("FTP server port not plausible " + oParam.getPort().toString());
-					throw new ValidationException("FTP server port \"" + oParam.getPort() + "\" not plausible");
+					throw new Exception("FTP server port \"" + oParam.getPort() + "\" not plausible");
 				}
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
 								
@@ -3201,7 +3197,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		try {
 			s_oLogger.info("readMetadata: start");
 			
-			String sProcessObjId = oReadMetadataParameter.getProcessObjId();
 			String sProductName = oReadMetadataParameter.getProductName();
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

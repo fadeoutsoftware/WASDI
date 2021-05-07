@@ -1397,8 +1397,7 @@ public class WasdiLib {
 	 */
 	public List<String> waitProcesses(List<String> asIds) {
 		updateStatus("WAITING");
-
-		String sResult ="";
+		
 		boolean bDone = false;
 		while(!bDone) {
 			bDone = true;	
@@ -3475,7 +3474,7 @@ public class WasdiLib {
 		//upload file if it is not on WASDI yet
 		try {
 			if(getUploadActive()) {
-				String sPath = getSavePath() + File.separator + sFileName;
+				//String sPath = getSavePath() + File.separator + sFileName;
 				if(!fileExistsOnWasdi(sFileName)) {
 					log("asynchCopyFileToSftp: file " + sFileName + " is not on WASDI yet, uploading...");
 					uploadFile(sFileName);

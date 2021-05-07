@@ -25,10 +25,11 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
+	protected String m_sTomcatUser;
 	ProcessorParameter m_oParameter;
 	protected ProcessWorkspace m_oProcessWorkspace= null;
 	
-	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
+	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
 			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;

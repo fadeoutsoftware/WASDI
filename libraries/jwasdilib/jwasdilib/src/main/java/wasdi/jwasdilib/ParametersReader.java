@@ -17,7 +17,8 @@ public class ParametersReader {
     	loadPropValues();
     }
 
-    private void loadPropValues() {
+    @SuppressWarnings("unchecked")
+	private void loadPropValues() {
 
         InputStream oInputStream = null;
         try {
