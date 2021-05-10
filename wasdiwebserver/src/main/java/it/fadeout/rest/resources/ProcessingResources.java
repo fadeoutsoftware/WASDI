@@ -371,7 +371,8 @@ public class ProcessingResources {
 				// check if the current user has a sharing of the workflow
 				if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
 					oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
-					Utils.debugLog("ProcessingResource.deleteWorkflow: Deleted sharing between user "+ sUserId + " and workflow "+ oWorkflow.getName() );
+					Utils.debugLog("ProcessingResource.deleteWorkflow: Deleted sharing between user "+ sUserId + " and workflow "+ oWorkflow.getName() 
+					+" Workflow files kept in place" );
 					return Response.ok().build();
 				}
 				// not the owner && no sharing with you. You have no power here !
@@ -526,26 +527,30 @@ public class ProcessingResources {
 		return oResult;
 	}
 	
+	
+	/**
+	 * Retrieves the active sharings given a workflow
+	 * @param sSessionId
+	 * @param sWorkflowId
+	 * @return
+	 */
 	@GET
 	@Path("share/byworkflow")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<WorkflowSharingViewModel> getEnableUsersSharedWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
 		ArrayList<WorkflowSharingViewModel> oResult = new ArrayList<WorkflowSharingViewModel>();
-	
 		Utils.debugLog("ProcessingResource.getEnableUsersSharedWorkflow(  Workflow : " + sWorkflowId +" )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oAskingUser = Wasdi.getUserFromSession(sSessionId);
 	
-		
-
-		if (oOwnerUser == null) {
+		if (oAskingUser == null) {
 			Utils.debugLog("ProcessingResource.shareProcessor( Session: " + sSessionId + ", Workflow: " + sWorkflowId + "): invalid session");
 		
 			return oResult;
 		}
 
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		if (Utils.isNullOrEmpty(oAskingUser.getUserId())) {
 		
 			return oResult;
 		}
@@ -557,21 +562,24 @@ public class ProcessingResources {
 			SnapWorkflow oValidateWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
 			
 			if (oValidateWorkflow == null) {
-				
+				// return
+				Utils.debugLog("Processing.getEnableUsersSharedWorkflow: Workflow not found");
+				// if something went wrong returns an empty set
 				return oResult;		
 			}
-			
-			if (!oValidateWorkflow.getUserId().equals(oOwnerUser.getUserId())) {
-				
+		
+				//Retrieve and returns the sharings 
+				WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+				oWorkflowSharingRepository.getWorkflowSharingByWorkflow(sWorkflowId).forEach(element -> {
+					oResult.add(new WorkflowSharingViewModel(element));
+				});
 				return oResult;				
-			}
+		
 		}catch (Exception oEx) {
 			Utils.debugLog("Processing.getEnableUsersSharedWorkflow: " + oEx);
 			return oResult;
 		}
 		
-		
-		return oResult;	
 		
 	}
 	

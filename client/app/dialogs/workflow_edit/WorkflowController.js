@@ -36,12 +36,45 @@ var WorkflowController = (function() {
         /**
          * Field with list of active sharing
          */
-        this.m_aoEnabledUsers = [{userId:"me"} , {userId:"myself"} , {userId:"Id"}];
+        this.m_aoEnabledUsers=[];
+        /**
+         * Init the list of users which this workflow is shared with
+         */
+        this.getListOfEnableUsers(this.m_oWorkflow.workflowId);
+
+
     }
     WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId){
         this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId,oUserId);
     }
 
+    WorkflowController.prototype.getListOfEnableUsers = function(sWorkflowId){
+
+        if(utilsIsStrNullOrEmpty(sWorkflowId) === true)
+        {
+            return false;
+        }
+        var oController = this;
+        this.m_oSnapOperationService.getUsersBySharedWorkflow(sWorkflowId)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false)
+                {
+                    oController.m_aoEnableUsers = data.data;
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW SHARINGS");
+                }
+
+            },function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW SHARINGS");
+            });
+        return true;
+    };
+
+    WorkflowController.prototype.getWorkflowSharings = function (sWorkflowId){
+        this.m_aoEnabledUsers = this.m_oSnapOperationService.getWorkflowSharing(sWorkflowId);
+    }
 
     WorkflowController.prototype.iAmTheOwner = function (){
         return (this.m_oConstantService.getUser().userId === this.m_oWorkflow.userId) ;

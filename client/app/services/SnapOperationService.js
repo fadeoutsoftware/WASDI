@@ -65,8 +65,8 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
     };
     /************************************ SHARINGS **************************************************/
 
-    this.getWorkflowSharing = function (sWorkspaceId, sUserId) {
-        return this.m_oHttp.get(this.APIURL + '/processing/share/byworkflow');
+    this.getUsersBySharedWorkflow = function (sWorkflowId) {
+        return this.m_oHttp.get(this.APIURL + '/processing/share/byworkflow?workflowId='+sWorkflowId);
     }
 
     this.addWorkflowSharing = function (sWorkflowId, sUserId) {
@@ -74,7 +74,7 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
     }
 
     this.deleteWorkflowSharing = function (sWorkflowId, sUserId) {
-
+        return this.m_oHttp.get(this.APIURL + '/processing/deletegraph=' + sWorkflowId + '&userId=' + sUserId);
 
     }
 
