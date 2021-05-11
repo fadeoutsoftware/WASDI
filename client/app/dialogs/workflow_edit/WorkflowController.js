@@ -1,7 +1,7 @@
 
-var WorkflowController = (function() {
+var WorkflowController = (function () {
 
-    function WorkflowController($scope,oExtras,oConstantsService,oSnapOperationService) {
+    function WorkflowController($scope, oExtras, oConstantsService, oSnapOperationService) {
 
         /**
          * Angular Scope
@@ -32,11 +32,17 @@ var WorkflowController = (function() {
          * Field to add sharing
          * @type {string}
          */
-        this.m_sUserEmail ="";
+        this.m_sUserEmail = "";
         /**
          * Field with list of active sharing
          */
-        this.m_aoEnabledUsers=[];
+        this.m_aoEnabledUsers = [];
+
+        // Close this Dialog handler
+        $scope.close = function () {
+            // close, but give 500ms for bootstrap to animate
+            oClose(null, 300);
+        };
         /**
          * Init the list of users which this workflow is shared with
          */
@@ -44,47 +50,44 @@ var WorkflowController = (function() {
 
 
     }
-    WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId){
-        this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId,oUserId);
+    WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId) {
+        this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId);
     }
 
-    WorkflowController.prototype.getListOfEnableUsers = function(sWorkflowId){
+    WorkflowController.prototype.getListOfEnableUsers = function (sWorkflowId) {
 
-        if(utilsIsStrNullOrEmpty(sWorkflowId) === true)
-        {
+        if (utilsIsStrNullOrEmpty(sWorkflowId) === true) {
             return false;
         }
         var oController = this;
         this.m_oSnapOperationService.getUsersBySharedWorkflow(sWorkflowId)
             .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false)
-                {
-                    oController.m_aoEnableUsers = data.data;
+                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                    oController.m_aoEnabledUsers = data.data;
                 }
-                else
-                {
+                else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW SHARINGS");
                 }
 
-            },function (error) {
+            }, function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW SHARINGS");
             });
         return true;
     };
 
-    WorkflowController.prototype.getWorkflowSharings = function (sWorkflowId){
+    WorkflowController.prototype.getWorkflowSharings = function (sWorkflowId) {
         this.m_aoEnabledUsers = this.m_oSnapOperationService.getWorkflowSharing(sWorkflowId);
     }
 
-    WorkflowController.prototype.iAmTheOwner = function (){
-        return (this.m_oConstantService.getUser().userId === this.m_oWorkflow.userId) ;
+    WorkflowController.prototype.iAmTheOwner = function () {
+        return (this.m_oConstantService.getUser().userId === this.m_oWorkflow.userId);
     }
     WorkflowController.$inject = [
         '$scope',
         'extras',
         'ConstantsService',
         'SnapOperationService'
-        ]
+    ]
 
 
     return WorkflowController;
