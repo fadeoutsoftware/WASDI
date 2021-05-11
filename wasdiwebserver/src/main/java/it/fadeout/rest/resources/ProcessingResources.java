@@ -102,7 +102,6 @@ import wasdi.shared.viewmodels.ColorManipulationViewModel;
 import wasdi.shared.viewmodels.MaskViewModel;
 import wasdi.shared.viewmodels.MathMaskViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessorSharingViewModel;
 import wasdi.shared.viewmodels.ProductMaskViewModel;
 import wasdi.shared.viewmodels.RangeMaskViewModel;
 import wasdi.shared.viewmodels.SnapWorkflowViewModel;
