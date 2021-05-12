@@ -74,7 +74,7 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
     }
 
     this.removeWorkflowSharing = function (sWorkflowId, sUserId) {
-        return this.m_oHttp.delete(this.APIURL + '/processing/share/delete=workflowId=' + sWorkflowId + '&userId=' + sUserId);
+        return this.m_oHttp.delete(this.APIURL + '/processing/share/delete?workflowId=' + sWorkflowId + '&userId=' + sUserId);
 
     }
 

@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.geotools.data.wms.xml.ogcElement;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
+import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.utils.Utils;
 
@@ -176,6 +178,32 @@ public class WorkflowSharingRepository extends  MongoRepository{
     }    
     
     /**
+     * Deletes all the instances of sharing of an user for a specific workflow
+     * @param sWorkflowId The string representing the workflow
+     * @param sUserId The user id to identify the user
+     * @return An integer, reporting the count of the deleted items 
+     */
+    public int deleteByWorkflowIdUserId(String sWorkflowId,String sUserId ) {
+    	if (Utils.isNullOrEmpty(sWorkflowId) || Utils.isNullOrEmpty(sUserId)) return 0;
+    	
+        try {
+
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.and(Filters.eq("userId", sUserId), Filters.eq("workflowId", sWorkflowId)));
+
+            if (oDeleteResult != null)
+            {
+                return  (int) oDeleteResult.getDeletedCount();
+            }
+
+        } 
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }    	
+    	return 0;
+    }
+    
+    
+    /**
      * Delete all the sharings of a specific Workflow
      * @param sWorkflowId
      * @return
@@ -260,20 +288,40 @@ public class WorkflowSharingRepository extends  MongoRepository{
      * @return
      */
     public boolean isSharedWithUser(String sUserId, String sWorkflowId) {
-    	try {
-    		Document oWSDocument = getCollection(m_sThisCollection).find(
-    				Filters.and(
-    						Filters.eq("userId", sUserId),
-    						Filters.eq("workflowId", sWorkflowId)
-    						)
-    		).first();
-    		if(null!=oWSDocument) {
-    			return true;
-    		}
-    		
-    	} catch (Exception oE) {
-			Utils.debugLog("WorkflowSharingRepository.isSharedWithUser( " + sUserId + ", " + sWorkflowId + "): error: " + oE);
-		}
-    	return false;
+    	return (getWorkflowSharingByUserIdWorkflowId(sUserId, sWorkflowId ) != null);
     }
+    
+    /**
+     * Returns the WorkflowSharing for the user and workflow
+     * @param sUserId 
+     * @param sWorkflowId 
+     * @return
+     */
+	public WorkflowSharing getWorkflowSharingByUserIdWorkflowId(String sUserId, String sWorkflowId) {
+		 	
+		try {
+		Document oWSDocument = getCollection(m_sThisCollection).find(
+				Filters.and(
+						Filters.eq("userId", sUserId),
+						Filters.eq("workflowId", sWorkflowId)
+						)
+		).first();
+		if(null!=oWSDocument) {
+			String sJSON = oWSDocument.toJson();
+			WorkflowSharing oWorkflowSharing;
+		    try {
+                oWorkflowSharing = s_oMapper.readValue(sJSON,WorkflowSharing.class);
+                return oWorkflowSharing;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+		   
+		}
+		
+	} catch (Exception oE) {
+		Utils.debugLog("WorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId( " + sUserId + ", " + sWorkflowId + "): error: " + oE);
+	}
+	return null;	
+	}
 }
+	

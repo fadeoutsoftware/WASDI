@@ -29,6 +29,7 @@ import javax.media.jai.OperationRegistry;
 import javax.media.jai.RegistryElementDescriptor;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -527,6 +528,70 @@ public class ProcessingResources {
 	}
 	
 	
+	@DELETE
+	@Path("share/delete")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult deleteUserSharingWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
+
+		Utils.debugLog("ProcessorsResource.deleteUserSharedWorkflow( ProcId: " + sWorkflowId + ", User:" + sUserId + " )");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		try {
+			// Validate Session
+			User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oOwnerUser == null) {
+				Utils.debugLog("WorkflowsResource.deleteUserSharedWorkflow( Session: " + sSessionId + ", ProcId: " + sWorkflowId + ", User:" + sUserId + " ): invalid session");
+				oResult.setStringValue("Invalid session");
+				return oResult;
+			}
+
+			if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+				oResult.setStringValue("Invalid user.");
+				return oResult;
+			}
+
+			if (Utils.isNullOrEmpty(sUserId)) {
+				oResult.setStringValue("Invalid shared user.");
+				return oResult;			
+			}
+
+			try {
+				WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+
+				WorkflowSharing oProcShare = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, sWorkflowId);
+
+				if (oProcShare!= null) {
+					if (oProcShare.getUserId().equals(oOwnerUser.getUserId()) || oProcShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+						oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
+					}
+					else {
+						oResult.setStringValue("Unauthorized");
+						return oResult;					
+					}
+				}
+				else {
+					oResult.setStringValue("Sharing not found");
+					return oResult;				
+				}
+			} 
+			catch (Exception oEx) {
+				Utils.debugLog("WorkflowsResource.deleteUserSharedWorkflow: " + oEx);
+				oResult.setStringValue("Error deleting processor sharing");
+				return oResult;
+			}
+
+			oResult.setStringValue("Done");
+			oResult.setBoolValue(true);
+		} catch (Exception oE) {
+			Utils.debugLog("WorkflowsResource.deleteUserSharedWorkflow( Session: " + sSessionId + ", ProcId: " + sWorkflowId + ", User:" + sUserId + " ): " + oE);
+		}
+		return oResult;
+	}
+	
+	
+	
+	
 	/**
 	 * Retrieves the active sharings given a workflow
 	 * @param sSessionId
@@ -581,6 +646,14 @@ public class ProcessingResources {
 		
 		
 	}
+	
+	/**
+	 * Retrieves the active sharings given a workflow
+	 * @param sSessionId
+	 * @param sWorkflowId
+	 * @return
+	 */
+	
 	
 		
 		
