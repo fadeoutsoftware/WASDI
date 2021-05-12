@@ -46,13 +46,28 @@ var WorkflowController = (function () {
         /**
          * Init the list of users which this workflow is shared with
          */
-        this.getListOfEnableUsers(this.m_oWorkflow.workflowId);
+        this.getListOfEnabledUsers(this.m_oWorkflow.workflowId);
 
 
     }
     WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId) {
-        this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId);
-    }
+        var oController = this;
+        this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId)
+        .then(function(data){
+            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true){
+            // all done 
+            utilsVexDialogAlertTop("GURU MEDITATION<br>NEW WORKFLOW SHARING");
+            oController.getListOfEnabledUsers(oController.m_oWorkflow.workflowId);
+            }
+            else{
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING WORKFLOW");
+            }
+        // reload the sharing list
+        
+        },function (error){
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING WORKFLOW");
+        });
+    };
 
     /**
      * Invokes the API for graph deletion. It handles the request by deleting the 
@@ -69,12 +84,26 @@ var WorkflowController = (function () {
      * @param {*} oUserId the identifier of the User
      */
     WorkflowController.prototype.removeUserSharing = function (oUserId) {
-        this.m_oSnapOperationService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId);
+        var oController= this;
+        this.m_oSnapOperationService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId).then(function(data){
+            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true){
+            // all done 
+            utilsVexDialogAlertTop("GURU MEDITATION<br>DELETED WORKFLOW SHARING");
+            oController.getListOfEnabledUsers(oController.m_oWorkflow.workflowId);
+            }
+            else{
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DELETING SHARING WORKFLOW");
+            }
         // reload the sharing list
-        this.getListOfEnableUsers(this.m_oWorkflow.workflowId);
-    }
+        
+        },function (error){
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DELETING SHARING WORKFLOW");
+        });
+    };
+        
+    
 
-    WorkflowController.prototype.getListOfEnableUsers = function (sWorkflowId) {
+    WorkflowController.prototype.getListOfEnabledUsers = function (sWorkflowId) {
 
         if (utilsIsStrNullOrEmpty(sWorkflowId) === true) {
             return false;
