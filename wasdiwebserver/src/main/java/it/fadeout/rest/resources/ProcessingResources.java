@@ -559,10 +559,14 @@ public class ProcessingResources {
 			try {
 				WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
 
-				WorkflowSharing oProcShare = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, sWorkflowId);
+				WorkflowSharing oWorkflowShare = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, sWorkflowId);
 
-				if (oProcShare!= null) {
-					if (oProcShare.getUserId().equals(oOwnerUser.getUserId()) || oProcShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+				if (oWorkflowShare!= null) {
+					// if the user making the call is the one on the sharing OR
+					if (oWorkflowShare.getUserId().equals(oOwnerUser.getUserId()) ||
+					// if the user making the call is the owner of the workflow		
+							oWorkflowShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+						// Delete the sharing 
 						oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
 					}
 					else {
