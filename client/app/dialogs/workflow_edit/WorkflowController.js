@@ -63,9 +63,15 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.deleteWorkflow(this.m_oWorkflow.workflowId, oUserId);
     }
 
-
+    /**
+     * Invokes the deletion of the sharing between the current workflow and the 
+     * user identified by UserId
+     * @param {*} oUserId the identifier of the User
+     */
     WorkflowController.prototype.removeUserSharing = function (oUserId) {
         this.m_oSnapOperationService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId);
+        // reload the sharing list
+        this.getListOfEnableUsers(this.m_oWorkflow.workflowId);
     }
 
     WorkflowController.prototype.getListOfEnableUsers = function (sWorkflowId) {
