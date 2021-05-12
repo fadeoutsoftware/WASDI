@@ -54,6 +54,20 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId);
     }
 
+    /**
+     * Invokes the API for graph deletion. It handles the request by deleting the 
+     * workflow if invoked by the Owner, and delete the sharing if invoked by another user
+     * @param {*} oUserId the user ID invoking the API
+     */
+    WorkflowController.prototype.deleteWorkflow = function (oUserId) {
+        this.m_oSnapOperationService.deleteWorkflow(this.m_oWorkflow.workflowId, oUserId);
+    }
+
+
+    WorkflowController.prototype.removeUserSharing = function (oUserId) {
+        this.m_oSnapOperationService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId);
+    }
+
     WorkflowController.prototype.getListOfEnableUsers = function (sWorkflowId) {
 
         if (utilsIsStrNullOrEmpty(sWorkflowId) === true) {

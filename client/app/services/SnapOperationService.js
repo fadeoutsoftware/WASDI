@@ -73,8 +73,8 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
         return this.m_oHttp.put(this.APIURL + '/processing/share/add?workflowId=' + sWorkflowId + '&userId=' + sUserId);
     }
 
-    this.deleteWorkflowSharing = function (sWorkflowId, sUserId) {
-        return this.m_oHttp.get(this.APIURL + '/processing/deletegraph=' + sWorkflowId + '&userId=' + sUserId);
+    this.removeWorkflowSharing = function (sWorkflowId, sUserId) {
+        return this.m_oHttp.delete(this.APIURL + '/processing/share/delete=workflowId=' + sWorkflowId + '&userId=' + sUserId);
 
     }
 
