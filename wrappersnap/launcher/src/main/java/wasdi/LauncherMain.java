@@ -1467,7 +1467,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				s_oLogger.error("LauncherMain.copyToSfpt: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
-				throw new IOException("Unable to access destination directory for the Workspace");
+				//throw new IOException("Unable to access destination directory for the Workspace");
+				return "";
 			}
 			
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);

@@ -47,6 +47,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.OCTAVE)) {
 			return new OctaveProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
+		else if (sType.equals(ProcessorTypes.CONDA)) {
+			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}
 		else {
 			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
