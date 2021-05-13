@@ -150,11 +150,7 @@ public class GeoServerManager {
         boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED, sStyle);
         boolean bExistsCoverageStore = m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName);
         boolean bExistsCoverage= m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName);
-        
-        oLogger.error("GeoServerManager.publishStandardGeoTiff: bRes = " + bRes);
-        oLogger.error("GeoServerManager.publishStandardGeoTiff: existsCoveragestore = " + bExistsCoverageStore);
-        oLogger.error("GeoServerManager.publishStandardGeoTiff: existsCoverage = " + bExistsCoverage);
-        
+                
         if (bRes && bExistsCoverageStore && bExistsCoverage) {
         	GSCoverageEncoder oCe = new GSCoverageEncoder();
             oCe.setEnabled(true); //abilito il coverage

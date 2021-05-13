@@ -161,7 +161,7 @@ public abstract class QueryExecutor {
 
 
 	public void setDownloadProtocol(String sDownloadProtocol) {
-		Utils.debugLog("QueryExecutor.setDownloadProtocol");
+		//Utils.debugLog("QueryExecutor.setDownloadProtocol");
 		m_sDownloadProtocol = sDownloadProtocol;
 		if(null==m_sDownloadProtocol) {
 			m_sDownloadProtocol = "https:";
@@ -169,7 +169,7 @@ public abstract class QueryExecutor {
 	}
 
 	public void setCredentials(AuthenticationCredentials oCredentials) {
-		Utils.debugLog("QueryExecutor.setCredentials");
+		//Utils.debugLog("QueryExecutor.setCredentials");
 		if(null!=oCredentials) {
 			setUser(oCredentials.getUser());
 			setPassword(oCredentials.getPassword());

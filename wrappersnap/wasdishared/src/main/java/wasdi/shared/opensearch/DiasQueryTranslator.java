@@ -102,7 +102,7 @@ public class DiasQueryTranslator {
 	protected String m_sAppConfigPath;
 
 	public String translateAndEncode(String sQueryFromClient) {
-		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
+		//Utils.debugLog("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQueryFromClient));
 	}
 
