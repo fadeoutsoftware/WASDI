@@ -10,7 +10,6 @@ import sys
 import urllib.parse
 import json
 import traceback
-#import myProcessor
 
 
 def executeProcessor(parameters, processId): 
