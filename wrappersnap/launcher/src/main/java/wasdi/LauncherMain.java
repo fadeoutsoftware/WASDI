@@ -366,8 +366,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
-
-			Path oPropFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
+			
+			String sSnapAuxProperties =ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"); 
+			Path oPropFile = Paths.get(sSnapAuxProperties);
 			Config.instance("snap.auxdata").load(oPropFile);
 			Config.instance().load();
 
