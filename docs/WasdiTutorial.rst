@@ -17,7 +17,7 @@ http://www.wasdi.net/
 
 WASDI Login
 ------------------------------------------
-[TODO fix]
+
 The user can access using his own google account without the need of any registration, just clicking on Login and then selecting Sign In with Google
 
 
