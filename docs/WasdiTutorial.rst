@@ -139,20 +139,17 @@ The user can browse the bands of the image. Just click on a band to see the band
 
 Data can be shown in Image Editor (default) or Geographic view.
 
-To switch just click con the button in the top left corner of the band image space:
+To switch just click con the button in the top right corner of the band image space:
 
-Devmanimage13.png
+.. image:: _static/wasdi_tutorial_images/Devmanimage13.png
 
 
 
 When in geographic mode, WASDI will publish on the fly in WMS the selected bands.
 
-Devmanimage19.png
-
-
 Once published the band will be shown on the map:
 
-Devmanimage14.png
+.. image:: _static/wasdi_tutorial_images/Devmanimage14.png
 
 
 Click again the Editor Mode button to return in Image Editing Mode.
@@ -160,18 +157,6 @@ Click again the Editor Mode button to return in Image Editing Mode.
 
 From the editor is possible to run some SNAP Processor, upload and run a full SNAP workflow, run user-supplied processors.
 
-
-From the image editor is possible to work with the band masks or filters.
-
-
-Devmanimage3.png
+.. image:: _static/wasdi_tutorial_images/Devmanimage14.png
 
 
-For example, the user can activate, deactivate or create Mask for each band:
-
-
-Devmanimage4.png
-
-
-
-Retrieved from "http://www.wasdi.net/index.php?title=Tutorial&oldid=839"

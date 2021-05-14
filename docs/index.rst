@@ -12,7 +12,7 @@ Getting Started with WASDI
 ---------------------------
 WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources !
 
-This :doc:`basic tutorial </WebUser>`  will help to acquire the main concepts and use WASDI for your EO research.
+This :doc:`basic tutorial </WasdiTutoria>`  will help to acquire the main concepts and use WASDI for your EO research.
 
 
 .. toctree::
