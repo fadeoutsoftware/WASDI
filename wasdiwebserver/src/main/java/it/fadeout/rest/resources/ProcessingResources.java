@@ -15,7 +15,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -66,16 +65,10 @@ import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
 import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.business.WpsProvider;
-import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.ProcessorSharingRepository;
-import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkflowSharingRepository;
@@ -719,12 +712,10 @@ public class ProcessingResources {
 
 	/**
 	 * Exectues a Workflow from workflow Id
-	 * 
 	 * @param sSessionId
 	 * @param sWorkspace
-	 * @param sourceProductName
-	 * @param destinationProdutName
-	 * @param workflowId
+	 * @param sParentProcessWorkspaceId
+	 * @param oSnapWorkflowViewModel
 	 * @return
 	 * @throws Exception
 	 */
