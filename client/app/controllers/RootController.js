@@ -763,7 +763,7 @@ var RootController = (function() {
         var oAudio = new Audio('assets/audio/R2D2a.wav');
         oAudio.play();
 
-        this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
+        this.m_oWindow.open('https://wasdi.readthedocs.io/en/latest/index.html', '_blank');
     }
 
     RootController.prototype.getOperationDescription = function(oOperation) {
