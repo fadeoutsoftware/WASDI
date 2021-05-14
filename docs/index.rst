@@ -46,9 +46,8 @@ A good starting point, for the development of WASDI applications is the :doc:`py
 
 Reference center
 ---------------------------
-WASDI allows users and developer to interact though **libraries** and **APIs**
+WASDI allows users and developer to interact though **libraries** and **APIs**.
 
-A good starting point, for the development of WASDI applications is the :doc:`python tutorial </PythonTutorial>`
 
 .. toctree::
    :maxdepth: 2
@@ -57,7 +56,3 @@ A good starting point, for the development of WASDI applications is the :doc:`py
 
    java/WasdiLib.rst
 
-Search
-^^^^^^^^^^^^^^^^^^
-
-* :ref:`search`
