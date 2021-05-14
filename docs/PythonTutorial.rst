@@ -4,8 +4,13 @@
    contain the root `toctree` directive.
 .. _PythonTutorial:
 
+Python Tutorial
+===========================
+
+
 Setup
-=====
+---------------------------
+
 Open PyCharm and start a new project.
 
 .. image:: _static/python_tutorial_images/openPyCharmAndStartANewProject.png
@@ -58,7 +63,7 @@ Next, point your browser to wasdi.net, log in, make sure you see the workspaces 
 Create a workspace called AdvancedTutorialTest
 
 First lines
-===========
+----------------------
 Let's begin by editing the config.json file. It's a JSON file, containing the user credentials and some fundamental parameters to get you started:
 
 .. code-block:: JSON
@@ -263,7 +268,7 @@ Let's debug it and we're going to see, after the initialization output, the foll
 Parameters can be of any type supported by the JSON format. When the processor will be deployed, the final user, or third party systems will be able to run it passing these parameters.
 
 A more meaningful example
-=========================
+---------------------------------
 Let’s try another example. We want to write a processor that searches for Sentinel-2 images and uses them to create a RGB GeoTIFF file.
 
 You can download the final code from here: 
@@ -652,7 +657,7 @@ To wrap up, you can download the complete code from here:
 `myProcessor.py <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/myProcessor.py>`_
 
 Creating a help file
-====================
+-----------------------------
 You can create a manual for those who are going to use your processor by adding a file called readme.md to your project. As you can see, it is a markdown file that, once the processor will be deployed, will be rendered to the users.
 
 In the help, it's a good idea to describe what the processor does and how to use its parameters. This is an example you can copy and paste in your file:
@@ -691,7 +696,7 @@ Check your file locally, you're going to use it in a moment. If you wish, you ca
 `readme.md <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/readme.md>`_
 
 Deploy the processor on WASDI
-=============================
+----------------------------------
 Now go to the folder containing your processor, create a zip file containing only the following two files:
 
 * `myProcessor.py <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/myProcessor.py>`_
@@ -746,7 +751,7 @@ Select it, and your JSON demo will be displayed. From here you can run it!
 .. image:: _static/python_tutorial_images/searchForYourProcessor1.png
 
 Turn the processor into an app on the marketplace
-=================================================
+----------------------------------------------------
 Well, well, you did great! Now it's time to let others use your processor (in a not too distant future, you will even be able to monetize your processor by selling its usage): enter the WASDI app store!
 
 Go back to the apps, search for advancedpythontutorial, select it, and clic on the pencil icon to edit its properties.
@@ -859,7 +864,7 @@ This is what it should look like in the end (you can copy paste this, if you did
 If you wish, you can download the UI description as a JSON file from here: `UI.json <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/UI.json>`_
 
 The app store
-=============
+-----------------
 Now go to the app store, and try to use your app from there. To find it, you can filter using your user, or search using the name.
 
 .. image:: _static/python_tutorial_images/appStoreMarketplace.png
@@ -884,7 +889,7 @@ before running the processor, you can also check the JSON that will be generated
 Feel free to play with your processor and tweak it.
 
 Delete your app
-===============
+---------------------
 Are you done? Here you are two sad facts:
 
 * this processor is not a milestone in the history of remote sensing
