@@ -31,18 +31,11 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.net.io.Util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.jwasdilib.utils.MosaicSetting;
 
-
-/**
- * @author c.nattero
- *
- */
 /**
  * @author c.nattero
  *
@@ -3456,16 +3449,30 @@ public class WasdiLib {
 	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
 	 */
 	public String copyFileToSftp(String sFileName) {
-		return waitProcess(asynchCopyFileToSftp(sFileName));
+		return copyFileToSftp(sFileName, null);
 	}
 	
+	/**
+	 * Copy a file from a workspace to the WASDI user's SFTP Folder in a synchronous way
+	 * @param sFileName the filename to move to the SFTP folder
+	 * @param sRelativePath relative path in the SFTP root
+	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
+	 */
+	public String copyFileToSftp(String sFileName, String sRelativePath) {
+		return waitProcess(asynchCopyFileToSftp(sFileName, sRelativePath));
+	}
+
+	
+	public String asynchCopyFileToSftp(String sFileName) {
+		return asynchCopyFileToSftp(sFileName, null);
+	}
 
 	/**
 	 * Copy a file from a workspace to the WASDI user's SFTP Folder in asynchronous way
 	 * @param sFileName the filename to move to the SFTP folder
 	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
 	 */
-	public String asynchCopyFileToSftp(String sFileName) {
+	public String asynchCopyFileToSftp(String sFileName, String sRelativePath) {
 		if(null==sFileName || sFileName.isEmpty()) {
 			log("asynchCopyFileToSftp: invalid file name, aborting");
 			return null;
@@ -3495,6 +3502,13 @@ public class WasdiLib {
 			if(getIsOnServer()) {
 				oUrl = oUrl.append("&parent=").append(getMyProcId());
 			}
+			
+			if (sRelativePath != null) {
+				if (!sRelativePath.isEmpty()) {
+					oUrl = oUrl.append("&path=").append(sRelativePath);
+				}
+			}
+			
 			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 		} catch (Exception oE) {
 			log("asynchCopyFileToSftp: could not HTTP GET to /catalog/copytosfpt due to: " + oE + ", aborting");
