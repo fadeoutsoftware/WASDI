@@ -56,7 +56,6 @@ var WorkflowController = (function () {
         .then(function(data){
             if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true){
             // all done 
-            utilsVexDialogAlertTop("GURU MEDITATION<br>NEW WORKFLOW SHARING");
             oController.getListOfEnabledUsers(oController.m_oWorkflow.workflowId);
             }
             else{
@@ -88,7 +87,6 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId).then(function(data){
             if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true){
             // all done 
-            utilsVexDialogAlertTop("GURU MEDITATION<br>DELETED WORKFLOW SHARING");
             oController.getListOfEnabledUsers(oController.m_oWorkflow.workflowId);
             }
             else{
