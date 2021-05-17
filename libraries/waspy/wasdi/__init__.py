@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.2
-Last Update: 10/03/2021
+Version 0.6.3
+Last Update: 06/05/2021
 
 Tested with: Python 2.7, Python 3.7
 
