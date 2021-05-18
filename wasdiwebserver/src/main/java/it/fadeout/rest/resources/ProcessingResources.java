@@ -4,14 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.sql.Timestamp;
@@ -284,7 +277,7 @@ public class ProcessingResources {
      *
      * @param fileInputStream Xml file containing the new version of the Snap Workflow
      * @param sSessionId      Session of the current user
-     * @param sWorkflowId     Used to check if the workflow exists, and then, uppload the file
+     * @param sWorkflowId     Used to check if the workflow exists, and then, upload the file
      * @return
      */
     @POST
@@ -317,62 +310,87 @@ public class ProcessingResources {
                 oWorkflowsPath.mkdirs();
             }
 
-            // Check that the workflow exists
+            // Check that the workflow exists on db
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
             if (oWorkflow == null) {
                 Utils.debugLog("ProcessingResources.updateGraph: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found, please check parameters").build();
             }
+            // original xml file
             File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
-            // the ne
-
-
-            // checks that the graph field is valid by checking the nodes
-            try (FileReader oFileReader = new FileReader(oWorkflowXmlFile)) {
-                // Read the graph
-                Graph oGraph = GraphIO.read(oFileReader);
-                // Take the nodes
-                Node[] aoNodes = oGraph.getNodes();
-
-                for (int iNodes = 0; iNodes < aoNodes.length; iNodes++) {
-                    Node oNode = aoNodes[iNodes];
-                    // Search Read and Write nodes
-                    if (oNode.getOperatorName().equals("Read")) {
-                        oWorkflow.getInputNodeNames().add(oNode.getId());
-                    } else if (oNode.getOperatorName().equals("Write")) {
-                        oWorkflow.getOutputNodeNames().add(oNode.getId());
-                    }
-                }
-            }
-
-            Utils.debugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
-
-            // save uploaded file
+            // new xml file
+            File oWorkflowXmlFileTemp = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml.temp");
+            //if the new one is ok delete the old and rename the ".temp" file
+            // save uploaded file in ".temp" format
             int iRead = 0;
+            // flush the temp
             byte[] ayBytes = new byte[1024];
-            // TODO overWrites? on Any OS? check
-            try (OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFile)) {
-                while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+            try (OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFileTemp)) {
+                while ((iRead = fileInputStream.read(ayBytes)) != -1) { // While EOF
                     oOutStream.write(ayBytes, 0, iRead);
                 }
                 oOutStream.flush();
-            }
-            // save pojo on repository
-            oWorkflow.setFilePath(oWorkflowXmlFile.getPath());
-
-
-            if (Wasdi.getActualNode() != null) {
-                oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
-                oWorkflow.setNodeUrl(Wasdi.getActualNode().getNodeBaseAddress());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
+            // checks that the graph field is valid by checking the nodes
+            try (FileReader oFileReader = new FileReader(oWorkflowXmlFileTemp)) {
+                // Read the graph
+                Graph oGraph;
+                try {
+                    oGraph = GraphIO.read(oFileReader);
 
-        } catch (Exception oEx) {
-            Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
-            return Response.serverError().build();
+                    // Take the nodes
+                    Node[] aoNodes = oGraph.getNodes();
+
+                    for (int iNodes = 0; iNodes < aoNodes.length; iNodes++) {
+                        Node oNode = aoNodes[iNodes];
+                        // Search Read and Write nodes
+                        if (oNode.getOperatorName().equals("Read")) {
+                            oWorkflow.getInputNodeNames().add(oNode.getId());
+                        } else if (oNode.getOperatorName().equals("Write")) {
+                            oWorkflow.getOutputNodeNames().add(oNode.getId());
+                        }
+                    }
+                    // Close the file reader
+                    oFileReader.close();
+                } catch (GraphException oE) {
+                    Utils.debugLog("ProcessingResources.uploadGraph: malformed workflow file");
+
+
+                }
+                // Overwrite the old file
+                Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
+                // Delete the temp file
+                Files.delete(oWorkflowXmlFileTemp.toPath());
+
+
+                Utils.debugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
+
+
+                if (Wasdi.getActualNode() != null) {
+                    oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
+                    oWorkflow.setNodeUrl(Wasdi.getActualNode().getNodeBaseAddress());
+                }
+
+                // Updates the location on the current server
+                oWorkflow.setFilePath(oWorkflowXmlFile.getPath());
+                oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);
+
+
+
+            } catch (Exception oEx) {
+                Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
+                return Response.serverError().build();
+            }
+
+
+        } catch (Exception oe) {
         }
-
         return Response.ok().build();
     }
 
