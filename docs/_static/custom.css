@@ -7,22 +7,41 @@
     src: url(./hero_regular/Hero.otf);
 }
 
-body {
-    background-color: white;
-    font-family: Hero;
-    color: #329036;
-}
 
-
-
-div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6{
-    color: #43516a;
-    font-family: Hero;
-
+.rst-content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend{
+    margin-top: 0;
+    font-weight: 700;
+    font-family: Hero,ff-tisa-web-pro,Georgia,Arial,sans-serif;
 }
 
 div.body {
-    background-color: #d8e7ff;
-    color: #43516a;
     font-family: Hero;
 }
+h1,h2,h3,h4, span.caption-text {
+   color: #009036;
+}
+
+body {
+    font-family: Hero;
+}
+
+.wy-side-nav-search {
+    display: block;
+    width: 300px;
+    padding: .809em;
+    margin-bottom: .809em;
+    z-index: 200;
+    background-color: #43516A;
+    text-align: center;
+    color: #fcfcfc;
+}
+
+.wy-nav-top {
+    background: #43516A;
+}
+
+dt {
+    display: inline-block !important;
+}
+
+

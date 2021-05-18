@@ -797,7 +797,7 @@ public class Wasdi extends ResourceConfig {
 		
 		String sZippedFile = null;
 		
-		if (!oFile.getName().toUpperCase().equals("ZIP")) {
+		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
 			
 			Utils.debugLog("Wasdi.httpPostFile: File not zipped, zip it");
 			

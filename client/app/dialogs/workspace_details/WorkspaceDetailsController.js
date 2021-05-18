@@ -5,7 +5,7 @@
 
 var WorkspaceDetailsController = (function () {
 
-    function WorkspaceDetailsController($scope, oExtras, oWorkspaceService, oNodeService) {
+    function WorkspaceDetailsController($scope, oExtras, oWorkspaceService, oNodeService, oConstantService) {
 
         /**
          * Angular Scope
@@ -23,6 +23,11 @@ var WorkspaceDetailsController = (function () {
          * Injected Node service <-> Get the list of nodes on opening of the dialog
          */
         this.m_oNodeService = oNodeService;
+        /**
+         *
+         */
+        this.m_oConstantService = oConstantService;
+
 
 
         /**
@@ -88,12 +93,15 @@ var WorkspaceDetailsController = (function () {
     WorkspaceDetailsController.prototype.saveNodeCode = function () {
         this.m_oWorkspaceViewModel.nodeCode = this.m_sCurrentNode;
         if (null != this.m_oWorkspaceService.UpdateWorkspace(this.m_oWorkspaceViewModel)) {
+            //var oWorkspace = this.m_oConstantService.getActiveWorkspace();
+            this.m_oConstantService.getActiveWorkspace().nodeCode = this.m_sCurrentNode;
+
             var oDialog = utilsVexDialogAlertBottomRightCorner('WORKSPACE NODE UPDATED<br>READY');
             utilsVexCloseDialogAfter(4000, oDialog);
         }
         else{
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR UPDATING WORKSPACE NODE');
-            utilsVexCloseDialogAfter(10000, oDialog);            
+            utilsVexCloseDialogAfter(10000, oDialog);
         }
     }
 
@@ -106,7 +114,8 @@ var WorkspaceDetailsController = (function () {
         '$scope',
         'extras',
         'WorkspaceService',
-        'NodeService'
+        'NodeService',
+        'ConstantsService'
     ];
     return WorkspaceDetailsController;
 })();

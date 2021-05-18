@@ -60,8 +60,8 @@
 
 .. java:import:: wasdi.jwasdilib.utils MosaicSetting
 
-WasdiLib
-========
+Java WasdiLib
+==============
 
 .. java:package:: java
    :noindex:
@@ -84,7 +84,7 @@ WasdiLib
 .. java:constructor:: public WasdiLib()
    :outertype: WasdiLib
 
-   Self constructor. If there is a config file initilizes the class members
+   Self constructor. If there is a config file initializes the class members
 
 Methods
 -------
