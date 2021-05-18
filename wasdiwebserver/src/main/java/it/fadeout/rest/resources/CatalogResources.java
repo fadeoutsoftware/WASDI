@@ -752,7 +752,7 @@ public class CatalogResources {
 	@GET
 	@Path("/copytosfpt")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId) {
+	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -818,6 +818,9 @@ public class CatalogResources {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			if (!Utils.isNullOrEmpty(sRelativePath)) {
+				oParameter.setRelativePath(sRelativePath);
+			}
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 

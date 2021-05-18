@@ -119,59 +119,97 @@ public class Mosaic {
 		
 		
 		try {
-			String sGdalMergeCommand = "gdal_merge.py";
+			String sGdalCommand = "gdal_merge.py";
+			
+			String sOutputFormat = LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat);
+			Boolean bVrt = false;
+			
+			if (sOutputFormat.equals("VRT")) {
+				sGdalCommand = "gdalbuildvrt";
+				bVrt = true;
+			}
 			
 			ArrayList<String> asArgs = new ArrayList<String>();
-			asArgs.add(sGdalMergeCommand);
+			asArgs.add(sGdalCommand);
 			
-			// Output file
-			asArgs.add("-o");
-			asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
-			
-			processWorkspaceLog("Setting output file " + m_sOuptutFile);
-			
-			// Output format
-			asArgs.add("-of");
-			asArgs.add(LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat));
-			
-			if (LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat).equals("GTiff")) {
+			if (!bVrt) {
+				// Output file
+				asArgs.add("-o");
+				asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
-				processWorkspaceLog("Adding Tiff format options");
+				// Output format
+				asArgs.add("-of");
+				asArgs.add(sOutputFormat);
 				
-				asArgs.add("-co");
-				asArgs.add("COMPRESS=LZW");
+				if (sOutputFormat.equals("GTiff")) {
+					
+					processWorkspaceLog("Adding Tiff format options");
+					
+					asArgs.add("-co");
+					asArgs.add("COMPRESS=LZW");
+					
+					asArgs.add("-co");
+					asArgs.add("BIGTIFF=YES");
+				}
 				
-				asArgs.add("-co");
-				asArgs.add("BIGTIFF=YES");
-			}
-			
-			// Set No Data for input 
-			if (m_oMosaicSetting.getInputIgnoreValue()!= null) {
-				processWorkspaceLog("Adding Ignore input value option" + m_oMosaicSetting.getInputIgnoreValue().toString());
-				
-				asArgs.add("-n");
-				asArgs.add(""+m_oMosaicSetting.getInputIgnoreValue());				
-			}
+				// Set No Data for input 
+				if (m_oMosaicSetting.getInputIgnoreValue()!= null) {
+					processWorkspaceLog("Adding Ignore input value option" + m_oMosaicSetting.getInputIgnoreValue().toString());
+					
+					asArgs.add("-n");
+					asArgs.add(""+m_oMosaicSetting.getInputIgnoreValue());				
+				}
 
-			if (m_oMosaicSetting.getNoDataValue() != null) {
-				processWorkspaceLog("Adding no data option " + m_oMosaicSetting.getNoDataValue().toString());
+				if (m_oMosaicSetting.getNoDataValue() != null) {
+					processWorkspaceLog("Adding no data option " + m_oMosaicSetting.getNoDataValue().toString());
+					
+					asArgs.add("-a_nodata");
+					asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+
+					asArgs.add("-init");
+					asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+
+				}
 				
-				asArgs.add("-a_nodata");
-				asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
-
-				asArgs.add("-init");
-				asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
-
+				// Pixel Size
+				if (m_oMosaicSetting.getPixelSizeX()>0.0 && m_oMosaicSetting.getPixelSizeY()>0.0) {
+					processWorkspaceLog("Adding pixel size option x = "+ m_oMosaicSetting.getPixelSizeX() + " - y = " + m_oMosaicSetting.getPixelSizeY());
+					asArgs.add("-ps");
+					asArgs.add(""+ m_oMosaicSetting.getPixelSizeX());
+					asArgs.add("" + m_oMosaicSetting.getPixelSizeY());
+				}				
 			}
+			else {
+				
+				processWorkspaceLog("Virtual mosaic - set params for gdalbuildvrt");
+				
+				// Set No Data for input 
+				if (m_oMosaicSetting.getInputIgnoreValue()!= null) {
+					processWorkspaceLog("Adding Ignore input value option" + m_oMosaicSetting.getInputIgnoreValue().toString());
+					
+					asArgs.add("-srcnodata");
+					asArgs.add(""+m_oMosaicSetting.getInputIgnoreValue());				
+				}
+				
+				// Set no data for mosaics 
+				if (m_oMosaicSetting.getNoDataValue() != null) {
+					processWorkspaceLog("Adding no data option " + m_oMosaicSetting.getNoDataValue().toString());
+					
+					asArgs.add("-vrtnodata");
+					asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+					
+					// Could not find this param for vrt..
+					//asArgs.add("-init");
+					//asArgs.add(""+m_oMosaicSetting.getNoDataValue());
+				}
+				
 			
-			// Pixel Size
-			if (m_oMosaicSetting.getPixelSizeX()>0.0 && m_oMosaicSetting.getPixelSizeY()>0.0) {
-				processWorkspaceLog("Adding pixel size option x = "+ m_oMosaicSetting.getPixelSizeX() + " - y = " + m_oMosaicSetting.getPixelSizeY());
-				asArgs.add("-ps");
-				asArgs.add(""+ m_oMosaicSetting.getPixelSizeX());
-				asArgs.add("" + m_oMosaicSetting.getPixelSizeY());
+				asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				processWorkspaceLog("Setting output file " + m_sOuptutFile);
+				
 			}
-			
+						
 			// Get Base Path
 			String sWorkspacePath = LauncherMain.getWorspacePath(m_oMosaicParameter);
 			
