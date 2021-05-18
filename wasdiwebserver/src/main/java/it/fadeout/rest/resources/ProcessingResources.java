@@ -157,7 +157,6 @@ public class ProcessingResources {
      *
      * @param fileInputStream
      * @param sSessionId
-     * @param sWorkspace      TODO not used check and remove
      * @param sName
      * @param sDescription
      * @return
