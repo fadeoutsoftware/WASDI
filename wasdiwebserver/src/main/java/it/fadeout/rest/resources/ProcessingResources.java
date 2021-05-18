@@ -368,9 +368,7 @@ public class ProcessingResources {
                 // Delete the temp file
                 Files.delete(oWorkflowXmlFileTemp.toPath());
 
-
-                Utils.debugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
-
+                Utils.debugLog("ProcessingResources.uploadGraph: workflow files updated! workflowID" + oWorkflow.getWorkflowId());
 
                 if (Wasdi.getActualNode() != null) {
                     oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
@@ -380,8 +378,6 @@ public class ProcessingResources {
                 // Updates the location on the current server
                 oWorkflow.setFilePath(oWorkflowXmlFile.getPath());
                 oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);
-
-
 
             } catch (Exception oEx) {
                 Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
@@ -416,7 +412,28 @@ public class ProcessingResources {
             @QueryParam("description") String sDescription,
             @QueryParam("public") Boolean bPublic
 
-    ) throws Exception {
+    ) {
+
+        if (Utils.isNullOrEmpty(sSessionId)) {
+            Utils.debugLog("ProcessingResources.updateGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
+            return Response.status(401).build();
+        }
+        User oUser = Wasdi.getUserFromSession(sSessionId);
+
+        if (oUser == null) return Response.status(401).build();
+        if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+
+        SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+        SnapWorkflow oSnapWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+        if (oSnapWorkflow == null) {
+            return Response.status(404).build();
+        }
+        oSnapWorkflow.setName(sName);
+        oSnapWorkflow.setDescription(sDescription);
+        oSnapWorkflow.setIsPublic(bPublic);
+        oSnapWorkflowRepository.updateSnapWorkflow(oSnapWorkflow);
+
+
         return Response.ok().build();
     }
 
