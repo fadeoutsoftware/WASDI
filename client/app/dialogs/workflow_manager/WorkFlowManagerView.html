@@ -1,6 +1,7 @@
 <div class="modal fade wapps-dialog">
     <div class="modal-dialog modal-dialog-extra-large">
         <div class="modal-content">
+
             <!-- HEADER -->
             <div class=" modal-header">
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;
@@ -9,14 +10,22 @@
                     <!--<img class="snap-logo" src="assets/wasdi/SnapLogo.jpg" alt="SnapLogo">-->
                     <i class="fa fa-cogs" aria-hidden="true"></i>&nbsp;
                     <a href="http://step.esa.int/main/toolboxes/snap/" target="_blank" style="color: white"
-                       rel="noopener noreferrer">{{"DIALOG_WORKFLOW_MANAGER_TITLE" | translate}}</a>
+                        rel="noopener noreferrer">{{"DIALOG_WORKFLOW_MANAGER_TITLE" | translate}}</a>
                 </h4>
 
             </div>
 
+            <div class="row-v4">
+                <button class="btn btn-primary btn-lg btn-wasdi" ng-click="m_oController.updateGraph()"
+                    ng-show="m_oController.isFileLoaded()">Update Workflow</button>
+            </div>
+
             <div class="modal-body d-flex flex-column">
                 <!-- TAB NAVIGATION -->
+           
                 <div class="row-v4">
+                    <button class="btn btn-primary btn-lg btn-wasdi" ng-click="m_oController.updateGraph()"
+                    ng-show="m_oController.isFileLoaded()">Update Workflow</button>
                     <ul class="nav nav-tabs" role="tablist">
                         <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
                             ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
@@ -38,8 +47,9 @@
                         <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
                             ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
                             <a href="" role="tab" data-toggle="tab">
-                                <i class="fa fa-cloud-upload" aria-hidden="true"></i>&nbsp;
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
+                                <i class="custom-icon fa fa-lg fa-plus-square" aria-hidden="true"></i>&nbsp;
+                                New Workflow
+                                <!--{{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}-->
                             </a>
                         </li>
                     </ul>
@@ -50,24 +60,24 @@
                 <div class="tab-content" style="height: 100vh;">
                     <!-------   TABLE WORKFLOWS + LIST OF PRODUCTS ------->
                     <div class="tab-pane fade in" id="WorkFlowTab1"
-                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
-                         ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
+                        ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
+                        ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
                         <ng-include src="'dialogs/workflow_manager/tab-execute-batch.html'"></ng-include>
 
                     </div>
 
                     <!------- MULTI WORKFLOW INPUT ------->
                     <div class="tab-pane fade in" id="WorkFlowTab3"
-                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
-                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab3'">
+                        ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
+                        ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab3'">
                         <ng-include src="'dialogs/workflow_manager/tab-execute.html'"></ng-include>
 
                     </div>
 
                     <!------- Upload ------->
                     <div class="tab-pane fade in" id="WorkFlowTab2"
-                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
-                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab2'">
+                        ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
+                        ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab2'">
                         <ng-include src="'dialogs/workflow_manager/tab-upload.html'"></ng-include>
 
                     </div>
