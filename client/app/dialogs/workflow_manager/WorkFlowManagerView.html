@@ -1,7 +1,6 @@
 <div class="modal fade wapps-dialog">
     <div class="modal-dialog modal-dialog-extra-large">
         <div class="modal-content">
-
             <!-- HEADER -->
             <div class=" modal-header">
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;
@@ -14,18 +13,17 @@
                 </h4>
 
             </div>
-
-            <div class="row-v4">
-                <button class="btn btn-primary btn-lg btn-wasdi" ng-click="m_oController.updateGraph()"
-                    ng-show="m_oController.isFileLoaded()">Update Workflow</button>
+      <!-- REFERENCE FOR BUTTON NEW WORKFLOW      
+          <div class="modal-body d-flex flex-column">
+                <div class="row-v4"><button class="btn btn-primary btn-wasdi">
+                    <i class="custom-icon fa fa-lg fa-plus-square" aria-hidden="true"></i>New Workflow
+                    </button>
+                </div>
             </div>
-
+        -->
             <div class="modal-body d-flex flex-column">
                 <!-- TAB NAVIGATION -->
-           
                 <div class="row-v4">
-                    <button class="btn btn-primary btn-lg btn-wasdi" ng-click="m_oController.updateGraph()"
-                    ng-show="m_oController.isFileLoaded()">Update Workflow</button>
                     <ul class="nav nav-tabs" role="tablist">
                         <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
                             ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
@@ -49,7 +47,7 @@
                             <a href="" role="tab" data-toggle="tab">
                                 <i class="custom-icon fa fa-lg fa-plus-square" aria-hidden="true"></i>&nbsp;
                                 New Workflow
-                                <!--{{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}-->
+                             <!--   {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}-->
                             </a>
                         </li>
                     </ul>
