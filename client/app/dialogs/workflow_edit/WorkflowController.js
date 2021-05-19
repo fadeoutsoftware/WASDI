@@ -213,7 +213,7 @@ var WorkflowController = (function () {
 
                         oController.isUploadingWorkflow = false;
                     }, function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPDATE WORKFLOW PROCESS");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID SNAP GRAPH FILE");
                         oController.cleanAllUploadWorkflowFields();
                         oController.isUploadingWorkflow = false;
                     });
