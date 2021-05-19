@@ -335,7 +335,8 @@ public class ProcessingResources {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            oWorkflow.getInputNodeNames().clear();
+            oWorkflow.getOutputNodeNames().clear();
             // checks that the graph field is valid by checking the nodes
             try (FileReader oFileReader = new FileReader(oWorkflowXmlFileTemp)) {
                 // Read the graph
