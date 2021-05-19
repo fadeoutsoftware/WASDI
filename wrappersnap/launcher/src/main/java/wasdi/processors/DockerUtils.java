@@ -268,12 +268,15 @@ public class DockerUtils {
 						oDeleteScriptWriter.flush();
 						oDeleteScriptWriter.close();
 					}					
-				}
+				}				
 				
-				
-				Runtime.getRuntime().exec("chmod u+x "+sDeleteScriptFile);				
+				Runtime.getRuntime().exec("chmod u+x "+sDeleteScriptFile);
+			}
+			else {
+				Runtime.getRuntime().exec("chmod u+x "+sDeleteScriptFile);
 			}
 
+			
 			Runtime.getRuntime().exec(sDeleteScriptFile);
 
 			// Wait for docker to finish

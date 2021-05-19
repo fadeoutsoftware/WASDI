@@ -774,11 +774,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: update docker for " + sProcessorName);
 			
+			onAfterUnzipProcessor(sProcessorFolder);
+			
 			// Copy Docker template files in the processor folder
 			File oDockerTemplateFolder = new File(m_sDockerTemplatePath);
 			File oProcessorFolder = new File(sProcessorFolder);
 			
-			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);			
+			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
+			
+			onAfterCopyTemplate(sProcessorFolder);
 			
 			// Create utils
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor,sProcessorFolder,m_sWorkingRootPath, m_sTomcatUser);
@@ -791,6 +795,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: deploy the image");
 			oDockerUtils.deploy();
+			
+			onAfterDeploy(sProcessorFolder);
 			
 			// Run
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
@@ -877,9 +883,9 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
 			String sOutputResult;
 			String sOutputCumulativeResult = "";
-			Utils.debugLog("ProcessorsResource.help: Output from Server .... \n");
+			Utils.debugLog("DockerProcessorEngine.libraryUpdate: Output from Server .... \n");
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
+				Utils.debugLog("DockerProcessorEngine.libraryUpdate: " + sOutputResult);
 				
 				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
 			}

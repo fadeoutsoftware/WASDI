@@ -406,6 +406,8 @@ public class dbUtils {
 		        
 		        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
 		        
+		        oEngine.setParameter(oParameter);
+		        
 		        oEngine.redeploy(oParameter);
 		        
 	        }
