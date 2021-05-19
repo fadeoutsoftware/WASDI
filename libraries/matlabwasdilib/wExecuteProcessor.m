@@ -1,5 +1,5 @@
-function sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
-% Execute a WASDI processor
+function sProcessId=wExecuteProcessor(Wasdi, sProcessorName, asParams)
+% Execute a WASDI processor asynchronously
 % Syntax
 % sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
 % 
@@ -9,7 +9,7 @@ function sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
 %	 asParams: Processor parameters, as a key/value dictionary
 %
 % OUTPUT
-%   sStatus: Status of the process
+%   sProcessId: process workspace id. It can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
 %
 
   if exist("Wasdi") < 1 
@@ -17,8 +17,10 @@ function sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
     return
    end
    
-   %sStatus = Wasdi.subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE);
+   sJsonParams = wUrlEncode(savejson('',asParams,'Compact',1))
    
-   disp(['TODO: ' ]);
+   sProcessId = char(Wasdi.executeProcessor(sProcessorName, sJsonParams));
+   
+   disp(['sProcessId: ', sProcessId ]);
    
 end
