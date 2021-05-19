@@ -164,6 +164,7 @@ public class WasdiLib {
 	 * @param sUser User
 	 */
 	public void setUser(String sUser) {
+		log("WasdiLib.setUser( " + sUser + " )");
 		this.m_sUser = sUser;
 	}
 
@@ -180,6 +181,7 @@ public class WasdiLib {
 	 * @param sPassword
 	 */
 	public void setPassword(String sPassword) {
+		log("WasdiLib.setPassword( ********** )");
 		this.m_sPassword = sPassword;
 	}
 
@@ -196,6 +198,7 @@ public class WasdiLib {
 	 * @param sNewActiveWorkspaceId
 	 */
 	public void setActiveWorkspace(String sNewActiveWorkspaceId) {
+		log("WasdiLib.setActiveWorkspace( " + sNewActiveWorkspaceId + " )");
 		this.m_sActiveWorkspace = sNewActiveWorkspaceId;
 
 		if (m_sActiveWorkspace != null && !m_sActiveWorkspace.equals("")) {
@@ -216,6 +219,7 @@ public class WasdiLib {
 	 * @param sSessionId
 	 */
 	public void setSessionId(String sSessionId) {
+		log("WasdiLib.setSessionId( " + sSessionId + " )");
 		this.m_sSessionId = sSessionId;
 	}
 
@@ -232,6 +236,7 @@ public class WasdiLib {
 	 * @param sBaseUrl
 	 */
 	public void setBaseUrl(String sBaseUrl) {
+		log("WasdiLib.setBaseUrl( " + sBaseUrl + " )");
 		this.m_sBaseUrl = sBaseUrl;
 	}
 
@@ -248,6 +253,7 @@ public class WasdiLib {
 	 * @param bIsOnServer
 	 */
 	public void setIsOnServer(Boolean bIsOnServer) {
+		log("WasdiLib.setIsOnServer( " + bIsOnServer + " )");
 		this.m_bIsOnServer = bIsOnServer;
 	}
 
@@ -264,6 +270,7 @@ public class WasdiLib {
 	 * @param bDownloadActive
 	 */
 	public void setDownloadActive(Boolean bDownloadActive) {
+		log("WasdiLib.setDownloadActive( " + bDownloadActive + " )");
 		this.m_bDownloadActive = bDownloadActive;
 	}
 
@@ -271,8 +278,9 @@ public class WasdiLib {
 		return m_bUploadActive;
 	}
 
-	public void setUploadActive(Boolean m_bUploadActive) {
-		this.m_bUploadActive = m_bUploadActive;
+	public void setUploadActive(Boolean bUploadActive) {
+		log("WasdiLib.setUploadActive( " + bUploadActive + " )");
+		this.m_bUploadActive = bUploadActive;
 	}
 
 	/**
@@ -288,6 +296,7 @@ public class WasdiLib {
 	 * @param sBasePath
 	 */
 	public void setBasePath(String sBasePath) {
+		log("WasdiLib.setBasePath ( " + sBasePath + " )");
 		this.m_sBasePath = sBasePath;
 	}
 
@@ -304,6 +313,7 @@ public class WasdiLib {
 	 * @param m_sMyProcId
 	 */
 	public void setMyProcId(String sMyProcId) {
+		log("WasdiLib.setMyProcId( " + sMyProcId + " )");
 		this.m_sMyProcId = sMyProcId;
 	}
 
@@ -320,6 +330,7 @@ public class WasdiLib {
 	 * @param bVerbose
 	 */
 	public void setVerbose(Boolean bVerbose) {
+		log("WasdiLib.setVerbose( " + bVerbose +" )" );
 		this.m_bVerbose = bVerbose;
 	}
 
@@ -337,6 +348,7 @@ public class WasdiLib {
 	 * @param sParam
 	 */
 	public void addParam(String sKey, String sParam) {
+		log("WasdiLib.addParam( " + sKey + ", " + sParam + " )");
 		m_aoParams.put(sKey, sParam);
 	}
 
@@ -374,6 +386,7 @@ public class WasdiLib {
 	 * @param sParametersFilePath parameters file path
 	 */
 	public void setParametersFilePath(String sParametersFilePath) {
+		log("WasdiLib.setParametersFilePath( " + sParametersFilePath + " )");
 		this.m_sParametersFilePath = sParametersFilePath;
 	}
 
@@ -384,6 +397,7 @@ public class WasdiLib {
 	 * @return True if the system is initialized, False if there is any error
 	 */
 	public Boolean init(String sConfigFilePath) {
+		log("WasdiLib.init( " + sConfigFilePath + " )");
 		try {
 
 			if (sConfigFilePath != null) {
@@ -497,7 +511,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public Boolean internalInit() {
-
+		log("WasdiLib.internalInit");
 		try {
 
 			log("jWASDILib Init");
@@ -699,6 +713,7 @@ public class WasdiLib {
 	 * @return User Id if found, "" if there is any error
 	 */
 	public String getWorkspaceOwnerByName(String sWorkspaceName) {
+		log("WasdiLib.getWorkspaceOwnerByName( " + sWorkspaceName + " )");
 		try {
 			String sUrl = m_sBaseUrl + "/ws/byuser";
 
@@ -729,6 +744,7 @@ public class WasdiLib {
 	 * @return userId if found, "" if there is any error
 	 */
 	public String getWorkspaceOwnerByWSId(String sWorkspaceId) {
+		log("WasdiLib.getWorkspaceOwnerByWSId( " + sWorkspaceId + " )");
 		try {
 			String sUrl = m_sBaseUrl + "/ws/byuser";
 
@@ -758,6 +774,7 @@ public class WasdiLib {
 	 * @return Url of the distribuited node of the Workspace
 	 */
 	public String getWorkspaceUrlByWsId(String sWorkspaceId) {
+		log("WasdiLib.getWorkspaceUrlByWsId( " + sWorkspaceId + " )");
 		try {
 			String sUrl = m_sBaseUrl + "/ws?sWorkspaceId=" + sWorkspaceId;
 
@@ -780,8 +797,9 @@ public class WasdiLib {
 	 * @return the workspace ID if opened successfully, empty string otherwise
 	 */
 	public String openWorkspaceById(String sWorkspaceId) {
+		log("WasdiLib.openWorkspaceById( " + sWorkspaceId + " )");
 		if(null==sWorkspaceId || sWorkspaceId.isEmpty()) {
-			log("openWorkspaceById: invalid workspace ID, aborting");
+			log("WasdiLib.openWorkspaceById: invalid workspace ID, aborting");
 			return "";
 		}
 		setActiveWorkspace(sWorkspaceId);
@@ -827,6 +845,7 @@ public class WasdiLib {
 	 * @return List of Strings representing the product names
 	 */
 	public List <String> getProductsByWorkspaceId(String sWorkspaceId) {
+		log("WasdiLib.getProductsByWorkspaceId( " + sWorkspaceId + " )");
 		List<String> asProducts = new ArrayList<String>();
 		try {
 
@@ -893,6 +912,7 @@ public class WasdiLib {
 	 * @return Product Full Path as a String ready to open file
 	 */
 	public String getFullProductPath(String sProductName) {
+		log("WasdiLib.getFullProductPath( " + sProductName + " )");
 		try {
 			String sFullPath = m_sBasePath;
 
@@ -931,6 +951,7 @@ public class WasdiLib {
 	}
 
 	private boolean fileExistsOnWasdi(String sFileName) {
+		log("WasdiLib.fileExistsOnWasdi( " + sFileName + " )");
 		if(null==sFileName) {
 			throw new NullPointerException("WasdiLib.fileExistssOnWasdi: passed a null file name");
 		}
@@ -2173,6 +2194,7 @@ public class WasdiLib {
 
 
 	public String asynchImportProduct(Map<String, Object> oProduct) {
+		log("WasdiLib.asynchImportProduct (with map)");
 		return asynchImportProduct(oProduct, null);
 	}
 
@@ -2184,6 +2206,7 @@ public class WasdiLib {
 	 * @return status of the Import process
 	 */
 	public String asynchImportProduct(Map<String, Object> oProduct, String sProvider) {
+		log("WasdiLib.asynchImportProduct( oProduct, " + sProvider + " )");
 		String sReturn = "ERROR";
 
 		try {
@@ -2247,6 +2270,7 @@ public class WasdiLib {
 	 * @return status of the Import process
 	 */
 	public String asynchImportProduct(String sFileUrl) {
+		log("WasdiLib.asynchImportProduct( " + sFileUrl + " )");
 		return asynchImportProduct(sFileUrl, "");
 	}
 
@@ -2258,6 +2282,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
+		log("WasdiLib.asynchImportProduct( " + sFileUrl + ", " + sBoundingBox + " )");
 		return asynchImportProduct(sFileUrl, sBoundingBox, null);
 	}
 
@@ -2268,6 +2293,7 @@ public class WasdiLib {
 	 * @return status of the Import process
 	 */
 	public String asynchImportProduct(String sFileUrl, String sBoundingBox, String sProvider) {
+		log("WasdiLib.asynchImportProduct( " + sFileUrl + ", " + sBoundingBox + ", " + sProvider + " )");
 		String sReturn = "ERROR";
 
 		try {
@@ -2333,6 +2359,7 @@ public class WasdiLib {
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
 	public List<String> asynchImportProductListWithMaps(List<Map<String, Object>> aoProductsToImport){
+		log("WasdiLib.asynchImportProductList ( with list of maps )");
 		if(null==aoProductsToImport) {
 			return null;
 		}
@@ -2349,6 +2376,7 @@ public class WasdiLib {
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
 	public List<String> asynchImportProductList(List<String> asProductsToImport){
+		log("WasdiLib.asynchImportProductList ( with list )");
 		if(null==asProductsToImport) {
 			return null;
 		}
@@ -2541,6 +2569,7 @@ public class WasdiLib {
 	 * @param sProduct
 	 */
 	public String deleteProduct(String sProduct) {
+		log("WasdiLib.deleteProduct( " + sProduct + " )");
 		try {
 
 			// Build API URL
@@ -2600,6 +2629,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String getProcessorPath() {
+		log("WasdiLib.getProcessorPath");
 		try {
 			StackTraceElement[] aoStackTrace = new Throwable().getStackTrace();
 			File oFile = new File(getClass().getClassLoader().getResource(aoStackTrace[1].getClassName().replace('.', '/') + ".class").toURI());
@@ -3167,10 +3197,12 @@ public class WasdiLib {
 	}
 
 	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix) {
+		log("WasdiLib.importAndPreprocess( aoProductsToImport, " + sWorkflow + ", " + sPreProcSuffix + " )");
 		importAndPreprocess(aoProductsToImport, sWorkflow, sPreProcSuffix, null);
 	}
 
 	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix, String sProvider) {
+		log("WasdiLib.importAndPreprocess( aoProductsToImport, " + sWorkflow + ", " + sPreProcSuffix + ", " + sProvider + " )");
 		if(null==aoProductsToImport) {
 			wasdiLog("The list of products to be imported is null, aborting");
 			return;
@@ -3275,6 +3307,7 @@ public class WasdiLib {
 	}
 
 	public String createWorkspace(String sWorkspaceName, String sNodeCode) {
+		log("WasdiLib.createWorkspace( " + sWorkspaceName + ", " + sNodeCode + " )");
 		String sReturn = null;
 		try {
 			if(null == sWorkspaceName) {
@@ -3312,6 +3345,7 @@ public class WasdiLib {
 	 * @return the ID of the workspace as a String if succesful, empty string otherwise
 	 */
 	public String deleteWorkspace(String sWorkspaceId) {
+		log("WasdiLib.deleteWorkspace( " + sWorkspaceId + " )");
 		String sResult = null;
 		if(null==sWorkspaceId || sWorkspaceId.isEmpty()) {
 			log("deleteWorkspace: none passed, aborting");
@@ -3381,6 +3415,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public Map<String, Object> getProcessorPayload(String sProcessObjId){
+		log("WasdiLib.getProcessorPayload( "+ sProcessObjId + " )");
 		if(null==sProcessObjId || sProcessObjId.isEmpty()) {
 			log("internalGetProcessorPayload: the processor ID is null or empty");
 		}
@@ -3399,6 +3434,7 @@ public class WasdiLib {
 	 * @return the payload as a JSON string, or null if error occurred
 	 */
 	public String getProcessorPayloadAsJSON(String sProcessObjId) {
+		log("WasdiLib.getProcessorPayloadAsJSON( "+ sProcessObjId + " )");
 		if(null==sProcessObjId || sProcessObjId.isEmpty()) {
 			log("internalGetProcessorPayload: the processor ID is null or empty");
 		}
@@ -3416,8 +3452,9 @@ public class WasdiLib {
 	}
 
 	public String getProductBbox(String sFileName) {
+		log("WasdiLib.getProductBBOX( " + sFileName + " )");
 		if(null==sFileName || sFileName.isEmpty()) {
-			log("getProductBBOX: file name is null or empty, aborting");
+			log("WasdiLib.getProductBBOX: file name is null or empty, aborting");
 			return null;
 		}
 		String sResponse = null;
@@ -3452,6 +3489,7 @@ public class WasdiLib {
 	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
 	 */
 	public String copyFileToSftp(String sFileName) {
+		log("WasdiLib.copyFileToSftp( " + sFileName + " )");
 		return copyFileToSftp(sFileName, null);
 	}
 	
@@ -3462,6 +3500,7 @@ public class WasdiLib {
 	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
 	 */
 	public String copyFileToSftp(String sFileName, String sRelativePath) {
+		log("WasdiLib.copyFileToSftp( " + sFileName + ", " + sRelativePath + " )");
 		return waitProcess(asynchCopyFileToSftp(sFileName, sRelativePath));
 	}
 
@@ -3540,6 +3579,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String multiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE) {
+		log("WasdiLib.multiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE )");
 		return waitProcess(asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE));
 	}
 
@@ -3555,6 +3595,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String multiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE, boolean bBigTiff) {
+		log("WasdiLib.multiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE, " + bBigTiff + " )");
 		return waitProcess(asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff));
 	}
 	
@@ -3569,6 +3610,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String asynchMultiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE) {
+		log("WasdiLib.asynchMultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE )");
 		return asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, true); 
 	}
 	
@@ -3584,6 +3626,7 @@ public class WasdiLib {
 	 * @return
 	 */
 	public String asynchMultiSubset(String sInputFile, List<String> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE, boolean bBigTiff) {
+		log("WasdiLib.asynchMultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE, " + bBigTiff + " )");
 		if(null==sInputFile || sInputFile.isEmpty()) {
 			log("multisubset: input file null or empty, aborting");
 			return null;
