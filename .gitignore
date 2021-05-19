@@ -947,3 +947,5 @@ client/app/environments/environment.js
 client/app/environments/secrets.js
 client/app/.vscode/tasks.json
 wasdiOctaveDocker/.pydevproject
+wasdiIDLDocker/.pydevproject
+wasdiCondaDocker/.pydevproject

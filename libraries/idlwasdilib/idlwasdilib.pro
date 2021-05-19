@@ -2,12 +2,12 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.2.1
+; IDL WASDI Lib Version 0.6.3
 ; Last Update: 2021-05-06
 ;
 ; History
-; 0.6.2.1 - 2021-05-06
-;	support start by workspace id
+; 0.6.3 - 2021-05-06
+;	support start by workspace id and copy to sftp relative path
 ;
 ; 0.6.2 - 2021-03-10
 ;	moved to https
@@ -53,8 +53,8 @@
 ;	Removed debug prints
 ;
 ; 0.1.15
-;
 ;	Fixed path generation for shared workspaces
+;
 ;--------------------------------------------------------------------------------------------------------------------------
 
 PRO STARTWASDI, sConfigFilePath
@@ -2667,7 +2667,7 @@ END
 ;sFileName: FIle name (with extension, without path) to copy in the SFTP folder
 ;bAsynch: True to return after the triggering, False to wait the process to finish
 ;return: status. An empty string is returned in case of failure    
-FUNCTION WASDICOPYFILETOSFTP, sFileName
+FUNCTION WASDICOPYFILETOSFTP, sFileName, sRelativePath
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
@@ -2677,6 +2677,17 @@ FUNCTION WASDICOPYFILETOSFTP, sFileName
 	
 	IF (isonserver EQ '1') THEN BEGIN
 		UrlPath = UrlPath + "&parent="+myprocid
+	END
+	
+	; add the relative path if exists	
+	IF sRelativePath NE !NULL THEN BEGIN
+		IF STRLEN(sRelativePath) > 0 THEN BEGIN
+			;Create a new url object
+			oUrl = OBJ_NEW('IDLnetUrl')
+			sEncodedRelativePath = oUrl->URLEncode(sRelativePath)
+			
+			UrlPath = UrlPath + "&path=" + sEncodedRelativePath
+		END 
 	END
 
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)

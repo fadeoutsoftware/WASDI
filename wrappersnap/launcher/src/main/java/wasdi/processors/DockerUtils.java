@@ -83,7 +83,9 @@ public class DockerUtils {
 					oBuildScriptWriter.newLine();
 					oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
 					oBuildScriptWriter.newLine();
-					oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " $1 >> " + m_sDockerLogFile + " 2>&1");
+					oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " --build-arg USR_NAME=" + m_sUser+ " --build-arg USR_ID=$(id -u "+m_sUser+")" +  
+							" --build-arg GRP_NAME=" + m_sUser+ " --build-arg GRP_ID=$(id -g "+m_sUser+")" +
+							" $1 >> " + m_sDockerLogFile + " 2>&1");
 					oBuildScriptWriter.newLine();
 					oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
 					oBuildScriptWriter.flush();

@@ -366,8 +366,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
-
-			Path oPropFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
+			
+			String sSnapAuxProperties =ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"); 
+			Path oPropFile = Paths.get(sSnapAuxProperties);
 			Config.instance("snap.auxdata").load(oPropFile);
 			Config.instance().load();
 
@@ -1456,8 +1457,39 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			String sDestinationPath = sSftpPath;
 			if (!sDestinationPath.endsWith("/")) sDestinationPath+="/";
-			sDestinationPath += oParameter.getUserId();
-			sDestinationPath += "/uploads/";
+			
+			// Is there a relative path?
+			String sRelativePath = oParameter.getRelativePath();
+			
+			if (Utils.isNullOrEmpty(sRelativePath)) {
+				// No, just go in the user default folder
+				sDestinationPath += oParameter.getUserId();
+				sDestinationPath += "/uploads/";				
+			}
+			else {
+				
+				// Yes: this can have also a different user path
+				String sUserPath = oParameter.getUserId();
+				String sRelativePart = sRelativePath;
+				
+				// Do we have the user or not?
+				String [] asSplitted = sRelativePath.split(";");
+				if (asSplitted!=null) {
+					if (asSplitted.length>1) {
+						sUserPath = asSplitted[0];
+						sRelativePart = asSplitted[1];
+					}
+				}
+				
+				// Add the user
+				sDestinationPath += sUserPath;
+				// Add the path
+				if (!sRelativePart.startsWith("/")) sDestinationPath += "/";
+				sDestinationPath += sRelativePart;
+				if (!sDestinationPath.endsWith("/")) sDestinationPath += "/";
+				
+			}
+			
 
 			File oDstDir = new File(sDestinationPath);
 
@@ -1467,7 +1499,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				s_oLogger.error("LauncherMain.copyToSfpt: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
-				throw new IOException("Unable to access destination directory for the Workspace");
+				//throw new IOException("Unable to access destination directory for the Workspace");
+				return "";
 			}
 			
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
@@ -2822,21 +2855,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Get The product view Model
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
 				oProductViewModel = oReadProduct.getProductViewModel();
-
-//				P.Campanella 20210506: try to trust in metadata on demand				
-//				// P.Campanella 20200126: ma non sarebbe forse pi� corretto il contrario?!?
-//				if (oProductViewModel.getMetadata() != null) {
-//					if (bAsynchMetadata) {
-//						// Asynch Metadata Save
-//						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
-//						oProductViewModel.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
-//					} else {
-//						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
-//						oProductViewModel.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
-//					}
-//				}
 				
-
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
 			}
 

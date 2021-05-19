@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.2
-Last Update: 10/03/2021
+Version 0.6.3
+Last Update: 06/05/2021
 
 Tested with: Python 2.7, Python 3.7
 
@@ -43,6 +43,7 @@ Created on 11 Jun 2018
 """
 from time import sleep
 from telnetlib import AO
+from urllib.parse import urlencode
 try:
     from __builtin__ import str
 except Exception as oE0:
@@ -2672,7 +2673,7 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
 
 
 
-def copyFileToSftp(sFileName, bAsynch=None):
+def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
     """
     Copy a file from a workspace to the WASDI user's SFTP Folder
     
@@ -2732,6 +2733,10 @@ def copyFileToSftp(sFileName, bAsynch=None):
             sUrl += "&parent="
             sUrl += getProcId()
 
+        if sRelativePath is not None:
+            sUrl += "&path="
+            sUrl += sRelativePath
+        
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(url=sUrl, headers=asHeaders)
         if oResponse is None:
