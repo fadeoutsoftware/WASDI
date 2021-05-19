@@ -285,7 +285,7 @@ public class ProcessingResources {
     public Response updateGraphfile(@FormDataParam("file") InputStream fileInputStream,
                                     @HeaderParam("x-session-token") String sSessionId,
                                     @QueryParam("workflowid") String sWorkflowId) {
-        Utils.debugLog("ProcessingResources.updateGraph( Ws: " + sWorkflowId + " )");
+        Utils.debugLog("ProcessingResources.updateGraphFile( InputStream, WorkflowId: " + sWorkflowId );
 
         try {
             // Check authorization
@@ -358,9 +358,11 @@ public class ProcessingResources {
                     // Close the file reader
                     oFileReader.close();
                 } catch (GraphException oE) {
+                    // Close the file reader
+                    oFileReader.close();
                     Utils.debugLog("ProcessingResources.uploadGraph: malformed workflow file");
-
-
+                    // Leave the original file unchanged and delete the temp
+                    Files.delete(oWorkflowXmlFileTemp.toPath());
                 }
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
@@ -413,6 +415,7 @@ public class ProcessingResources {
 
     ) {
 
+        Utils.debugLog("ProcessingResources.updateGraphParameters( InputStream, Workflow: " + sName + ", WorkflowId: " + sWorkflowId );
         if (Utils.isNullOrEmpty(sSessionId)) {
             Utils.debugLog("ProcessingResources.updateGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
             return Response.status(401).build();

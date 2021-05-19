@@ -9,6 +9,11 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
     this.m_oHttp = $http;
     this.m_oController = this;
     this.m_oConstantService = oConstantsService;
+    // header field for post calls
+    this.m_oOptions = {
+        transformRequest: angular.identity,
+        headers: { 'Content-Type': undefined }
+    };
 
     /************************************ Workflow **************************************************/
     this.postWorkFlow = function (oFileXmlInput, sWorkspaceInput, sSourceInput, sDestinationInput) {
@@ -22,13 +27,20 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
     };
 
     this.uploadGraph = function (sWorkspaceInput, sName, sDescription, oBody, bIsPublic) {
-        var oOptions = {
-            transformRequest: angular.identity,
-            headers: {'Content-Type': undefined}
-        };
+
         return this.m_oHttp.post(this.APIURL + '/processing/uploadgraph?workspace=' + sWorkspaceInput + "&name=" + sName +
-            "&description=" + sDescription + "&public=" + bIsPublic, oBody, oOptions);
+            "&description=" + sDescription + "&public=" + bIsPublic, oBody, this.m_oOptions);
     };
+
+    this.updateGraphFile = function (sWorkflowId, oBody) {
+        return this.m_oHttp.post(this.APIURL + '/processing/updategraphfile?workflowid=' + sWorkflowId, oBody, this.m_oOptions);
+    }
+    this.updateGraphParameters = function (sWorkflowId, sName, sDescription, bIsPublic) {
+        return this.m_oHttp.post(this.APIURL + '/processing/updategraphparameters?workflowid=' + sWorkflowId +
+            '&name=' + sName +
+            '&description=' + sDescription +
+            '&public=' + bIsPublic);
+    }
 
     this.deleteWorkflow = function (sWorkflowId) {
         return this.m_oHttp.get(this.APIURL + '/processing/deletegraph?workflowId=' + sWorkflowId);
@@ -66,7 +78,7 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
     /************************************ SHARINGS **************************************************/
 
     this.getUsersBySharedWorkflow = function (sWorkflowId) {
-        return this.m_oHttp.get(this.APIURL + '/processing/share/byworkflow?workflowId='+sWorkflowId);
+        return this.m_oHttp.get(this.APIURL + '/processing/share/byworkflow?workflowId=' + sWorkflowId);
     }
 
     this.addWorkflowSharing = function (sWorkflowId, sUserId) {
@@ -83,7 +95,7 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
 
     this.Operation = function (sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput) {
         var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
-        var oConfig = {header: ""};
+        var oConfig = { header: "" };
         sUrl = sUrl.replace("{sOperation}", sOperation);
         return this.m_oHttp.post(sUrl, oOptionsInput, oConfig);
     };
