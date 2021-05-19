@@ -131,20 +131,6 @@ var WorkflowController = (function () {
 
     };
 
-    /**
-     * updateUserGraphOnServer
-     */
-
-    WorkflowController.prototype.updateUserGraphOnServer = function () {
-
-        var oBody = new FormData();
-        oBody.append('file', this.m_oFile[0]);
-        //this.m_oConstantService.getActiveWorkspace().sWorkspaceId
-        this.uploadGraph("idworkspace", // Current Workspace from constant service <-> unused on API
-            this.m_oWorkflow.name, this.m_oWorkflow.description, this.m_oWorkflow.public, // name, description and boolean for isPublic
-            oBody); // content of the file
-
-    };
 
 
     WorkflowController.isUploadedWorkFlow = function () {
@@ -181,7 +167,6 @@ var WorkflowController = (function () {
                 utilsVexCloseDialogAfter(4000, oDialog);
 
             } else {
-
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
             }
 
@@ -215,7 +200,7 @@ var WorkflowController = (function () {
             oController.m_oWorkflow.description,
             oController.m_oWorkflow.public).then(function () {
                 // update file only if File is uploaded
-                if (oController.m_oFile[0] != undefined) {
+                if (oController.m_oFile != undefined) {
                     var oBody = new FormData();
                         oBody.append('file', oController.m_oFile[0]);
                         oController.m_oSnapOperationService.updateGraphFile(oController.m_oWorkflow.workflowId, oBody).then(function (data) {
