@@ -136,12 +136,20 @@ public class WasdiLib {
 	 */
 	private String m_sDefaultProvider = "LSA";
 
+	
+	/**
+	 * Self constructor. If there is a config file initilizes the class members
+	 */
+	public WasdiLib() {
+		log("WasdiLib.WasdiLib()");
+	}
 
 	public String getDefaultProvider() {
 		return m_sDefaultProvider;
 	}
 
 	public void setDefaultProvider(String sProvider) {
+		log("WasdiLib.setDefaultProvider( " + sProvider + " )");
 		if(sProvider==null || sProvider.isEmpty()) {
 			System.out.println("WasdiLib.setDefaultProvider: the provider cannot be null or empty, aborting");
 		} else {
@@ -149,12 +157,6 @@ public class WasdiLib {
 		}
 	}
 
-	/**
-	 * Self constructor. If there is a config file initilizes the class members
-	 */
-	public WasdiLib() {
-
-	}
 
 	/**
 	 * Get User 
@@ -2459,7 +2461,7 @@ public class WasdiLib {
 	 * @return ProcessWorkspace Id
 	 */
 	public String asynchExecuteProcessor(String sProcessorName, Map<String, Object> aoParams) {
-
+		log("WasdiLib.asynchExecuteProcessor( " + sProcessorName + ", Map<String, Object> aoParams )");
 		try {
 			// Initialize
 			String sParamsJson = "";
@@ -2500,6 +2502,7 @@ public class WasdiLib {
 	 */
 	public String asynchExecuteProcessor(String sProcessorName, String sEncodedParams) {
 
+		log("WasdiLib.asynchExecuteProcessor( " + sProcessorName + ", " +  sEncodedParams + " )"); 
 		//Domain check
 		if (sProcessorName == null) {
 			log("ProcessorName is null, return");
@@ -2520,10 +2523,10 @@ public class WasdiLib {
 
 			// Build API URL
 			String sUrl = m_sBaseUrl + "/processors/run?workspace="+m_sActiveWorkspace+"&name="+sProcessorName+"&encodedJson="+sEncodedParams;
-
+			log("WasdiLib.asynchExecuteProcessor: GET: " + sUrl );
 			// Call API
 			String sResponse = httpGet(sUrl, getStandardHeaders());
-
+			log("WasdiLib.asynchExecuteProcessor: response: " + sResponse );
 			// Read the result
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
 
@@ -2660,7 +2663,7 @@ public class WasdiLib {
 				return sResponse.toString();
 			} else {
 				String sMessage = oConnection.getResponseMessage();
-				System.out.println(sMessage);
+				log(sMessage);
 				return "";
 			}			
 		}
