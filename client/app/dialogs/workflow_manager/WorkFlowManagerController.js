@@ -416,7 +416,7 @@ var WorkFlowManagerController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            // TODO update the list of workflow in WorkflowManagerView
             });
         });
     }
