@@ -45,6 +45,8 @@ var WorkflowController = (function () {
         // boolean to discriminate mode default edit
         this.m_bEditMode = true;
 
+        this.m_sDialogTitle = "Edit Workflow"; // swap with translation ?
+
 
         this.initModal();
 
@@ -59,10 +61,12 @@ var WorkflowController = (function () {
         var oController = this;
         if (utilsIsObjectNullOrUndefined(this.m_oWorkflow)) {
             this.m_bEditMode = false;
+            this.m_sDialogTitle = "New Workflow"
+            // init new model for workflow
             this.m_oWorkflow = {
-                name : "test",
-                description : "just to check dynamic binding",
-                public : true
+                name: "",
+                description: "",
+                public: false
             }
         }
         else {
@@ -90,11 +94,20 @@ var WorkflowController = (function () {
     WorkflowController.prototype.apply = function () {
         var oController = this;
         if (oController.m_sSelectedTab == "Base") {
-            oController.updateGraph();
+            if (oController.m_bEditMode) {
+                // UPDATE 
+                oController.updateGraph(); 
+            }
+            else { 
+                // UPLOAD
+                oController.uploadUserGraphOnServer();
+            }
         }
         //cose the dialog
         close();
     }
+
+
 
 
 
@@ -194,16 +207,16 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.uploadGraph("workspace", sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
-                var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD, UPDATED WORKFLOW");
+                var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD, NEW WORKFLOW"+ sName.toUpperCase());
                 utilsVexCloseDialogAfter(4000, oDialog);
 
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID SNAP WORKFLOW FILE");
             }
 
             oController.isUploadingWorkflow = false;
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID SNAP WORKFLOW FILE");
             oController.cleanAllUploadWorkflowFields();
             oController.isUploadingWorkflow = false;
         });
@@ -244,7 +257,7 @@ var WorkflowController = (function () {
 
                         oController.isUploadingWorkflow = false;
                     }, function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID SNAP GRAPH FILE");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID SNAP WORKFLOW FILE");
                         oController.cleanAllUploadWorkflowFields();
                         oController.isUploadingWorkflow = false;
                     });

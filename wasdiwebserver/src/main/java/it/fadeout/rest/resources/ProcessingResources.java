@@ -253,6 +253,7 @@ public class ProcessingResources {
                     oFileReader.close();
                     // Delete the file fom the server
                     Files.delete(oWorkflowXmlFile.toPath());
+                    return Response.serverError().build();
                 }
                 // Save the Workflow
                 SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
@@ -364,6 +365,7 @@ public class ProcessingResources {
                     Utils.debugLog("ProcessingResources.uploadGraph: malformed workflow file");
                     // Leave the original file unchanged and delete the temp
                     Files.delete(oWorkflowXmlFileTemp.toPath());
+                    return Response.serverError().build();
                 }
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));

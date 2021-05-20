@@ -404,6 +404,7 @@ var WorkFlowManagerController = (function () {
 
     WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
         var oController = this; 
+        oController.m_sSelectedWorkflowTab = 'WorkFlowTab3';
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_edit/WorkflowView.html",
             controller: "WorkflowController",
