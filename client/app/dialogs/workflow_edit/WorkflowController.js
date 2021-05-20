@@ -61,8 +61,24 @@ var WorkflowController = (function () {
      * @returns true if the file is uploaded, false instead
      */
     WorkflowController.prototype.isFileLoaded = function () {
-        return true; // for debugging reasons
-        //return !(this.m_oFile === undefined);
+       return !(this.m_oFile === undefined);
+    }
+
+    /**
+    * Method invoke on apply:
+    * if the currrent tab is "Base" update the workflow
+    * if the current tab is "Share" just close, because all the work on sharings
+    * has an immediate feedback so no operation must be done on closing
+    * @param {*} oUserId 
+    * @returns 
+    */
+    WorkflowController.prototype.apply = function () {
+        var oController = this;
+        if (oController.m_sSelectedTab == "Base") {
+            oController.updateGraph();
+        }
+        //cose the dialog
+        close();
     }
 
 
@@ -202,8 +218,8 @@ var WorkflowController = (function () {
                 // update file only if File is uploaded
                 if (oController.m_oFile != undefined) {
                     var oBody = new FormData();
-                        oBody.append('file', oController.m_oFile[0]);
-                        oController.m_oSnapOperationService.updateGraphFile(oController.m_oWorkflow.workflowId, oBody).then(function (data) {
+                    oBody.append('file', oController.m_oFile[0]);
+                    oController.m_oSnapOperationService.updateGraphFile(oController.m_oWorkflow.workflowId, oBody).then(function (data) {
                         if (utilsIsObjectNullOrUndefined(data.data) == false) {
                             var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFULLY UPDATED WORKFLOW");
                             utilsVexCloseDialogAfter(4000, oDialog);
