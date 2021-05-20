@@ -15,7 +15,9 @@
                             {{"DIALOG_WORKFLOW_TAB_BASE" | translate}}
                         </a>
                     </li>
-                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'Share'}" ng-click="m_oController.m_sSelectedTab = 'Share'">
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'Share'}" ng-click="m_oController.m_sSelectedTab = 'Share'"
+                    ng-show="m_oController.m_bEditMode == true"
+                    >
                         <a href="" role="tab" data-toggle="tab">
                             <i class="fa fa-share-alt" ></i>
                             {{"DIALOG_WORKFLOW_TAB_SHARE" | translate}}

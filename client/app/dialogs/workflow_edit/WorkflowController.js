@@ -41,27 +41,42 @@ var WorkflowController = (function () {
          */
         this.m_oFile = undefined;
 
-        /* Close this Dialog handler
-        $scope.close = function () {
-            // close, but give 500ms for bootstrap to animate
-            oClose(null, 300);
-        };*/
+
+        // boolean to discriminate mode default edit
+        this.m_bEditMode = true;
 
 
-        /**
-         * Init the list of users which this workflow is shared with
-         */
-        this.getListOfEnabledUsers(this.m_oWorkflow.workflowId);
-
-
+        this.initModal();
 
     }
+
+    /**
+     * Init the current view accordingly to mode.
+     * Mode can be "new" if no workflow is passed
+     * or "edit" if a workflow is passed via extras to the modal    
+     */
+    WorkflowController.prototype.initModal = function () {
+        var oController = this;
+        if (utilsIsObjectNullOrUndefined(this.m_oWorkflow)) {
+            this.m_bEditMode = false;
+            this.m_oWorkflow = {
+                name : "test",
+                description : "just to check dynamic binding",
+                public : true
+            }
+        }
+        else {
+            //Init the list of users which this workflow is shared with
+            this.getListOfEnabledUsers(this.m_oWorkflow.workflowId);
+        }
+    }
+
     /**
      * Util to check if the file is uploaded
      * @returns true if the file is uploaded, false instead
      */
     WorkflowController.prototype.isFileLoaded = function () {
-       return !(this.m_oFile === undefined);
+        return !(this.m_oFile === undefined);
     }
 
     /**

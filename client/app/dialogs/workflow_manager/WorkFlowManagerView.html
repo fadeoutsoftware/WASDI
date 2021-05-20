@@ -39,11 +39,12 @@
                             <a href="" role="tab" data-toggle="tab">
                                 <i class="fa fa-forward" aria-hidden="true"></i>&nbsp;
                                 {{"DIALOG_WORKFLOW_MANAGER_TAB_BATCH_WORKFLOW" | translate}}
-
+   
                             </a>
                         </li>
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
-                            ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
+                        <!--ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"-->
+                        <li 
+                            ng-click="m_oController.openEditWorkflowDialog(null)">
                             <a href="" role="tab" data-toggle="tab">
                                 <i class="custom-icon fa fa-lg fa-plus-square" aria-hidden="true"></i>&nbsp;
                                 New Workflow
@@ -72,13 +73,13 @@
 
                     </div>
 
-                    <!------- Upload ------->
+                    <!------- Upload
                     <div class="tab-pane fade in" id="WorkFlowTab2"
                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab2'">
                         <ng-include src="'dialogs/workflow_manager/tab-upload.html'"></ng-include>
 
-                    </div>
+                    </div> ------->
 
 
                 </div>

@@ -69,6 +69,7 @@ var WorkFlowManagerController = (function () {
 
     }
 
+
     WorkFlowManagerController.prototype.selectedMultiInputWorkflow = function (oWorkflow) {
         this.m_oSelectedMultiInputWorkflow = oWorkflow;
         // create a dictionary
@@ -402,8 +403,7 @@ var WorkFlowManagerController = (function () {
     };
 
     WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
-        var oController = this;
-
+        var oController = this; 
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_edit/WorkflowView.html",
             controller: "WorkflowController",
