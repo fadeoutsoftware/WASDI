@@ -12,7 +12,7 @@ Getting Started with WASDI
 ---------------------------
 WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources !
 
-This :doc:`basic tutorial </WasdiTutoria>`  will help to acquire the main concepts and use WASDI for your EO research.
+This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your EO research.
 
 
 .. toctree::
@@ -32,15 +32,22 @@ Wasdi supports several programming languages:
 * **IDL 3.7.2**
 * **Octave 6x**
 
-
-A good starting point, for the development of WASDI applications is the :doc:`python tutorial </PythonTutorial>`
+A good starting point to applications is the :doc:`App store overview </AppStoreTutorial.rst>`
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Programming
+   :caption: App Store
 
+   AppStoreTutorial.rst
    PythonTutorial.rst
+
+
+If you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
+
+
+
+
 
 
 
