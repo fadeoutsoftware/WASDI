@@ -28,9 +28,9 @@ Unleash the real power of WASDI, uploading your application and run it on EO ima
 Wasdi supports several programming languages:
 
 * **Python 2.7**
-* **Python 3.7**
+* **Python 3.x**
 * **IDL 3.7.2**
-* **Octave 6x**
+* **Octave 6.x**
 
 
 A good starting point, for the development of WASDI applications is the :doc:`python tutorial </PythonTutorial>`
