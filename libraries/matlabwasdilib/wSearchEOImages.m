@@ -30,10 +30,9 @@ function [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(W
     return
    end
 
-   aoProducts = Wasdi.searchEOImages(sPlatform, sDateFrom, sDateTo, ...
-       java.lang.Double(dULLat), java.lang.Double(dULLon), ...
-       java.lang.Double(dLRLat), java.lang.Double(dLRLon), ...
-       sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
+   aoProducts = Wasdi.searchEOImages(sPlatform, sDateFrom, sDateTo,
+      double(dULLat), double(dULLon), double(dLRLat), double(dLRLon),
+       sProductType, int16(iOrbitNumber), sSensorOperationalMode, sCloudCoverage);
 
    iTotFound = aoProducts.size();
 
