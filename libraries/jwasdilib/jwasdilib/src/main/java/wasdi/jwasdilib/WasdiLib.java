@@ -1210,6 +1210,10 @@ public class WasdiLib {
 	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
 	 */
 	public String getProcessStatus(String sProcessId) {
+		log("WasdiLib.getProcessStatus( " + sProcessId + " )");
+		if(null==sProcessId || sProcessId.isEmpty()) {
+			log("WasdiLib.getProcessStatus: process id null or empty, aborting");
+		}
 		try {
 
 			String sUrl = getWorkspaceBaseUrl() + "/process/byid?sProcessId="+sProcessId;
@@ -1217,12 +1221,15 @@ public class WasdiLib {
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
 
-			return aoJSONMap.get("status").toString();			
+			String sStatus = aoJSONMap.get("status").toString();
+			if(isThisAValidStatus(sStatus)) {
+				return sStatus;
+			}
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
-			return "";
 		}	  
+		return "";
 	}
 
 	/**
@@ -1279,6 +1286,9 @@ public class WasdiLib {
 	 */
 	public String updateStatus(String sStatus) {
 
+		if(!isThisAValidStatus(sStatus)) {
+			return "";
+		}
 		if (m_bIsOnServer == false) return sStatus;
 
 		return updateStatus(sStatus,-1);
@@ -1292,6 +1302,9 @@ public class WasdiLib {
 	 */
 	public String updateStatus(String sStatus,int iPerc) {
 
+		if(!isThisAValidStatus(sStatus)) {
+			return "";
+		}
 		if (m_bIsOnServer == false) return sStatus;
 
 		return updateProcessStatus(getMyProcId(),sStatus,iPerc);
@@ -1308,13 +1321,8 @@ public class WasdiLib {
 		try {
 			// iPerc not controlled: can be -1 to "not update"
 
-			if (sStatus == null) {
-				System.out.println("sStatus must not be null");
-				return "";				
-			}
-
-			if (!(sStatus.equals("CREATED") ||  sStatus.equals("RUNNING") ||  sStatus.equals("STOPPED")||  sStatus.equals("DONE")||  sStatus.equals("ERROR")||  sStatus.equals("WAITING")||  sStatus.equals("READY"))) {
-				System.out.println("sStatus must be a string like one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY");
+			if(!isThisAValidStatus(sStatus)) {
+				log("WasdiLib.updateProcessStatus: " + sStatus + " is not a valid status. It must be one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY");
 				return "";
 			}
 
@@ -1341,8 +1349,6 @@ public class WasdiLib {
 
 	/**
 	 *  Update the status of a process
-	 * @param sProcessId Process Id
-	 * @param sStatus Status to set
 	 * @param iPerc Progress in %
 	 * @return updated status as a String or '' if there was any problem
 	 */
@@ -1386,13 +1392,18 @@ public class WasdiLib {
 	 * @return the process status
 	 */
 	public String waitProcess(String sProcessId) {
-
+		if(null==sProcessId || sProcessId.isEmpty()) {
+			log("WasdiLib.waitProcess: sProcessId is null or empty");
+		}
 
 		updateStatus("WAITING");
 
 		String sStatus = "";
 		while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
 			sStatus = getProcessStatus(sProcessId);
+			if(!isThisAValidStatus(sStatus)) {
+				return "";
+			}
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
@@ -1405,6 +1416,18 @@ public class WasdiLib {
 		return sStatus;
 	}
 
+
+	private boolean isThisAValidStatus(String sStatus) {
+		return(null!=sStatus &&(
+				sStatus.equals("CREATED") ||
+				sStatus.equals("RUNNING") ||
+				sStatus.equals("DONE") ||
+				sStatus.equals("STOPPED") ||
+				sStatus.equals("ERROR") ||
+				sStatus.equals("WAITING") ||
+				sStatus.equals("READY")
+				));
+	}
 
 	/**
 	 * Wait for a collection of processes to finish
@@ -3524,6 +3547,7 @@ public class WasdiLib {
 	 * @return Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
 	 */
 	public String asynchCopyFileToSftp(String sFileName, String sRelativePath) {
+		log("WasdiLib.asynchCopyFileToSftp( " + sFileName + ", " + sRelativePath + " )");
 		if(null==sFileName || sFileName.isEmpty()) {
 			log("asynchCopyFileToSftp: invalid file name, aborting");
 			return null;
