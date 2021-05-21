@@ -2055,8 +2055,17 @@ public class WasdiLib {
 	 * 		properties = < Another JSON Object containing other product-specific info >
 	 * }
 	 */
-	public List<Map<String, Object>> searchEOImages(String sPlatform, String sDateFrom, String sDateTo, Double dULLat, Double dULLon, Double dLRLat, Double dLRLon,  String sProductType, Integer iOrbitNumber, String sSensorOperationalMode, String sCloudCoverage ) {
+	public List<Map<String, Object>> searchEOImages(String sPlatform, String sDateFrom, String sDateTo, Double dULLat, Double dULLon, Double dLRLat, Double dLRLon,
+			String sProductType, Integer iOrbitNumber, String sSensorOperationalMode, String sCloudCoverage ) {
 
+		log("WasdiLib.searchEOImages( " + sPlatform + ", [ " + sDateFrom + ", " + sDateTo + " ], " +
+				"[ " + dULLat + ", " + dULLon + ", " + dLRLat + ", " + dLRLon + " ], " + 
+				"product type: " + sProductType + ", " + 
+				"orbit: " + iOrbitNumber + ", " +
+				"sensor mode: " + sSensorOperationalMode + ", " +
+				"cloud coverage: " + sCloudCoverage
+		);
+		
 		List<Map<String, Object>> aoReturnList = (List<Map<String, Object>>) new ArrayList<Map<String, Object>>() ;
 
 		if (sPlatform == null) {
