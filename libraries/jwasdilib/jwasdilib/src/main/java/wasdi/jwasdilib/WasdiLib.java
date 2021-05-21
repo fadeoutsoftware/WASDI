@@ -3354,7 +3354,7 @@ public class WasdiLib {
 				oUrl=oUrl.append("name=").append(sWorkspaceName);
 			}
 			if(null!=sNodeCode && !sNodeCode.isEmpty()) {
-				oUrl=oUrl.append("node=").append(sNodeCode);
+				oUrl=oUrl.append("&node=").append(sNodeCode);
 			}
 			String sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
