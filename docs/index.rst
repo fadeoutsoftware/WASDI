@@ -32,7 +32,7 @@ Wasdi supports several programming languages:
 * **IDL 3.7.2**
 * **Octave 6x**
 
-A good starting point to applications is the :doc:`App store overview </AppStoreTutorial.rst>`
+A good starting point to applications is the :doc:`App store overview </AppStoreTutorial>`
 
 .. toctree::
    :maxdepth: 2
