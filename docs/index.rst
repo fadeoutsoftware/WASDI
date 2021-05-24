@@ -37,14 +37,20 @@ A good starting point to applications is the :doc:`App store overview </AppStore
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: App Store
+   :caption: Wasdi App Store
 
    AppStoreTutorial.rst
-   PythonTutorial.rst
+
 
 
 If you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Programming tutorials
+
+   PythonTutorial.rst
 
 
 
