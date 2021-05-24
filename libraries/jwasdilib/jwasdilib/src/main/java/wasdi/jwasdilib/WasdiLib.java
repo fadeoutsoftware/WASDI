@@ -3357,6 +3357,10 @@ public class WasdiLib {
 				oUrl=oUrl.append("&node=").append(sNodeCode);
 			}
 			String sResponse = httpGet(oUrl.toString(), getStandardHeaders());
+			if(null==sResponse || sResponse.isEmpty()) {
+				log("WasdiLib.createWorkspace: response is null or empty, aborting");
+				return null;
+			}
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
 			// get the workspace id
 			sReturn = (String) aoJSONMap.get("stringValue"); 
