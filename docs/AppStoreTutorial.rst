@@ -15,8 +15,8 @@ a web browser, with a fast and consistent user experience.
 Also, a dedicated graphical interface(UI) can be added to the application,
 allowing to supply other users a well taylored experience. |:smile:|
 
-Intro
----------
+Introduction
+-------------
 
 The main app store view consist of a list of entries reporting various WASDI applications:
 
@@ -115,7 +115,8 @@ acquired day before the flood event reported on the website.
 
 .. image:: _static/appstore_images/11.png
 
-
+The geoTiff reported here above show in light blue the flooded areas and in dark blue the permanent waters(river streams).
+Congratulations for concluding your remote sensing analysis with WASDI! |:bottle_with_popping_cork:|
 
 Add a new application
 -------------------------
@@ -140,6 +141,8 @@ reported in the following image.
 In order to upload the effective application a *.Zip* file, containing a set of files that must be prepared beforehand.
 Please refer to the particular WASDI libraries in order to acquire all the details about conventions and file format required.
 Note that it is possible to make the uploaded application available to all users of WASDI, by enabling the dedicated checkbox.
+
+A great starting point as developer on WASDI is the :doc:`python tutorial </PythonTutorial>`. Check it out !
 
 A key factor of WASDI application is the possibility for the developer to create an user interface for the application, directly on the WASDI website.
 A JSON descriptor of the required fields can be edited to allow users to interact with canonical web widget.

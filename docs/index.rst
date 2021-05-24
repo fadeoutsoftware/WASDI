@@ -37,13 +37,13 @@ A good starting point to applications is the :doc:`App store overview </AppStore
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Wasdi App Store
+   :caption: Wasdi Applications
 
    AppStoreTutorial.rst
 
 
 
-If you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
+If you already know WASDI features and you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
 
 .. toctree::
    :maxdepth: 2
