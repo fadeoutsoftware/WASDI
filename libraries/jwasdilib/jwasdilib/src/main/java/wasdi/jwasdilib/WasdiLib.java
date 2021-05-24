@@ -2912,7 +2912,7 @@ public class WasdiLib {
 				String sMessage = oConnection.getResponseMessage();
 				log("httpDelete: connection failed, message follows");
 				log(sMessage);
-				return "";
+				return null;
 			}			
 		} catch (Exception e) {
 			e.printStackTrace();
