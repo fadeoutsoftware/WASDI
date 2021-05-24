@@ -10,24 +10,17 @@ Wasdi Web Platform access and basic usage
 =========================================
 The home page of WASDI is reachable at the address:
 
-http://www.wasdi.net/
+https://www.wasdi.net/
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage11.png
 
 
 WASDI Login
 ------------------------------------------
-
-The user can access using his own google account without the need of any registration, just clicking on Login and then selecting Sign In with Google
+To create a WASDI account, just click on the **New User? Register here!** link
 
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage7.png
-
-
-
-This kind of access **CANNOT BE USED BY DEVELOPERS**. While a google user can access all the web platform features, he cannot use the WASDI Libraries features.
-
-To use this functionality the user has to register within the WASDI Platform, clicking Register from the home page.
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage5.png
 
@@ -40,11 +33,11 @@ To register the user has to input:
 * A Name and Surname
 
 
-The user will receive a confirmation e-mail and then will be enabled to use WASDI.
+The user will receive a confirmation e-mail and then, after the confirmation, will be enabled to use WASDI.
 
 Workspace Management
 --------------------
-Each user in WASDI can work in one or more Workspace. A Workspace is a set of EO Images (original or elaborated by some processor) that are grouped in the same “project”.
+Each user in WASDI can work in one or more Workspaces. A Workspace is a set of files (original EO data or elaborated by some processor) that are grouped in the same “project”.
 
 The workspace concept is the same of many other development tools or languages: can be called workspace or project and is just a name given to a specific set of files.
 
@@ -62,20 +55,22 @@ The WASDI Sections are listed in the top blue bar:
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage1.png
 
+* **App Store**: Space Marketplace: explore and run available applications;
 
-* **Home**: workspace management, to create open or delete user workspaces;
+* **Workspaces**: workspace management: create, open or delete your workspaces;
 
-* **Plan**: explore new acquisition plan;
+* **Plan**: explore new acquisition plan for different Satellite platforms;
 
-* **Search**: search for an EO Image;
+* **Search**: search for Satellite Images from all the supported Data Providers;
 
 * **Edit**: edit data in a workspace;
 
-* **User**: user info
+* **User**: link to the documentation;
+
+* **User**: user info and properties
 
 
-
-Plan, and User are out of the scope of this Tutorial.
+App Store, Plan, and User are out of the scope of this Tutorial.
 
 Search
 ^^^^^^
@@ -118,7 +113,7 @@ The results are shown in different tabs for different providers:
 To add a image to WASDI, click on the “+” icon near to the name of the image. The system will ask for the workspace to use and then will start the import of the image.
 
 
-Devmanimage23.png
+.. image:: _static/wasdi_tutorial_images/Devmanimage23.png
 
 Editor
 ^^^^^^
@@ -131,32 +126,19 @@ Editor is where the user can interact with the EO Images.
 On the left the tree of the products in the workspace is shown. Each product has its own metadata and band subfolder.
 
 
-The user can browse the bands of the image. Just click on a band to see the band image.
-
 .. image:: _static/wasdi_tutorial_images/Devmanimage21.png
 
 
-
-Data can be shown in Image Editor (default) or Geographic view.
-
-To switch just click con the button in the top right corner of the band image space:
+The user can browse the bands of the image. Just click on a band to see the band image.
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage13.png
 
 
-
-When in geographic mode, WASDI will publish on the fly in WMS the selected bands.
+WASDI will publish on the fly in OGC-WMS standard the selected bands.
 
 Once published the band will be shown on the map:
 
 .. image:: _static/wasdi_tutorial_images/Devmanimage14.png
 
-
-Click again the Editor Mode button to return in Image Editing Mode.
-
-
-From the editor is possible to run some SNAP Processor, upload and run a full SNAP workflow, run user-supplied processors.
-
-.. image:: _static/wasdi_tutorial_images/Devmanimage14.png
-
+From the editor is possible to run SNAP Workflows and all the available user-supplied processors.
 

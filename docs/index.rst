@@ -22,15 +22,9 @@ This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main conce
 
    WasdiTutorial.rst
 
-Programming tutorials
+WASDI Marketplace
 ---------------------------
-Unleash the real power of WASDI, uploading your application and run it on EO images on the fly!
-Wasdi supports several programming languages:
-
-* **Python 2.7**
-* **Python 3.7**
-* **IDL 3.7.2**
-* **Octave 6x**
+All the WASDI Applications are available for end users' with a simple and intuitive Interface. Choose your App, set your input data with a few clicks and enjoy the result.
 
 A good starting point to applications is the :doc:`App store overview </AppStoreTutorial>`
 
@@ -42,6 +36,16 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    AppStoreTutorial.rst
 
 
+Add your App to WASDI
+---------------------------
+Unleash the real power of WASDI, developing and uploading your own downstream application to run it on EO images on the fly!
+Wasdi supports several programming languages:
+
+* **Python 2.7**
+* **Python 3.7**
+* **IDL 3.7.2**
+* **Octave 6.x**
+
 
 If you already know WASDI features and you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
 
@@ -51,10 +55,6 @@ If you already know WASDI features and you are a Python developer check out the 
    :caption: Programming tutorials
 
    PythonTutorial.rst
-
-
-
-
 
 
 Reference center
