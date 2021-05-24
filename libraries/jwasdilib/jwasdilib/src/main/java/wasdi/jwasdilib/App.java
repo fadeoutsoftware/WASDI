@@ -53,7 +53,7 @@ public class App
 //        testImportAndPreprocess(oLib);
         
         //testCreateWorkspace(oLib);
-        //testDeleteWorkspace(oLib);
+        testDeleteWorkspace(oLib);
         
         //testGetProcessesByWorkspace(oLib);
         //testGetProductsByWorkspace(oLib);
@@ -320,7 +320,9 @@ public class App
 	}
     
     private static void testDeleteWorkspace(WasdiLib oLib) {
-    	System.out.println(oLib.deleteWorkspace(oLib.getWorkspaceIdByName(s_sWorkspaceName)));
+    	String sWorkspaceName = "PLEASE_DELETE_ME";
+    	oLib.createWorkspace(sWorkspaceName);
+    	System.out.println(oLib.deleteWorkspace(oLib.getWorkspaceIdByName(sWorkspaceName)));
 	}
     
     private static void testGetProcessesByWorkspace(WasdiLib oLib) {
