@@ -3393,7 +3393,9 @@ public class WasdiLib {
 					.append("&bDeleteLayer=").append(true).append("&bDeleteFile=").append(true);
 
 			sResult = httpDelete(oUrlBuilder.toString(), getStandardHeaders());
-
+			if(null==sResult) {
+				log("WasdiLib.deleteWorkspace: could not delete workspace (please check the return value, it's going to be null)");
+			}
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
