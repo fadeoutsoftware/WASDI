@@ -2681,7 +2681,7 @@ public class WasdiLib {
 	 * @return Server response
 	 */
 	public String httpGet(String sUrl, Map<String, String> asHeaders) {
-
+		log("WasdiLib.httpGet( " + sUrl + ", asHeaders )");
 		try {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
@@ -2879,6 +2879,7 @@ public class WasdiLib {
 	 */
 
 	public String httpDelete(String sUrl, Map<String, String> asHeaders) {
+		log("WasdiLib.httpDelete( " + sUrl + ", asHeaders )");
 		if(null==sUrl || sUrl.isEmpty()) {
 			log("httpDelete: invalid URL, aborting");
 			return null;
@@ -3338,6 +3339,11 @@ public class WasdiLib {
 		wasdiLog("importAndPreprocess: complete :-)");
 	}
 
+	public String createWorkspace(String sWorkspaceName) {
+		log("WasdiLib.createWorkspace( " + sWorkspaceName + " )");
+		return createWorkspace(sWorkspaceName, null);
+	}
+	
 	public String createWorkspace(String sWorkspaceName, String sNodeCode) {
 		log("WasdiLib.createWorkspace( " + sWorkspaceName + ", " + sNodeCode + " )");
 		String sReturn = null;
