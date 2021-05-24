@@ -1,5 +1,10 @@
 # \_\_/== Changelog ==\\\_\_
 
+## [0.6.4] - 2021-05-21
+
+### Fixed
+- searchEOImages: fixed file name in VIIRS (replace .part with _part)
+
 ## [0.6.3] - 2021-05-21
 
 ### Added

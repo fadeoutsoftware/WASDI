@@ -32,7 +32,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.3
+Version 0.6.4
 Last Update: 21/05/2021
 
 Tested with: Python 2.7, Python 3.7
@@ -1765,6 +1765,9 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
                 # Se the file name                
                 if sPlatform=="S1" or sPlatform=="S2":
                     oSearchResult["fileName"] = oSearchResult["title"] + ".zip"
+                elif sPlatform=="VIIRS":
+                    oSearchResult["fileName"] = oSearchResult["title"].replace(".part", "_part")
+                    oSearchResult["title"] = oSearchResult["title"].replace(".part", "_part")
                 else:
                     oSearchResult["fileName"] = oSearchResult["title"]
                         
