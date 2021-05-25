@@ -243,8 +243,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
                     _this.m_oClient.connect(_this.m_oConstantsService.getRabbitUser(), _this.m_oConstantsService.getRabbitPassword(), _this.m_oOn_Connect, _this.m_oOn_Error, '/');
                 };
-
-
+                
                 this.m_oRabbitReconnect = rabbit_reconnect;
                 //connect to the queue
                 this.m_oClient.connect(_this.m_oConstantsService.getRabbitUser(), _this.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');

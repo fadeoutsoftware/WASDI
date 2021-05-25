@@ -60,8 +60,8 @@ var WorkFlowManagerController = (function () {
 
 
         $scope.close = function (result) {
-
-            oClose(result, 500); // close, but give 500ms for bootstrap to animate
+            // close, but give 500ms for bootstrap to animate
+            oClose(result, 500); 
         };
 
         //Load workflows
@@ -86,10 +86,6 @@ var WorkFlowManagerController = (function () {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, DATA NOT AVAILABLE");
             }
 
-            //it changes the default tab, we can't visualize the 'WorkFlowTab1' because there aren't workflows
-            if ((utilsIsObjectNullOrUndefined(oController.m_aoWorkflows) === true) || (oController.m_aoWorkflows.length === 0)) {
-                oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
-            }
             oController.m_bIsLoadingWorkflows = false;
         },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW LIST");
@@ -404,7 +400,6 @@ var WorkFlowManagerController = (function () {
 
     WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
         var oController = this; 
-        oController.m_sSelectedWorkflowTab = 'WorkFlowTab3';
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_edit/WorkflowView.html",
             controller: "WorkflowController",
@@ -415,8 +410,9 @@ var WorkFlowManagerController = (function () {
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function (oResult) {
-            // TODO update the list of workflow in WorkflowManagerView
+            modal.close.then(function (oResult, iDelay) {
+                oController.m_sSelectedWorkflowTab="WorkFlowTab3";
+                oController.getWorkflowsByUser();
             });
         });
     }

@@ -537,18 +537,22 @@ public class ProcessingResources {
             if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
             String sUserId = oUser.getUserId();
-
+            
+            // Check if the workflow exists
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+            
             if (oWorkflow == null) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            
             // check if the current user is the owner of the workflow
             if (oWorkflow.getUserId().equals(sUserId) == false) {
+            	
+            	// check if the current user has a sharing of the workflow
                 WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-                // check if the current user has a sharing of the workflow
+                
                 if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
                     oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
-                    Utils.debugLog("ProcessingResource.deleteWorkflow: Deleted sharing between user " + sUserId + " and workflow " + oWorkflow.getName()
-                            + " Workflow files kept in place");
+                    Utils.debugLog("ProcessingResource.deleteWorkflow: Deleted sharing between user " + sUserId + " and workflow " + oWorkflow.getName() + " Workflow files kept in place");
                     return Response.ok().build();
                 }
                 // not the owner && no sharing with you. You have no power here !
@@ -569,6 +573,12 @@ public class ProcessingResources {
             } else {
                 Utils.debugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
             }
+            
+            // Delete sharings
+            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            oWorkflowSharingRepository.deleteByWorkflowId(sWorkflowId);
+                        
+            // Delete the workflow
             oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
         } catch (Exception oE) {
             Utils.debugLog("ProcessingResources.deleteWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + " ): " + oE);
@@ -954,9 +964,19 @@ public class ProcessingResources {
                 return oResult;
             }
             if (oWF.getUserId().equals(sUserId) == false && oWF.getIsPublic() == false) {
-                oResult.setBoolValue(false);
-                oResult.setIntValue(401);
-                return oResult;
+            	
+            	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            	
+            	WorkflowSharing oWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, oSnapWorkflowViewModel.getWorkflowId());
+            	
+            	if (oWorkflowSharing==null) {
+            		
+            		Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Workflow now owned or shared, exit");
+            		
+                    oResult.setBoolValue(false);
+                    oResult.setIntValue(401);
+                    return oResult;
+            	}            	
             }
 
             String sBasePath = Wasdi.getDownloadPath(m_oServletConfig);
