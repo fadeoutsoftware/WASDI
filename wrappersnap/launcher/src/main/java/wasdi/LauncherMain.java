@@ -1660,7 +1660,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Is already published?
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-			PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sProductName, oParameter.getBandName());
+			PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sFile, oParameter.getBandName());
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
 
@@ -1704,7 +1704,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sFile.toUpperCase().contains("FRISK")) {
 				sStyle = "frisk";
 			}
-			// Hard Coded set Flood Risk Style - STYLES HAS TO BE MANAGED
+			// Hard Coded set rgb Style - STYLES HAS TO BE MANAGED
 			if (sFile.toUpperCase().contains("_rgb")) {
 				sStyle = "wasdi_s2_rgb";
 			}			
@@ -1871,7 +1871,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Create Entity
 				PublishedBand oPublishedBand = new PublishedBand();
 				oPublishedBand.setLayerId(sLayerId);
-				oPublishedBand.setProductName(sProductName);
+				oPublishedBand.setProductName(oDownloadedFile.getFilePath());
 				oPublishedBand.setBandName(oParameter.getBandName());
 				oPublishedBand.setUserId(oParameter.getUserId());
 				oPublishedBand.setWorkspaceId(oParameter.getWorkspace());

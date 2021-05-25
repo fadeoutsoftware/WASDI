@@ -155,7 +155,8 @@ public class FileBufferResource {
 			
 			// Is there this publish band?
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-			PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
+			
+			PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oDownloadedFile.getFilePath(), sBand);
 			
 			oReturnValue = new RabbitMessageViewModel();			
 

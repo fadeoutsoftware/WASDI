@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.3
-Last Update: 06/05/2021
+Version 0.6.4
+Last Update: 21/05/2021
 
 Tested with: Python 2.7, Python 3.7
 
@@ -1530,18 +1530,18 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     """
     Search EO images
 
-    :param sPlatform: satellite platform (S1 or S2)
+    :param sPlatform: satellite platform:(S1|S2|VIIRS|L8|ENVI)
     :param sDateFrom: inital date YYYY-MM-DD
     :param sDateTo: final date YYYY-MM-DD
     :param fULLat: Latitude of Upper-Left corner
     :param fULLon: Longitude of Upper-Left corner
     :param fLRLat: Latitude of Lower-Right corner
     :param fLRLon: Longitude of Lower-Right corner
-    :param sProductType: type of EO product; If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.
+    :param sProductType: type of EO product; Can be null. FOR "S1" -> "SLC","GRD", "OCN". FOR "S2" -> "S2MSI1C","S2MSI2Ap","S2MSI2A". FOR "VIIRS" -> "VIIRS_1d_composite","VIIRS_5d_composite". FOR "L8" -> "L1T","L1G","L1GT","L1GS","L1TP". For "ENVI" -> "ASA_IM__0P", "ASA_WS__0P" 
     :param iOrbitNumber: orbit number
     :param sSensorOperationalMode: sensor operational mode
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
-    :param sProvider: WASDI Data Provider to query. Null means default node provider
+    :param sProvider: WASDI Data Provider to query (LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = LSA.
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
     aoReturnList = []
@@ -1550,10 +1550,10 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         print('[ERROR] waspy.searchEOImages: platform cannot be None' +
               '  ******************************************************************************')
         return aoReturnList
-
+    
     # todo support other platforms
-    if (sPlatform != "S1") and (sPlatform != "S2"):
-        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1 or S2. Received [' + sPlatform + ']' +
+    if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (sPlatform != "ENVI") :
+        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI. Received [' + sPlatform + ']' +
               '  ******************************************************************************')
         return aoReturnList
 
@@ -1570,6 +1570,33 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
                 wasdiLog(
                     "[ERROR] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                    + sProductType + "]" +
+                    '  ******************************************************************************')
+                return aoReturnList
+
+    if sPlatform == "VIIRS":
+        if sProductType is not None:
+            if not (sProductType == "VIIRS_5d_composite" or sProductType == "VIIRS_1d_composite"):
+                wasdiLog(
+                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; VIIRS_1d_composite, VIIRS_5d_composite. Received ["
+                    + sProductType + "]" +
+                    '  ******************************************************************************')
+                return aoReturnList
+
+    if sPlatform == "L8":
+        if sProductType is not None:
+            if not (sProductType == "L1T" or sProductType == "L1G" or sProductType == "L1GT" or sProductType == "L1GS" or sProductType == "L1TP"):
+                wasdiLog(
+                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; L1T, L1G, L1GT, L1GS, L1TP. Received ["
+                    + sProductType + "]" +
+                    '  ******************************************************************************')
+                return aoReturnList
+
+    if sPlatform == "ENVI":
+        if sProductType is not None:
+            if not (sProductType == "ASA_IM__0P" or sProductType == "ASA_WS__0P"):
+                wasdiLog(
+                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; ASA_IM__0P, ASA_WS__0P. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
                 return aoReturnList
@@ -1644,11 +1671,20 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sQuery += "Sentinel-2 "
     elif sPlatform == "S1":
         sQuery += "Sentinel-1"
+    elif sPlatform == "VIIRS":
+        sQuery += "VIIRS"
+    elif sPlatform == "L8":
+        sQuery += "Landsat-*"
+    elif sPlatform == "ENVI":
+        sQuery += "Envisat"
 
     # If available add product type
     if sProductType is not None:
         sQuery += " AND producttype:" + str(sProductType)
-
+    else:
+        if sPlatform == "VIIRS":
+            sQuery += " AND producttype:VIIRS_1d_composite"
+    
     # If available Sensor Operational Mode
     if (sSensorOperationalMode is not None) and (sPlatform == "S1"):
         sQuery += " AND sensoroperationalmode:" + str(sSensorOperationalMode)
@@ -1686,12 +1722,17 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sFootPrint = "( footprint:\"intersects(POLYGON(( " + str(fULLon) + " " + str(fLRLat) + "," + \
                      str(fULLon) + " " + str(fULLat) + "," + str(fLRLon) + " " + str(fULLat) + "," + str(fLRLon) + \
                      " " + str(fLRLat) + "," + str(fULLon) + " " + str(fLRLat) + ")))\") AND "
-    sQuery = sFootPrint + sQuery
+        sQuery = sFootPrint + sQuery
 
     sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"
 
     if sProvider is None:
-        sProvider = "ONDA"
+        if sPlatform=="VIIRS":
+            sProvider="VIIRS"
+        elif sPlatform == "ENVI" or sPlatform== "L8":
+            sProvider="CREODIAS"
+        else:
+            sProvider = "LSA"
 
     sQuery = "sQuery=" + sQuery + "&offset=0&limit=10&providers=" + sProvider
 
@@ -1720,12 +1761,19 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             
             # Initialize the fileName property
             if oSearchResult["title"] is not None:
-                # Se the file name
-                oSearchResult["fileName"] = oSearchResult["title"] + ".zip"
+
+                # Se the file name                
+                if sPlatform=="S1" or sPlatform=="S2":
+                    oSearchResult["fileName"] = oSearchResult["title"] + ".zip"
+                elif sPlatform=="VIIRS":
+                    oSearchResult["fileName"] = oSearchResult["title"].replace(".part", "_part")
+                    oSearchResult["title"] = oSearchResult["title"].replace(".part", "_part")
+                else:
+                    oSearchResult["fileName"] = oSearchResult["title"]
                         
             # Initialized the relative orbit
             if oSearchResult["properties"] is not None:
-                if oSearchResult["properties"]["relativeorbitnumber"] is not None:
+                if "relativeorbitnumber" in oSearchResult["properties"]:
                     # Set the relative Orbit
                     oSearchResult["relativeOrbit"] = oSearchResult["properties"]["relativeorbitnumber"]
         
@@ -2735,7 +2783,7 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
 
         if sRelativePath is not None:
             sUrl += "&path="
-            sUrl += sRelativePath
+            sUrl += str(sRelativePath)
         
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(url=sUrl, headers=asHeaders)

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
@@ -262,6 +263,8 @@ public class ZipExtractor {
 					File oDest = new File(oFile.getCanonicalPath().replace(sTemp, "")); // removes the tmp-part from the destination files
 					if (oDest.isDirectory()) return; // checks the existence of the dir
 					Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+					Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
+																													  
 				} catch (IOException oE) {
 					oE.printStackTrace();
 				}
