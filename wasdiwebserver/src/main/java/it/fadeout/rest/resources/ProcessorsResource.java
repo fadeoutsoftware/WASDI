@@ -2070,17 +2070,17 @@ public class ProcessorsResource  {
 		Utils.debugLog("ProcessorsResource.shareProcessor(  WS: " + sProcessorId + ", User: " + sUserId + " )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
-		if (oOwnerUser == null) {
+		if (oRequesterUser == null) {
 			Utils.debugLog("ProcessorsResource.shareProcessor( Session: " + sSessionId + ", WS: " + sProcessorId + ", User: " + sUserId + " ): invalid session");
 			oResult.setStringValue("Invalid session.");
 			return oResult;
 		}
 
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
 			oResult.setStringValue("Invalid user.");
 			return oResult;
 		}
@@ -2095,12 +2095,7 @@ public class ProcessorsResource  {
 				oResult.setStringValue("Invalid processor");
 				return oResult;		
 			}
-			
-			if (!oValidateProcessor.getUserId().equals(oOwnerUser.getUserId())) {
-				oResult.setStringValue("Unauthorized");
-				return oResult;				
-			}
-			
+						
 			// Check the destination user
 			UserRepository oUserRepository = new UserRepository();
 			User oDestinationUser = oUserRepository.getUser(sUserId);
@@ -2112,7 +2107,6 @@ public class ProcessorsResource  {
 			
 			// Check if has been already shared
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			
 			ProcessorSharing oAlreadyExists = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
 			
 			if (oAlreadyExists != null) {
@@ -2120,16 +2114,30 @@ public class ProcessorsResource  {
 				return oResult;					
 			}
 			
+			// The requester is the owner?			
+			if (!oValidateProcessor.getUserId().equals(oRequesterUser.getUserId())) {
+				
+				// No: the requestr has a sharing on this processor?
+				ProcessorSharing oHasSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oRequesterUser.getUserId(), sProcessorId);
+				
+				if (oHasSharing==null) {
+					
+					//No. So it is neither the owner or a shared one
+					oResult.setStringValue("Unauthorized");
+					return oResult;				
+				}				
+			}			
+			
 			// Create and insert the sharing
 			ProcessorSharing oProcessorSharing = new ProcessorSharing();
 			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-			oProcessorSharing.setOwnerId(oOwnerUser.getUserId());
+			oProcessorSharing.setOwnerId(oRequesterUser.getUserId());
 			oProcessorSharing.setUserId(sUserId);
 			oProcessorSharing.setProcessorId(sProcessorId);
 			oProcessorSharing.setShareDate((double) oTimestamp.getTime());
 			oProcessorSharingRepository.insertProcessorSharing(oProcessorSharing);
 			
-			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 			
 			try {
 				String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
@@ -2152,7 +2160,7 @@ public class ProcessorsResource  {
 					
 					oMessage.setSender(sSender);
 					
-					String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
+					String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
 									
 					oMessage.setMessage(sMessage);
 			
