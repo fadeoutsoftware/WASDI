@@ -85,6 +85,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
         	
         	for (WorkflowSharing wfs : aoWorkflowSharing) {
         		SnapWorkflow ocurWorkflow = oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId());
+        		if (ocurWorkflow == null) continue;
         		if(!ocurWorkflow.getIsPublic()) {
         		aoReturnList.add(oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId()));
         		}
