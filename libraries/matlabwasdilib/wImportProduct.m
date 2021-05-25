@@ -14,7 +14,7 @@ function sProcessObjId=wImportProduct(Wasdi, sProductLink, sBoundingBox='', sPro
 %
 
   if exist("Wasdi") < 1 
-    disp('Wasdi variable does not existst')
+    disp('Wasdi variable does not exist')
     return
    end
    
