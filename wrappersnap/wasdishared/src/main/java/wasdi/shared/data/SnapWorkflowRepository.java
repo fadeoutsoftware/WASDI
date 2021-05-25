@@ -18,17 +18,18 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.utils.Utils;
 
-public class SnapWorkflowRepository extends  MongoRepository {
-	
-	public SnapWorkflowRepository() {
-		m_sThisCollection = "snapworkflows";
-	}
-	
-	/**
-	 * Insert a new workflow
-	 * @param oWorkflow
-	 * @return
-	 */
+public class SnapWorkflowRepository extends MongoRepository {
+
+    public SnapWorkflowRepository() {
+        m_sThisCollection = "snapworkflows";
+    }
+
+    /**
+     * Insert a new workflow
+     *
+     * @param oWorkflow
+     * @return
+     */
     public boolean insertSnapWorkflow(SnapWorkflow oWorkflow) {
 
         try {
@@ -46,6 +47,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
 
     /**
      * Get a workflow by Id
+     *
      * @param sWorkflowId
      * @return
      */
@@ -56,43 +58,46 @@ public class SnapWorkflowRepository extends  MongoRepository {
 
             String sJSON = oWSDocument.toJson();
 
-            SnapWorkflow oWorkflow = s_oMapper.readValue(sJSON,SnapWorkflow.class);
+            SnapWorkflow oWorkflow = s_oMapper.readValue(sJSON, SnapWorkflow.class);
 
             return oWorkflow;
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
 
-        return  null;
+        return null;
     }
 
     /**
      * Get all the workflow that can be accessed by UserId
+     *
      * @param sUserId
      * @return List of private workflow of users plus all the public ones plus the ones shared with the user
      */
     public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {
-    	// migrated to set in order to avoid redundancy
+        // migrated to set in order to avoid redundancy
         final HashSet<SnapWorkflow> aoReturnList = new HashSet<SnapWorkflow>();
         try {
-        	// find sharings by userId
-        	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-        	List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
-        	SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+            // find sharings by userId
+            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
 
-        	// fetch snapworkflows using the ids in the sharing 
-        	// if they're not public, prepend them the to return list
-        	
-        	for (WorkflowSharing wfs : aoWorkflowSharing) {
-        		SnapWorkflow ocurWorkflow = oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId());
-        		if (ocurWorkflow == null) continue;
-        		if(!ocurWorkflow.getIsPublic()) {
-        		aoReturnList.add(oSnapWorkflowRepository.getSnapWorkflow(wfs.getWorkflowId()));
-        		}
-        	}
-        	
-        	Bson oOrFilter = Filters.or(new Document("userId", sUserId),new Document("isPublic", true));
-        	
+
+            // fetch snapworkflows using the ids in the sharing
+            // if they're not public, prepend them the to return list
+
+            for (WorkflowSharing oWorkflowSharing : aoWorkflowSharing) {
+                SnapWorkflow oCurrentWorkflow = this.getSnapWorkflow(oWorkflowSharing.getWorkflowId());
+                if (oCurrentWorkflow == null) continue;
+                if (!oCurrentWorkflow.getIsPublic()) {
+                    aoReturnList.add(oCurrentWorkflow);
+                }
+            }
+            // Then search all the other workflow using UserId of the current user
+            // - OR -
+            // the public ones
+            Bson oOrFilter = Filters.or(new Document("userId", sUserId), new Document("isPublic", true));
+
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oOrFilter);
 
             oWSDocuments.forEach(new Block<Document>() {
@@ -100,7 +105,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
                     String sJSON = document.toJson();
                     SnapWorkflow oWorkflow = null;
                     try {
-                        oWorkflow = s_oMapper.readValue(sJSON,SnapWorkflow.class);
+                        oWorkflow = s_oMapper.readValue(sJSON, SnapWorkflow.class);
                         aoReturnList.add(oWorkflow);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -115,15 +120,16 @@ public class SnapWorkflowRepository extends  MongoRepository {
 
         return new ArrayList<SnapWorkflow>(aoReturnList);
     }
-    
+
     /**
      * Get the list of all workflows
+     *
      * @return
      */
     public List<SnapWorkflow> getList() {
 
         final ArrayList<SnapWorkflow> aoReturnList = new ArrayList<SnapWorkflow>();
-        
+
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
@@ -133,7 +139,7 @@ public class SnapWorkflowRepository extends  MongoRepository {
                     String sJSON = document.toJson();
                     SnapWorkflow oWorkflow = null;
                     try {
-                        oWorkflow = s_oMapper.readValue(sJSON,SnapWorkflow.class);
+                        oWorkflow = s_oMapper.readValue(sJSON, SnapWorkflow.class);
                         aoReturnList.add(oWorkflow);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -148,9 +154,10 @@ public class SnapWorkflowRepository extends  MongoRepository {
 
         return aoReturnList;
     }
-    
+
     /**
      * Update a Workflow
+     *
      * @param oSnapWorkflow
      * @return
      */
@@ -159,8 +166,8 @@ public class SnapWorkflowRepository extends  MongoRepository {
         try {
             String sJSON = s_oMapper.writeValueAsString(oSnapWorkflow);
             Document filter = new Document("workflowId", oSnapWorkflow.getWorkflowId());
-			Document update = new Document("$set", new Document(Document.parse(sJSON)));
-			getCollection(m_sThisCollection).updateOne(filter, update);
+            Document update = new Document("$set", new Document(Document.parse(sJSON)));
+            getCollection(m_sThisCollection).updateOne(filter, update);
 
             return true;
 
@@ -170,23 +177,21 @@ public class SnapWorkflowRepository extends  MongoRepository {
 
         return false;
     }
-    
+
     /**
      * Deletes a workflow
      */
     public boolean deleteSnapWorkflow(String sWorkflowId) {
-    	
-    	if (Utils.isNullOrEmpty(sWorkflowId)) return false;
+
+        if (Utils.isNullOrEmpty(sWorkflowId)) return false;
 
         try {
 
             DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("workflowId", sWorkflowId));
 
-            if (oDeleteResult != null)
-            {
-                if (oDeleteResult.getDeletedCount() == 1 )
-                {
-                    return  true;
+            if (oDeleteResult != null) {
+                if (oDeleteResult.getDeletedCount() == 1) {
+                    return true;
                 }
             }
 
@@ -194,25 +199,25 @@ public class SnapWorkflowRepository extends  MongoRepository {
             oEx.printStackTrace();
         }
 
-        return  false;
+        return false;
     }
-    
+
     /**
      * Delete all the workflows of User
+     *
      * @param sUserId
      * @return
      */
     public int deleteSnapWorkflowByUser(String sUserId) {
-    	
-    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+
+        if (Utils.isNullOrEmpty(sUserId)) return 0;
 
         try {
 
             DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(new Document("userId", sUserId));
 
-            if (oDeleteResult != null)
-            {
-                return  (int) oDeleteResult.getDeletedCount();
+            if (oDeleteResult != null) {
+                return (int) oDeleteResult.getDeletedCount();
             }
 
         } catch (Exception oEx) {
