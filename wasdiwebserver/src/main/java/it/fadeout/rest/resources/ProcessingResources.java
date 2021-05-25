@@ -286,7 +286,7 @@ public class ProcessingResources {
     public Response updateGraphfile(@FormDataParam("file") InputStream fileInputStream,
                                     @HeaderParam("x-session-token") String sSessionId,
                                     @QueryParam("workflowid") String sWorkflowId) {
-        Utils.debugLog("ProcessingResources.updateGraphFile( InputStream, WorkflowId: " + sWorkflowId );
+        Utils.debugLog("ProcessingResources.updateGraphFile( InputStream, WorkflowId: " + sWorkflowId);
 
         try {
             // Check authorization
@@ -418,7 +418,7 @@ public class ProcessingResources {
 
     ) {
 
-        Utils.debugLog("ProcessingResources.updateGraphParameters( InputStream, Workflow: " + sName + ", WorkflowId: " + sWorkflowId );
+        Utils.debugLog("ProcessingResources.updateGraphParameters( InputStream, Workflow: " + sName + ", WorkflowId: " + sWorkflowId);
         if (Utils.isNullOrEmpty(sSessionId)) {
             Utils.debugLog("ProcessingResources.updateGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
             return Response.status(401).build();
@@ -588,23 +588,26 @@ public class ProcessingResources {
     @PUT
     @Path("share/add")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult shareWorkflow(@HeaderParam("x-session-token") String
-                                                 sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
+    public PrimitiveResult shareWorkflow(@HeaderParam("x-session-token") String sSessionId,
+                                         @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
 
-        Utils.debugLog("ProcessingResource.shareProcessor(  Workflow : " + sWorkflowId + ", User: " + sUserId + " )");
+        Utils.debugLog("ProcessingResource.shareWorkflow(  Workflow : " + sWorkflowId + ", User: " + sUserId + " )");
 
+        //init repositories
+        WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+        SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
         // Validate Session
-        User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+        User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
         PrimitiveResult oResult = new PrimitiveResult();
         oResult.setBoolValue(false);
 
-        if (oOwnerUser == null) {
-            Utils.debugLog("ProcessingResource.shareProcessor( Session: " + sSessionId + ", Workflow: " + sWorkflowId + ", User: " + sUserId + " ): invalid session");
+        if (oRequesterUser == null) {
+            Utils.debugLog("ProcessingResource.shareWorkflow( Session: " + sSessionId + ", Workflow: " + sWorkflowId + ", User: " + sUserId + " ): invalid session");
             oResult.setStringValue("Invalid session.");
             return oResult;
         }
 
-        if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+        if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
             oResult.setStringValue("Invalid user.");
             return oResult;
         }
@@ -612,31 +615,52 @@ public class ProcessingResources {
         try {
 
             // Check if the processor exists and is of the user calling this API
-            SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
-            SnapWorkflow oValidateWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
+            oWorkflowRepository = new SnapWorkflowRepository();
+            SnapWorkflow oWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
-            if (oValidateWorkflow == null) {
-                oResult.setStringValue("Invalid processor");
+            if (oWorkflow == null) {
+                oResult.setStringValue("Invalid Workflow");
                 return oResult;
             }
-
-            if (!oValidateWorkflow.getUserId().equals(oOwnerUser.getUserId())) {
+            if (oRequesterUser.getUserId().equals(sUserId)) {
+                Utils.debugLog("ProcessingResource.ShareWorkflow: auto sharing not so smart");
+                oResult.setStringValue("Impossible to autoshare.");
+                return oResult;
+            }
+            /* This was ONLY THE OWNER CAN ADD SHARE
+            if (!oWorkflow.getUserId().equals(oRequesterUser.getUserId())) {
                 oResult.setStringValue("Unauthorized");
                 return oResult;
-            }
+            }*/
 
             // Check the destination user
             UserRepository oUserRepository = new UserRepository();
             User oDestinationUser = oUserRepository.getUser(sUserId);
-
+            // Can't find destination user for the sharing
             if (oDestinationUser == null) {
-                oResult.setStringValue("Unauthorized");
+                oResult.setStringValue("Can't find target user of the sharing");
                 return oResult;
             }
 
-            // Check if has been already shared
-            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            //if the requester is not the owner
+            if (!oWorkflow.getUserId().equals(oRequesterUser.getUserId())) {
 
+                // Is he trying to share with the owner?
+                if (oWorkflow.getUserId().equals(sUserId)) {
+                    oResult.setStringValue("Cannot Share with owner");
+                    return oResult;
+                }
+                // the requester has the share?
+                if (!oWorkflowSharingRepository.isSharedWithUser(oRequesterUser.getUserId(),sWorkflowId)){
+                    oResult.setStringValue("Unauthorized");
+                    return oResult;
+                }
+
+            }
+
+
+
+            // Check if has been already shared
             if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
                 oResult.setStringValue("Already shared");
                 return oResult;
@@ -645,13 +669,13 @@ public class ProcessingResources {
             // Create and insert the sharing
             WorkflowSharing oWorkflowSharing = new WorkflowSharing();
             Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-            oWorkflowSharing.setOwnerId(oOwnerUser.getUserId());
+            oWorkflowSharing.setOwnerId(oRequesterUser.getUserId());
             oWorkflowSharing.setUserId(sUserId);
             oWorkflowSharing.setWorkflowId(sWorkflowId);
             oWorkflowSharing.setShareDate((double) oTimestamp.getTime());
             oWorkflowSharingRepository.insertWorkflowSharing(oWorkflowSharing);
 
-            Utils.debugLog("ProcessingResource.shareWorkflow: Workflow" + sWorkflowId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+            Utils.debugLog("ProcessingResource.shareWorkflow: Workflow" + sWorkflowId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
             try {
                 String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
@@ -662,7 +686,7 @@ public class ProcessingResources {
                     MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);
                     Message oMessage = new Message();
 
-                    String sTitle = "Workflow " + oValidateWorkflow.getName() + " Shared";
+                    String sTitle = "Workflow " + oWorkflow.getName() + " Shared";
 
                     oMessage.setTilte(sTitle);
 
@@ -673,7 +697,7 @@ public class ProcessingResources {
 
                     oMessage.setSender(sSender);
 
-                    String sMessage = "The user " + oOwnerUser.getUserId() + " shared with you the Workflow: " + oValidateWorkflow.getName();
+                    String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the Workflow: " + oWorkflow.getName();
 
                     oMessage.setMessage(sMessage);
 
@@ -691,7 +715,7 @@ public class ProcessingResources {
         } catch (Exception oEx) {
             Utils.debugLog("Processing.shareWorkflow: " + oEx);
 
-            oResult.setStringValue("Error in save proccess");
+            oResult.setStringValue("Error in save process");
             oResult.setBoolValue(false);
 
             return oResult;
