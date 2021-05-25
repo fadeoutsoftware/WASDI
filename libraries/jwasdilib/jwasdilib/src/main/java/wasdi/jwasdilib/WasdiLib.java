@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -340,6 +341,29 @@ public class WasdiLib {
 	 */
 	public Map<String, String> getParams() {
 		return m_aoParams;
+	}
+	
+	public String getParamsAsJsonString() {
+		if(null==getParams()) {
+			log("WasdiLib.getParamsAsJsonString: no params, returning empty JSON");
+			return "{}";
+		}
+		StringBuilder oBuilder = new StringBuilder().append("{"); 
+		for (Entry<String,String> oPair : getParams().entrySet()) {
+			if(!oBuilder.toString().endsWith("{")) {
+				oBuilder.append(",");
+			}
+			oBuilder.append("\"")
+			.append(oPair.getKey())
+			.append("\"")
+			.append(":")
+			.append("\"")
+			.append(oPair.getValue())
+			.append("\"");
+		}
+		
+		oBuilder.append("}");
+		return oBuilder.toString();
 	}
 
 	/**

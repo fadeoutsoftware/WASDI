@@ -53,7 +53,7 @@ public class App
 //        testImportAndPreprocess(oLib);
         
         //testCreateWorkspace(oLib);
-        testDeleteWorkspace(oLib);
+        //testDeleteWorkspace(oLib);
         
         //testGetProcessesByWorkspace(oLib);
         //testGetProductsByWorkspace(oLib);
@@ -66,10 +66,14 @@ public class App
         //testMultisubset(oLib);
         
         
+        testGetParamsAsJsonString(oLib);
+        
         System.out.println("JWasdiLib Test Done");
         oLib.updateStatus("DONE");
         
     }    
+
+
 
 
 
@@ -417,5 +421,12 @@ public class App
     	
     	oLib.multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE);
     }
+    
+    private static void testGetParamsAsJsonString(WasdiLib oLib) {
+    	oLib.addParam("name", "Marilyn");
+    	oLib.addParam("surname", "Monroe");
+    	oLib.addParam("the answer is", "42");
+		System.out.println(oLib.getParamsAsJsonString());
+	}
     
 }
