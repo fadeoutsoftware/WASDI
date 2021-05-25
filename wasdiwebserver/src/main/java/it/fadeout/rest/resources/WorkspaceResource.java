@@ -681,6 +681,12 @@ public class WorkspaceResource {
 		
 		if (!oWorkspace.getUserId().equals(oRequesterUser.getUserId())) {
 			
+			// Is he trying to share with the owner?
+			if (oWorkspace.getUserId().equals(sUserId)) {
+				oResult.setStringValue("Cannot Share with owner");
+				return oResult;					
+			}			
+			
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 			
 			if (!oWorkspaceSharingRepository.isSharedWithUser(oRequesterUser.getUserId(), sWorkspaceId)) {

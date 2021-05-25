@@ -2123,6 +2123,12 @@ public class ProcessorsResource  {
 			// The requester is the owner?			
 			if (!oValidateProcessor.getUserId().equals(oRequesterUser.getUserId())) {
 				
+				// Is he trying to share with the owner?
+				if (oValidateProcessor.getUserId().equals(sUserId)) {
+					oResult.setStringValue("Cannot Share with owner");
+					return oResult;					
+				}
+				
 				// No: the requestr has a sharing on this processor?
 				ProcessorSharing oHasSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oRequesterUser.getUserId(), sProcessorId);
 				
