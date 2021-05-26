@@ -2710,10 +2710,12 @@ public class WasdiLib {
 	public String getProcessorPath() {
 		log("WasdiLib.getProcessorPath");
 		try {
-			StackTraceElement[] aoStackTrace = new Throwable().getStackTrace();
-			File oFile = new File(getClass().getClassLoader().getResource(aoStackTrace[1].getClassName().replace('.', '/') + ".class").toURI());
+			return WasdiLib.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			
+//			StackTraceElement[] aoStackTrace = new Throwable().getStackTrace();
+//			File oFile = new File(getClass().getClassLoader().getResource(aoStackTrace[1].getClassName().replaceAll(".", File.separator) + ".class").toURI());
 
-			return oFile.getParent()+ File.separator;
+//			return oFile.getParent()+ File.separator;
 		}
 		catch (Exception oEx) {
 			System.out.println("Exception in get Processor Path " + oEx.toString());

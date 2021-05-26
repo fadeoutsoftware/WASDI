@@ -27,6 +27,8 @@ public class App
         oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
 
         oLib.printStatus();
+        
+        System.out.println(oLib.getProcessorPath());
       
         
         //testConnection(oLib);
