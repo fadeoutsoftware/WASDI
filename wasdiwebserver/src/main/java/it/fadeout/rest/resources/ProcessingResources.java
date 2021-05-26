@@ -472,14 +472,6 @@ public class ProcessingResources {
 
         String sUserId = oUser.getUserId();
 
-        // find sharings by userId
-        WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-        List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
-        // create a support list with workflows id
-        HashSet<String> aoUniqueIds = new HashSet();
-        for (WorkflowSharing wfs : aoWorkflowSharing) {
-            aoUniqueIds.add(wfs.getWorkflowId());
-        }
 
         SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
         ArrayList<SnapWorkflowViewModel> aoRetWorkflows = new ArrayList<>();
@@ -488,21 +480,25 @@ public class ProcessingResources {
             List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.getSnapWorkflowPublicAndByUser(sUserId);
 
             for (SnapWorkflow oCurWF : aoDbWorkflows) {
-                SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
-                oVM.setName(oCurWF.getName());
-                oVM.setDescription(oCurWF.getDescription());
-                oVM.setWorkflowId(oCurWF.getWorkflowId());
-                oVM.setOutputNodeNames(oCurWF.getOutputNodeNames());
-                oVM.setInputNodeNames(oCurWF.getInputNodeNames());
-                oVM.setPublic(oCurWF.getIsPublic());
-                oVM.setUserId(oCurWF.getUserId());
-                oVM.setNodeUrl(oCurWF.getNodeUrl());
+                SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oCurWF);
+                // check if it was shared, if so, set shared with me to true
+                oVM.setSharedWithMe(false);
+                aoRetWorkflows.add(oVM);
+            }
+            
+            // find sharings by userId
+            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
+
+            for (WorkflowSharing oSharing : aoWorkflowSharing) {
+            	SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getWorkflowId());
+            	SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
 
                 // check if it was shared, if so, set shared with me to true
-                oVM.setSharedWithMe(aoUniqueIds.contains(oCurWF.getWorkflowId()));
-                aoRetWorkflows.add(oVM);
-
+                oVM.setSharedWithMe(true);
+            	aoRetWorkflows.add(oVM);
             }
+            
         } catch (Exception oE) {
             Utils.debugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " ): " + oE);
         }
@@ -976,7 +972,7 @@ public class ProcessingResources {
                     oResult.setBoolValue(false);
                     oResult.setIntValue(401);
                     return oResult;
-            	}            	
+            	}
             }
 
             String sBasePath = Wasdi.getDownloadPath(m_oServletConfig);
