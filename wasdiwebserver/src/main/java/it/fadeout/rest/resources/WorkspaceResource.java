@@ -817,14 +817,14 @@ public class WorkspaceResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oOwnerUser == null) {
+		if (oRequestingUser == null) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: invalid session");
 			return oResult;
 		}
 
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		if (Utils.isNullOrEmpty(oRequestingUser.getUserId())) {
 			oResult.setStringValue("Invalid user");
 			return oResult;
 		}
@@ -838,6 +838,13 @@ public class WorkspaceResource {
 			oResult.setStringValue("Invalid user.");
 			return oResult;
 		}
+
+/*		if (!oRequestingUser.getUserId().equals(sUserId)  && //request for another user
+				! new WorkspaceRepository().getWorkspace(sWorkspaceId).getUserId().equals(sUserId)){ // not the owner
+			oResult.setStringValue("Attempting to delete other users sharing. Only owner can delete other sharings");
+			return oResult;
+		}*/
+
 		try {
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 
