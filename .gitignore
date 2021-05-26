@@ -1200,3 +1200,6 @@ docs/build/html/_static/wasdi_tutorial_images/Devmanimage25.png
 docs/build/html/_static/wasdi_tutorial_images/Devmanimage30.png
 docs/build/html/java/package-index.html
 docs/build/html/java/WasdiLib.html
+wasdiCondaDocker/.pydevproject
+wasdiIDLDocker/.pydevproject
+wasdiOctaveDocker/.pydevproject
