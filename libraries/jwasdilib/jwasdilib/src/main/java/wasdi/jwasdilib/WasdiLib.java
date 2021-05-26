@@ -130,7 +130,7 @@ public class WasdiLib {
 	 */
 	private String m_sDefaultProvider = "LSA";
 
-	
+
 	/**
 	 * Self constructor. If there is a config file initilizes the class members
 	 */
@@ -342,7 +342,7 @@ public class WasdiLib {
 	public Map<String, String> getParams() {
 		return m_aoParams;
 	}
-	
+
 	public String getParamsAsJsonString() {
 		if(null==getParams()) {
 			log("WasdiLib.getParamsAsJsonString: no params, returning empty JSON");
@@ -361,7 +361,7 @@ public class WasdiLib {
 			.append(oPair.getValue())
 			.append("\"");
 		}
-		
+
 		oBuilder.append("}");
 		return oBuilder.toString();
 	}
@@ -814,7 +814,7 @@ public class WasdiLib {
 		}		
 	}
 
-	
+
 	/**
 	 * Opens a workspace given its ID
 	 * @param sWorkspaceId the ID of the workspace
@@ -827,7 +827,7 @@ public class WasdiLib {
 			return "";
 		}
 		setActiveWorkspace(sWorkspaceId);
-		
+
 		m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sWorkspaceId);
 		setWorkspaceBaseUrl(getWorkspaceUrlByWsId(m_sActiveWorkspace));
 
@@ -922,21 +922,43 @@ public class WasdiLib {
 	 * @return Full local path
 	 */
 	public String getPath(String sProductName) {
+		if(null==sProductName || sProductName.isEmpty()) {
+			log("WasdiLib.getPath: product name is empty or null, returning save path");
+			return getSavePath();
+		}
 		if (fileExistsOnWasdi(sProductName)) {
-			return getFullProductPath(sProductName);
+			return internalGetFullProductPath(sProductName);
 		}
 		else {
 			return getSavePath() + sProductName;
 		}
 	}
 
+
+
+	/**
+	 * Old way of getting path to product
+	 * @param sProductName
+	 * 
+	 * @deprecated  use {@link #getPath(sProductName)} instead
+	 */
+	@Deprecated
+	public String getFullProductPath(String sProductName) {
+		return internalGetFullProductPath(sProductName);
+	}
+
+
 	/**
 	 * Get the full local path of a product given the product name. Use the output of this API to open the file
 	 * @param sProductName Product Name
 	 * @return Product Full Path as a String ready to open file
 	 */
-	public String getFullProductPath(String sProductName) {
+	public String internalGetFullProductPath(String sProductName) {
 		log("WasdiLib.getFullProductPath( " + sProductName + " )");
+		if(null==sProductName || sProductName.isEmpty()) {
+			log("WasdiLib.getFullProductPath: product name is null or empty, aborting");
+			return "";
+		}
 		try {
 			String sFullPath = m_sBasePath;
 
@@ -976,8 +998,9 @@ public class WasdiLib {
 
 	private boolean fileExistsOnWasdi(String sFileName) {
 		log("WasdiLib.fileExistsOnWasdi( " + sFileName + " )");
-		if(null==sFileName) {
-			throw new NullPointerException("WasdiLib.fileExistssOnWasdi: passed a null file name");
+		if(null==sFileName || sFileName.isEmpty()) {
+			log("WasdiLib.fileExistssOnWasdi: passed a null or empty file name, aborting");
+			return false;
 		}
 		int iResult = 200;
 		try{
@@ -1460,7 +1483,7 @@ public class WasdiLib {
 	 */
 	public List<String> waitProcesses(List<String> asIds) {
 		updateStatus("WAITING");
-		
+
 		boolean bDone = false;
 		while(!bDone) {
 			bDone = true;	
@@ -1511,7 +1534,7 @@ public class WasdiLib {
 		}
 	}
 
-	
+
 	/**
 	 * Sets the payload of current process 
 	 * @param sData the payload as a String. JSON format recommended  
@@ -1527,7 +1550,7 @@ public class WasdiLib {
 			log("setPayload: " + sData);
 		}
 	}
-	
+
 	/**
 	 * Adds output payload to a process
 	 * @param sProcessId
@@ -1567,8 +1590,8 @@ public class WasdiLib {
 	public void refreshParameters() {
 		m_oParametersReader.refresh();
 	}
-	
-	
+
+
 	/**
 	 * Private version of the add file to wasdi function.
 	 * Adds a generated file to current open workspace
@@ -1652,7 +1675,7 @@ public class WasdiLib {
 	public String addFileToWASDI(String sFileName, String sStyle) {
 		return internalAddFileToWASDI(sFileName, false, sStyle);
 	}
-	
+
 	/**
 	 * Adds a generated file to current open workspace in asynchronous way
 	 * @param sFileName File Name to add to the open workspace
@@ -1662,7 +1685,7 @@ public class WasdiLib {
 	public String asynchAddFileToWASDI(String sFileName, String sStyle) {
 		return internalAddFileToWASDI(sFileName, true, sStyle);
 	}
-	
+
 	/**
 	 * Ingest a new file in the Active WASDI Workspace waiting for the result
 	 * The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
@@ -2111,8 +2134,8 @@ public class WasdiLib {
 				"orbit: " + iOrbitNumber + ", " +
 				"sensor mode: " + sSensorOperationalMode + ", " +
 				"cloud coverage: " + sCloudCoverage
-		);
-		
+				);
+
 		List<Map<String, Object>> aoReturnList = (List<Map<String, Object>>) new ArrayList<Map<String, Object>>() ;
 
 		if (sPlatform == null) {
@@ -3367,7 +3390,7 @@ public class WasdiLib {
 		log("WasdiLib.createWorkspace( " + sWorkspaceName + " )");
 		return createWorkspace(sWorkspaceName, null);
 	}
-	
+
 	public String createWorkspace(String sWorkspaceName, String sNodeCode) {
 		log("WasdiLib.createWorkspace( " + sWorkspaceName + ", " + sNodeCode + " )");
 		String sReturn = null;
@@ -3560,7 +3583,7 @@ public class WasdiLib {
 		log("WasdiLib.copyFileToSftp( " + sFileName + " )");
 		return copyFileToSftp(sFileName, null);
 	}
-	
+
 	/**
 	 * Copy a file from a workspace to the WASDI user's SFTP Folder in a synchronous way
 	 * @param sFileName the filename to move to the SFTP folder
@@ -3572,7 +3595,7 @@ public class WasdiLib {
 		return waitProcess(asynchCopyFileToSftp(sFileName, sRelativePath));
 	}
 
-	
+
 	public String asynchCopyFileToSftp(String sFileName) {
 		return asynchCopyFileToSftp(sFileName, null);
 	}
@@ -3588,7 +3611,7 @@ public class WasdiLib {
 			log("asynchCopyFileToSftp: invalid file name, aborting");
 			return null;
 		}
-		
+
 		//upload file if it is not on WASDI yet
 		try {
 			if(getUploadActive()) {
@@ -3602,30 +3625,30 @@ public class WasdiLib {
 			log("asynchCopyFileToSftp: upload failed due to: " + oE + ", aborting");
 			return null;
 		}
-		
+
 		String sResponse = null;
 		try {
 			StringBuilder oUrl = new StringBuilder()
 					.append(getWorkspaceBaseUrl())
 					.append("/catalog/copytosfpt?file=").append(sFileName)
 					.append("&workspace=").append(getActiveWorkspace());
-	
+
 			if(getIsOnServer()) {
 				oUrl = oUrl.append("&parent=").append(getMyProcId());
 			}
-			
+
 			if (sRelativePath != null) {
 				if (!sRelativePath.isEmpty()) {
 					oUrl = oUrl.append("&path=").append(sRelativePath);
 				}
 			}
-			
+
 			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 		} catch (Exception oE) {
 			log("asynchCopyFileToSftp: could not HTTP GET to /catalog/copytosfpt due to: " + oE + ", aborting");
 			return null;
 		}
-		
+
 		try {
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
 			String sProcessId = aoJSONMap.get("stringValue").toString();
@@ -3633,10 +3656,10 @@ public class WasdiLib {
 		} catch (Exception oE) {
 			log("asynchCopyFileToSftp: could not parse response due to: " + oE + ", aborting");
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL. Assumes big tiff format by default
 	 * @param sInputFile Input file
@@ -3667,7 +3690,7 @@ public class WasdiLib {
 		log("WasdiLib.multiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE, " + bBigTiff + " )");
 		return waitProcess(asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff));
 	}
-	
+
 	/**
 	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL. Assumes big tiff format by default
 	 * @param sInputFile Input file
@@ -3682,7 +3705,7 @@ public class WasdiLib {
 		log("WasdiLib.asynchMultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE )");
 		return asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, true); 
 	}
-	
+
 	/**
 	 * Asynchronous multisubset: creates a Many Subsets from an image. MAX 10 TILES PER CALL
 	 * @param sInputFile Input file
@@ -3720,7 +3743,7 @@ public class WasdiLib {
 			log("multisubset: adLonE null or empty, aborting");
 			return null;
 		}
-		
+
 		StringBuilder oUrl = null;
 		try {
 			oUrl = new StringBuilder()
@@ -3728,7 +3751,7 @@ public class WasdiLib {
 					.append("/processing/geometric/multisubset?sSourceProductName=").append(sInputFile)
 					.append("&sDestinationProductName=").append(sInputFile)
 					.append("&sWorkspaceId=").append(getActiveWorkspace());
-			
+
 			if(getIsOnServer()) {
 				oUrl = oUrl.append("&parent=").append(getMyProcId());
 			}
@@ -3736,7 +3759,7 @@ public class WasdiLib {
 			log("multisubset: could not prepare URL due to " + oE + ", aborting");
 			return null;
 		}
-		
+
 		Map<String, Object> aoPayload = null;
 		try {
 			aoPayload = new HashMap<>();
@@ -3745,7 +3768,7 @@ public class WasdiLib {
 			aoPayload.put("lonWList", adLonW);
 			aoPayload.put("latSList", adLatS);
 			aoPayload.put("lonEList", adLonE);
-			
+
 			if(bBigTiff) {
 				aoPayload.put("bigTiff", true);
 			}
@@ -3753,7 +3776,7 @@ public class WasdiLib {
 			log("multisubset: could not populate payload due to " + oE + ", aborting");
 			return null;
 		}
-		
+
 		String sPayload = null;
 		try {
 			sPayload = s_oMapper.writeValueAsString(aoPayload);
@@ -3761,7 +3784,7 @@ public class WasdiLib {
 			log("multisubset: could not serialize payload due to " + oE + ", aborting");
 			return null;
 		}
-		
+
 		String sResponse = null;
 		try {
 			sResponse = httpPost(oUrl.toString(), sPayload, getStandardHeaders());
@@ -3769,18 +3792,18 @@ public class WasdiLib {
 			log("multisubset: post did not succeed due to " + oE + ", aborting");
 			return null;
 		}
-		
+
 		try {
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
 			return (String)aoJSONMap.get("stringValue");
 		} catch (Exception oE) {
 			log("multisubset: response parsing failed due to " + oE + ", aborting");
 		}
-		
+
 		return null;		
 	}
 
-	
+
 	/**
 	 * Sets the sub pid
 	 * @param sProcessId the process ID
@@ -3796,17 +3819,17 @@ public class WasdiLib {
 		String sResponse = null;
 		try {
 			StringBuilder oUrl = new StringBuilder()
-				.append(getWorkspaceBaseUrl())
-				.append("/process/setsubpid?")
-				.append("sProcessId=").append(sProcessId)
-				.append("subpid").append(iSubPid);
-		
+					.append(getWorkspaceBaseUrl())
+					.append("/process/setsubpid?")
+					.append("sProcessId=").append(sProcessId)
+					.append("subpid").append(iSubPid);
+
 			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 		} catch (Exception oE) {
 			log("setSubPid: could not HTTP GET due to " + oE + ", aborting");
 			return "";
 		}
-		
+
 		Map<String, Object> aoJSONMap = null;
 		try {
 			aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -3816,7 +3839,7 @@ public class WasdiLib {
 		}
 		return "";
 	}
-	
+
 	public void printStatus() {
 		log("wasdi: user: " + getUser());
 		log("wasdi: password: ***********************");
