@@ -72,27 +72,12 @@ public class SnapWorkflowRepository extends MongoRepository {
      * Get all the workflow that can be accessed by UserId
      *
      * @param sUserId
-     * @return List of private workflow of users plus all the public ones plus the ones shared with the user
+     * @return List of private workflow of users plus all the public ones
      */
     public List<SnapWorkflow> getSnapWorkflowPublicAndByUser(String sUserId) {
         // migrated to set in order to avoid redundancy
         final HashSet<SnapWorkflow> aoReturnList = new HashSet<SnapWorkflow>();
         try {
-            // find sharings by userId
-            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
-
-
-            // fetch snapworkflows using the ids in the sharing
-            // if they're not public, prepend them the to return list
-
-            for (WorkflowSharing oWorkflowSharing : aoWorkflowSharing) {
-                SnapWorkflow oCurrentWorkflow = this.getSnapWorkflow(oWorkflowSharing.getWorkflowId());
-                if (oCurrentWorkflow == null) continue;
-                if (!oCurrentWorkflow.getIsPublic()) {
-                    aoReturnList.add(oCurrentWorkflow);
-                }
-            }
             // Then search all the other workflow using UserId of the current user
             // - OR -
             // the public ones

@@ -1,6 +1,8 @@
 package wasdi.shared.viewmodels;
 
 import java.util.ArrayList;
+
+import wasdi.shared.business.SnapWorkflow;
 /**
  * View model class to pass data from SnapWorkflow to UI 
  * aka Graph, Workflows
@@ -110,6 +112,19 @@ public class SnapWorkflowViewModel {
 	}
 	public void setSharedWithMe(boolean sharedWithMe) {
 		this.sharedWithMe = sharedWithMe;
+	}
+	
+	static public SnapWorkflowViewModel getFromWorkflow(SnapWorkflow oWorkflow) {
+        SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
+        oVM.setName(oWorkflow.getName());
+        oVM.setDescription(oWorkflow.getDescription());
+        oVM.setWorkflowId(oWorkflow.getWorkflowId());
+        oVM.setOutputNodeNames(oWorkflow.getOutputNodeNames());
+        oVM.setInputNodeNames(oWorkflow.getInputNodeNames());
+        oVM.setPublic(oWorkflow.getIsPublic());
+        oVM.setUserId(oWorkflow.getUserId());
+        oVM.setNodeUrl(oWorkflow.getNodeUrl());
+        return oVM;
 	}
 	
 }

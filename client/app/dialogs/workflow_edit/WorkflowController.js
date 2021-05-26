@@ -1,17 +1,28 @@
 
 var WorkflowController = (function () {
 
-    function WorkflowController($scope, oExtras, oConstantsService, oSnapOperationService) {
+    function WorkflowController($scope, oExtras, oConstantsService, oSnapOperationService, oClose) {
 
         /**
          * Angular Scope
          */
         this.m_oScope = $scope;
+
+        /**
+         * Class callback
+         */
+        this.m_oClose=oClose;
         /**
          * Reference to the controller
          */
         this.m_oScope.m_oController = this;
+        /**
+         * Constant Service
+         */
         this.m_oConstantService = oConstantsService;
+        /**
+         * Snap Operations Service
+         */
         this.m_oSnapOperationService = oSnapOperationService;
         /**
          * First tab visualized
@@ -27,8 +38,7 @@ var WorkflowController = (function () {
          */
         this.m_oWorkflow = this.m_oExtras.workflow;
         /**
-         * Field to add sharing
-         * @type {string}
+         * User Mail for share
          */
         this.m_sUserEmail = "";
         /**
@@ -42,12 +52,17 @@ var WorkflowController = (function () {
         this.m_oFile = undefined;
 
 
-        // boolean to discriminate mode default edit
+        /**
+         * boolean to discriminate mode default edit
+         */
         this.m_bEditMode = true;
 
+        /**
+         * Default dialog title
+         */
         this.m_sDialogTitle = "Edit Workflow"; // swap with translation ?
 
-
+        // Let's init the modal
         this.initModal();
 
     }
@@ -92,25 +107,23 @@ var WorkflowController = (function () {
     * @returns 
     */
     WorkflowController.prototype.apply = function () {
-        var oController = this;
-        if (oController.m_sSelectedTab == "Base") {
-            if (oController.m_bEditMode) {
+        if (this.m_sSelectedTab == "Base") {
+            if (this.m_bEditMode) {
                 // UPDATE 
-                oController.updateGraph(); 
+                this.updateGraph(); 
             }
             else { 
                 // UPLOAD
-                oController.uploadUserGraphOnServer();
+                this.uploadUserGraphOnServer();
             }
         }
         //cose the dialog
-        close();
+        this.m_oClose(null, 500);
     }
 
-
-
-
-
+    /**
+     * Share the workflow with a user
+     */
     WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId) {
         var oController = this;
         this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId)
@@ -182,14 +195,13 @@ var WorkflowController = (function () {
     }
 
     /**
- * uploadGraph
- * @param sWorkspaceId
- * @param sName
- * @param sDescription
- * @param oBody
- * @returns {boolean}
- */
-
+     * uploadGraph
+     * @param sWorkspaceId
+     * @param sName
+     * @param sDescription
+     * @param oBody
+     * @returns {boolean}
+     */
     WorkflowController.prototype.uploadGraph = function (sWorkspaceId, sName, sDescription, bIsPublic, oBody) {
 
         if (utilsIsObjectNullOrUndefined(sName) === true || utilsIsStrNullOrEmpty(sName) === true) {
@@ -207,7 +219,7 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.uploadGraph("workspace", sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
-                var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD, NEW WORKFLOW"+ sName.toUpperCase());
+                var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>"+ sName.toUpperCase());
                 utilsVexCloseDialogAfter(4000, oDialog);
 
             } else {
@@ -249,10 +261,10 @@ var WorkflowController = (function () {
                     oBody.append('file', oController.m_oFile[0]);
                     oController.m_oSnapOperationService.updateGraphFile(oController.m_oWorkflow.workflowId, oBody).then(function (data) {
                         if (utilsIsObjectNullOrUndefined(data.data) == false) {
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFULLY UPDATED WORKFLOW");
+                            var oDialog = utilsVexDialogAlertBottomRightCorner("UPDATED WORKFLOW<br>READY");
                             utilsVexCloseDialogAfter(4000, oDialog);
                         } else {
-                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPDATE WORKFLOW PROCESS");
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING WORKFLOW");
                         }
 
                         oController.isUploadingWorkflow = false;
@@ -263,11 +275,11 @@ var WorkflowController = (function () {
                     });
                 }
                 else {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFULLY UPDATED WORKFLOW FIELDS");
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPDATED<br>READY");
                     utilsVexCloseDialogAfter(4000, oDialog);
                 }
             }, function (error) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPDATE WORKFLOW PROCESS");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING WORKFLOW");
             });
 
         return true;
@@ -306,9 +318,9 @@ var WorkflowController = (function () {
         '$scope',
         'extras',
         'ConstantsService',
-        'SnapOperationService'
+        'SnapOperationService',
+        'close'
     ]
-
 
     return WorkflowController;
 })();
