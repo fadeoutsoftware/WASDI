@@ -676,9 +676,7 @@ public class ProcessingResources {
                 }
 
             }
-
-
-
+            
             // Check if has been already shared
             if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
                 oResult.setStringValue("Already shared");
@@ -688,7 +686,7 @@ public class ProcessingResources {
             // Create and insert the sharing
             WorkflowSharing oWorkflowSharing = new WorkflowSharing();
             Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-            oWorkflowSharing.setOwnerId(oRequesterUser.getUserId());
+            oWorkflowSharing.setOwnerId(oWorkflow.getUserId());
             oWorkflowSharing.setUserId(sUserId);
             oWorkflowSharing.setWorkflowId(sWorkflowId);
             oWorkflowSharing.setShareDate((double) oTimestamp.getTime());
