@@ -489,14 +489,27 @@ public class ProcessingResources {
             // find sharings by userId
             WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
             List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
-
+            
+            // For all the shared workflows
             for (WorkflowSharing oSharing : aoWorkflowSharing) {
+            	// Create the VM
             	SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getWorkflowId());
             	SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
-
-                // check if it was shared, if so, set shared with me to true
-                oVM.setSharedWithMe(true);
-            	aoRetWorkflows.add(oVM);
+            	
+            	if (oVM.isPublic() == false) {
+                    // This is shared and not public: add to return list
+                    oVM.setSharedWithMe(true);
+                	aoRetWorkflows.add(oVM);
+            	}
+            	else {
+            		// This is shared but public, so this is already in our return list
+            		for (SnapWorkflowViewModel oWorkFlow : aoRetWorkflows) {
+            			// Find it and set shared flag = true
+						if (oSharedWithMe.getWorkflowId().equals(oWorkFlow.getWorkflowId())) {
+							oWorkFlow.setSharedWithMe(true);
+						}
+					}
+            	}
             }
             
         } catch (Exception oE) {

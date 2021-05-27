@@ -1226,7 +1226,7 @@ public class ProcessorsResource  {
 			
 			// This API is allowed ONLY on the main node
 			if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
-				Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
+				Utils.debugLog("ProcessorsResource.deleteProcessor: this is not the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 
