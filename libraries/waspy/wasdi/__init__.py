@@ -131,7 +131,7 @@ def printStatus():
 def setVerbose(bVerbose):
     """Sets verbosity
 
-    :param bVerbose: False non verbose, True verbose
+    :param boolean bVerbose: False non verbose, True verbose
     :return:
     """
     if bVerbose is None:

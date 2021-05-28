@@ -27,7 +27,7 @@ author = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['javasphinx','sphinxemoji.sphinxemoji']
+extensions = ['javasphinx','sphinxemoji.sphinxemoji','sphinx.ext.autodoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -59,8 +59,15 @@ html_logo = '_static/logowasdi.svg'
 ##search for "l_,"" and replace it with ""
 ##search for "l_("" and replace it with "_("
 ##/home/docs/checkouts/readthedocs.org/user_builds/testreadthedocsbymena/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py
-
 import os
+import sys
+#print(sys.path)
+sys.path.insert(0, os.path.abspath('../libraries/waspy'))
+print(sys.path)
+
+
+
+
 
 
 os.system("echo --- HOT FIX for Javasphinx library ---")

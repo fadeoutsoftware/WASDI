@@ -59,6 +59,7 @@ If you already know WASDI features and you are a Python developer check out the 
 
 Reference center
 ---------------------------
+
 WASDI allows users and developer to interact though **libraries** and **APIs**.
 
 
@@ -68,4 +69,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    :caption: Libraries
 
    java/WasdiLib.rst
+   python/waspy.rst
+
+
 
