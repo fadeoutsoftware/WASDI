@@ -19,7 +19,8 @@ public class ConfigReader {
 
     static HashMap<String,String> m_aoProperties;
 
-    private static void loadPropValues() throws IOException {
+    @SuppressWarnings("unchecked")
+	private static void loadPropValues() throws IOException {
 
         InputStream inputStream = null;
         try {

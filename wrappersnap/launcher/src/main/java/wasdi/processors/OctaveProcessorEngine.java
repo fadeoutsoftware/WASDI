@@ -4,7 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+
+import com.google.common.io.Files;
 
 import wasdi.LauncherMain;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -19,22 +20,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 		m_sDockerTemplatePath += "octave";
 		
 	}
-	
-	@Override
-	protected void handleRunCommand(String sCommand, ArrayList<String> asArgs) {
 		
-	}
-
-	@Override
-	protected void handleBuildCommand(String sCommand, ArrayList<String> asArgs) {
-		
-	}
-
-	@Override
-	protected void handleUnzippedProcessor(String sProcessorFolder) {
-		
-	}
-	
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 		
@@ -101,6 +87,55 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 		LauncherMain.s_oLogger.debug("OctaveProcessorEngine.deploy: call super Docker Proc Engine deploy method");
 		
 		return super.deploy(oParameter, bFirstDeploy);
+	}
+	
+	
+	@Override
+	public boolean libraryUpdate(ProcessorParameter oParameter) {
+		
+		try {
+			LauncherMain.s_oLogger.debug("OctaveProcessorEngine.libraryUpdate: move lib in the processor folder");
+			
+			// Get the lib path
+			String sLibFilePath = m_sDockerTemplatePath;
+			
+			if (!sLibFilePath.endsWith(File.separator)) {
+				sLibFilePath += File.separator;
+			}
+			
+			// Get the processor Path
+			String sDestinationFilePath = m_sWorkingRootPath;
+			if (!sDestinationFilePath.endsWith(File.separator)) {
+				sDestinationFilePath+=File.separator;
+			}
+			
+			sDestinationFilePath = sDestinationFilePath+ "processors" + File.separator + m_oParameter.getName() + File.separator;
+
+			// Lib folder
+			File oLibFolder = new File(sLibFilePath);
+						
+			if (oLibFolder.exists()) {
+				File [] aoFiles = oLibFolder.listFiles();
+				
+				for (File oFile : aoFiles) {
+					
+					if (oFile.getName().endsWith(".m") || oFile.getName().endsWith(".jar")) {
+						// Create the file in the destination folder
+						File oDestinationFile = new File(sDestinationFilePath+oFile.getName());
+						// Copy the file
+						Files.copy(oFile, oDestinationFile);						
+					}
+				}
+			}
+						
+			LauncherMain.s_oLogger.debug("OctaveProcessorEngine.libraryUpdate: call super implementation to update the docker");
+			
+			return super.libraryUpdate(oParameter);
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
+			return false;
+		}
 	}
 
 }

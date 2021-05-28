@@ -642,13 +642,13 @@ public class WorkspaceResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
-		if (oOwnerUser == null) {
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid session");
 			return oResult;
 		}
 
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid user");
 			oResult.setStringValue("Invalid user.");
 			return oResult;
@@ -674,6 +674,29 @@ public class WorkspaceResource {
 			oResult.setStringValue("Invalid workspace.");
 			return oResult;			
 		}
+		
+		if (oRequesterUser.getUserId().equals(sUserId)) {
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
+			oResult.setStringValue("Impossible to autoshare.");
+			return oResult;				
+		}		
+		
+		if (!oWorkspace.getUserId().equals(oRequesterUser.getUserId())) {
+			
+			// Is he trying to share with the owner?
+			if (oWorkspace.getUserId().equals(sUserId)) {
+				oResult.setStringValue("Cannot Share with owner");
+				return oResult;					
+			}			
+			
+			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+			
+			if (!oWorkspaceSharingRepository.isSharedWithUser(oRequesterUser.getUserId(), sWorkspaceId)) {
+				//No. So it is neither the owner or a shared one
+				oResult.setStringValue("Unauthorized");
+				return oResult;
+			}
+		}
 
 		try {
 			WorkspaceSharing oWorkspaceSharing = new WorkspaceSharing();
@@ -681,7 +704,7 @@ public class WorkspaceResource {
 			
 			if (!oWorkspaceSharingRepository.isSharedWithUser(sUserId, sWorkspaceId)) {
 				Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-				oWorkspaceSharing.setOwnerId(oOwnerUser.getUserId());
+				oWorkspaceSharing.setOwnerId(oRequesterUser.getUserId());
 				oWorkspaceSharing.setUserId(sUserId);
 				oWorkspaceSharing.setWorkspaceId(sWorkspaceId);
 				oWorkspaceSharing.setShareDate((double) oTimestamp.getTime());
@@ -730,7 +753,7 @@ public class WorkspaceResource {
 				
 				oMessage.setSender(sSender);
 				
-				String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the workspace: " + oWorkspace.getName();
+				String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the workspace: " + oWorkspace.getName();
 								
 				oMessage.setMessage(sMessage);
 		
@@ -796,14 +819,14 @@ public class WorkspaceResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oOwnerUser == null) {
+		if (oRequestingUser == null) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: invalid session");
 			return oResult;
 		}
 
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		if (Utils.isNullOrEmpty(oRequestingUser.getUserId())) {
 			oResult.setStringValue("Invalid user");
 			return oResult;
 		}
@@ -817,6 +840,13 @@ public class WorkspaceResource {
 			oResult.setStringValue("Invalid user.");
 			return oResult;
 		}
+
+/*		if (!oRequestingUser.getUserId().equals(sUserId)  && //request for another user
+				! new WorkspaceRepository().getWorkspace(sWorkspaceId).getUserId().equals(sUserId)){ // not the owner
+			oResult.setStringValue("Attempting to delete other users sharing. Only owner can delete other sharings");
+			return oResult;
+		}*/
+
 		try {
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 

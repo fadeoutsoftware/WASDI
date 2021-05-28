@@ -6,12 +6,13 @@
 
 var WorkFlowManagerController = (function () {
 
-    function WorkFlowManagerController($scope, oClose, oExtras, oSnapOperationService, oConstantsService, oHttp) {
+    function WorkFlowManagerController($scope, oClose, oExtras, oSnapOperationService, oConstantsService, oHttp, oModalService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oModalService = oModalService;
         this.m_oFile = null;
         this.m_aoProducts = this.m_oExtras.products;
 
@@ -59,14 +60,15 @@ var WorkFlowManagerController = (function () {
 
 
         $scope.close = function (result) {
-
-            oClose(result, 500); // close, but give 500ms for bootstrap to animate
+            // close, but give 500ms for bootstrap to animate
+            oClose(result, 500); 
         };
 
         //Load workflows
         this.getWorkflowsByUser();
 
     }
+
 
     WorkFlowManagerController.prototype.selectedMultiInputWorkflow = function (oWorkflow) {
         this.m_oSelectedMultiInputWorkflow = oWorkflow;
@@ -84,10 +86,6 @@ var WorkFlowManagerController = (function () {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, DATA NOT AVAILABLE");
             }
 
-            //it changes the default tab, we can't visualize the 'WorkFlowTab1' because there aren't workflows
-            if ((utilsIsObjectNullOrUndefined(oController.m_aoWorkflows) === true) || (oController.m_aoWorkflows.length === 0)) {
-                oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
-            }
             oController.m_bIsLoadingWorkflows = false;
         },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW LIST");
@@ -400,6 +398,26 @@ var WorkFlowManagerController = (function () {
         return true;
     };
 
+    WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
+        var oController = this; 
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/workflow_edit/WorkflowView.html",
+            controller: "WorkflowController",
+            inputs: {
+                extras: {
+                    workflow:oWorkflow
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult, iDelay) {
+                oController.m_sSelectedWorkflowTab="WorkFlowTab3";
+                oController.getWorkflowsByUser();
+            });
+        });
+    }
+
+
     WorkFlowManagerController.prototype.openDeleteWorkflowDialog = function (oWorkflow) {
         if (utilsIsObjectNullOrUndefined(oWorkflow) === true) {
             return false;
@@ -450,7 +468,9 @@ var WorkFlowManagerController = (function () {
         'extras',
         'SnapOperationService',
         'ConstantsService',
-        '$http'
+        '$http',
+        'ModalService',
+
     ];
     return WorkFlowManagerController;
 })();

@@ -14,6 +14,7 @@ import org.apache.commons.net.io.Util;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -24,7 +25,9 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
-	protected String m_sTomcatUser = "tomcat8";
+	protected String m_sTomcatUser;
+	ProcessorParameter m_oParameter;
+	protected ProcessWorkspace m_oProcessWorkspace= null;
 	
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
@@ -36,7 +39,7 @@ public abstract class WasdiProcessorEngine {
 			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.IDL)) {
-			return new IDLProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
+			return new IDL2ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
 			return new UbuntuPython37ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
@@ -49,12 +52,18 @@ public abstract class WasdiProcessorEngine {
 		}
 	}
 	
+	/**
+	 * Create a Processor Engine
+	 * @param sWorkingRootPath Main working path
+	 * @param sDockerTemplatePath Docker template path
+	 * @param sTomcatUser Tomcat user
+	 */
 	public WasdiProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		m_sWorkingRootPath = sWorkingRootPath;
 		m_sDockerTemplatePath = sDockerTemplatePath;
 		m_sTomcatUser = sTomcatUser;
 	}
-	
+		
 	/**
 	 * Deploy a new Processor in WASDI
 	 * @param oParameter
@@ -82,7 +91,11 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public abstract boolean redeploy(ProcessorParameter oParameter);
 	
-	
+	/**
+	 * Force the library update
+	 * @param oParameter
+	 * @return
+	 */
 	public abstract boolean libraryUpdate(ProcessorParameter oParameter);
 	
 	/**
@@ -125,33 +138,7 @@ public abstract class WasdiProcessorEngine {
 			e.printStackTrace();
 		}
 	}
-//		
-//	/**
-//	 * Execute a system task
-//	 * @param sCommand
-//	 * @param asArgs
-//	 * @param bWait
-//	 */
-//	public void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-//		try {
-//			if (asArgs==null) asArgs = new ArrayList<String>();
-//			asArgs.add(0, sCommand);
-//			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
-//			pb.redirectErrorStream(true);
-//			Process process = pb.start();
-//			if (bWait) {
-//				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//				String line;
-//				while ((line = reader.readLine()) != null)
-//					LauncherMain.s_oLogger.debug("[docker]: " + line);
-//				process.waitFor();				
-//			}
-//		}
-//		catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
-//	
+	
 	/**
 	 * Check if a processor exists on actual node
 	 * @param oProcessorParameter
@@ -187,11 +174,12 @@ public abstract class WasdiProcessorEngine {
 		return aoHeaders;
 	}
 
-	
+
 	/**
-	 * Download Workflow on the local PC
-	 * @param sWorkflowId File Name
-	 * @return Full Path
+	 * Download Processor on the local PC
+	 * @param oProcessor
+	 * @param sSessionId
+	 * @return
 	 */
 	protected String downloadProcessor(Processor oProcessor, String sSessionId) {
 		try {
@@ -313,13 +301,45 @@ public abstract class WasdiProcessorEngine {
 	}
 	
 	/**
-	 * Safe Processo
+	 * Safe Processor log
 	 * @param sLog
 	 */
 	protected void processWorkspaceLog(String sLog) {
 		if (m_oProcessWorkspaceLogger!=null) {
 			m_oProcessWorkspaceLogger.log(sLog);
 		}
+	}
+	
+	/**
+	 * Get the reference to the process workspace
+	 * @return
+	 */
+	public ProcessWorkspace getProcessWorkspace() {
+		return m_oProcessWorkspace;
+	}
+
+	/**
+	 * Set the reference to the process workspace
+	 * @param oProcessWorkspace
+	 */
+	public void setProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+		this.m_oProcessWorkspace = oProcessWorkspace;
+	}
+
+	/**
+	 * Get the associated ProcessorParameter
+	 * @return
+	 */
+	public ProcessorParameter getParameter() {
+		return m_oParameter;
+	}
+
+	/**
+	 * Set the associated Processor Parameter
+	 * @param oParameter
+	 */
+	public void setParameter(ProcessorParameter oParameter) {
+		this.m_oParameter = oParameter;
 	}
 	
 }

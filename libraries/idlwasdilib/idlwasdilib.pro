@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.2
-; Last Update: 2021-03-10
+; IDL WASDI Lib Version 0.6.2.1
+; Last Update: 2021-05-06
 ;
 ; History
+; 0.6.2.1 - 2021-05-06
+;	support start by workspace id
+;
 ; 0.6.2 - 2021-03-10
 ;	moved to https
 ;
@@ -75,6 +78,7 @@ PRO STARTWASDI, sConfigFilePath
 	activeworkspace = ''
 	workspaceowner = ''
 	workspaceurl = ''
+	wsid = ''
 	token = ''
 	myprocid = ''
 	baseurl='www.wasdi.net'
@@ -113,6 +117,11 @@ PRO STARTWASDI, sConfigFilePath
 			'WORKSPACE': BEGIN
 					IF n_elements(asKeyValue) gt 1 THEN BEGIN
 						activeworkspace = asKeyValue[1]
+					END
+				END
+			'WORKSPACEID': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						wsid = asKeyValue[1]
 					END
 				END
 			'BASEPATH': BEGIN
@@ -170,7 +179,11 @@ PRO STARTWASDI, sConfigFilePath
 	INITWASDI,user,password,basepath,token,myprocid
 
 	IF (activeworkspace EQ !NULL) OR (STRLEN(activeworkspace) LE 1) THEN BEGIN
-		print, 'Workspace not set'
+		IF (STRLEN(wsid) GT 1) THEN BEGIN
+			WASDIOPENWORKSPACEBYID, wsid
+		END ELSE BEGIN
+			print, 'Workspace not set'
+		END
 	END ELSE BEGIN
 		WASDIOPENWORKSPACE, activeworkspace
 		print, 'Workspace ', activeworkspace, ' opened'
@@ -1789,9 +1802,11 @@ END
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
+	sPerc = STRTRIM(STRING(iPerc),2)
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+iPerc
+	UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+sPerc
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 	; get the output status

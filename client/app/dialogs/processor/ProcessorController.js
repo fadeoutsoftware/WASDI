@@ -214,11 +214,17 @@ var ProcessorController = (function() {
 
             if (oController.m_bEditMode == true) {
 
+                //new condition -> The user didn't put anything on the params
+                if (oController.m_sJSONSample == "" ) {
+                    oController.m_sJSONSample = "{}"; // suppose it was an empty JSON 
+                }
                 if (!oController.tryParseJSON(oController.m_sJSONSample)) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
                     utilsVexCloseDialogAfter(4000,oDialog);
                     return;
                 }
+                
+
 
                 if (oController.m_bUIChanged) {
                     if (!oController.tryParseJSON(oController.m_sProcessorUI)) {
@@ -239,8 +245,8 @@ var ProcessorController = (function() {
             else {
                 oController.postProcessor(oController, oController.m_oFile[0]);
             }
-
-            oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate
+            // close only if successfull?
+            //oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate
         };
 
         // Are we creating a new processor or editing an existing one?
@@ -255,6 +261,15 @@ var ProcessorController = (function() {
             this.m_sJSONSample = decodeURIComponent(this.m_oInputProcessor.paramsSample);
             this.m_sProcessorId = this.m_oInputProcessor.processorId;
             this.m_iMinuteTimeout = this.m_oInputProcessor.minuteTimeout;
+
+            try {
+                var oParsed = JSON.parse(this.m_sJSONSample);
+                sPrettyPrint = JSON.stringify(oParsed, null, 2);
+                this.m_sJSONSample = sPrettyPrint;
+            }
+            catch (oError) {
+
+            }
 
             // Get the list of Enabled users for sharing
             this.getListOfEnableUsers(this.m_sProcessorId)

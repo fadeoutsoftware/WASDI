@@ -103,11 +103,14 @@ public class WasdiGraph {
 	
 	/**
 	 * Construct the Graph object
-	 * @param oParams
-	 * @param oRabbitSender
+	 * @param oParams Parameters 
+	 * @param oRabbitSender Rabbit Sender
+	 * @param oLogger Process Workspace logger
+	 * @param oProcessWorkspace Process Workspace Entity
 	 * @throws Exception
 	 */
-	public WasdiGraph(GraphParameter oParams, Send oRabbitSender, ProcessWorkspaceLogger oLogger) throws Exception {
+	public WasdiGraph(GraphParameter oParams, Send oRabbitSender, ProcessWorkspaceLogger oLogger, ProcessWorkspace oProcessWorkspace) throws Exception {
+		
 		
 		this.m_oProcessWorkspaceLogger = oLogger;
 		
@@ -127,7 +130,7 @@ public class WasdiGraph {
 		
 		//retrieve wasdi process
         m_oProcessRepository = new ProcessWorkspaceRepository();
-        m_oProcess = m_oProcessRepository.getProcessByProcessObjId(oParams.getProcessObjId());
+        m_oProcess = oProcessWorkspace;
         
         m_oLogger.info("WasdiGraph: call find IO Nodes");
         findIONodes();
@@ -194,10 +197,6 @@ public class WasdiGraph {
 			m_oLogger.info("WasdiGraph.execute: start");
 			
 	        //check input file
-			//File oBaseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-	        //File oUserDir = new File(oBaseDir, m_oParams.getUserId());
-	        //File oWorkspaceDir = new File(oUserDir, m_oParams.getWorkspace());
-	        
 	        String sWorkspaceDir = LauncherMain.getWorspacePath(m_oParams);
 	        File oWorkspaceDir = new File(sWorkspaceDir);
 	        

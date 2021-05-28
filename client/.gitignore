@@ -20,6 +20,8 @@ logs/*
 *.launch
 .settings/
 *.sublime-workspace
+/.vscode
+*.iml
 
 # System Files
 .DS_Store

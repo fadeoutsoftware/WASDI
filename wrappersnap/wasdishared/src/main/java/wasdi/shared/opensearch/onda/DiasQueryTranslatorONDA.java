@@ -149,8 +149,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		while(sFreeText.endsWith("*")) {
 			sFreeText = sFreeText.substring(0,  sFreeText.length() - 1);
 		}
-
-		String sOld = sFreeText;
+		
 		sFreeText = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sFreeText);
 
 		//this is a heuristic to understand if the filename has its tail:

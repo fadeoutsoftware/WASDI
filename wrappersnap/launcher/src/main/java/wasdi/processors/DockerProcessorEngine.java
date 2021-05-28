@@ -73,7 +73,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			processWorkspaceLog("Start Deploy of " + sProcessorName + " Type " + oParameter.getProcessorType());
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			if (bFirstDeploy) {
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
@@ -123,6 +123,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				}
 				return false;
 			}
+			
+			onAfterUnzipProcessor(sProcessorFolder);
 		    
 			if (bFirstDeploy) LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: copy container image template");
@@ -137,13 +139,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 
 			// Generate the image
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: building image");
-			handleUnzippedProcessor(sProcessorFolder);
+			onAfterCopyTemplate(sProcessorFolder);
 			
 			processWorkspaceLog("Start building Image");
 			
 			// Create Docker Util and deploy the docker 
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 			oDockerUtils.deploy();
+			
+			onAfterDeploy(sProcessorFolder);
 			
 			processWorkspaceLog("Image done, start the docker");
 			
@@ -217,11 +221,30 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		return true;
 	}
 	
-	protected abstract void handleRunCommand(String sCommand, ArrayList<String> asArgs);
-
-	protected abstract void handleBuildCommand(String sCommand, ArrayList<String> asArgs);
-
-	protected abstract void handleUnzippedProcessor(String sProcessorFolder);
+	
+	/**
+	 * Called after the unzip of the processor
+	 * @param sProcessorFolder
+	 */
+	protected void onAfterUnzipProcessor(String sProcessorFolder) {
+		
+	}
+	
+	/**
+	 * Called after the template is copied in the processor folder
+	 * @param sProcessorFolder
+	 */
+	protected void onAfterCopyTemplate(String sProcessorFolder) {
+		
+	}
+	
+	/**
+	 * Called after the deploy is done
+	 * @param sProcessorFolder
+	 */
+	protected void onAfterDeploy(String sProcessorFolder) {
+		
+	}
 	
 	/**
 	 * Unzip the processor
@@ -250,19 +273,21 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
 				return false;
 			}
+			
 			//check myProcessor exists:
-			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
-			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
-				oWalk.map(Path::toFile).forEach(oFile->{
-					if(oFile.getName().equals("myProcessor.py")) {
-						oMyProcessorExists.set(true);
-					}
-				});
-			}
-		    if (!oMyProcessorExists.get()) {
-		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
-		    	//return false;
-		    }
+			// This class is generic. to use this code we need before to adapt it to run with all the different processor types
+//			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
+//			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
+//				oWalk.map(Path::toFile).forEach(oFile->{
+//					if(oFile.getName().equals("myProcessor.py")) {
+//						oMyProcessorExists.set(true);
+//					}
+//				});
+//			}
+//		    if (!oMyProcessorExists.get()) {
+//		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
+//		    	//return false;
+//		    }
 		    
 		    try {
 			    // Remove the zip?
@@ -285,6 +310,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	/**
 	 * Run a Docker Processor
 	 */
+	@SuppressWarnings("unchecked")
 	public boolean run(ProcessorParameter oParameter) {
 		
 		LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: start");
@@ -298,7 +324,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Get Repo and Process Workspace
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			
 			// Check workspace folder
@@ -606,7 +632,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -723,7 +749,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 						
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -809,7 +835,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			
 			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oParameter.getProcessObjId());
+			oProcessWorkspace = m_oProcessWorkspace;
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
@@ -829,9 +855,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Set the processor path
 			String sDownloadRootPath = m_sWorkingRootPath;
 			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-			
-			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
-			
+						
 			LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
 			
 			// Call localhost:port
