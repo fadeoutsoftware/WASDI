@@ -174,7 +174,7 @@ public class ProcessingResources {
 		try {
 			// Check authorization
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessingResources.uploadGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkspace + ", Name: " + sName + ", Descr: " + sDescription + ", Public: " + bPublic + " ): invalid session");
+				Utils.debugLog("ProcessingResources.uploadGraph: invalid session");
 				return Response.status(401).build();
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
