@@ -112,7 +112,7 @@ var WorkFlowManagerController = (function () {
             // var sDestinationProductName = oProduct.name + "_workflow";
             this.m_oSelectedWorkflow.inputFileNames.push(oProduct.fileName);
             var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId, this.m_oSelectedWorkflow.name, this.m_oSelectedWorkflow.description,
-                this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames, this.m_oSelectedWorkflow.outputNodeNames,
+                this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames[iIndexSelectedProduct], this.m_oSelectedWorkflow.outputNodeNames,
                 this.m_oSelectedWorkflow.outputFileNames);
             if (utilsIsObjectNullOrUndefined(oSnapWorkflowViewModel) === false) {
                 this.executeGraphFromWorkflowId(this.m_sWorkspaceId, oSnapWorkflowViewModel);
@@ -166,9 +166,11 @@ var WorkFlowManagerController = (function () {
             utilsIsObjectNullOrUndefined(asInputFileNames)) {
             bReturnValue = false;
         }
+        /*this checks always fails on multiple files passed to the workflow on batch mode
+        Batch mode work only with single input nodes workflows
         if (asInputNodeNames.length !== asInputFileNames.length) {
-            bReturnValue = false;
-        }
+            bReturnValue = false; 
+        }*/
 
         return bReturnValue;
     };
