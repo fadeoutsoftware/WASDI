@@ -1,5 +1,38 @@
 function Wasdi = startWasdi(config_path)
 
+% find out what the library path is:
+sFileName = 'startWasdi.m'
+sDir = which(sFileName)
+sDir = sDir(1:end-length(sFileName))
+
+% add the jsonlab path too
+addpath(fullfile(sDir,'jsonlab'))
+
+
+% try to set JAVA_HOME automatically
+sJavaHome = getenv('JAVA_HOME');
+if exist(sJavaHome)<1
+  disp('Warning: could not find JAVA_HOME, please define it');
+else
+  sLower=lower(sJavaHome);
+  %are we on windows?
+  % C:\Program Files\Java\jdk1.8.0_211\jre\bin\server
+  if(sLower(2:9)==':\progra')
+    % then the code is probably running on windows
+    sSubstr = substr(sJavaHome,-6,-1);
+    if strcmp(sSubstr, 'erve')<1
+      % turn this
+      % C:\Program Files\Java\jdk1.8.0_211\
+      % into this
+      % C:\Program Files\Java\jdk1.8.0_211\jre\bin\server
+      sOldJavaHome=sJavaHome;
+      sJavaHome= [sJavaHome, '/jre/bin/server'];
+      setenv('JAVA_HOME',sJavaHome);
+      disp(['Changed JAVA_HOME from ', sOldJavaHome, ' to ', sJavaHome])
+    end
+  end
+end
+
 % Check if there is the wasdipath variable
 iPathExists = exist("wasdipath");
 
@@ -12,7 +45,7 @@ if iPathExists > 0
 end
 
 % add internal path
-addpath(genpath(sPath))
+%addpath(genpath(sPath))
 % add WASDI Library Jar
 wasdilib = 'jwasdilib-0.9.3.jar';
 if isdeployed
