@@ -1,12 +1,12 @@
 function Wasdi = startWasdi(config_path)
 
 % find out what the library path is:
-sFileName = 'startWasdi.m'
-sDir = which(sFileName)
-sDir = sDir(1:end-length(sFileName))
+sFileName = 'startWasdi.m';
+sDir = which(sFileName);
+sDir = sDir(1:end-length(sFileName));
 
 % add the jsonlab path too
-addpath(fullfile(sDir,'jsonlab'))
+addpath(fullfile(sDir,'jsonlab'));
 
 
 % try to set JAVA_HOME automatically
@@ -28,7 +28,7 @@ else
       sOldJavaHome=sJavaHome;
       sJavaHome= [sJavaHome, '/jre/bin/server'];
       setenv('JAVA_HOME',sJavaHome);
-      disp(['Changed JAVA_HOME from ', sOldJavaHome, ' to ', sJavaHome])
+      disp(['Changed JAVA_HOME from ', sOldJavaHome, ' to ', sJavaHome]);
     end
   end
 end
@@ -47,7 +47,7 @@ end
 % add internal path
 %addpath(genpath(sPath))
 % add WASDI Library Jar
-wasdilib = 'jwasdilib-0.9.3.jar';
+wasdilib = 'jwasdilib.jar';
 if isdeployed
     javaaddpath(['./', wasdilib])
 else
