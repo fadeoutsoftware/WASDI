@@ -61,7 +61,7 @@ var WorkFlowManagerController = (function () {
 
         $scope.close = function (result) {
             // close, but give 500ms for bootstrap to animate
-            oClose(result, 500); 
+            oClose(result, 500);
         };
 
         //Load workflows
@@ -108,11 +108,18 @@ var WorkFlowManagerController = (function () {
             if (utilsIsObjectNullOrUndefined(oProduct)) {
                 return false;
             }
-            //TODO REMOVE IT
-            // var sDestinationProductName = oProduct.name + "_workflow";
+
+            // Graph execution on back end request a list of files so, on the client side, for each file a list
+            // with a single element in it must be initialized
+
             this.m_oSelectedWorkflow.inputFileNames.push(oProduct.fileName);
+            let ao_ListSingleInputFile = [];
+            ao_ListSingleInputFile.push(this.m_oSelectedWorkflow.inputFileNames[iIndexSelectedProduct]);
+
             var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId, this.m_oSelectedWorkflow.name, this.m_oSelectedWorkflow.description,
-                this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames[iIndexSelectedProduct], this.m_oSelectedWorkflow.outputNodeNames,
+                this.m_oSelectedWorkflow.inputNodeNames,
+                ao_ListSingleInputFile, // pass the local list with a single element in the list
+                 this.m_oSelectedWorkflow.outputNodeNames,
                 this.m_oSelectedWorkflow.outputFileNames);
             if (utilsIsObjectNullOrUndefined(oSnapWorkflowViewModel) === false) {
                 this.executeGraphFromWorkflowId(this.m_sWorkspaceId, oSnapWorkflowViewModel);
@@ -169,7 +176,7 @@ var WorkFlowManagerController = (function () {
         /*this checks always fails on multiple files passed to the workflow on batch mode
         Batch mode work only with single input nodes workflows
         if (asInputNodeNames.length !== asInputFileNames.length) {
-            bReturnValue = false; 
+            bReturnValue = false;
         }*/
 
         return bReturnValue;
@@ -401,7 +408,7 @@ var WorkFlowManagerController = (function () {
     };
 
     WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
-        var oController = this; 
+        var oController = this;
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_edit/WorkflowView.html",
             controller: "WorkflowController",
