@@ -2457,13 +2457,45 @@ public class WasdiLib {
 	public List<String> asynchImportProductList(List<String> asProductsToImport){
 		log("WasdiLib.asynchImportProductList ( with list )");
 		if(null==asProductsToImport) {
+			log("WasdiLib.asynchImportProductList: list is null, aborting");
 			return null;
 		}
+		if(asProductsToImport.size() <=0) {
+			log("WasdiLib.asynchImportProductList: list has no elements, aborting");
+			return null;
+		}
+		log("WasdiLib.asynchImportProductList: list has " + asProductsToImport.size() + " elements");
 		List<String> asIds = new ArrayList<String>(asProductsToImport.size());
 		for (String sProductUrl: asProductsToImport) {
 			asIds.add(asynchImportProduct(sProductUrl));
 		}
 		return asIds;
+	}
+	
+	public List<String> asynchImportProductList( String sJsonArray ){
+		log("WasdiLib.asynchImportProductList ( " + sJsonArray + " )");
+		if(null==sJsonArray || sJsonArray.isEmpty()) {
+			log("WasdiLib.asynchImportProductList: string is null or empty, aborting");
+			return null;
+		}
+		if(sJsonArray.startsWith("{")) {
+			sJsonArray = sJsonArray.substring(1);
+		}
+		if(sJsonArray.endsWith("}")) {
+			sJsonArray = sJsonArray.substring(0,sJsonArray.length()-1);
+		}
+		if(!sJsonArray.startsWith("[")||!sJsonArray.endsWith("]")) {
+			log("WasdiLib.asynchImportProductList: string passed is not a well formatted JSON array: "+
+					"it must begin with [ and end with ], aborting");
+			return null;
+		}
+		sJsonArray=sJsonArray.substring(1, sJsonArray.length()-1);
+		//remove all spaces
+		sJsonArray = sJsonArray.replaceAll("\\s+","").trim();
+		String[] asSplit = sJsonArray.split(",");
+		List<String> asProductsToImport = Arrays.asList(asSplit);
+		return asynchImportProductList(asProductsToImport);
+		
 	}
 
 
