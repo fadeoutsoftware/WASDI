@@ -182,12 +182,13 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
-				Utils.debugLog("FileBufferResource.PublishBand: band already published " );
+				String sProductName = Utils.getFileNameWithoutLastExtension(oPublishBand.getProductName());
+				Utils.debugLog("FileBufferResource.PublishBand: band already published: product Name : " + sProductName + " LayerId: " + oPublishBand.getLayerId());
 				PublishBandResultViewModel oPublishBandResultViewModel = new PublishBandResultViewModel();
 				oPublishBandResultViewModel.setBoundingBox(oPublishBand.getBoundingBox());
 				oPublishBandResultViewModel.setBandName(oPublishBand.getBandName());
 				oPublishBandResultViewModel.setLayerId(oPublishBand.getLayerId());
-				oPublishBandResultViewModel.setProductName(oPublishBand.getProductName());
+				oPublishBandResultViewModel.setProductName(sProductName);
 				oPublishBandResultViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 				oPublishBandResultViewModel.setGeoserverUrl(oPublishBand.getGeoserverUrl());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());

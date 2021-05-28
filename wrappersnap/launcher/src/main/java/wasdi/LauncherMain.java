@@ -3339,7 +3339,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			
 			String sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
-			sBaseUrl = "http://10.0.1.80/wasdiwebserver/rest";
 
 		    String sUrl = sBaseUrl + "/filebuffer/downloadstyle?style="+sStyle;
 		    
