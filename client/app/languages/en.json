@@ -418,5 +418,8 @@
     "DIALOG_WORKFLOW_TAB_BASE": "Workflow",
     "DIALOG_WORKFLOW_TAB_SHARE": "Share",
 
-    "DIALOG_PAYLOAD_COPY": "Copy payload"
+    "DIALOG_PAYLOAD_COPY": "Copy payload",
+
+    "DIALOG_WORKSPACE_DETAILS_APPLY" : "Apply",
+    "DIALOG_WORKSPACE_DETAILS_CLOSE": "Close"
 }
