@@ -74,7 +74,7 @@ var WorkflowController = (function () {
      * 1- getXmlFromFile on server
      * 2a - Convert to file and invoke update file 
      * -- OR -- 
-     * 2b - Update Xml as text
+     * 2b - Update Xml as text <--- nuova chiamata PUT or POST del testo
      * 
      */
 
@@ -98,7 +98,16 @@ var WorkflowController = (function () {
         else {
             //Init the list of users which this workflow is shared with
             this.getListOfEnabledUsers(this.m_oWorkflow.workflowId);
+            this.getWorkflowXml(this.m_oWorkflow.workflowId);
         }
+    }
+
+    WorkflowController.prototype.getWorkflowXml = function(sWorkflowId){
+        this.m_oSnapOperationService.getWorkflowXml(sWorkflowId).then(function (data){
+            this.m_asWorkflowXml = data.data;
+            console.log(this.m_asWorkflowXml);
+        });
+        
     }
 
     /**
