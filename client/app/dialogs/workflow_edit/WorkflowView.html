@@ -23,6 +23,15 @@
                             {{"DIALOG_WORKFLOW_TAB_SHARE" | translate}}
                         </a>
                     </li>
+
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'Xml'}" ng-click="m_oController.m_sSelectedTab = 'Xml'"
+                    ng-show="m_oController.m_bEditMode == true"
+                    >
+                        <a href="" role="tab" data-toggle="tab">
+                            <i class="fa fa-pencil" ></i>
+                            Edit XML
+                        </a>
+                    </li>
                 </ul>
 
 
@@ -40,6 +49,13 @@
                          ng-class="{'active':m_oController.m_sSelectedTab === 'Share' || m_oController.m_bEditMode==false}"
                          ng-hide="m_oController.m_sSelectedTab != 'Share'">
                         <ng-include src="'dialogs/workflow_edit/TabShareWorkflow.html'"></ng-include>
+                    </div>
+
+                    <!------- EDIT ------->
+                    <div class="tab-pane fade in" id="Share"
+                         ng-class="{'active':m_oController.m_sSelectedTab === 'Xml' || m_oController.m_bEditMode==false}"
+                         ng-hide="m_oController.m_sSelectedTab != 'Xml'">
+                        <ng-include src="'dialogs/workflow_edit/TabEditXml.html'"></ng-include>
                     </div>
 
                 </div>

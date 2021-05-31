@@ -65,7 +65,18 @@ var WorkflowController = (function () {
         // Let's init the modal
         this.initModal();
 
+        this.m_asWorkflowXml = "";
+
     }
+
+    /**
+     * Methods to be implemented On BE: 
+     * 1- getXmlFromFile on server
+     * 2a - Convert to file and invoke update file 
+     * -- OR -- 
+     * 2b - Update Xml as text
+     * 
+     */
 
     /**
      * Init the current view accordingly to mode.
