@@ -1,17 +1,17 @@
 """"""
 """
-WASDI Sàrl
+WASDI (LU) Sàrl
 
 **Disclaimer ** 
 The library is provided "as-is" without warranty
 
-Neither FadeOut Software (IT) Srl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential 
+Neither WASDI (LU) Sàrl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
 damages (including, but not limited to, breach of expressed or implied contract; procurement of substitute goods or services; loss of use, data or profits; 
 business interruption; or damage to any equipment, software and/or data files) however caused and on any legal theory of liability, whether for contract, 
 tort, strict liability, or a combination thereof (including negligence or otherwise) arising in any way out of the direct or indirect use of software, 
 even if advised of the possibility of such risk and potential damage.
 
-FadeOut Software (IT) Srl uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed, 
+WASDI (LU) Sàrl uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed,
 and that all products are free from any known software virus. For your own protection, you should scan all files for viruses prior to installation.
 
 
