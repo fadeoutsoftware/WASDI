@@ -11,7 +11,7 @@ var WorkflowController = (function () {
         /**
          * Class callback
          */
-        this.m_oClose=oClose;
+        this.m_oClose = oClose;
         /**
          * Reference to the controller
          */
@@ -65,7 +65,10 @@ var WorkflowController = (function () {
         // Let's init the modal
         this.initModal();
 
+        // model variable that contains the Xml of the graph
         this.m_asWorkflowXml;
+        // support variable enabled when the xml is edited on edit xml tab 
+        this.m_bXmlEdited = false;
 
     }
 
@@ -75,6 +78,9 @@ var WorkflowController = (function () {
      * 2a - Convert to file and invoke update file 
      * -- OR -- 
      * 2b - Update Xml as text <--- nuova chiamata PUT or POST del testo
+     * 
+     * Potential problem : both upload and edit -> check the current tab active
+     * (maybe notify user?)
      * 
      */
 
@@ -102,13 +108,26 @@ var WorkflowController = (function () {
         }
     }
 
-    WorkflowController.prototype.getWorkflowXml = function(sWorkflowId){
+    WorkflowController.prototype.getWorkflowXml = function (sWorkflowId) {
         var oController = this;
-        this.m_oSnapOperationService.getWorkflowXml(sWorkflowId).then(function (data){
+        this.m_oSnapOperationService.getWorkflowXml(sWorkflowId).then(function (data) {
             oController.m_asWorkflowXml = data.data;
-            console.log(this.m_asWorkflowXml);
         });
-        
+    }
+
+    WorkflowController.prototype.updateWorkflowXml = function () {
+        var oController = this;
+        if (!utilsIsStrNullOrEmpty(oController.m_asWorkflowXml)) {
+            let oBody = new FormData();
+            oBody.append('graphXml', oController.m_asWorkflowXml);
+            this.m_oSnapOperationService.postWorkflowXml(oController.m_oWorkflow.workflowId, oBody)
+                .then(function (data) {
+                    let dialog;
+                    if (data.status == 200) dialog = utilsVexDialogAlertBottomRightCorner("Workflow XML updated");
+                    else dialog = utilsVexDialogAlertBottomRightCorner("Something went wrong, <br> please check your XML content");
+                    utilsVexCloseDialogAfter(5000, dialog);
+                });
+        }
     }
 
     /**
@@ -131,11 +150,17 @@ var WorkflowController = (function () {
         if (this.m_sSelectedTab == "Base") {
             if (this.m_bEditMode) {
                 // UPDATE 
-                this.updateGraph(); 
+                this.updateGraph();
             }
-            else { 
+            else {
                 // UPLOAD
                 this.uploadUserGraphOnServer();
+            }
+        }
+        if (this.m_sSelectedTab == "Xml") {
+            if (this.m_bXmlEdited) {
+                // UPDATE 
+                this.updateWorkflowXml();
             }
         }
         //cose the dialog
@@ -240,7 +265,7 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.uploadGraph("workspace", sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
-                var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>"+ sName.toUpperCase());
+                var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>" + sName.toUpperCase());
                 utilsVexCloseDialogAfter(4000, oDialog);
 
             } else {

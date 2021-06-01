@@ -341,32 +341,12 @@ public class ProcessingResources {
     @POST
     @Path("/uploadgraphXml")
     public Response postGraphXML(@HeaderParam("x-session-token") String sSessionId,
-                                 @QueryParam("workflowid") String sWorkflowId,
-                                 @QueryParam("graphXml") String sGraphXml) {
-        try {
-            // Check authorization
-            if (Utils.isNullOrEmpty(sSessionId)) {
-                Utils.debugLog("ProcessingResources.getGraphXML( Workspace Id : " + sWorkflowId + ");");
-                return Response.status(Status.UNAUTHORIZED).build();
-            }
-            User oUser = Wasdi.getUserFromSession(sSessionId);
+                                 @QueryParam("workflowId") String sWorkflowId,
+                                 @FormDataParam("graphXml") String sGraphXml) {
 
-            if (oUser == null) return Response.status(Status.UNAUTHORIZED).build();
-            if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
-
-            // Check that the workflow exists on db
-            SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-            SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
-            if (oWorkflow == null) {
-                Utils.debugLog("ProcessingResources.updateGraph: error in workflowId " + sWorkflowId + " not found on DB");
-                return Response.notModified("WorkflowId not found, please check parameters").build();
-            }
-
-            String sUserId = oUser.getUserId();
-
-        } catch (Exception e) {
-        }
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            // convert string to file and invoke updateGraphFile
+            Utils.debugLog("ProcessingResources.uploadGraph: workflowId " + sWorkflowId + " invoke ProcessingResources.updateGraph");
+             return updateGraphfile(new ByteArrayInputStream(sGraphXml.getBytes(Charset.forName("UTF-8"))),sSessionId,sWorkflowId);
     }
 
 
@@ -482,6 +462,7 @@ public class ProcessingResources {
                 oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);
 
             } catch (Exception oEx) {
+                if (oWorkflowXmlFileTemp.exists()) oWorkflowXmlFileTemp.delete();
                 Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
                 return Response.serverError().build();
             }

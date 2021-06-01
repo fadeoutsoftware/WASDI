@@ -111,7 +111,10 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).ser
 
     this.getWorkflowXml= function(sWorkflowId){
         return this.m_oHttp.get(this.APIURL + '/processing/graphXml?workflowId=' + sWorkflowId);
-        
+    }
+
+    this.postWorkflowXml= function(sWorkflowId,sWorkflowXml){
+        return this.m_oHttp.post(this.APIURL + '/processing/uploadgraphXml?workflowId=' + sWorkflowId, sWorkflowXml,this.m_oOptions);
     }
 }]);
 
