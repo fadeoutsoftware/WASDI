@@ -65,7 +65,7 @@ var WorkflowController = (function () {
         // Let's init the modal
         this.initModal();
 
-        this.m_asWorkflowXml = "";
+        this.m_asWorkflowXml;
 
     }
 
@@ -103,8 +103,9 @@ var WorkflowController = (function () {
     }
 
     WorkflowController.prototype.getWorkflowXml = function(sWorkflowId){
+        var oController = this;
         this.m_oSnapOperationService.getWorkflowXml(sWorkflowId).then(function (data){
-            this.m_asWorkflowXml = data.data;
+            oController.m_asWorkflowXml = data.data;
             console.log(this.m_asWorkflowXml);
         });
         
