@@ -123,9 +123,14 @@ var WorkflowController = (function () {
             this.m_oSnapOperationService.postWorkflowXml(oController.m_oWorkflow.workflowId, oBody)
                 .then(function (data) {
                     let dialog;
-                    if (data.status == 200) dialog = utilsVexDialogAlertBottomRightCorner("Workflow XML updated");
-                    else dialog = utilsVexDialogAlertBottomRightCorner("Something went wrong, <br> please check your XML content");
-                    utilsVexCloseDialogAfter(5000, dialog);
+                    if (data.status == 200) dialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW XML UPDATED");
+                    utilsVexCloseDialogAfter(4000, dialog);
+                })
+                .catch(function (data) {
+                    let dialog;
+                    if (data.status == 304) dialog = utilsVexDialogAlertBottomRightCorner("MODIFICATIONS REJECTED<br>PLEASE CHECK THE XML");
+                    else dialog = utilsVexDialogAlertBottomRightCorner("INTERNAL SERVER ERROR<br>PLEASE TRY AGAIN LATER");
+                    utilsVexCloseDialogAfter(4000, dialog);
                 });
         }
     }

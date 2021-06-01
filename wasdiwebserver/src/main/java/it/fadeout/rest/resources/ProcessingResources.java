@@ -395,6 +395,12 @@ public class ProcessingResources {
                 Utils.debugLog("ProcessingResources.updateGraph: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found, please check parameters").build();
             }
+            // Checks that owner corresponds
+            if(!oUser.getUserId().equals(oWorkflow.getUserId()) &&
+            new WorkflowSharingRepository().isSharedWithUser(oUser.getUserId(),oWorkflow.getWorkflowId())){
+                Utils.debugLog("ProcessingResources.updateGraph: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
+                return  Response.status(Status.UNAUTHORIZED).build();
+            }
             // original xml file
             File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
             // new xml file
@@ -443,7 +449,7 @@ public class ProcessingResources {
                     Utils.debugLog("ProcessingResources.uploadGraph: malformed workflow file");
                     // Leave the original file unchanged and delete the temp
                     Files.delete(oWorkflowXmlFileTemp.toPath());
-                    return Response.serverError().build();
+                    return Response.status(Status.NOT_MODIFIED).build();
                 }
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
@@ -464,7 +470,7 @@ public class ProcessingResources {
             } catch (Exception oEx) {
                 if (oWorkflowXmlFileTemp.exists()) oWorkflowXmlFileTemp.delete();
                 Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
-                return Response.serverError().build();
+                return Response.status(Status.NOT_MODIFIED).build();
             }
 
 
