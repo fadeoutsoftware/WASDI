@@ -1,6 +1,6 @@
-
+""""""
 """
-FADEOUT SOFTWARE 
+WASDI Sàrl
 
 **Disclaimer ** 
 The library is provided "as-is" without warranty
@@ -156,6 +156,7 @@ def setVerbose(bVerbose):
 def getVerbose():
     """
     Get Verbose Flag
+
     :return: True or False
     """
     global m_bVerbose
@@ -165,6 +166,7 @@ def getVerbose():
 def getParametersDict():
     """
     Get the full Params Dictionary
+
     :return: a dictionary containing the parameters
     """
     global m_aoParamsDictionary
@@ -257,7 +259,7 @@ def setParametersFilePath(sParamPath):
     """
     Set The Parameters JSON File Path
     
-    :param sParamPath Local Path of the parameters file
+    :param: sParamPath Local Path of the parameters file
     """
     if sParamPath is None:
         print('[ERROR] waspy.setParametersFilePath: passed None as path, won\'t change' +
@@ -275,6 +277,7 @@ def setParametersFilePath(sParamPath):
 def getParametersFilePath():
     """
     Get the local parameters file Path
+
     :return: local paramters file path
     """
     global m_sParametersFilePath
@@ -284,6 +287,7 @@ def getParametersFilePath():
 def getSessionId():
     """
     Get the WASDI Session
+
     :return: Session Id [String]
     """
     global m_sSessionId
@@ -303,6 +307,7 @@ def setBasePath(sBasePath):
 def getBasePath():
     """
     Get the local Base Path for WASDI
+
     :return: local base path for WASDI
     """
     global m_sBasePath
@@ -322,6 +327,7 @@ def setBaseUrl(sBaseUrl):
 def getBaseUrl():
     """
     Get the WASDI API URL
+
     :return: WASDI API URL
     """
     global m_sBaseUrl
@@ -341,6 +347,7 @@ def setWorkspaceBaseUrl(sWorkspaceBaseUrl):
 def getWorkspaceBaseUrl():
     """
     Get the Workspace API URL
+
     :return: Workspace API URL
     """
     global m_sWorkspaceBaseUrl
@@ -360,6 +367,7 @@ def setIsOnServer(bIsOnServer):
 def getIsOnServer():
     """
     Get the WASDI API URL
+
     :return: True if it is running on server, False if it is running on the local Machine
     """
     global m_bIsOnServer
@@ -386,6 +394,7 @@ def setDownloadActive(bDownloadActive):
 def getDownloadActive():
     """
     Get the Download Active Flag
+
     :return: True if auto download is active, False if it is not active 
     """
     global m_bDownloadActive
@@ -412,6 +421,7 @@ def setUploadActive(bUploadActive):
 def getUploadActive():
     """
     Get the Upload Active Flag
+
     :return: True if Auto Upload is Active, False if it is NOT Active
     """
     global m_bUploadActive
@@ -431,6 +441,7 @@ def setProcId(sProcID):
 def getProcId():
     """
     Get the Own Proc Id
+
     :return: Own Processor Identifier
     """
     global m_sMyProcId
@@ -450,6 +461,7 @@ def setActiveWorkspaceId(sActiveWorkspace):
 def getActiveWorkspaceId():
     """
     Get Active workspace Id
+
     :return: the WorkspaceId as a String, '' if there is any error
     """
     global m_sActiveWorkspace
@@ -582,6 +594,7 @@ def init(sConfigFilePath=None):
 def hello():
     """
     Hello Wasdi to test the connection.
+
     :return: the hello message as Text
     """
     global m_sBaseUrl
@@ -593,6 +606,7 @@ def hello():
 def getWorkspaces():
     """
     Get List of user workspaces
+
     :return: an array of WASDI Workspace JSON Objects.
     Each Object is like this
     {
@@ -879,6 +893,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
 def getProductsByActiveWorkspace():
     """
     Get the list of products in the active workspace
+
     :return: the list is an array of string. Can be empty if there is any error
     """
     global m_sActiveWorkspace
@@ -891,7 +906,7 @@ def getPath(sFile):
     Get Local File Path. If the file exists and needed the file will be automatically downloaded.
     Returns the full local path where to read or write sFile
     
-    :param sFile name of the file
+    :param: sFile name of the file
     :return: Local path where to read or write sFile 
     """
 
@@ -957,6 +972,7 @@ def getFullProductPath(sProductName):
 def getSavePath():
     """
     Get the local base save path for a product. To save use this path + fileName. Path already include '/' as last char
+
     :return: local path to use to save files (with '/' as last char)
     """
     global m_sBasePath
@@ -1147,7 +1163,7 @@ def waitProcesses(asProcIdList):
     
     :param asProcIdList: list of strings, procId, to wait
     
-    :return list of strings with the same number of elements in input, with the exit status of the processes
+    :return: list of strings with the same number of elements in input, with the exit status of the processes
     """
     
     global m_sBaseUrl
@@ -1387,7 +1403,7 @@ def saveFile(sFileName):
     The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
     To work be sure that the file is on the server
     
-    :param Name of the file to add to the workpsace
+    :param: Name of the file to add to the workpsace
     :return: Status of the operation
     """
     global m_sBaseUrl
@@ -2598,6 +2614,7 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
 def getWorkflows():
     """
         Get the list of workflows for the user
+
         :return: None if there is any error; an array of WASDI Workspace JSON Objects if everything is ok. The format is as follows:
 
         {
@@ -2883,6 +2900,8 @@ def copyFileToSftp(sFileName, bAsynch=None):
 def getProcessorPath():
     """
     Get the local path of the processor (where myProcessor.py is located)
+
+    :return: Local path of the processor
     """
     
     try:        
@@ -2960,6 +2979,7 @@ def _log(sLog):
 def _getStandardHeaders():
     """
     Get the standard headers for a WASDI API Call, setting also the session token
+
     :return: dictionary of headers to add to the REST API
     """
     global m_sSessionId

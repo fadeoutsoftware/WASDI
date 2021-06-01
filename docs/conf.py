@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'WASDI documentation center'
-copyright = '2021, Fadeout Software'
+copyright = '2021, WASDI Sàrl'
 author = ''
 
 
