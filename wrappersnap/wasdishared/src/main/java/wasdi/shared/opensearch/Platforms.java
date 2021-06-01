@@ -12,6 +12,7 @@ public class Platforms {
 	public static String SENTINEL1 = "Sentinel-1";
 	public static String SENTINEL2 = "Sentinel-2";
 	public static String SENTINEL3 = "Sentinel-3";
+	public static String SENTINEL5P = "Sentinel-5P";
 	
 	public static String PROVAV = "ProvaV";
 	public static String LANDSAT8 = "Landsat-8";
