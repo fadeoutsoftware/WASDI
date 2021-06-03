@@ -824,6 +824,7 @@ var EditorController = (function () {
         }
 
         // Get the Tree Node
+        
         var sNodeID = oPublishedBand.productName + "_" + oPublishedBand.bandName;
         var oNode = $('#jstree').jstree(true).get_node(sNodeID);
 

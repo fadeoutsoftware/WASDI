@@ -7,7 +7,9 @@ import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
@@ -22,8 +24,10 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -33,6 +37,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.net.io.Util;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.dataio.ProductIO;
@@ -1694,7 +1699,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			// Hard Coded set NDVI Style - STYLES HAS TO BE MANAGED
 			if (sFile.toUpperCase().contains("NDVI")) {
-				sStyle = "wasdi:NDVI";
+				sStyle = "NDVI";
 			}
 			// Hard Coded set Burned Areas Style - STYLES HAS TO BE MANAGED
 			if (sFile.toUpperCase().contains("BURNEDAREA")) {
@@ -1741,8 +1746,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
 			String sTargetDir = sGeoServerDataDir;
 
-			if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\")))
-				sTargetDir += "/";
+			if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\"))) sTargetDir += "/";
 			sTargetDir += sLayerId + "/";
 
 			File oTargetDir = new File(sTargetDir);
@@ -1828,6 +1832,42 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Ok publish
 			GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
+			
+			// Do we have the style in this Geoserver?			
+			if (!oGeoServerManager.styleExists(sStyle)) {
+				
+				// Not yet: obtain styles root path
+				String sStylePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+				if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
+				sStylePath+="styles" + File.separator;
+				
+				// Set the style file
+				sStylePath += sStyle + ".sld";
+				
+				File oStyleFile = new File(sStylePath);
+				
+				// Do we have the file?
+				if (!oStyleFile.exists()) {
+					// No, Download style 
+					s_oLogger.info("LauncherMain.PublishBandImage: download style " + sStyle + " from main node");
+					String sRet = downloadStyle(sStyle,oParameter.getSessionID(),sStylePath);
+					
+					// Check download result
+					if (!sRet.equals(sStylePath)) {
+						// Not good...
+						s_oLogger.error("LauncherMain.PublishBandImage: error downloading style " + sStyle);
+					}
+				}
+				
+				// Publish the style
+				if (oGeoServerManager.publishStyle(sStylePath)) {
+					s_oLogger.info("LauncherMain.PublishBandImage: published style " + sStyle + " on local geoserver");
+				}
+				else {
+					s_oLogger.error("LauncherMain.PublishBandImage: error publishing style " + sStyle + " reset on raster");
+					sStyle = "raster";
+				}
+			}
 
 			Publisher oPublisher = new Publisher();
 
@@ -1838,7 +1878,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oPublisher.m_lMaxMbTiffPyramid = 1024L;
 			}
 
-			s_oLogger.debug("LauncherMain.PublishBandImage: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId);
+			s_oLogger.debug("LauncherMain.PublishBandImage: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
 			sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);
 
 			s_oLogger.debug("Obtained sLayerId = " + sLayerId);
@@ -1856,9 +1896,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 				m_oProcessWorkspaceLogger.log("Ok got layer id " + sLayerId);
 				
-				s_oLogger.debug("LauncherMain.PublishBandImage: Image published. ");
-
-				s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
+				s_oLogger.debug("LauncherMain.PublishBandImage: Image published.");
 
 				// get bounding box from data base
 				String sBBox = oDownloadedFile.getBoundingBox();
@@ -1866,7 +1904,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
 				s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
-				s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
 
 				// Create Entity
 				PublishedBand oPublishedBand = new PublishedBand();
@@ -1877,10 +1914,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
 				oPublishedBand.setBoundingBox(sBBox);
 				oPublishedBand.setGeoserverBoundingBox(sGeoserverBBox);
-
-				// P.Campanella 2019-11-06: add the geoserver url to the publish band entity
-				s_oLogger.debug("LauncherMain.PublishBandImage: searching workspace Node for wid: " + oParameter.getWorkspace());
-
+				
 				Node oNode = getWorkspaceNode(oParameter.getWorkspace());
 
 				if (oNode != null) {
@@ -1892,7 +1926,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oPublishedBandsRepository.insertPublishedBand(oPublishedBand);
 
 				s_oLogger.debug("LauncherMain.PublishBandImage: Index Updated");
-				s_oLogger.debug("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
 
 				// Create the View Model
 				PublishBandResultViewModel oVM = new PublishBandResultViewModel();
@@ -3283,6 +3316,109 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.error("readMetadata Exception " + oEx.toString());
 		}
 	}
+	
+	
+	
+	/**
+	 * Download Processor on the local PC
+	 * @param oProcessor
+	 * @param sSessionId
+	 * @return
+	 */
+	protected String downloadStyle(String sStyle, String sSessionId, String sDestinationFileFullPath) {
+		try {
+			
+			if (sStyle == null) {
+				System.out.println("sStyle must not be null");
+				return "";
+			}
+
+			if (sStyle.equals("")) {
+				System.out.println("sStyle must not be empty");
+				return "";
+			}
+			
+			String sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
+
+		    String sUrl = sBaseUrl + "/filebuffer/downloadstyle?style="+sStyle;
+		    
+		    HashMap<String, String> asHeaders = WasdiProcessorEngine.getStandardHeaders(sSessionId);
+			
+			try {
+				URL oURL = new URL(sUrl);
+				HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+				// optional default is GET
+				oConnection.setRequestMethod("GET");
+				
+				if (asHeaders != null) {
+					for (String sKey : asHeaders.keySet()) {
+						oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+					}
+				}
+				
+				int responseCode =  oConnection.getResponseCode();
+
+ 				if(responseCode == 200) {
+							
+					Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
+					List<String> asContents = null;
+					if(null!=aoHeaders) {
+						asContents = aoHeaders.get("Content-Disposition");
+					}
+					String sAttachmentName = null;
+					if(null!=asContents) {
+						String sHeader = asContents.get(0);
+						sAttachmentName = sHeader.split("filename=")[1];
+						if(sAttachmentName.startsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(1);
+						}
+						if(sAttachmentName.endsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
+						}
+						System.out.println(sAttachmentName);
+						
+					}
+					
+					File oTargetFile = new File(sDestinationFileFullPath);
+					File oTargetDir = oTargetFile.getParentFile();
+					oTargetDir.mkdirs();
+
+					// opens an output stream to save into file
+					try (FileOutputStream oOutputStream = new FileOutputStream(sDestinationFileFullPath)) {
+						InputStream oInputStream = oConnection.getInputStream();
+
+						Util.copyStream(oInputStream, oOutputStream);
+
+						if(null!=oOutputStream) {
+							oOutputStream.close();
+						}
+						if(null!=oInputStream) {
+							oInputStream.close();
+						}						
+					}
+
+					
+					return sDestinationFileFullPath;
+				} else {
+					String sMessage = oConnection.getResponseMessage();
+					System.out.println(sMessage);
+					return "";
+				}
+
+			} catch (Exception oEx) {
+				oEx.printStackTrace();
+				return "";
+			}
+			
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}		
+	}	
+	
+	
 }
 
 

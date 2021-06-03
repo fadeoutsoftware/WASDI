@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
+import it.geosolutions.geoserver.rest.HTTPUtils;
 import it.geosolutions.geoserver.rest.decoder.RESTBoundingBox;
 import it.geosolutions.geoserver.rest.decoder.RESTLayer;
 import it.geosolutions.geoserver.rest.decoder.RESTLayer.Type;
@@ -161,9 +162,29 @@ public class GeoServerManager {
 		return bRes;
     }
     
+    public boolean publishStyle(String sStyleFile) {
+    	File oFile = new File(sStyleFile);
+    	
+    	if (oFile.exists()) {
+    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+    		return m_oGsPublisher.publishStyle(oFile, sStyleName);
+    	}
+    	else {
+    		return false;
+    	}
+    }
     
-    
-    
+    public boolean styleExists(String sStyle) {
+    	String sStyles = HTTPUtils.get(m_sRestUrl+"/rest/styles", m_sRestUser, m_sRestPassword);
+    	
+    	if (Utils.isNullOrEmpty(sStyles) == false) {
+    		String sResearchKey = "\"name\":\"" + sStyle + "\"";
+    		
+    		if (sStyles.contains(sResearchKey)) return true;
+    	}
+    	
+    	return false;
+    }
     
 	/**
 	 * aggiunge un layer da uno shapefile
