@@ -1452,6 +1452,7 @@ public class WasdiLib {
 		while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
 			sStatus = getProcessStatus(sProcessId);
 			if(!isThisAValidStatus(sStatus)) {
+				log("WasdiLib.waitProcess: the returned status \"" + sStatus + "\" is not valid, please check the process ID you passed. Aborting");
 				return "";
 			}
 			try {
@@ -1502,8 +1503,30 @@ public class WasdiLib {
 				bDone = true;	
 
 				List<String> asStatus = getProcessesStatusAsList(asIds);
-
+				if(null==asIds) {
+					log("WasdiLib.waitProcesses: status list after getProcessesStatusAsList is null, aborting");
+					waitForResume();
+					return null;
+				}
+				
+				if(asStatus.size() != asIds.size()) {
+					log("WasdiLib.waitProcesses: warning: status list after getProcessesStatusAsList has size " + asStatus.size() + " instead of " + asIds.size() + ", please check the process IDs you passed");
+				}
+				
+				if (asStatus.size()<=0) {
+					log("WasdiLib.waitProcesses: status list after getProcessesStatusAsList is empty, please check the IDs you passed. Aborting");
+					waitForResume();
+					//return an empty list
+					return new ArrayList<>(asIds.size());
+				}
+				
+				// ok we're good, check the statuses
 				for (String sStatus : asStatus) {
+					if(!isThisAValidStatus(sStatus)) {
+						log("WasdiLib.waitProcesses: got \"" + sStatus + "\" which is not a valid status, skipping it (please check the IDs you passed)");
+						//set it temporary to error
+						sStatus = "ERROR";
+					}
 					if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
 						bDone = false;
 						//break: there's at least one process for which we need to wait

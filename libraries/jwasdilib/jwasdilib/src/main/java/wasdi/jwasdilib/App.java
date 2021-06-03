@@ -34,6 +34,8 @@ public class App
         //testConnection(oLib);
         
         testHello(oLib);
+        
+        
     //    testDownload(oLib);
         //testAutomaticUpload(oLib);
         
@@ -48,7 +50,7 @@ public class App
 //        testSubset(oLib);
         
         //testImport(oLib);
-        //testWaitProcesses(oLib);
+        testWaitProcesses(oLib);
         //testImportProductList(oLib);
         
         
@@ -89,7 +91,9 @@ public class App
 	}
 
 	private static void testWaitProcesses(WasdiLib oLib) {
-    	String sProcName = "hellotest";
+		
+		System.out.println("Wait for real processes");
+    	String sProcName = "hellowasdiworld";
     	Map<String,Object> asParams = new HashMap<>();
     	asParams.put("NAME", "Playmobil");
     	int iReps = 5;
@@ -99,7 +103,17 @@ public class App
     		asIds.add(sId);
     	}
     			
-		oLib.waitProcesses(asIds);
+    	System.out.println(oLib.waitProcesses(asIds));
+		
+		System.out.println("wait for fake processes");
+		List<String> asProcesses = new ArrayList<>(4);
+        asProcesses.add("one");
+        asProcesses.add("two");
+        asProcesses.add("three");
+        asProcesses.add("four");
+        
+        System.out.println(oLib.waitProcesses(asProcesses));
+        
 		
 	}
 
