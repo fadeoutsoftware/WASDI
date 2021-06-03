@@ -1333,7 +1333,9 @@ public class WasdiLib {
 	 */
 	public String updateStatus(String sStatus) {
 
+		log("WasdiLib.updateStatus( " + sStatus + " )");
 		if(!isThisAValidStatus(sStatus)) {
+			log("WasdiLib.updateStatus: " + sStatus + " is not a valid status, aborting");
 			return "";
 		}
 		if (m_bIsOnServer == false) return sStatus;
@@ -1350,6 +1352,7 @@ public class WasdiLib {
 	public String updateStatus(String sStatus,int iPerc) {
 
 		if(!isThisAValidStatus(sStatus)) {
+			log("WasdiLib.updateStatus( " + sStatus + ", " +  + iPerc +" ): " + sStatus + " is not a valid status, aborting");
 			return "";
 		}
 		if (m_bIsOnServer == false) return sStatus;
@@ -1482,34 +1485,48 @@ public class WasdiLib {
 	 * @return
 	 */
 	public List<String> waitProcesses(List<String> asIds) {
-		updateStatus("WAITING");
-
-		boolean bDone = false;
-		while(!bDone) {
-			bDone = true;	
-
-			List<String> asStatus = getProcessesStatusAsList(asIds);
-
-			for (String sStatus : asStatus) {
-				if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
-					bDone = false;
-					//we should break now and check their new status
-					break;
-				}
+		log("WasdiLib.waitProcesses");
+		try {
+			if(null==asIds) {
+				log("WasdiLib.waitProcesses: passed a null list, aborting");
+				return null;
 			}
-			if(!bDone) {
-				//then at least one needs to be waited for
-				try {
-					log("waitProcesses: sleep");
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			if(asIds.size()<=0) {
+				log("WasdiLib.waitProcesses: list is empty, returning immediately");
+				return new ArrayList<String>();
 			}
-		}		
-		waitForResume();
+			updateStatus("WAITING");
 
-		return getProcessesStatusAsList(asIds);
+			boolean bDone = false;
+			while(!bDone) {
+				bDone = true;	
+
+				List<String> asStatus = getProcessesStatusAsList(asIds);
+
+				for (String sStatus : asStatus) {
+					if( !(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR")) ) {
+						bDone = false;
+						//break: there's at least one process for which we need to wait
+						break;
+					}
+				}
+				if(!bDone) {
+					//then at least one needs to be waited for
+					try {
+						log("waitProcesses: sleep");
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}		
+			waitForResume();
+
+			return getProcessesStatusAsList(asIds);
+		} catch (Exception oE) {
+			log("WasdiLib.waitProcesses: " + oE);
+			return null;
+		}
 	}
 
 	/**
