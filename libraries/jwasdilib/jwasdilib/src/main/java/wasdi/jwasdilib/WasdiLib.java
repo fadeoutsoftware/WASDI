@@ -297,7 +297,35 @@ public class WasdiLib {
 	 * @param sBasePath
 	 */
 	public void setBasePath(String sBasePath) {
-		log("WasdiLib.setBasePath ( " + sBasePath + " )");
+		log("WasdiLib.setBasePath ( \"" + sBasePath + "\" )");
+
+		//simpler validation
+		if(null==sBasePath || sBasePath.isEmpty() ||
+				//injection attempt?
+				sBasePath.contains("..")) {
+				log("WasdiLib.setBasePath: \"" + sBasePath + "\" is not a valid path");
+				return;
+		}
+
+		//check existence
+		File oPath = new File(sBasePath);
+		if(!oPath.exists()) {
+			log("WasdiLib.setBasePath: \"" + sBasePath + "\" does not exist, let's see if we can create it...");
+			
+			if(!oPath.mkdirs()) {
+				log("WasdiLib.setBasePath: directory \"" + sBasePath + "\" could not be created, aborting");
+				return;
+			} else {
+				log("WasdiLib.setBasePath: directory \"" + sBasePath + "\" successfully created"); 
+			}
+		}
+
+		//check accessibility
+		if(!oPath.exists() || !oPath.canRead() || !oPath.canWrite() || !oPath.isDirectory()) {
+			log("WasdiLib.setBasePath: \"" + sBasePath + "\" canot be read properly, aborting");
+			return;
+		}
+	
 		this.m_sBasePath = sBasePath;
 	}
 

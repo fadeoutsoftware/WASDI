@@ -34,6 +34,7 @@ public class App
         //testConnection(oLib);
         
         testHello(oLib);
+        testSetBasePath(oLib);
         
         
     //    testDownload(oLib);
@@ -76,6 +77,18 @@ public class App
         oLib.updateStatus("DONE");
         
     }    
+
+	private static void testSetBasePath(WasdiLib oLib) {
+		//fail
+		oLib.setBasePath("");
+		oLib.setBasePath("john doe");
+		
+		String sUserHome = System.getProperty("user.home");
+		String sWasdiHome = sUserHome + "/.wasdi/";
+		//work
+		oLib.setBasePath(sWasdiHome);
+		
+	}
 
 
 
