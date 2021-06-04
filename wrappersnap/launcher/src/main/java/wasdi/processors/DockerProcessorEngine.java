@@ -91,7 +91,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Create the file
 			File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
 			
-			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: check processor exists");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: check processor exists");
 			
 			// Check it
 			if (oProcessorZipFile.exists()==false) {
