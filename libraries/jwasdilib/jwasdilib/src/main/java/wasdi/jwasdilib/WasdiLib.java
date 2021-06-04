@@ -2816,15 +2816,14 @@ public class WasdiLib {
 
 		if (m_bIsOnServer) {
 			try {
-
 				// Check minimun input values
 				if (sLogRow == null) {
-					log("Log line null");
+					log("Log line null, aborting");
 					return;
 				}
 
-				if (sLogRow.equals("")) {
-					log("Log line empty");
+				if (sLogRow.isEmpty()) {
+					log("Log line empty, aborting");
 					return;
 				}
 
