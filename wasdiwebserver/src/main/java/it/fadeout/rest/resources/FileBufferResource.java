@@ -188,7 +188,14 @@ public class FileBufferResource {
 				oPublishBandResultViewModel.setBoundingBox(oPublishBand.getBoundingBox());
 				oPublishBandResultViewModel.setBandName(oPublishBand.getBandName());
 				oPublishBandResultViewModel.setLayerId(oPublishBand.getLayerId());
-				oPublishBandResultViewModel.setProductName(sProductName);
+				
+				if (oDownloadedFile.getProductViewModel() != null) {
+					oPublishBandResultViewModel.setProductName(oDownloadedFile.getProductViewModel().getName());
+				}
+				else {
+					oPublishBandResultViewModel.setProductName(sProductName);
+				}
+				
 				oPublishBandResultViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 				oPublishBandResultViewModel.setGeoserverUrl(oPublishBand.getGeoserverUrl());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
