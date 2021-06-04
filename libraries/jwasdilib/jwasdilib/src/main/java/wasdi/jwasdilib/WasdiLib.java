@@ -167,6 +167,10 @@ public class WasdiLib {
 	 */
 	public void setUser(String sUser) {
 		log("WasdiLib.setUser( " + sUser + " )");
+		if(null==sUser || sUser.isEmpty()) {
+			log("WasdiLib.setUser: user null or empty, aborting");
+			return;
+		}
 		this.m_sUser = sUser;
 	}
 
@@ -222,6 +226,10 @@ public class WasdiLib {
 	 */
 	public void setSessionId(String sSessionId) {
 		log("WasdiLib.setSessionId( " + sSessionId + " )");
+		if(null==sSessionId || sSessionId.isEmpty()) {
+			log("WasdiLib.setSessionId: session null or empty, aborting");
+			return;
+		}
 		this.m_sSessionId = sSessionId;
 	}
 
@@ -241,10 +249,6 @@ public class WasdiLib {
 		log("WasdiLib.setBaseUrl( " + sBaseUrl + " )");
 		try {
 			URL oUrl = new URL(sBaseUrl);
-			if(null==oUrl) {
-				log("WasdiLib.setBaseUrl: \"" + sBaseUrl + "\" is not a valid URL: cannot instantiate URL, aborting");
-				return;
-			}
 			URI oURI = oUrl.toURI();
 			if(null == oURI) {
 				log("WasdiLib.setBaseUrl: \"" + sBaseUrl + "\" is not a valid URL: cannot obtain URI from URL, aborting");
@@ -360,6 +364,10 @@ public class WasdiLib {
 	 */
 	public void setMyProcId(String sMyProcId) {
 		log("WasdiLib.setMyProcId( " + sMyProcId + " )");
+		if(null==sMyProcId || sMyProcId.isEmpty()) {
+			log("WasdiLib.setMyProcId: processor ID is null or empty, aborting");
+			return;
+		}
 		this.m_sMyProcId = sMyProcId;
 	}
 
@@ -455,7 +463,24 @@ public class WasdiLib {
 	 * @param sParametersFilePath parameters file path
 	 */
 	public void setParametersFilePath(String sParametersFilePath) {
-		log("WasdiLib.setParametersFilePath( " + sParametersFilePath + " )");
+		log("WasdiLib.setParametersFilePath( \"" + sParametersFilePath + "\" )");
+		
+		if(null==sParametersFilePath || sParametersFilePath.isEmpty() ||
+				//injection attempt?
+				sParametersFilePath.contains("..") ) {
+			log("WasdiLib.setParametersFilePath: \"" + sParametersFilePath + "\" is not a valid path, aborting");
+			return;
+		}
+		try {
+			File oPath = new File(sParametersFilePath);
+			if(!oPath.exists()) {
+				log("WasdiLib.setParametersFilePath: \"" + sParametersFilePath + "\" does not exist, aborting");
+				return;
+			}
+		} catch (Exception oE) {
+			log("WasdiLib.setParametersFilePath: " + oE + ", aborting");
+			return;
+		}			
 		this.m_sParametersFilePath = sParametersFilePath;
 	}
 
@@ -3366,8 +3391,20 @@ public class WasdiLib {
 		return m_sWorkspaceBaseUrl;
 	}
 
-	public void setWorkspaceBaseUrl(String m_sWorkspaceBaseUrl) {
-		this.m_sWorkspaceBaseUrl = m_sWorkspaceBaseUrl;
+	public void setWorkspaceBaseUrl(String sWorkspaceBaseUrl) {
+		log("WasdiLib.setWorkspaceBaseUrl( \"" + sWorkspaceBaseUrl + "\" )");
+		try {
+			URL oUrl = new URL(sWorkspaceBaseUrl);
+			URI oURI = oUrl.toURI();
+			if(null == oURI) {
+				log("WasdiLib.setWorkspaceBaseUrl: \"" + sWorkspaceBaseUrl + "\" is not a valid URL: cannot obtain URI from URL, aborting");
+				return;
+			}
+		} catch (Exception oE) {
+			log("WasdiLib.setWorkspaceBaseUrl: " + sWorkspaceBaseUrl + " is not a valid URL due to " + oE + ", aborting");
+			return;
+		}
+		this.m_sWorkspaceBaseUrl = sWorkspaceBaseUrl;
 	}
 
 	public String hello() {
