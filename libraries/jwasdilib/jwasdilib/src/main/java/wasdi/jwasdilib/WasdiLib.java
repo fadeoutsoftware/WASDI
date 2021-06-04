@@ -16,6 +16,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -238,6 +239,22 @@ public class WasdiLib {
 	 */
 	public void setBaseUrl(String sBaseUrl) {
 		log("WasdiLib.setBaseUrl( " + sBaseUrl + " )");
+		try {
+			URL oUrl = new URL(sBaseUrl);
+			if(null==oUrl) {
+				log("WasdiLib.setBaseUrl: \"" + sBaseUrl + "\" is not a valid URL: cannot instantiate URL, aborting");
+				return;
+			}
+			URI oURI = oUrl.toURI();
+			if(null == oURI) {
+				log("WasdiLib.setBaseUrl: \"" + sBaseUrl + "\" is not a valid URL: cannot obtain URI from URL, aborting");
+				return;
+			}
+		} catch (Exception oE) {
+			log("WasdiLib.setBaseUrl: " + sBaseUrl + " is not a valid URL due to " + oE + ", aborting");
+			return;
+		}
+		
 		this.m_sBaseUrl = sBaseUrl;
 	}
 
