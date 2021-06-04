@@ -84,17 +84,17 @@ public class WasdiLib {
 	/**
 	 * Flag to know if we are on the real server
 	 */
-	private Boolean m_bIsOnServer = false;
+	private boolean m_bIsOnServer = false;
 
 	/**
 	 * Flag to activate the automatic local download
 	 */
-	private Boolean m_bDownloadActive = true;
+	private boolean m_bDownloadActive = true;
 
 	/**
 	 * Flag to activate the automatic upload of locally created files
 	 */
-	private Boolean m_bUploadActive = true;
+	private boolean m_bUploadActive = true;
 
 	/**
 	 * Base Folder Path
@@ -109,7 +109,7 @@ public class WasdiLib {
 	/**
 	 * Flag to set if the lib has to be verbose or not
 	 */
-	private Boolean m_bVerbose = true;
+	private boolean m_bVerbose = true;
 
 	/**
 	 * Params dictionary
@@ -262,7 +262,7 @@ public class WasdiLib {
 	 * Get is on server flag
 	 * @return
 	 */
-	public Boolean getIsOnServer() {
+	public boolean getIsOnServer() {
 		return m_bIsOnServer;
 	}
 
@@ -270,7 +270,7 @@ public class WasdiLib {
 	 * Set is on server flag
 	 * @param bIsOnServer
 	 */
-	public void setIsOnServer(Boolean bIsOnServer) {
+	public void setIsOnServer(boolean bIsOnServer) {
 		log("WasdiLib.setIsOnServer( " + bIsOnServer + " )");
 		this.m_bIsOnServer = bIsOnServer;
 	}
@@ -287,16 +287,16 @@ public class WasdiLib {
 	 * Set Download Active Flag
 	 * @param bDownloadActive
 	 */
-	public void setDownloadActive(Boolean bDownloadActive) {
+	public void setDownloadActive(boolean bDownloadActive) {
 		log("WasdiLib.setDownloadActive( " + bDownloadActive + " )");
 		this.m_bDownloadActive = bDownloadActive;
 	}
 
-	public Boolean getUploadActive() {
+	public boolean getUploadActive() {
 		return m_bUploadActive;
 	}
 
-	public void setUploadActive(Boolean bUploadActive) {
+	public void setUploadActive(boolean bUploadActive) {
 		log("WasdiLib.setUploadActive( " + bUploadActive + " )");
 		this.m_bUploadActive = bUploadActive;
 	}
@@ -367,7 +367,7 @@ public class WasdiLib {
 	 * Get Verbose Flag
 	 * @return
 	 */
-	public Boolean getVerbose() {
+	public boolean getVerbose() {
 		return m_bVerbose;
 	}
 
@@ -375,7 +375,7 @@ public class WasdiLib {
 	 * Set Verbose flag
 	 * @param bVerbose
 	 */
-	public void setVerbose(Boolean bVerbose) {
+	public void setVerbose(boolean bVerbose) {
 		log("WasdiLib.setVerbose( " + bVerbose +" )" );
 		this.m_bVerbose = bVerbose;
 	}
@@ -465,7 +465,7 @@ public class WasdiLib {
 	 * @param sConfigFilePath full path of the configuration file
 	 * @return True if the system is initialized, False if there is any error
 	 */
-	public Boolean init(String sConfigFilePath) {
+	public boolean init(String sConfigFilePath) {
 		log("WasdiLib.init( " + sConfigFilePath + " )");
 		try {
 
@@ -567,7 +567,7 @@ public class WasdiLib {
 		}
 	}
 
-	public Boolean init() {
+	public boolean init() {
 		return init(null);
 	}
 
@@ -579,7 +579,7 @@ public class WasdiLib {
 	 * Password or SessionId
 	 * @return
 	 */
-	public Boolean internalInit() {
+	public boolean internalInit() {
 		log("WasdiLib.internalInit");
 		try {
 
@@ -1013,7 +1013,7 @@ public class WasdiLib {
 
 			sFullPath = sFullPath +m_sWorkspaceOwner + File.separator + m_sActiveWorkspace + File.separator + sProductName;
 			File oFile = new File(sFullPath);
-			Boolean bFileExists = oFile.exists();
+			boolean bFileExists = oFile.exists();
 
 			if (m_bIsOnServer==false) {
 				if (m_bDownloadActive && !bFileExists) {
