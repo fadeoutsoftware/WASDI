@@ -1,0 +1,1 @@
+function wSetDownloadActive(Wasdi, iActive)% Set the download active flag% Syntax% wSetDownloadActive(Wasdi, iActive)% % INPUT%    Wasdi: Wasdi object created after the wasdilib call%    iActive: true/false%  if exist("Wasdi") < 1     disp('Wasdi variable does not existst')    return   end     Wasdi.setDownloadActive(iActive);end
