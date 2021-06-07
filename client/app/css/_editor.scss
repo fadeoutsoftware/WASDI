@@ -698,6 +698,37 @@
         font-style: italic;
     }
 
+    .opacitySlider{
+        input[type="range"] {
+    display: block;
+
+    -webkit-appearance: none;
+    background-color: #009036;
+    width: 180px;
+    height: 5px;
+    border-radius: 5px;
+    margin: 0 auto;
+    outline: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: #009036;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: .3s ease-in-out;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    background-color: white;
+    border: 2px solid #009036;
+}
+input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+}
+    }
+
 }
 
 // Move down the cesium globe toolbar when active in editor
@@ -708,3 +739,5 @@
 #mapcontainer .cesium-infoBox {
     margin-top: 4em;
 }
+
+

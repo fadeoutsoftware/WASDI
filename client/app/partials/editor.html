@@ -276,7 +276,7 @@
                         </div>
                     </div-->
                     <!----------------------------------------------- TAB 3  LAYERS---------------------------------------------->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container"
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider"
                         ng-show="m_oController.m_iActiveMapPanelTab === 1">
                         <div>
                             <div ng-repeat="a in m_oController.m_aoVisibleBands">
@@ -289,7 +289,7 @@
                                        min="0"
                                        max="100"
                                        ng-model="a.opacity"
-                                       class="slider"
+                                       class=""
                                        ng-change="m_oController.setLayerOpacity(a.opacity,$index)">
 
                             </div>
