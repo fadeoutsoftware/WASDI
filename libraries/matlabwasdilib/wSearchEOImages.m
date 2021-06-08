@@ -2,7 +2,7 @@ function [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(W
 % Search EO Images. Returns 3 parallel arrays: one with the names, one with the links and one with the footprints of the found products.
 % The links and footprints can be used as input to the wImportProduct function, that imports the product in the active workspace
 % Syntax
-% [asWorkspaceNames, asWorkspaceIds]=wSearchEOImages(Wasdi, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
+% [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(Wasdi, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
 %
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
