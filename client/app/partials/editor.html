@@ -276,27 +276,23 @@
                         </div>
                     </div-->
                     <!----------------------------------------------- TAB 3  LAYERS---------------------------------------------->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider"
-                        ng-show="m_oController.m_iActiveMapPanelTab === 1">
+                    <!-- ng-show="m_oController.m_iActiveMapPanelTab === 1"-->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider">
                         <div>
                             <div ng-repeat="a in m_oController.m_aoVisibleBands">
                                 Product name : {{a.productName}} <br> Band : {{a.name}}<br>
-                            <div class="range-container">
-                                <label class="color-value">
-                                    {{a.opacity}} %
-                                </label>
-                                <input type="range"
-                                       min="0"
-                                       max="100"
-                                       ng-model="a.opacity"
-                                       class=""
-                                       ng-change="m_oController.setLayerOpacity(a.opacity,$index)">
+                                <div class="range-container">
+                                    <label class="color-value">
+                                        {{a.opacity}} %
+                                    </label>
+                                    <input type="range" min="0" max="100" ng-model="a.opacity" class=""
+                                        ng-change="m_oController.setLayerOpacity(a.opacity,$index)">
 
+                                </div>
                             </div>
-                        </div>
 
                         </div>
-                        
+
                     </div>
                 </div>
             </div>

@@ -729,6 +729,11 @@ input[type="range"]::-webkit-slider-thumb:active {
 }
     }
 
+    .no_checkbox>i.jstree-checkbox
+    {
+        display:none
+    }
+
 }
 
 // Move down the cesium globe toolbar when active in editor

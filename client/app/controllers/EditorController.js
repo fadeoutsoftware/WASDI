@@ -3158,12 +3158,18 @@ var EditorController = (function () {
                     "icon": "assets/icons/metadata-24.png",
                     "children": [],
                     "clicked": false,//semaphore
-                    "url": oController.m_oProductService.getProductMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
+                    "url": oController.m_oProductService.getProductMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId),
+                    a_attr: {
+                        class: "no_checkbox"
+                    }
                 },
                 {
                     "text": "Bands",
                     "icon": "assets/icons/bandsTree.png",
-                    "children": []
+                    "children": [],
+                    a_attr: {
+                        class: "no_checkbox"
+                    }
                 }
             ];
 
@@ -3181,6 +3187,10 @@ var EditorController = (function () {
                 } else {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
+                // REMOVE CHECKBOXES 
+                oNode.a_attr = new Object();
+                oNode.a_attr.class = "no_checkbox";
+                
 
                 //BAND
                 oNode.band = oaBandsItems[iIndexBandsItems];
