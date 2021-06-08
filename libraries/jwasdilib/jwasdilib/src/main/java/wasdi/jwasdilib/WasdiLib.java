@@ -3612,6 +3612,82 @@ public class WasdiLib {
 
 
 	/**
+	 * Get a paginated list of processes in the active workspace, each element of which is a JSON string 
+	 * @param iStartIndex start index of the process (0 by default is the last one)
+	 * @param iEndIndex end index of the process (optional)
+	 * @param sStatus status filter, null by default. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 * @param sOperationType Operation Type Filter, null by default. Can be RUNPROCESSOR, RUNIDL, RUNMATLAB, INGEST, DOWNLOAD, GRAPH, DEPLOYPROCESSOR
+	 * @param sNamePattern Name filter. The name meaning depends by the operation type, null by default. For RUNPROCESSOR, RUNIDL and RUNMATLAB is the name of the application
+	 * @return a list of process IDs
+	 */
+	public List<String> getProcessesByWorkspaceAsListOfJson(int iStartIndex, Integer iEndIndex, String sStatus, String sOperationType, String sNamePattern){
+		log("WasdiLib.getProcessesByWorkspaceAsListOfJson");
+		List<String> asJson = null;
+		try {
+			List<Map<String, String>> aoList = getProcessesByWorkspace(iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
+			asJson = new ArrayList<>(aoList.size());
+			for (Map<String, String> asMap : aoList) {
+				try {
+					boolean bIsFirst = true;
+					StringBuilder oStringBuilder = new StringBuilder().append("{");
+					for (Entry<String, String> oEntry : asMap.entrySet()) {
+						if(!bIsFirst) {
+							oStringBuilder = oStringBuilder.append(",");
+						} else {
+							bIsFirst = false;
+						}
+						String sKey = oEntry.getKey();
+						String sValue = oEntry.getValue();
+						boolean bReplacement = false;
+						if(null==sKey) {
+							log("WasdiLib.getProcessesByWorkspaceAsListOfJson: WARNING key is null, replacing it with empty string");
+							sKey = "";
+							bReplacement = true;
+						}
+						if(null==sValue) {
+							log("WasdiLib.getProcessesByWorkspaceAsListOfJson: WARNING value is null, replacing it with empty string");
+							sValue = "";
+							bReplacement = true;
+						}
+						if(bReplacement) {
+							log("WasdiLib.getProcessesByWorkspaceAsListOfJson: k/v now are: " + sKey + " : " + sValue);
+						}
+						if(
+								sKey.toLowerCase().equals("payload=") ||
+								sKey.toLowerCase().equals("payload")
+						) {
+							sKey = "\"payload\"";
+							if(sValue.startsWith("\"")) {
+								sValue = sValue.substring(1);
+							}
+							if(sValue.endsWith("\"")) {
+								sValue = sValue.substring(0,sValue.length()-1);
+							}
+							if(sValue.isEmpty()) {
+								sValue = "\"\"";
+							}
+						} else {
+							sKey = "\"" + sKey + "\"";
+							sValue = "\"" + sValue + "\"";
+						}
+						oStringBuilder = oStringBuilder
+								.append(sKey)
+								.append(":")
+								.append(sValue);
+					}
+					oStringBuilder = oStringBuilder.append("}");
+					asJson.add(oStringBuilder.toString());
+				} catch (Exception oE) {
+					log("WasdiLib.getProcessesByWorkspaceAsListOfJson: skipping process " + asMap + " due to "  + oE);
+				}
+			}
+		} catch (Exception oE) {
+			log("WasdiLib.getProcessesByWorkspaceAsListOfJson: " + oE);
+		}
+		return asJson;
+	}
+
+	/**
 	 * Get a paginated list of processes in the active workspace 
 	 * @param iStartIndex start index of the process (0 by default is the last one)
 	 * @param iEndIndex end index of the process (optional)

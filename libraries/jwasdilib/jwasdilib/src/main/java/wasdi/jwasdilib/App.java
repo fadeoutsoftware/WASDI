@@ -34,7 +34,7 @@ public class App
         //testConnection(oLib);
         
         testHello(oLib);
-        testSetBasePath(oLib);
+        //testSetBasePath(oLib);
         
         
     //    testDownload(oLib);
@@ -51,7 +51,7 @@ public class App
 //        testSubset(oLib);
         
         //testImport(oLib);
-        testWaitProcesses(oLib);
+        //testWaitProcesses(oLib);
         //testImportProductList(oLib);
         
         
@@ -60,7 +60,7 @@ public class App
         //testCreateWorkspace(oLib);
         //testDeleteWorkspace(oLib);
         
-        //testGetProcessesByWorkspace(oLib);
+        testGetProcessesByWorkspace(oLib);
         //testGetProductsByWorkspace(oLib);
 
         //testGetPayload(oLib);
@@ -71,7 +71,7 @@ public class App
         //testMultisubset(oLib);
         
         
-        testGetParamsAsJsonString(oLib);
+        //testGetParamsAsJsonString(oLib);
         
         System.out.println("JWasdiLib Test Done");
         oLib.updateStatus("DONE");
@@ -359,7 +359,10 @@ public class App
 	}
     
     private static void testGetProcessesByWorkspace(WasdiLib oLib) {
+    	System.out.println("testGetProcessesByWorkspace");
     	System.out.println(oLib.getProcessesByWorkspace(0, 20, null, null, null));
+    	System.out.println("testGetProcessesByWorkspace: now the JSON version");
+    	System.out.println(oLib.getProcessesByWorkspaceAsListOfJson(0, 20, null, null, null));
     }
     
     private static void testGetPayload(WasdiLib oLib) {
