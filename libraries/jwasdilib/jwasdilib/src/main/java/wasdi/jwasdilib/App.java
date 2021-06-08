@@ -55,15 +55,15 @@ public class App
         //testImportProductList(oLib);
         
         
-//        testImportAndPreprocess(oLib);
+        testImportAndPreprocess(oLib);
         
         //testCreateWorkspace(oLib);
         //testDeleteWorkspace(oLib);
         
-        testGetProcessesByWorkspace(oLib);
+        //testGetProcessesByWorkspace(oLib);
         //testGetProductsByWorkspace(oLib);
 
-        //testGetPayload(oLib);
+        testGetPayload(oLib);
 
         //testgetProductBbox(oLib);
         
@@ -341,7 +341,7 @@ public class App
     }
     
     public static void testImportAndPreprocess(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-06-01", "2021-06-06", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importAndPreprocess(aoFound.subList(0, 2), "ndvi", "_ndvi.tif");
     }

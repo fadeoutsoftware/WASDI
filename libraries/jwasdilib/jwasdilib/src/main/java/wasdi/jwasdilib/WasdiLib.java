@@ -3430,7 +3430,41 @@ public class WasdiLib {
 		return sResult;
 
 	}
+	
+	
+	public void importAndPreprocessWithLinks(List<String> asProductsLink, List<String> asProductsNames, String sWorkflow, String sPreProcSuffix) {
+		log("WasdiLib.importAndPreprocess( aoProductsToImport, " + sWorkflow + ", " + sPreProcSuffix + " )");
+		importAndPreprocessWithLinks(asProductsLink, asProductsNames, sWorkflow, sPreProcSuffix, null);
+	}
+	
+	public void importAndPreprocessWithLinks(List<String> asProductsLinks, List<String> asProductsNames, String sWorkflow, String sPreProcSuffix, String sProvider) {
+		log("WasdiLib.importAndPreprocess( aoProductsToImport, " + sWorkflow + ", " + sPreProcSuffix + ", " + sProvider + " )");
+		if(null==asProductsLinks) {
+			wasdiLog("The list of products links to be imported is null, aborting");
+			return;
+		}
+		if(null==asProductsNames) {
+			wasdiLog("The list of products names to be imported is null, aborting");
+			return;
+		}
+		if(asProductsLinks.size() !=  asProductsNames.size()) {
+			wasdiLog("The list of products names has a different size from the list of product links, aborting");
+			return;
+		}
+		if(sProvider==null || sProvider.isEmpty()) {
+			sProvider = getDefaultProvider();
+		}
 
+		//start downloads
+		List<String> asDownloadIds = asynchImportProductList(asProductsLinks);
+
+		List<String> asWorkflowIds = asynchPreprocessProductsOnceDownloadedWithNames(asProductsNames, sWorkflow,
+				sPreProcSuffix, asDownloadIds);
+		waitProcesses(asWorkflowIds);
+		wasdiLog("importAndPreprocess: complete :-)");
+	}
+
+	
 	public void importAndPreprocess(List<Map<String, Object>> aoProductsToImport, String sWorkflow, String sPreProcSuffix) {
 		log("WasdiLib.importAndPreprocess( aoProductsToImport, " + sWorkflow + ", " + sPreProcSuffix + " )");
 		importAndPreprocess(aoProductsToImport, sWorkflow, sPreProcSuffix, null);
@@ -3449,96 +3483,123 @@ public class WasdiLib {
 		//start downloads
 		List<String> asDownloadIds = asynchImportProductListWithMaps(aoProductsToImport);
 
-		//prepare for preprocessing
-		List<String> asDownloadStatuses = null;
-
-		final String sNotStartedYet = "NOT STARTED YET";
-
-		//DOWNLOAD
-		List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
-		//WORKFLOW
-		List<String> asWorkflowStatuses = new ArrayList<String>(asDownloadIds.size());
-
-		//init lists by marking process not started
-		for(int i = 0; i < aoProductsToImport.size(); ++i) {
-			asWorkflowIds.add(sNotStartedYet);
-			asWorkflowStatuses.add(sNotStartedYet);
-		}
-
-		boolean bDownloading = true;
-		boolean bRunningWorkflow = true;
-		boolean bAllWorkflowsStarted = false;
-		while(bRunningWorkflow || bDownloading) {
-
-			//DOWNLOADS
-			if(bDownloading) {
-				bDownloading = false;
-				//update status of downloads
-				asDownloadStatuses = getProcessesStatusAsList(asDownloadIds);
-				for (String sStatus : asDownloadStatuses) {
-					if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
-						bDownloading = true;
-					}
-				}
-				if(!bDownloading) {
-					wasdiLog("importAndPreprocess: completed all downloads");
-				} else {
-					log("importAndPreprocess: downloads not completed yet");
-				}
-			}
-
-			//WORKFLOWS
-			bRunningWorkflow = false;
-			bAllWorkflowsStarted = true;
-			for(int i = 0; i < asDownloadIds.size(); ++i) {
-				//check the download status and start as many workflows as possible
-				if(asDownloadStatuses.get(i).equals("DONE")) {
-					//download complete
-					if(asWorkflowIds.get(i).equals(sNotStartedYet)) {
-						//then workflow must be started
-						String sInputName = getProductName(aoProductsToImport.get(i));
-						if(null==sInputName || sInputName.equals("")) {
-							wasdiLog("importAndPreprocess: WARNING: input name for " + i + "th product could not be retrieved, skipping");
-							asWorkflowIds.set(i, "ERROR "+i);
-							asWorkflowStatuses.set(i, "ERROR");
-						} else {
-							String[] asInputFileName = new String[] {sInputName};
-							String sOutputName = sInputName + sPreProcSuffix;
-							String[] asOutputFileName = new String[] {sOutputName};
-							String sWorkflowId = asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflow);
-							wasdiLog("importAndPreprocess: started " + i + "th workflow with id " + sWorkflowId + " -> " + sOutputName);
-							asWorkflowIds.set(i, sWorkflowId);
-							bRunningWorkflow = true;
-						}
-					} else {
-						//check the status of the workflow
-						String sStatus = getProcessStatus(asWorkflowIds.get(i));
-						if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
-							bRunningWorkflow = true;
-						}
-						asWorkflowStatuses.set(i, sStatus);
-					}
-				} else if(asDownloadStatuses.get(i).equals("STOPPED")) {
-					asWorkflowIds.set(i, "STOPPED");
-				} else if(asDownloadStatuses.get(i).equals("ERROR")) {
-					asWorkflowIds.set(i, "ERROR");
-				}
-				if(asWorkflowIds.get(i).equals(sNotStartedYet)) {
-					bAllWorkflowsStarted = false;
-				}
-			}
-			if(bAllWorkflowsStarted) {
-				break;
-			}
-			try {
-				log("importAndPreprocess: sleep");
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		List<String> asWorkflowIds = asynchPreprocessProductsOnceDownloaded(aoProductsToImport, sWorkflow,
+				sPreProcSuffix, asDownloadIds);
 		waitProcesses(asWorkflowIds);
 		wasdiLog("importAndPreprocess: complete :-)");
+	}
+	
+	private List<String> asynchPreprocessProductsOnceDownloaded(List<Map<String, Object>> aoProductsToImport,
+			String sWorkflow, String sPreProcSuffix, List<String> asDownloadIds) {
+		try {
+			List<String> asProductsNames = new ArrayList<>(aoProductsToImport.size());
+			for (Map<String, Object> aoMap: aoProductsToImport) {
+				String sName = getProductName(aoMap);
+				asProductsNames.add(sName);
+			}
+			return asynchPreprocessProductsOnceDownloadedWithNames(asProductsNames, sWorkflow, sPreProcSuffix, asDownloadIds);
+		} catch (Exception oE) {
+			log("WasdiLib.asynchPreprocessProductsOnceDownloaded: " + oE + ", aborting");
+			return null;
+		}
+	}
+
+	private List<String> asynchPreprocessProductsOnceDownloadedWithNames(List<String> asProductsNames,
+			String sWorkflow, String sPreProcSuffix, List<String> asDownloadIds) {
+		try {
+			//prepare for preprocessing
+			List<String> asDownloadStatuses = null;
+	
+			final String sNotStartedYet = "NOT STARTED YET";
+	
+			//DOWNLOAD
+			List<String> asWorkflowIds = new ArrayList<String>(asDownloadIds.size());
+			//WORKFLOW
+			List<String> asWorkflowStatuses = new ArrayList<String>(asDownloadIds.size());
+	
+			//init lists by marking process not started
+			for(int i = 0; i < asProductsNames.size(); ++i) {
+				asWorkflowIds.add(sNotStartedYet);
+				asWorkflowStatuses.add(sNotStartedYet);
+			}
+	
+			boolean bDownloading = true;
+			boolean bRunningWorkflow = true;
+			boolean bAllWorkflowsStarted = false;
+			while(bRunningWorkflow || bDownloading) {
+	
+				//DOWNLOADS
+				if(bDownloading) {
+					bDownloading = false;
+					//update status of downloads
+					asDownloadStatuses = getProcessesStatusAsList(asDownloadIds);
+					for (String sStatus : asDownloadStatuses) {
+						if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
+							bDownloading = true;
+						}
+					}
+					if(!bDownloading) {
+						wasdiLog("importAndPreprocess: completed all downloads");
+					} else {
+						log("importAndPreprocess: downloads not completed yet");
+					}
+				}
+	
+				//WORKFLOWS
+				bRunningWorkflow = false;
+				bAllWorkflowsStarted = true;
+				for(int i = 0; i < asDownloadIds.size(); ++i) {
+					//check the download status and start as many workflows as possible
+					if(asDownloadStatuses.get(i).equals("DONE")) {
+						//download complete
+						if(asWorkflowIds.get(i).equals(sNotStartedYet)) {
+							//then workflow must be started
+							String sInputName = asProductsNames.get(i);
+							if(null==sInputName || sInputName.equals("")) {
+								wasdiLog("importAndPreprocess: WARNING: input name for " + i + "th product could not be retrieved, skipping");
+								asWorkflowIds.set(i, "ERROR "+i);
+								asWorkflowStatuses.set(i, "ERROR");
+							} else {
+								String[] asInputFileName = new String[] {sInputName};
+								String sOutputName = sInputName + sPreProcSuffix;
+								String[] asOutputFileName = new String[] {sOutputName};
+								String sWorkflowId = asynchExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflow);
+								wasdiLog("importAndPreprocess: started " + i + "th workflow with id " + sWorkflowId + " -> " + sOutputName);
+								asWorkflowIds.set(i, sWorkflowId);
+								bRunningWorkflow = true;
+							}
+						} else {
+							//check the status of the workflow
+							String sStatus = getProcessStatus(asWorkflowIds.get(i));
+							if(!(sStatus.equals("DONE") || sStatus.equals("ERROR") || sStatus.equals("STOPPED"))) {
+								bRunningWorkflow = true;
+							}
+							asWorkflowStatuses.set(i, sStatus);
+						}
+					} else if(asDownloadStatuses.get(i).equals("STOPPED")) {
+						asWorkflowIds.set(i, "STOPPED");
+					} else if(asDownloadStatuses.get(i).equals("ERROR")) {
+						asWorkflowIds.set(i, "ERROR");
+					}
+					if(asWorkflowIds.get(i).equals(sNotStartedYet)) {
+						bAllWorkflowsStarted = false;
+					}
+				}
+				if(bAllWorkflowsStarted) {
+					break;
+				}
+				try {
+					log("importAndPreprocess: sleep");
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			return asWorkflowIds;
+		} catch (Exception oE) {
+			log("WasdiLib.asynchPreprocessProductsOnceDownloadedWithNames: " + oE + ", aborting");
+		}
+		return null;
 	}
 
 	public String createWorkspace(String sWorkspaceName) {
@@ -3706,7 +3767,7 @@ public class WasdiLib {
 					.append("sWorkspaceId=").append(getActiveWorkspace())
 					.append("&startindex=").append(iStartIndex);
 			if(null!=iEndIndex && iEndIndex > iStartIndex) {
-				oUrl = oUrl.append("&endIndex=").append(iEndIndex);
+				oUrl = oUrl.append("&endindex=").append(iEndIndex);
 			}
 			if(null!=sStatus && !sStatus.isEmpty()) {
 				oUrl = oUrl.append("&status=").append(sStatus);
@@ -3742,7 +3803,8 @@ public class WasdiLib {
 			log("internalGetProcessorPayload: the processor ID is null or empty");
 		}
 		try {
-			return s_oMapper.readValue(getProcessorPayloadAsJSON(sProcessObjId), new TypeReference<Map<String,Object>>(){});
+			String sJsonPayload = getProcessorPayloadAsJSON(sProcessObjId);
+			return s_oMapper.readValue(sJsonPayload, new TypeReference<Map<String,Object>>(){});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -3766,9 +3828,11 @@ public class WasdiLib {
 					.append(getWorkspaceBaseUrl())
 					.append("/process/payload")
 					.append("?processObjId=").append(sProcessObjId);
-			return httpGet(oUrl.toString(), getStandardHeaders());
-		} catch (Exception e) {
-			e.printStackTrace();
+			String sResponse = httpGet(oUrl.toString(), getStandardHeaders()); 
+			sResponse = java.net.URLDecoder.decode(sResponse, java.nio.charset.StandardCharsets.UTF_8.name());
+			return sResponse;
+		} catch (Exception oE) {
+			log("internalGetProcessorPayload: " + oE);
 		}
 		return null;
 	}
