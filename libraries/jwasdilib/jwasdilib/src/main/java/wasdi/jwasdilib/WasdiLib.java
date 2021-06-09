@@ -1431,6 +1431,7 @@ public class WasdiLib {
 	 */
 	public String updateStatus(String sStatus,int iPerc) {
 
+		log("WasdiLib.updateStatus( " + sStatus + ", " + iPerc + " )");
 		if(!isThisAValidStatus(sStatus)) {
 			log("WasdiLib.updateStatus( " + sStatus + ", " +  + iPerc +" ): " + sStatus + " is not a valid status, aborting");
 			return "";
@@ -1464,7 +1465,11 @@ public class WasdiLib {
 				System.out.println("sProcessId must not be empty");
 			}
 
-			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId="+sProcessId+"&status="+sStatus+"&perc="+iPerc + "&sendrabbit=1";
+			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId="+sProcessId+"&status="+sStatus;
+			if(iPerc >= 0 && iPerc <=100) {
+				sUrl += "&perc="+iPerc;
+			}
+			sUrl += "&sendrabbit=1";
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
