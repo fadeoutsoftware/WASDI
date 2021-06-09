@@ -808,6 +808,10 @@ public class WasdiLib {
 	 */
 	public String getWorkspaceOwnerByName(String sWorkspaceName) {
 		log("WasdiLib.getWorkspaceOwnerByName( " + sWorkspaceName + " )");
+		if(null==sWorkspaceName || sWorkspaceName.isEmpty()) {
+			log("WasdiLib.getWorkspaceOwnerByName: workspace name null or empty, aborting");
+			return "";
+		}
 		try {
 			String sUrl = m_sBaseUrl + "/ws/byuser";
 
@@ -839,6 +843,10 @@ public class WasdiLib {
 	 */
 	public String getWorkspaceOwnerByWSId(String sWorkspaceId) {
 		log("WasdiLib.getWorkspaceOwnerByWSId( " + sWorkspaceId + " )");
+		if(null==sWorkspaceId || sWorkspaceId.isEmpty()) {
+			log("WasdiLib.getWorkspaceOwnerByWSId: workspace id is null or empty, aborting");
+			return "";
+		}
 		try {
 			String sUrl = m_sBaseUrl + "/ws/byuser";
 
