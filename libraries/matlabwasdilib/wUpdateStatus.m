@@ -1,22 +1,22 @@
-function sOutputStatus =wUpdateStatus(Wasdi, sStatus)
-% Updates the status of the actual Process
-% Syntax
-% sStatus =wUpdateStatus(Wasdi, sStatus);
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sStatus: updated status. Must be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+function sStatus = wUpdateStatus(wasdi, sStatus, iPerc=[])
 %
-% OUTPUT
-%   sOutputStatus: Process Status Updated as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+% updates the status and, optionally, the progress percent
+% syntax:
+% sStatus = wUpdateStatus(Wasdi, sStatus, iPerc=[])
+%
+% INPUT:
+%   Wasdi: Wasdi object created after the wasdilib call
+%   sStatus: the status to be set
+%   iPerc: optional, the progress percent
 
-  if exist("Wasdi") < 1 
-    disp('Wasdi variable does not existst')
+  if exist("wasdi") < 1 
+    disp('Wasdi variable does not exist')
     return
    end
    
-   sOutputStatus = char(Wasdi.updateStatus(sStatus));
-   
-   %disp(['Process Status ', sStatus]);
-
+   if isempty(iPerc)
+     wasdi.updateStatus(sStatus)
+   else
+       wasdi.updateStatus(sStatus,iPerc)
+   end
 end
