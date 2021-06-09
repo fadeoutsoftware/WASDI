@@ -821,12 +821,14 @@ public class WasdiLib {
 
 			// Search the one by name
 			for (Map<String, Object> oWorkspace : aoJSONMap) {
-				if (oWorkspace.get("workspaceName").toString().equals(sWorkspaceName)) {
+				if (oWorkspace.get("workspaceName").toString().equals(sWorkspaceName)
+						|| oWorkspace.get("workspaceName").toString().equals(URLEncoder.encode(sWorkspaceName, java.nio.charset.StandardCharsets.UTF_8.toString()))
+						) {
 					// Found
 					return (String) oWorkspace.get("ownerUserId").toString();
 				}
 			}
-
+			log("WasdiLib.getWorkspaceOwnerByName: workspace " + sWorkspaceName + " could not be found");
 			return "";
 		}
 		catch (Exception oEx) {
