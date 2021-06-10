@@ -8,7 +8,7 @@ function asProducts=wGetProductsByWorkspace(Wasdi, sWorkspaceName)
 %    sWorkspaceName: name of the workspace
 %  
 %
-% :Returns:
+%:Returns:
 %   asProducts: array of strings that are the names of the products
 
 

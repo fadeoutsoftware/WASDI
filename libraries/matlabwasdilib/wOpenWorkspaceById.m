@@ -7,7 +7,7 @@ function sWorkspaceId=wOpenWorkspaceById(Wasdi,sWorkspaceId)
 %   Wasdi: Wasdi object created after the wasdilib call
 %   sWorkspaceId: ID of the workspace to open
 %
-% :Returns:
+%:Returns:
 %   sWorkspaceId: the ID of the workspace if succesfully opened, empty string otherwise
 %
 

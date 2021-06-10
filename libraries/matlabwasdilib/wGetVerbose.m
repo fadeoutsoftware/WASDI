@@ -7,7 +7,7 @@ function bVerbose = wGetVerbose(Wasdi)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% :Returns:
+%:Returns:
 %   bVerbose: verbosity flag
 
   if exist("Wasdi") < 1 

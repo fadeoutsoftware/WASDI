@@ -6,7 +6,7 @@ function sParametersFilePath = wGetParametersFilePath(Wasdi)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% :Returns:
+%:Returns:
 %   sParametersFilePath : the path to the parameters file
 
   if exist("Wasdi") < 1 

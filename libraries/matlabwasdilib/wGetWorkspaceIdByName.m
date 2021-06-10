@@ -8,7 +8,7 @@ function sWorkspaceId =wGetWorkspaceIdByName(Wasdi, sWorkspaceName)
 %    sWorkspaceName: Name of the workspace 
 %  
 %
-% :Returns:
+%:Returns:
 %   sWorkspaceId: id of the workspace
 
   if exist("Wasdi") < 1 

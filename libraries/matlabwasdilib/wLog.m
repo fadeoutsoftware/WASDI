@@ -7,7 +7,7 @@ function wLog(Wasdi, sLogRow)
 %    Wasdi: Wasdi object created after the wasdilib call
 %	 sLogRow Text to log
 %
-% :Returns:
+%:Returns:
 %   None
 %
 

@@ -6,7 +6,7 @@ function sPassword = wGetPassword(Wasdi)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% :Returns:
+%:Returns:
 %   sPassword: WASDI user's password
 
   if exist("Wasdi") < 1 

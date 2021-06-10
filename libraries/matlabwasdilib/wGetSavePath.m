@@ -7,7 +7,7 @@ function sSavePath =wGetSavePath(Wasdi)
 %    Wasdi: Wasdi object created after the wasdilib call
 %  
 %
-% :Returns:
+%:Returns:
 %   sSavePath: the local path to use to save the file, including last /
 
   if exist("Wasdi") < 1 

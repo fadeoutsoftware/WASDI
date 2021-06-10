@@ -8,7 +8,7 @@ function sStatus =wSetProcessPayload(Wasdi, sProcessId, sData)
 %    sProcessId: Id of the process to update 
 %    sData: Data to write as payloar
 %
-% :Returns:
+%:Returns:
 %   sStatus: Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 

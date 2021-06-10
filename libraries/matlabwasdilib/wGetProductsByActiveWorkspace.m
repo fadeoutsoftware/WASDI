@@ -7,7 +7,7 @@ function asProducts=wGetProductsByActiveWorkspace(Wasdi)
 %    Wasdi: Wasdi object created after the wasdilib call
 %  
 %
-% :Returns:
+%:Returns:
 %   asProducts: array of strings that are the names of the products
 
 

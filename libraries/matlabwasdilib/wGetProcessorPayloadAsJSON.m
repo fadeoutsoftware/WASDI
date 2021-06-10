@@ -7,7 +7,7 @@ function sProcessPayload = wGetProcessorPayloadAsJSON(Wasdi, sProcessObjId)
 %    Wasdi: Wasdi object created after the wasdilib call
 %    sProcessObjId: process ID for which the payload must be retrieve
 %
-% :Returns:
+%:Returns:
 %   sProcessPayload: a JSON formatted string containing the payload
 
   if exist("Wasdi") < 1 

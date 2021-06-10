@@ -7,7 +7,7 @@ function asStatuses=wImportProductList(Wasdi, asProductLinks)
 %   Wasdi: Wasdi object created after the wasdilib call
 %   asProductLinks: collection of Product Direct Link as returned by wSearchEOImage
 %
-% :Returns:
+%:Returns:
 %   asStatuses: list of statuses of the import processes
 %
 

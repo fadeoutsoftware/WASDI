@@ -7,7 +7,7 @@ function [asWorkspaceNames, asWorkspaceIds]=wGetWorkspaces(Wasdi);
 %    Wasdi: Wasdi object created after the wasdilib call
 %  
 %
-% :Returns:
+%:Returns:
 %   asWorkspaceNames: array of strings that are the names of the workspaces
 %   asWorkspaceIds: array of strings that are the id of the workspaces
 

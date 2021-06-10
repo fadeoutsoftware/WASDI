@@ -7,7 +7,7 @@ function bUploadActive = wGetUploadActive(Wasdi)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% :Returns:
+%:Returns:
 %   bUploadActive: true if Upload is active, false otherwise
 
   if exist("Wasdi") < 1 

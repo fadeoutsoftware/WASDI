@@ -7,7 +7,7 @@ function sParameter = wGetParameter(Wasdi, sKey)
 %    Wasdi: Wasdi object created after the wasdilib call
 %    sKey: The KEY of the parameter in the paramteres file
 %
-% :Returns:
+%:Returns:
 %   sParameter: The value of the parameter. If it does not exists the function returns ""
 
   if exist("Wasdi") < 1 

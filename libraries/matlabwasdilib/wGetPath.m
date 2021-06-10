@@ -6,7 +6,7 @@ function sPath = wGetPath(Wasdi, sFileName)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% :Returns:
+%:Returns:
 %   sPath: wasdi local path for given product
 
   if exist("Wasdi") < 1 
