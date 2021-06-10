@@ -65,7 +65,7 @@ import sys
 # Import Waspy library
 sys.path.insert(0, os.path.abspath('../libraries/waspy'))
 # Import Octave/Matlab library
-matlab_src_dir = os.path.abspath('../libraries/octavewasdilib')
+matlab_src_dir = os.path.abspath('../libraries/')
 
 print("Python source folders " + sys.path[0] +"\n")
 print("Matlab/Octave source folder " + matlab_src_dir +"\n")
