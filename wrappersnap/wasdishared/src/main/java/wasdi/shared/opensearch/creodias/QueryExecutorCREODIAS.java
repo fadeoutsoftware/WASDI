@@ -30,7 +30,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 	}
 
 	public QueryExecutorCREODIAS() {
-		Utils.debugLog(s_sClassName);
+		//Utils.debugLog(s_sClassName);
 		m_sProvider=s_sClassName;
 		this.m_oQueryTranslator = new DiasQueryTranslatorCREODIAS();
 		this.m_oResponseTranslator = new DiasResponseTranslatorCREODIAS();

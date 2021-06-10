@@ -218,6 +218,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-gdal-writer</artifactId>
+			<version>8.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-radiometric-indices</artifactId>
 			<version>8.0.3</version>
 		</dependency>

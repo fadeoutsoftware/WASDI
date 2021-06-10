@@ -42,7 +42,7 @@ Unleash the real power of WASDI, developing and uploading your own downstream ap
 Wasdi supports several programming languages:
 
 * **Python 2.7**
-* **Python 3.7**
+* **Python 3.x**
 * **IDL 3.7.2**
 * **Octave 6.x**
 

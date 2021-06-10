@@ -667,12 +667,23 @@ public class AuthResource {
 				oNewUser.setValidAfterFirstAccess(true);
 				oNewUser.setAuthServiceProvider("keycloak");
 				Utils.debugLog("AuthResource.userRegistration: user details parsed");
-
+				
+				String sDefaultNode = "wasdi";
+				
+				try {					
+					sDefaultNode = m_oServletConfig.getInitParameter("USERS_DEFAULT_NODE");
+					if (Utils.isNullOrEmpty(sDefaultNode)) {
+						sDefaultNode = "wasdi";
+					}
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("Exception reading Users default node " + oEx.toString());
+				}
 
 				//third: store user in DB
 				//create new user
 				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
-				oNewUser.setDefaultNode("wasdi");
+				oNewUser.setDefaultNode(sDefaultNode);
 				oNewUser.setValidAfterFirstAccess(true);
 
 				PrimitiveResult oResult = null;

@@ -33,6 +33,8 @@ var EditorController = (function () {
         this.m_b2DMapModeOn = true;
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
         this.m_bIsActiveGeoraphicalMode = false;
+        // Flag to know if the first zoom on band has been done
+        this.m_bFirstZoomOnBandDone = false;
 
         //filter query text in tree
         this.m_sTextQueryFilterInTree = "";
@@ -73,21 +75,13 @@ var EditorController = (function () {
         //
         this.m_aoNavBarMenu = [];
 
-        this.m_oUndoRedoBoundigBoxesZoom = {
-            actualLayerId: "",
-            actualBoundingBox: "",
-            actualBoundingBoxType: "",
-            undoLayerId: "",
-            undoBoundingBox: "",
-            undoBoundingBoxType: "",
-        };
-
         this.m_oAreHideBars = {
             mainBar: false,
             radarBar: true,
             opticalBar: true,
             processorBar: true
         };
+
         //we save the masks selected
         this.m_oMasksSaved = null;
         // Index of the actual Active Tab
@@ -415,13 +409,7 @@ var EditorController = (function () {
 
                         var sColor = "#f22323";
                         var sGeoserverBBox = oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox;
-                        // if( oController.m_oMapService.isProductGeoreferenced( oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox ) === false )
-                        // {
-                        //     var oRectangleBoundingBox = oController.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
-                        //     //the options.layers property is used for remove the rectangle to the map
-                        //     oRectangleBoundingBox.options.layers = "wasdi:" + oController.m_aoVisibleBands[iIndexLayers].layerId;
-                        // }
-                        //
+
                         oController.productIsNotGeoreferencedRectangle2DMap(sColor, sGeoserverBBox, oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].layerId);
                         oController.addLayerMap2DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                     }
@@ -533,13 +521,10 @@ var EditorController = (function () {
                     if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
                         this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
                         this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
-                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
                     } else {
                         // Try with the generic product bounding box
                         this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
                         this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
-                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
-
                     }
                 }
             } else {
@@ -573,13 +558,6 @@ var EditorController = (function () {
 
         // Show the external Layers
         this.addExternalLayersOnMaps();
-        // for (var iExternals = 0; iExternals<this.m_aoExternalLayers.length; iExternals++) {
-        //     var oLayer = this.m_aoExternalLayers[iExternals];
-        //
-        //     // Add to the map External Layer
-        //     this.addLayerMap2DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
-        //     this.addLayerMap3DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
-        // }
 
         // Set the base maps
         this.m_oMapService.setBasicMap();
@@ -846,6 +824,7 @@ var EditorController = (function () {
         }
 
         // Get the Tree Node
+        
         var sNodeID = oPublishedBand.productName + "_" + oPublishedBand.bandName;
         var oNode = $('#jstree').jstree(true).get_node(sNodeID);
 
@@ -900,128 +879,21 @@ var EditorController = (function () {
             this.m_aoVisibleBands.push(oBand);
 
             if (this.m_aoVisibleBands.length == 1) {
-                //if there isn't Bounding Box is impossible to zoom
-                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
-                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                    this.saveBoundingBoxUndo(oBand.geoserverBoundingBox, 'geoserverBB', oBand.layerId);
-                } else {
-                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                    this.saveBoundingBoxUndo(oBand.bbox, 'BB', oBand.layerId);
+
+                if (!this.m_bFirstZoomOnBandDone) {
+                    // Make auto zoom only once 
+                    this.m_bFirstZoomOnBandDone = true;
+
+                    //if there isn't Bounding Box is impossible to zoom
+                    if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
+                        this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                        this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    } else {
+                        this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                        this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                    }
                 }
             }
-        }
-
-    };
-    /**
-     *
-     * @param sBoundingBox
-     * @param sType
-     * @returns {boolean}
-     */
-    EditorController.prototype.saveBoundingBoxUndo = function (sBoundingBox, sType, sLayerId) {
-        if (utilsIsStrNullOrEmpty(sBoundingBox) === true || utilsIsStrNullOrEmpty(sType) === true || utilsIsStrNullOrEmpty(sLayerId)) {
-            return false;
-        }
-        if (sType !== 'geoserverBB' && sType !== 'BB') {
-            return false;
-        }
-
-
-        if (utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox) === false) {
-            this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox = this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox;
-            this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType = this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType;
-            this.m_oUndoRedoBoundigBoxesZoom.undoLayerId = this.m_oUndoRedoBoundigBoxesZoom.actualLayerId;
-        }
-
-        this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType = sType;
-        this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox = sBoundingBox;
-        this.m_oUndoRedoBoundigBoxesZoom.actualLayerId = sLayerId;
-
-        return true;
-    };
-    /**
-     *
-     *
-     * @returns {boolean}
-     */
-    EditorController.prototype.isActiveUndoMode = function () {
-        return utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox) === false;
-    };
-
-    EditorController.prototype.isActiveRedoMode = function () {
-        return utilsIsStrNullOrEmpty(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox) === false;
-    };
-
-    /**
-     *
-     * @param sLayerdId
-     */
-    EditorController.prototype.removeUndoBoundingBox = function (sLayerId) {
-        if ((utilsIsStrNullOrEmpty(sLayerId) === false) && (this.m_oUndoRedoBoundigBoxesZoom.undoLayerId === sLayerId)) {
-            this.m_oUndoRedoBoundigBoxesZoom.undoLayerId = "";
-            this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox = "";
-            this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType = "";
-
-        }
-    };
-    /**
-     *
-     * @param sLayerdId
-     */
-    EditorController.prototype.removeActualBoundingBox = function (sLayerId) {
-        if ((utilsIsStrNullOrEmpty(sLayerId) === false) && (this.m_oUndoRedoBoundigBoxesZoom.actualLayerId === sLayerId)) {
-            this.m_oUndoRedoBoundigBoxesZoom.actualLayerId = this.m_oUndoRedoBoundigBoxesZoom.undoLayerId;
-            this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox = this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox;
-            this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType = this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType;
-
-            this.m_oUndoRedoBoundigBoxesZoom.undoLayerId = "";
-            this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox = "";
-            this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType = "";
-
-        }
-    };
-
-    /**
-     *
-     */
-    EditorController.prototype.clickOnUndoZoom2DMap = function () {
-        if (this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType === "geoserverBB") {
-            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
-        } else {
-            this.m_oMapService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
-        }
-    };
-
-    /**
-     *
-     */
-    EditorController.prototype.clickOnUndoZoom3DGLobe = function () {
-        if (this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBoxType === "geoserverBB") {
-            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
-        } else {
-            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.undoBoundingBox);
-        }
-    };
-    /**
-     *
-     */
-    EditorController.prototype.clickOnRedoZoom2DMap = function () {
-        if (this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType === "geoserverBB") {
-            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
-        } else {
-            this.m_oMapService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
-        }
-    };
-    /**
-     *
-     */
-    EditorController.prototype.clickOnRedoZoom3DGlobe = function () {
-        if (this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBoxType === "geoserverBB") {
-            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
-        } else {
-            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_oUndoRedoBoundigBoxesZoom.actualBoundingBox);
         }
     };
 
@@ -1494,11 +1366,6 @@ var EditorController = (function () {
                         oMap2D.removeLayer(layer);
                     }
                 });
-                //undo - redo
-                this.removeActualBoundingBox(oBand.layerId);
-                this.removeUndoBoundingBox(oBand.layerId);
-                // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-                // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             } else {
 
                 // We Are in editor mode
@@ -1511,17 +1378,12 @@ var EditorController = (function () {
                 // Fly Home
                 // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
-        } else {
-
+        } 
+        else 
+        {
             this.removeBandLayersIn3dMaps(sLayerId);
-
-
             //if the layers isn't georeferenced remove the Corresponding rectangle
             this.removeRedSquareIn3DMap(sLayerId);
-
-            //undo - redo
-            this.removeActualBoundingBox(oBand.layerId);
-            this.removeUndoBoundingBox(oBand.layerId);
         }
 
         // Deselect the node
@@ -1561,7 +1423,7 @@ var EditorController = (function () {
 
         //Remove band layer
         for (var iIndexLayer = 0; iIndexLayer < aoGlobeLayers.length; iIndexLayer++) {
-            aoGlobeLayers.get(iIndexLayer);
+            oLayer = aoGlobeLayers.get(iIndexLayer);
 
             if (utilsIsStrNullOrEmpty(sLayerId) === false && utilsIsObjectNullOrUndefined(oLayer) === false && oLayer.imageryProvider.layers === sLayerId) {
                 aoGlobeLayers.remove(oLayer);
@@ -1788,54 +1650,6 @@ var EditorController = (function () {
 
     /**
      *
-     * @param oSelectedProduct
-     * @returns {boolean}
-     */
-    EditorController.prototype.openMergeDialog = function (oSelectedProduct, oWindow) {
-
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/merge_products_dialog/MergeProductsDialog.html",
-            controller: "MergeProductsController",
-            inputs: {
-                extras: {
-                    SelectedProduct: oSelectedProduct,
-                    ListOfProducts: oController.m_aoProducts,
-                    WorkSpaceId: oController.m_oActiveWorkspace
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (result) {
-                oController.m_oScope.Result = result;
-            });
-        });
-
-        return true;
-    };
-
-
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openMergeDialogInNavBar = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-        oWindow.openMergeDialog(null, oController);
-    };
-
-    /**
-     *
      * @returns {boolean}
      */
     EditorController.prototype.openProcessorDialog = function (oWindow) {
@@ -1858,38 +1672,6 @@ var EditorController = (function () {
             modal.element.modal();
             modal.close.then(function (oResult) {
                 oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-            });
-        });
-
-        return true;
-    };
-
-
-    /**
-     * openWPSDialog
-     * @returns {boolean}
-     */
-    EditorController.prototype.openWPSDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/wps_dialog/WpsView.html",
-            controller: "WpsController",
-            inputs: {
-                extras: {
-                    // products:oController.m_aoProducts
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -2003,14 +1785,7 @@ var EditorController = (function () {
         } else {
             oController = oWindow;
         }
-/*        // Before opening the modal window get the workspaceViewModel
-        oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oController.m_oActiveWorkspace.workspaceId)
-            .then(function (data, status) {
-                if (data.data != null && data.data != undefined) {
-                    oController.m_oActiveWorkspace = data.data;
-                }
-            }, function (data, status) {
-            });*/
+        // Before opening the modal window get the workspaceViewModel
         // also, before opening get the node list
         oController.m_oNodeService.getNodesList()
             .then(function (data, status) {
@@ -2188,32 +1963,6 @@ var EditorController = (function () {
             });
         });
     };
-
-
-    EditorController.prototype.openUploadFileDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/upload_file/UploadFileView.html",
-            controller: "UploadFileController",
-            inputs: {
-                extras: {
-                    workflowId: oController.m_oActiveWorkspace.workspaceId
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-    };
-
 
     /**
      * When user right click on a product and choose 'Properties' a dialog
@@ -3028,14 +2777,6 @@ var EditorController = (function () {
                                             if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowManagerDialog();
                                         }
                                     },
-                                    "Filter Band": {
-                                        "label": "Filter Band",
-                                        "_disabled": true
-                                    },
-                                    "Mask Manager": {
-                                        "label": "Mask Manager",
-                                        "_disabled": true
-                                    },
                                     "Zoom2D": {
                                         "label": "Zoom Band 2D Map",
                                         "_disabled": true
@@ -3070,11 +2811,6 @@ var EditorController = (function () {
                                             //$node.original.fileName;
                                             if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
                                                 oController.findProductByName($node.original.fileName);
-                                                // var oEntry = {
-                                                //     "fileName": oProduct.fileName,
-                                                //     "filePath": oProduct.filePath
-                                                // };
-                                                // oController.downloadEntry(oEntry);
                                                 oController.downloadProductByName($node.original.fileName);
                                             }
                                         }
@@ -3184,8 +2920,6 @@ var EditorController = (function () {
      */
     EditorController.prototype.downloadEntry = function (oEntry) {
         if (utilsIsObjectNullOrUndefined(oEntry)) return false;
-        // if(this.m_bIsDownloadingProduct === true)
-        //     return false;
 
         var oJson = {
             fileName: oEntry.fileName,
@@ -3213,6 +2947,7 @@ var EditorController = (function () {
 
         return true;
     };
+
     EditorController.prototype.downloadProductByName = function (sFileName) {
         if (utilsIsStrNullOrEmpty(sFileName) === true) {
             return false;

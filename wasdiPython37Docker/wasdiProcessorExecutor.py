@@ -10,7 +10,6 @@ import sys
 import urllib.parse
 import json
 import traceback
-import myProcessor
 
 
 def executeProcessor(parameters, processId): 
@@ -85,6 +84,7 @@ def executeProcessor(parameters, processId):
     
     #Run the processor
     try:
+        import myProcessor        
         wasdi.wasdiLog("wasdi.executeProcessor RUN " + processId)
         myProcessor.run()
         wasdi.wasdiLog("wasdi.executeProcessor Done")
