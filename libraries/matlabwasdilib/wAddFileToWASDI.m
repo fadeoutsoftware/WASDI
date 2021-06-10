@@ -14,7 +14,7 @@ function sStatus =wAddFileToWASDI(Wasdi, sFileName)
 %   :sStatus: Status of the Ingest Process as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 
-    disp('Wasdi variable does not existst')
+    disp('Wasdi variable does not exist')
     return
    end
    
