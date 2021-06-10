@@ -1041,6 +1041,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
     :param sStatus: Status of the process. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
 
     :param iPerc: percentage of complete of the processor. Use -1 to ignore Percentage. Use a value between 0 and 100 to set it.
+
     :return: the updated status as a String or '' if there was any problem
     """
 
@@ -1597,6 +1598,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     Search EO images
 
     :param sPlatform: satellite platform:(S1|S2|VIIRS|L8|ENVI)
+
     :param sDateFrom: inital date YYYY-MM-DD
 
     :param sDateTo: final date YYYY-MM-DD
@@ -1608,13 +1610,17 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     :param fLRLat: Latitude of Lower-Right corner
 
     :param fLRLon: Longitude of Lower-Right corner
+
     :param sProductType: type of EO product; Can be null. FOR "S1" -> "SLC","GRD", "OCN". FOR "S2" -> "S2MSI1C","S2MSI2Ap","S2MSI2A". FOR "VIIRS" -> "VIIRS_1d_composite","VIIRS_5d_composite". FOR "L8" -> "L1T","L1G","L1GT","L1GS","L1TP". For "ENVI" -> "ASA_IM__0P", "ASA_WS__0P"
+
     :param iOrbitNumber: orbit number
 
     :param sSensorOperationalMode: sensor operational mode
 
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
+
     :param sProvider: WASDI Data Provider to query (LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = LSA.
+
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
     aoReturnList = []
