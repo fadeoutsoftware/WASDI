@@ -62,12 +62,13 @@ html_logo = '_static/logowasdi.svg'
 import os
 import sys
 #print(sys.path)
+# Import Waspy library
 sys.path.insert(0, os.path.abspath('../libraries/waspy'))
-print(sys.path)
+# Import Octave/Matlab library
+matlab_src_dir = os.path.abspath('../libraries/octavewasdilib')
 
-
-
-
+print("Python source folders " + sys.path[0] +"\n")
+print("Matlab/Octave source folder " + matlab_src_dir +"\n")
 
 
 os.system("echo --- HOT FIX for Javasphinx library ---")
