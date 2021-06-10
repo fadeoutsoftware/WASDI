@@ -7,7 +7,7 @@ function [asWorkflowNames, asWorkflowIds]=wGetWorkflows(Wasdi)
 %    Wasdi: Wasdi object created after the wasdilib call
 %  
 %
-% OUTPUT
+% :Returns:
 %   asWorkflowNames: array of strings that are the names of the workflows
 %   asWorkflowIds: array of strings that are the id of the workflows
   if exist("Wasdi") < 1 

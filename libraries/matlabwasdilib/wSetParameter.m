@@ -8,7 +8,7 @@ function sParameter = wSetParameter(Wasdi, sKey, sValue)
 %    sKey: The KEY of the parameter to add or update
 %    sValue: The the value of the parameter
 %
-% OUTPUT
+% :Returns:
 %   sParameter: The value (same as sValue in input)
 
   if exist("Wasdi") < 1 

@@ -7,7 +7,7 @@ function sOutputStatus =wUpdateProgress(Wasdi, iPerc)
 %    Wasdi: Wasdi object created after the wasdilib call
 %    iPerc: progress percentage of the own process
 %
-% OUTPUT
+% :Returns:
 %   sOutputStatus: Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 

@@ -9,7 +9,7 @@ function sOutputStatus =wUpdateProcessStatus(Wasdi, sProcessId, sStatus, iPerc)
 %    sStatus: updated status. Must be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 %    iPerc: progress percentage of the process
 %
-% OUTPUT
+% :Returns:
 %   sOutputStatus: Process Status Updated as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 

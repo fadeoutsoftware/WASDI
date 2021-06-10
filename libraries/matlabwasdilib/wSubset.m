@@ -12,7 +12,7 @@ function sStatus=wSubset(Wasdi, sInputFile, sOutputFile, dLatN, dLonW, dLatS, dL
 %	 dLatS Lat South Coordinate
 %	 dLonE Lon East Coordinate 
 %
-% OUTPUT
+% :Returns:
 %   sStatus: Status of the operation
 %
 

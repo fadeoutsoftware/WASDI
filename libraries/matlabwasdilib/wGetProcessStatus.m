@@ -8,7 +8,7 @@ function sStatus =wGetProcessStatus(Wasdi, sProcessId)
 %    sProcessId: Id of the process to query
 %
 %
-% OUTPUT
+% :Returns:
 %   sStatus: Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1

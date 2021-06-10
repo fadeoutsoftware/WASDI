@@ -7,7 +7,7 @@ function asParams = wGetParams(Wasdi)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% OUTPUT
+% :Returns:
 %   asParams: a map containing the parameters
 
   if exist("Wasdi") < 1 

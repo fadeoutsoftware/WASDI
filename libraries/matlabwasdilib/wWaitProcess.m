@@ -8,7 +8,7 @@ function sStatus =wWaitProcess(Wasdi, sProcessId)
 %    sProcessId: Id of the process to wait 
 %  
 %
-% OUTPUT
+% :Returns:
 %   sStatus: exit status of the process: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 

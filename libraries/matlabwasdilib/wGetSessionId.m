@@ -7,7 +7,7 @@ function sSessionId = wGetSessionId(Wasdi)
 %    Wasdi: Wasdi object created after the wasdilib call
 %  
 %
-% OUTPUT
+% :Returns:
 %   sSessionId: the current session
 
   if exist("Wasdi") < 1 

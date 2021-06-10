@@ -10,7 +10,7 @@ function sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValue, sIn
 %	 sNoDataValue: value to use as no data in the output file
 %	 sInputIgnoreValue: value used as no data in the input file
 %
-% OUTPUT
+% :Returns:
 %   sStatus: end status of the mosaic operation
 %
 

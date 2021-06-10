@@ -8,7 +8,7 @@ function sWorkspaceOwner = wGetWorkspaceOwnerByName(Wasdi, sWorkspaceName)
 %    Wasdi: Wasdi object created after the wasdilib call
 %    sWorkspaceName: the name of the workspace
 %
-% OUTPUT
+% :Returns:
 %   sWorkspaceOwner: the owner of the workspace
 
   if exist("Wasdi") < 1 

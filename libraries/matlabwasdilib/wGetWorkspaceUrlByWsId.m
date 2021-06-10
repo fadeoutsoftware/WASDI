@@ -6,7 +6,7 @@ function sWorkspaceUrl = wGetWorkspaceUrlByWsId(Wasdi, sWorkspaceId)
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %
-% OUTPUT
+% :Returns:
 %   sBaseUrl: the base URL for WASDI
 
   if exist("Wasdi") < 1 
