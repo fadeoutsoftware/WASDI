@@ -12,12 +12,13 @@ addpath(fullfile(sDir,'jsonlab'));
 % try to set JAVA_HOME automatically
 sJavaHome = getenv('JAVA_HOME');
 if exist(sJavaHome)<1
-  disp('Warning: could not find JAVA_HOME, please define it');
+  disp('WASDI: Warning: could not find JAVA_HOME, please define it');
 else
   sLower=lower(sJavaHome);
   %are we on windows?
   % C:\Program Files\Java\jdk1.8.0_211\jre\bin\server
   if(sLower(2:9)==':\progra')
+  disp('WASDI: Windows detected, checking environment variables...')
     % then the code is probably running on windows
     sSubstr = substr(sJavaHome,-6,-1);
     if strcmp(sSubstr, 'erve')<1
@@ -28,7 +29,8 @@ else
       sOldJavaHome=sJavaHome;
       sJavaHome= [sJavaHome, '/jre/bin/server'];
       setenv('JAVA_HOME',sJavaHome);
-      disp(['Changed JAVA_HOME from ', sOldJavaHome, ' to ', sJavaHome]);
+      disp(['WASDI: Changed JAVA_HOME from ', sOldJavaHome, ' to ', sJavaHome]);
+      disp('WASDI: (This is temporary and will not affect the operating system)')
     end
   end
 end
@@ -54,8 +56,6 @@ else
     javaaddpath(fullfile(sPath, wasdilib))
 end
 
-% Log
-disp('WASDI MATLAB LIB INITIALIZED (v.0.09.03)')
 
 % Create the Wasdi Object
 Wasdi = javaObject ("wasdi.jwasdilib.WasdiLib");
@@ -65,3 +65,6 @@ if nargin == 0
 else
     Wasdi.init(config_path);
 end
+
+% Log
+disp('WASDI: WASDI MATLAB LIB INITIALIZED (v.0.09.03). Have fun :-)')
