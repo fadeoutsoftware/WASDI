@@ -3028,6 +3028,27 @@ var EditorController = (function () {
                                         }
                                     });
                                 }
+                            },
+                            "DeleteSelectedProduct": {
+                                "label": "Delete All selected",
+                                "icon": "delete-icon-context-menu-jstree",
+
+                                "action": function (obj) {
+
+                                    utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
+                                        if (value) {
+                                            bDeleteFile = true;
+                                            bDeleteLayer = true;
+                                            this.temp = $node;
+                                            var that = this;
+                                            oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
+                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                            }, (function (error) {
+                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                            }));
+                                        }
+                                    });
+                                }
                             }
                         };
                     }
@@ -3127,6 +3148,27 @@ var EditorController = (function () {
                                         }
                                     });
                                 }
+                            },
+                            "DeleteSelectedProduct": {
+                                "label": "Delete All selected",
+                                "icon": "delete-icon-context-menu-jstree",
+
+                                "action": function (obj) {
+
+                                    utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
+                                        if (value) {
+                                            bDeleteFile = true;
+                                            bDeleteLayer = true;
+                                            this.temp = $node;
+                                            var that = this;
+                                            oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
+                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                            }, (function (error) {
+                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                            }));
+                                        }
+                                    });
+                                }
                             }
                         };
                     }
@@ -3204,6 +3246,14 @@ var EditorController = (function () {
 
         return oTree;
     };
+
+    /**
+     * Returns all nodes with checked state 
+     * @param {*} oEntry 
+     */
+    EditorController.prototype.getSelectedNodesFromTree = function (oEntry) {
+        
+    }
 
     /**
      * Download of a product
