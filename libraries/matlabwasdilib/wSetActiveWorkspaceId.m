@@ -1,11 +1,10 @@
 function wSetActiveWorkspaceId(Wasdi, sNewActiveWorkspaceId)
-% Set the active workspace
-% Syntax
-% wSetActiveWorkspaceId(Wasdi, sNewActiveWorkspaceId)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sNewActiveWorkspaceId: the workspace ID to open
+%Set the active workspace
+%Syntax
+%wSetActiveWorkspaceId(Wasdi, sNewActiveWorkspaceId)
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sNewActiveWorkspaceId: the workspace ID to open
 %
 
   if exist("Wasdi") < 1 

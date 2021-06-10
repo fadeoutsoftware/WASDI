@@ -10,7 +10,7 @@ function sStatus=wAsynchMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValu
 %:param sInputIgnoreValue: value used as no data in the input file
 %
 %:Returns:
-%   :sProcessId: Id of the mosaic process on WASDI. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
+%  :sProcessId: Id of the mosaic process on WASDI. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
 
 
   if exist("Wasdi") < 1 

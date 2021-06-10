@@ -7,7 +7,7 @@ function asStatuses=wAsynchImportProductList(Wasdi, asProductLinks)
 %:param asProductLinks: collection of Product Direct Link as returned by wSearchEOImage
 %
 %:Returns:
-%   :param asStatuses: list of statuses of the import processes
+%  :param asStatuses: list of statuses of the import processes
 
 
   if exist("Wasdi") < 1 

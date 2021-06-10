@@ -3,10 +3,10 @@ function sBasePath = wGetBasePath(Wasdi)
 %Syntax
 %sBasePath = wGetBasePath(Wasdi)
 %
-%   Wasdi: Wasdi object created after the wasdilib call
+%  Wasdi: Wasdi object created after the wasdilib call
 %
 %OUTPUT
-%  sBasePath: the base path in use
+% sBasePath: the base path in use
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

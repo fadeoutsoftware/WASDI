@@ -1,11 +1,10 @@
 function wSetUploadActive(Wasdi, iActive)
-% Set the Upload active flag
-% Syntax
-% wSetUploadActive(Wasdi, iActive)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    iActive: true/false
+%Set the Upload active flag
+%Syntax
+%wSetUploadActive(Wasdi, iActive)
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param iActive: true/false
 %
 
 

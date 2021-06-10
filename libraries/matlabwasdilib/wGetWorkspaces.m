@@ -1,15 +1,14 @@
 function [asWorkspaceNames, asWorkspaceIds]=wGetWorkspaces(Wasdi);
-% Get the List of Workspace of the actual User
-% Syntax
-% [asWorkspaceNames, asWorkspaceIds]=wGetWorkspaces(Wasdi);
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%  
+%Get the List of Workspace of the actual User
+%Syntax
+%[asWorkspaceNames, asWorkspaceIds]=wGetWorkspaces(Wasdi);
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%
 %
 %:Returns:
-%   asWorkspaceNames: array of strings that are the names of the workspaces
-%   asWorkspaceIds: array of strings that are the id of the workspaces
+%  asWorkspaceNames: array of strings that are the names of the workspaces
+%  asWorkspaceIds: array of strings that are the id of the workspaces
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')
@@ -22,7 +21,7 @@ function [asWorkspaceNames, asWorkspaceIds]=wGetWorkspaces(Wasdi);
    
    disp(['Number of Workspaces: ' sprintf("%d",iTotWs)]);
 
-  % For each workspace
+  %For each workspace
   for iWs = 0:iTotWs-1
     oWorkspace = aoWorkspaces.get(iWs);
     asWorkspaceNames{iWs+1} = oWorkspace.get("workspaceName");

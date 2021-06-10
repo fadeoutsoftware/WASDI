@@ -10,7 +10,7 @@ function sFullPath = wGetFullProductPath(Wasdi, sFileName)
 %
 %
 %:Returns:
-%  :sFullPath: full local path
+% :sFullPath: full local path
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

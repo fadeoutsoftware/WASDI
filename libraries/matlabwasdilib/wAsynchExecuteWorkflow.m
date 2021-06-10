@@ -8,10 +8,10 @@ function sProcessId = wAsynchExecuteWorkflow(Wasdi, sWorkflow, asInputFiles, asO
 %:param sWorkflow: Name of the workflow
 %:param asInputFiles: array of strings with the name of the input files. Must be one file for each Read Node of the workflow, in the exact order
 %:param asOutputFiles: array of strings with the name of the output files. Must be one file for each Write Node of the workflow, in the exact order
-%  
+%
 %
 %:Returns:
-%   :sProcessId: Id of the process representing the Workflow execution. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
+%  :sProcessId: Id of the process representing the Workflow execution. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

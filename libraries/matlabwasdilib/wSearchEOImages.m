@@ -19,9 +19,9 @@ function [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(W
 %
 %
 %:Returns:
-%   :asProductNames: array of strings that are the names of the found products
-%   :asProductLinks: array of strings that are the links to download the products
-%   :asProductFootprints: array of strings that are the footprints of found products in WKT
+%  :asProductNames: array of strings that are the names of the found products
+%  :asProductLinks: array of strings that are the links to download the products
+%  :asProductFootprints: array of strings that are the footprints of found products in WKT
 
 
   if exist("Wasdi") < 1
@@ -37,7 +37,7 @@ function [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(W
 
    disp(['Number of Products found: ' sprintf("%d",iTotFound)]);
 
-  % For each product
+  %For each product
   for iProduct = 0:iTotFound-1
     oProduct = aoProducts.get(iProduct);
     asProductNames{iProduct+1} = oProduct.get("title");

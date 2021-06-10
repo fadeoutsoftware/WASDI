@@ -1,13 +1,12 @@
 function sStatus = wUpdateStatus(wasdi, sStatus, iPerc=[])
 %
-% updates the status and, optionally, the progress percent
-% syntax:
-% sStatus = wUpdateStatus(Wasdi, sStatus, iPerc=[])
+%updates the status and, optionally, the progress percent
+%syntax:
+%sStatus = wUpdateStatus(Wasdi, sStatus, iPerc=[])
 %
-% INPUT:
-%   Wasdi: Wasdi object created after the wasdilib call
-%   sStatus: the status to be set
-%   iPerc: optional, the progress percent
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sStatus: the status to be set
+%:param iPerc: optional, the progress percent
 
   if exist("wasdi") < 1 
     disp('Wasdi variable does not exist')

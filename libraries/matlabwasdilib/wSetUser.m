@@ -1,11 +1,10 @@
 function wSetUser(Wasdi, sUser)
-% Set the user
-% Syntax
-% wSetUser(Wasdi, sUser)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sUser: the user
+%Set the user
+%Syntax
+%wSetUser(Wasdi, sUser)
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sUser: the user
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

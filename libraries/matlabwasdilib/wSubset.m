@@ -1,19 +1,18 @@
 function sStatus=wSubset(Wasdi, sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE)
-% Make a Subset (tile) of an input image in a specified Lat Lon Rectangle
-% Syntax
-% sStatus=wSubset(Wasdi, sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%	 sInputFile Name of the input file
-%	 sOutputFile Name of the output file
-%	 dLatN Lat North Coordinate
-%	 dLonW Lon West Coordinate
-%	 dLatS Lat South Coordinate
-%	 dLonE Lon East Coordinate 
+%Make a Subset (tile) of an input image in a specified Lat Lon Rectangle
+%Syntax
+%sStatus=wSubset(Wasdi, sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE)
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sInputFile Name of the input file
+%:param sOutputFile Name of the output file
+%:param dLatN Lat North Coordinate
+%:param dLonW Lon West Coordinate
+%:param dLatS Lat South Coordinate
+%:param dLonE Lon East Coordinate
 %
 %:Returns:
-%   sStatus: Status of the operation
+%  :sStatus: Status of the operation
 %
 
   if exist("Wasdi") < 1 

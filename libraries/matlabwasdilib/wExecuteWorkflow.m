@@ -10,7 +10,7 @@ function sStatus = wExecuteWorkflow(Wasdi, sWorkflow, asInputFiles, asOutputFile
 %:param asOutputFiles: array of strings with the name of the output files. Must be one file for each Write Node of the workflow, in the exact order
 %
 %:Returns:
-%   :sStatus: Exit Workflow Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+%  :sStatus: Exit Workflow Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

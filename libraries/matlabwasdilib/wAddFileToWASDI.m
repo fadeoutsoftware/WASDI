@@ -4,14 +4,14 @@ function sStatus =wAddFileToWASDI(Wasdi, sFileName)
 %o work be sure that the file is on the server
 %Syntax
 %sStatus =wAddFileToWASDI(Wasdi, sFileName);
-% 
+%
 %
 %:param Wasdi: Wasdi object created after the wasdilib call
 %:param sFileName: Name of the file to add
-%  
+%
 %
 %:Returns:
-%   :sStatus: Status of the Ingest Process as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+%  :sStatus: Status of the Ingest Process as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

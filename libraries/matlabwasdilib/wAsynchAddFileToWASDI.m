@@ -4,13 +4,13 @@ function sStatus =wAsynchAddFileToWASDI(Wasdi, sFileName)
 %If the file is not present in the WASDI cloud workpsace, it will be automatically uploaded if the config AUTOUPLOAD flag is true (default)
 %Syntax
 %sStatus =wAsynchAddFileToWASDI(Wasdi, sFileName);
-% 
+%
 %
 %:param Wasdi: Wasdi object created after the wasdilib call
 %:param sFileName: Name of the file to add
-%  
+%
 %:Returns:
-%   :sProcessId: Process Id of the WASDI Ingest operation on the server. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
+%  :sProcessId: Process Id of the WASDI Ingest operation on the server. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')
