@@ -1,28 +1,27 @@
 function [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(Wasdi, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage)
-% Search EO Images. Returns 3 parallel arrays: one with the names, one with the links and one with the footprints of the found products.
-% The links and footprints can be used as input to the wImportProduct function, that imports the product in the active workspace
-% Syntax
-% [asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(Wasdi, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
+%Search EO Images. Returns 3 parallel arrays: one with the names, one with the links and one with the footprints of the found products.
+%The links and footprints can be used as input to the wImportProduct function, that imports the product in the active workspace
+%Syntax
+%[asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(Wasdi, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
 %
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-% 	 sPlatform Satellite Platform. Accepts "S1","S2"
-%	 sDateFrom Starting date in format "YYYY-MM-DD"
-% 	 sDateTo End date in format "YYYY-MM-DD"
-%	 dULLat Upper Left Lat Coordinate. Can be null.
-%	 dULLon Upper Left Lon Coordinate. Can be null.
-%	 dLRLat Lower Right Lat Coordinate. Can be null.
-%	 dLRLon Lower Right Lon Coordinate. Can be null.
-%	 sProductType Product Type. If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.
-%	 iOrbitNumber Sentinel Orbit Number. Can be null.
-%	 sSensorOperationalMode Sensor Operational Mode. ONLY for S1. Accepts -> "SM", "IW", "EW", "WV". Can be null. Ignored for Platform "S2"
-%	 sCloudCoverage sCloudCoverage Cloud Coverage. Sample syntax: [0 TO 9.4]
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sPlatform: Satellite Platform. Accepts "S1","S2"
+%:param sDateFrom: Starting date in format "YYYY-MM-DD"
+%:param sDateTo: End date in format "YYYY-MM-DD"
+%:param dULLat: Upper Left Lat Coordinate. Can be null.
+%:param dULLon: Upper Left Lon Coordinate. Can be null.
+%:param dLRLat: Lower Right Lat Coordinate. Can be null.
+%:param dLRLon: Lower Right Lon Coordinate. Can be null.
+%:param sProductType: Product Type. If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.
+%:param iOrbitNumber: Sentinel Orbit Number. Can be null.
+%:param sSensorOperationalMode: Sensor Operational Mode. ONLY for S1. Accepts -> "SM", "IW", "EW", "WV". Can be null. Ignored for Platform "S2"
+%:param sCloudCoverage: sCloudCoverage Cloud Coverage. Sample syntax: [0 TO 9.4]
 %
 %
-% OUTPUT
-%   asProductNames: array of strings that are the names of the found products
-%   asProductLinks: array of strings that are the links to download the products
-%   asProductFootprints: array of strings that are the footprints of found products in WKT
+%:Returns:
+%   :asProductNames: array of strings that are the names of the found products
+%   :asProductLinks: array of strings that are the links to download the products
+%   :asProductFootprints: array of strings that are the footprints of found products in WKT
 
 
   if exist("Wasdi") < 1
