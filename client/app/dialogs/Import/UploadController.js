@@ -59,8 +59,8 @@ var UploadController = (function() {
         this.m_bIsUploading = true;
         var oController = this;
         this.m_oProductService.uploadFile(this.m_sWorkspaceId,oBody,this.m_oFile[0].name)
-            .then(function(data,status){
-                if(status !== 200)
+            .then(function(data){
+                if(data.status !== 200)
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD FILE");
                 }
