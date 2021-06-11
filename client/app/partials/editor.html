@@ -278,19 +278,25 @@
                     <!----------------------------------------------- TAB 3  LAYERS---------------------------------------------->
                     <!-- ng-show="m_oController.m_iActiveMapPanelTab === 1"-->
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider">
-                        <div>
-                            <div ng-repeat="a in m_oController.m_aoVisibleBands">
-                                Product name : {{oBand.productName}} <br> Band : {{oBand.name}}<br>
-                                <div class="range-container">
-                                    <label class="color-value">
-                                        {{oBand.opacity}} %
-                                    </label>
-                                    <input type="range" min="0" max="100" ng-model="oBand.opacity" class=""
-                                        ng-change="m_oController.setLayerOpacity(oBand.opacity,$index)">
 
+                        <div ng-repeat="oBand in m_oController.m_aoVisibleBands">
+                            <div class="row-v4">
+                                <div class="col-xs-6" style="padding-left: 30px;">
+                                    <span class="layer-details-heading">Product name </span>: {{oBand.productName}}
+                                    <br>
+                                    <span class="layer-details-heading">Band </span>: {{oBand.name}}
+                                    <br>
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="range-container">
+                                        <label class="color-value">
+                                            {{oBand.opacity}} %
+                                        </label>
+                                        <input type="range" min="0" max="100" ng-model="oBand.opacity" class=""
+                                            ng-change="m_oController.setLayerOpacity(oBand.opacity,$index)">
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
 
                     </div>
