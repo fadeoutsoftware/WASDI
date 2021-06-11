@@ -127,11 +127,8 @@
                             <a href=""><i class="fa fa-globe"></i>&nbsp;Navigation</a>
                         </li>
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
-                            ng-click="m_oController.setActiveTab(1)" ng-show="(m_oController.m_oActiveBand !== null)">
-                            <a href="">
-                                <!--- {{"EDITOR_COLOUR_MANIPULATION_TITLE" | translate}}-->
-                                Layers
-                            </a>
+                            ng-click="m_oController.setActiveTab(1)">
+                            <a href=""><i class="fa fa-globe"></i>&nbsp;Layers</a>
                         </li>
                         <!--li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 2}"
                             ng-click="m_oController.setActiveTab(2)">
@@ -278,6 +275,23 @@
                     <!----------------------------------------------- TAB 3  LAYERS---------------------------------------------->
                     <!-- ng-show="m_oController.m_iActiveMapPanelTab === 1"-->
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider">
+                        <div class="row-v4">
+                            <div class="col-xs-6" style="padding-left: 30px;">
+                                <span class="layer-details-heading">Base Layer </span>
+                                <br>
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="range-container">
+                                    <label class="color-value">
+                                        {{m_oController.oBaseBand.opacity}} %
+                                    </label>
+                                    <input type="range" value="100" min="0" max="100"
+                                        ng-model="m_oController.oBaseBand.opacity"
+                                        ng-change="m_oController.setLayerOpacity(m_oController.oBaseBand.opacity,0)">
+                                </div>
+                            </div>
+                        </div>
+
 
                         <div ng-repeat="oBand in m_oController.m_aoVisibleBands">
                             <div class="row-v4">
@@ -292,8 +306,11 @@
                                         <label class="color-value">
                                             {{oBand.opacity}} %
                                         </label>
-                                        <input type="range" min="0" max="100" ng-model="oBand.opacity" class=""
-                                            ng-change="m_oController.setLayerOpacity(oBand.opacity,$index)">
+                                        <!-- Index is zero based and the [0] layer is the map-->
+                                        <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity"
+                                            class="" ng-change="m_oController.setLayerOpacity(oBand.opacity,$index+1)">
+
+
                                     </div>
                                 </div>
                             </div>

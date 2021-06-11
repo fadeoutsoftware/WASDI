@@ -54,6 +54,10 @@ var EditorController = (function () {
         // Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+        this.oBaseBand ={
+            "opacity" : 100
+        }
+
 
         this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
         // Object used to exchange information with the image preview directive
@@ -896,7 +900,8 @@ var EditorController = (function () {
                 this.addLayerMap2DByServer(oBand.layerId, oBand.geoserverUrl);
 
             }
-
+            // show the layer with full opacity at ther beginning
+            oBand.opacity=100;
             this.m_aoVisibleBands.push(oBand);
 
             if (this.m_aoVisibleBands.length == 1) {
@@ -1628,7 +1633,7 @@ var EditorController = (function () {
     };
 
     /**
-     * Set the opacity for the current layer
+     * Set the opacity for the layer identified by the index
      * @param {int} iOpacity level of opacity 
      */
     EditorController.prototype.setLayerOpacity = function (iOpacity, iIndexLayer) {
@@ -1639,8 +1644,7 @@ var EditorController = (function () {
         if( layer instanceof L.TileLayer )
         layers.push(layer);
         });
-        // plus one because the base layer is in position 0
-        layers[iIndexLayer+1].setOpacity(fPercentage);
+        layers[iIndexLayer].setOpacity(fPercentage);
     }
     
 
