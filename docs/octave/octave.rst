@@ -269,9 +269,6 @@ wSetParameter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  .. mat:autofunction:: matlabwasdilib::wSetParameter
 
-wSetParametersFilPath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- .. mat:autofunction:: matlabwasdilib::wSetParametersFilPath
 
 wSetPassword
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

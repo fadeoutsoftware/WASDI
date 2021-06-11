@@ -7,7 +7,7 @@ function sUser = wGetUser(Wasdi)
 %:param Wasdi: Wasdi object created after the wasdilib call
 %
 %:Returns:
-%  sUser: the username on wasdi
+%  :sUser: the username on wasdi
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

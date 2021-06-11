@@ -2,6 +2,7 @@ function wImportAndPreprocess(Wasdi, asProductLinks, asProductNames, sWorkflowNa
 %Import and preprocess a collection of EO products
 %Syntax
 %wImportAndPreprocess(Wasdi, asProductLinks, asProductNames, sWorkflowName, sSuffix)
+%
 %:param Wasdi: Wasdi object created after the wasdilib call
 %:param asProductLinks: collection of Product Direct Link as returned by wSearchEOImages
 %:param asProductNames: collection of Product names, as returned by wSearchEOImages

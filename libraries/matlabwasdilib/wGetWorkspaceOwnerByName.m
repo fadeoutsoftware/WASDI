@@ -8,7 +8,7 @@ function sWorkspaceOwner = wGetWorkspaceOwnerByName(Wasdi, sWorkspaceName)
 %:param sWorkspaceName: the name of the workspace
 %
 %:Returns:
-%  sWorkspaceOwner: the owner of the workspace
+%  :sWorkspaceOwner: the owner of the workspace
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

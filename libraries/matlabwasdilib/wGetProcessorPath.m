@@ -6,7 +6,7 @@ function sProcessorPath = wGetProcessorPath(Wasdi)
 %:param Wasdi: Wasdi object created after the wasdilib call
 %
 %:Returns:
-%  sProcessorPath : the path to current processor
+%  :sProcessorPath: the path to current processor
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

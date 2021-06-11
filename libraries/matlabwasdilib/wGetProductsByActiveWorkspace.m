@@ -7,7 +7,7 @@ function asProducts=wGetProductsByActiveWorkspace(Wasdi)
 %
 %
 %:Returns:
-%  asProducts: array of strings that are the names of the products
+%  :asProducts: array of strings that are the names of the products
 
 
   if exist("Wasdi") < 1 

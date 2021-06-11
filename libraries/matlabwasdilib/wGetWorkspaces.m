@@ -7,8 +7,8 @@ function [asWorkspaceNames, asWorkspaceIds]=wGetWorkspaces(Wasdi);
 %
 %
 %:Returns:
-%  asWorkspaceNames: array of strings that are the names of the workspaces
-%  asWorkspaceIds: array of strings that are the id of the workspaces
+%  :asWorkspaceNames: array of strings that are the names of the workspaces
+%  :asWorkspaceIds: array of strings that are the id of the workspaces
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

@@ -10,7 +10,7 @@ function sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValue, sIn
 %	 sInputIgnoreValue: value used as no data in the input file
 %
 %:Returns:
-%  sStatus: end status of the mosaic operation
+%  :sStatus: end status of the mosaic operation
 %
 
   if exist("Wasdi") < 1 

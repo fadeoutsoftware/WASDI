@@ -7,8 +7,8 @@ function [asWorkflowNames, asWorkflowIds]=wGetWorkflows(Wasdi)
 %
 %
 %:Returns:
-%  asWorkflowNames: array of strings that are the names of the workflows
-%  asWorkflowIds: array of strings that are the id of the workflows
+%  :asWorkflowNames: array of strings that are the names of the workflows
+%  :asWorkflowIds: array of strings that are the id of the workflows
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')
     return

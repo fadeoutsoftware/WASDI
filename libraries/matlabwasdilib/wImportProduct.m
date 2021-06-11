@@ -9,7 +9,7 @@ function sProcessObjId=wImportProduct(Wasdi, sProductLink, sBoundingBox='', sPro
 %:param sProvider: data provider, optional
 %
 %:Returns:
-%  sProcessObjId: Identifier of the import process
+%  :sProcessObjId: Identifier of the import process
 %
 
   if exist("Wasdi") < 1 

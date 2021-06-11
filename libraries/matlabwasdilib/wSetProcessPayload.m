@@ -8,7 +8,7 @@ function sStatus =wSetProcessPayload(Wasdi, sProcessId, sData)
 %:param sData: Data to write as payloar
 %
 %:Returns:
-%  sStatus: Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+%  :sStatus: Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

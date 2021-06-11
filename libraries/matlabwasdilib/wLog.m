@@ -4,7 +4,7 @@ function wLog(Wasdi, sLogRow)
 %wLog(Wasdi, sLogRow)
 %
 %:param Wasdi: Wasdi object created after the wasdilib call
-%	 sLogRow Text to log
+%:param sLogRow: Text to log
 %
 %
 

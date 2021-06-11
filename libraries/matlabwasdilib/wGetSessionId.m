@@ -7,7 +7,7 @@ function sSessionId = wGetSessionId(Wasdi)
 %
 %
 %:Returns:
-%  sSessionId: the current session
+%  :sSessionId: the current session
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

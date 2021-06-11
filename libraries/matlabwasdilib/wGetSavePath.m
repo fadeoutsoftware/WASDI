@@ -7,7 +7,7 @@ function sSavePath =wGetSavePath(Wasdi)
 %
 %
 %:Returns:
-%  sSavePath: the local path to use to save the file, including last /
+%  :sSavePath: the local path to use to save the file, including last /
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')
