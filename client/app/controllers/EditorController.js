@@ -1227,7 +1227,7 @@ var EditorController = (function () {
 
         this.m_oActiveBand = oBand;
         //set navigation tab
-        this.m_iActiveMapPanelTab = 0;
+        //this.m_iActiveMapPanelTab = 0;
         //set default value for preview image
         this.m_sPreviewUrlSelectedBand = "empty";
 
