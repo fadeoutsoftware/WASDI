@@ -946,6 +946,10 @@ target/sonar/report-task.txt
 client/app/environments/environment.js
 client/app/environments/secrets.js
 client/app/.vscode/tasks.json
+wasdiOctaveDocker/.pydevproject
+docs/build
+wasdiIDLDocker/.pydevproject
+wasdiIDLDocker/.pydevproject
 /wasdi-parent.iml
 client/.vscode/launch.json
 docs/build/doctrees/AdvancedUser.doctree
@@ -1201,3 +1205,4 @@ docs/build/html/_static/wasdi_tutorial_images/Devmanimage30.png
 docs/build/html/java/package-index.html
 docs/build/html/java/WasdiLib.html
 wasdiIDLDocker/.pydevproject
+wasdiOctaveDocker/.pydevproject

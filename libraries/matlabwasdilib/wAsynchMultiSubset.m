@@ -1,16 +1,15 @@
 function sReturn=wAsynchMultiSubset(Wasdi, sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE)
-% Extracts subsets of an image given its name and the desired bounding boxes.Asynchronous version
-% Syntax
-% sReturn=wAsynchMultiSubset(Wasdi, sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE)
-% 
-% INPUT
-%   Wasdi: Wasdi object created after the wasdilib call
-%   sInputFile: the input file from where subsets must be extracted
-%   asOutputFiles: names to be given to output files
-%   adLatN: a collection of Northernmost latitudes
-%   adLonW: a collection of Westernmost longitudes
-%   adLatS: a collection of Southernmost latitudes
-%   adLonE: a collection of Easternnmost longitudes
+%Extracts subsets of an image given its name and the desired bounding boxes.Asynchronous version
+%Syntax
+%sReturn=wAsynchMultiSubset(Wasdi, sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE)
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sInputFile: the input file from where subsets must be extracted
+%:param asOutputFiles: names to be given to output files
+%:param adLatN: a collection of Northernmost latitudes
+%:param adLonW: a collection of Westernmost longitudes
+%:param adLatS: a collection of Southernmost latitudes
+%:param adLonE: a collection of Easternnmost longitudes
 %
 
   if exist("Wasdi") < 1 

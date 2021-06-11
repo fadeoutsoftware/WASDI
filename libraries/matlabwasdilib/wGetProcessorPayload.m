@@ -1,14 +1,13 @@
 function oProcessPayload = wGetProcessorPayload(Wasdi, sProcessObjId)
-% Gets the payload of given processor
-% Syntax
-% oProcessPayload = wGetProcessorPayload(Wasdi, sProcessObjId)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sProcessObjId: process ID for which the payload must be retrieve
+%Gets the payload of given processor
+%Syntax
+%oProcessPayload = wGetProcessorPayload(Wasdi, sProcessObjId)
 %
-% OUTPUT
-%   oProcessPayload: an object containing the payload
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sProcessObjId: process ID for which the payload must be retrieve
+%
+%:Returns:
+%  :oProcessPayload: an object containing the payload
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

@@ -1,14 +1,11 @@
 function wLog(Wasdi, sLogRow)
-% Add a row to the application logs. Locally, just print on the console if VERBOSE. On the server, it logs on the WASDI interface.
-% Syntax
-% wLog(Wasdi, sLogRow)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%	 sLogRow Text to log
+%Add a row to the application logs. Locally, just print on the console if VERBOSE. On the server, it logs on the WASDI interface.
+%Syntax
+%wLog(Wasdi, sLogRow)
 %
-% OUTPUT
-%   None
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sLogRow: Text to log
+%
 %
 
   if exist("Wasdi") < 1 

@@ -13,12 +13,15 @@ logs/*
 
 # IDEs and editors
 /.idea
+/.vscode
 .project
 .classpath
 .c9/
 *.launch
 .settings/
 *.sublime-workspace
+/.vscode
+*.iml
 
 # System Files
 .DS_Store

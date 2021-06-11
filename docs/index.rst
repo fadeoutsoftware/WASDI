@@ -12,7 +12,7 @@ Getting Started with WASDI
 ---------------------------
 WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources !
 
-This :doc:`basic tutorial </WasdiTutoria>`  will help to acquire the main concepts and use WASDI for your EO research.
+This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your EO research.
 
 
 .. toctree::
@@ -22,9 +22,23 @@ This :doc:`basic tutorial </WasdiTutoria>`  will help to acquire the main concep
 
    WasdiTutorial.rst
 
-Programming tutorials
+WASDI Marketplace
 ---------------------------
-Unleash the real power of WASDI, uploading your application and run it on EO images on the fly!
+All the WASDI Applications are available for end users' with a simple and intuitive Interface. Choose your App, set your input data with a few clicks and enjoy the result.
+
+A good starting point to applications is the :doc:`App store overview </AppStoreTutorial>`
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Wasdi Applications
+
+   AppStoreTutorial.rst
+
+
+Add your App to WASDI
+---------------------------
+Unleash the real power of WASDI, developing and uploading your own downstream application to run it on EO images on the fly!
 Wasdi supports several programming languages:
 
 * **Python 2.7**
@@ -33,31 +47,29 @@ Wasdi supports several programming languages:
 * **Octave 6.x**
 
 
-A good starting point, for the development of WASDI applications is the :doc:`python tutorial </PythonTutorial>`
+If you already know WASDI features and you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Programming
+   :caption: Programming tutorials
 
    PythonTutorial.rst
 
 
-
 Reference center
 ---------------------------
-WASDI allows users and developer to interact though **libraries** and **APIs**
 
-A good starting point, for the development of WASDI applications is the :doc:`python tutorial </PythonTutorial>`
+WASDI allows users and developer to interact though **libraries** and **APIs**.
+
 
 .. toctree::
    :maxdepth: 2
    :hidden:
    :caption: Libraries
 
+   octave/octave.rst
    java/WasdiLib.rst
+   python/waspy.rst
 
-Search
-^^^^^^^^^^^^^^^^^^
 
-* :ref:`search`

@@ -1,14 +1,14 @@
 function sStatus = wDeleteWorkspace(Wasdi, sWorkspaceName)
-% Deletes a workspace. If the user is not the workspace owner, then just the sharing is deleted
-% Syntax
-% sStatus = wDeleteProduct(Wasdi, sWorkspaceName)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sWorkspaceName: the name of the workspace to be deleted
+%Deletes a workspace. If the user is not the workspace owner, then just the sharing is deleted
+%Syntax
+%sStatus = wDeleteProduct(Wasdi, sWorkspaceName)
 %
-% OUTPUT
-%   sStatus: empty string if deletion was successful, null in case it did not work
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sWorkspaceName: the name of the workspace to be deleted
+%
+%:Returns:
+%  :sStatus: empty string if deletion was successful, null in case it did not work
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')

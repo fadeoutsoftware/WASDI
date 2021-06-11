@@ -1,17 +1,17 @@
-
+""""""
 """
-FADEOUT SOFTWARE 
+WASDI (LU) Sàrl
 
 **Disclaimer ** 
 The library is provided "as-is" without warranty
 
-Neither FadeOut Software (IT) Srl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential 
+Neither WASDI (LU) Sàrl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
 damages (including, but not limited to, breach of expressed or implied contract; procurement of substitute goods or services; loss of use, data or profits; 
 business interruption; or damage to any equipment, software and/or data files) however caused and on any legal theory of liability, whether for contract, 
 tort, strict liability, or a combination thereof (including negligence or otherwise) arising in any way out of the direct or indirect use of software, 
 even if advised of the possibility of such risk and potential damage.
 
-FadeOut Software (IT) Srl uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed, 
+WASDI (LU) Sàrl uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed,
 and that all products are free from any known software virus. For your own protection, you should scan all files for viruses prior to installation.
 
 
@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.4
-Last Update: 21/05/2021
+Version 0.6.2
+Last Update: 10/03/2021
 
 Tested with: Python 2.7, Python 3.7
 
@@ -132,7 +132,8 @@ def printStatus():
 def setVerbose(bVerbose):
     """Sets verbosity
 
-    :param bVerbose: False non verbose, True verbose
+
+    :param boolean bVerbose: False non verbose, True verbose
     :return:
     """
     if bVerbose is None:
@@ -156,6 +157,7 @@ def setVerbose(bVerbose):
 def getVerbose():
     """
     Get Verbose Flag
+
     :return: True or False
     """
     global m_bVerbose
@@ -165,6 +167,7 @@ def getVerbose():
 def getParametersDict():
     """
     Get the full Params Dictionary
+
     :return: a dictionary containing the parameters
     """
     global m_aoParamsDictionary
@@ -174,6 +177,7 @@ def getParametersDict():
 def setParametersDict(aoParams):
     """
     Get the full Params Dictionary
+
     :param aoParams: dictionary of Parameters
     :return: a dictionary containing the parameters
     """
@@ -184,7 +188,9 @@ def setParametersDict(aoParams):
 def addParameter(sKey, oValue):
     """
     Adds a parameter
+
     :param sKey: parameter key
+
     :param oValue: parameter value
     """
     global m_aoParamsDictionary
@@ -194,7 +200,9 @@ def addParameter(sKey, oValue):
 def getParameter(sKey, oDefault=None):
     """
     Gets a parameter using its key
+
     :param sKey: parameter key
+
     :param oDefault: Default value to return if parameter is not present
     :return: parameter value
     """
@@ -208,6 +216,7 @@ def getParameter(sKey, oDefault=None):
 def setUser(sUser):
     """
     Sets the WASDI User
+
     :param sUser: WASDI UserID
     :return:
     """
@@ -250,7 +259,8 @@ def setSessionId(sSessionId):
 def setParametersFilePath(sParamPath):
     """
     Set The Parameters JSON File Path
-    :param sParamPath Local Path of the parameters file
+
+    :param: sParamPath Local Path of the parameters file
     """
     if sParamPath is None:
         print('[ERROR] waspy.setParametersFilePath: passed None as path, won\'t change' +
@@ -268,6 +278,7 @@ def setParametersFilePath(sParamPath):
 def getParametersFilePath():
     """
     Get the local parameters file Path
+
     :return: local paramters file path
     """
     global m_sParametersFilePath
@@ -277,6 +288,7 @@ def getParametersFilePath():
 def getSessionId():
     """
     Get the WASDI Session
+
     :return: Session Id [String]
     """
     global m_sSessionId
@@ -286,6 +298,7 @@ def getSessionId():
 def setBasePath(sBasePath):
     """
     Set the local Base Path for WASDI
+
     :param sBasePath: local WASDI base Path. If not set, by default WASDI uses [USERHOME].wasdi
     """
     global m_sBasePath
@@ -295,6 +308,7 @@ def setBasePath(sBasePath):
 def getBasePath():
     """
     Get the local Base Path for WASDI
+
     :return: local base path for WASDI
     """
     global m_sBasePath
@@ -304,6 +318,7 @@ def getBasePath():
 def setBaseUrl(sBaseUrl):
     """
     Set the WASDI API URL
+
     :param sBaseUrl: WASDI API URL
     """
     global m_sBaseUrl
@@ -313,6 +328,7 @@ def setBaseUrl(sBaseUrl):
 def getBaseUrl():
     """
     Get the WASDI API URL
+
     :return: WASDI API URL
     """
     global m_sBaseUrl
@@ -322,6 +338,7 @@ def getBaseUrl():
 def setWorkspaceBaseUrl(sWorkspaceBaseUrl):
     """
     Set the Workspace specific API URL
+
     :param sWorkspaceBaseUrl: Workspace API URL
     """
     global m_sWorkspaceBaseUrl
@@ -331,6 +348,7 @@ def setWorkspaceBaseUrl(sWorkspaceBaseUrl):
 def getWorkspaceBaseUrl():
     """
     Get the Workspace API URL
+
     :return: Workspace API URL
     """
     global m_sWorkspaceBaseUrl
@@ -340,6 +358,7 @@ def getWorkspaceBaseUrl():
 def setIsOnServer(bIsOnServer):
     """
     Set the Is on Server Flag: keep it false, as default, while developing
+
     :param bIsOnServer: set the flag to know if the processor is running on the server or on the local PC
     """
     global m_bIsOnServer
@@ -349,6 +368,7 @@ def setIsOnServer(bIsOnServer):
 def getIsOnServer():
     """
     Get the WASDI API URL
+
     :return: True if it is running on server, False if it is running on the local Machine
     """
     global m_bIsOnServer
@@ -359,6 +379,7 @@ def setDownloadActive(bDownloadActive):
     """
     When in development, set True to download locally files from Server.
     Set it to false to NOT donwload data. In this case the developer must check the availability of the files
+
     :param bDownloadActive: True (default) to activate autodownload. False to disactivate
     """
 
@@ -374,7 +395,8 @@ def setDownloadActive(bDownloadActive):
 def getDownloadActive():
     """
     Get the Download Active Flag
-    :return: True if auto download is active, False if it is not active 
+
+    :return: True if auto download is active, False if it is not active
     """
     global m_bDownloadActive
     return m_bDownloadActive
@@ -384,6 +406,7 @@ def setUploadActive(bUploadActive):
     """
     When in development, set True to upload local files on Server.
     Set it to false to NOT upload data. In this case the developer must check the availability of the files
+
     :param bUploadActive: True to activate Auto Upload, False to disactivate auto upload
     """
 
@@ -399,6 +422,7 @@ def setUploadActive(bUploadActive):
 def getUploadActive():
     """
     Get the Upload Active Flag
+
     :return: True if Auto Upload is Active, False if it is NOT Active
     """
     global m_bUploadActive
@@ -408,6 +432,7 @@ def getUploadActive():
 def setProcId(sProcID):
     """
     Own Proc Id
+
     :param sProcID: self processor identifier
     """
     global m_sMyProcId
@@ -417,6 +442,7 @@ def setProcId(sProcID):
 def getProcId():
     """
     Get the Own Proc Id
+
     :return: Own Processor Identifier
     """
     global m_sMyProcId
@@ -426,6 +452,7 @@ def getProcId():
 def setActiveWorkspaceId(sActiveWorkspace):
     """
     Set the Active Workspace Id
+
     :param sActiveWorkpsace: Active Workspace Id
     """
     global m_sActiveWorkspace
@@ -435,6 +462,7 @@ def setActiveWorkspaceId(sActiveWorkspace):
 def getActiveWorkspaceId():
     """
     Get Active workspace Id
+
     :return: the WorkspaceId as a String, '' if there is any error
     """
     global m_sActiveWorkspace
@@ -450,6 +478,7 @@ def refreshParameters():
 def init(sConfigFilePath=None):
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
+
     :param sConfigFilePath: local path of the config file. In None or the file does not exists, WASDI will ask for login in the console
     :return: True if login was successful, False otherwise
     """
@@ -566,6 +595,7 @@ def init(sConfigFilePath=None):
 def hello():
     """
     Hello Wasdi to test the connection.
+
     :return: the hello message as Text
     """
     global m_sBaseUrl
@@ -577,6 +607,7 @@ def hello():
 def getWorkspaces():
     """
     Get List of user workspaces
+
     :return: an array of WASDI Workspace JSON Objects.
     Each Object is like this
     {
@@ -604,6 +635,7 @@ def getWorkspaces():
 def createWorkspace(sName=None):
     """
     Create a new workspaces and set it as ACTIVE Workspace
+
     :param sName: Name of the workspace to create. Null by default
     :return: Workspace Id as a String if it is a success, None otherwise
     """
@@ -633,6 +665,7 @@ def createWorkspace(sName=None):
 def deleteWorkspace(sWorkspaceId):
     """
     Delete a workspace
+
     :param workspaceId: Id of the workspace to delete
     :return: Workspace Id as a String if it is a success, None otherwise
     """
@@ -665,6 +698,7 @@ def deleteWorkspace(sWorkspaceId):
 def getWorkspaceIdByName(sName):
     """
     Get Id of a Workspace from the name
+
     :param sName: Workspace Name
     :return: the WorkspaceId as a String, '' if there is any error
     """
@@ -693,6 +727,7 @@ def getWorkspaceIdByName(sName):
 def getWorkspaceOwnerByName(sName):
     """
     Get user Id of the owner of Workspace from the name
+
     :param sName: Name of the workspace
     :return: the userId as a String, '' if there is any error
     """
@@ -721,6 +756,7 @@ def getWorkspaceOwnerByName(sName):
 def getWorkspaceOwnerByWsId(sWsId):
     """
     Get user Id of the owner of Workspace from the Workspace Id
+
     :param sWsId: Workspace Id
     :return: the userId as a String, '' if there is any error
     """
@@ -749,6 +785,7 @@ def getWorkspaceOwnerByWsId(sWsId):
 def getWorkspaceUrlByWsId(sWsId):
     """
     Get Base Url of a Workspace from the Workspace Id
+
     :param sWsId: Workspace Id
     :return: the Workspace Base Url as a String, '' if there is any error
     """
@@ -774,6 +811,7 @@ def getWorkspaceUrlByWsId(sWsId):
 def openWorkspaceById(sWorkspaceId):
     """
     Open a workspace by Id
+
     :param sWorkspaceId: Workspace Id
     :return: the WorkspaceId as a String, '' if there is any error
     """
@@ -794,6 +832,7 @@ def openWorkspaceById(sWorkspaceId):
 def openWorkspace(sWorkspaceName):
     """
     Open a workspace
+
     :param sWorkspaceName: Workspace Name
     :return: the WorkspaceId as a String, '' if there is any error
     """
@@ -812,6 +851,7 @@ def openWorkspace(sWorkspaceName):
 def getProductsByWorkspace(sWorkspaceName):
     """
     Get the list of products in a workspace by Name
+
     :param sWorkspaceName: Name of the workspace
     :return: the list is an array of string. Can be empty if there is any error
     """
@@ -823,6 +863,7 @@ def getProductsByWorkspace(sWorkspaceName):
 def getProductsByWorkspaceId(sWorkspaceId):
     """
     Get the list of products in a workspace by Id
+
     :param sWorkspaceId: Workspace Id
     :return: the list is an array of string. Can be empty if there is any error
     """
@@ -853,6 +894,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
 def getProductsByActiveWorkspace():
     """
     Get the list of products in the active workspace
+
     :return: the list is an array of string. Can be empty if there is any error
     """
     global m_sActiveWorkspace
@@ -864,7 +906,8 @@ def getPath(sFile):
     """
     Get Local File Path. If the file exists and needed the file will be automatically downloaded.
     Returns the full local path where to read or write sFile
-    :param sFile name of the file
+
+    :param: sFile name of the file
     :return: Local path where to read or write sFile 
     """
 
@@ -878,6 +921,7 @@ def getFullProductPath(sProductName):
     """
     Get the full local path of a product given the product name. If auto download is true and the code is running locally, WASDI will download the image and keep the file on the local PC
     Use the output of this API to get the full path to open a file
+
     :param sProductName: name of the product to get the path open (WITH the final extension)
     :return: local path of the Product File
     """
@@ -929,6 +973,7 @@ def getFullProductPath(sProductName):
 def getSavePath():
     """
     Get the local base save path for a product. To save use this path + fileName. Path already include '/' as last char
+
     :return: local path to use to save files (with '/' as last char)
     """
     global m_sBasePath
@@ -949,6 +994,7 @@ def getSavePath():
 def getProcessStatus(sProcessId):
     """
     get the status of a Process
+
     :param sProcessId: Id of the process to query
     :return: the status or 'ERROR' if there was any error
 
@@ -989,9 +1035,13 @@ def getProcessStatus(sProcessId):
 def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
     """
     Update the status of a process
-    :param sProcessId: Id of the process to update. 
+
+    :param sProcessId: Id of the process to update.
+
     :param sStatus: Status of the process. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
-    :param iPerc: percentage of complete of the processor. Use -1 to ignore Percentage. Use a value between 0 and 100 to set it. 
+
+    :param iPerc: percentage of complete of the processor. Use -1 to ignore Percentage. Use a value between 0 and 100 to set it.
+
     :return: the updated status as a String or '' if there was any problem
     """
 
@@ -1056,7 +1106,9 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
 def updateStatus(sStatus, iPerc=-1):
     """
     Update the status of the running process
+
     :param sStatus: new status. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+
     :param iPerc: new Percentage.-1 By default, means no change percentage. Use a value between 0 and 100 to set it.
     :return: the updated status as a String or '' if there was any problem
     """
@@ -1074,6 +1126,7 @@ def updateStatus(sStatus, iPerc=-1):
 def waitProcess(sProcessId):
     """
     Wait for a process to End
+
     :param sProcessId: Id of the process to wait
     :return: output status of the process
     """
@@ -1109,9 +1162,10 @@ def waitProcesses(asProcIdList):
     Wait for a list of processes to wait.
     The list of processes is an array of strings, each with a proc id to wait
     
+
     :param asProcIdList: list of strings, procId, to wait
     
-    :return list of strings with the same number of elements in input, with the exit status of the processes
+    :return: list of strings with the same number of elements in input, with the exit status of the processes
     """
     
     global m_sBaseUrl
@@ -1170,6 +1224,7 @@ def waitProcesses(asProcIdList):
 def updateProgressPerc(iPerc):
     """
     Update the actual progress Percentage of the processor
+
     :param iPerc: new Percentage. Use a value between 0 and 100 to set it.
     :return: updated status of the process or '' if there was any error
     """
@@ -1217,7 +1272,9 @@ def updateProgressPerc(iPerc):
 def setProcessPayload(sProcessId, data):
     """
     Saves the Payload of a process
+
     :param sProcessId: Id of the process
+
     :param data: data to write in the payload. Suggestion to use a JSON
     :return: the updated status as a String or '' if there was any problem
     """
@@ -1250,6 +1307,7 @@ def setPayload(data):
     """
     Set the payload of the actual running process.
     The payload is saved only when run on Server. In local mode is just a print.
+
     :param data: data to save in the payload. Suggestion is to use JSON
     return None
     """
@@ -1267,7 +1325,9 @@ def setPayload(data):
 def getProcessorPayload(sProcessObjId, bAsJson=False):
     """
     Retrieves the payload
+
     :param sProcessObjId: a valid processor obj id
+
     :param bAsJson: flag to indicate whether the payload is a json object: if True, then a dictionary is returned
     :return: the processor payload if present, None otherwise
     """
@@ -1297,6 +1357,7 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
 def getProcessorPayloadAsJson(sProcessorPayload):
     """
     Retrieves the payload in json format using getProcessorPayload
+
     :param sProcessObjId: a valid processor obj id
     :return: the processor payload if present as a dictionary, None otherwise
     """
@@ -1306,7 +1367,9 @@ def getProcessorPayloadAsJson(sProcessorPayload):
 def setSubPid(sProcessId, iSubPid):
     """
     Set the sub pid
+
     :param sProcessId: Id of the process
+
     :param iSubPid: PID of the physical process
     :return: the updated status as a String or '' if there was any problem
     """
@@ -1341,7 +1404,8 @@ def saveFile(sFileName):
     Ingest a new file in the Active WASDI Workspace.
     The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
     To work be sure that the file is on the server
-    :param Name of the file to add to the workpsace
+
+    :param: Name of the file to add to the workpsace
     :return: Status of the operation
     """
     global m_sBaseUrl
@@ -1372,6 +1436,7 @@ def saveFile(sFileName):
 def _downloadFile(sFileName):
     """
     Download a file from WASDI
+
     :param sFileName: file to download
     :return: None
     """
@@ -1466,6 +1531,7 @@ def _downloadFile(sFileName):
 def wasdiLog(sLogRow):
     """
     Write one row of Log
+
     :param sLogRow: text to log
     :return: None
     """
@@ -1490,6 +1556,7 @@ def wasdiLog(sLogRow):
 def deleteProduct(sProduct):
     """
     Delete a Product from a Workspace
+
     :param sProduct: Name of the product to delete (WITH EXTENSION)
     :return: True if the file has been deleted, False if there was any error
     """
@@ -1531,17 +1598,29 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     Search EO images
 
     :param sPlatform: satellite platform:(S1|S2|VIIRS|L8|ENVI)
+
     :param sDateFrom: inital date YYYY-MM-DD
+
     :param sDateTo: final date YYYY-MM-DD
+
     :param fULLat: Latitude of Upper-Left corner
+
     :param fULLon: Longitude of Upper-Left corner
+
     :param fLRLat: Latitude of Lower-Right corner
+
     :param fLRLon: Longitude of Lower-Right corner
-    :param sProductType: type of EO product; Can be null. FOR "S1" -> "SLC","GRD", "OCN". FOR "S2" -> "S2MSI1C","S2MSI2Ap","S2MSI2A". FOR "VIIRS" -> "VIIRS_1d_composite","VIIRS_5d_composite". FOR "L8" -> "L1T","L1G","L1GT","L1GS","L1TP". For "ENVI" -> "ASA_IM__0P", "ASA_WS__0P" 
+
+    :param sProductType: type of EO product; Can be null. FOR "S1" -> "SLC","GRD", "OCN". FOR "S2" -> "S2MSI1C","S2MSI2Ap","S2MSI2A". FOR "VIIRS" -> "VIIRS_1d_composite","VIIRS_5d_composite". FOR "L8" -> "L1T","L1G","L1GT","L1GS","L1TP". For "ENVI" -> "ASA_IM__0P", "ASA_WS__0P"
+
     :param iOrbitNumber: orbit number
+
     :param sSensorOperationalMode: sensor operational mode
+
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
+
     :param sProvider: WASDI Data Provider to query (LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = LSA.
+
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
     aoReturnList = []
@@ -1550,7 +1629,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         print('[ERROR] waspy.searchEOImages: platform cannot be None' +
               '  ******************************************************************************')
         return aoReturnList
-    
+
     # todo support other platforms
     if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (sPlatform != "ENVI") :
         wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI. Received [' + sPlatform + ']' +
@@ -1684,7 +1763,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     else:
         if sPlatform == "VIIRS":
             sQuery += " AND producttype:VIIRS_1d_composite"
-    
+
     # If available Sensor Operational Mode
     if (sSensorOperationalMode is not None) and (sPlatform == "S1"):
         sQuery += " AND sensoroperationalmode:" + str(sSensorOperationalMode)
@@ -1762,7 +1841,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             # Initialize the fileName property
             if oSearchResult["title"] is not None:
 
-                # Se the file name                
+                # Se the file name
                 if sPlatform=="S1" or sPlatform=="S2":
                     oSearchResult["fileName"] = oSearchResult["title"] + ".zip"
                 elif sPlatform=="VIIRS":
@@ -1791,6 +1870,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 def getFoundProductName(aoProduct):
     """
     Get The name of a product from a Dictionary returned by Search EO Images
+
     :param aoProduct: dictionary representing the product as returned by Search EO Images
     :return: product name or '' if there was any error
     """
@@ -1809,6 +1889,7 @@ def getFoundProductName(aoProduct):
 def fileExistsOnWasdi(sFileName):
     """
     checks if a file already exists on WASDI or not
+
     :param sFileName: file name with extension
     :return: True if the file exists, False otherwise
     """
@@ -1850,6 +1931,7 @@ def fileExistsOnWasdi(sFileName):
 def getProductBBOX(sFileName):
     """
     Gets the bounding box of a file
+
     :param sFileName: name of the file to query for bounding box
     :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
     """
@@ -1886,8 +1968,11 @@ def getProductBBOX(sFileName):
 def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
+
     :param sFileUrl: url of the file to import
+
     :param sBoundingBox: declared bounding box of the file to import
+
     :param sProvider: WASDI Data Provider to use. Use None for Default
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -1942,8 +2027,11 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
 def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
+
     :param sFileUrl: url of the file to import
+
     :param sBoundingBox: declared bounding box of the file to import
+
     :param sProvider: WASDI Data Provider. Use None for default
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
@@ -1997,7 +2085,9 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
 def importProduct(oProduct, sProvider=None):
     """
     Imports a product from a Provider in WASDI starting from the object returned by searchEOImages
+
     :param oProduct: product dictionary as returned by searchEOImages
+
     :param sProvider: WASDI Data Provider. Use None for default
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -2027,7 +2117,9 @@ def importProduct(oProduct, sProvider=None):
 def asynchImportProduct(oProduct, sProvider=None):
     """
     Asynch Import a product from a Provider in WASDI starting from the object returned by searchEOImages
+
     :param oProduct: product dictionary as returned by searchEOImages
+
     :param sProvider: WASDI Data Provider. Use None for default
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
@@ -2057,8 +2149,10 @@ def asynchImportProduct(oProduct, sProvider=None):
 def importProductList(aoProducts, sProvider=None):
     """
     Imports a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
+
     :param aoProducts: Array of product dictionary as returned by searchEOImages
-    :param sProvider: WASDI Data Provider. Use None for default 
+
+    :param sProvider: WASDI Data Provider. Use None for default
     :return: execution status as an array of  STRINGs, one for each product in input. Can be CREATED, DONE, ERROR, STOPPED, WAITING, READY
     """
 
@@ -2101,7 +2195,9 @@ def importProductList(aoProducts, sProvider=None):
 def asynchImportProductList(aoProducts, sProvider=None):
     """
     Asynch Import a list of product from a Provider in WASDI starting from an array of objects returned by searchEOImages
+
     :param aoProducts: Array of product dictionary as returned by searchEOImages
+
     :param sProvider: WASDI Data Provider. Use None for default
     :return: array of the ProcessId of the Download Operations. An element can be "ERROR" if there was any problem
     """
@@ -2144,9 +2240,13 @@ def asynchImportProductList(aoProducts, sProvider=None):
 def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvider=None):
     """
     Imports in WASDI and apply a SNAP Workflow to an array of EO Images as returned by searchEOImages
+
     :param aoImages: array of images to import as returned by searchEOImages
+
     :param sWorkflow: name of the workflow to apply to each imported images
+
     :param sProvider: WASDI Data Provider. Use None for default
+
     :param sPreProcSuffix: suffix to use for the name of the output of the workflows
     :return: 
     """
@@ -2222,7 +2322,9 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
 def asynchExecuteProcessor(sProcessorName, aoParams={}):
     """
     Execute a WASDI processor asynchronously
+
     :param sProcessorName: WASDI processor name
+
     :param aoParams: a dictionary of parameters for the processor
     :return: processor ID
     """
@@ -2279,8 +2381,10 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
 def executeProcessor(sProcessorName, aoProcessParams):
     """
     Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
+
     :param sProcessorName: WASDI processor name
-    :param aoParams: a dictionary of parameters for the processor    
+
+    :param aoParams: a dictionary of parameters for the processor
     :return: the Process Id if every thing is ok, '' if there was any problem
     """
     global m_sActiveWorkspace
@@ -2343,6 +2447,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
 def _uploadFile(sFileName):
     """
     Uploads a file to WASDI
+
     :param sFileName: name of file inside working directory OR path to file RELATIVE to working directory
     :return: True if succeded, False otherwise
     """
@@ -2388,7 +2493,9 @@ def _uploadFile(sFileName):
 def addFileToWASDI(sFileName, sStyle=""):
     """
     Add a file to the wasdi workspace
+
     :param sFileName: Name (with extension) of the file to add
+
     :param sStyle: name of a valid WMS style
     :return: status of the operation
     """
@@ -2398,7 +2505,9 @@ def addFileToWASDI(sFileName, sStyle=""):
 def asynchAddFileToWASDI(sFileName, sStyle=""):
     """
     Triggers the ingestion of File Name in the workspace
+
     :param: sFileName: Name (with extension) of the file to add
+
     :param sStyle: name of a valid WMS style
     :return: Process Id of the ingestion
     """
@@ -2408,11 +2517,17 @@ def asynchAddFileToWASDI(sFileName, sStyle=""):
 def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     """
     Creates a Subset of an image:
-    :param sInputFile: Input file 
+
+    :param sInputFile: Input file
+
     :param sOutputFile: Output File
+
     :param dLatN: Latitude north of the subset
+
     :param dLonW: Longitude west of the subset
+
     :param dLatS: Latitude South of the subset
+
     :param dLonE: Longitude Est of the subset
     """
     _log('[INFO] waspy.subset( ' + str(sInputFile) + ', ' + str(sOutputFile) + ', ' +
@@ -2466,11 +2581,17 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
 def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff=False):
     """
     Creates a Many Subsets from an image. MAX 10 TILES PER CALL
-    :param sInputFile: Input file 
+
+    :param sInputFile: Input file
+
     :param sOutputFile: Array of Output File Names
+
     :param dLatN: Array of Latitude north of the subset
+
     :param dLonW: Array of Longitude west of the subset
+
     :param dLatS: Array of Latitude South of the subset
+
     :param dLonE: Array of Longitude Est of the subset
     """
 
@@ -2543,6 +2664,7 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
 def getWorkflows():
     """
         Get the list of workflows for the user
+
         :return: None if there is any error; an array of WASDI Workspace JSON Objects if everything is ok. The format is as follows:
 
         {
@@ -2570,8 +2692,11 @@ def getWorkflows():
 def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     """
     Execute a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
+
     :param asInputFileNames: array of the inputs of the workflow. Must correspond to the number of inputs of the workflow.
+
     :param asOutputFileNames: array of the  outputs of the workflow. Must correspond to the number of inputs of the workflow.
+
     :param sWorkflowName: Name of the workflow to run
     :return: final status of the executed Workflow
     """
@@ -2581,8 +2706,11 @@ def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
 def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     """
     Trigger the asynch execution of a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
+
     :param asInputFileNames: array of the inputs of the workflow. Must correspond to the number of inputs of the workflow.
+
     :param asOutputFileNames: array of the  outputs of the workflow. Must correspond to the number of inputs of the workflow.
+
     :param sWorkflowName: Name of the workflow to run
     :return: Process Id of the started workflow
     """
@@ -2593,9 +2721,13 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     """
     Start a mosaic out of a set of images in asynch way
 
+
     :param asInputFiles: List of input files to mosaic
+
     :param sOutputFile: Name of the mosaic output file
+
     :param iNoDataValue: Value to use as noData. Use -1 to ignore
+
     :param iIgnoreInputValue: Value to ignore from the input files of the mosaic. Use -1 to ignore
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
@@ -2607,10 +2739,15 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     """
     Creates a mosaic out of a set of images
 
+
     :param asInputFiles: List of input files to mosaic
+
     :param sOutputFile: Name of the mosaic output file
+
     :param iNoDataValue: Value to use as noData. Use -1 to ignore
+
     :param iIgnoreInputValue: Value to ignore from the input files of the mosaic. Use -1 to ignore
+
     :param bAsynch: True to return after the triggering, False to wait the process to finish
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
@@ -2725,7 +2862,9 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
     """
     Copy a file from a workspace to the WASDI user's SFTP Folder
     
+
     :param sFileName: FIle name (with extension, without path) to copy in the SFTP folder
+
     :param bAsynch: True to return after the triggering, False to wait the process to finish
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure    
     """
@@ -2784,7 +2923,7 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
         if sRelativePath is not None:
             sUrl += "&path="
             sUrl += str(sRelativePath)
-        
+
         asHeaders = _getStandardHeaders()
         oResponse = requests.get(url=sUrl, headers=asHeaders)
         if oResponse is None:
@@ -2815,6 +2954,8 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
 def getProcessorPath():
     """
     Get the local path of the processor (where myProcessor.py is located)
+
+    :return: Local path of the processor
     """
     
     try:        
@@ -2835,10 +2976,15 @@ def getProcessorPath():
 def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperationType=None, sName=None):
     """
     Get a paginated list of processes in the active workspace
+
     :param iStartIndex: start index of the process (0 by default is the last one)
+
     :param iEndIndex: end index of the process (20 by default)
-    :param sStatus: status filter. None by default. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY 
+
+    :param sStatus: status filter. None by default. Can be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+
     :param sOperationType: Operation Type Filter. None by default. Can be RUNPROCESSOR, RUNIDL, RUNMATLAB, INGEST, DOWNLOAD, GRAPH, DEPLOYPROCESSOR
+
     :param sName: Name filter. The name meaning depends by the operation type. None by default. For RUNPROCESSOR, RUNIDL and RUNMATLAB is the name of the application
     """
     
@@ -2875,6 +3021,7 @@ def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperatio
 def _log(sLog):
     """
     Internal Log function
+
     :param sLog: text row to log
     """
     global m_bVerbose
@@ -2886,6 +3033,7 @@ def _log(sLog):
 def _getStandardHeaders():
     """
     Get the standard headers for a WASDI API Call, setting also the session token
+
     :return: dictionary of headers to add to the REST API
     """
     global m_sSessionId
@@ -2896,6 +3044,7 @@ def _getStandardHeaders():
 def _loadConfig(sConfigFilePath):
     """
     Loads configuration from given file
+
     :param sConfigFilePath: a string containing a path to the configuration file
     """
     if sConfigFilePath is None:
@@ -2983,7 +3132,9 @@ def _loadParams():
 def _unzip(sAttachmentName, sPath):
     """
     Unzips a file
+
     :param sAttachmentName: filename to unzip
+
     :param sPath: both the path where the file is and where it must be unzipped
     :return: None
     """
@@ -3031,6 +3182,7 @@ def _waitForResume():
 def _normPath(sPath):
     """
     Normalizes path by adjusting separator
+
     :param sPath: a path to be normalized
     :return: the normalized path
     """
@@ -3159,9 +3311,13 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     """
     Internal call to execute workflow
 
+
     :param asInputFileNames: name of the file in input (string WITH extension) or array of strings of the files in input (WITH extension)
+
     :param asOutputFileNames: name of the file in output (string WITH extension) or array of strings of the files in output (WITH extension)
+
     :param sWorkflowName: name of the SNAP workflow uploaded in WASDI
+
     :param bAsynch: true to run asynch, false to run synch
     :return: processID if asynch, status of the executed process if synch, empty string in case of failure
     """
@@ -3278,6 +3434,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
 def _fileOnNode(sFileName):
     """
     checks if a file already exists on the node of the workspace or not
+
     :param sFileName: file name with extension
     :return: True if the file exists, False otherwise
     """

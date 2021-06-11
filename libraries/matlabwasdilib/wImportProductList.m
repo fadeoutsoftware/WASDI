@@ -1,14 +1,13 @@
 function asStatuses=wImportProductList(Wasdi, asProductLinks)
-% Import an EO Image in WASDI. This is the asynchronous version
-% Syntax
-% sProcessObjId=wAsynchImportProductList(Wasdi, asProductLinks)
-% 
-% INPUT
-%   Wasdi: Wasdi object created after the wasdilib call
-%   asProductLinks: collection of Product Direct Link as returned by wSearchEOImage
+%Import an EO Image in WASDI. This is the asynchronous version
+%Syntax
+%sProcessObjId=wAsynchImportProductList(Wasdi, asProductLinks)
 %
-% OUTPUT
-%   asStatuses: list of statuses of the import processes
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param asProductLinks: collection of Product Direct Link as returned by wSearchEOImage
+%
+%:Returns:
+%  :asStatuses: list of statuses of the import processes
 %
 
   if exist("Wasdi") < 1 

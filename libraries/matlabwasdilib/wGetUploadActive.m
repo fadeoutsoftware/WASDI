@@ -1,14 +1,13 @@
 function bUploadActive = wGetUploadActive(Wasdi)
 %
-% Gets whether Upload is active or not
-% Syntax
-% bUploadActive = wGetUploadActive(Wasdi)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
+%Gets whether Upload is active or not
+%Syntax
+%bUploadActive = wGetUploadActive(Wasdi)
 %
-% OUTPUT
-%   bUploadActive: true if Upload is active, false otherwise
+%:param Wasdi: Wasdi object created after the wasdilib call
+%
+%:Returns:
+%  :bUploadActive: true if Upload is active, false otherwise
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not exist')
