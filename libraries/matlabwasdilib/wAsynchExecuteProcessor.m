@@ -1,7 +1,7 @@
-function sProcessId=wExecuteProcessor(Wasdi, sProcessorName, asParams)
+function sProcessId=wAsynchExecuteProcessor(Wasdi, sProcessorName, asParams)
 % Execute a WASDI processor asynchronously
 % Syntax
-% sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
+% sStatus=wAsynchExecuteProcessor(Wasdi, sProcessorName, asParams)
 % 
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
@@ -19,7 +19,7 @@ function sProcessId=wExecuteProcessor(Wasdi, sProcessorName, asParams)
    
    sJsonParams = wUrlEncode(savejson('',asParams,'Compact',1))
    
-   sProcessId = char(Wasdi.executeProcessor(sProcessorName, sJsonParams));
+   sProcessId = char(Wasdi.asynchExecuteProcessor(sProcessorName, sJsonParams));
    
    disp(['sProcessId: ', sProcessId ]);
    

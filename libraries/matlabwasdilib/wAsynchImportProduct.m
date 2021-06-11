@@ -1,5 +1,5 @@
-function sProcessObjId=wImportProduct(Wasdi, sProductLink, sBoundingBox='', sProvider='LSA')
-% Import an EO Image in WASDI
+function sProcessObjId=wAsynchImportProduct(Wasdi, sProductLink, sBoundingBox='', sProvider='LSA')
+% Import an EO Image in WASDI. This is the asynchronous version
 % Syntax
 % sStatus=wImportProduct(Wasdi, sProductLink)
 % 
@@ -14,11 +14,11 @@ function sProcessObjId=wImportProduct(Wasdi, sProductLink, sBoundingBox='', sPro
 %
 
   if exist("Wasdi") < 1 
-    disp('Wasdi variable does not exist')
+    disp('Wasdi variable does not existst')
     return
    end
    
-   sProcessObjId = Wasdi.importProduct(sProductLink, sBoundingBox, sProvider);
+   sProcessObjId = Wasdi.asynchImportProduct(sProductLink, sBoundingBox, sProvider);
    
    
 end
