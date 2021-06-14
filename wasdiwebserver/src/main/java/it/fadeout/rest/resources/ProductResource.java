@@ -922,7 +922,7 @@ public class ProductResource {
     @POST
     @Path("deletelist")
     @Consumes(MediaType.APPLICATION_JSON)
-    public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("bDeleteFile") Boolean bDeleteFile,
+    public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("bDeleteFile") Boolean bDeleteFile,
                                          @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer,
                                          List<String> as_ProductList) {
         // Support variable used to identify if deletions of one or more products failed
