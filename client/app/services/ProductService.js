@@ -34,6 +34,17 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.get(sUrl + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     };
 
+    this.deleteProductListFromWorkspace = function (sProductNameList, sWorkspaceId, bDeleteFile, bDeleteLayer) {
+        if (sProductNameList.length == 0){
+            return 400; // bad parameters
+        }
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+        //the list is passed in the body request
+        return this.m_oHttp.post(sUrl + '/product/deletelist?sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer,sProductNameList);
+    };
+
     this.updateProduct = function (oProductViewModel,workspaceId) {
         return this.m_oHttp.post(this.APIURL + '/product/update?workspace=' + workspaceId, oProductViewModel);
     };

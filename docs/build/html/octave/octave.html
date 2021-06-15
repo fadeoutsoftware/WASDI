@@ -1,0 +1,2425 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Octave WasdiLib &mdash; WASDI documentation center  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Java WasdiLib" href="../java/WasdiLib.html" />
+    <link rel="prev" title="Python Tutorial" href="../PythonTutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> WASDI documentation center
+          
+
+          
+            
+            <img src="../_static/logowasdi.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../WasdiTutorial.html">Wasdi Web Platform access and basic usage</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Wasdi Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../AppStoreTutorial.html">Wasdi App Store</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Programming tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PythonTutorial.html">Python Tutorial</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Libraries</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Octave WasdiLib</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#startwasdi">startWasdi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#waddfiletowasdi">wAddFileToWASDI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#waddparam">wAddParam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchaddfiletowasdi">wAsynchAddFileToWASDI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchcopyfiletosftp">wAsynchCopyFileToSftp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchexecuteprocessor">wAsynchExecuteProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchexecuteworkflow">wAsynchExecuteWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchimportproduct">wAsynchImportProduct</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchimportproductlist">wAsynchImportProductList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchmosaic">wAsynchMosaic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasynchmultisubset">wAsynchMultiSubset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wcopyfiletosftp">wCopyFileToSftp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wcreateworkspace">wCreateWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wdeleteproduct">wDeleteProduct</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wdeleteworkspace">wDeleteWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wexecuteprocessor">wExecuteProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wexecuteworkflow">wExecuteWorkflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetactiveworkspace">wGetActiveWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetbasepath">wGetBasePath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetbaseurl">wGetBaseUrl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetdownloadactive">wGetDownloadActive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetfullproductpath">wGetFullProductPath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetmyprocid">wGetMyProcId</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetparameter">wGetParameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetparametersfilepath">wGetParametersFilePath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetparams">wGetParams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetpassword">wGetPassword</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetpath">wGetPath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetprocessstatus">wGetProcessStatus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetprocessesbyworkspace">wGetProcessesByWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetprocessorpath">wGetProcessorPath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetprocessorpayload">wGetProcessorPayload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetprocessorpayloadasjson">wGetProcessorPayloadAsJSON</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetproductbbox">wGetProductBbox</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetproductsbyactiveworkspace">wGetProductsByActiveWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetproductsbyworkspace">wGetProductsByWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetsavepath">wGetSavePath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetsessionid">wGetSessionId</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetuploadactive">wGetUploadActive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetuser">wGetUser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetverbose">wGetVerbose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetworkflows">wGetWorkflows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetworkspacebaseurl">wGetWorkspaceBaseUrl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetworkspaceidbyname">wGetWorkspaceIdByName</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetworkspaceownerbyname">wGetWorkspaceOwnerByName</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetworkspaceurlbywsid">wGetWorkspaceUrlByWsId</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wgetworkspaces">wGetWorkspaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wimportandpreprocess">wImportAndPreprocess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wimportproduct">wImportProduct</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wimportproductlist">wImportProductList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wlog">wLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wmosaic">wMosaic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wmultisubset">wMultiSubset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wopenworkspace">wOpenWorkspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wopenworkspacebyid">wOpenWorkspaceById</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wprintstatus">wPrintStatus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wrefreshparameters">wRefreshParameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsearcheoimages">wSearchEOImages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetactiveworkspaceid">wSetActiveWorkspaceId</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetbasepath">wSetBasePath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetbaseurl">wSetBaseUrl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetdownloadactive">wSetDownloadActive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetisonserver">wSetIsOnServer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetmyprocid">wSetMyProcId</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetparameter">wSetParameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetpassword">wSetPassword</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetpayload">wSetPayload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetprocesspayload">wSetProcessPayload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetsessionid">wSetSessionId</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetsubpid">wSetSubPid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetuploadactive">wSetUploadActive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetuser">wSetUser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetverbose">wSetVerbose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsetworkspacebaseurl">wSetWorkspaceBaseUrl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wsubset">wSubset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wupdateprocessstatus">wUpdateProcessStatus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wupdateprogress">wUpdateProgress</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wupdateprogressperc">wUpdateProgressPerc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wupdatestatus">wUpdateStatus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wurlencode">wUrlEncode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wwaitprocess">wWaitProcess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasdihello">wasdiHello</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wasdilog">wasdiLog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../java/WasdiLib.html">Java WasdiLib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/waspy.html">Python WasdiLib</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">WASDI documentation center</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Octave WasdiLib</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/octave/octave.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="octave-wasdilib">
+<span id="id1"></span><h1>Octave WasdiLib<a class="headerlink" href="#octave-wasdilib" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="startwasdi">
+<h3>startWasdi<a class="headerlink" href="#startwasdi" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.startWasdi">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">startWasdi</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">config_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.startWasdi" title="Permalink to this definition">¶</a></dt>
+<dd><p>find out what the library path is:</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="waddfiletowasdi">
+<h3>wAddFileToWASDI<a class="headerlink" href="#waddfiletowasdi" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAddFileToWASDI">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAddFileToWASDI</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sFileName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAddFileToWASDI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ingest a new file in the Active WASDI Workspace waiting for the result
+The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
+o work be sure that the file is on the server
+Syntax
+sStatus =wAddFileToWASDI(Wasdi, sFileName);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sFileName</strong> – Name of the file to add</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>Status of the Ingest Process as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="waddparam">
+<h3>wAddParam<a class="headerlink" href="#waddparam" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAddParam">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAddParam</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sKey</span></em>, <em class="sig-param"><span class="pre">sValue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAddParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a parameter to current processor
+Syntax
+wAddParam(Wasdi, sKey, sValue)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sKey</strong> – a string to be used as key for the param</p></li>
+<li><p><strong>sValue</strong> – a string to be used as a value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchaddfiletowasdi">
+<h3>wAsynchAddFileToWASDI<a class="headerlink" href="#wasynchaddfiletowasdi" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchAddFileToWASDI">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchAddFileToWASDI</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sFileName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchAddFileToWASDI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ingest a new file in the Active WASDI Workspace WITHOUT waiting for the result
+The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
+If the file is not present in the WASDI cloud workpsace, it will be automatically uploaded if the config AUTOUPLOAD flag is true (default)
+Syntax
+sStatus =wAsynchAddFileToWASDI(Wasdi, sFileName);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sFileName</strong> – Name of the file to add</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessId</dt>
+<dd class="field-odd"><p>Process Id of the WASDI Ingest operation on the server. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchcopyfiletosftp">
+<h3>wAsynchCopyFileToSftp<a class="headerlink" href="#wasynchcopyfiletosftp" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchCopyFileToSftp">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchCopyFileToSftp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sFileName</span></em>, <em class="sig-param"><span class="pre">sRelativePath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchCopyFileToSftp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy file to SFTP folder, asynchronous version
+Syntax
+wAsynchCopyFileToSftp(Wasdi, sFileName, sRelativePath)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sFileName</strong> – a string containing the file name</p></li>
+<li><p><strong>sRelativePath</strong> – a string containinng the relative path</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchexecuteprocessor">
+<h3>wAsynchExecuteProcessor<a class="headerlink" href="#wasynchexecuteprocessor" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchExecuteProcessor">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchExecuteProcessor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessorName</span></em>, <em class="sig-param"><span class="pre">asParams</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchExecuteProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a WASDI processor asynchronously
+Syntax
+sStatus=wAsynchExecuteProcessor(Wasdi, sProcessorName, asParams)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessorName</strong> – Processor Name</p></li>
+<li><p><strong>asParams</strong> – Processor parameters, as a key/value dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessId</dt>
+<dd class="field-odd"><p>process workspace id. It can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchexecuteworkflow">
+<h3>wAsynchExecuteWorkflow<a class="headerlink" href="#wasynchexecuteworkflow" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchExecuteWorkflow">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchExecuteWorkflow</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkflow</span></em>, <em class="sig-param"><span class="pre">asInputFiles</span></em>, <em class="sig-param"><span class="pre">asOutputFiles</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchExecuteWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a SNAP workflow in Asynch mode. The workflow has to be uploaded in WASDI: it can be public or private of a user.
+If it is private, it must be triggered from the owner.
+Syntax
+sProcessId = wExecuteWorkflow(Wasdi, sWorkflow, asInputFiles, asOutputFiles);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkflow</strong> – Name of the workflow</p></li>
+<li><p><strong>asInputFiles</strong> – array of strings with the name of the input files. Must be one file for each Read Node of the workflow, in the exact order</p></li>
+<li><p><strong>asOutputFiles</strong> – array of strings with the name of the output files. Must be one file for each Write Node of the workflow, in the exact order</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessId</dt>
+<dd class="field-odd"><p>Id of the process representing the Workflow execution. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchimportproduct">
+<h3>wAsynchImportProduct<a class="headerlink" href="#wasynchimportproduct" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchImportProduct">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchImportProduct</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProductLink</span></em>, <em class="sig-param"><span class="pre">sBoundingBox=''</span></em>, <em class="sig-param"><span class="pre">sProvider='LSA'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchImportProduct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import an EO Image in WASDI. This is the asynchronous version
+Syntax
+sStatus=wImportProduct(Wasdi, sProductLink)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProductLink</strong> – Product Direct Link as returned by wSearchEOImage</p></li>
+<li><p><strong>sBoundingBox</strong> – product bounding box, optional</p></li>
+<li><p><strong>sProvider</strong> – data provider, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">param sProcessObjId</dt>
+<dd class="field-odd"><p>Identifier of the import process</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchimportproductlist">
+<h3>wAsynchImportProductList<a class="headerlink" href="#wasynchimportproductlist" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchImportProductList">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchImportProductList</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">asProductLinks</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchImportProductList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import an EO Image in WASDI. This is the asynchronous version
+Syntax
+sProcessObjId=wAsynchImportProductList(Wasdi, asProductLinks)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>asProductLinks</strong> – collection of Product Direct Link as returned by wSearchEOImage</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">param asStatuses</dt>
+<dd class="field-odd"><p>list of statuses of the import processes</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchmosaic">
+<h3>wAsynchMosaic<a class="headerlink" href="#wasynchmosaic" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchMosaic">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchMosaic</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">asInputFileNames</span></em>, <em class="sig-param"><span class="pre">sOutputFile</span></em>, <em class="sig-param"><span class="pre">sNoDataValue</span></em>, <em class="sig-param"><span class="pre">sInputIgnoreValue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchMosaic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mosaic input images in the output file
+Syntax
+sProcessId=wAsynchMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>asInputFileNames</strong> – Array of input file names</p></li>
+<li><p><strong>sOutputFile</strong> – Name of the output file</p></li>
+<li><p><strong>sNoDataValue</strong> – value to use as no data in the output file</p></li>
+<li><p><strong>sInputIgnoreValue</strong> – value used as no data in the input file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessId</dt>
+<dd class="field-odd"><p>Id of the mosaic process on WASDI. Can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasynchmultisubset">
+<h3>wAsynchMultiSubset<a class="headerlink" href="#wasynchmultisubset" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wAsynchMultiSubset">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wAsynchMultiSubset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sInputFile</span></em>, <em class="sig-param"><span class="pre">asOutputFiles</span></em>, <em class="sig-param"><span class="pre">adLatN</span></em>, <em class="sig-param"><span class="pre">adLonW</span></em>, <em class="sig-param"><span class="pre">adLatS</span></em>, <em class="sig-param"><span class="pre">adLonE</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wAsynchMultiSubset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts subsets of an image given its name and the desired bounding boxes.Asynchronous version
+Syntax
+sReturn=wAsynchMultiSubset(Wasdi, sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sInputFile</strong> – the input file from where subsets must be extracted</p></li>
+<li><p><strong>asOutputFiles</strong> – names to be given to output files</p></li>
+<li><p><strong>adLatN</strong> – a collection of Northernmost latitudes</p></li>
+<li><p><strong>adLonW</strong> – a collection of Westernmost longitudes</p></li>
+<li><p><strong>adLatS</strong> – a collection of Southernmost latitudes</p></li>
+<li><p><strong>adLonE</strong> – a collection of Easternnmost longitudes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wcopyfiletosftp">
+<h3>wCopyFileToSftp<a class="headerlink" href="#wcopyfiletosftp" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wCopyFileToSftp">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wCopyFileToSftp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sFileName</span></em>, <em class="sig-param"><span class="pre">sRelativePath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wCopyFileToSftp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy file to SFTP folder, synchronous version
+Syntax
+wCopyFileToSftp(Wasdi, sFileName, sRelativePath)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sFileName</strong> – a string containing the file name</p></li>
+<li><p><strong>sRelativePath</strong> – a string containinng the relative path</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="field-list simple">
+<dt class="field-odd">sProcessId</dt>
+<dd class="field-odd"><p>process workspace id. It can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wcreateworkspace">
+<h3>wCreateWorkspace<a class="headerlink" href="#wcreateworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wCreateWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wCreateWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceName</span></em>, <em class="sig-param"><span class="pre">sNodeCode=''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wCreateWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy file to SFTP folder, asynchronous version
+Syntax
+wCreateWorkspace(Wasdi, sWorkspaceName, sNodeCode)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceName</strong> – the name of the workspace</p></li>
+<li><p><strong>sNodeCode</strong> – the code of the node, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceId</dt>
+<dd class="field-odd"><p>the ID of the workspace (empty in case of error)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wdeleteproduct">
+<h3>wDeleteProduct<a class="headerlink" href="#wdeleteproduct" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wDeleteProduct">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wDeleteProduct</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProductName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wDeleteProduct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a product in active workspace
+Syntax
+sStatus = wDeleteProduct(Wasdi, sProductName)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sFileName</strong> – Name of the file to add</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>empty string if deletion was successful, null in case it did not work</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wdeleteworkspace">
+<h3>wDeleteWorkspace<a class="headerlink" href="#wdeleteworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wDeleteWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wDeleteWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wDeleteWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a workspace. If the user is not the workspace owner, then just the sharing is deleted
+Syntax
+sStatus = wDeleteProduct(Wasdi, sWorkspaceName)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceName</strong> – the name of the workspace to be deleted</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>empty string if deletion was successful, null in case it did not work</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wexecuteprocessor">
+<h3>wExecuteProcessor<a class="headerlink" href="#wexecuteprocessor" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wExecuteProcessor">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wExecuteProcessor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessorName</span></em>, <em class="sig-param"><span class="pre">asParams</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wExecuteProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a WASDI processor asynchronously
+Syntax
+sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessorName</strong> – Processor Name</p></li>
+<li><p><strong>asParams</strong> – Processor parameters, as a key/value dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessId</dt>
+<dd class="field-odd"><p>process workspace id. It can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wexecuteworkflow">
+<h3>wExecuteWorkflow<a class="headerlink" href="#wexecuteworkflow" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wExecuteWorkflow">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wExecuteWorkflow</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkflow</span></em>, <em class="sig-param"><span class="pre">asInputFiles</span></em>, <em class="sig-param"><span class="pre">asOutputFiles</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wExecuteWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a SNAP workflow. The workflow has to be uploaded in WASDI: it can be public or private of a user.
+If it is private, it must be triggered from the owner.
+Syntax
+sStatus = wExecuteWorkflow(Wasdi, sWorkflow, asInputFiles, asOutputFiles);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkflow</strong> – Name of the workflow</p></li>
+<li><p><strong>asInputFiles</strong> – array of strings with the name of the input files. Must be one file for each Read Node of the workflow, in the exact order</p></li>
+<li><p><strong>asOutputFiles</strong> – array of strings with the name of the output files. Must be one file for each Write Node of the workflow, in the exact order</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>Exit Workflow Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetactiveworkspace">
+<h3>wGetActiveWorkspace<a class="headerlink" href="#wgetactiveworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetActiveWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetActiveWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetActiveWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the active workspace ID
+Syntax
+sWorkspaceId = wGetActiveWorkspace(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceId</dt>
+<dd class="field-odd"><p>the ID of active WASDI workspace</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetbasepath">
+<h3>wGetBasePath<a class="headerlink" href="#wgetbasepath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetBasePath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetBasePath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetBasePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the base path
+Syntax
+sBasePath = wGetBasePath(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sBasePath</dt>
+<dd class="field-odd"><p>the base path in use</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetbaseurl">
+<h3>wGetBaseUrl<a class="headerlink" href="#wgetbaseurl" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetBaseUrl">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetBaseUrl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetBaseUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the base URL
+Syntax
+sBasePath = wGetBaseUrl(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sBaseUrl</dt>
+<dd class="field-odd"><p>the base URL for WASDI</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetdownloadactive">
+<h3>wGetDownloadActive<a class="headerlink" href="#wgetdownloadactive" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetDownloadActive">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetDownloadActive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetDownloadActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets whether download is active or not
+Syntax
+bDownloadActive = wGetDownloadActive(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">bDownloadActive</dt>
+<dd class="field-odd"><p>true if download is active, false otherwise</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetfullproductpath">
+<h3>wGetFullProductPath<a class="headerlink" href="#wgetfullproductpath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetFullProductPath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetFullProductPath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sFileName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetFullProductPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the full local path of a product. If it is not present on the local PC
+and DownloadActive flag is true the product will be downloaded
+Syntax
+sFullPath =wGetFullProductPath(Wasdi, sFileName);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sFileName</strong> – Name of the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sFullPath</dt>
+<dd class="field-odd"><p>full local path</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetmyprocid">
+<h3>wGetMyProcId<a class="headerlink" href="#wgetmyprocid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetMyProcId">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetMyProcId</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetMyProcId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets own processor ID
+Syntax
+sProcId = wGetProcessorPayloadAsJSON(Wasdi, sProcessObjId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcId</dt>
+<dd class="field-odd"><p>own processor ID</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetparameter">
+<h3>wGetParameter<a class="headerlink" href="#wgetparameter" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetParameter">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetParameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sKey</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of a parameter identified by sKey in the parameters file
+Syntax
+sParameter = wGetParameter(Wasdi, sKey)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sKey</strong> – The KEY of the parameter in the paramteres file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sParameter</dt>
+<dd class="field-odd"><p>The value of the parameter. If it does not exists the function returns “”</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetparametersfilepath">
+<h3>wGetParametersFilePath<a class="headerlink" href="#wgetparametersfilepath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetParametersFilePath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetParametersFilePath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetParametersFilePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the parameters file path
+Syntax
+sParametersFilePath = wGetParametersFilPath(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sParametersFilePath</dt>
+<dd class="field-odd"><p>the path to the parameters file</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetparams">
+<h3>wGetParams<a class="headerlink" href="#wgetparams" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetParams">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetParams</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets processor parameters
+Syntax
+asParams = wGetParams(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asParams</dt>
+<dd class="field-odd"><p>a map containing the parameters</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetpassword">
+<h3>wGetPassword<a class="headerlink" href="#wgetpassword" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetPassword">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetPassword</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetPassword" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the password
+Syntax
+sPassword = wGetPassword(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sPassword</dt>
+<dd class="field-odd"><p>WASDI user’s password</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetpath">
+<h3>wGetPath<a class="headerlink" href="#wgetpath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetPath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetPath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sFileName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the path of given product
+Syntax
+sPath = wGetPath(Wasdi, sFileName)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sPath</dt>
+<dd class="field-odd"><p>wasdi local path for given product</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetprocessstatus">
+<h3>wGetProcessStatus<a class="headerlink" href="#wgetprocessstatus" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProcessStatus">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProcessStatus</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProcessStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the status of a Process
+Syntax
+sStatus =wGetProcessStatus(Wasdi, sProcessId);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessId</strong> – Id of the process to query</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetprocessesbyworkspace">
+<h3>wGetProcessesByWorkspace<a class="headerlink" href="#wgetprocessesbyworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProcessesByWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProcessesByWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">iStartIndex=0</span></em>, <em class="sig-param"><span class="pre">iEndIndex=</span></em>, <span class="optional">[</span><span class="optional">]</span><em class="sig-param"><span class="pre">sStatus=</span></em>, <span class="optional">[</span><span class="optional">]</span><em class="sig-param"><span class="pre">sOperationType=</span></em>, <span class="optional">[</span><span class="optional">]</span><em class="sig-param"><span class="pre">sNamePattern=</span></em><span class="optional">[</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProcessesByWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a paginated list of processes in the active workspace
+Syntax
+asProcesses=wgetProcessesByWorkspace(Wasdi, iStartIndex, iEndIndex=[], sStatus=[], sOperationType=[], sNamePattern=[]?)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>iStartIndex</strong> – first index</p></li>
+<li><p><strong>iEndIndex</strong> – last index</p></li>
+<li><p><strong>sStatus</strong> – filter by statuses</p></li>
+<li><p><strong>sOperationType</strong> – filter by operation name</p></li>
+<li><p><strong>sNamePattern</strong> – filter by name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asProcesses</dt>
+<dd class="field-odd"><p>list of processes</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetprocessorpath">
+<h3>wGetProcessorPath<a class="headerlink" href="#wgetprocessorpath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProcessorPath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProcessorPath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProcessorPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the parameters file path
+Syntax
+sProcessorPath = wGetProcessorPath(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessorPath</dt>
+<dd class="field-odd"><p>the path to current processor</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetprocessorpayload">
+<h3>wGetProcessorPayload<a class="headerlink" href="#wgetprocessorpayload" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProcessorPayload">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProcessorPayload</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessObjId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProcessorPayload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the payload of given processor
+Syntax
+oProcessPayload = wGetProcessorPayload(Wasdi, sProcessObjId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessObjId</strong> – process ID for which the payload must be retrieve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">oProcessPayload</dt>
+<dd class="field-odd"><p>an object containing the payload</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetprocessorpayloadasjson">
+<h3>wGetProcessorPayloadAsJSON<a class="headerlink" href="#wgetprocessorpayloadasjson" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProcessorPayloadAsJSON">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProcessorPayloadAsJSON</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessObjId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProcessorPayloadAsJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the payload of given processor as a JSON string
+Syntax
+sProcessPayload = wGetProcessorPayloadAsJSON(Wasdi, sProcessObjId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessObjId</strong> – process ID for which the payload must be retrieve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessPayload</dt>
+<dd class="field-odd"><p>a JSON formatted string containing the payload</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetproductbbox">
+<h3>wGetProductBbox<a class="headerlink" href="#wgetproductbbox" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProductBbox">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProductBbox</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProductName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProductBbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets own processor ID
+Syntax
+sProcId = wGetProductBbox(Wasdi, sProductName)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProductName</strong> – the product name for which the bounding box must be retrieved</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sBbox</dt>
+<dd class="field-odd"><p>the requested bounding box</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetproductsbyactiveworkspace">
+<h3>wGetProductsByActiveWorkspace<a class="headerlink" href="#wgetproductsbyactiveworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProductsByActiveWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProductsByActiveWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProductsByActiveWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the List of Products in the active Workspace
+Syntax
+asProducts=wGetProductsByActiveWorkspace(Wasdi);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asProducts</dt>
+<dd class="field-odd"><p>array of strings that are the names of the products</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetproductsbyworkspace">
+<h3>wGetProductsByWorkspace<a class="headerlink" href="#wgetproductsbyworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetProductsByWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetProductsByWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetProductsByWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the List of Products in a Workspace
+Syntax
+asProducts=wGetProductsByWorkspace(Wasdi, sWorkspaceName);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceName</strong> – name of the workspace</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asProducts</dt>
+<dd class="field-odd"><p>array of strings that are the names of the products</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetsavepath">
+<h3>wGetSavePath<a class="headerlink" href="#wgetsavepath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetSavePath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetSavePath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetSavePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the full local path where to save a product in the active workspace
+Syntax
+sSavePath =wGetSavePath(Wasdi);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sSavePath</dt>
+<dd class="field-odd"><p>the local path to use to save the file, including last /</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetsessionid">
+<h3>wGetSessionId<a class="headerlink" href="#wgetsessionid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetSessionId">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetSessionId</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetSessionId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the session ID
+Syntax
+sSessionId = wGetSessionId(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sSessionId</dt>
+<dd class="field-odd"><p>the current session</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetuploadactive">
+<h3>wGetUploadActive<a class="headerlink" href="#wgetuploadactive" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetUploadActive">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetUploadActive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetUploadActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets whether Upload is active or not
+Syntax
+bUploadActive = wGetUploadActive(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">bUploadActive</dt>
+<dd class="field-odd"><p>true if Upload is active, false otherwise</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetuser">
+<h3>wGetUser<a class="headerlink" href="#wgetuser" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetUser">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetUser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetUser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the user
+Syntax
+sUser = wGetUser(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sUser</dt>
+<dd class="field-odd"><p>the username on wasdi</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetverbose">
+<h3>wGetVerbose<a class="headerlink" href="#wgetverbose" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetVerbose">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetVerbose</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetVerbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets verbosity flag
+Syntax
+bVerbose = wGetVerbose(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">bVerbose</dt>
+<dd class="field-odd"><p>verbosity flag</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetworkflows">
+<h3>wGetWorkflows<a class="headerlink" href="#wgetworkflows" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetWorkflows">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetWorkflows</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetWorkflows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the List of Workflows of the actual User
+Syntax
+[asWorkflowNames, asWorkflowIds]=wGetWorkflows(Wasdi);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asWorkflowNames</dt>
+<dd class="field-odd"><p>array of strings that are the names of the workflows</p>
+</dd>
+<dt class="field-even">asWorkflowIds</dt>
+<dd class="field-even"><p>array of strings that are the id of the workflows</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetworkspacebaseurl">
+<h3>wGetWorkspaceBaseUrl<a class="headerlink" href="#wgetworkspacebaseurl" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetWorkspaceBaseUrl">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetWorkspaceBaseUrl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetWorkspaceBaseUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the workspace base URL
+Syntax
+sWorkspaceBaseUrl = wGetWorkspaceBaseUrl(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceBaseUrl</dt>
+<dd class="field-odd"><p>the base URL for active workspace</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetworkspaceidbyname">
+<h3>wGetWorkspaceIdByName<a class="headerlink" href="#wgetworkspaceidbyname" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetWorkspaceIdByName">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetWorkspaceIdByName</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetWorkspaceIdByName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Id of a Workspace from the name
+Syntax
+sWorkspaceId=wGetWorkspaceIdByName(Wasdi, sWorkspaceName);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceName</strong> – Name of the workspace</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceId</dt>
+<dd class="field-odd"><p>id of the workspace</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetworkspaceownerbyname">
+<h3>wGetWorkspaceOwnerByName<a class="headerlink" href="#wgetworkspaceownerbyname" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetWorkspaceOwnerByName">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetWorkspaceOwnerByName</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetWorkspaceOwnerByName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the owner of the workspace given its name
+Syntax
+sWorkspaceOwner = wGetWorkspaceOwnerByName(Wasdi, sWorkspaceName)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceName</strong> – the name of the workspace</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceOwner</dt>
+<dd class="field-odd"><p>the owner of the workspace</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetworkspaceurlbywsid">
+<h3>wGetWorkspaceUrlByWsId<a class="headerlink" href="#wgetworkspaceurlbywsid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetWorkspaceUrlByWsId">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetWorkspaceUrlByWsId</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetWorkspaceUrlByWsId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the workspace URL given its ID
+Syntax:
+sWorkspaceUrl = wGetWorkspaceUrlByWsId(Wasdi, sWorkspaceId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sBaseUrl</dt>
+<dd class="field-odd"><p>the base URL for WASDI</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wgetworkspaces">
+<h3>wGetWorkspaces<a class="headerlink" href="#wgetworkspaces" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wGetWorkspaces">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wGetWorkspaces</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wGetWorkspaces" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wimportandpreprocess">
+<h3>wImportAndPreprocess<a class="headerlink" href="#wimportandpreprocess" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wImportAndPreprocess">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wImportAndPreprocess</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">asProductLinks</span></em>, <em class="sig-param"><span class="pre">asProductNames</span></em>, <em class="sig-param"><span class="pre">sWorkflowName</span></em>, <em class="sig-param"><span class="pre">sSuffix</span></em>, <em class="sig-param"><span class="pre">sProvider=</span></em><span class="optional">[</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wImportAndPreprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import and preprocess a collection of EO products
+Syntax
+wImportAndPreprocess(Wasdi, asProductLinks, asProductNames, sWorkflowName, sSuffix)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>asProductLinks</strong> – collection of Product Direct Link as returned by wSearchEOImages</p></li>
+<li><p><strong>asProductNames</strong> – collection of Product names, as returned by wSearchEOImages</p></li>
+<li><p><strong>sWorkflowName</strong> – the name of the SNAP workflow to be applied to downloaded imagesc</p></li>
+<li><p><strong>sSuffix</strong> – the suffix to append to the preprocessed files</p></li>
+<li><p><strong>sProvider</strong> – optional, the provider from where data must be collected</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wimportproduct">
+<h3>wImportProduct<a class="headerlink" href="#wimportproduct" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wImportProduct">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wImportProduct</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProductLink</span></em>, <em class="sig-param"><span class="pre">sBoundingBox=''</span></em>, <em class="sig-param"><span class="pre">sProvider='LSA'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wImportProduct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import an EO Image in WASDI
+Syntax
+sStatus=wImportProduct(Wasdi, sProductLink)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProductLink</strong> – Product Direct Link as returned by wSearchEOImage</p></li>
+<li><p><strong>sBoundingBox</strong> – product bounding box, optional</p></li>
+<li><p><strong>sProvider</strong> – data provider, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sProcessObjId</dt>
+<dd class="field-odd"><p>Identifier of the import process</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wimportproductlist">
+<h3>wImportProductList<a class="headerlink" href="#wimportproductlist" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wImportProductList">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wImportProductList</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">asProductLinks</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wImportProductList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import an EO Image in WASDI. This is the asynchronous version
+Syntax
+sProcessObjId=wAsynchImportProductList(Wasdi, asProductLinks)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>asProductLinks</strong> – collection of Product Direct Link as returned by wSearchEOImage</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asStatuses</dt>
+<dd class="field-odd"><p>list of statuses of the import processes</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wlog">
+<h3>wLog<a class="headerlink" href="#wlog" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wLog">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wLog</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sLogRow</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a row to the application logs. Locally, just print on the console if VERBOSE. On the server, it logs on the WASDI interface.
+Syntax
+wLog(Wasdi, sLogRow)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sLogRow</strong> – Text to log</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wmosaic">
+<h3>wMosaic<a class="headerlink" href="#wmosaic" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wMosaic">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wMosaic</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">asInputFileNames</span></em>, <em class="sig-param"><span class="pre">sOutputFile</span></em>, <em class="sig-param"><span class="pre">sNoDataValue</span></em>, <em class="sig-param"><span class="pre">sInputIgnoreValue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wMosaic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mosaic input images in the output file
+Syntax
+sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call
+asInputFileNames: Array of input file names
+sOutputFile: Name of the output file
+sNoDataValue: value to use as no data in the output file
+sInputIgnoreValue: value used as no data in the input file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>end status of the mosaic operation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wmultisubset">
+<h3>wMultiSubset<a class="headerlink" href="#wmultisubset" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wMultiSubset">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wMultiSubset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sInputFile</span></em>, <em class="sig-param"><span class="pre">asOutputFiles</span></em>, <em class="sig-param"><span class="pre">adLatN</span></em>, <em class="sig-param"><span class="pre">adLonW</span></em>, <em class="sig-param"><span class="pre">adLatS</span></em>, <em class="sig-param"><span class="pre">adLonE</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wMultiSubset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts subsets of an image given its name and the desired bounding boxes
+Syntax
+sReturn=wMultiSubset(Wasdi, sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sInputFile</strong> – the input file from where subsets must be extracted</p></li>
+<li><p><strong>asOutputFiles</strong> – names to be given to output files</p></li>
+<li><p><strong>adLatN</strong> – a collection of Northernmost latitudes</p></li>
+<li><p><strong>adLonW</strong> – a collection of Westernmost longitudes</p></li>
+<li><p><strong>adLatS</strong> – a collection of Southernmost latitudes</p></li>
+<li><p><strong>adLonE</strong> – a collection of Easternnmost longitudes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wopenworkspace">
+<h3>wOpenWorkspace<a class="headerlink" href="#wopenworkspace" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wOpenWorkspace">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wOpenWorkspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wOpenWorkspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a Workspace
+Syntax
+sWorkspaceId=wOpenWorkspace(Wasdi, sWorkspaceName);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceName</strong> – Name of the workspace</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceId</dt>
+<dd class="field-odd"><p>id of the workspace</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wopenworkspacebyid">
+<h3>wOpenWorkspaceById<a class="headerlink" href="#wopenworkspacebyid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wOpenWorkspaceById">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wOpenWorkspaceById</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sWorkspaceId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wOpenWorkspaceById" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a workspace given its ID
+Syntax
+sWorkspaceId=wOpenWorkspaceById(Wasdi,sWorkspaceId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sWorkspaceId</strong> – ID of the workspace to open</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sWorkspaceId</dt>
+<dd class="field-odd"><p>the ID of the workspace if succesfully opened, empty string otherwise</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wprintstatus">
+<h3>wPrintStatus<a class="headerlink" href="#wprintstatus" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wPrintStatus">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wPrintStatus</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wPrintStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the status
+Syntax:
+printStatus(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wrefreshparameters">
+<h3>wRefreshParameters<a class="headerlink" href="#wrefreshparameters" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wRefreshParameters">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wRefreshParameters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wRefreshParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read again the parameters from the configured file
+Syntax
+sParameter = wRefreshParameters(Wasdi, sKey)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsearcheoimages">
+<h3>wSearchEOImages<a class="headerlink" href="#wsearcheoimages" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSearchEOImages">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSearchEOImages</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sPlatform</span></em>, <em class="sig-param"><span class="pre">sDateFrom</span></em>, <em class="sig-param"><span class="pre">sDateTo</span></em>, <em class="sig-param"><span class="pre">dULLat</span></em>, <em class="sig-param"><span class="pre">dULLon</span></em>, <em class="sig-param"><span class="pre">dLRLat</span></em>, <em class="sig-param"><span class="pre">dLRLon</span></em>, <em class="sig-param"><span class="pre">sProductType</span></em>, <em class="sig-param"><span class="pre">iOrbitNumber</span></em>, <em class="sig-param"><span class="pre">sSensorOperationalMode</span></em>, <em class="sig-param"><span class="pre">sCloudCoverage</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSearchEOImages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search EO Images. Returns 3 parallel arrays: one with the names, one with the links and one with the footprints of the found products.
+The links and footprints can be used as input to the wImportProduct function, that imports the product in the active workspace
+Syntax
+[asProductNames, asProductLinks, asProductFootprints]=wSearchEOImages(Wasdi, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sPlatform</strong> – Satellite Platform. Accepts “S1”,”S2”</p></li>
+<li><p><strong>sDateFrom</strong> – Starting date in format “YYYY-MM-DD”</p></li>
+<li><p><strong>sDateTo</strong> – End date in format “YYYY-MM-DD”</p></li>
+<li><p><strong>dULLat</strong> – Upper Left Lat Coordinate. Can be null.</p></li>
+<li><p><strong>dULLon</strong> – Upper Left Lon Coordinate. Can be null.</p></li>
+<li><p><strong>dLRLat</strong> – Lower Right Lat Coordinate. Can be null.</p></li>
+<li><p><strong>dLRLon</strong> – Lower Right Lon Coordinate. Can be null.</p></li>
+<li><p><strong>sProductType</strong> – Product Type. If Platform = “S1” -&gt; Accepts “SLC”,”GRD”, “OCN”. If Platform = “S2” -&gt; Accepts “S2MSI1C”,”S2MSI2Ap”,”S2MSI2A”. Can be null.</p></li>
+<li><p><strong>iOrbitNumber</strong> – Sentinel Orbit Number. Can be null.</p></li>
+<li><p><strong>sSensorOperationalMode</strong> – Sensor Operational Mode. ONLY for S1. Accepts -&gt; “SM”, “IW”, “EW”, “WV”. Can be null. Ignored for Platform “S2”</p></li>
+<li><p><strong>sCloudCoverage</strong> – sCloudCoverage Cloud Coverage. Sample syntax: [0 TO 9.4]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">asProductNames</dt>
+<dd class="field-odd"><p>array of strings that are the names of the found products</p>
+</dd>
+<dt class="field-even">asProductLinks</dt>
+<dd class="field-even"><p>array of strings that are the links to download the products</p>
+</dd>
+<dt class="field-odd">asProductFootprints</dt>
+<dd class="field-odd"><p>array of strings that are the footprints of found products in WKT</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetactiveworkspaceid">
+<h3>wSetActiveWorkspaceId<a class="headerlink" href="#wsetactiveworkspaceid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetActiveWorkspaceId">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetActiveWorkspaceId</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sNewActiveWorkspaceId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetActiveWorkspaceId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the active workspace
+Syntax
+wSetActiveWorkspaceId(Wasdi, sNewActiveWorkspaceId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sNewActiveWorkspaceId</strong> – the workspace ID to open</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetbasepath">
+<h3>wSetBasePath<a class="headerlink" href="#wsetbasepath" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetBasePath">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetBasePath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sNewBasePath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetBasePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the base path
+Syntax
+wSetBasePath(Wasdi, sNewBasePath)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sNewBasePath</strong> – the new base path</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetbaseurl">
+<h3>wSetBaseUrl<a class="headerlink" href="#wsetbaseurl" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetBaseUrl">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetBaseUrl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sBaseUrl</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetBaseUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the base URL
+Syntax
+wSetBaseUrl(Wasdi, sBaseUrl)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sBaseUrl</strong> – the new base URL (must be valid)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetdownloadactive">
+<h3>wSetDownloadActive<a class="headerlink" href="#wsetdownloadactive" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetDownloadActive">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetDownloadActive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">iActive</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetDownloadActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the download active flag
+Syntax
+wSetDownloadActive(Wasdi, iActive)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>iActive</strong> – true/false</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetisonserver">
+<h3>wSetIsOnServer<a class="headerlink" href="#wsetisonserver" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetIsOnServer">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetIsOnServer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">bIsOnServer</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetIsOnServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set is on server flag
+Syntax
+wSetVerbose(Wasdi, bIsOnServer)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>bIsOnServer</strong> – true/false</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetmyprocid">
+<h3>wSetMyProcId<a class="headerlink" href="#wsetmyprocid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetMyProcId">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetMyProcId</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sMyNewProcId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetMyProcId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the processor ID
+Syntax
+wSetMyProcId(Wasdi, sMyNewProcId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sMyNewProcId</strong> – the new processor ID</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetparameter">
+<h3>wSetParameter<a class="headerlink" href="#wsetparameter" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetParameter">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetParameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sKey</span></em>, <em class="sig-param"><span class="pre">sValue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of a parameter
+Syntax
+sParameter = wSetParameter(Wasdi, sKey, sValue)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sKey</strong> – The KEY of the parameter to add or update</p></li>
+<li><p><strong>sValue</strong> – The the value of the parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sParameter</dt>
+<dd class="field-odd"><p>The value (same as sValue in input)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetpassword">
+<h3>wSetPassword<a class="headerlink" href="#wsetpassword" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetPassword">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetPassword</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sPassword</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetPassword" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the WASDI user password
+Syntax
+wSetPassword(Wasdi, sPassword)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sPassword</strong> – the password</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetpayload">
+<h3>wSetPayload<a class="headerlink" href="#wsetpayload" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetPayload">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetPayload</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sPayload</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetPayload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a Payload in a process
+Syntax
+sStatus =wSetProcessPayload(Wasdi, sProcessId, sData);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sPayload</strong> – the process payload</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetprocesspayload">
+<h3>wSetProcessPayload<a class="headerlink" href="#wsetprocesspayload" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetProcessPayload">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetProcessPayload</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessId</span></em>, <em class="sig-param"><span class="pre">sData</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetProcessPayload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a Payload in a process
+Syntax
+sStatus =wSetProcessPayload(Wasdi, sProcessId, sData);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessId</strong> – Id of the process to update</p></li>
+<li><p><strong>sData</strong> – Data to write as payloar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetsessionid">
+<h3>wSetSessionId<a class="headerlink" href="#wsetsessionid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetSessionId">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetSessionId</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sSessionId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetSessionId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the session ID
+Syntax
+wSetSessionId(Wasdi, sSessionId)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sSessionId</strong> – the session ID</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetsubpid">
+<h3>wSetSubPid<a class="headerlink" href="#wsetsubpid" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetSubPid">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetSubPid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessId</span></em>, <em class="sig-param"><span class="pre">iSubPid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetSubPid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sub pid
+Syntax
+sStatus=wSetSubPid(Wasdi, sProcessId, iSubPid)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessId</strong> – the process ID</p></li>
+<li><p><strong>iSubPid</strong> – the sub pid</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetuploadactive">
+<h3>wSetUploadActive<a class="headerlink" href="#wsetuploadactive" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetUploadActive">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetUploadActive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">iActive</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetUploadActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the Upload active flag
+Syntax
+wSetUploadActive(Wasdi, iActive)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>iActive</strong> – true/false</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetuser">
+<h3>wSetUser<a class="headerlink" href="#wsetuser" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetUser">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetUser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sUser</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetUser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the user
+Syntax
+wSetUser(Wasdi, sUser)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sUser</strong> – the user</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetverbose">
+<h3>wSetVerbose<a class="headerlink" href="#wsetverbose" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetVerbose">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetVerbose</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">bVerbose</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetVerbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set verbose flag
+Syntax
+wSetVerbose(Wasdi, bVerbose)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>bVerbose</strong> – true/false</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsetworkspacebaseurl">
+<h3>wSetWorkspaceBaseUrl<a class="headerlink" href="#wsetworkspacebaseurl" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSetWorkspaceBaseUrl">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSetWorkspaceBaseUrl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sUrl</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSetWorkspaceBaseUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the workspace base URL
+Syntax
+wSetWorkspaceBaseUrl(Wasdi, sUrl)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sUrl</strong> – the workspace base URL</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wsubset">
+<h3>wSubset<a class="headerlink" href="#wsubset" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wSubset">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wSubset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sInputFile</span></em>, <em class="sig-param"><span class="pre">sOutputFile</span></em>, <em class="sig-param"><span class="pre">dLatN</span></em>, <em class="sig-param"><span class="pre">dLonW</span></em>, <em class="sig-param"><span class="pre">dLatS</span></em>, <em class="sig-param"><span class="pre">dLonE</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wSubset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a Subset (tile) of an input image in a specified Lat Lon Rectangle
+Syntax
+sStatus=wSubset(Wasdi, sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sInputFile</strong> – Name of the input file</p></li>
+<li><p><strong>sOutputFile</strong> – Name of the output file</p></li>
+<li><p><strong>dLatN</strong> – Lat North Coordinate</p></li>
+<li><p><strong>dLonW</strong> – Lon West Coordinate</p></li>
+<li><p><strong>dLatS</strong> – Lat South Coordinate</p></li>
+<li><p><strong>dLonE</strong> – Lon East Coordinate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>Status of the operation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wupdateprocessstatus">
+<h3>wUpdateProcessStatus<a class="headerlink" href="#wupdateprocessstatus" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wUpdateProcessStatus">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wUpdateProcessStatus</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessId</span></em>, <em class="sig-param"><span class="pre">sStatus</span></em>, <em class="sig-param"><span class="pre">iPerc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wUpdateProcessStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the status of a Process
+Syntax
+sStatus =wUpdateProcessStatus(Wasdi, sProcessId, sStatus, iPerc);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessId</strong> – Id of the process to update</p></li>
+<li><p><strong>sStatus</strong> – updated status. Must be CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p></li>
+<li><p><strong>iPerc</strong> – progress percentage of the process</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sOutputStatus</dt>
+<dd class="field-odd"><p>Process Status Updated as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wupdateprogress">
+<h3>wUpdateProgress<a class="headerlink" href="#wupdateprogress" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wUpdateProgress">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wUpdateProgress</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">iPerc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wUpdateProgress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the progress of the processor
+Syntax
+sStatus =wUpdateProgress(Wasdi, iPerc);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>iPerc</strong> – progress percentage of the own process</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sOutputStatus</dt>
+<dd class="field-odd"><p>Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wupdateprogressperc">
+<h3>wUpdateProgressPerc<a class="headerlink" href="#wupdateprogressperc" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wUpdateProgressPerc">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wUpdateProgressPerc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">iPerc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wUpdateProgressPerc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the status of a process
+Syntax
+sStatus = wUpdateProgressPerc(Wasdi, iPerc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>iPerc</strong> – the %of completion</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>updated status as a String or ‘’ if there was any problem</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wupdatestatus">
+<h3>wUpdateStatus<a class="headerlink" href="#wupdatestatus" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wUpdateStatus">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wUpdateStatus</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">wasdi</span></em>, <em class="sig-param"><span class="pre">sStatus</span></em>, <em class="sig-param"><span class="pre">iPerc=</span></em><span class="optional">[</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wUpdateStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the status and, optionally, the progress percent
+syntax:
+sStatus = wUpdateStatus(Wasdi, sStatus, iPerc=[])</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sStatus</strong> – the status to be set</p></li>
+<li><p><strong>iPerc</strong> – optional, the progress percent</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wurlencode">
+<h3>wUrlEncode<a class="headerlink" href="#wurlencode" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wUrlEncode">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wUrlEncode</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">s</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wUrlEncode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wwaitprocess">
+<h3>wWaitProcess<a class="headerlink" href="#wwaitprocess" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wWaitProcess">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wWaitProcess</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sProcessId</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wWaitProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for the end of a process
+Syntax
+sStatus =wWaitProcess(Wasdi, sProcessId);</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sProcessId</strong> – Id of the process to wait</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="field-list simple">
+<dt class="field-odd">sStatus</dt>
+<dd class="field-odd"><p>exit status of the process: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasdihello">
+<h3>wasdiHello<a class="headerlink" href="#wasdihello" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wasdiHello">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wasdiHello</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wasdiHello" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hello world in WASDI. Useful for testing the setup
+Syntax:
+wasdiHello(Wasdi)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="wasdilog">
+<h3>wasdiLog<a class="headerlink" href="#wasdilog" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="mat function">
+<dt id="matlabwasdilib.wasdiLog">
+<code class="sig-prename descclassname"><span class="pre">matlabwasdilib.</span></code><code class="sig-name descname"><span class="pre">wasdiLog</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Wasdi</span></em>, <em class="sig-param"><span class="pre">sLine</span></em><span class="sig-paren">)</span><a class="headerlink" href="#matlabwasdilib.wasdiLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs a line
+Syntax
+wasdiLog(Wasdi, sLine)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wasdi</strong> – Wasdi object created after the wasdilib call</p></li>
+<li><p><strong>sLine</strong> – the string to be logged</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../java/WasdiLib.html" class="btn btn-neutral float-right" title="Java WasdiLib" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../PythonTutorial.html" class="btn btn-neutral float-left" title="Python Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, WASDI Sàrl.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

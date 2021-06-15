@@ -3141,7 +3141,6 @@ var EditorController = (function () {
                                             var that = this;
                                             var sFileName = $node.original.fileName;
                                             console.log(sFileName);
-                                            /* TODO RESTORE AFTER TEST
                                             oController.m_oProductService.deleteProductFromWorkspace(sFileName,
                                                  oController.m_oActiveWorkspace.workspaceId,
                                                   bDeleteFile,
@@ -3149,7 +3148,7 @@ var EditorController = (function () {
                                                 oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
                                             }, (function (error) {
                                                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                            })); */
+                                            })); 
                                         }
                                     });
                                 }
@@ -3159,9 +3158,29 @@ var EditorController = (function () {
                                 "icon": "delete-icon-context-menu-jstree",
 
                                 "action": function (obj) {
-                                    //utilsVexDialogAlertTop("SUBMENU for Product");
-                                    oController.getSelectedNodesFromTree($node.original.fileName);
 
+                                    let asSelectedProducts = oController.getSelectedNodesFromTree($node.original.fileName);
+                                    // first, check that something were selected
+                                    if (asSelectedProducts.length > 0) {
+                                        utilsVexDialogConfirm("DELETING " + asSelectedProducts.length + " PRODUCTS.<br>ARE YOU SURE?", function (value) {
+                                            if (value) {
+                                                bDeleteFile = true;
+                                                bDeleteLayer = true;
+                                                this.temp = $node;
+                                                var that = this;
+                                                oController.m_oProductService.deleteProductListFromWorkspace(asSelectedProducts, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
+                                                    // for each in asSelectedProduct
+                                                    $.each(asSelectedProducts, function (i, val) {
+                                                    oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                                    });
+                                                }, (function (error) {
+                                                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                }));
+                                            }
+                                        });
+
+
+                                    }
 
                                     /*utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
                                         if (value) {
@@ -3274,13 +3293,11 @@ var EditorController = (function () {
         // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
         $.each(jsonNodes, function (i, val) {
             let sClass = val.a_attr.class;
-            if (val.state.selected == true && sClass == undefined ) {
+            if (val.state.selected == true && sClass == undefined) { // imposed on any other node the no_checkbox class
                 idList.push($(val).attr('id'));
             }
         })
-
-
-        console.log(Ids);
+        return idList;
 
     }
 
