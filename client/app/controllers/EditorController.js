@@ -54,8 +54,9 @@ var EditorController = (function () {
         // Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
-        this.oBaseBand ={
-            "opacity" : 100
+        // Field used to control the opacity of the base layer in 2D map mode
+        this.oBaseBand = {
+            "opacity": 100
         }
 
 
@@ -901,7 +902,7 @@ var EditorController = (function () {
 
             }
             // show the layer with full opacity at ther beginning
-            oBand.opacity=100;
+            oBand.opacity = 100;
             this.m_aoVisibleBands.push(oBand);
 
             if (this.m_aoVisibleBands.length == 1) {
@@ -1638,15 +1639,15 @@ var EditorController = (function () {
      */
     EditorController.prototype.setLayerOpacity = function (iOpacity, iIndexLayer) {
         var oMap = this.m_oMapService.getMap();
-        var fPercentage= iOpacity/100;
+        var fPercentage = iOpacity / 100;
         var layers = [];
-        oMap.eachLayer(function(layer) {
-        if( layer instanceof L.TileLayer )
-        layers.push(layer);
+        oMap.eachLayer(function (layer) {
+            if (layer instanceof L.TileLayer)
+                layers.push(layer);
         });
         layers[iIndexLayer].setOpacity(fPercentage);
     }
-    
+
 
     /**
      * Add layer for Cesium Globe
@@ -2938,7 +2939,7 @@ var EditorController = (function () {
         {
             'core': { 'data': [], "check_callback": true },
             "state": { "key": "state_tree" },
-            "plugins": ["checkbox", "contextmenu", "state", "search"], // all plugin in use
+            "plugins": ["checkbox", "contextmenu", "state", "search"], // plugins in use
             "search": {
                 "show_only_matches": true,
                 "show_only_matches_children": true
@@ -2947,6 +2948,7 @@ var EditorController = (function () {
                 "items": function ($node) {
 
                     //only the band has property $node.original.band
+                    // menu showed when a band is selected
                     var oReturnValue = null;
                     if (utilsIsObjectNullOrUndefined($node.original.band) == false) {
                         //******************************** BAND *************************************
@@ -3033,31 +3035,24 @@ var EditorController = (function () {
                                     });
                                 }
                             },
-                            "DeleteSelectedProduct": {
+                            /*"DeleteSelectedProduct": {
                                 "label": "Delete All selected",
                                 "icon": "delete-icon-context-menu-jstree",
 
                                 "action": function (obj) {
 
-                                    utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
-                                        if (value) {
-                                            bDeleteFile = true;
-                                            bDeleteLayer = true;
-                                            this.temp = $node;
-                                            var that = this;
-                                            oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                            }, (function (error) {
-                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                            }));
-                                        }
-                                    });
+                                    
+
+                                        utilsVexDialogAlertTop("Sub Menu from bands");
+                                        m_oController.getSelectedNodesFromTree(null);
+                                    
                                 }
-                            }
-                        };
+                            }*/
+                        }; // menu entries
                     }
 
-                    //only products has $node.original.fileName
+                    // only products has $node.original.fileName
+                    // menu showed when a product is selected 
                     if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
                         //***************************** PRODUCT ********************************************
                         oReturnValue =
@@ -3144,11 +3139,17 @@ var EditorController = (function () {
                                             bDeleteLayer = true;
                                             this.temp = $node;
                                             var that = this;
-                                            oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
+                                            var sFileName = $node.original.fileName;
+                                            console.log(sFileName);
+                                            /* TODO RESTORE AFTER TEST
+                                            oController.m_oProductService.deleteProductFromWorkspace(sFileName,
+                                                 oController.m_oActiveWorkspace.workspaceId,
+                                                  bDeleteFile,
+                                                   bDeleteLayer).then(function (data) {
                                                 oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
                                             }, (function (error) {
                                                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                            }));
+                                            })); */
                                         }
                                     });
                                 }
@@ -3158,8 +3159,11 @@ var EditorController = (function () {
                                 "icon": "delete-icon-context-menu-jstree",
 
                                 "action": function (obj) {
+                                    //utilsVexDialogAlertTop("SUBMENU for Product");
+                                    oController.getSelectedNodesFromTree($node.original.fileName);
 
-                                    utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
+
+                                    /*utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
                                         if (value) {
                                             bDeleteFile = true;
                                             bDeleteLayer = true;
@@ -3171,7 +3175,7 @@ var EditorController = (function () {
                                                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                             }));
                                         }
-                                    });
+                                    });*/
                                 }
                             }
                         };
@@ -3236,7 +3240,7 @@ var EditorController = (function () {
                 // REMOVE CHECKBOXES 
                 oNode.a_attr = new Object();
                 oNode.a_attr.class = "no_checkbox";
-                
+
 
                 //BAND
                 oNode.band = oaBandsItems[iIndexBandsItems];
@@ -3256,7 +3260,28 @@ var EditorController = (function () {
      * @param {*} oEntry 
      */
     EditorController.prototype.getSelectedNodesFromTree = function (oEntry) {
-        
+        var m_oController = this;
+        var node = oEntry;
+        var oTree = $('#jstree').jstree(true);
+        var Ids = oTree.get_selected();
+        // return all the nodes selected 
+        // a clever way to get only the parents?
+        //1) get all nodes 
+        //2) filters only parents 
+        //3) select the ones in Ids 
+        var idList = [];
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (val.state.selected == true && sClass == undefined ) {
+                idList.push($(val).attr('id'));
+            }
+        })
+
+
+        console.log(Ids);
+
     }
 
     /**
