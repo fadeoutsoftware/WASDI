@@ -3142,13 +3142,13 @@ var EditorController = (function () {
                                             var sFileName = $node.original.fileName;
                                             console.log(sFileName);
                                             oController.m_oProductService.deleteProductFromWorkspace(sFileName,
-                                                 oController.m_oActiveWorkspace.workspaceId,
-                                                  bDeleteFile,
-                                                   bDeleteLayer).then(function (data) {
-                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                            }, (function (error) {
-                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                            })); 
+                                                oController.m_oActiveWorkspace.workspaceId,
+                                                bDeleteFile,
+                                                bDeleteLayer).then(function (data) {
+                                                    oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                                }, (function (error) {
+                                                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                }));
                                         }
                                     });
                                 }
@@ -3171,7 +3171,7 @@ var EditorController = (function () {
                                                 oController.m_oProductService.deleteProductListFromWorkspace(asSelectedProducts, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
                                                     // for each in asSelectedProduct
                                                     $.each(asSelectedProducts, function (i, val) {
-                                                    oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
                                                     });
                                                 }, (function (error) {
                                                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
