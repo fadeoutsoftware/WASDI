@@ -2106,7 +2106,7 @@ public class ProcessorsResource  {
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 			
 			if (oDestinationUser == null) {
-				oResult.setStringValue("Unauthorized");
+				oResult.setStringValue("Invalid Destination User");
 				return oResult;				
 			}
 			

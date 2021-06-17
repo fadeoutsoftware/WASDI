@@ -529,7 +529,15 @@ var ProcessorController = (function() {
                      // SHARING SAVED
                  }else
                  {
-                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+                     sMessage = "GURU MEDITATION<br>ERROR SHARING PROCESSOR"
+
+                     if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                         if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                             sMessage = sMessage + ": " + data.data.stringValue;
+                         }
+                     }
+
+                     utilsVexDialogAlertTop(sMessage);
                  }
                  oController.getListOfEnableUsers(sFinalProcessorId);
 
