@@ -2958,7 +2958,7 @@ var EditorController = (function () {
 
                         oReturnValue =
                         {
-                            "Workflow": {
+                            /*"Workflow": {
                                 "label": "Workflow",
                                 "action": function (obj) {
                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
@@ -2983,7 +2983,7 @@ var EditorController = (function () {
                                     oController.openMaskManager(oBand, oFoundProduct);
                                 },
                                 "_disabled": !$node.original.band.bVisibleNow
-                            },
+                            },*/
                             "Zoom2D": {
                                 "label": "Zoom Band 2D Map",
                                 "action": function (obj) {
@@ -3011,6 +3011,32 @@ var EditorController = (function () {
                                 "action": function (obj) {
                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
                                     if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
+                                }
+                            },
+                            "Download": {
+                                "label": "Download",
+                                "icon": "fa fa-download",
+                                "action": function (obj) {
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
+                                        oController.findProductByName($node.original.fileName);
+                                        // var oEntry = {
+                                        //     "fileName": oProduct.fileName,
+                                        //     "filePath": oProduct.filePath
+                                        // };
+                                        // oController.downloadEntry(oEntry);
+                                        oController.downloadProductByName($node.original.fileName);
+                                    }
+                                }
+                            },
+                            "SendToFtp": {
+                                "label": "Send To Ftp",
+                                "icon": "fa fa-upload",
+                                "action": function (obj) {
+                                    var sSourceFileName = $node.original.fileName;
+                                    var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
                                 }
                             },
                             "DeleteProduct": {
@@ -3059,7 +3085,7 @@ var EditorController = (function () {
                         //***************************** PRODUCT ********************************************
                         oReturnValue =
                         {
-                            "Workflow": {
+                            /*"Workflow": {
                                 "label": "Workflow",
                                 "action": function (obj) {
                                     var sSourceFileName = $node.original.fileName;
@@ -3083,7 +3109,7 @@ var EditorController = (function () {
                             "Zoom3D": {
                                 "label": "Zoom Band 3D Map",
                                 "_disabled": true
-                            },
+                            },*/
                             "Properties": {
                                 "label": "Properties ",
                                 "icon": "info-icon-context-menu-jstree",
@@ -3129,7 +3155,7 @@ var EditorController = (function () {
                                     if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
                                 }
                             }, //openTransferToFtpDialog
-                            "DeleteProduct": {
+                            /*"DeleteProduct": {
                                 "label": "Delete Product",
                                 "icon": "delete-icon-context-menu-jstree",
 
@@ -3154,9 +3180,9 @@ var EditorController = (function () {
                                         }
                                     });
                                 }
-                            },
+                            },*/
                             "DeleteSelectedProduct": {
-                                "label": "Delete All selected",
+                                "label": "Delete Product",
                                 "icon": "delete-icon-context-menu-jstree",
 
                                 "action": function (obj) {
@@ -3183,20 +3209,6 @@ var EditorController = (function () {
 
 
                                     }
-
-                                    /*utilsVexDialogConfirm("DELETING 11 PRODUCTS.<br>ARE YOU SURE?", function (value) {
-                                        if (value) {
-                                            bDeleteFile = true;
-                                            bDeleteLayer = true;
-                                            this.temp = $node;
-                                            var that = this;
-                                            oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                            }, (function (error) {
-                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                            }));
-                                        }
-                                    });*/
                                 }
                             }
                         };
