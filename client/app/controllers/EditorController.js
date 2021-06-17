@@ -2958,7 +2958,7 @@ var EditorController = (function () {
 
                         oReturnValue =
                         {
-                            /*"Workflow": {
+                            "Workflow": {
                                 "label": "Workflow",
                                 "action": function (obj) {
                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
@@ -2983,7 +2983,7 @@ var EditorController = (function () {
                                     oController.openMaskManager(oBand, oFoundProduct);
                                 },
                                 "_disabled": !$node.original.band.bVisibleNow
-                            },*/
+                            },
                             "Zoom2D": {
                                 "label": "Zoom Band 2D Map",
                                 "action": function (obj) {
@@ -3011,32 +3011,6 @@ var EditorController = (function () {
                                 "action": function (obj) {
                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
                                     if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
-                                }
-                            },
-                            "Download": {
-                                "label": "Download",
-                                "icon": "fa fa-download",
-                                "action": function (obj) {
-                                    //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                        oController.findProductByName($node.original.fileName);
-                                        // var oEntry = {
-                                        //     "fileName": oProduct.fileName,
-                                        //     "filePath": oProduct.filePath
-                                        // };
-                                        // oController.downloadEntry(oEntry);
-                                        oController.downloadProductByName($node.original.fileName);
-                                    }
-                                }
-                            },
-                            "SendToFtp": {
-                                "label": "Send To Ftp",
-                                "icon": "fa fa-upload",
-                                "action": function (obj) {
-                                    var sSourceFileName = $node.original.fileName;
-                                    var oFound = oController.findProductByFileName(sSourceFileName);
-
-                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
                                 }
                             },
                             "DeleteProduct": {
@@ -3209,6 +3183,7 @@ var EditorController = (function () {
 
 
                                     }
+
                                 }
                             }
                         };
@@ -3307,7 +3282,8 @@ var EditorController = (function () {
         // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
         $.each(jsonNodes, function (i, val) {
             let sClass = val.a_attr.class;
-            if (val.state.selected == true && sClass == undefined && val.state.hidden == false) { // imposed on any other node the no_checkbox class
+            if (val.state.selected == true && sClass == undefined && 
+                (val.state.hidden == false || val.state.hidden == undefined) ) { // imposed on any other node the no_checkbox class
                 idList.push($(val).attr('id'));
             }
         })
