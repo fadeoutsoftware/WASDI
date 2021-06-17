@@ -463,7 +463,8 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			String sItem = "";
 			
 			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SURL);
-			if(null==sItem) {
+			if(null==sItem || sItem.isEmpty()) {
+				Utils.debugLog("DiasResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
 				sItem = "http://";
 			} 
 			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //0
@@ -471,7 +472,23 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 			sItem = oResult.getTitle();
 			if(null==sItem) {
 				sItem = "";
-			} 
+			}
+			//fix file extension
+			if(!sItem.toLowerCase().endsWith(".zip") && !sItem.toLowerCase().endsWith(".tif") && !sItem.toLowerCase().endsWith(".tar.gz") || !sItem.toLowerCase().endsWith(".nc")) {
+				if(sItem.toUpperCase().startsWith("S1A") || sItem.toUpperCase().startsWith("S1B") ||
+						sItem.toUpperCase().startsWith("S2A") || sItem.toUpperCase().startsWith("S2B") || 
+						sItem.toUpperCase().startsWith("S3A") || sItem.toUpperCase().startsWith("S3B") || sItem.toUpperCase().startsWith("S3_") ||
+						sItem.toUpperCase().startsWith("S5") ||
+						sItem.toUpperCase().startsWith("LC08") ||
+						sItem.toUpperCase().startsWith("COP-DEM") ||
+						sItem.toUpperCase().startsWith("S2GLC")
+						) {
+					if(sItem.endsWith(".SAFE")) {
+						sItem = sItem.substring(0, sItem.length()-5);
+					}
+					sItem = sItem + ".zip";
+				}
+			}
 			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //1
 			
 			
