@@ -24,6 +24,18 @@
                         <em class="fa fa-bath" aria-hidden="true" style="margin-right: 0px;"></em>
                     </button>
 
+                    <button class="btn btn-wasdi fa btn-outline-primary" title="Select"
+                        ng-click="m_oController.selectFiltered();"
+                        ng-show="m_oController.m_bIsFilteredTree === true">
+                        <em class="fa fa-square-o" aria-hidden="true" style="margin-right: 0px;"
+                        ng-show="m_oController.m_bAllSelected"
+                        ></em>
+                        <em class="fa fa-check-square-o" aria-hidden="true" style="margin-right: 0px;"
+                        ng-show="!m_oController.m_bAllSelected"
+                        ></em>
+                    </button>
+
+
                     <button class="btn btn-wasdi fa btn-outline-primary" title="Workspace Info"
                         ng-click="m_oController.openWorkspaceDetailsDialog(); ">
                         <!--ng-disabled="m_oController.m_bIsFilteredTree === false"-->
@@ -294,7 +306,8 @@
 
 
                         <div ng-repeat="oBand in m_oController.m_aoVisibleBands">
-                            <div class="row-v4">
+                            
+                            <div class="row-v4" style="padding-top: 15px;">
                                 <div class="col-xs-6" style="padding-left: 30px;">
                                     <span class="layer-details-heading">Product name </span>: {{oBand.productName}}
                                     <br>

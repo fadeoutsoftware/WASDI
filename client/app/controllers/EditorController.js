@@ -58,6 +58,8 @@ var EditorController = (function () {
         this.oBaseBand = {
             "opacity": 100
         }
+        // support variable to handle select all/ de select all in tree
+        this.m_bAllSelected = false;
 
 
         this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
@@ -3293,12 +3295,41 @@ var EditorController = (function () {
         // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
         $.each(jsonNodes, function (i, val) {
             let sClass = val.a_attr.class;
-            if (val.state.selected == true && sClass == undefined) { // imposed on any other node the no_checkbox class
+            if (val.state.selected == true && sClass == undefined && val.state.hidden == false) { // imposed on any other node the no_checkbox class
                 idList.push($(val).attr('id'));
             }
         })
         return idList;
 
+    }
+    /**
+     * Utils method to select or de-select all the entries in jstree after a search is done
+     * all or nothing only of visible nodes
+     * @param {*} sTextQuery 
+     */
+    EditorController.prototype.selectFiltered = function () {
+        this.m_bAllSelected = ! this.m_bAllSelected; // flip the value 
+        // gather all nodes from tree 
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        let oController = this;
+        // get only the parents
+        var idList = [];
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (sClass == undefined){ // only parents <-> other instances have class "no_checkbox"
+                if (val.state.hidden == false) { // not hidden must be selected
+                    if (oController.m_bAllSelected){ $('#jstree').jstree(true).select_node($(val).attr('id'));}
+                    else { $('#jstree').jstree(true).deselect_node($(val).attr('id'));}
+                }
+                if (val.state.hidden == true) { // hidden must be de-selected
+                    $('#jstree').jstree(true).deselect_node($(val).attr('id'));
+                }
+
+            }
+            
+        })
+        console.log("done");
+        
     }
 
     /**
@@ -3393,6 +3424,10 @@ var EditorController = (function () {
         return this.m_bIsActiveGeoraphicalMode === false;
     };
 
+
+
+    
+
     EditorController.prototype.filterTree = function (sTextQuery) {
 
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
@@ -3404,7 +3439,18 @@ var EditorController = (function () {
 
         $('#jstree').jstree(true).search(sTextQuery);
 
-        return true;
+        // deselect all
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        // get only the parents
+        var idList = [];
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (sClass == undefined){ // only parents <-> other instances have class "no_checkbox"
+                $('#jstree').jstree(true).deselect_node($(val).attr('id'));
+            }
+        }); // each
+        this.m_bAllSelected = false;
+
     };
 
     EditorController.prototype.cleanFilterTree = function () {
