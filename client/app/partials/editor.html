@@ -314,34 +314,6 @@
                         </div>
                     </button>
 
-                    <button type="button" class="btn btn-primary" ng-show="m_oController.m_b2DMapModeOn === true
-                             && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveUndoMode()"
-                            title="{{'EDITOR_TOOLTIP_UNDO_ZOOM'|translate}}"
-                            ng-click="m_oController.clickOnUndoZoom2DMap()">
-                        <em class="fa fa-undo" aria-hidden="true"></em>
-                    </button>
-
-                    <button type="button" class="btn btn-primary" ng-show="m_oController.m_b2DMapModeOn === false
-                            && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveUndoMode()"
-                            title="{{'EDITOR_TOOLTIP_UNDO_ZOOM'|translate}}"
-                            ng-click="m_oController.clickOnUndoZoom3DGLobe()">
-                        <em class="fa fa-undo" aria-hidden="true"></em>
-                    </button>
-
-                    <button type="button" class="btn btn-primary" ng-show="m_oController.m_b2DMapModeOn === true
-                             && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveRedoMode()"
-                            title="{{'EDITOR_TOOLTIP_REDO_ZOOM'|translate}}"
-                            ng-click="m_oController.clickOnRedoZoom2DMap()">
-                        <em class="fa fa-repeat" aria-hidden="true"></em>
-                    </button>
-
-                    <button type="button" class="btn btn-primary" ng-show="m_oController.m_b2DMapModeOn === false
-                            && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveRedoMode()"
-                            title="{{'EDITOR_TOOLTIP_REDO_ZOOM'|translate}}"
-                            ng-click="m_oController.clickOnRedoZoom3DGlobe()">
-                        <em class="fa fa-repeat" aria-hidden="true"></em>
-                    </button>
-
                     <!-- 2D map Home button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"
                             data-toggle="tooltip"

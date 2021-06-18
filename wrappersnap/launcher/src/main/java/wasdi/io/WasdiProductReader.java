@@ -203,6 +203,49 @@ public class WasdiProductReader {
     	return oRetViewModel;
 
     }
+    
+   public ProductViewModel getVrtFileProductViewModel(File oFile) {
+    	
+    	// Create the return value
+    	GeorefProductViewModel oRetViewModel = null;
+    	
+    	try {
+    		
+        	// Create the Product View Model
+        	oRetViewModel = new GeorefProductViewModel();
+        	
+        	// Set name values
+        	oRetViewModel.setFileName(oFile.getName());
+        	oRetViewModel.setName(Utils.getFileNameWithoutLastExtension(oFile.getName()));
+        	oRetViewModel.setProductFriendlyName(oRetViewModel.getName());
+        	
+        	// Create the sub folder
+        	NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
+        	oNodeGroupViewModel.setNodeName("VRT");
+        	
+        	// Create the single band representing the shape
+        	BandViewModel oBandViewModel = new BandViewModel();
+        	oBandViewModel.setPublished(false);
+        	oBandViewModel.setGeoserverBoundingBox("");
+        	oBandViewModel.setHeight(0);
+        	oBandViewModel.setWidth(0);
+        	oBandViewModel.setPublished(false);
+        	oBandViewModel.setName("VRT Fake Band");
+        	
+        	ArrayList<BandViewModel> oBands = new ArrayList<BandViewModel>();
+        	oBands.add(oBandViewModel);
+        	
+        	oNodeGroupViewModel.setBands(oBands);
+        	
+        	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
+    	}
+    	catch (Exception oEx) {
+    		LauncherMain.s_oLogger.debug("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
+		}
+    	
+    	return oRetViewModel;
+
+    }
     /**
      * Converts a product in a View Model
      * @param oFile
@@ -220,18 +263,27 @@ public class WasdiProductReader {
 
             if (oExportProduct == null) {
             	
-                LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: read snap product returns null: try shape file");
-                
-                ProductViewModel oRetValue = getShapeFileProductViewModel(oFile);
-                
-                //Here we can add new file types
-                
-                return oRetValue;
+            	if (oFile.getName().toLowerCase().endsWith("shp")) {
+                    LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: this is a shape file");
+                    ProductViewModel oRetValue = getShapeFileProductViewModel(oFile);
+                    
+                    return oRetValue;            		
+            	}
+            	else if (oFile.getName().toLowerCase().endsWith("vrt")) {
+                    LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: this is a vrt file");
+                    ProductViewModel oRetValue = getVrtFileProductViewModel(oFile);
+                    
+                    return oRetValue;            		
+            	}
+            	else {
+            		LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: unsupported file");
+            		return null;
+            	}
             }
 
             ProductViewModel oViewModel = getProductViewModel(oExportProduct, oFile);
 
-            LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
+            //LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
             return  oViewModel;        	
         }
         finally {

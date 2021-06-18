@@ -57,8 +57,8 @@ var RootController = (function() {
 
         this.signalRabbitConnectionLost = function()
         {
-            var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
-            utilsVexCloseDialogAfter(5000, dialog);
+            //var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
+            //utilsVexCloseDialogAfter(5000, dialog);
         };
 
 

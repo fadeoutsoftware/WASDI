@@ -1,10 +1,9 @@
 function wRefreshParameters(Wasdi)
-% Read again the parameters from the configured file
-% Syntax
-% sParameter = wRefreshParameters(Wasdi, sKey)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
+%Read again the parameters from the configured file
+%Syntax
+%sParameter = wRefreshParameters(Wasdi, sKey)
+%
+%:param Wasdi: Wasdi object created after the wasdilib call
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')

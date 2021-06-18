@@ -84,7 +84,7 @@ var ProcessorController = (function() {
          * Types of available processors
          * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
          */
-        this.m_aoProcessorTypes = [{'name':'Python 2.7','id':'ubuntu_python_snap'},{'name':'Python 3.7','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'},{'name':'OCTAVE 6.x','id':'octave'}];
+        this.m_aoProcessorTypes = [{'name':'Python 2.7 Pip','id':'ubuntu_python_snap'},{'name':'Python 3.7 Pip','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'},{'name':'OCTAVE 6.x','id':'octave'},{'name':'Python 3.x Conda','id':'conda'}];
         /**
          * Selected Processor Type
          * @type {string}
@@ -339,7 +339,8 @@ var ProcessorController = (function() {
             return true;
         }
 
-        if (this.m_sTypeIdOnly === "ubuntu_idl372" || this.m_sTypeIdOnly === "ubuntu_python37_snap")  {
+        if (this.m_sTypeIdOnly === "ubuntu_idl372" || this.m_sTypeIdOnly === "ubuntu_python37_snap"
+        || this.m_sTypeIdOnly === "conda" || this.m_sTypeIdOnly === "octave")  {
             return true;
         }
         return false;
@@ -528,7 +529,15 @@ var ProcessorController = (function() {
                      // SHARING SAVED
                  }else
                  {
-                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+                     sMessage = "GURU MEDITATION<br>ERROR SHARING PROCESSOR"
+
+                     if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                         if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                             sMessage = sMessage + ": " + data.data.stringValue;
+                         }
+                     }
+
+                     utilsVexDialogAlertTop(sMessage);
                  }
                  oController.getListOfEnableUsers(sFinalProcessorId);
 

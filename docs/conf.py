@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'WASDI documentation center'
-copyright = '2021, Fadeout Software'
+copyright = '2021, WASDI Sàrl'
 author = ''
 
 
@@ -27,7 +27,7 @@ author = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['javasphinx']
+extensions = ['javasphinx','sphinxemoji.sphinxemoji','sphinx.ext.autodoc', 'sphinxcontrib.matlab']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -45,18 +45,30 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 
 html_theme = 'sphinx_rtd_theme'
+html_css_files = ["custom.css"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_favicon = 'favicon.ico'
+
+html_logo = '_static/logowasdi.svg'
 
 ## test to fix the file replacing "_l" with "_"
 ##search for "l_,"" and replace it with ""
 ##search for "l_("" and replace it with "_("
 ##/home/docs/checkouts/readthedocs.org/user_builds/testreadthedocsbymena/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py
-
 import os
+import sys
+#print(sys.path)
+# Import Waspy library
+sys.path.insert(0, os.path.abspath('../libraries/waspy'))
+# Import Octave/Matlab library
+matlab_src_dir = os.path.abspath('../libraries/')
+
+print("Python source folders " + sys.path[0] +"\n")
+print("Matlab/Octave source folder " + matlab_src_dir +"\n")
 
 
 os.system("echo --- HOT FIX for Javasphinx library ---")

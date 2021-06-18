@@ -1584,7 +1584,7 @@ public class ProcessorsResource  {
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("file") String sInputFileName) {
 
-		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
+		Utils.debugLog("ProcessorsResource.updateProcessorFiles( WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " filename: " + sInputFileName + " )");
 		try {
 			if(Utils.isNullOrEmpty(sProcessorId) || sProcessorId.contains("\\") || sProcessorId.contains("/")) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid processor name, aborting");
@@ -1661,7 +1661,7 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
+			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Saving Processor file Path: " + oProcessorFile.getPath());
 			
 			//save uploaded file
 			int iRead = 0;
@@ -1730,7 +1730,6 @@ public class ProcessorsResource  {
 						}						
 					}
 				}
-				
 				
 				// Trigger the library update on this specific node
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Forcing Update Lib");
@@ -2107,7 +2106,7 @@ public class ProcessorsResource  {
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 			
 			if (oDestinationUser == null) {
-				oResult.setStringValue("Unauthorized");
+				oResult.setStringValue("Invalid Destination User");
 				return oResult;				
 			}
 			

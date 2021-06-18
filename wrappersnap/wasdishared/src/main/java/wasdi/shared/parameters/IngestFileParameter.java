@@ -11,14 +11,8 @@ public class IngestFileParameter extends BaseParameter{
     private String filePath;
     
     private String style;
-
-	public String getStyle() {
-		return style;
-	}
-
-	public void setStyle(String style) {
-		this.style = style;
-	}
+    
+    private String relativePath;
 
 	public String getFilePath() {
 		return filePath;
@@ -28,6 +22,20 @@ public class IngestFileParameter extends BaseParameter{
 		this.filePath = filePath;
 	}
 
-    
+	public String getRelativePath() {
+		return relativePath;
+	}
+
+	public void setRelativePath(String relativePath) {
+		this.relativePath = relativePath;
+	}
+
+	public String getStyle() {
+		return style;
+	}
+
+	public void setStyle(String style) {
+		this.style = style;
+	}    
     
 }
