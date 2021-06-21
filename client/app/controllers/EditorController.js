@@ -3084,10 +3084,11 @@ var EditorController = (function () {
                                 "label": "Zoom Band 3D Map",
                                 "_disabled": true
                             },*/
-                           
+
                             "Download": {
                                 "label": "Download",
                                 "icon": "fa fa-download",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
                                     //$node.original.fileName;
                                     if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
@@ -3104,6 +3105,7 @@ var EditorController = (function () {
                             "SendToFtp": {
                                 "label": "Send To Ftp",
                                 "icon": "fa fa-upload",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
                                     var sSourceFileName = $node.original.fileName;
                                     var oFound = oController.findProductByFileName(sSourceFileName);
@@ -3138,7 +3140,7 @@ var EditorController = (function () {
                                 }
                             },*/
                             "DeleteSelectedProduct": {
-                                "label": "Delete Product",
+                                "label": oController.getDeleteLabel(),
                                 "icon": "delete-icon-context-menu-jstree",
 
                                 "action": function (obj) {
@@ -3171,6 +3173,7 @@ var EditorController = (function () {
                             "Properties": {
                                 "label": "Properties ",
                                 "icon": "info-icon-context-menu-jstree",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "separator_before": true,
                                 "action": function (obj) {
                                     //$node.original.fileName;
@@ -3265,6 +3268,22 @@ var EditorController = (function () {
     };
 
     /**
+     * Creates the label for deletion command using the selected 
+     * product list. Gives a better feedback to the user of what he/she 's 
+     * operating onto.
+     * @returns a string with the number of currently selected entries
+     */
+    EditorController.prototype.getDeleteLabel = function () {
+        let iCount = this.getSelectedNodesFromTree(null).length;
+        if (iCount > 1) {
+            return "Delete "+ iCount + " products";
+        }
+        else {
+            return "Delete product";
+        }
+    }
+
+    /**
      * Returns all nodes with checked state 
      * @param {*} oEntry 
      */
@@ -3283,8 +3302,8 @@ var EditorController = (function () {
         // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
         $.each(jsonNodes, function (i, val) {
             let sClass = val.a_attr.class;
-            if (val.state.selected == true && sClass == undefined && 
-                (val.state.hidden == false || val.state.hidden == undefined) ) { // imposed on any other node the no_checkbox class
+            if (val.state.selected == true && sClass == undefined &&
+                (val.state.hidden == false || val.state.hidden == undefined)) { // imposed on any other node the no_checkbox class
                 idList.push($(val).attr('id'));
             }
         })
@@ -3297,7 +3316,7 @@ var EditorController = (function () {
      * @param {*} sTextQuery 
      */
     EditorController.prototype.selectFiltered = function () {
-        this.m_bAllSelected = ! this.m_bAllSelected; // flip the value 
+        this.m_bAllSelected = !this.m_bAllSelected; // flip the value 
         // gather all nodes from tree 
         var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
         let oController = this;
@@ -3305,20 +3324,20 @@ var EditorController = (function () {
         var idList = [];
         $.each(jsonNodes, function (i, val) {
             let sClass = val.a_attr.class;
-            if (sClass == undefined){ // only parents <-> other instances have class "no_checkbox"
+            if (sClass == undefined) { // only parents <-> other instances have class "no_checkbox"
                 if (val.state.hidden == false) { // not hidden must be selected
-                    if (oController.m_bAllSelected){ $('#jstree').jstree(true).select_node($(val).attr('id'));}
-                    else { $('#jstree').jstree(true).deselect_node($(val).attr('id'));}
+                    if (oController.m_bAllSelected) { $('#jstree').jstree(true).select_node($(val).attr('id')); }
+                    else { $('#jstree').jstree(true).deselect_node($(val).attr('id')); }
                 }
                 if (val.state.hidden == true) { // hidden must be de-selected
                     $('#jstree').jstree(true).deselect_node($(val).attr('id'));
                 }
 
             }
-            
+
         })
         console.log("done");
-        
+
     }
 
     /**
@@ -3415,7 +3434,7 @@ var EditorController = (function () {
 
 
 
-    
+
 
     EditorController.prototype.filterTree = function (sTextQuery) {
 
@@ -3434,7 +3453,7 @@ var EditorController = (function () {
         var idList = [];
         $.each(jsonNodes, function (i, val) {
             let sClass = val.a_attr.class;
-            if (sClass == undefined){ // only parents <-> other instances have class "no_checkbox"
+            if (sClass == undefined) { // only parents <-> other instances have class "no_checkbox"
                 $('#jstree').jstree(true).deselect_node($(val).attr('id'));
             }
         }); // each
