@@ -3084,25 +3084,7 @@ var EditorController = (function () {
                                 "label": "Zoom Band 3D Map",
                                 "_disabled": true
                             },*/
-                            "Properties": {
-                                "label": "Properties ",
-                                "icon": "info-icon-context-menu-jstree",
-                                "separator_before": true,
-                                "action": function (obj) {
-                                    //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
-                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
-                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
-                                                oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
-                                                break;
-                                            }
-
-                                        }
-
-                                    }
-                                }
-                            },
+                           
                             "Download": {
                                 "label": "Download",
                                 "icon": "fa fa-download",
@@ -3184,6 +3166,25 @@ var EditorController = (function () {
 
                                     }
 
+                                }
+                            },
+                            "Properties": {
+                                "label": "Properties ",
+                                "icon": "info-icon-context-menu-jstree",
+                                "separator_before": true,
+                                "action": function (obj) {
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
+                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
+                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
+                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
+                                                oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
+                                                break;
+                                            }
+
+                                        }
+
+                                    }
                                 }
                             }
                         };
