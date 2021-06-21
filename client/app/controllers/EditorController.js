@@ -2958,7 +2958,27 @@ var EditorController = (function () {
 
                         oReturnValue =
                         {
-                            "Workflow": {
+                            "Zoom2D": {
+                                "label": "Zoom Band 2D Map",
+                                "action": function (obj) {
+                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
+                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                                    }
+                                },
+                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
+                                "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true) 
+                            },
+                            "Zoom3D": {
+                                "label": "Zoom Band 3D Map",
+                                "action": function (obj) {
+                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
+                                        oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                                    }
+                                },
+                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
+                                "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true) 
+                            },
+                            /*"Workflow": {
                                 "label": "Workflow",
                                 "action": function (obj) {
                                     var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
@@ -2983,36 +3003,36 @@ var EditorController = (function () {
                                     oController.openMaskManager(oBand, oFoundProduct);
                                 },
                                 "_disabled": !$node.original.band.bVisibleNow
-                            },
-                            "Zoom2D": {
-                                "label": "Zoom Band 2D Map",
+                            },*/
+                            "Download": {
+                                "label": "Download",
+                                "icon": "fa fa-download",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
-                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
+                                        oController.findProductByName($node.original.fileName);
+                                        // var oEntry = {
+                                        //     "fileName": oProduct.fileName,
+                                        //     "filePath": oProduct.filePath
+                                        // };
+                                        // oController.downloadEntry(oEntry);
+                                        oController.downloadProductByName($node.original.fileName);
                                     }
-                                },
-                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
-                                "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
-                            },
-                            "Zoom3D": {
-                                "label": "Zoom Band 3D Map",
-                                "action": function (obj) {
-                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                        oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                                    }
-                                },
-                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
-                                "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
-                            },
-                            "Properties": {
-                                "label": "Properties ",
-                                "icon": "info-icon-context-menu-jstree",
-                                "separator_before": true,
-                                "action": function (obj) {
-                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                    if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
                                 }
                             },
+                            "SendToFtp": {
+                                "label": "Send To Ftp",
+                                "icon": "fa fa-upload",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "action": function (obj) {
+                                    var sSourceFileName = $node.original.fileName;
+                                    var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
+                                }
+                            },
+                           
                             "DeleteProduct": {
                                 "label": "Delete Product",
                                 "icon": "delete-icon-context-menu-jstree",
@@ -3037,6 +3057,15 @@ var EditorController = (function () {
                                     });
                                 }
                             },
+                            "Properties": {
+                                "label": "Properties ",
+                                "icon": "info-icon-context-menu-jstree",
+                                "separator_before": true,
+                                "action": function (obj) {
+                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                    if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
+                                }
+                            }
                             /*"DeleteSelectedProduct": {
                                 "label": "Delete All selected",
                                 "icon": "delete-icon-context-menu-jstree",
