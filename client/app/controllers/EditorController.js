@@ -666,7 +666,8 @@ var EditorController = (function () {
 
                     } else {
                         oController.m_aoVisibleBands = [];
-                        oController.m_aoVisibleBands.push(oController.m_oActiveBand);
+                        // unshift means add to first position
+                        oController.m_aoVisibleBands.unshift(oController.m_oActiveBand);
                     }
                     // Reopen only the active one
                     oController.openBandImage(oController.m_oActiveBand);
@@ -905,7 +906,7 @@ var EditorController = (function () {
             }
             // show the layer with full opacity at ther beginning
             oBand.opacity = 100;
-            this.m_aoVisibleBands.push(oBand);
+            this.m_aoVisibleBands.unshift(oBand);
 
             if (this.m_aoVisibleBands.length == 1) {
                 //if there isn't Bounding Box is impossible to zoom
@@ -1395,7 +1396,7 @@ var EditorController = (function () {
                     oController.setTreeNodeAsSelected(sNodeID);
 
                     // And set the node in the visible list
-                    oController.m_aoVisibleBands.push(oController.m_oActiveBand);
+                    oController.m_aoVisibleBands.unshift(oController.m_oActiveBand);
 
                     // Zoom on the bounding box in the 3d globe
                     oController.m_oGlobeService.zoomBandImageOnBBOX(oController.m_aoProducts[oController.m_oActiveBand.productIndex].bbox);
