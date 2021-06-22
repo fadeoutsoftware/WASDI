@@ -321,7 +321,7 @@
                                         </label>
                                         <!-- Index is zero based and the [0] layer is the map-->
                                         <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity"
-                                            class="" ng-change="m_oController.setLayerOpacity(oBand.opacity,$index+1)">
+                                            class="" ng-change="m_oController.setLayerOpacity(oBand.opacity,m_oController.m_aoVisibleBands.length - $index)">
 
 
                                     </div>
