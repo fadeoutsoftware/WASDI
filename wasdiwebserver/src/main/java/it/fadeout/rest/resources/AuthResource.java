@@ -884,64 +884,100 @@ public class AuthResource {
 	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
 
 		Utils.debugLog("AuthService.lostPassword: sUserId: " + sUserId);
+		try {
 
-		if(null == sUserId ) {
-			Utils.debugLog("User id is null");
-			return PrimitiveResult.getInvalid();
-		}
-
-		if(!m_oCredentialPolicy.validUserId(sUserId)) {
-			Utils.debugLog("User id not valid");
-			return PrimitiveResult.getInvalid();
-		}
-
-		UserRepository oUserRepository = new UserRepository();
-		User oUser = oUserRepository.getUser(sUserId);
-
-		if(null == oUser) {
-			Utils.debugLog("User not found");
-			PrimitiveResult oResult = PrimitiveResult.getInvalid();
-			//unauthorized
-			oResult.setIntValue(401);
-			return oResult;
-		} 
-		else {
-			if(null != oUser.getAuthServiceProvider()){
-				if( m_oCredentialPolicy.authenticatedByWasdi(oUser.getAuthServiceProvider()) ){
-
-					if(m_oCredentialPolicy.validEmail(oUser.getUserId()) ) {
-
-						String sPassword = Utils.generateRandomPassword();
-						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
-						oUser.setPassword(sHashedPassword);
-
-						if(oUserRepository.updateUser(oUser)) {
-
-							if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
-								return PrimitiveResult.getInvalid(); 
-							}
-
-							PrimitiveResult oResult = new PrimitiveResult();
-							oResult.setBoolValue(true);
-							oResult.setIntValue(0);
-							return oResult;
-						} 
-						else {
-							return PrimitiveResult.getInvalid();
-						}
-					} 
-					else {
-						//older users did not necessarily specified an email
-						return PrimitiveResult.getInvalid();
-					}
-				} 
-				else {
-					return PrimitiveResult.getInvalid();
-				}
-			} else {
-				return PrimitiveResult.getInvalid();
+			if(Utils.isNullOrEmpty(sUserId)) {
+				Utils.debugLog("AuthService.lostPassword: User id is null or empty, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Bad Request");
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
 			}
+
+			if(!m_oCredentialPolicy.validUserId(sUserId)) {
+				Utils.debugLog("AuthService.lostPassword: User id not valid, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Bad Request");
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
+
+		} catch (Exception oE) {
+			Utils.debugLog("AuthService.lostPassword: preliminary checks broken due to: " + oE + ", aborting");
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setStringValue("Internal Server Error");
+			oResult.setIntValue(500);
+			oResult.setBoolValue(false);
+			return oResult;
 		}
+
+		UserRepository oUserRepository = null;
+		User oUser = null;
+		try {
+			oUserRepository = new UserRepository();
+			oUser = oUserRepository.getUser(sUserId);
+
+			if(null == oUser) {
+				Utils.debugLog("AuthService.lostPassword: User not found, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Bad Request");
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
+			Utils.debugLog("AuthService.lostPassword: user " + sUserId + " found");
+
+			if(Utils.isNullOrEmpty(oUser.getAuthServiceProvider())) {
+				//todo check if user is on keycloak
+				Utils.debugLog("AuthService.lostPassword: auth service provider null or empty, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Internal Server Error");
+				oResult.setIntValue(500);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
+
+			//now, providers!
+			switch(oUser.getAuthServiceProvider().toUpperCase()) {
+			case "WASDI":
+				String sPassword = Utils.generateRandomPassword();
+				String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
+				oUser.setPassword(sHashedPassword);
+
+				if(oUserRepository.updateUser(oUser)) {
+					if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
+						return PrimitiveResult.getInvalid(); 
+					}
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					oResult.setIntValue(0);
+					return oResult;
+				}
+				//else nothing is returned here and in the end 500 is returned
+				break;
+			case "KEYCLOAK":
+				//prepare URL
+				// PUT /auth/admin/realms/{realm}/users/{id}/execute-actions-email
+				//required action: "UPDATE_PASSWORD"
+				String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
+				//TODO PUT to send email to the user to initiate password recovery				
+				break;
+			default:
+				break;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("AuthService.lostPassword: could not complete the password recovery due to: " + oE);
+		}
+
+		//apparently things did not work well
+		Utils.debugLog("AuthService.lostPassword( " + sUserId + "): could not change user password, about to end");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setStringValue("Internal Server Error");
+		oResult.setIntValue(500);
+		oResult.setBoolValue(false);
+		return oResult;
 	}
 
 
