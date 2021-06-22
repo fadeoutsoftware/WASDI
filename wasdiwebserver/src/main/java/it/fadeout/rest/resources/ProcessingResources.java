@@ -1002,20 +1002,20 @@ public class ProcessingResources {
 
 
     /**
-     * Exectues a Workflow from workflow Id
+     * Executes a Workflow from workflow Id
      *
      * @param sSessionId
      * @param sWorkspace
      * @param sParentProcessWorkspaceId
      * @param oSnapWorkflowViewModel
      * @return
-     * @throws Exception
      */
     @POST
     @Path("/graph_id")
     public PrimitiveResult executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sSessionId,
-                                                      @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String
-                                                              sParentProcessWorkspaceId, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
+                                                      @QueryParam("workspace") String sWorkspace,
+                                                      @QueryParam("parent") String sParentProcessWorkspaceId,
+                                                      SnapWorkflowViewModel oSnapWorkflowViewModel) {
 
         PrimitiveResult oResult = new PrimitiveResult();
         Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Ws: " + sWorkspace + ", ... )");
@@ -1076,16 +1076,16 @@ public class ProcessingResources {
             if (!oWorkflowFile.exists()) {
                 Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Workflow file not on this node. Try to download it");
 
-                String sDownloadedWorflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId, m_oServletConfig);
+                String sDownloadedWorkflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId, m_oServletConfig);
 
-                if (Utils.isNullOrEmpty(sDownloadedWorflowPath)) {
+                if (Utils.isNullOrEmpty(sDownloadedWorkflowPath)) {
                     Utils.debugLog("Error downloading workflow. Return error");
                     oResult.setBoolValue(false);
                     oResult.setIntValue(500);
                     return oResult;
                 }
 
-                sWorkflowPath = sDownloadedWorflowPath;
+                sWorkflowPath = sDownloadedWorkflowPath;
             }
 
             try (FileInputStream oFileInputStream = new FileInputStream(sWorkflowPath)) {
@@ -1103,7 +1103,7 @@ public class ProcessingResources {
                 String sSourceProductName = "";
                 String sDestinationProdutName = "";
 
-                if (oSnapWorkflowViewModel.getInputFileNames().size() > 00) {
+                if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
                     // TODO: Output file name
                     sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
