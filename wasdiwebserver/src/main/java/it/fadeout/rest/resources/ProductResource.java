@@ -927,21 +927,19 @@ public class ProductResource {
                                          List<String> as_ProductList) {
         // Support variable used to identify if deletions of one or more products failed
         AtomicBoolean bDirty = new AtomicBoolean(false);
-        as_ProductList.stream().forEach(s -> {
+        as_ProductList.stream().forEach(sFile -> {
             // if one deletion fail is detected the bDirty boolean becames true
-            bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,s,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
+            bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,sFile,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
         });
 
-        PrimitiveResult primitiveResult = new PrimitiveResult();
+        PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 
-        if (bDirty.get()) primitiveResult.setIntValue(207);
-        else primitiveResult.setIntValue(200);
+        if (bDirty.get()) oPrimitiveResult.setIntValue(207);
+        else oPrimitiveResult.setIntValue(200);
         // returns the opposite value of Dirty
-        primitiveResult.setBoolValue(!bDirty.get());
+        oPrimitiveResult.setBoolValue(!bDirty.get());
 
-        return primitiveResult;
-
-
+        return oPrimitiveResult;
     }
 
 }
