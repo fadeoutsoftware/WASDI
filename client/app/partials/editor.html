@@ -25,14 +25,11 @@
                     </button>
 
                     <button class="btn btn-wasdi fa btn-outline-primary" title="Select"
-                        ng-click="m_oController.selectFiltered();"
-                        ng-show="m_oController.m_bIsFilteredTree === true">
+                        ng-click="m_oController.selectFiltered();" ng-show="m_oController.m_bIsFilteredTree === true">
                         <em class="fa fa-square-o" aria-hidden="true" style="margin-right: 0px;"
-                        ng-show="m_oController.m_bAllSelected"
-                        ></em>
+                            ng-show="m_oController.m_bAllSelected"></em>
                         <em class="fa fa-check-square-o" aria-hidden="true" style="margin-right: 0px;"
-                        ng-show="!m_oController.m_bAllSelected"
-                        ></em>
+                            ng-show="!m_oController.m_bAllSelected"></em>
                     </button>
 
 
@@ -131,7 +128,8 @@
                 </div>
             </div>
             <!--**************** PANEL CESIUM GLOBE *********************-->
-            <div class="panel panel-default small-map-container flex-grow-1 d-flex flex-column">
+            <div class="panel panel-default small-map-container flex-grow-1 d-flex flex-column"
+                style="overflow-y: auto;">
                 <div class="panel-heading">
                     <ul class="nav nav-tabs">
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 0}"
@@ -284,9 +282,9 @@
 
                         </div>
                     </div-->
-                    <!----------------------------------------------- TAB 3  LAYERS---------------------------------------------->
-                    <!-- ng-show="m_oController.m_iActiveMapPanelTab === 1"-->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider">
+                    <!----------------------------------------------- TAB 1  LAYERS---------------------------------------------->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container opacitySlider"
+                        ng-show="m_oController.m_iActiveMapPanelTab === 1">
                         <!--div class="row-v4">
                             <div class="col-xs-6" style="padding-left: 30px;">
                                 <span class="layer-details-heading">Base Layer </span>
@@ -304,12 +302,13 @@
                             </div>
                         </div-->
 
-
+                       
                         <div ng-repeat="oBand in m_oController.m_aoVisibleBands">
-                            
+
                             <div class="row-v4" style="padding-top: 15px;">
                                 <div class="col-xs-6" style="padding-left: 30px;">
-                                    <!--<span class="layer-details-heading">Product name </span>:--> {{oBand.productName}}
+                                    <!--<span class="layer-details-heading">Product name </span>:-->
+                                    {{oBand.productName}}
                                     <br>
                                     <!--<span class="layer-details-heading">Band </span>:--> {{oBand.name}}
                                     <br>
@@ -321,7 +320,8 @@
                                         </label>
                                         <!-- Index is zero based and the [0] layer is the map-->
                                         <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity"
-                                            class="" ng-change="m_oController.setLayerOpacity(oBand.opacity,m_oController.m_aoVisibleBands.length - $index)">
+                                            class=""
+                                            ng-change="m_oController.setLayerOpacity(oBand.opacity,m_oController.m_aoVisibleBands.length - $index)">
 
 
                                     </div>

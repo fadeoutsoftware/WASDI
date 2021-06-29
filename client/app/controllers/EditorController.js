@@ -306,7 +306,7 @@ var EditorController = (function () {
         let oBand, sFileName;
         this.m_iActiveMapPanelTab = iTab;
         // if was clicked the tab color manipulation && the active band isn't null && there isn't any saved colour manipulation, get colour manipulation
-        if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
+        /*if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
             (this.m_bIsLoadingColourManipulation === false)) {
             oBand = this.m_oActiveBand;
             sFileName = this.m_aoProducts[oBand.productIndex].fileName
@@ -336,6 +336,7 @@ var EditorController = (function () {
 
             this.processingGetBandPreview(oBodyImagePreview, this.m_oActiveWorkspace.workspaceId);
         }
+        */
     };
 
 
@@ -1478,7 +1479,7 @@ var EditorController = (function () {
         // Get the layer Id
         var sLayerId = "wasdi:" + oBand.layerId;
         //set navigation tab
-        this.m_iActiveMapPanelTab = 0;
+        //this.m_iActiveMapPanelTab = 0;
         //remove preview band image
         this.m_sPreviewUrlSelectedBand = "empty";
         // Check the actual Mode
