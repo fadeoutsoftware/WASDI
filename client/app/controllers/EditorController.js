@@ -2949,6 +2949,7 @@ var EditorController = (function () {
                 "show_only_matches_children": true
             },
             "contextmenu": { // my right click menu
+                "select_node" : false,
                 "items": function ($node) {
 
                     //only the band has property $node.original.band
