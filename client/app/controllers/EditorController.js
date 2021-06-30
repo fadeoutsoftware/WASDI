@@ -1639,7 +1639,7 @@ var EditorController = (function () {
 
     /**
      * Set the opacity for the layer identified by the index
-     * @param {int} iOpacity level of opacity 
+     * @param {int} iOpacity level of opacity
      */
     EditorController.prototype.setLayerOpacity = function (iOpacity, iIndexLayer) {
         var oMap = this.m_oMapService.getMap();
@@ -2969,7 +2969,7 @@ var EditorController = (function () {
                                     }
                                 },
                                 // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
-                                "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true) 
+                                "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
                             },
                             "Zoom3D": {
                                 "label": "Zoom Band 3D Map",
@@ -2979,7 +2979,7 @@ var EditorController = (function () {
                                     }
                                 },
                                 // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
-                                "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true) 
+                                "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
                             },
                             /*"Workflow": {
                                 "label": "Workflow",
@@ -3035,7 +3035,7 @@ var EditorController = (function () {
                                     if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
                                 }
                             },
-                           
+
                             "DeleteProduct": {
                                 "label": "Delete Product",
                                 "icon": "delete-icon-context-menu-jstree",
@@ -3075,18 +3075,18 @@ var EditorController = (function () {
 
                                 "action": function (obj) {
 
-                                    
+
 
                                         utilsVexDialogAlertTop("Sub Menu from bands");
                                         m_oController.getSelectedNodesFromTree(null);
-                                    
+
                                 }
                             }*/
                         }; // menu entries
                     }
 
                     // only products has $node.original.fileName
-                    // menu showed when a product is selected 
+                    // menu showed when a product is selected
                     if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
                         //***************************** PRODUCT ********************************************
                         oReturnValue =
@@ -3281,7 +3281,7 @@ var EditorController = (function () {
                 } else {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
-                // REMOVE CHECKBOXES 
+                // REMOVE CHECKBOXES
                 oNode.a_attr = new Object();
                 oNode.a_attr.class = "no_checkbox";
 
@@ -3300,8 +3300,8 @@ var EditorController = (function () {
     };
 
     /**
-     * Creates the label for deletion command using the selected 
-     * product list. Gives a better feedback to the user of what he/she 's 
+     * Creates the label for deletion command using the selected
+     * product list. Gives a better feedback to the user of what he/she 's
      * operating onto.
      * @returns a string with the number of currently selected entries
      */
@@ -3316,19 +3316,19 @@ var EditorController = (function () {
     }
 
     /**
-     * Returns all nodes with checked state 
-     * @param {*} oEntry 
+     * Returns all nodes with checked state
+     * @param {*} oEntry
      */
     EditorController.prototype.getSelectedNodesFromTree = function (oEntry) {
         var m_oController = this;
         var node = oEntry;
         var oTree = $('#jstree').jstree(true);
         var Ids = oTree.get_selected();
-        // return all the nodes selected 
+        // return all the nodes selected
         // a clever way to get only the parents?
-        //1) get all nodes 
-        //2) filters only parents 
-        //3) select the ones in Ids 
+        //1) get all nodes
+        //2) filters only parents
+        //3) select the ones in Ids
         var idList = [];
         var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
         // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
@@ -3345,11 +3345,11 @@ var EditorController = (function () {
     /**
      * Utils method to select or de-select all the entries in jstree after a search is done
      * all or nothing only of visible nodes
-     * @param {*} sTextQuery 
+     * @param {*} sTextQuery
      */
     EditorController.prototype.selectFiltered = function () {
-        this.m_bAllSelected = !this.m_bAllSelected; // flip the value 
-        // gather all nodes from tree 
+        this.m_bAllSelected = !this.m_bAllSelected; // flip the value
+        // gather all nodes from tree
         var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
         let oController = this;
         // get only the parents
@@ -3514,6 +3514,21 @@ var EditorController = (function () {
         //reload product list
         this.getProductListByWorkspace();
     };
+
+    EditorController.prototype.navigateTo = function (oBand,iIndexLayer){
+         // Check for geoserver bounding box
+         if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
+            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
+        } else {
+            // Try with the generic product bounding box
+            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
+
+        }
+    }
 
     EditorController.prototype.deleteProductInGlobe = function (aoVisibleBands, oChildrenNode) {
         var iLengthLayer = aoVisibleBands.length;
