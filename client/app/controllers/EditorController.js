@@ -3515,7 +3515,7 @@ var EditorController = (function () {
         this.getProductListByWorkspace();
     };
 
-    EditorController.prototype.navigateTo = function (oBand,iIndexLayer){
+    EditorController.prototype.navigateTo = function (iIndexLayer){
          // Check for geoserver bounding box
          if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
             this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
