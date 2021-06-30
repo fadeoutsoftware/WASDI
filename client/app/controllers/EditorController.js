@@ -3263,6 +3263,21 @@ var EditorController = (function () {
         this.getProductListByWorkspace();
     };
 
+    EditorController.prototype.navigateTo = function (iIndexLayer){
+         // Check for geoserver bounding box
+         if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
+            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
+        } else {
+            // Try with the generic product bounding box
+            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
+
+        }
+    }
+
     EditorController.prototype.deleteProductInGlobe = function (aoVisibleBands, oChildrenNode) {
         var iLengthLayer = aoVisibleBands.length;
         var iLengthChildren_d = oChildrenNode.length;//that.temp.children_d

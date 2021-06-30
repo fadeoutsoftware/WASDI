@@ -313,18 +313,35 @@
                                     <!--<span class="layer-details-heading">Band </span>:--> {{oBand.name}}
                                     <br>
                                 </div>
-                                <div class="col-xs-6">
-                                    <div class="range-container">
-                                        <label class="color-value">
-                                            {{oBand.opacity}} %
-                                        </label>
-                                        <!-- Index is zero based and the [0] layer is the map-->
-                                        <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity"
-                                            class=""
-                                            ng-change="m_oController.setLayerOpacity(oBand.opacity,m_oController.m_aoVisibleBands.length - $index)">
+                                <div class="col-xs-1">
+                                    <button class="btn btn-wasdi fa btn-outline-primary" title="Navigate to"
+                                        ng-click="m_oController.navigateTo($index)"
+                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                        <em class="fa fa-expand" aria-hidden="true"></em>
+                                    </button>
+                                </div>
+
+                                <div class="col-xs-1">
+                                    <button class="btn btn-wasdi fa btn-outline-primary" title="Remove layer from map"
+                                        ng-click="m_oController.removeBandImage(oBand)"
+                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                        <em class="fa fa-times" aria-hidden="true"></em>
+                                    </button>
+
+                                </div>
 
 
-                                    </div>
+                                <div class="col-xs-4">
+
+                                    <label class="color-value">
+                                        {{oBand.opacity}} %
+                                    </label>
+                                    <!-- Index is zero based and the [0] layer is the map-->
+                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class=""
+                                        ng-change="m_oController.setLayerOpacity(oBand.opacity,m_oController.m_aoVisibleBands.length - $index)">
+
+
+
                                 </div>
                             </div>
                         </div>
