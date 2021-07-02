@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
@@ -16,11 +17,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.ConfigReader;
+import wasdi.ProcessWorkspaceLogger;
 import wasdi.processors.WasdiProcessorEngine;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.PasswordAuthentication;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
@@ -30,8 +34,10 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
+import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
@@ -42,12 +48,15 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -1041,6 +1050,7 @@ public class dbUtils {
 	        System.out.println("\t1 - Clean shared ws errors");
 	        System.out.println("\t2 - Move Workpsace to new node");
 	        System.out.println("\t3 - Delete Wokspace");
+	        System.out.println("\t4 - Reconstruct Wokspace");
 	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
@@ -1273,7 +1283,162 @@ public class dbUtils {
 				else {
 					System.out.println("Impossible to delete workspace from the db");
 				}
-	        }		
+	        }
+	        else if (sInputString.equals("4")) {
+	        	System.out.println("Please Insert workspaceId to reconstruct:");
+	        	String sWorkspaceId = s_oScanner.nextLine();
+	        	
+				// repositories
+				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				SessionRepository oSessionRepository = new SessionRepository();
+				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+				
+				// Check if workspace exists
+				Workspace oWS = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+				
+				if (oWS == null) {
+					System.out.println("Workspace " + sWorkspaceId + " does not exists");
+					return;
+				}
+				
+				String sWorkspaceOwner =  oWS.getUserId();
+				
+				// get workspace path
+				String sWorkspacePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH") + "/" + sWorkspaceOwner + "/"+ sWorkspaceId;
+				
+				// Check and create the folder
+				File oWorkspaceFolder = new File(sWorkspacePath);
+				
+				if (!oWorkspaceFolder.exists()) {
+					oWorkspaceFolder.mkdirs();
+				}
+				
+				// List of process workspaces to re-run
+				ArrayList<String> asProcessesToReRun = new ArrayList<String>();
+				
+				System.out.println("Getting Workspace Products");
+	        	
+				// Get the list of the files that were in the workspace
+				List<ProductWorkspace> aoProductsInWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+				
+				System.out.println("Search root processors");
+				
+				// For each Product in the workspace
+				for (ProductWorkspace oProductWorkspace : aoProductsInWorkspace) {
+					
+					// Search the last ingestion of this product
+					String sProductName = oProductWorkspace.getProductName();
+					sProductName = new File(sProductName).getName();
+					
+					List<ProcessWorkspace> aoProductProcesses = oProcessWorkspaceRepository.getProcessByProductName(sProductName);
+					
+					for (ProcessWorkspace oProcess : aoProductProcesses) {
+						
+						if (oProcess.getOperationType().equals(LauncherOperations.INGEST.name())) {
+							
+							// Now search for the grandparent process that created the file
+							String sParentId = oProcess.getParentId();
+							
+							if (asProcessesToReRun.contains(sParentId)) break;
+							
+							String sRootOperation = "";
+							
+							while(!Utils.isNullOrEmpty(sParentId)) {
+								ProcessWorkspace oParent = oProcessWorkspaceRepository.getProcessByProcessObjId(sParentId);
+								sRootOperation = oParent.getProcessObjId();
+								sParentId = oParent.getParentId();
+							}
+							
+							if (Utils.isNullOrEmpty(sRootOperation)==false) {
+								if (!asProcessesToReRun.contains(sRootOperation)) {
+									asProcessesToReRun.add(sRootOperation);
+									System.out.println("Added " + sRootOperation + " to the re-run list");
+								}
+							}
+							
+							// This must be done once, only for the last ingestion
+							break;
+						}
+					}
+				}
+				
+				System.out.println("Delete not existing products from the workspace");
+				
+				// Delete Products, otherwise there is the risk that the processor will not re-create it
+				for (ProductWorkspace oProductWorkspace : aoProductsInWorkspace) {
+					
+					File oFile = new File(oProductWorkspace.getProductName());
+					
+					if (!oFile.exists()) {
+						oDownloadedFilesRepository.deleteByFilePath(oProductWorkspace.getProductName());
+						oProductWorkspaceRepository.deleteByProductNameWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId());						
+					}
+				}
+				
+				
+				ArrayList<ProcessWorkspace> aoProcesses = new ArrayList<ProcessWorkspace>();
+				
+				for (String sProcId : asProcessesToReRun) {
+					ProcessWorkspace oProc = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcId);
+					aoProcesses.add(oProc);
+				}
+				
+				Collections.sort(aoProcesses, new ProcessWorkspaceStartDateComparator());
+				
+				for (ProcessWorkspace oProcToRun : aoProcesses) {
+					
+					System.out.println("Starting again " + oProcToRun.getProcessObjId());
+					
+					String sSerializationPath = ConfigReader.getPropValue("SERIALIZATION_PATH","/usr/lib/wasdi/params/");
+					
+					if (!sSerializationPath.endsWith(""+File.separatorChar)) sSerializationPath += File.separatorChar;
+					
+					String sParameter = sSerializationPath + oProcToRun.getProcessObjId();
+					
+					try {
+						
+						// Create the base Parameter
+						BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+						
+						String sSessionId = oBaseParameter.getSessionID();
+						String sUser = oBaseParameter.getUserId();
+						
+						UserSession oSession = oSessionRepository.getSession(sSessionId);
+						
+						if (oSession!=null) {
+							oSessionRepository.touchSession(oSession);
+						}
+						else {
+							UserSession oNewSession = new UserSession();
+							oNewSession.setSessionId(sSessionId);
+							oNewSession.setUserId(sUser);
+							oNewSession.setLoginDate((double) new Date().getTime());
+							oNewSession.setLastTouch((double) new Date().getTime());
+							
+							oSessionRepository.insertSession(oNewSession);
+						}
+						
+					} catch (Exception oEx) {
+						
+						System.out.println("Exception searching parameter " + oEx.toString());
+					}					
+					
+					oProcToRun.setStatus(ProcessStatus.CREATED.name());
+					
+					oProcessWorkspaceRepository.updateProcess(oProcToRun);
+					
+					
+					while (! (oProcToRun.getStatus().equals("DONE") || oProcToRun.getStatus().equals("ERROR") || oProcToRun.getStatus().equals("STOPPED"))) {
+						Thread.sleep(5000);
+						oProcToRun = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcToRun.getProcessObjId());
+					}
+					
+					System.out.println("Process Finished with status: " + oProcToRun.getStatus());
+					
+				}
+	        }
 	    }
 		catch (Exception oEx) {
 			System.out.println("Workspace Sharing Exception: " + oEx);
@@ -1647,7 +1812,7 @@ public class dbUtils {
 	        MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 	        MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 	        
-	        String sNode = ConfigReader.getPropValue("NODECODE");
+	        String sNode = ConfigReader.getPropValue("WASDI_NODE");
 	        if (!Utils.isNullOrEmpty(sNode)) {
 	        	s_sMyNodeCode = sNode;
 	        }

@@ -811,30 +811,35 @@ public class ProductResource {
             }
 
             if (bDeleteLayer) {
+            	
+            	try {
+                    // Delete layerId on Geoserver
+                    GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
 
-                // Delete layerId on Geoserver
-                GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
-
-                // For all the published bands
-                for (PublishedBand oPublishedBand : aoPublishedBands) {
-                    try {
-                        Utils.debugLog("ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
-
-                        if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-                            Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
-                        }
-
+                    // For all the published bands
+                    for (PublishedBand oPublishedBand : aoPublishedBands) {
                         try {
-                            // delete published band on data base
-                            oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
-                        } catch (Exception oEx) {
-                            Utils.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
-                        }
+                            Utils.debugLog("ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
 
-                    } catch (Exception oEx) {
-                        Utils.debugLog("ProductResource.DeleteProduct: " + oEx);
-                    }
-                }
+                            if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+                                Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+                            }
+
+                            try {
+                                // delete published band on data base
+                                oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+                            } catch (Exception oEx) {
+                                Utils.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
+                            }
+
+                        } catch (Exception oEx) {
+                            Utils.debugLog("ProductResource.DeleteProduct: " + oEx);
+                        }
+                    }            		
+            	}
+            	catch (Exception oEx) {
+                    Utils.debugLog("ProductResource.DeleteProduct: Exception deleting layers: " + oEx);
+                }            	
             }
 
             // delete the product-workspace related records on db and the Downloaded File Entry
