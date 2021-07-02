@@ -54,6 +54,7 @@ import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
+import org.esa.snap.runtime.EngineConfig;
 import org.geotools.referencing.CRS;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -379,6 +380,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			SystemUtils.init3rdPartyLibs(null);
 			
+			Engine.start(false);
+			
 			// Snap Log
 			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "1");
 
@@ -407,8 +410,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oFileHandler.setLevel(oLogLevel);
 					oFileHandler.setFormatter(oSimpleFormatter);
 					
-					SystemUtils.LOG.setLevel(oLogLevel);
-					SystemUtils.LOG.addHandler(oFileHandler);
+					EngineConfig oSnapConfig = Engine.getInstance().getConfig();
+					oSnapConfig.logLevel(oLogLevel);
+					java.util.logging.Logger oSnapLogger = oSnapConfig.logger();
+					
+					oSnapLogger.addHandler(oFileHandler);
+					
+					//SystemUtils.LOG.setLevel(oLogLevel);
+					//SystemUtils.LOG.addHandler(oFileHandler);
 					
 				} catch (Exception oEx) {
 					System.out.println("LauncherMain Constructor: exception configuring SNAP log file " + oEx.toString());
@@ -427,8 +436,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			else {
 				m_bNotifyDownloadUpdateActive = false;
 			}
-
-			Engine.start(false);
 
 		} catch (Throwable oEx) {
 			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));

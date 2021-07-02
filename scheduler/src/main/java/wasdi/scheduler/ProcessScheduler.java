@@ -289,7 +289,14 @@ public class ProcessScheduler {
 				
 				// If it is launched, it "needs" CREATED State. If not, has been done in some way
 				ProcessWorkspace oLaunched = m_oProcessWorkspaceRepository.getProcessByProcessObjId(sLaunchedProcessWorkspaceId);
-				if (oLaunched.getStatus().equals(ProcessStatus.CREATED.name()) == false) {
+				
+				if (oLaunched != null) {
+					if (oLaunched.getStatus().equals(ProcessStatus.CREATED.name()) == false) {
+						asLaunchedToDelete.add(sLaunchedProcessWorkspaceId);
+					}					
+				}
+				else {
+					WasdiScheduler.log(m_sLogPrefix + ".run: Invalid Proc WS ID : " + sLaunchedProcessWorkspaceId);
 					asLaunchedToDelete.add(sLaunchedProcessWorkspaceId);
 				}
 			}
@@ -323,19 +330,21 @@ public class ProcessScheduler {
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
 						
-						// Is it still running?
-						if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())) {
-							
-							// Force to error
-							oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-							// Set the operation end date
-							if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
-								oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-							}
-							// Update the process
-							m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-							WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
-						}							
+						if (oCheckProcessWorkspace != null) {
+							// Is it still running?
+							if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())) {
+								
+								// Force to error
+								oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+								// Set the operation end date
+								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
+									oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+								}
+								// Update the process
+								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
+								WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
+							}								
+						}
 					}
 				}
 				else {
@@ -437,24 +446,26 @@ public class ProcessScheduler {
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
 						
-						// Is it still running?
-						if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ||
-								oCheckProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name()) ||
-								oCheckProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
-							
-							// It cannot be in any of these states if the PID does not exists
-							
-							// Force to error
-							oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-							// Set the operation end date
-							if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
-								oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-							}
-							
-							// Update the process
-							m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-							WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
-						}							
+						if (oCheckProcessWorkspace != null) {
+							// Is it still running?
+							if (oCheckProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ||
+									oCheckProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name()) ||
+									oCheckProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
+								
+								// It cannot be in any of these states if the PID does not exists
+								
+								// Force to error
+								oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+								// Set the operation end date
+								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
+									oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+								}
+								
+								// Update the process
+								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
+								WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
+							}							
+						}
 					}
 				}
 				else {
