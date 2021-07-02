@@ -2692,7 +2692,7 @@ var EditorController = (function () {
         {
             'core': { 'data': [], "check_callback": true },
             "state": { "key": "state_tree" },
-            "plugins": ["checkbox", "contextmenu", "state", "search"], // plugins in use
+            "plugins": ["checkbox", "contextmenu", "search"], // plugins in use
             "search": {
                 "show_only_matches": true,
                 "show_only_matches_children": true
@@ -2940,6 +2940,9 @@ var EditorController = (function () {
                                                     $.each(asSelectedProducts, function (i, val) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
                                                     });
+                                                    /// deselect all 
+                                                    $("#jstree").jstree().deselect_all(true);
+
                                                 }, (function (error) {
                                                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                 }));
