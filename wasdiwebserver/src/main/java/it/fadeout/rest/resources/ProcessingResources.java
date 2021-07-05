@@ -345,7 +345,7 @@ public class ProcessingResources {
                                  @FormDataParam("graphXml") String sGraphXml) {
 
         // convert string to file and invoke updateGraphFile
-        Utils.debugLog("ProcessingResources.uploadGraph: workflowId " + sWorkflowId + " invoke ProcessingResources.updateGraph");
+        Utils.debugLog("ProcessingResources.uploadGraphXML: workflowId " + sWorkflowId + " invoke ProcessingResources.updateGraph");
         return updateGraphfile(new ByteArrayInputStream(sGraphXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sWorkflowId);
     }
 
@@ -369,7 +369,7 @@ public class ProcessingResources {
         try {
             // Check authorization
             if (Utils.isNullOrEmpty(sSessionId)) {
-                Utils.debugLog("ProcessingResources.updateGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
+                Utils.debugLog("ProcessingResources.updateGraphfile( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
                 return Response.status(401).build();
             }
             User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -380,7 +380,7 @@ public class ProcessingResources {
             // Get Download Path
             String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 
-            Utils.debugLog("ProcessingResources.updateGraph: download path " + sDownloadRootPath);
+            Utils.debugLog("ProcessingResources.updateGraphfile: download path " + sDownloadRootPath);
 
             File oWorkflowsPath = new File(sDownloadRootPath + "workflows/");
 
@@ -391,16 +391,20 @@ public class ProcessingResources {
             // Check that the workflow exists on db
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+            
             if (oWorkflow == null) {
-                Utils.debugLog("ProcessingResources.updateGraph: error in workflowId " + sWorkflowId + " not found on DB");
+                Utils.debugLog("ProcessingResources.updateGraphfile: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found, please check parameters").build();
             }
-            // Checks that owner corresponds
-            if (!oUser.getUserId().equals(oWorkflow.getUserId()) &&
-                    new WorkflowSharingRepository().isSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
-                Utils.debugLog("ProcessingResources.updateGraph: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
+            
+            // Checks that user can modify the workflow
+            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            
+            if (!oUser.getUserId().equals(oWorkflow.getUserId()) && !oWorkflowSharingRepository.isSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
+                Utils.debugLog("ProcessingResources.updateGraphfile: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
                 return Response.status(Status.UNAUTHORIZED).build();
             }
+            
             // original xml file
             File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
             // new xml file
@@ -446,7 +450,7 @@ public class ProcessingResources {
                 } catch (GraphException oE) {
                     // Close the file reader
                     oFileReader.close();
-                    Utils.debugLog("ProcessingResources.uploadGraph: malformed workflow file");
+                    Utils.debugLog("ProcessingResources.updateGraphfile: malformed workflow file");
                     // Leave the original file unchanged and delete the temp
                     Files.delete(oWorkflowXmlFileTemp.toPath());
                     return Response.status(Status.NOT_MODIFIED).build();
@@ -456,7 +460,7 @@ public class ProcessingResources {
                 // Delete the temp file
                 Files.delete(oWorkflowXmlFileTemp.toPath());
 
-                Utils.debugLog("ProcessingResources.uploadGraph: workflow files updated! workflowID" + oWorkflow.getWorkflowId());
+                Utils.debugLog("ProcessingResources.updateGraphfile: workflow files updated! workflowID" + oWorkflow.getWorkflowId());
 
                 if (Wasdi.getActualNode() != null) {
                     oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
@@ -469,7 +473,7 @@ public class ProcessingResources {
 
             } catch (Exception oEx) {
                 if (oWorkflowXmlFileTemp.exists()) oWorkflowXmlFileTemp.delete();
-                Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
+                Utils.debugLog("ProcessingResources.updateGraphfile: " + oEx);
                 return Response.status(Status.NOT_MODIFIED).build();
             }
 
