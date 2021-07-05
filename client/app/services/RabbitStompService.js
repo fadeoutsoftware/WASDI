@@ -237,8 +237,8 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                     _this.m_oWebSocket = new WebSocket(_this.m_oConstantsService.getStompUrl());
                     //_this.oWebSocket = new SockJS(_this.m_oConstantsService.getStompUrl());
                     _this.m_oClient = Stomp.over(_this.m_oWebSocket);
-                    _this.m_oClient.heartbeat.outgoing = 0;
-                    _this.m_oClient.heartbeat.incoming = 0;
+                    _this.m_oClient.heartbeat.outgoing = 20000;
+                    _this.m_oClient.heartbeat.incoming = 20000;
                     _this.m_oClient.debug = null;
 
                     _this.m_oClient.connect(_this.m_oConstantsService.getRabbitUser(), _this.m_oConstantsService.getRabbitPassword(), _this.m_oOn_Connect, _this.m_oOn_Error, '/');
