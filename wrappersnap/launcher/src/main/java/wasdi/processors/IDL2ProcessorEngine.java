@@ -146,6 +146,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 				}							
 			}
 			
+			/*
+			 * 
 			File oRunFile = new File(sRunFile);
 			
 			try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
@@ -167,8 +169,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					oRunWriter.flush();
 					oRunWriter.close();
 				}			
-				
 			}
+			*/
 						
 			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
 
