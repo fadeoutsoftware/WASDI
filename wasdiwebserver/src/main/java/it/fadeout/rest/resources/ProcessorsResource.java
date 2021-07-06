@@ -1850,6 +1850,7 @@ public class ProcessorsResource  {
 		
 		try {
 			
+			// Check authorization
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
 				sTokenSessionId = sSessionId;
 			}
@@ -1861,6 +1862,7 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			// Check the processor
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
@@ -1885,11 +1887,7 @@ public class ProcessorsResource  {
 			
 			File oFile = oFilePath.toFile();
 			
-//			if(!oFile.exists()) {
-//				Utils.debugLog("ProcessorsResource.downloadProcessor: zip file not found");
-//				return Response.status(Status.NOT_FOUND).build();
-//			}
-			
+			// Create the zip and return the stream						
 			return zipProcessor(oFile, oProcessor);			
 		} 
 		catch (Exception oEx) {
