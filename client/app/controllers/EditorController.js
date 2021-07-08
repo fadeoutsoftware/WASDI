@@ -440,6 +440,11 @@ var EditorController = (function () {
                 if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) == false) {
                     oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
                     oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
+                    oController.setLayerOpacity(oController.m_oActiveBand.opacity,oController.m_oActiveBand.layerId);
+                    // Re-apply layers opacity fìoer each band
+                    oController.m_aoVisibleBands.forEach(oCurBand => {
+                        oController.setLayerOpacity(oCurBand.opacity,oCurBand.layerId);
+                    });
 
                 } else {
                     // Zoom on the workspace
@@ -1502,6 +1507,7 @@ var EditorController = (function () {
     /**
      * Set the opacity for the layer identified by the index
      * @param {int} iOpacity level of opacity
+     * @param {string} sLayerId the name representig the band
      */
     EditorController.prototype.setLayerOpacity = function (iOpacity, sLayerId) {
         var oMap = this.m_oMapService.getMap();
@@ -1520,6 +1526,8 @@ var EditorController = (function () {
         
     }
 
+    EditorController.prototype.setAllLayersOpacity = function () {
+    }
 
     /**
      * Add layer for Cesium Globe
