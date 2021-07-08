@@ -740,53 +740,7 @@ public class Wasdi extends ResourceConfig {
 			return "";
 		}
 	}
-	
-	
-	/**
-	 * Standard http get utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post 
-	 * @param asHeaders headers dictionary
-	 * @return server response
-	 */
-	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
 		
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setConnectTimeout(2000);
-			oConnection.setReadTimeout(2000);
-
-			oConnection.setDoOutput(true);
-			// Set POST
-			oConnection.setRequestMethod("GET");
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-				}
-			}
-						
-			oConnection.connect();
-
-			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String sInputLine;
-			StringBuilder sResponse = new StringBuilder();
-	
-			while ((sInputLine = oInputBuffer.readLine()) != null) {
-				sResponse.append(sInputLine);
-			}
-			oInputBuffer.close();
-			
-			return sResponse.toString();
-		}
-		catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-		
-	
 	public static void httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) throws IOException 
 	{
 		//local file -> automatically checks for null
@@ -914,6 +868,112 @@ public class Wasdi extends ResourceConfig {
 			catch (Exception oE) {
 				Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
 			}			
+		}
+	}
+	
+	
+	/**
+	 * Standard http put utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders) {
+		return httpPut(sUrl, sPayload, asHeaders, null);
+	}
+	
+	/**
+	 * Standard http put utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post
+	 * @param asHeaders headers dictionary
+	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
+	 * @return server response
+	 */
+	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			if(!Utils.isNullOrEmpty(sAuth)) {
+				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
+				String sAuthHeaderValue = "Basic " + sEncodedAuth;
+				oConnection.setRequestProperty("Authorization", sAuthHeaderValue);
+
+			}
+
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("PUT");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+			
+			OutputStream oPostOutputStream = oConnection.getOutputStream();
+			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
+			if (sPayload!= null) oStreamWriter.write(sPayload);
+			oStreamWriter.flush();
+			oStreamWriter.close();
+			oPostOutputStream.close(); 
+			
+			oConnection.connect();
+
+			String sMessage = readHttpResponse(oConnection);
+			oConnection.disconnect();
+			
+			return sMessage;
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+	
+	/**
+	 * Standard http get utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post 
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
+		
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setConnectTimeout(2000);
+			oConnection.setReadTimeout(2000);
+
+			oConnection.setDoOutput(true);
+			// Set POST
+			oConnection.setRequestMethod("GET");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+						
+			oConnection.connect();
+
+			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+			String sInputLine;
+			StringBuilder sResponse = new StringBuilder();
+	
+			while ((sInputLine = oInputBuffer.readLine()) != null) {
+				sResponse.append(sInputLine);
+			}
+			oInputBuffer.close();
+			
+			return sResponse.toString();
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
 		}
 	}
 
