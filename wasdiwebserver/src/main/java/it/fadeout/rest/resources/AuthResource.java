@@ -958,13 +958,7 @@ public class AuthResource {
 				//else nothing is returned here and in the end 500 is returned
 				break;
 			case "KEYCLOAK":
-				//prepare URL
-				// PUT /auth/admin/realms/{realm}/users/{id}/execute-actions-email
-				//required action: "UPDATE_PASSWORD"
-				String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
-				String sToken = m_oKeycloakService.getToken();
-				//TODO PUT to send email to the user to initiate password recovery				
-				break;
+				return m_oKeycloakService.requirePasswordUpdateViaEmail(sUserId);
 			default:
 				break;
 			}
