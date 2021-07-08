@@ -1503,15 +1503,21 @@ var EditorController = (function () {
      * Set the opacity for the layer identified by the index
      * @param {int} iOpacity level of opacity
      */
-    EditorController.prototype.setLayerOpacity = function (iOpacity, iIndexLayer) {
+    EditorController.prototype.setLayerOpacity = function (iOpacity, sLayerId) {
         var oMap = this.m_oMapService.getMap();
         var fPercentage = iOpacity / 100;
         var layers = [];
         oMap.eachLayer(function (layer) {
-            if (layer instanceof L.TileLayer)
-                layers.push(layer);
+            if (layer instanceof L.TileLayer ){
+                if (!utilsIsObjectNullOrUndefined(layer.options.layers)){
+                    if (layer.options.layers == ("wasdi:"+sLayerId)){
+                        layer.setOpacity(fPercentage); // condition to be fixed to avoid duplicates
+                    }
+                }
+            }
+                
         });
-        layers[iIndexLayer].setOpacity(fPercentage);
+        
     }
 
 
