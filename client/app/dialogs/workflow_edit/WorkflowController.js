@@ -129,6 +129,7 @@ var WorkflowController = (function () {
                 .catch(function (data) {
                     let dialog;
                     if (data.status == 304) dialog = utilsVexDialogAlertBottomRightCorner("MODIFICATIONS REJECTED<br>PLEASE CHECK THE XML");
+                    if (data.status == 401) dialog = utilsVexDialogAlertBottomRightCorner("MODIFICATIONS REJECTED<br>UNAUTHORIZED");
                     else dialog = utilsVexDialogAlertBottomRightCorner("INTERNAL SERVER ERROR<br>PLEASE TRY AGAIN LATER");
                     utilsVexCloseDialogAfter(4000, dialog);
                 });

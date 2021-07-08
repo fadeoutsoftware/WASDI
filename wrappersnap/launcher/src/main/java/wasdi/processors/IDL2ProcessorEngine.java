@@ -18,6 +18,32 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
 		m_sDockerTemplatePath += "idl";		
 	}
+	
+	@Override
+	protected void onAfterUnzipProcessor(String sProcessorFolder) {
+		
+		try {
+			File oProcessorFolder = new File(sProcessorFolder);
+			if (!oProcessorFolder.exists()) return;
+			
+			if (!sProcessorFolder.endsWith(""+File.separatorChar)) sProcessorFolder = sProcessorFolder + File.separatorChar;
+			
+			String sRunscript = sProcessorFolder + "runwasdidocker.sh";
+			
+			File oRunScriptFile = new File(sRunscript);
+			
+			if (oRunScriptFile.exists()) {
+				if (!oRunScriptFile.delete()) {
+					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterUnzipProcessor: ERROR deleting runwasdidocker.sh");
+				}
+			}
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterUnzipProcessor: Exception :"+oEx.toString());
+		}
+		
+		//super.onAfterUnzipProcessor(sProcessorFolder);
+	}
 
 	/**
 	 * After copy template, overwrite call_idl, wasdi_wrapper e run processor
@@ -120,6 +146,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 				}							
 			}
 			
+			/*
+			 * 
 			File oRunFile = new File(sRunFile);
 			
 			try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
@@ -141,8 +169,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					oRunWriter.flush();
 					oRunWriter.close();
 				}			
-				
 			}
+			*/
 						
 			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
 

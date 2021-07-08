@@ -300,7 +300,7 @@ var EditorController = (function () {
         let oBand, sFileName;
         this.m_iActiveMapPanelTab = iTab;
         // if was clicked the tab color manipulation && the active band isn't null && there isn't any saved colour manipulation, get colour manipulation
-        if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
+        /*if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
             (this.m_bIsLoadingColourManipulation === false)) {
             oBand = this.m_oActiveBand;
             sFileName = this.m_aoProducts[oBand.productIndex].fileName
@@ -330,6 +330,7 @@ var EditorController = (function () {
 
             this.processingGetBandPreview(oBodyImagePreview, this.m_oActiveWorkspace.workspaceId);
         }
+        */
     };
 
 
@@ -1350,7 +1351,7 @@ var EditorController = (function () {
         // Get the layer Id
         var sLayerId = "wasdi:" + oBand.layerId;
         //set navigation tab
-        this.m_iActiveMapPanelTab = 0;
+        //this.m_iActiveMapPanelTab = 0;
         //remove preview band image
         this.m_sPreviewUrlSelectedBand = "empty";
         // Check the actual Mode
@@ -2691,12 +2692,13 @@ var EditorController = (function () {
         {
             'core': { 'data': [], "check_callback": true },
             "state": { "key": "state_tree" },
-            "plugins": ["checkbox", "contextmenu", "state", "search"], // plugins in use
+            "plugins": ["checkbox", "contextmenu", "search"], // plugins in use
             "search": {
                 "show_only_matches": true,
                 "show_only_matches_children": true
             },
             "contextmenu": { // my right click menu
+                "select_node" : false,
                 "items": function ($node) {
 
                     //only the band has property $node.original.band
@@ -2938,6 +2940,9 @@ var EditorController = (function () {
                                                     $.each(asSelectedProducts, function (i, val) {
                                                         oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
                                                     });
+                                                    /// deselect all 
+                                                    $("#jstree").jstree().deselect_all(true);
+
                                                 }, (function (error) {
                                                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                 }));
@@ -3260,6 +3265,21 @@ var EditorController = (function () {
         //reload product list
         this.getProductListByWorkspace();
     };
+
+    EditorController.prototype.navigateTo = function (iIndexLayer){
+         // Check for geoserver bounding box
+         if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
+            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
+        } else {
+            // Try with the generic product bounding box
+            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
+
+        }
+    }
 
     EditorController.prototype.deleteProductInGlobe = function (aoVisibleBands, oChildrenNode) {
         var iLengthLayer = aoVisibleBands.length;

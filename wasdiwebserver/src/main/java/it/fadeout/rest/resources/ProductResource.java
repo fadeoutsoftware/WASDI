@@ -811,30 +811,35 @@ public class ProductResource {
             }
 
             if (bDeleteLayer) {
+            	
+            	try {
+                    // Delete layerId on Geoserver
+                    GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
 
-                // Delete layerId on Geoserver
-                GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
-
-                // For all the published bands
-                for (PublishedBand oPublishedBand : aoPublishedBands) {
-                    try {
-                        Utils.debugLog("ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
-
-                        if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-                            Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
-                        }
-
+                    // For all the published bands
+                    for (PublishedBand oPublishedBand : aoPublishedBands) {
                         try {
-                            // delete published band on data base
-                            oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
-                        } catch (Exception oEx) {
-                            Utils.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
-                        }
+                            Utils.debugLog("ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
 
-                    } catch (Exception oEx) {
-                        Utils.debugLog("ProductResource.DeleteProduct: " + oEx);
-                    }
-                }
+                            if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+                                Utils.debugLog("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+                            }
+
+                            try {
+                                // delete published band on data base
+                                oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+                            } catch (Exception oEx) {
+                                Utils.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
+                            }
+
+                        } catch (Exception oEx) {
+                            Utils.debugLog("ProductResource.DeleteProduct: " + oEx);
+                        }
+                    }            		
+            	}
+            	catch (Exception oEx) {
+                    Utils.debugLog("ProductResource.DeleteProduct: Exception deleting layers: " + oEx);
+                }            	
             }
 
             // delete the product-workspace related records on db and the Downloaded File Entry
@@ -927,21 +932,19 @@ public class ProductResource {
                                          List<String> as_ProductList) {
         // Support variable used to identify if deletions of one or more products failed
         AtomicBoolean bDirty = new AtomicBoolean(false);
-        as_ProductList.stream().forEach(s -> {
+        as_ProductList.stream().forEach(sFile -> {
             // if one deletion fail is detected the bDirty boolean becames true
-            bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,s,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
+            bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,sFile,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
         });
 
-        PrimitiveResult primitiveResult = new PrimitiveResult();
+        PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 
-        if (bDirty.get()) primitiveResult.setIntValue(207);
-        else primitiveResult.setIntValue(200);
+        if (bDirty.get()) oPrimitiveResult.setIntValue(207);
+        else oPrimitiveResult.setIntValue(200);
         // returns the opposite value of Dirty
-        primitiveResult.setBoolValue(!bDirty.get());
+        oPrimitiveResult.setBoolValue(!bDirty.get());
 
-        return primitiveResult;
-
-
+        return oPrimitiveResult;
     }
 
 }
