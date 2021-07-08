@@ -743,7 +743,7 @@ public class Wasdi extends ResourceConfig {
 	
 	
 	/**
-	 * Standard http post utility function
+	 * Standard http get utility function
 	 * @param sUrl url to call
 	 * @param sPayload payload of the post 
 	 * @param asHeaders headers dictionary
