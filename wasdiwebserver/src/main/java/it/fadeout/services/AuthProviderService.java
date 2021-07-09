@@ -2,6 +2,7 @@
  * 
  */
 package it.fadeout.services;
+import wasdi.shared.business.User;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -15,5 +16,13 @@ public interface AuthProviderService {
 	String login(String sUser, String sPassword);
 	String getUserDbId(String sUserId);
 	PrimitiveResult requirePasswordUpdateViaEmail(String sUserId);
+	/**
+	 * Checks the user exists in keycloak
+	 * @param sUserId the id of the user (in most cases, her/his email)
+	 * @return a User if it exists, null otherwise
+	 * @throws NullPointerException if the response is null
+	 * @throws IllegalStateException if the users found come in quantity different from 1
+	 */
+	User getUser(String sUserId);
 
 }
