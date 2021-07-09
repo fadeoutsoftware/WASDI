@@ -1,6 +1,5 @@
 package it.fadeout.services;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.business.User;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
@@ -149,9 +150,6 @@ public class KeycloakService implements AuthProviderService {
 				.append(sUserDbId)
 				.append("/execute-actions-email?redirect_uri=https://www.wasdi.net/&client_id=wasdi_api");
 		String sUrl = oUrlBuilder.toString();
-		//todo check if it is possible to invalidate current password (password expire?)
-		//alternatively: set a temporary password unknown to the user
-		//todo decide whether we want to interrupt existing sessions
 		String sPayload = "[\"UPDATE_PASSWORD\"]";
 		try {
 			String sToken = getToken();
@@ -168,6 +166,42 @@ public class KeycloakService implements AuthProviderService {
 		
 				
 		return oResult;
+	}
+	
+
+	@Override
+	public User getUser(String sUserId) {
+		//first: authenticate on keycloak as admin and get the token
+		String sKcTokenId = getToken();
+		
+		// second: check the user exists on keycloak
+		String sBody = getUserData(sKcTokenId, sUserId);
+
+		//validate
+		if(Utils.isNullOrEmpty(sBody)) {
+			throw new NullPointerException("keycloak returned null body");
+		}
+		JSONArray oJsonArray = new JSONArray(sBody);
+		if(oJsonArray.length() < 1 ) {
+			throw new IllegalStateException("Returned JSON array has 0 or less elements");
+		}
+		if(oJsonArray.length() > 1 ) {
+			throw new IllegalStateException("Returned JSON array has more than 1 element");
+		}
+
+		//then get the user
+		JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
+		User oNewUser = new User();
+		if(oJsonResponse.has("firstName")) {
+			oNewUser.setName(oJsonResponse.optString("firstName", null));
+		}
+		if(oJsonResponse.has("lastName")) {
+			oNewUser.setSurname(oJsonResponse.optString("lastName", null));
+		}
+		if(oJsonResponse.has("createdTimestamp")) {
+			oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", System.currentTimeMillis())));
+		}
+		return oNewUser;
 	}
 }
 
