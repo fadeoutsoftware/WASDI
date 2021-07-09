@@ -420,7 +420,7 @@ public class AuthResource {
 		String sExt;
 		String sFileName;
 
-		User oUser = getUser(sSessionId);
+		User oUser = getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -453,7 +453,7 @@ public class AuthResource {
 	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
 
 
-		User oUser = getUser(sSessionId);
+		User oUser = getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -477,7 +477,7 @@ public class AuthResource {
 	@DELETE
 	@Path("/delete/userimage")
 	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
-		User oUser = getUser(sSessionId);
+		User oUser = getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -638,32 +638,17 @@ public class AuthResource {
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
 
-				//first: authenticate on keycloak as admin and get the token
-				String sKcTokenId = m_oKeycloakService.getToken();
+				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
-				// second: check the user exists on keycloak
-				String sBody = m_oKeycloakService.getUserData(sKcTokenId, oRegistrationInfoViewModel.getUserId());
+				User oNewUser = m_oKeycloakService.getUser(sUserId);
+				if(null==oNewUser) {
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setIntValue(400); //forbidden
+					Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " not found in keycloak, aborting");
+					return oResult;
+				}
 				
-
-				JSONArray oJsonArray = new JSONArray(sBody);
-				if(oJsonArray.length() < 1 ) {
-					//TODO this means no such user has been found, return 404
-					throw new IllegalStateException("Returned JSON array has 0 or less elements");
-				}
-				if(oJsonArray.length() > 1 ) {
-					throw new IllegalStateException("Returned JSON array has more than 1 element");
-				}
-				JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
-				User oNewUser = new User();
-				if(oJsonResponse.has("firstName")) {
-					oNewUser.setName(oJsonResponse.optString("firstName", null));
-				}
-				if(oJsonResponse.has("lastName")) {
-					oNewUser.setSurname(oJsonResponse.optString("lastName", null));
-				}
-				if(oJsonResponse.has("createdTimestamp")) {
-					oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", 0l)));
-				}
+				//populate remaining fields
 				oNewUser.setValidAfterFirstAccess(true);
 				oNewUser.setAuthServiceProvider("keycloak");
 				Utils.debugLog("AuthResource.userRegistration: user details parsed");
@@ -682,7 +667,7 @@ public class AuthResource {
 
 				//third: store user in DB
 				//create new user
-				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
+				oNewUser.setUserId(sUserId);
 				oNewUser.setDefaultNode(sDefaultNode);
 				oNewUser.setValidAfterFirstAccess(true);
 
@@ -717,6 +702,7 @@ public class AuthResource {
 		oResult.setIntValue(500);
 		return oResult;
 	}
+
 
 
 	@GET
@@ -1146,7 +1132,7 @@ public class AuthResource {
 		return true;
 	}
 
-	protected User getUser(String sSessionId){
+	protected User getUserFromSession(String sSessionId){
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return null;
