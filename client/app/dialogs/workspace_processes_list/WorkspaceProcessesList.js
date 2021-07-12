@@ -64,13 +64,15 @@ var WorkspaceProcessesList = (function () {
     WorkspaceProcessesList.prototype.testInterval = function () {
         let oController = this;
         var iCount = 1;
+         
+        // Check the status of The windows in the update loop ! 
+
         oController.m_oTick = oController.m_oInterval(function () {
-            console.log("Interval");
             oController.resetCounters();
             oController.m_aoProcessesLogs = [];
             oController.getAllProcessesLogs();
             iCount++;
-            if (iCount > 10) {
+            if (iCount > 10) { // limits the test to 10 times 
                 oController.stopTick();
             }
         }, 5000);
