@@ -214,11 +214,17 @@ var ProcessorController = (function() {
 
             if (oController.m_bEditMode == true) {
 
+                //new condition -> The user didn't put anything on the params
+                if (oController.m_sJSONSample == "" ) {
+                    oController.m_sJSONSample = "{}"; // suppose it was an empty JSON 
+                }
                 if (!oController.tryParseJSON(oController.m_sJSONSample)) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("PLEASE CHECK YOUR JSON<br>IN THE PARAMS SAMPLE");
                     utilsVexCloseDialogAfter(4000,oDialog);
                     return;
                 }
+                
+
 
                 if (oController.m_bUIChanged) {
                     if (!oController.tryParseJSON(oController.m_sProcessorUI)) {
@@ -239,8 +245,8 @@ var ProcessorController = (function() {
             else {
                 oController.postProcessor(oController, oController.m_oFile[0]);
             }
-
-            oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate
+            // close only if successfull?
+            //oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate
         };
 
         // Are we creating a new processor or editing an existing one?
@@ -523,7 +529,15 @@ var ProcessorController = (function() {
                      // SHARING SAVED
                  }else
                  {
-                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING PROCESSOR");
+                     sMessage = "GURU MEDITATION<br>ERROR SHARING PROCESSOR"
+
+                     if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                         if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                             sMessage = sMessage + ": " + data.data.stringValue;
+                         }
+                     }
+
+                     utilsVexDialogAlertTop(sMessage);
                  }
                  oController.getListOfEnableUsers(sFinalProcessorId);
 

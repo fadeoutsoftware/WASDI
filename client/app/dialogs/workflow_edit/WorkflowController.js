@@ -11,7 +11,7 @@ var WorkflowController = (function () {
         /**
          * Class callback
          */
-        this.m_oClose=oClose;
+        this.m_oClose = oClose;
         /**
          * Reference to the controller
          */
@@ -65,7 +65,24 @@ var WorkflowController = (function () {
         // Let's init the modal
         this.initModal();
 
+        // model variable that contains the Xml of the graph
+        this.m_asWorkflowXml;
+        // support variable enabled when the xml is edited on edit xml tab 
+        this.m_bXmlEdited = false;
+
     }
+
+    /**
+     * Methods to be implemented On BE: 
+     * 1- getXmlFromFile on server
+     * 2a - Convert to file and invoke update file 
+     * -- OR -- 
+     * 2b - Update Xml as text <--- nuova chiamata PUT or POST del testo
+     * 
+     * Potential problem : both upload and edit -> check the current tab active
+     * (maybe notify user?)
+     * 
+     */
 
     /**
      * Init the current view accordingly to mode.
@@ -87,6 +104,35 @@ var WorkflowController = (function () {
         else {
             //Init the list of users which this workflow is shared with
             this.getListOfEnabledUsers(this.m_oWorkflow.workflowId);
+            this.getWorkflowXml(this.m_oWorkflow.workflowId);
+        }
+    }
+
+    WorkflowController.prototype.getWorkflowXml = function (sWorkflowId) {
+        var oController = this;
+        this.m_oSnapOperationService.getWorkflowXml(sWorkflowId).then(function (data) {
+            oController.m_asWorkflowXml = data.data;
+        });
+    }
+
+    WorkflowController.prototype.updateWorkflowXml = function () {
+        var oController = this;
+        if (!utilsIsStrNullOrEmpty(oController.m_asWorkflowXml)) {
+            let oBody = new FormData();
+            oBody.append('graphXml', oController.m_asWorkflowXml);
+            this.m_oSnapOperationService.postWorkflowXml(oController.m_oWorkflow.workflowId, oBody)
+                .then(function (data) {
+                    let dialog;
+                    if (data.status == 200) dialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW XML UPDATED");
+                    utilsVexCloseDialogAfter(4000, dialog);
+                })
+                .catch(function (data) {
+                    let dialog;
+                    if (data.status == 304) dialog = utilsVexDialogAlertBottomRightCorner("MODIFICATIONS REJECTED<br>PLEASE CHECK THE XML");
+                    if (data.status == 401) dialog = utilsVexDialogAlertBottomRightCorner("MODIFICATIONS REJECTED<br>UNAUTHORIZED");
+                    else dialog = utilsVexDialogAlertBottomRightCorner("INTERNAL SERVER ERROR<br>PLEASE TRY AGAIN LATER");
+                    utilsVexCloseDialogAfter(4000, dialog);
+                });
         }
     }
 
@@ -110,11 +156,17 @@ var WorkflowController = (function () {
         if (this.m_sSelectedTab == "Base") {
             if (this.m_bEditMode) {
                 // UPDATE 
-                this.updateGraph(); 
+                this.updateGraph();
             }
-            else { 
+            else {
                 // UPLOAD
                 this.uploadUserGraphOnServer();
+            }
+        }
+        if (this.m_sSelectedTab == "Xml") {
+            if (this.m_bXmlEdited) {
+                // UPDATE 
+                this.updateWorkflowXml();
             }
         }
         //cose the dialog
@@ -219,7 +271,7 @@ var WorkflowController = (function () {
         this.m_oSnapOperationService.uploadGraph("workspace", sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
-                var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>"+ sName.toUpperCase());
+                var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>" + sName.toUpperCase());
                 utilsVexCloseDialogAfter(4000, oDialog);
 
             } else {

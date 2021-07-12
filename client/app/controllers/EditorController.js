@@ -3,9 +3,9 @@
  */
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
-                              oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService, oTranslate, oCatalogService,
-                              $window) {
+        oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
+        oSnapOperationService, oModalService, oFilterService, oTranslate, oCatalogService,
+        $window) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -56,6 +56,13 @@ var EditorController = (function () {
         // Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+        // Field used to control the opacity of the base layer in 2D map mode
+        this.oBaseBand = {
+            "opacity": 100
+        }
+        // support variable to handle select all/ de select all in tree
+        this.m_bAllSelected = false;
+
 
         this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
         // Object used to exchange information with the image preview directive
@@ -112,7 +119,7 @@ var EditorController = (function () {
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
         // add the GeoSearch plugin bar
-        oMapService.initGeoSearchPluginForOpenStreetMap({"position": 'bottomRight'});
+        oMapService.initGeoSearchPluginForOpenStreetMap({ "position": 'bottomRight' });
         oMapService.removeLayersFromMap();
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
@@ -293,7 +300,7 @@ var EditorController = (function () {
         let oBand, sFileName;
         this.m_iActiveMapPanelTab = iTab;
         // if was clicked the tab color manipulation && the active band isn't null && there isn't any saved colour manipulation, get colour manipulation
-        if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
+        /*if ((iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
             (this.m_bIsLoadingColourManipulation === false)) {
             oBand = this.m_oActiveBand;
             sFileName = this.m_aoProducts[oBand.productIndex].fileName
@@ -323,6 +330,7 @@ var EditorController = (function () {
 
             this.processingGetBandPreview(oBodyImagePreview, this.m_oActiveWorkspace.workspaceId);
         }
+        */
     };
 
 
@@ -637,7 +645,8 @@ var EditorController = (function () {
 
                     } else {
                         oController.m_aoVisibleBands = [];
-                        oController.m_aoVisibleBands.push(oController.m_oActiveBand);
+                        // unshift means add to first position
+                        oController.m_aoVisibleBands.unshift(oController.m_oActiveBand);
                     }
                     // Reopen only the active one
                     oController.openBandImage(oController.m_oActiveBand);
@@ -824,7 +833,7 @@ var EditorController = (function () {
         }
 
         // Get the Tree Node
-        
+
         var sNodeID = oPublishedBand.productName + "_" + oPublishedBand.bandName;
         var oNode = $('#jstree').jstree(true).get_node(sNodeID);
 
@@ -875,13 +884,14 @@ var EditorController = (function () {
                 this.addLayerMap2DByServer(oBand.layerId, oBand.geoserverUrl);
 
             }
-
-            this.m_aoVisibleBands.push(oBand);
+            // show the layer with full opacity at ther beginning
+            oBand.opacity = 100;
+            this.m_aoVisibleBands.unshift(oBand);
 
             if (this.m_aoVisibleBands.length == 1) {
 
                 if (!this.m_bFirstZoomOnBandDone) {
-                    // Make auto zoom only once 
+                    // Make auto zoom only once
                     this.m_bFirstZoomOnBandDone = true;
 
                     //if there isn't Bounding Box is impossible to zoom
@@ -1019,7 +1029,7 @@ var EditorController = (function () {
 
 
             }
-        },(function (data, status) {
+        }, (function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         }));
     };
@@ -1047,7 +1057,7 @@ var EditorController = (function () {
                     }
                 }
             }
-        },(function (data, status) {
+        }, (function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITOR')
         }));
 
@@ -1094,7 +1104,7 @@ var EditorController = (function () {
 
         this.m_oActiveBand = oBand;
         //set navigation tab
-        this.m_iActiveMapPanelTab = 0;
+        //this.m_iActiveMapPanelTab = 0;
         //set default value for preview image
         this.m_sPreviewUrlSelectedBand = "empty";
 
@@ -1125,7 +1135,7 @@ var EditorController = (function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
                     oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
                 }
-            },(function (data, status) {
+            }, (function (data, status) {
                 console.log('publish band error');
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
                 oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
@@ -1206,13 +1216,13 @@ var EditorController = (function () {
         this.m_oFilterService.getProductBand(oBody, workspaceId).then(function (data, status) {
             if (data.data != null) {
                 if (data.data != undefined) {
-                    var blob = new Blob([data.data], {type: "octet/stream"});
+                    var blob = new Blob([data.data], { type: "octet/stream" });
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sPreviewUrlSelectedBand = objectUrl;
                     oController.m_bIsLoadedPreviewBandImage = true;
                 }
             }
-        },(function (data, status) {
+        }, (function (data, status) {
             // Clear the editor
             oController.clearImageEditor();
             oController.m_bIsLoadedPreviewBandImage = true;
@@ -1250,7 +1260,7 @@ var EditorController = (function () {
             if (data.data != null) {
                 if (data.data != undefined) {
                     // Create the link to the stream
-                    var blob = new Blob([data.data], {type: "octet/stream"});
+                    var blob = new Blob([data.data], { type: "octet/stream" });
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sViewUrlSelectedBand = objectUrl;
 
@@ -1259,7 +1269,7 @@ var EditorController = (function () {
                     oController.setTreeNodeAsSelected(sNodeID);
 
                     // And set the node in the visible list
-                    oController.m_aoVisibleBands.push(oController.m_oActiveBand);
+                    oController.m_aoVisibleBands.unshift(oController.m_oActiveBand);
 
                     // Zoom on the bounding box in the 3d globe
                     oController.m_oGlobeService.zoomBandImageOnBBOX(oController.m_aoProducts[oController.m_oActiveBand.productIndex].bbox);
@@ -1268,7 +1278,7 @@ var EditorController = (function () {
                     // oController.getProductColorManipulation(oBody.productFileName,oBody.bandName,true,workspaceId);
                 }
             }
-        },(function (data, status) {
+        }, (function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
             // Set the node as selected
             var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
@@ -1300,7 +1310,7 @@ var EditorController = (function () {
      * @returns {{productFileName: *, bandName: *, filterVM: *, vp_x: *, vp_y: *, vp_w: *, vp_h: *, img_w: *, img_h: *}}
      */
     EditorController.prototype.createBodyForProcessingBandImage = function (sFileName, sBandName, sFilters, iRectangleX, iRectangleY,
-                                                                            iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight, oColorManipulation) {
+        iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight, oColorManipulation) {
 
         var oBandImageBody = {
             "productFileName": sFileName,
@@ -1341,7 +1351,7 @@ var EditorController = (function () {
         // Get the layer Id
         var sLayerId = "wasdi:" + oBand.layerId;
         //set navigation tab
-        this.m_iActiveMapPanelTab = 0;
+        //this.m_iActiveMapPanelTab = 0;
         //remove preview band image
         this.m_sPreviewUrlSelectedBand = "empty";
         // Check the actual Mode
@@ -1378,8 +1388,8 @@ var EditorController = (function () {
                 // Fly Home
                 // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
-        } 
-        else 
+        }
+        else
         {
             this.removeBandLayersIn3dMaps(sLayerId);
             //if the layers isn't georeferenced remove the Corresponding rectangle
@@ -1478,6 +1488,7 @@ var EditorController = (function () {
             format: 'image/png',
             transparent: true,
             noWrap: true,
+            opacity: 1
         });
 
         //it set the zindex of layer in map
@@ -1487,6 +1498,22 @@ var EditorController = (function () {
 
         return true;
     };
+
+    /**
+     * Set the opacity for the layer identified by the index
+     * @param {int} iOpacity level of opacity
+     */
+    EditorController.prototype.setLayerOpacity = function (iOpacity, iIndexLayer) {
+        var oMap = this.m_oMapService.getMap();
+        var fPercentage = iOpacity / 100;
+        var layers = [];
+        oMap.eachLayer(function (layer) {
+            if (layer instanceof L.TileLayer)
+                layers.push(layer);
+        });
+        layers[iIndexLayer].setOpacity(fPercentage);
+    }
+
 
     /**
      * Add layer for Cesium Globe
@@ -1603,10 +1630,10 @@ var EditorController = (function () {
         this.m_bIsVisiblePixelInfo = !this.m_bIsVisiblePixelInfo;
 
         if (this.m_bIsVisiblePixelInfo == true) {
-            $('.leaflet-popup-pane').css({"visibility": "visible"});
+            $('.leaflet-popup-pane').css({ "visibility": "visible" });
             $('.leaflet-container').css('cursor', 'crosshair');
         } else {
-            $('.leaflet-popup-pane').css({"visibility": "hidden"});
+            $('.leaflet-popup-pane').css({ "visibility": "hidden" });
             $('.leaflet-container').css('cursor', '');
         }
     };
@@ -1828,8 +1855,8 @@ var EditorController = (function () {
                         }, function (data, status) {
                         });
                 }
-            },(function (data, status) {
-        }));
+            }, (function (data, status) {
+            }));
 
 
         return true;
@@ -1902,13 +1929,13 @@ var EditorController = (function () {
                     if (data.data != null) {
                         if (data.data != undefined) {
                             // Create the link to the stream
-                            var blob = new Blob([data.data], {type: "octet/stream"});
+                            var blob = new Blob([data.data], { type: "octet/stream" });
                             var objectUrl = URL.createObjectURL(blob);
                             oController.m_sViewUrlSelectedBand = objectUrl;
                         }
                     }
                     oController.m_bIsLoadedViewBandImage = true;
-                },(function (data, status) {
+                }, (function (data, status) {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
                     oController.m_bIsLoadedViewBandImage = true;
                 }));
@@ -2150,7 +2177,7 @@ var EditorController = (function () {
             if (data != null) {
                 if (data != undefined) {
                     // Create the link to the stream
-                    var blob = new Blob([data], {type: "octet/stream"});
+                    var blob = new Blob([data], { type: "octet/stream" });
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sViewUrlSelectedBand = objectUrl;
                 }
@@ -2326,7 +2353,7 @@ var EditorController = (function () {
             },
 
         };
-        Plotly.newPlot(sNameDiv, data, layout, {staticPlot: true});//,layout,{staticPlot: true}
+        Plotly.newPlot(sNameDiv, data, layout, { staticPlot: true });//,layout,{staticPlot: true}
 
         return true;
     };
@@ -2460,7 +2487,7 @@ var EditorController = (function () {
                 }
             }
             oController.m_bIsLoadingColourManipulation = false;
-        },(function (data, status) {
+        }, (function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>PRODUCT COLOR MANIPULATION ');
             oController.m_bIsLoadingColourManipulation = false;
         }));
@@ -2662,196 +2689,297 @@ var EditorController = (function () {
     EditorController.prototype.generateTree = function () {
         var oController = this;
         var oTree =
-            {
-                'core': {'data': [], "check_callback": true},
-                "state": {"key": "state_tree"},
-                "plugins": ["contextmenu", "state", "search"], // all plugin in use
-                "search": {
-                    "show_only_matches": true,
-                    "show_only_matches_children": true
-                },
-                "contextmenu": { // my right click menu
-                    "items": function ($node) {
+        {
+            'core': { 'data': [], "check_callback": true },
+            "state": { "key": "state_tree" },
+            "plugins": ["checkbox", "contextmenu", "search"], // plugins in use
+            "search": {
+                "show_only_matches": true,
+                "show_only_matches_children": true
+            },
+            "contextmenu": { // my right click menu
+                "select_node" : false,
+                "items": function ($node) {
 
-                        //only the band has property $node.original.band
-                        var oReturnValue = null;
-                        if (utilsIsObjectNullOrUndefined($node.original.band) == false) {
-                            //******************************** BAND *************************************
-                            var oBand = $node.original.band;
+                    //only the band has property $node.original.band
+                    // menu showed when a band is selected
+                    var oReturnValue = null;
+                    if (utilsIsObjectNullOrUndefined($node.original.band) == false) {
+                        //******************************** BAND *************************************
+                        var oBand = $node.original.band;
 
-                            oReturnValue =
-                                {
-                                    "Workflow": {
-                                        "label": "Workflow",
-                                        "action": function (obj) {
+                        oReturnValue =
+                        {
+                            "Zoom2D": {
+                                "label": "Zoom Band 2D Map",
+                                "action": function (obj) {
+                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
+                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                                    }
+                                },
+                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
+                                "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
+                            },
+                            "Zoom3D": {
+                                "label": "Zoom Band 3D Map",
+                                "action": function (obj) {
+                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
+                                        oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                                    }
+                                },
+                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
+                                "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
+                            },
+                            /*"Workflow": {
+                                "label": "Workflow",
+                                "action": function (obj) {
+                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+
+                                    if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowManagerDialog();
+                                }
+
+                            },
+                            "Filter Band": {
+                                "label": "Filter Band",
+                                "action": function (pbj) {
+                                    if (utilsIsObjectNullOrUndefined(oBand) == false)
+                                        oController.filterBandDialog(oBand);
+                                },
+                                "_disabled": !$node.original.band.bVisibleNow
+                            },
+                            "Mask Manager": {
+                                "label": "Mask Manager",
+                                "action": function (pbj) {
+                                    if (utilsIsObjectNullOrUndefined(oBand) == false)
+                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                    oController.openMaskManager(oBand, oFoundProduct);
+                                },
+                                "_disabled": !$node.original.band.bVisibleNow
+                            },*/
+                            "Download": {
+                                "label": "Download",
+                                "icon": "fa fa-download",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "action": function (obj) {
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
+                                        oController.findProductByName($node.original.fileName);
+                                        // var oEntry = {
+                                        //     "fileName": oProduct.fileName,
+                                        //     "filePath": oProduct.filePath
+                                        // };
+                                        // oController.downloadEntry(oEntry);
+                                        oController.downloadProductByName($node.original.fileName);
+                                    }
+                                }
+                            },
+                            "SendToFtp": {
+                                "label": "Send To Ftp",
+                                "icon": "fa fa-upload",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "action": function (obj) {
+                                    var sSourceFileName = $node.original.fileName;
+                                    var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
+                                }
+                            },
+
+                            "DeleteProduct": {
+                                "label": "Delete Product",
+                                "icon": "delete-icon-context-menu-jstree",
+
+                                "action": function (obj) {
+
+                                    utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
+                                        if (value) {
+                                            bDeleteFile = true;
+                                            bDeleteLayer = true;
+                                            this.temp = $node.parents[1];
+                                            var that = this;
+
                                             var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
 
-                                            if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowManagerDialog();
+                                            oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
+                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                            }, (function (error) {
+                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                            }));
                                         }
+                                    });
+                                }
+                            },
+                            "Properties": {
+                                "label": "Properties ",
+                                "icon": "info-icon-context-menu-jstree",
+                                "separator_before": true,
+                                "action": function (obj) {
+                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                    if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
+                                }
+                            }
+                            /*"DeleteSelectedProduct": {
+                                "label": "Delete All selected",
+                                "icon": "delete-icon-context-menu-jstree",
 
-                                    },
-                                    "Filter Band": {
-                                        "label": "Filter Band",
-                                        "action": function (pbj) {
-                                            if (utilsIsObjectNullOrUndefined(oBand) == false)
-                                                oController.filterBandDialog(oBand);
-                                        },
-                                        "_disabled": !$node.original.band.bVisibleNow
-                                    },
-                                    "Mask Manager": {
-                                        "label": "Mask Manager",
-                                        "action": function (pbj) {
-                                            if (utilsIsObjectNullOrUndefined(oBand) == false)
-                                                var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                            oController.openMaskManager(oBand, oFoundProduct);
-                                        },
-                                        "_disabled": !$node.original.band.bVisibleNow
-                                    },
-                                    "Zoom2D": {
-                                        "label": "Zoom Band 2D Map",
-                                        "action": function (obj) {
-                                            if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                                oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                                            }
-                                        },
-                                        // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
-                                        "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
-                                    },
-                                    "Zoom3D": {
-                                        "label": "Zoom Band 3D Map",
-                                        "action": function (obj) {
-                                            if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                                oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                                            }
-                                        },
-                                        // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
-                                        "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
-                                    },
-                                    "Properties": {
-                                        "label": "Properties ",
-                                        "icon": "info-icon-context-menu-jstree",
-                                        "separator_before": true,
-                                        "action": function (obj) {
-                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                            if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
-                                        }
-                                    },
-                                    "DeleteProduct": {
-                                        "label": "Delete Product",
-                                        "icon": "delete-icon-context-menu-jstree",
+                                "action": function (obj) {
 
-                                        "action": function (obj) {
 
-                                            utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
-                                                if (value) {
-                                                    bDeleteFile = true;
-                                                    bDeleteLayer = true;
-                                                    this.temp = $node.parents[1];
-                                                    var that = this;
 
-                                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                        utilsVexDialogAlertTop("Sub Menu from bands");
+                                        m_oController.getSelectedNodesFromTree(null);
 
-                                                    oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                                    },(function (error) {
-                                                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                                    }));
-                                                }
-                                            });
-                                        }
-                                    }
-                                };
-                        }
-
-                        //only products has $node.original.fileName
-                        if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
-                            //***************************** PRODUCT ********************************************
-                            oReturnValue =
-                                {
-                                    "Workflow": {
-                                        "label": "Workflow",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var oFound = oController.findProductByFileName(sSourceFileName);
-
-                                            if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowManagerDialog();
-                                        }
-                                    },
-                                    "Zoom2D": {
-                                        "label": "Zoom Band 2D Map",
-                                        "_disabled": true
-                                    },
-                                    "Zoom3D": {
-                                        "label": "Zoom Band 3D Map",
-                                        "_disabled": true
-                                    },
-                                    "Properties": {
-                                        "label": "Properties ",
-                                        "icon": "info-icon-context-menu-jstree",
-                                        "separator_before": true,
-                                        "action": function (obj) {
-                                            //$node.original.fileName;
-                                            if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
-                                                var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                                for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
-                                                    if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
-                                                        oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
-                                                        break;
-                                                    }
-
-                                                }
-
-                                            }
-                                        }
-                                    },
-                                    "Download": {
-                                        "label": "Download",
-                                        "icon": "fa fa-download",
-                                        "action": function (obj) {
-                                            //$node.original.fileName;
-                                            if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                                oController.findProductByName($node.original.fileName);
-                                                oController.downloadProductByName($node.original.fileName);
-                                            }
-                                        }
-                                    },
-                                    "SendToFtp": {
-                                        "label": "Send To Ftp",
-                                        "icon": "fa fa-upload",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var oFound = oController.findProductByFileName(sSourceFileName);
-
-                                            if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
-                                        }
-                                    }, //openTransferToFtpDialog
-                                    "DeleteProduct": {
-                                        "label": "Delete Product",
-                                        "icon": "delete-icon-context-menu-jstree",
-
-                                        "action": function (obj) {
-
-                                            utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
-                                                if (value) {
-                                                    bDeleteFile = true;
-                                                    bDeleteLayer = true;
-                                                    this.temp = $node;
-                                                    var that = this;
-                                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                                    },(function (error) {
-                                                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
-                                                    }));
-                                                }
-                                            });
-                                        }
-                                    }
-                                };
-                        }
-                        return oReturnValue;
+                                }
+                            }*/
+                        }; // menu entries
                     }
+
+                    // only products has $node.original.fileName
+                    // menu showed when a product is selected
+                    if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
+                        //***************************** PRODUCT ********************************************
+                        oReturnValue =
+                        {
+                            /*"Workflow": {
+                                "label": "Workflow",
+                                "action": function (obj) {
+                                    var sSourceFileName = $node.original.fileName;
+                                    var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowManagerDialog();
+                                }
+                            },
+                            "Filter Band": {
+                                "label": "Filter Band",
+                                "_disabled": true
+                            },
+                            "Mask Manager": {
+                                "label": "Mask Manager",
+                                "_disabled": true
+                            },
+                            "Zoom2D": {
+                                "label": "Zoom Band 2D Map",
+                                "_disabled": true
+                            },
+                            "Zoom3D": {
+                                "label": "Zoom Band 3D Map",
+                                "_disabled": true
+                            },*/
+
+                            "Download": {
+                                "label": "Download",
+                                "icon": "fa fa-download",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "action": function (obj) {
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
+                                        oController.findProductByName($node.original.fileName);
+                                        // var oEntry = {
+                                        //     "fileName": oProduct.fileName,
+                                        //     "filePath": oProduct.filePath
+                                        // };
+                                        // oController.downloadEntry(oEntry);
+                                        oController.downloadProductByName($node.original.fileName);
+                                    }
+                                }
+                            },
+                            "SendToFtp": {
+                                "label": "Send To Ftp",
+                                "icon": "fa fa-upload",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "action": function (obj) {
+                                    var sSourceFileName = $node.original.fileName;
+                                    var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
+                                }
+                            }, //openTransferToFtpDialog
+                            /*"DeleteProduct": {
+                                "label": "Delete Product",
+                                "icon": "delete-icon-context-menu-jstree",
+
+                                "action": function (obj) {
+
+                                    utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
+                                        if (value) {
+                                            bDeleteFile = true;
+                                            bDeleteLayer = true;
+                                            this.temp = $node;
+                                            var that = this;
+                                            var sFileName = $node.original.fileName;
+                                            console.log(sFileName);
+                                            oController.m_oProductService.deleteProductFromWorkspace(sFileName,
+                                                oController.m_oActiveWorkspace.workspaceId,
+                                                bDeleteFile,
+                                                bDeleteLayer).then(function (data) {
+                                                    oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                                }, (function (error) {
+                                                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                }));
+                                        }
+                                    });
+                                }
+                            },*/
+                            "DeleteSelectedProduct": {
+                                "label": oController.getDeleteLabel(),
+                                "icon": "delete-icon-context-menu-jstree",
+
+                                "action": function (obj) {
+
+                                    let asSelectedProducts = oController.getSelectedNodesFromTree($node.original.fileName);
+                                    // first, check that something were selected
+                                    if (asSelectedProducts.length > 0) {
+                                        utilsVexDialogConfirm("DELETING " + asSelectedProducts.length + " PRODUCTS.<br>ARE YOU SURE?", function (value) {
+                                            if (value) {
+                                                bDeleteFile = true;
+                                                bDeleteLayer = true;
+                                                this.temp = $node;
+                                                var that = this;
+                                                oController.m_oProductService.deleteProductListFromWorkspace(asSelectedProducts, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
+                                                    // for each in asSelectedProduct
+                                                    $.each(asSelectedProducts, function (i, val) {
+                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
+                                                    });
+                                                    /// deselect all 
+                                                    $("#jstree").jstree().deselect_all(true);
+
+                                                }, (function (error) {
+                                                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                }));
+                                            }
+                                        });
+
+
+                                    }
+
+                                }
+                            },
+                            "Properties": {
+                                "label": "Properties ",
+                                "icon": "info-icon-context-menu-jstree",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "separator_before": true,
+                                "action": function (obj) {
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
+                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
+                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
+                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
+                                                oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
+                                                break;
+                                            }
+
+                                        }
+
+                                    }
+                                }
+                            }
+                        };
+                    }
+                    return oReturnValue;
                 }
-            };
+            }
+        };
 
 
         // For each product generate sub-node
@@ -2876,12 +3004,18 @@ var EditorController = (function () {
                     "icon": "assets/icons/metadata-24.png",
                     "children": [],
                     "clicked": false,//semaphore
-                    "url": oController.m_oProductService.getProductMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
+                    "url": oController.m_oProductService.getProductMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId),
+                    a_attr: {
+                        class: "no_checkbox"
+                    }
                 },
                 {
                     "text": "Bands",
                     "icon": "assets/icons/bandsTree.png",
-                    "children": []
+                    "children": [],
+                    a_attr: {
+                        class: "no_checkbox"
+                    }
                 }
             ];
 
@@ -2899,6 +3033,10 @@ var EditorController = (function () {
                 } else {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
+                // REMOVE CHECKBOXES
+                oNode.a_attr = new Object();
+                oNode.a_attr.class = "no_checkbox";
+
 
                 //BAND
                 oNode.band = oaBandsItems[iIndexBandsItems];
@@ -2912,6 +3050,79 @@ var EditorController = (function () {
 
         return oTree;
     };
+
+    /**
+     * Creates the label for deletion command using the selected
+     * product list. Gives a better feedback to the user of what he/she 's
+     * operating onto.
+     * @returns a string with the number of currently selected entries
+     */
+    EditorController.prototype.getDeleteLabel = function () {
+        let iCount = this.getSelectedNodesFromTree(null).length;
+        if (iCount > 1) {
+            return "Delete "+ iCount + " products";
+        }
+        else {
+            return "Delete product";
+        }
+    }
+
+    /**
+     * Returns all nodes with checked state
+     * @param {*} oEntry
+     */
+    EditorController.prototype.getSelectedNodesFromTree = function (oEntry) {
+        var m_oController = this;
+        var node = oEntry;
+        var oTree = $('#jstree').jstree(true);
+        var Ids = oTree.get_selected();
+        // return all the nodes selected
+        // a clever way to get only the parents?
+        //1) get all nodes
+        //2) filters only parents
+        //3) select the ones in Ids
+        var idList = [];
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        // filter nodes by considering the following condition (class.don't contains no_checkbox and state.selected == true)
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (val.state.selected == true && sClass == undefined &&
+                (val.state.hidden == false || val.state.hidden == undefined)) { // imposed on any other node the no_checkbox class
+                idList.push($(val).attr('id'));
+            }
+        })
+        return idList;
+
+    }
+    /**
+     * Utils method to select or de-select all the entries in jstree after a search is done
+     * all or nothing only of visible nodes
+     * @param {*} sTextQuery
+     */
+    EditorController.prototype.selectFiltered = function () {
+        this.m_bAllSelected = !this.m_bAllSelected; // flip the value
+        // gather all nodes from tree
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        let oController = this;
+        // get only the parents
+        var idList = [];
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (sClass == undefined) { // only parents <-> other instances have class "no_checkbox"
+                if (val.state.hidden == false) { // not hidden must be selected
+                    if (oController.m_bAllSelected) { $('#jstree').jstree(true).select_node($(val).attr('id')); }
+                    else { $('#jstree').jstree(true).deselect_node($(val).attr('id')); }
+                }
+                if (val.state.hidden == true) { // hidden must be de-selected
+                    $('#jstree').jstree(true).deselect_node($(val).attr('id'));
+                }
+
+            }
+
+        })
+        console.log("done");
+
+    }
 
     /**
      * Download of a product
@@ -2938,10 +3149,10 @@ var EditorController = (function () {
 
         this.m_oCatalogService.downloadEntry(oJson, sUrl).then(function (data, status, headers, config) {
             if (utilsIsObjectNullOrUndefined(data) == false) {
-                var blob = new Blob([data.data], {type: "application/octet-stream"});
+                var blob = new Blob([data.data], { type: "application/octet-stream" });
                 saveAs(blob, sFileName);
             }
-        },(function (error) {
+        }, (function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
         }));
 
@@ -3004,6 +3215,10 @@ var EditorController = (function () {
         return this.m_bIsActiveGeoraphicalMode === false;
     };
 
+
+
+
+
     EditorController.prototype.filterTree = function (sTextQuery) {
 
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
@@ -3015,7 +3230,18 @@ var EditorController = (function () {
 
         $('#jstree').jstree(true).search(sTextQuery);
 
-        return true;
+        // deselect all
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        // get only the parents
+        var idList = [];
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (sClass == undefined) { // only parents <-> other instances have class "no_checkbox"
+                $('#jstree').jstree(true).deselect_node($(val).attr('id'));
+            }
+        }); // each
+        this.m_bAllSelected = false;
+
     };
 
     EditorController.prototype.cleanFilterTree = function () {
@@ -3039,6 +3265,21 @@ var EditorController = (function () {
         //reload product list
         this.getProductListByWorkspace();
     };
+
+    EditorController.prototype.navigateTo = function (iIndexLayer){
+         // Check for geoserver bounding box
+         if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
+            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
+        } else {
+            // Try with the generic product bounding box
+            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
+
+        }
+    }
 
     EditorController.prototype.deleteProductInGlobe = function (aoVisibleBands, oChildrenNode) {
         var iLengthLayer = aoVisibleBands.length;

@@ -672,7 +672,6 @@ Parameters are in this form:
 
 .. code-block:: JSON
 
-   json
    {
    "BBOX": "45.9,8.5,45.7,8.7",
    "MAXCLOUD": "50",

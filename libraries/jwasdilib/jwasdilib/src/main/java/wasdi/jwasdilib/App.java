@@ -27,11 +27,16 @@ public class App
         oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
 
         oLib.printStatus();
+        
+        System.out.println(oLib.getProcessorPath());
       
         
         //testConnection(oLib);
         
         testHello(oLib);
+        //testSetBasePath(oLib);
+        
+        
     //    testDownload(oLib);
         //testAutomaticUpload(oLib);
         
@@ -50,7 +55,7 @@ public class App
         //testImportProductList(oLib);
         
         
-//        testImportAndPreprocess(oLib);
+        testImportAndPreprocess(oLib);
         
         //testCreateWorkspace(oLib);
         //testDeleteWorkspace(oLib);
@@ -58,7 +63,7 @@ public class App
         //testGetProcessesByWorkspace(oLib);
         //testGetProductsByWorkspace(oLib);
 
-        //testGetPayload(oLib);
+        testGetPayload(oLib);
 
         //testgetProductBbox(oLib);
         
@@ -66,10 +71,26 @@ public class App
         //testMultisubset(oLib);
         
         
+        //testGetParamsAsJsonString(oLib);
+        
         System.out.println("JWasdiLib Test Done");
         oLib.updateStatus("DONE");
         
     }    
+
+	private static void testSetBasePath(WasdiLib oLib) {
+		//fail
+		oLib.setBasePath("");
+		oLib.setBasePath("john doe");
+		
+		String sUserHome = System.getProperty("user.home");
+		String sWasdiHome = sUserHome + "/.wasdi/";
+		//work
+		oLib.setBasePath(sWasdiHome);
+		
+	}
+
+
 
 
 
@@ -83,7 +104,9 @@ public class App
 	}
 
 	private static void testWaitProcesses(WasdiLib oLib) {
-    	String sProcName = "hellotest";
+		
+		System.out.println("Wait for real processes");
+    	String sProcName = "hellowasdiworld";
     	Map<String,Object> asParams = new HashMap<>();
     	asParams.put("NAME", "Playmobil");
     	int iReps = 5;
@@ -93,7 +116,17 @@ public class App
     		asIds.add(sId);
     	}
     			
-		oLib.waitProcesses(asIds);
+    	System.out.println(oLib.waitProcesses(asIds));
+		
+		System.out.println("wait for fake processes");
+		List<String> asProcesses = new ArrayList<>(4);
+        asProcesses.add("one");
+        asProcesses.add("two");
+        asProcesses.add("three");
+        asProcesses.add("four");
+        
+        System.out.println(oLib.waitProcesses(asProcesses));
+        
 		
 	}
 
@@ -308,7 +341,7 @@ public class App
     }
     
     public static void testImportAndPreprocess(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-06-01", "2021-06-06", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importAndPreprocess(aoFound.subList(0, 2), "ndvi", "_ndvi.tif");
     }
@@ -320,11 +353,16 @@ public class App
 	}
     
     private static void testDeleteWorkspace(WasdiLib oLib) {
-    	System.out.println(oLib.deleteWorkspace(oLib.getWorkspaceIdByName(s_sWorkspaceName)));
+    	String sWorkspaceName = "PLEASE_DELETE_ME";
+    	oLib.createWorkspace(sWorkspaceName);
+    	System.out.println(oLib.deleteWorkspace(oLib.getWorkspaceIdByName(sWorkspaceName)));
 	}
     
     private static void testGetProcessesByWorkspace(WasdiLib oLib) {
+    	System.out.println("testGetProcessesByWorkspace");
     	System.out.println(oLib.getProcessesByWorkspace(0, 20, null, null, null));
+    	System.out.println("testGetProcessesByWorkspace: now the JSON version");
+    	System.out.println(oLib.getProcessesByWorkspaceAsListOfJson(0, 20, null, null, null));
     }
     
     private static void testGetPayload(WasdiLib oLib) {
@@ -415,5 +453,12 @@ public class App
     	
     	oLib.multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE);
     }
+    
+    private static void testGetParamsAsJsonString(WasdiLib oLib) {
+    	oLib.addParam("name", "Marilyn");
+    	oLib.addParam("surname", "Monroe");
+    	oLib.addParam("the answer is", "42");
+		System.out.println(oLib.getParamsAsJsonString());
+	}
     
 }

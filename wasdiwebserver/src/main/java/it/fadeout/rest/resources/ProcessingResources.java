@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -271,6 +272,83 @@ public class ProcessingResources {
         return Response.ok().build();
     }
 
+    /**
+     * Obtain and returns the workflow's xml as a String
+     *
+     * @param sSessionId  current user session
+     * @param sWorkflowId Id of the workflow
+     * @return
+     */
+    @GET
+    @Path("/graphXml")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getGraphXML(
+            @HeaderParam("x-session-token") String sSessionId,
+            @QueryParam("workflowId") String sWorkflowId) {
+
+        Utils.debugLog("ProcessingResources.getGraphXML( Workspace Id : " + sWorkflowId + ");");
+        String sXml = "";
+        ResponseBuilder oResponseBuilder = null;
+        try {
+            // Check authorization
+            if (Utils.isNullOrEmpty(sSessionId)) {
+                Utils.debugLog("ProcessingResources.getGraphXML( Workspace Id : " + sWorkflowId + ");");
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
+            User oUser = Wasdi.getUserFromSession(sSessionId);
+            // Checks whether null file is passed
+
+            if (oUser == null) return Response.status(Status.UNAUTHORIZED).build();
+            if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+            String sUserId = oUser.getUserId();
+
+            // Check that the workflow exists on db
+            SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+            SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+            if (oWorkflow == null) {
+                Utils.debugLog("ProcessingResources.updateGraph: error in workflowId " + sWorkflowId + " not found on DB");
+                return Response.notModified("WorkflowId not found, please check parameters").build();
+            }
+
+            // Get Download Path
+            String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+
+            File oWorkflowsFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
+
+            if (!oWorkflowsFile.exists()) {
+                Utils.debugLog("ProcessingResources.getGraphXML( Workflow Id : " + sWorkflowId + ") Error, workflow file not found;");
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            // Check is the owner or a the sharing
+            sXml = new String(Files.readAllBytes(oWorkflowsFile.toPath()));
+            return Response.ok(sXml, MediaType.APPLICATION_XML).build();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * Post the string of an existing workflow
+     *
+     * @param sWorkflowId Id of the workflow
+     * @return
+     */
+    @POST
+    @Path("/uploadgraphXml")
+    public Response postGraphXML(@HeaderParam("x-session-token") String sSessionId,
+                                 @QueryParam("workflowId") String sWorkflowId,
+                                 @FormDataParam("graphXml") String sGraphXml) {
+
+        // convert string to file and invoke updateGraphFile
+        Utils.debugLog("ProcessingResources.uploadGraphXML: workflowId " + sWorkflowId + " invoke ProcessingResources.updateGraph");
+        return updateGraphfile(new ByteArrayInputStream(sGraphXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sWorkflowId);
+    }
+
 
     /**
      * Update a SNAP Workflow XML file
@@ -291,7 +369,7 @@ public class ProcessingResources {
         try {
             // Check authorization
             if (Utils.isNullOrEmpty(sSessionId)) {
-                Utils.debugLog("ProcessingResources.updateGraph( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
+                Utils.debugLog("ProcessingResources.updateGraphfile( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
                 return Response.status(401).build();
             }
             User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -302,7 +380,7 @@ public class ProcessingResources {
             // Get Download Path
             String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
 
-            Utils.debugLog("ProcessingResources.updateGraph: download path " + sDownloadRootPath);
+            Utils.debugLog("ProcessingResources.updateGraphfile: download path " + sDownloadRootPath);
 
             File oWorkflowsPath = new File(sDownloadRootPath + "workflows/");
 
@@ -313,10 +391,20 @@ public class ProcessingResources {
             // Check that the workflow exists on db
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+            
             if (oWorkflow == null) {
-                Utils.debugLog("ProcessingResources.updateGraph: error in workflowId " + sWorkflowId + " not found on DB");
+                Utils.debugLog("ProcessingResources.updateGraphfile: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found, please check parameters").build();
             }
+            
+            // Checks that user can modify the workflow
+            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            
+            if (!oUser.getUserId().equals(oWorkflow.getUserId()) && !oWorkflowSharingRepository.isSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
+                Utils.debugLog("ProcessingResources.updateGraphfile: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
+            
             // original xml file
             File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
             // new xml file
@@ -362,17 +450,17 @@ public class ProcessingResources {
                 } catch (GraphException oE) {
                     // Close the file reader
                     oFileReader.close();
-                    Utils.debugLog("ProcessingResources.uploadGraph: malformed workflow file");
+                    Utils.debugLog("ProcessingResources.updateGraphfile: malformed workflow file");
                     // Leave the original file unchanged and delete the temp
                     Files.delete(oWorkflowXmlFileTemp.toPath());
-                    return Response.serverError().build();
+                    return Response.status(Status.NOT_MODIFIED).build();
                 }
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
                 // Delete the temp file
                 Files.delete(oWorkflowXmlFileTemp.toPath());
 
-                Utils.debugLog("ProcessingResources.uploadGraph: workflow files updated! workflowID" + oWorkflow.getWorkflowId());
+                Utils.debugLog("ProcessingResources.updateGraphfile: workflow files updated! workflowID" + oWorkflow.getWorkflowId());
 
                 if (Wasdi.getActualNode() != null) {
                     oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
@@ -384,8 +472,9 @@ public class ProcessingResources {
                 oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);
 
             } catch (Exception oEx) {
-                Utils.debugLog("ProcessingResources.updateGraph: " + oEx);
-                return Response.serverError().build();
+                if (oWorkflowXmlFileTemp.exists()) oWorkflowXmlFileTemp.delete();
+                Utils.debugLog("ProcessingResources.updateGraphfile: " + oEx);
+                return Response.status(Status.NOT_MODIFIED).build();
             }
 
 
@@ -405,7 +494,6 @@ public class ProcessingResources {
      * @return
      * @throws Exception
      */
-    // TODO implement method
     @POST
     @Path("/updategraphparameters")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -485,33 +573,32 @@ public class ProcessingResources {
                 oVM.setSharedWithMe(false);
                 aoRetWorkflows.add(oVM);
             }
-            
+
             // find sharings by userId
             WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
             List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
-            
+
             // For all the shared workflows
             for (WorkflowSharing oSharing : aoWorkflowSharing) {
-            	// Create the VM
-            	SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getWorkflowId());
-            	SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
-            	
-            	if (oVM.isPublic() == false) {
+                // Create the VM
+                SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getWorkflowId());
+                SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
+
+                if (oVM.isPublic() == false) {
                     // This is shared and not public: add to return list
                     oVM.setSharedWithMe(true);
-                	aoRetWorkflows.add(oVM);
-            	}
-            	else {
-            		// This is shared but public, so this is already in our return list
-            		for (SnapWorkflowViewModel oWorkFlow : aoRetWorkflows) {
-            			// Find it and set shared flag = true
-						if (oSharedWithMe.getWorkflowId().equals(oWorkFlow.getWorkflowId())) {
-							oWorkFlow.setSharedWithMe(true);
-						}
-					}
-            	}
+                    aoRetWorkflows.add(oVM);
+                } else {
+                    // This is shared but public, so this is already in our return list
+                    for (SnapWorkflowViewModel oWorkFlow : aoRetWorkflows) {
+                        // Find it and set shared flag = true
+                        if (oSharedWithMe.getWorkflowId().equals(oWorkFlow.getWorkflowId())) {
+                            oWorkFlow.setSharedWithMe(true);
+                        }
+                    }
+                }
             }
-            
+
         } catch (Exception oE) {
             Utils.debugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " ): " + oE);
         }
@@ -546,19 +633,19 @@ public class ProcessingResources {
             if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
             String sUserId = oUser.getUserId();
-            
+
             // Check if the workflow exists
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
-            
+
             if (oWorkflow == null) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-            
+
             // check if the current user is the owner of the workflow
             if (oWorkflow.getUserId().equals(sUserId) == false) {
-            	
-            	// check if the current user has a sharing of the workflow
+
+                // check if the current user has a sharing of the workflow
                 WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-                
+
                 if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
                     oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
                     Utils.debugLog("ProcessingResource.deleteWorkflow: Deleted sharing between user " + sUserId + " and workflow " + oWorkflow.getName() + " Workflow files kept in place");
@@ -582,11 +669,11 @@ public class ProcessingResources {
             } else {
                 Utils.debugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
             }
-            
+
             // Delete sharings
             WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
             oWorkflowSharingRepository.deleteByWorkflowId(sWorkflowId);
-                        
+
             // Delete the workflow
             oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
         } catch (Exception oE) {
@@ -670,13 +757,13 @@ public class ProcessingResources {
                     return oResult;
                 }
                 // the requester has the share?
-                if (!oWorkflowSharingRepository.isSharedWithUser(oRequesterUser.getUserId(),sWorkflowId)){
+                if (!oWorkflowSharingRepository.isSharedWithUser(oRequesterUser.getUserId(), sWorkflowId)) {
                     oResult.setStringValue("Unauthorized");
                     return oResult;
                 }
 
             }
-            
+
             // Check if has been already shared
             if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
                 oResult.setStringValue("Already shared");
@@ -919,20 +1006,20 @@ public class ProcessingResources {
 
 
     /**
-     * Exectues a Workflow from workflow Id
+     * Executes a Workflow from workflow Id
      *
      * @param sSessionId
      * @param sWorkspace
      * @param sParentProcessWorkspaceId
      * @param oSnapWorkflowViewModel
      * @return
-     * @throws Exception
      */
     @POST
     @Path("/graph_id")
     public PrimitiveResult executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sSessionId,
-                                                      @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String
-                                                              sParentProcessWorkspaceId, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
+                                                      @QueryParam("workspace") String sWorkspace,
+                                                      @QueryParam("parent") String sParentProcessWorkspaceId,
+                                                      SnapWorkflowViewModel oSnapWorkflowViewModel) {
 
         PrimitiveResult oResult = new PrimitiveResult();
         Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId( Ws: " + sWorkspace + ", ... )");
@@ -971,19 +1058,19 @@ public class ProcessingResources {
                 return oResult;
             }
             if (oWF.getUserId().equals(sUserId) == false && oWF.getIsPublic() == false) {
-            	
-            	WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            	
-            	WorkflowSharing oWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, oSnapWorkflowViewModel.getWorkflowId());
-            	
-            	if (oWorkflowSharing==null) {
-            		
-            		Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Workflow now owned or shared, exit");
-            		
+
+                WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+
+                WorkflowSharing oWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, oSnapWorkflowViewModel.getWorkflowId());
+
+                if (oWorkflowSharing == null) {
+
+                    Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Workflow now owned or shared, exit");
+
                     oResult.setBoolValue(false);
                     oResult.setIntValue(401);
                     return oResult;
-            	}
+                }
             }
 
             String sBasePath = Wasdi.getDownloadPath(m_oServletConfig);
@@ -993,16 +1080,16 @@ public class ProcessingResources {
             if (!oWorkflowFile.exists()) {
                 Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Workflow file not on this node. Try to download it");
 
-                String sDownloadedWorflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId, m_oServletConfig);
+                String sDownloadedWorkflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId, m_oServletConfig);
 
-                if (Utils.isNullOrEmpty(sDownloadedWorflowPath)) {
+                if (Utils.isNullOrEmpty(sDownloadedWorkflowPath)) {
                     Utils.debugLog("Error downloading workflow. Return error");
                     oResult.setBoolValue(false);
                     oResult.setIntValue(500);
                     return oResult;
                 }
 
-                sWorkflowPath = sDownloadedWorflowPath;
+                sWorkflowPath = sDownloadedWorkflowPath;
             }
 
             try (FileInputStream oFileInputStream = new FileInputStream(sWorkflowPath)) {
@@ -1020,7 +1107,7 @@ public class ProcessingResources {
                 String sSourceProductName = "";
                 String sDestinationProdutName = "";
 
-                if (oSnapWorkflowViewModel.getInputFileNames().size() > 00) {
+                if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
                     // TODO: Output file name
                     sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
@@ -1059,6 +1146,9 @@ public class ProcessingResources {
                 return Response.status(Status.UNAUTHORIZED).build();
             }
 
+            SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+            SnapWorkflow oSnapWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+
             // Take path
             String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
             String sWorkflowXmlPath = sDownloadRootPath + "workflows/" + sWorkflowId + ".xml";
@@ -1066,6 +1156,12 @@ public class ProcessingResources {
             File oFile = new File(sWorkflowXmlPath);
 
             ResponseBuilder oResponseBuilder = null;
+
+            if (oSnapWorkflow == null) {
+                Utils.debugLog("ProcessingResource.downloadGraphByName( Session: " + sSessionId + ", WorkflowId: " + sWorkflowId + " ): Workflow Id not found on DB");
+                oResponseBuilder = Response.noContent();
+                return oResponseBuilder.build();
+            }
 
             if (oFile.exists() == false) {
                 Utils.debugLog("ProcessingResource.downloadGraphByName: file does not exists " + oFile.getPath());
@@ -1078,7 +1174,7 @@ public class ProcessingResources {
                 oStream = new FileStreamingOutput(oFile);
 
                 oResponseBuilder = Response.ok(oStream);
-                oResponseBuilder.header("Content-Disposition", "attachment; filename=" + oFile.getName());
+                oResponseBuilder.header("Content-Disposition", "attachment; filename=" + oSnapWorkflow.getName() + ".xml");
                 oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
             }
 
