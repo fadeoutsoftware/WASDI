@@ -90,34 +90,28 @@ public class AuthResource {
 	public UserViewModel login(LoginInfo oLoginInfo) {
 		Utils.debugLog("AuthResource.Login");
 
-		if (oLoginInfo == null) {
-			Utils.debugLog("Auth.Login: login info null, user not authenticated");
-			return UserViewModel.getInvalid();
-		}
-
-		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
-			Utils.debugLog("Auth.Login: Login Info does not support Credential Policy, user " + oLoginInfo.getUserId() + " not authenticated" );
-			return UserViewModel.getInvalid();
-		}
-
 		try {
+			if (oLoginInfo == null) {
+				Utils.debugLog("Auth.Login: login info null, user not authenticated");
+				return UserViewModel.getInvalid();
+			}
+			if(Utils.isNullOrEmpty(oLoginInfo.getUserId())){
+				Utils.debugLog("Auth.Login: userId null or empty, user not authenticated");
+				return UserViewModel.getInvalid();	
+			}
+			if(Utils.isNullOrEmpty(oLoginInfo.getUserPassword())){
+				Utils.debugLog("Auth.Login: password null or empty, user not authenticated");
+				return UserViewModel.getInvalid();	
+			}
 
 			Utils.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
 
 			UserRepository oUserRepository = new UserRepository();
-
 			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
-
 			if( oUser == null ) {
 				Utils.debugLog("AuthResource.Login: user not found: " + oLoginInfo.getUserId() + ", aborting");
 				return UserViewModel.getInvalid();
 			}
-
-
-			/*if(!m_oCredentialPolicy.satisfies(oUser)) {
-				Utils.debugLog("AuthResource.Login: Wasdi user " + oUser.getUserId() + " does not satisfy Credential Policy, aborting");
-				return UserViewModel.getInvalid();
-			}*/
 
 			if(null == oUser.getValidAfterFirstAccess()) {
 				// this is to fix legacy users for which confirmation has never been activated
@@ -125,14 +119,10 @@ public class AuthResource {
 				oUser.setValidAfterFirstAccess(true);
 			}
 
-//			if(!oUser.getValidAfterFirstAccess() ) {
-//				Utils.debugLog("AuthResource.Login: user " + oUser.getUserId() + " tried to access but never validated her/his account. Aborting" );
-//				return UserViewModel.getInvalid(); 
-//			}
 
 			//authenticate against keycloak
 			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
-			String sSessionId = null;
+			
 
 			boolean bLoginSuccess = false;
 
@@ -146,17 +136,13 @@ public class AuthResource {
 				oUser.setLastLogin((new Date()).toString());
 				oUserRepository.updateUser(oUser);
 
+				
+				//SESSION
 				Wasdi.clearUserExpiredSessions(oUser);
-				UserSession oSession = new UserSession();
-				oSession.setUserId(oUser.getUserId());
-				//todo ensure a unique session 
-				sSessionId = UUID.randomUUID().toString();
-				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate((double) new Date().getTime());
-				oSession.setLastTouch((double) new Date().getTime());
-
-				SessionRepository oSessionRepo = new SessionRepository();
-				if (!oSessionRepo.insertSession(oSession)) {
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
+				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
+					Utils.debugLog("AuthResource.Login: could not insert session in DB, aborting");
 					return UserViewModel.getInvalid();
 				}
 				
@@ -166,9 +152,9 @@ public class AuthResource {
 				oUserVM.setSurname(oUser.getSurname());
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
-				oUserVM.setSessionId(sSessionId);
+				oUserVM.setSessionId(oSession.getSessionId());
 
-				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
+				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
 				return oUserVM;
 			} else {
