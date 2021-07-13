@@ -40,7 +40,7 @@ var WorkspaceProcessesList = (function () {
                 // stops the update of the inverval
                 this.m_oController.stopTick();
                 // close, but give 500ms for bootstrap to animate
-                oClose(result, 500); 
+                oClose(result, 500);
             };
 
             this.getAllProcessesLogs();
@@ -71,18 +71,12 @@ var WorkspaceProcessesList = (function () {
      */
     WorkspaceProcessesList.prototype.IntervalUpdate = function () {
         let oController = this;
-        var iCount = 1;
-
+        let iIntervalmS = 5000; // interval of the periodical update in mS
         // Check the status of The windows in the update loop !
         oController.m_oTick = oController.m_oInterval(function () {
-            oController.resetCounters();
-            oController.m_aoProcessesLogs = [];
-            oController.getAllProcessesLogs();
-            iCount++;
-            if (iCount > 10) { // limits the test to 10 times
-                oController.stopTick();
-            }
-        }, 5000);
+            // suspend binding on angular 
+            oController.getLastProcessesLogs();
+        }, iIntervalmS);
     }
 
     WorkspaceProcessesList.prototype.comboStatusClick = function (sStatus) {
@@ -114,6 +108,47 @@ var WorkspaceProcessesList = (function () {
         this.m_oFilter.m_sDate = "";
 
         this.getAllProcessesLogs();
+    };
+
+
+    /**
+     * Get the Last 40 ProcessesLogs
+     * Note: the processes Log are retrieved considering the status of the filters
+     * @returns {boolean}
+     */
+    WorkspaceProcessesList.prototype.getLastProcessesLogs = function () {
+        var oController = this;
+
+        if (utilsIsObjectNullOrUndefined(this.m_sActiveWorkspaceId) === true) {
+            return false;
+        }
+
+        //this.m_bAreProcessesLoaded = false;
+        // retrieves the last 40 processor Logs considering the current state of the filters
+        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40,this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+            .then(function (data) {
+                if (!utilsIsObjectNullOrUndefined(data.data)) {
+                    if (data.data.length > 0) {
+                        oController.m_aoProcessesLogs = data.data;
+                        oController.m_sHrefLogFile = oController.generateLogFile();
+                    }
+                    else {
+                        oController.isLoadMoreButtonClickable = false;
+                    }
+
+                    if (data.data.length < oController.m_iNumberOfProcessForRequest) {
+                        //there aren't enough processes for other requests so you can't load more processes
+                        oController.isLoadMoreButtonClickable = false;
+
+                    }
+                   // oController.m_bAreProcessesLoaded = true;
+                }
+            }, function (data, status) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PROCESSES LOGS DIALOG<br>UNABLE TO LOAD ALL PROCESSES LOGS FROM SERVER");
+                oController.m_bAreProcessesLoaded = true;
+            });
+
+        return true;
     };
 
     /**
