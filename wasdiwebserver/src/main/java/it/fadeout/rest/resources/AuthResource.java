@@ -612,28 +612,31 @@ public class AuthResource {
 
 			Utils.debugLog("AuthService.UserRegistration: input is good");
 
+			Utils.debugLog("AuthService.UserRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi ");
 			UserRepository oUserRepository = new UserRepository();
-			Utils.debugLog("AuthService.UserRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi "); 
 			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
 
 			//do we already have this user in our DB?
 			if(oWasdiUser != null){
 				//yes, it's a well known user. Stop here
 				PrimitiveResult oResult = new PrimitiveResult();
-				oResult.setIntValue(403); //forbidden
+				//not modified
+				oResult.setIntValue(304);
 				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
 				return oResult;
 			} else {
 				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " is a new user");
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
+				//otherwise someone might call this api even if the user is not registered on KC
 
 				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
 				User oNewUser = m_oKeycloakService.getUser(sUserId);
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
-					oResult.setIntValue(400); //forbidden
+					//not found
+					oResult.setIntValue(404);
 					Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " not found in keycloak, aborting");
 					return oResult;
 				}
@@ -644,7 +647,6 @@ public class AuthResource {
 				Utils.debugLog("AuthResource.userRegistration: user details parsed");
 				
 				String sDefaultNode = "wasdi";
-				
 				try {					
 					sDefaultNode = m_oServletConfig.getInitParameter("USERS_DEFAULT_NODE");
 					if (Utils.isNullOrEmpty(sDefaultNode)) {
@@ -652,35 +654,26 @@ public class AuthResource {
 					}
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("Exception reading Users default node " + oEx.toString());
+					Utils.debugLog("Exception reading Users default node " + oEx);
 				}
-
-				//third: store user in DB
-				//create new user
-				oNewUser.setUserId(sUserId);
 				oNewUser.setDefaultNode(sDefaultNode);
-				oNewUser.setValidAfterFirstAccess(true);
+				
 
-				PrimitiveResult oResult = null;
+				//store user in DB
 				if(oUserRepository.insertUser(oNewUser)) {
 					//success: the user is stored in DB!
 					Utils.debugLog("AuthResource.userRegistration: user " + oNewUser.getUserId() + " added to wasdi");
-					oResult = new PrimitiveResult();
-					oResult.setBoolValue(true);
-					oResult.setStringValue(oNewUser.getUserId());
-					
 					notifyNewUserInWasdi(oNewUser, true);
-					
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);					
 					oResult.setIntValue(200);
 					oResult.setStringValue("Welcome to space");
 					return oResult;
 				} else {
 					//insert failed: log, mail and throw
 					String sMessage = "could not insert new user " + oNewUser.getUserId() + " in DB";
-					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", throwing");
-					
+					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", aborting");
 					notifyNewUserInWasdi(oNewUser, false);
-					
 					throw new RuntimeException(sMessage);
 				}
 			}
@@ -689,6 +682,7 @@ public class AuthResource {
 		}
 
 		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
 		return oResult;
 	}
