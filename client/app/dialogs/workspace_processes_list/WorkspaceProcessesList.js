@@ -37,7 +37,10 @@ var WorkspaceProcessesList = (function () {
             this.m_sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
 
             $scope.close = function (result) {
-                oClose(result, 500); // close, but give 500ms for bootstrap to animate
+                // stops the update of the inverval
+                this.m_oController.stopTick();
+                // close, but give 500ms for bootstrap to animate
+                oClose(result, 500); 
             };
 
             this.getAllProcessesLogs();
@@ -47,11 +50,12 @@ var WorkspaceProcessesList = (function () {
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
         }
-
-        this.testInterval();
+        // invoke the
+        this.IntervalUpdate();
 
     }
 
+    // function that stops the interval update
     WorkspaceProcessesList.prototype.stopTick = function () {
         let oController = this;
         if (angular.isDefined(oController.m_oTick)) {
@@ -60,19 +64,22 @@ var WorkspaceProcessesList = (function () {
         }
     }
 
-
-    WorkspaceProcessesList.prototype.testInterval = function () {
+    /**
+     * Function invoked in the constructor to update the status of the
+     * current modal, the current version stops after 10 iterations
+     * @constructor
+     */
+    WorkspaceProcessesList.prototype.IntervalUpdate = function () {
         let oController = this;
         var iCount = 1;
-         
-        // Check the status of The windows in the update loop ! 
 
+        // Check the status of The windows in the update loop !
         oController.m_oTick = oController.m_oInterval(function () {
             oController.resetCounters();
             oController.m_aoProcessesLogs = [];
             oController.getAllProcessesLogs();
             iCount++;
-            if (iCount > 10) { // limits the test to 10 times 
+            if (iCount > 10) { // limits the test to 10 times
                 oController.stopTick();
             }
         }, 5000);
@@ -123,7 +130,7 @@ var WorkspaceProcessesList = (function () {
         this.m_bAreProcessesLoaded = false;
 
         //this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess,this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data, status) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
