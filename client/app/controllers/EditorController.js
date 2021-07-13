@@ -440,10 +440,10 @@ var EditorController = (function () {
                 if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) == false) {
                     oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
                     oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
-                    oController.setLayerOpacity(oController.m_oActiveBand.opacity,oController.m_oActiveBand.layerId);
+                    oController.setLayerOpacity(oController.m_oActiveBand.opacity, oController.m_oActiveBand.layerId);
                     // Re-apply layers opacity fìoer each band
                     oController.m_aoVisibleBands.forEach(oCurBand => {
-                        oController.setLayerOpacity(oCurBand.opacity,oCurBand.layerId);
+                        oController.setLayerOpacity(oCurBand.opacity, oCurBand.layerId);
                     });
 
                 } else {
@@ -1394,8 +1394,7 @@ var EditorController = (function () {
                 // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
         }
-        else
-        {
+        else {
             this.removeBandLayersIn3dMaps(sLayerId);
             //if the layers isn't georeferenced remove the Corresponding rectangle
             this.removeRedSquareIn3DMap(sLayerId);
@@ -1514,16 +1513,17 @@ var EditorController = (function () {
         var fPercentage = iOpacity / 100;
         var layers = [];
         oMap.eachLayer(function (layer) {
-            if (layer instanceof L.TileLayer ){
-                if (!utilsIsObjectNullOrUndefined(layer.options.layers)){
-                    if (layer.options.layers == ("wasdi:"+sLayerId)){
-                        layer.setOpacity(fPercentage); // condition to be fixed to avoid duplicates
+            if (layer instanceof L.TileLayer) {
+                if (!utilsIsObjectNullOrUndefined(layer.options.layers)) {
+                    // first condition covers the downloaded images, the second one is for uploaded band image
+                    if (layer.options.layers == ("wasdi:" + sLayerId) || layer.options.layers == sLayerId) {
+                        layer.setOpacity(fPercentage);
                     }
                 }
             }
-                
+
         });
-        
+
     }
 
     EditorController.prototype.setAllLayersOpacity = function () {
@@ -2712,7 +2712,7 @@ var EditorController = (function () {
                 "show_only_matches_children": true
             },
             "contextmenu": { // my right click menu
-                "select_node" : false,
+                "select_node": false,
                 "items": function ($node) {
 
                     //only the band has property $node.original.band
@@ -3074,7 +3074,7 @@ var EditorController = (function () {
     EditorController.prototype.getDeleteLabel = function () {
         let iCount = this.getSelectedNodesFromTree(null).length;
         if (iCount > 1) {
-            return "Delete "+ iCount + " products";
+            return "Delete " + iCount + " products";
         }
         else {
             return "Delete product";
@@ -3280,9 +3280,9 @@ var EditorController = (function () {
         this.getProductListByWorkspace();
     };
 
-    EditorController.prototype.navigateTo = function (iIndexLayer){
-         // Check for geoserver bounding box
-         if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
+    EditorController.prototype.navigateTo = function (iIndexLayer) {
+        // Check for geoserver bounding box
+        if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox)) {
             this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
             this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
             //this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'geoserverBB', this.m_aoVisibleBands[iIndexLayer].layerId);
