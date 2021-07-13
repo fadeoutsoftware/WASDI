@@ -76,11 +76,13 @@ public class KeycloakService implements AuthProviderService {
 		}
 		sUrl += "admin/realms/wasdi/users?exact=true&username=";
 		sUrl += sUserId;
-		Utils.debugLog("KeycloakService.userRegistration: about to GET to " + sUrl);
+		Utils.debugLog("KeycloakService.getUserData: about to GET to " + sUrl);
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.clear();
 		asHeaders.put("Authorization", "Bearer " + sToken);
-		return Wasdi.httpGet(sUrl, asHeaders);
+		String sResponse = Wasdi.httpGet(sUrl, asHeaders);
+		Utils.debugLog("KeycloakService.getUserData: user data: " + sResponse);
+		return sResponse;
 	}
 
 	@Override
@@ -96,7 +98,7 @@ public class KeycloakService implements AuthProviderService {
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 		String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
-
+		Utils.debugLog("KeycloakService.login: auth result: " + sAuthResult);
 		return sAuthResult;
 	}
 	
@@ -123,7 +125,9 @@ public class KeycloakService implements AuthProviderService {
 				return null;
 			}
 			JSONObject oEntry = oResponseArray.getJSONObject(0);
-			return oEntry.optString("id", null);
+			String sUserDbId = oEntry.optString("id", null);
+			Utils.debugLog("KeycloakService.getUserDbId: user DB id: " + sUserDbId );
+			return sUserDbId;
 		} catch (Exception oE) {
 			Utils.debugLog("KeycloakService.getUserDbId: could not parse response due to " + oE + ", aborting");
 		}
@@ -157,7 +161,7 @@ public class KeycloakService implements AuthProviderService {
 			asHeaders.put("Authorization", "Bearer " + sToken);
 			asHeaders.put("Content-Type", "application/json");
 			String sResponse = Wasdi.httpPut(sUrl, sPayload, asHeaders);
-			System.out.println(sResponse);
+			Utils.debugLog("KeycloakService.getUserDbId: response (should be empty): \"" + sResponse + "\"");
 			oResult.setIntValue(200);
 			return oResult;
 		} catch (Exception oE) {
@@ -201,6 +205,7 @@ public class KeycloakService implements AuthProviderService {
 		if(oJsonResponse.has("createdTimestamp")) {
 			oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", System.currentTimeMillis())));
 		}
+		oNewUser.setUserId(sUserId);
 		return oNewUser;
 	}
 }
