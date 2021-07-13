@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.bson.Document;
 
@@ -27,8 +28,8 @@ public class SessionRepository extends MongoRepository {
 	
 	/**
 	 * Create a new session
-	 * @param oSession
-	 * @return
+	 * @param oSession a valid WASDI session
+	 * @return true if insert was successful, false otherwise
 	 */
     public boolean insertSession(UserSession oSession) {
         try {
@@ -43,6 +44,52 @@ public class SessionRepository extends MongoRepository {
 
         return false;
     }
+    
+    
+    
+    /**
+     * Creates a new unique session for the given user
+     * @param sUserId a valid wasdi user id
+     * @return a UserSession if it could be created successfully, null otherwise
+     */
+    public UserSession createUniqueSession(String sUserId) {
+    	if(Utils.isNullOrEmpty(sUserId)) {
+    		return null;
+    	}
+    	UserSession oSession = null;
+    	String sSessionId = "";
+		do {
+			sSessionId = UUID.randomUUID().toString();
+			oSession = getSession(sSessionId);
+		}while(null!=oSession);
+		
+		oSession = new UserSession();
+		oSession.setSessionId(sSessionId);
+		oSession.setUserId(sUserId);
+		oSession.setLoginDate((double) new Date().getTime());
+		oSession.setLastTouch((double) new Date().getTime());
+    	
+    	return oSession;
+    }
+    
+    
+    /**
+     * Creates a new session for the given user, and inserts it in the DB
+     * @param sUserId a valid WASDI user
+     * @return true if the creation and insert succeded, false otherwise
+     */
+    public UserSession insertUniqueSession(String sUserId) {
+    	try {
+	    	UserSession oSession = createUniqueSession(sUserId);
+	    	if(insertSession(oSession)) {
+	    		return oSession;
+	    	}
+    	} catch (Exception oE) {
+			oE.printStackTrace();
+		}
+    	return null;
+    }
+    
     
     /**
      * Get a session by Id
