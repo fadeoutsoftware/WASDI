@@ -949,7 +949,6 @@ public class Wasdi extends ResourceConfig {
 			oConnection.setReadTimeout(2000);
 
 			oConnection.setDoOutput(true);
-			// Set POST
 			oConnection.setRequestMethod("GET");
 			
 			if (asHeaders != null) {
@@ -959,17 +958,8 @@ public class Wasdi extends ResourceConfig {
 			}
 						
 			oConnection.connect();
-
-			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String sInputLine;
-			StringBuilder sResponse = new StringBuilder();
-	
-			while ((sInputLine = oInputBuffer.readLine()) != null) {
-				sResponse.append(sInputLine);
-			}
-			oInputBuffer.close();
 			
-			return sResponse.toString();
+			return readHttpResponse(oConnection);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
