@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -173,24 +175,27 @@ public class AuthResource {
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
-
-		if(Utils.isNullOrEmpty(sSessionId)) {
-			Utils.debugLog("AuthResource.CheckSession: SessionId is null or empty");
-			return UserViewModel.getInvalid();
+		try {
+			if(Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("AuthResource.CheckSession: SessionId is null or empty");
+				return UserViewModel.getInvalid();
+			}
+	
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("AuthResource.CheckSession: invalid session");
+				return UserViewModel.getInvalid();
+			}
+	
+			UserViewModel oUserVM = new UserViewModel();
+			oUserVM.setName(oUser.getName());
+			oUserVM.setSurname(oUser.getSurname());
+			oUserVM.setUserId(oUser.getUserId());
+			return oUserVM;
+		} catch (Exception oE) {
+			Utils.debugLog("AuthResource.CheckSession: " + oE);
 		}
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-			Utils.debugLog("AuthResource.CheckSession: invalid session");
-			return UserViewModel.getInvalid();
-		}
-
-		UserViewModel oUserVM = new UserViewModel();
-		oUserVM.setName(oUser.getName());
-		oUserVM.setSurname(oUser.getSurname());
-		oUserVM.setUserId(oUser.getUserId());
-
-		return oUserVM;
+		return UserViewModel.getInvalid();
 	}	
 
 
@@ -240,28 +245,41 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Utils.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
+		if(Utils.isNullOrEmpty(sEmail)) {
+			Utils.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
 		try {
-	
-			if(!m_oCredentialPolicy.validEmail(sEmail)) {
-				return Response.status(Status.BAD_REQUEST).build();
-			}
-	
+			InternetAddress emailAddr = new InternetAddress(sEmail);
+			emailAddr.validate();
+		} catch (AddressException oEx) {
+			Utils.debugLog("AuthResource.createSftpAccount: email is invalid, aborting");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		try {	
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
+				Utils.debugLog("AuthResource.createSftpAccount: session invalid or user not found, aborting");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-	
+			
 			// Get the User Id
 			String sAccount = oUser.getUserId();
+			if(Utils.isNullOrEmpty(sAccount)) {
+				Utils.debugLog("AuthResource.createSftpAccount: userid is null, aborting");
+				return Response.serverError().build();
+			}
 	
 			// Search for the sftp service
-			String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
-			if (Utils.isNullOrEmpty(wsAddress)) {
-				wsAddress = "ws://localhost:6703";
+			String sWsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+			if (Utils.isNullOrEmpty(sWsAddress)) {
+				sWsAddress = "ws://localhost:6703";
+				Utils.debugLog("AuthResource.createSftpAccount: sWsAddress is null or empty, defaulting to " + sWsAddress);
 			}
 	
 			// Manager instance
-			SFTPManager oManager = new SFTPManager(wsAddress);
+			SFTPManager oManager = new SFTPManager(sWsAddress);
 			String sPassword = Utils.generateRandomPassword();
 	
 			// Try to create the account
