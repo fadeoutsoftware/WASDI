@@ -45,8 +45,7 @@ var WorkspaceProcessesList = (function () {
 
             this.getAllProcessesLogs();
             this.m_sHrefLogFile = "";
-        }
-        else {
+        } else {
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
         }
@@ -74,7 +73,7 @@ var WorkspaceProcessesList = (function () {
         let iIntervalmS = 5000; // interval of the periodical update in mS
         // Check the status of The windows in the update loop !
         oController.m_oTick = oController.m_oInterval(function () {
-            // suspend binding on angular 
+            // suspend binding on angular
             oController.getLastProcessesLogs();
         }, iIntervalmS);
     }
@@ -89,9 +88,9 @@ var WorkspaceProcessesList = (function () {
 
         .comboTypeClick = function (sStatus) {
 
-            if (sStatus == "None") sStatus = "Type...";
-            this.m_oFilter.m_sType = sStatus;
-        };
+        if (sStatus == "None") sStatus = "Type...";
+        this.m_oFilter.m_sType = sStatus;
+    };
 
     WorkspaceProcessesList.prototype.applyFilters = function () {
         this.resetCounters();
@@ -123,25 +122,18 @@ var WorkspaceProcessesList = (function () {
             return false;
         }
 
-        //this.m_bAreProcessesLoaded = false;
         // retrieves the last 40 processor Logs considering the current state of the filters
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40,this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
-                        oController.m_aoProcessesLogs = data.data;
+                        // update only the last 40, instead of reassign all the array
+                        data.data.forEach(function callbackFn(element, index) {
+                            oController.m_aoProcessesLogs[index] = element;
+                        });
+                        //oController.m_aoProcessesLogs = data.data;
                         oController.m_sHrefLogFile = oController.generateLogFile();
                     }
-                    else {
-                        oController.isLoadMoreButtonClickable = false;
-                    }
-
-                    if (data.data.length < oController.m_iNumberOfProcessForRequest) {
-                        //there aren't enough processes for other requests so you can't load more processes
-                        oController.isLoadMoreButtonClickable = false;
-
-                    }
-                   // oController.m_bAreProcessesLoaded = true;
                 }
             }, function (data, status) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PROCESSES LOGS DIALOG<br>UNABLE TO LOAD ALL PROCESSES LOGS FROM SERVER");
@@ -165,15 +157,14 @@ var WorkspaceProcessesList = (function () {
         this.m_bAreProcessesLoaded = false;
 
         //this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess,this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data, status) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
                         oController.m_aoProcessesLogs = oController.m_aoProcessesLogs.concat(data.data);
                         oController.m_sHrefLogFile = oController.generateLogFile();
                         oController.calculateNextListOfProcess();
-                    }
-                    else {
+                    } else {
                         oController.isLoadMoreButtonClickable = false;
                     }
 
@@ -246,8 +237,7 @@ var WorkspaceProcessesList = (function () {
         if (iNumber > 0) {
             if (iNumber < 10) {
                 sNumber = "0" + String(iNumber);
-            }
-            else {
+            } else {
                 sNumber = String(iNumber);
             }
         }
@@ -351,7 +341,6 @@ var WorkspaceProcessesList = (function () {
     };
 
 
-
     WorkspaceProcessesList.prototype.deleteProcess = function (oProcessInput) {
         this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
         return true;
@@ -360,8 +349,6 @@ var WorkspaceProcessesList = (function () {
     WorkspaceProcessesList.prototype.getOperationDescription = function (oOperation) {
         return utilsConvertOperationToDescription(oOperation);
     };
-
-
 
 
     WorkspaceProcessesList.$inject = [
