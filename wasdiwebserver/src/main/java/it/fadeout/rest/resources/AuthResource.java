@@ -174,14 +174,13 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
 
-		if(null == sSessionId) {
-			Utils.debugLog("AuthResource.CheckSession: SessionId is null");
+		if(Utils.isNullOrEmpty(sSessionId)) {
+			Utils.debugLog("AuthResource.CheckSession: SessionId is null or empty");
 			return UserViewModel.getInvalid();
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		//if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-		if (oUser == null ) {
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 			Utils.debugLog("AuthResource.CheckSession: invalid session");
 			return UserViewModel.getInvalid();
 		}
