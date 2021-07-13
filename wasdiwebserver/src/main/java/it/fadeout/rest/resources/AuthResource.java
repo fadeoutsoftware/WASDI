@@ -240,43 +240,48 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Utils.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
-
-		if(!m_oCredentialPolicy.validEmail(sEmail)) {
-			return Response.status(Status.BAD_REQUEST).build();
+		try {
+	
+			if(!m_oCredentialPolicy.validEmail(sEmail)) {
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+	
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+	
+			// Get the User Id
+			String sAccount = oUser.getUserId();
+	
+			// Search for the sftp service
+			String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+			if (Utils.isNullOrEmpty(wsAddress)) {
+				wsAddress = "ws://localhost:6703";
+			}
+	
+			// Manager instance
+			SFTPManager oManager = new SFTPManager(wsAddress);
+			String sPassword = Utils.generateRandomPassword();
+	
+			// Try to create the account
+			if (!oManager.createAccount(sAccount, sPassword)) {
+	
+				Utils.debugLog("AuthService.CreateSftpAccount: error creating sftp account");
+				return Response.serverError().build();
+			}
+	
+			// Sent the credentials to the user
+			if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
+				return Response.serverError().build();
+			}
+	
+			// All is done
+			return Response.ok().build();
+		}catch (Exception oE) {
+			Utils.debugLog("AuthService.CreateSftpAccount: " + oE);
 		}
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-
-		// Get the User Id
-		String sAccount = oUser.getUserId();
-
-		// Search for the sftp service
-		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
-		if (wsAddress==null) {
-			wsAddress = "ws://localhost:6703";
-		}
-
-		// Manager instance
-		SFTPManager oManager = new SFTPManager(wsAddress);
-		String sPassword = Utils.generateRandomPassword();
-
-		// Try to create the account
-		if (!oManager.createAccount(sAccount, sPassword)) {
-
-			Utils.debugLog("AuthService.CreateSftpAccount: error creating sftp account");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		// Sent the credentials to the user
-		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		// All is done
-		return Response.ok().build();
+		return Response.serverError().build();
 	}
 
 	@GET
