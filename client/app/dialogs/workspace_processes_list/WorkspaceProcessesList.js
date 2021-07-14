@@ -130,6 +130,8 @@ var WorkspaceProcessesList = (function () {
                         // update only the last 40, instead of reassign all the array
                         data.data.forEach(function callbackFn(element, index) {
                             oController.m_aoProcessesLogs[index] = element;
+                            // this condition to check whether the operation is still running
+                            if (element.operationEndDate == "null Z") {console.log("Still Running");}
                         });
                         //oController.m_aoProcessesLogs = data.data;
                         oController.m_sHrefLogFile = oController.generateLogFile();
