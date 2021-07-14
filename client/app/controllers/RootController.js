@@ -757,7 +757,7 @@ var RootController = (function() {
             oController.openProcessorLogsDialog(process);
             return true;
         }else{
-            console.error("Cannot find process ID " + processId + " in the processes list")
+        //    console.error("Cannot find process ID " + processId + " in the processes list") 
             return false;
         }
     };
