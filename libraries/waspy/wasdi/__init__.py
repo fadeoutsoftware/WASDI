@@ -1225,7 +1225,7 @@ def updateProgressPerc(iPerc):
     """
     Update the actual progress Percentage of the processor
 
-    :param iPerc: new Percentage. Use a value between 0 and 100 to set it.
+    :param iPerc: new Percentage. Use a value between 0 and 100 to set it. The value must be an integer
     :return: updated status of the process or '' if there was any error
     """
     try:
