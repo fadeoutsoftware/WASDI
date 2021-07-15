@@ -131,7 +131,12 @@ var WorkspaceProcessesList = (function () {
                         data.data.forEach(function callbackFn(element, index) {
                             oController.m_aoProcessesLogs[index] = element;
                             // this condition to check whether the operation is still running
-                            if (element.operationEndDate == "null Z") {console.log("Still Running");}
+                            if (element.operationEndDate == "null Z") {
+                                console.log("Still Running");
+                            let lStartTime = new Date(element.operationStartDate).getTime();
+                            let lCurTime = new Date().getTime();
+                            let seconds = 3;
+                            }
                         });
                         //oController.m_aoProcessesLogs = data.data;
                         oController.m_sHrefLogFile = oController.generateLogFile();
@@ -198,7 +203,14 @@ var WorkspaceProcessesList = (function () {
     WorkspaceProcessesList.prototype.getProcessDuration = function (oProcess) {
         //time by server
         let oStartTime = new Date(oProcess.operationStartDate);
-        let oEndTime = new Date(oProcess.operationEndDate);
+        // still running
+        let oEndTime = new Date();
+        // reassign in case is ended
+        if(oProcess.operationEndDate != "null Z"){
+            oEndTime = new Date(oProcess.operationEndDate);
+        }
+
+
 
         if (utilsIsValidDate(oEndTime) === false) {
             oEndTime = new Date(oProcess.lastChangeDate);
