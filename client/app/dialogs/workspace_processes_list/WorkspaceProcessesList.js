@@ -192,18 +192,21 @@ var WorkspaceProcessesList = (function () {
         this.m_iNumberOfProcessForRequest = 40;
         this.m_iFirstProcess = 0;
     };
-
+    /**
+     * Calculate and retrieve process duration in HH:MM:SS format
+     * Bind on ng-binding in the WorkspaceProcessList dialog
+     * @param oProcess The process Object (see ProcessWorkspaceViewModel.java)
+     * @returns {string} String of duration in HH:MM:SS format
+     */
     WorkspaceProcessesList.prototype.getProcessDuration = function (oProcess) {
-        //time by server
+        // start time by server
         let oStartTime = new Date(oProcess.operationStartDate);
-        // still running
+        // still running -> assign "now"
         let oEndTime = new Date();
-        // reassign in case is ended
+        // reassign in case the process is already ended
         if(oProcess.operationEndDate != "null Z"){
             oEndTime = new Date(oProcess.operationEndDate);
         }
-
-
 
         if (utilsIsValidDate(oEndTime) === false) {
             oEndTime = new Date(oProcess.lastChangeDate);
