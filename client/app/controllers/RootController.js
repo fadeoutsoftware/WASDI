@@ -594,7 +594,7 @@ var RootController = (function() {
         var oController = this;
         // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
-            templateUrl: "dialogs/workspace_processes_list/WorkpsaceProcessesList.html",
+            templateUrl: "dialogs/workspace_processes_list/WorkspaceProcessesList.html",
             controller: "WorkspaceProcessesList"
         }).then(function(modal) {
             modal.element.modal();
