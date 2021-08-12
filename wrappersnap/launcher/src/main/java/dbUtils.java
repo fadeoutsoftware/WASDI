@@ -17,7 +17,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.ConfigReader;
-import wasdi.ProcessWorkspaceLogger;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -1811,6 +1810,8 @@ public class dbUtils {
     public static void main(String[] args) {
 
         try {
+        	System.out.println("Wasdi DB Utils");
+        	
             //this is how you read parameters:
             MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
             MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
