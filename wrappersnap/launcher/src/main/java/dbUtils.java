@@ -534,79 +534,101 @@ public class dbUtils {
 	        System.out.println("Ok, what we do with metadata?");
 	        
 	        System.out.println("\t1 - Clear Unlinked metadata");
+	        System.out.println("\t2 - Clear metadata from DB if file does not exist");
+	        System.out.println("\t3 - Clear metadata from this node (both from disk and DB)");
 	        System.out.println("\tx - back");
 	        System.out.println("");
 	        
 	        String sInputString = s_oScanner.nextLine();
 
-	        if (sInputString.equals("x")) {
-	        	return;
-	        }
-
-	        if (sInputString.equals("1")) {
-	        	
-	        	System.out.println("Searching Metadata files to delete");
-	        	
-	        	File oMetadataPath = new File("/data/wasdi/metadata");
-	        	
-	        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-	        	// Get all the downloaded files
-	        	DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-	        	List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getList();
-	        	
-	        	ArrayList<String> asMetadataFileReference = new ArrayList<String>();
-	        	
-	        	// Generate the list of valid metadata file reference
-	        	for (DownloadedFile oDownloadedFile : aoDownloadedFileList) {
-	        		
-	        		if (!isProductOnThisNode(oDownloadedFile, oWorkspaceRepository)) {
-	        			System.out.println("Product " + oDownloadedFile.getFileName() + " NOT IN THIS NODE JUMP");
-	        			continue;
-	        		}
-	        		
-	        		// Get the view model
-	        		ProductViewModel oVM = oDownloadedFile.getProductViewModel();
-	        		
-	        		if (oVM != null) {
-	        			if (!Utils.isNullOrEmpty(oVM.getMetadataFileReference())){
-	        				// Check metadata file refernece
-	        				if (!asMetadataFileReference.contains(oVM.getMetadataFileReference())) {
-	        					// Add to the list
-	        					asMetadataFileReference.add(oVM.getMetadataFileReference());
-	        				}
-	        			}
-	        		}
-				}
-	        	
-	        	// Files to delete
-	        	ArrayList<File> aoFilesToDelete = new ArrayList<File>();
-	        	
-	        	// For all the files in metadata
-	        	for (File oFile : oMetadataPath.listFiles()) {
-	        		
-	        		// Get the name:
-	        		String sName = oFile.getName();
-	        		
-	        		// Is linked?
-	        		if (!asMetadataFileReference.contains(sName)) {
-	        			// No!!
-	        			aoFilesToDelete.add(oFile);
-	        		}
-	        	}
-	        	
-	        	
-	        	for (File oFile : aoFilesToDelete) {
-	        		System.out.println("Deleting metadata File: " + oFile.getPath());
-	        		if (oFile.delete()==false) {
-	        			System.out.println("Error Deleting metadata File: " + oFile.getPath());
-	        		}
-				}
-      	
-	        }
+	        switch (sInputString) {
+			case "1":
+				metadataDeleteOrphanedFiles();
+				break;
+			case "2":
+				metadataCleanDB();
+				break;
+			case "3":
+				metadataCleanAll();
+				break;
+			case "x":
+			default:
+				return;
+			}
+	        
 		}
 		catch (Exception oEx) {
 			System.out.println("metadata Exception: " + oEx);
 			oEx.printStackTrace();
+		}
+	}
+
+	private static void metadataCleanAll() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static void metadataCleanDB() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static void metadataDeleteOrphanedFiles() {
+		System.out.println("Searching Metadata files to delete");
+		
+		File oMetadataPath = new File("/data/wasdi/metadata");
+		
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		// Get all the downloaded files
+		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+		List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getList();
+		
+		ArrayList<String> asMetadataFileReference = new ArrayList<String>();
+		
+		// Generate the list of valid metadata file reference
+		for (DownloadedFile oDownloadedFile : aoDownloadedFileList) {
+			
+			if (!isProductOnThisNode(oDownloadedFile, oWorkspaceRepository)) {
+				System.out.println("Product " + oDownloadedFile.getFileName() + " NOT IN THIS NODE SKIP");
+				continue;
+			}
+			
+			// Get the view model
+			ProductViewModel oVM = oDownloadedFile.getProductViewModel();
+			
+			if (oVM != null) {
+				if (!Utils.isNullOrEmpty(oVM.getMetadataFileReference())){
+					// Check metadata file refernece
+					if (!asMetadataFileReference.contains(oVM.getMetadataFileReference())) {
+						// Add to the list
+						asMetadataFileReference.add(oVM.getMetadataFileReference());
+					}
+				}
+			}
+		}
+		
+		// Files to delete
+		ArrayList<File> aoFilesToDelete = new ArrayList<File>();
+		
+		// For all the files in metadata
+		for (File oFile : oMetadataPath.listFiles()) {
+			
+			// Get the name:
+			String sName = oFile.getName();
+			
+			// Is linked?
+			if (!asMetadataFileReference.contains(sName)) {
+				// No!!
+				aoFilesToDelete.add(oFile);
+			}
+		}
+		
+		
+		for (File oFile : aoFilesToDelete) {
+			System.out.println("Deleting metadata File: " + oFile.getPath());
+			if (oFile.delete()==false) {
+				System.out.println("Error Deleting metadata File: " + oFile.getPath());
+			}
 		}
 	}
 
