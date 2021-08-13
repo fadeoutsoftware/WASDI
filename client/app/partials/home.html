@@ -51,32 +51,36 @@
 
                 </form>
 
-                <br>
+                <!--br -->
 
                 <!--GOOGLE BUTTON-->
 <!--                <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>-->
 
 <!--                <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>-->
 
-                <br>
+                <!--br-->
                 <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
                     </a>
                 </div>
                 <br>
-                <div  ng-hide="m_oController.m_bRegisterIsVisible">
+                <div  ng-hide="m_oController.m_bRegisterIsVisible || m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.keycloakRegister()">
                         New User? Register here!
                     </a>
                 </div>
                 <!-- NEW WASDI LOGIN  -->
+                
+                <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
+
                 <br><hr><br>
 
                 <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()"
                         ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     {{"LOGIN_BUTTON_SIGN_IN_2"|translate}}
                 </button>
+                </div>
 
 
 

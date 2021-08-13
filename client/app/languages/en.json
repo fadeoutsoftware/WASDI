@@ -14,7 +14,7 @@
     "LOGIN_LINK_REGISTER":"Register",
 
     "RECOVERY_EMAIL_BUTTON":"Send request",
-    "RECOVERY_EMAIL_TITLE":"Insert your email if you want to recover your password",
+    "RECOVERY_EMAIL_TITLE":"Please, insert your email and confirm.\n A message will be sent with further instructions to recover your account",
 
     "SIGN_IN_PLACEHOLDER_EMAIL":"Email Address",
     "SIGN_IN_PLACEHOLDER_PASSWORD":"Password",
