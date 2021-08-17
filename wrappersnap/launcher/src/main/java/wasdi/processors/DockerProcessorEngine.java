@@ -2,8 +2,11 @@ package wasdi.processors;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -19,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
@@ -315,7 +319,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		
 		LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: start");
 		
-		if (oParameter == null) return false;
+		if (oParameter == null) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.run: parameter is null");
+			return false;
+		}
 		
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
 		ProcessWorkspace oProcessWorkspace = null;		
@@ -337,8 +344,8 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 					LauncherMain.s_oLogger.info("DockerProcessorEngine.run: creating ws folder");
 					oWorkspacePath.mkdirs();
 				}
-				catch (Exception oWorkspaceFolderExcetpion) {
-					LauncherMain.s_oLogger.error("DockerProcessorEngine.run: exception creating ws");
+				catch (Exception oWorkspaceFolderException) {
+					LauncherMain.s_oLogger.error("DockerProcessorEngine.run: exception creating ws: " + oWorkspaceFolderException);
 				}
 			}
 			
@@ -419,12 +426,11 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				oOutputStream.write(sJson.getBytes());
 				oOutputStream.flush();
 				
-				if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
-					throw new Exception();
-				}
+				printErrorMessageFromConnection(oConnection);
+				throw new Exception("DockerProcessorEngine.printErrorMessageFromConnection: response code is: " + oConnection.getResponseCode());
 			}
-			catch (Exception e) {
-				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to start container again");
+			catch (Exception oE) {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");
 				
 				// Try to start Again the docker
 				
@@ -453,6 +459,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				oOutputStream.flush();
 				
 				if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+					printErrorMessageFromConnection(oConnection);
 					// Nothing to do
 					throw new RuntimeException("Failed Again: HTTP error code : " + oConnection.getResponseCode());
 				}
@@ -498,10 +505,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				oOutputJsonMap = oMapper.readValue(sJsonOutput, Map.class);				
 			}
 			catch (Exception oEx) {
-				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: exception converting proc output in Json " + oEx.toString());
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: exception converting proc output in Json " + oEx);
 			}
 			
-			// Check if is a processor > 1.0: 
+			// Check if it is a processor > 1.0: 
 			// first processors where blocking: docker server waited for the execution to end before going back to the launcher
 			// New processors (>=2.0) are asynch: returns just Engine Version
 			if (oOutputJsonMap != null) {
@@ -615,6 +622,16 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 		
 		return true;
+	}
+
+	protected void printErrorMessageFromConnection(HttpURLConnection oConnection) throws IOException, Exception {
+		if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+			 InputStream oErrorStream = oConnection.getErrorStream();
+		    try (Reader reader = new InputStreamReader(oErrorStream)) {
+		    	String sMessage = CharStreams.toString(reader);
+		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.printErrorMessageFromConnection: connection failed with " + oConnection.getResponseCode() + ": " + sMessage);
+		    }
+		}
 	}
 	
 	public boolean delete(ProcessorParameter oParameter) {
