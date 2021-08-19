@@ -162,12 +162,20 @@ public class DockerUtils {
 				
 				// Port
 				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
+
+				/* TODO this parameter is needed just by adwaiseo node
+					- Check if it's possibile to add to properties.config file
+				 */
+				asArgs.add("--add-host=adwaiseo1.wasdi.net:172.17.0.1");
 				
 				// Docker name
 				asArgs.add(sDockerName);
 
 				// Generate the command line
 				String sCommandLine = "";
+
+
+
 				
 				for (String sArg : asArgs) {
 					sCommandLine += sArg + " ";
