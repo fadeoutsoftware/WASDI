@@ -171,7 +171,7 @@ public class DockerUtils {
                 if (!Utils.isNullOrEmpty(sExtra_Host)) {
                     LauncherMain.s_oLogger.debug("DockerUtils.run Found extra host in configuration file");
                     LauncherMain.s_oLogger.debug("DockerUtils.run adding host mapping to the run arguments");
-                    asArgs.add("--add-host=" + sExtra_Host);    //adwaiseo1.wasdi.net:172.17.0.1
+                    asArgs.add("--add-host=" + sExtra_Host);
                 }
 
 
