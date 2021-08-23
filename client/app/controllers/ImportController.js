@@ -196,7 +196,7 @@ var ImportController = (function() {
 
             oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
             oController.m_oScope.$apply();
-
+            // selects the first mission (S1)
             oController.updateMissionSelection(0);
         });
 
@@ -541,10 +541,9 @@ var ImportController = (function() {
         return true;
     };
 
-    ImportController.prototype.searchAndCount = function(oProvider, oThat)
+    ImportController.prototype.searchAndCount = function(oProvider)
     {
         var oController = this;
-        if(utilsIsObjectNullOrUndefined(oThat) === false) oController = oThat;
 
         if(oController.thereIsAtLeastOneProvider() === false) return false;
         if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
