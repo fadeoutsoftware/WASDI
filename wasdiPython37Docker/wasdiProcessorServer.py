@@ -21,7 +21,8 @@ def run(processId):
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))	
 	os.chdir(dir_path)
-	
+	print("wasdiProcessorServer: processor folder set")
+
 	try:
 		# Copy updated files from processor folder to the docker
 		copy_tree("/wasdi", "/home/wasdi", update=1)
@@ -221,7 +222,7 @@ def run(processId):
 		print(f'[{processId}] wasdiProcessorServer Workspace Id not available in parameters: {type(oE)}: {oE}')
 	except:
 		# todo catch BaseException or something
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.")		
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.")
 
 
 	#Try to get the base url
@@ -233,7 +234,7 @@ def run(processId):
 		print(f'[{processId}] wasdiProcessorServer Using default base url: {type(oE)}: {oE}')
 	except:
 		# todo catch BaseException or something
-		print("[" + processId+ "] wasdiProcessorServer Using default base url")		
+		print("[" + processId+ "] wasdiProcessorServer Using default base url")
 
 	
 	#Init Wasdi
