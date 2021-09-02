@@ -11,7 +11,7 @@ Legal Notice
 -------------------
 WASDI Sàrl
 
-**Disclaimer **
+**Disclaimer**
 The library is provided "as-is" without warranty
 
 Neither FadeOut Software (IT) Srl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
