@@ -1206,3 +1206,4 @@ docs/build/html/java/package-index.html
 docs/build/html/java/WasdiLib.html
 wasdiIDLDocker/.pydevproject
 wasdiOctaveDocker/.pydevproject
+/docs/build/
