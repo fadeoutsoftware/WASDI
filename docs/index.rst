@@ -68,8 +68,9 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    :hidden:
    :caption: Libraries
 
+   python/waspy.rst
    octave/octave.rst
    java/WasdiLib.rst
-   python/waspy.rst
+
 
 
