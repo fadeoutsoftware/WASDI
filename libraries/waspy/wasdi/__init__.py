@@ -1,17 +1,17 @@
 """"""
 """
-WASDI (LU) Sàrl
+WASDI (LU) S.a.r.l.
 
 **Disclaimer ** 
 The library is provided "as-is" without warranty
 
-Neither WASDI (LU) Sàrl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
+Neither WASDI (LU) S.a.r.l. or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
 damages (including, but not limited to, breach of expressed or implied contract; procurement of substitute goods or services; loss of use, data or profits; 
 business interruption; or damage to any equipment, software and/or data files) however caused and on any legal theory of liability, whether for contract, 
 tort, strict liability, or a combination thereof (including negligence or otherwise) arising in any way out of the direct or indirect use of software, 
 even if advised of the possibility of such risk and potential damage.
 
-WASDI (LU) Sàrl uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed,
+WASDI (LU) S.a.r.l. uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed,
 and that all products are free from any known software virus. For your own protection, you should scan all files for viruses prior to installation.
 
 
@@ -19,7 +19,7 @@ and that all products are free from any known software virus. For your own prote
 
 This is WASPY, the WASDI Python lib.
 
-WASDI is an ESA GSTP Project sponsored by ASI in 2016. The system is a fully scalable and distributed Cloud based EO analytical platform. The system is cross-cloud and cross DIAS. 
+WASDI is a fully scalable and distributed Cloud based EO analytical platform. The system is cross-cloud and cross DIAS. 
 WASDI is an operating platform that offers services to develop and deploy DIAS based EO on-line applications, designed 
 to extract value-added information, made and distributed by EO-Experts without any specific IT/Cloud skills.  
 WASDI offers as well to End-Users the opportunity to run EO applications both from a dedicated user-friendly interface 
@@ -32,8 +32,8 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.2
-Last Update: 10/03/2021
+Version 0.6.5
+Last Update: 02/09/2021
 
 Tested with: Python 2.7, Python 3.7
 
@@ -87,6 +87,7 @@ m_aoParamsDictionary = {}
 m_sMyProcId = ''
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
+m_iRequestsTimeout = 2*60
 
 
 def printStatus():
@@ -468,6 +469,20 @@ def getActiveWorkspaceId():
     global m_sActiveWorkspace
     return m_sActiveWorkspace
 
+def geRequestsTimeout():
+    """
+    :return: the timeout for HTTP requests
+    """
+    global m_iRequestsTimeout
+    return m_iRequestsTimeout
+
+def setRequestsTimeout(iTimeout):
+    """
+    :param fTimeout: the timeout to be set for HTTP requests
+    """
+    global m_iRequestsTimeout
+    m_iRequestsTimeout = iTimeout
+
 def refreshParameters():
     """
     Refresh parameters, reading the file again
@@ -532,7 +547,11 @@ def init(sConfigFilePath=None):
     if m_sSessionId != '':
         asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/auth/checksession'
-        oResponse = requests.get(sUrl, headers=asHeaders)
+        try:
+            oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+        
         if (oResponse is not None) and (oResponse.ok is True):
             oJsonResult = oResponse.json()
             try:
@@ -554,7 +573,10 @@ def init(sConfigFilePath=None):
         asHeaders = {'Content-Type': 'application/json'}
         sUrl = m_sBaseUrl + '/auth/login'
         sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
-        oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
+        try:
+            oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))            
 
         if oResponse is None:
             print('[ERROR] waspy.init: cannot authenticate' +
@@ -601,7 +623,14 @@ def hello():
     global m_sBaseUrl
 
     sUrl = m_sBaseUrl + '/wasdi/hello'
-    oResult = requests.get(sUrl)
+    try:
+        oResult = requests.get(sUrl, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+    
+    if oResult is None:
+        return ""
+    
     return oResult.text
 
 def getWorkspaces():
@@ -623,8 +652,11 @@ def getWorkspaces():
     asHeaders = _getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
-
-    oResult = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
@@ -648,8 +680,11 @@ def createWorkspace(sName=None):
 
     if sName is not None:
         sUrl = sUrl + "?name=" + sName
-
-    oResult = requests.get(sUrl, headers=asHeaders)
+        
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
@@ -686,7 +721,10 @@ def deleteWorkspace(sWorkspaceId):
     try:
         sUrl = getWorkspaceBaseUrl() + '/ws/delete?sWorkspaceId='+sWorkspaceId+'&bDeleteLayer='+str(bDeleteLayer) + "&bDeleteFile=" + str(bDeleteFile)
         
-        oResult = requests.delete(sUrl, headers=asHeaders)
+        try:
+            oResult = requests.delete(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))            
     
         if (oResult is not None) and (oResult.ok is True):
             return True
@@ -709,7 +747,10 @@ def getWorkspaceIdByName(sName):
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
-    oResult = requests.get(sUrl, headers=asHeaders)
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
@@ -738,7 +779,10 @@ def getWorkspaceOwnerByName(sName):
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
-    oResult = requests.get(sUrl, headers=asHeaders)
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
@@ -767,7 +811,10 @@ def getWorkspaceOwnerByWsId(sWsId):
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
-    oResult = requests.get(sUrl, headers=asHeaders)
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
@@ -796,7 +843,10 @@ def getWorkspaceUrlByWsId(sWsId):
 
     sUrl = m_sBaseUrl + '/ws?sWorkspaceId=' + sWsId
 
-    oResult = requests.get(sUrl, headers=asHeaders)
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
@@ -877,8 +927,11 @@ def getProductsByWorkspaceId(sWorkspaceId):
     sUrl = m_sBaseUrl + '/product/namesbyws'
 
     asProducts = []
-
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if oResult.ok is True:
         oJsonResults = oResult.json()
@@ -1018,7 +1071,10 @@ def getProcessStatus(sProcessId):
 
     sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
 
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     sStatus = ''
 
@@ -1089,7 +1145,10 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
 
     sUrl = getWorkspaceBaseUrl() + '/process/updatebyid'
 
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     sStatus = ''
 
@@ -1155,7 +1214,7 @@ def waitProcess(sProcessId):
     # Wait to be resumed
     _waitForResume()
 
-    return sStatus
+    return sStatus    
 
 def waitProcesses(asProcIdList):
     """
@@ -1185,6 +1244,10 @@ def waitProcesses(asProcIdList):
     if not isinstance(asProcIdList, list):
         wasdiLog("[WARNING] waitProcesses asProcIdList is not a list, return empty list")
         return asReturnStatus;
+    
+    if len(asProcIdList) == 0:
+        wasdiLog("[WARNING] waitProcesses asProcIdList is empty, return empty list")
+        return asReturnStatus;
 
     iTotalTime = 0
 
@@ -1195,7 +1258,10 @@ def waitProcesses(asProcIdList):
     
     while not bAllDone:
         
-        oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders)
+        try:
+            oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))            
     
         if (oResult is not None) and (oResult.ok is True):
             asResultStatus = oResult.json()
@@ -1254,7 +1320,12 @@ def updateProgressPerc(iPerc):
         sStatus = "RUNNING"
         sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
         asHeaders = _getStandardHeaders()
-        oResponse = requests.get(sUrl, headers=asHeaders)
+        
+        try:
+            oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+                    
         sResult = ""
         if (oResponse is not None) and (oResponse.ok is True):
             oJson = oResponse.json()
@@ -1286,8 +1357,11 @@ def setProcessPayload(sProcessId, data):
         payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
 
         sUrl = getWorkspaceBaseUrl() + '/process/setpayload'
-
-        oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+        
+        try:
+            oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))            
 
         sStatus = ''
 
@@ -1338,7 +1412,12 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
         sUrl = getWorkspaceBaseUrl() + '/process/payload'
         asParams = {'processObjId': sProcessObjId}
         asHeaders = _getStandardHeaders()
-        oResponse = requests.get(url=sUrl, headers=asHeaders, params=asParams)
+        
+        try:
+            oResponse = requests.get(url=sUrl, headers=asHeaders, params=asParams, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+                    
         if oResponse is None:
             wasdiLog('[ERROR] waspy.getProcessorPayload: response is None, failing')
             return None
@@ -1381,8 +1460,11 @@ def setSubPid(sProcessId, iSubPid):
         payload = {'sProcessId': sProcessId, 'subpid': iSubPid}
 
         sUrl = getWorkspaceBaseUrl() + '/process/setsubpid'
-
-        oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+        
+        try:
+            oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))            
 
         sStatus = ''
 
@@ -1417,8 +1499,11 @@ def saveFile(sFileName):
 
     # sUrl = m_sBaseUrl + '/catalog/upload/ingestinws'
     sUrl = getWorkspaceBaseUrl() + '/catalog/upload/ingestinws'
-
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     sProcessId = ''
 
@@ -1458,8 +1543,11 @@ def _downloadFile(sFileName):
     sUrl += getActiveWorkspaceId()
 
     _log('[INFO] waspy.downloadfile: send request to configured url ' + sUrl)
-
-    oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
+    
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResponse is not None) and (oResponse.status_code == 200):
         _log('[INFO] waspy.downloadFile: got ok result, downloading')
@@ -1544,7 +1632,11 @@ def wasdiLog(sLogRow):
     if m_bIsOnServer:
         asHeaders = _getStandardHeaders()
         sUrl = getWorkspaceBaseUrl() + '/processors/logs/add?processworkspace=' + m_sMyProcId
-        oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders)
+        try:
+            oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            _log("[ERROR] there was an error contacting the API " + str(oEx))
+                    
         if oResult is None:
             print('[WARNING] waspy.wasdiLog: could not log')
         elif oResult.ok is not True:
@@ -1576,7 +1668,11 @@ def deleteProduct(sProduct):
     sUrl += "&bDeleteFile=true&sWorkspaceId="
     sUrl += m_sActiveWorkspace
     sUrl += "&bDeleteLayer=true"
-    oResult = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if oResult is None:
         wasdiLog('[ERROR] waspy.deleteProduct: deletion failed' +
@@ -1819,7 +1915,12 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
         _log("[INFO] searchEOImages: Start Provider Query")
         asHeaders = _getStandardHeaders()
-        oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
+        
+        try:
+            oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+                    
         _log("[INFO] searchEOImages: Query Done, starting conversion")
         try:
             # populate list from response
@@ -1915,7 +2016,11 @@ def fileExistsOnWasdi(sFileName):
     sUrl += sActiveWorkspace
 
     asHeaders = _getStandardHeaders()
-    oResult = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if oResult is None:
         wasdiLog('[ERROR] waspy.fileExistsOnWasdi: failed contacting the server' +
@@ -1943,8 +2048,11 @@ def getProductBBOX(sFileName):
     sUrl += getActiveWorkspaceId()
 
     asHeaders = _getStandardHeaders()
-
-    oResponse = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     try:
         if oResponse is None:
@@ -2005,8 +2113,12 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
         sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
-
-    oResponse = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+            
     if oResponse is None:
         wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot import product' +
               '  ******************************************************************************')
@@ -2064,8 +2176,12 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
         sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
-
-    oResponse = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+            
     if oResponse is None:
         wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot import product' +
               '  ******************************************************************************')
@@ -2356,8 +2472,11 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
         aoWasdiParams['parent'] = getProcId()
 
     sUrl = getBaseUrl() + "/processors/run"
-
-    oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams)
+    
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
     
     if oResponse is None:
         wasdiLog('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting' +
@@ -2419,7 +2538,10 @@ def executeProcessor(sProcessorName, aoProcessParams):
         
         _log("[INFO] waspy.executeProcessor: execute Processor Attempt # " + str(iAttempt+1))
         
-        oResult = requests.post(sUrl, data=sEncodedParams, headers=asHeaders)
+        try:
+            oResult = requests.post(sUrl, data=sEncodedParams, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))            
         
         if oResult is None:
             wasdiLog('[ERROR] waspy.executeProcessor: something broke when contacting the server')
@@ -2475,8 +2597,12 @@ def _uploadFile(sFileName):
         oFiles = {'file': (sFileProperName, open(sFullPath, 'rb'))}
 
         _log('uploadFile: uploading file to wasdi...')
-
-        oResponse = requests.post(sUrl, files=oFiles, headers=asHeaders)
+        
+        try:
+            oResponse = requests.post(sUrl, files=oFiles, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+                   
         if oResponse.ok:
             _log('uploadFile: upload complete :-)')
             bResult = True
@@ -2559,7 +2685,12 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
 
     sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }"
     asHeaders = _getStandardHeaders()
-    oResponse = requests.get(sUrl, data=sSubsetSetting, headers=asHeaders)
+    
+    try:
+        oResponse = requests.get(sUrl, data=sSubsetSetting, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+            
     if oResponse is None:
         wasdiLog('[ERROR] waspy.subset: cannot contact server' +
               '  ******************************************************************************')
@@ -2640,8 +2771,11 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
     
     sSubsetSetting = json.dumps(aoBody)
     asHeaders = _getStandardHeaders()
-
-    oResponse = requests.post(sUrl, headers=asHeaders, data=sSubsetSetting)
+    
+    try:
+        oResponse = requests.post(sUrl, headers=asHeaders, data=sSubsetSetting, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if oResponse is None:
         wasdiLog('[ERROR] waspy.multiSubset: cannot contact server' +
@@ -2680,8 +2814,11 @@ def getWorkflows():
     asHeaders = _getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
-
-    oResult = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResults = oResult.json()
@@ -2838,7 +2975,12 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
         return ''
 
     asHeaders = _getStandardHeaders()
-    oResponse = requests.post(sUrl, data=json.dumps(aoMosaicSettings), headers=asHeaders)
+    
+    try:
+        oResponse = requests.post(sUrl, data=json.dumps(aoMosaicSettings), headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+            
     if oResponse is None:
         wasdiLog('[ERROR] waspy.mosaic: cannot contact server, aborting')
         return ''
@@ -2925,7 +3067,12 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
             sUrl += str(sRelativePath)
 
         asHeaders = _getStandardHeaders()
-        oResponse = requests.get(url=sUrl, headers=asHeaders)
+        
+        try:
+            oResponse = requests.get(url=sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+                    
         if oResponse is None:
             wasdiLog('[ERROR] waspy.copyFileToSftp: cannot contact server' +
                   '  ******************************************************************************')
@@ -3004,8 +3151,11 @@ def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperatio
     sUrl = getWorkspaceBaseUrl() + '/process/byws'
 
     asProcesses = []
-
-    oResult = requests.get(sUrl, headers=asHeaders, params=aoPayload)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, params=aoPayload, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
     if oResult.ok is True:
         oJsonResults = oResult.json()
@@ -3097,6 +3247,8 @@ def _loadConfig(sConfigFilePath):
                 m_bVerbose = bool(oJson["VERBOSE"])
             if 'BASEURL' in oJson:
                 setBaseUrl(oJson['BASEURL'])
+            if 'REQUESTSTIMEOUT' in oJson:
+                setRequestsTimeout(oJson['REQUESTSTIMEOUT'])                
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -3282,7 +3434,12 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle = ""):
             sUrl += getProcId()
 
         asHeaders = _getStandardHeaders()
-        oResponse = requests.get(url=sUrl, headers=asHeaders)
+        
+        try:
+            oResponse = requests.get(url=sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+        except Exception as oEx: 
+            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+                    
         if oResponse is None:
             wasdiLog('[ERROR] waspy._internalAddFileToWASDI: cannot contact server' +
                   '  ******************************************************************************')
@@ -3406,7 +3563,12 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     _log('[INFO] waspy._internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' + str(
         aoDictPayload))
     asHeaders = _getStandardHeaders()
-    oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload))
+    
+    try:
+        oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload), timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+            
     if oResponse is None:
         wasdiLog('[ERROR] waspy._internalExecuteWorkflow: communication with the server failed, aborting' +
               '  ******************************************************************************')
@@ -3460,7 +3622,11 @@ def _fileOnNode(sFileName):
     sUrl += sActiveWorkspace
 
     asHeaders = _getStandardHeaders()
-    oResult = requests.get(sUrl, headers=asHeaders)
+    
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx: 
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))        
 
     if oResult is None:
         wasdiLog('[ERROR] waspy._fileOnNode: failed contacting the server' +

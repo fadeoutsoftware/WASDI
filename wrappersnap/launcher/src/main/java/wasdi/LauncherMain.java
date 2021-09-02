@@ -3099,7 +3099,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				}
 				
 				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
-				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
 				if(!bCanSpawnChildren) {
 					s_oLogger.debug("killProcessTree: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
 					continue;

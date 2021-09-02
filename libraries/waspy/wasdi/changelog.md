@@ -1,5 +1,14 @@
 # \_\_/== Changelog ==\\\_\_
 
+
+## [0.6.5] - 2021-09-02
+
+### Added
+- REQUEST TIMEOUT: added a timeout to all the requests calls. It is 2 min by default. Can be configured in config.json, key REQUESTSTIMEOUT, value is the number of seconds
+### Fixed
+- searchEOImages: fixed file name in VIIRS (replace .part with _part)
+
+
 ## [0.6.4] - 2021-05-21
 
 ### Fixed
