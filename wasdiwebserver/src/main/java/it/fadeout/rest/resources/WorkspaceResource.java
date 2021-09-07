@@ -442,7 +442,7 @@ public class WorkspaceResource {
 		Utils.debugLog("WorkspaceResource.DeleteWorkspace( WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " )");
 		
 		// before any operation check that this is not an injection attempt from the user 
-		if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
+		if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\") || sWorkspaceId.contains(File.separator)) {
 			Utils.debugLog("WorkspaceResource.deleteWorkspace: Injection attempt from users");
 			return Response.status(400).build();
 		}
@@ -453,8 +453,11 @@ public class WorkspaceResource {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
 			return null;
 		}
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
+		
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace: userId is null");
 			return null;
+		}
 
 		try {
 			// repositories
