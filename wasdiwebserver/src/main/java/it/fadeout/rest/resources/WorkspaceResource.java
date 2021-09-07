@@ -461,7 +461,7 @@ public class WorkspaceResource {
 
 		
 		try {
-			// repositories
+			// workspace repository
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			//TODO check that the workspace really exists
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
@@ -471,7 +471,41 @@ public class WorkspaceResource {
 				
 			}
 			
-			//TODO kill running processes before deletion
+			// Get all the process-workspaces of this workspace
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			//TODO get list of processes that are not DONE / STOPPED / ERROR and search their root processes
+			List<ProcessWorkspace> aoWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId);
+			//for each of these launch killProcessTree
+			for (ProcessWorkspace oProcessWorkspace : aoWorkspaceProcessesList) {
+				//TODO get the father instead
+				/*
+				//javascript
+				db.getCollection('processworkpsace').aggregate([
+			    	{$graphLookup: {
+						from: "processworkpsace",
+			         	startWith: "$parentId",
+			         	connectFromField: "parentId",
+			         	connectToField: "processObjId",
+			         	as: "father"
+			      	}},
+			      	{ $match: {processObjId:"80adefbe-7de4-4f6e-80e7-9d7cfb8898b4"}}
+				] )
+				*/
+				if(Utils.isNullOrEmpty(oProcessWorkspace.getParentId())) {
+					//TODO kill this
+					
+				}
+			}
+			
+			// Delete all the logs
+			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+			
+			for (ProcessWorkspace oProcessWorkspace : aoWorkspaceProcessesList) {
+				oProcessorLogRepository.deleteLogsByProcessWorkspaceId(oProcessWorkspace.getProcessObjId());
+			}
+			
+			// Delete all the process-workspaces
+			oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
 			
 
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
@@ -616,21 +650,6 @@ public class WorkspaceResource {
 				// Delete also the sharings, it is deleted by the owner..
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
-				
-				
-				// Get all the process-workspaces of this workspace
-				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-				List<ProcessWorkspace> aoWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId);
-				
-				// Delete all the logs
-				ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-				
-				for (ProcessWorkspace oProcessWorkspace : aoWorkspaceProcessesList) {
-					oProcessorLogRepository.deleteLogsByProcessWorkspaceId(oProcessWorkspace.getProcessObjId());
-				}
-				
-				// Delete all the process-workspaces
-				oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
 
 				return Response.ok().build();
 			} else
