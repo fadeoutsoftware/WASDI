@@ -451,20 +451,28 @@ public class WorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
-			return null;
+			return Response.status(401).build();
 		}
 		
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: userId is null");
-			return null;
+			return Response.status(401).build();
 		}
 
+		
 		try {
 			// repositories
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			//TODO check that the workspace really exists
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			if(null==oWorkspace) {
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " is not a valid workspace, aborting");
+				return Response.status(400).build();
+				
+			}
+			
+			//TODO kill running processes before deletion
+			
 
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
 
