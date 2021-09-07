@@ -3174,9 +3174,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		//(code ported from webserver)
 
 		try {
+			
+			String sCurrentSatus = oProcessToKill.getStatus();
 			int iPid = oProcessToKill.getPid();
 	
 			if (iPid>0) {
+				//FIXME race condition: the process might have completed in the meanwhile,
+				//and the system pid might have been reassigned to some other processes that must not be killed
 				// Pid exists, kill the process
 				String sShellExString = ConfigReader.getPropValue("KillCommand");
 				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
@@ -3191,12 +3195,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 	
 			// set process state to STOPPED only if CREATED or RUNNING
-			String sPrevSatus = oProcessToKill.getStatus();
 	
-			if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
-					sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
-					sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
-					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
+			if (sCurrentSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
+					sCurrentSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
+					sCurrentSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
+					sCurrentSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
 	
 				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
 				oProcessToKill.setOperationEndDate(Utils.getFormatDate(new Date()));
@@ -3207,7 +3210,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				}
 	
 			} else {
-				s_oLogger.info("killProcess: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sPrevSatus);
+				s_oLogger.info("killProcess: Process " + oProcessToKill.getProcessObjId() + " already terminated: " + sCurrentSatus);
 			}
 		} catch (Exception oE) {
 			s_oLogger.error("killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
