@@ -491,10 +491,12 @@ public class WorkspaceResource {
 
 			// Delete Workspace Db Entry
 			if (oWorkspaceRepository.deleteWorkspace(sWorkspaceId)) {
-
 				// Get all Products in workspace
+				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
+				
+				DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 				// Do we need to delete layers?
 				if (bDeleteLayer) {
 					try {
@@ -530,6 +532,7 @@ public class WorkspaceResource {
 							}
 
 							// Get the list of published bands by product name
+							PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 							List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(sProductName);
 
 							// For each published band
