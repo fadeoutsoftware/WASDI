@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -473,11 +475,14 @@ public class WorkspaceResource {
 			
 			// Get all the process-workspaces of this workspace
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			//TODO get list of processes that are not DONE / STOPPED / ERROR and search their root processes
-			List<ProcessWorkspace> aoWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId);
+			//get list of processes that are not DONE / STOPPED / ERROR
+			ProcessStatus[] aeNotTerminalStatusesArray = {ProcessStatus.CREATED, ProcessStatus.READY, ProcessStatus.RUNNING, ProcessStatus.WAITING};
+			List<ProcessWorkspace> aoWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId, new ArrayList<>(Arrays.asList(aeNotTerminalStatusesArray)));
+			//search for the fathers of these processes
+			List<ProcessWorkspace> aoFathers = oProcessWorkspaceRepository.getFathers(aoWorkspaceProcessesList);
+			
 			//for each of these launch killProcessTree
-			for (ProcessWorkspace oProcessWorkspace : aoWorkspaceProcessesList) {
-				//TODO get the father instead
+			for (ProcessWorkspace oFather : aoFathers) {
 				/*
 				//javascript
 				db.getCollection('processworkpsace').aggregate([
@@ -491,10 +496,10 @@ public class WorkspaceResource {
 			      	{ $match: {processObjId:"80adefbe-7de4-4f6e-80e7-9d7cfb8898b4"}}
 				] )
 				*/
-				if(Utils.isNullOrEmpty(oProcessWorkspace.getParentId())) {
-					//TODO kill this
-					
+				if(null == oFather.getParentId()) {
+					//TODO killProcessTree
 				}
+				
 			}
 			
 			// Delete all the logs

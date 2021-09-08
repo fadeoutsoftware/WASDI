@@ -3,8 +3,10 @@ package wasdi.shared.data;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -14,6 +16,7 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 
@@ -29,6 +32,10 @@ import wasdi.shared.utils.Utils;
  * @author s.adamo
  * @author c.nattero
  * @author p.campanella
+ *
+ */
+/**
+ * @author c.nattero
  *
  */
 public class ProcessWorkspaceRepository extends MongoRepository {
@@ -169,16 +176,108 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     	}
 
         return false;
-    }        
+    }   
+    
+    
+    /**
+     * Retrieves the fathers of a list of processes
+     * @param aoChildProcesses a list of child processes
+     * @return a list of fathers
+     */
+    public List<ProcessWorkspace> getFathers(List<ProcessWorkspace> aoChildProcesses){
+    	List<ProcessWorkspace> aoFathers = new LinkedList<ProcessWorkspace>();
+    	if(null == aoChildProcesses) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: the list is null, aborting");
+    		return aoFathers;
+    	}
+    	if(aoChildProcesses.size() <= 0) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: the list has size 0, aborting");
+    		return aoFathers;
+    	}
+    	try {
+
+    		Bson oLookup = new Document("$graphLookup",
+    		        new Document("from", "processworkpsace")
+    		                .append("startWith", "$parentId")
+    		                .append("connectFromField", "parentId")
+    		                .append("connectToField", "processObjId")
+    		                .append("as", "fathers")
+    		                );
+
+    		List<String> asProcessIds = new ArrayList<String>(aoChildProcesses.size());
+    		for (ProcessWorkspace oProcess : aoChildProcesses) {
+    			if(null==oProcess) {
+    				continue;
+    			}
+    			if(Utils.isNullOrEmpty(oProcess.getProcessObjId())) {
+    				continue;
+    			}
+    			asProcessIds.add(oProcess.getProcessObjId());
+			}
+    		Bson oMatch = new Document("$match",
+    		        Filters.in("processObjId", asProcessIds)
+    		        );
+
+    		List<Bson> aoFilters = new ArrayList<>(2);
+    		aoFilters.add(oLookup);
+    		aoFilters.add(oMatch);
+    		
+    		AggregateIterable<Document> oWSDocuments = getCollection(m_sThisCollection).aggregate(aoFilters); 
+            fillList(aoFathers, (FindIterable<Document>) oWSDocuments);
+
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getFathers: " + oE);
+		}
+    	return aoFathers;
+    }
+    
+    /**
+     * Get List of Process Workspaces in a Workspace filtering by desired process status
+     * @param sWorkspaceId unique id of the workspace
+     * @param aeDesiredStatuses a list of desired statuses
+     */
+    public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, List<ProcessStatus> aeDesiredStatuses) {
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        if(Utils.isNullOrEmpty(sWorkspaceId)) {
+        	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): sWorkspaceId null or empty, aborting");
+        	return aoReturnList;
+        }
+        if(null == aeDesiredStatuses) {
+        	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", null ): aeDesiredStatuses is null, aborting");
+        	return aoReturnList;
+        }
+        if(aeDesiredStatuses.size() <= 0) {
+        	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): aeDesiredStatuses is empty, returning empty list");
+        	return aoReturnList;
+        }
+        
+        try {
+        	//build filter on statuses
+        	Bson oOrFilter = null;
+        	for (ProcessStatus eStatus : aeDesiredStatuses) {
+        		if(null!=eStatus && !Utils.isNullOrEmpty(eStatus.name())) {
+        			if( null == oOrFilter) {
+        				oOrFilter = Filters.eq("status", eStatus.name());
+        			} else {
+	        			Bson oCond = Filters.eq("status", eStatus.name());
+	        			oOrFilter = Filters.or(oOrFilter, oCond);
+        			}
+        		}
+			}
+        	Bson oFilter = Filters.and(Filters.eq("workspaceId", sWorkspaceId), oOrFilter);
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
 
     /**
      * Get List of Process Workspaces in a Workspace
      * @param sWorkspaceId unique id of the workspace
-     * @param eStatus the status of the process
-     * @param eOperation the type of Launcher Operation
-     * @param oDateFRom starting date (included)
-     * @param oDateTo ending date (included)
-     * @return list of results
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId) {
 
@@ -890,7 +989,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param aoReturnList
      * @param oWSDocuments
      */
-	private void fillList(final ArrayList<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
+	private void fillList(final List<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
 		oWSDocuments.forEach(new Block<Document>() {
 		    public void apply(Document document) {
 		        String sJSON = document.toJson();
