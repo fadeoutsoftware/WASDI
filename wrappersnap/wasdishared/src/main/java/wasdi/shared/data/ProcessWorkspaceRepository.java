@@ -18,6 +18,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
 import wasdi.shared.LauncherOperations;
@@ -180,53 +182,92 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     
     
     /**
-     * Retrieves the fathers of a list of processes
+     * Retrieves the hierarchy of fathers of a list of processes
      * @param aoChildProcesses a list of child processes
      * @return a list of fathers
      */
     public List<ProcessWorkspace> getFathers(List<ProcessWorkspace> aoChildProcesses){
-    	List<ProcessWorkspace> aoFathers = new LinkedList<ProcessWorkspace>();
+    	
+    	//check inputs
     	if(null == aoChildProcesses) {
     		Utils.debugLog("ProcessWorkspaceRepository.getFathers: the list is null, aborting");
-    		return aoFathers;
+    		return new LinkedList<ProcessWorkspace>();
     	}
     	if(aoChildProcesses.size() <= 0) {
     		Utils.debugLog("ProcessWorkspaceRepository.getFathers: the list has size 0, aborting");
-    		return aoFathers;
+    		return new LinkedList<ProcessWorkspace>();
     	}
+    	
+    	//prepare iterable collection of processObjIds of given children 
+    	List<String> asChildrenProcessObjIds = null;
     	try {
-
-    		Bson oLookup = new Document("$graphLookup",
-    		        new Document("from", "processworkpsace")
-    		                .append("startWith", "$parentId")
-    		                .append("connectFromField", "parentId")
-    		                .append("connectToField", "processObjId")
-    		                .append("as", "fathers")
-    		                );
-
-    		List<String> asProcessIds = new ArrayList<String>(aoChildProcesses.size());
-    		for (ProcessWorkspace oProcess : aoChildProcesses) {
-    			if(null==oProcess) {
-    				continue;
-    			}
-    			if(Utils.isNullOrEmpty(oProcess.getProcessObjId())) {
-    				continue;
-    			}
-    			asProcessIds.add(oProcess.getProcessObjId());
+    		asChildrenProcessObjIds = new ArrayList<String>(aoChildProcesses.size());
+    		for (ProcessWorkspace oChildProcess : aoChildProcesses) {
+				if(null==oChildProcess) {
+					continue;
+				}
+				if(Utils.isNullOrEmpty(oChildProcess.getProcessObjId())) {
+					continue;
+				}
+				asChildrenProcessObjIds.add(oChildProcess.getProcessObjId());
 			}
-    		Bson oMatch = new Document("$match",
-    		        Filters.in("processObjId", asProcessIds)
-    		        );
+    	} catch (Exception oE) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: " + oE);
+    		return new LinkedList<ProcessWorkspace>();
+    	}
 
-    		List<Bson> aoFilters = new ArrayList<>(2);
-    		aoFilters.add(oLookup);
-    		aoFilters.add(oMatch);
+    	//query DB
+    	AggregateIterable<Document> oWSDocuments = null;
+    	try {
+    		//create pipeline for aggregation using graphLookup
+    		Bson oLookup = Aggregates.graphLookup(
+    				"processworkpsace",
+    				"$parentId",
+    				"parentId",
+    				"processObjId",
+    				"fathers"
+    				);
     		
-    		AggregateIterable<Document> oWSDocuments = getCollection(m_sThisCollection).aggregate(aoFilters); 
-            fillList(aoFathers, (FindIterable<Document>) oWSDocuments);
+    		//create matching condition for aggregation
+    		Bson oMatch = Aggregates.match(Filters.in("processObjId", asChildrenProcessObjIds));
+    		
+    		//create aggregation
+    		oWSDocuments = getCollection(m_sThisCollection).aggregate(
+				Arrays.asList(
+						//pipeline
+						oLookup,
+						oMatch
+				)
+			);
+    	} catch (Exception oE) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to " + oE );
+    		return new LinkedList<ProcessWorkspace>();
+		}
+
+    	//parse results
+    	List<ProcessWorkspace> aoFathers = new LinkedList<ProcessWorkspace>();
+    	try {
+    		MongoCursor<Document> oIterator = oWSDocuments.iterator();
+    		while(oIterator.hasNext()) {
+	    		Document next = oIterator.next();
+	    		List<Document> aoLocalFathers = null;
+	    		//TODO cast to List<?> and then iterate and cast each element to Document
+	    		aoLocalFathers = (List<Document>) next.get("fathers");
+
+	    		for (Document oFather : aoLocalFathers) {
+	    			String sJSON = oFather.toJson();
+	    			ProcessWorkspace oProcessWorkspace = null;
+	    			try {
+	    				oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
+	    				aoFathers.add(oProcessWorkspace);
+	    			} catch (IOException oE) {
+	    				Utils.debugLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
+	    			}
+	    		}
+    		}
 
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.getFathers: " + oE);
+			Utils.debugLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to " + oE);
 		}
     	return aoFathers;
     }
