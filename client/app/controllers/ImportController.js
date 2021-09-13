@@ -357,6 +357,9 @@ var ImportController = (function() {
         }
         mission.selected = !mission.selected;
         this.updateMissionSelection(index);
+        // also do the selection of the tab 
+        this.m_activeMissionTab = index;
+        
 
         // prevent tab selection when user click on the checkbox
         event.stopPropagation();
