@@ -348,6 +348,13 @@ var ImportController = (function() {
 
     ImportController.prototype.toggleMissionSelection= function(mission, index, event)
     {
+
+        // Beforehand deselect all the missions -> the migrate this behaviour to tab selection (on active tabs)
+        let curMission = null;
+        for (var i = 0;i< this.m_aoMissions.length;i++){ 
+            curMission = this.m_aoMissions[i];
+            curMission.selected= false;
+        }
         mission.selected = !mission.selected;
         this.updateMissionSelection(index);
 
