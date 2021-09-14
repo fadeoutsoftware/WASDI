@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -810,28 +811,8 @@ public class ProcessWorkspaceResource {
 			}
 			
 			
-			//create the operation parameter
-			String sDeleteObjId = Utils.GetRandomName();
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
-			oKillProcessParameter.setProcessObjId(sDeleteObjId);
-			oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
-			if(null!=bKillTheEntireTree) {
-				oKillProcessParameter.setKillTree(bKillTheEntireTree);
-			}
-			
-			
-			String sWorkspaceId = oProcessToDelete.getWorkspaceId();
-			
-			//base parameter atttributes
-			oKillProcessParameter.setWorkspace(sWorkspaceId);
-			oKillProcessParameter.setUserId(oUser.getUserId());
-			oKillProcessParameter.setExchange(sWorkspaceId);
-			oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-			
-			//schedule the deletion
-			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), oProcessToDelete.getProductName(), sPath, oKillProcessParameter, null);
-			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
+			PrimitiveResult oResult = killProcessTree(sSessionId, sToKillProcessObjId, bKillTheEntireTree, oUser,
+					oProcessToDelete);
 			
 			return Response.status(oResult.getIntValue()).build();
 						
@@ -841,6 +822,34 @@ public class ProcessWorkspaceResource {
 		}
 
 		return Response.status(500).build();
+	}
+
+
+	private PrimitiveResult killProcessTree(String sSessionId, String sToKillProcessObjId, Boolean bKillTheEntireTree,
+			User oUser, ProcessWorkspace oProcessToDelete) throws IOException {
+		//create the operation parameter
+		String sDeleteObjId = Utils.GetRandomName();
+		String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+		KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
+		oKillProcessParameter.setProcessObjId(sDeleteObjId);
+		oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
+		if(null!=bKillTheEntireTree) {
+			oKillProcessParameter.setKillTree(bKillTheEntireTree);
+		}
+		
+		
+		String sWorkspaceId = oProcessToDelete.getWorkspaceId();
+		
+		//base parameter atttributes
+		oKillProcessParameter.setWorkspace(sWorkspaceId);
+		oKillProcessParameter.setUserId(oUser.getUserId());
+		oKillProcessParameter.setExchange(sWorkspaceId);
+		oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+		
+		//schedule the deletion
+		PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), oProcessToDelete.getProductName(), sPath, oKillProcessParameter, null);
+		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
+		return oResult;
 	}
 
 	
