@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -25,6 +26,9 @@ import org.apache.commons.io.FileUtils;
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
+import it.fadeout.services.ProcessService;
+import it.fadeout.services.ProcessServiceInterface;
+import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -54,6 +58,9 @@ import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 @Path("/ws")
 public class WorkspaceResource {
 
+	@Inject
+	ProcessService m_oProcessWorkspaceService;
+	
 	private CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	private WorkspacePolicy m_oWorkspacePolicy = new WorkspacePolicy();
 
@@ -442,79 +449,51 @@ public class WorkspaceResource {
 			@QueryParam("bDeleteFile") Boolean bDeleteFile) {
 
 		Utils.debugLog("WorkspaceResource.DeleteWorkspace( WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " )");
+		User oUser = null;
 		
-		// before any operation check that this is not an injection attempt from the user 
-		if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\") || sWorkspaceId.contains(File.separator)) {
-			Utils.debugLog("WorkspaceResource.deleteWorkspace: Injection attempt from users");
-			return Response.status(400).build();
+		//preliminary checks
+		try {
+			// before any operation check that this is not an injection attempt from the user 
+			if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\") || sWorkspaceId.contains(File.separator)) {
+				Utils.debugLog("WorkspaceResource.deleteWorkspace: Injection attempt from users");
+				return Response.status(400).build();
+			}
+	
+			// Validate Session
+			oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
+				return Response.status(401).build();
+			}
+			
+			//check user is valid
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: userId is null");
+				return Response.status(401).build();
+			}
+			
+			//check user can access given workspace
+			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " cannot be accessed by " + oUser.getUserId() + ", aborting");
+				return Response.status(403).build();
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace( " + sSessionId + ", " + sWorkspaceId + " ): cannot complete checks due to " + oE);
 		}
-
-		// Validate Session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) {
-			Utils.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
-			return Response.status(401).build();
-		}
-		
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			Utils.debugLog("WorkspaceResource.DeleteWorkspace: userId is null");
-			return Response.status(401).build();
-		}
-
 		
 		try {
 			// workspace repository
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			//TODO check that the workspace really exists
+
+			//check that the workspace really exists
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			if(null==oWorkspace) {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " is not a valid workspace, aborting");
 				return Response.status(400).build();
-				
 			}
 			
-			// Get all the process-workspaces of this workspace
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			//get list of processes that are not DONE / STOPPED / ERROR
-			ProcessStatus[] aeNotTerminalStatusesArray = {ProcessStatus.CREATED, ProcessStatus.READY, ProcessStatus.RUNNING, ProcessStatus.WAITING};
-			List<ProcessWorkspace> aoWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId, new ArrayList<>(Arrays.asList(aeNotTerminalStatusesArray)));
-			//search for the fathers of these processes
-			List<ProcessWorkspace> aoFathers = oProcessWorkspaceRepository.getFathers(aoWorkspaceProcessesList);
-			
-			//for each of these launch killProcessTree
-			for (ProcessWorkspace oFather : aoFathers) {
-				/*
-				//javascript
-				db.getCollection('processworkpsace').aggregate([
-			    	{$graphLookup: {
-						from: "processworkpsace",
-			         	startWith: "$parentId",
-			         	connectFromField: "parentId",
-			         	connectToField: "processObjId",
-			         	as: "father"
-			      	}},
-			      	{ $match: {processObjId:"80adefbe-7de4-4f6e-80e7-9d7cfb8898b4"}}
-				] )
-				*/
-				if(null == oFather.getParentId()) {
-					//TODO killProcessTree
-				}
-				
-			}
-			
-			// Delete all the logs
-			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-			
-			for (ProcessWorkspace oProcessWorkspace : aoWorkspaceProcessesList) {
-				oProcessorLogRepository.deleteLogsByProcessWorkspaceId(oProcessWorkspace.getProcessObjId());
-			}
-			
-			// Delete all the process-workspaces
-			oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
-			
-
+			//delete sharing if the user is not the owner
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
-
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
 				Utils.debugLog("User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
@@ -522,6 +501,24 @@ public class WorkspaceResource {
 				oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
+			
+			//kill active processes
+			//TODO test
+			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId);
+			
+			
+			//TODO test
+			//TODO move to service
+			//big list...
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			List<String> asWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId(sWorkspaceId);
+			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+			oProcessorLogRepository.deleteLogsByProcessWorkspaceIds(asWorkspaceProcessesList);
+			
+			
+			// Delete all the process-workspaces
+			oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
+			
 
 			// get workspace path
 			String sWorkspacePath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
@@ -887,7 +884,6 @@ public class WorkspaceResource {
 
 		try {
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-
 			oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(sUserId, sWorkspaceId);
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
