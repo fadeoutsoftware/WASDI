@@ -40,6 +40,10 @@ import wasdi.shared.utils.Utils;
  * @author c.nattero
  *
  */
+/**
+ * @author c.nattero
+ *
+ */
 public class ProcessWorkspaceRepository extends MongoRepository {
 	
 	public ProcessWorkspaceRepository() {
@@ -169,17 +173,50 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     	if(!Utils.isNullOrEmpty(sWorkspaceId)) {
             try {
                 getCollection(m_sThisCollection).deleteMany(new Document("workspaceId", sWorkspaceId));
-
                 return true;
-
             } catch (Exception oEx) {
                 oEx.printStackTrace();
             }
     	}
-
         return false;
     }   
     
+    
+    /**
+     * Get a list of root processes from a list of children 
+     * @param aoChildren
+     * @return the list of root processes 
+     */
+    public List<ProcessWorkspace> getRoots(List<ProcessWorkspace> aoChildren){
+    	if(null==aoChildren) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getRoots: list of children is null, aborting");
+    		return new ArrayList<ProcessWorkspace>(0);
+    	}
+    	if(aoChildren.size()<=0) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getRoots: list of children is empty, aborting");
+    		return new ArrayList<ProcessWorkspace>(0);
+    	}
+    	try {
+    		List<ProcessWorkspace> aoFathers = getFathers(aoChildren);
+
+    		//TODO learn how to write a better query and let mongo filter these results out
+    		List<ProcessWorkspace> aoRoots = new LinkedList<>();
+			//for each of these launch killProcessTree
+			for (ProcessWorkspace oFather : aoFathers) {
+				if(null==oFather) {
+					//programmers look both ways when crossing a one-way street...
+					continue;
+				}
+				if(null == oFather.getParentId()) {
+					aoRoots.add(oFather);
+				}
+			}
+    		return aoFathers;
+		} catch (Exception oE) {
+			Utils.debugLog("ProcessWorkspaceRepository.getRoots: " + oE);
+		}
+    	return new ArrayList<ProcessWorkspace>(0);
+    }
     
     /**
      * Retrieves the hierarchy of fathers of a list of processes
@@ -294,18 +331,14 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         
         try {
         	//build filter on statuses
-        	Bson oOrFilter = null;
+        	List<String> asDesiredStatuses = new ArrayList<String>(aeDesiredStatuses.size());
         	for (ProcessStatus eStatus : aeDesiredStatuses) {
         		if(null!=eStatus && !Utils.isNullOrEmpty(eStatus.name())) {
-        			if( null == oOrFilter) {
-        				oOrFilter = Filters.eq("status", eStatus.name());
-        			} else {
-	        			Bson oCond = Filters.eq("status", eStatus.name());
-	        			oOrFilter = Filters.or(oOrFilter, oCond);
-        			}
+        			asDesiredStatuses.add(eStatus.name());
         		}
-			}
-        	Bson oFilter = Filters.and(Filters.eq("workspaceId", sWorkspaceId), oOrFilter);
+        	}
+        	Bson oInFilter = Filters.in("status", asDesiredStatuses);
+        	Bson oFilter = Filters.and(Filters.eq("workspaceId", sWorkspaceId), oInFilter);
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
             		.sort(new Document("operationDate", -1));
             fillList(aoReturnList, oWSDocuments);
@@ -314,6 +347,48 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         }
 
         return aoReturnList;
+    }
+    
+    
+    
+    /**
+     * Gets the list of processObjIds from a given workspace 
+     * @param sWorkspaceId the workspace id
+     * @return the list of processObjIds in given workspace
+     */
+    public List<String> getProcessObjIdsFromWorkspaceId(String sWorkspaceId){
+    	if(Utils.isNullOrEmpty(sWorkspaceId)) {
+    		Utils.debugLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: workspace id null or empty, aborting");
+    		return new ArrayList<String>(0);
+    	}
+
+    	try {
+
+    		Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
+    		List<Document> oWSDocuments = getCollection(m_sThisCollection)
+    				.find(oFilter)
+    				.sort(new Document("operationDate", -1))
+    				.projection(new Document("processObjId",1))
+    				.into(new ArrayList<Document>());
+    		List<String> asProcessObjIds = new ArrayList<String>(oWSDocuments.size());
+    		for (Document oDocument : oWSDocuments) {
+				if(null==oDocument) {
+					continue;
+				}
+				try {
+					String sProcessObjId = (String)oDocument.get("processObjId");
+					asProcessObjIds.add(sProcessObjId);
+				} catch (Exception oE) {
+					Utils.debugLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: cannot parse document due to " + oE + ", skipping");
+					continue;
+				}
+			}
+    		return asProcessObjIds;
+    	} catch (Exception oEx) {
+    		oEx.printStackTrace();
+    	}
+
+    	return new ArrayList<String>(0);
     }
 
     /**
