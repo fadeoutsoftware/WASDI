@@ -84,6 +84,10 @@ public class Utils {
 		return new Date(lLong);
 	}
 
+	public static Date getDate(Long oLong) {
+		return new Date(oLong);
+	}
+
 	public static boolean isValidSession(UserSession oSession) {
 
 		if (oSession == null)

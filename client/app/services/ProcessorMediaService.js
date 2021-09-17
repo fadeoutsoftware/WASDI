@@ -82,12 +82,32 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
     }
 
     /**
+     * Get the comments list of a review
+     * @param sReviewId
+     * @param iPage
+     * @param iItemsPerPage
+     * @returns {*}
+     */
+    this.getReviewComments = function (sReviewId, iPage, iItemsPerPage) {
+        return this.m_oHttp.get(this.APIURL + this.m_sResource + '/comments/getlist?reviewId='+sReviewId+'&page='+iPage+"&itemsPerPage="+iItemsPerPage);
+    }
+
+    /**
      * Add a new Review
      * @param oReview
      * @returns {*}
      */
     this.addProcessorReview = function (oReview) {
         return this.m_oHttp.post(this.APIURL + this.m_sResource + '/reviews/add', oReview);
+    }
+
+    /**
+     * Add a new Comment to a Review
+     * @param oComment
+     * @returns {*}
+     */
+    this.addReviewComment = function (oComment) {
+        return this.m_oHttp.post(this.APIURL + this.m_sResource + '/comments/add', oComment);
     }
 
     /**
@@ -100,12 +120,30 @@ service('ProcessorMediaService', ['ConstantsService','$rootScope','$http', funct
     }
 
     /**
+     * Update a Comment of a Review
+     * @param oComment
+     * @returns {*}
+     */
+    this.updateReviewComment = function (oComment) {
+        return this.m_oHttp.post(this.APIURL + this.m_sResource + '/comments/update', oComment);
+    }
+
+    /**
      * Delete a review
      * @param oReview
      * @returns {*}
      */
     this.deleteProcessorReview = function (sProcessorId, sReviewId) {
         return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/reviews/delete?processorId='+ encodeURI(sProcessorId)+'&reviewId='+ encodeURI(sReviewId));
+    }
+
+    /**
+     * Delete a Comment of a Review
+     * @param oComment
+     * @returns {*}
+     */
+    this.deleteReviewComment = function (sReviewId, sCommentId) {
+        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/comments/delete?reviewId='+ encodeURI(sReviewId)+'&commentId='+ encodeURI(sCommentId));
     }
 
 }]);
