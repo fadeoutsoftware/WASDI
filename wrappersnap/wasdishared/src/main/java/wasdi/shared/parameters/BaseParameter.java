@@ -18,7 +18,7 @@ public class BaseParameter {
     private String workspace;
     
     /**
-     * Workspace Onwer
+     * Workspace Owner
      */
     private String workspaceOwnerId;
 
