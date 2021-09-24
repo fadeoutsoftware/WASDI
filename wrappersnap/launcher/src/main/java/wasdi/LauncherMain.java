@@ -619,11 +619,47 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
     }
 
     /**
-     * Method to make the conversion from Sentinel-2 L1 images to L2 images,
+     * Operation to make the conversion from Sentinel-2 L1 images to L2 images,
      * using the image correction algorithm L2A_Process from sen2core package.
+     * This commands, before launching the convertion itself, checks the availability
+     * of the L2A_Process on the host machine.
+     *
      * @param oSen2CorParameters contains parameters to initialize Sen2Cor conversion
      */
-    private void sen2Cor(Sen2CorParameters oSen2CorParameters) {
+    private void sen2Cor(Sen2CorParameters oSen2CorParameters) throws Exception{
+
+        // 0 - Create ad-hoc parameter
+        // 1 - Access workspace
+        // 2 - Checks whether the product file is present on FS
+        // 3 - Unzip -> obtain L1C.SAFE
+        // 4 - Convert -> obain L2A.SAFE
+        // 5 - ZipIt -> L2A.zip
+        // 6 - delete intermediary files
+        // 7 - Add file to wasdi(L2A.zip)
+
+
+        String sSen2CorePath = ConfigReader.getPropValue("SEN2CORE");
+        ProcessBuilder oProcess = new ProcessBuilder(sSen2CorePath + "/L2A_Process");
+        oProcess.start();
+        if(oProcess.redirectOutput().toString().contains("no L2A_Process")){
+            s_oLogger.debug("LauncherMain.sen2Cor: L2A_Process not available on the host machine, checks installation and configuration");
+            return; // interrupt execution
+        };
+
+        s_oLogger.info("Sen2Cor");
+        if (oSen2CorParameters == null ){
+            s_oLogger.debug("LauncherMain.sen2Cor: Null pointer exception");
+            m_oProcessWorkspaceLogger.log("Null parameters passed to Launcher for conversion");
+            throw new NullPointerException("Null parameters passed to Launcher for conversion");
+        }
+        if (oSen2CorParameters.isValid()){
+            String sProductId = oSen2CorParameters.getProductName();
+
+
+        }
+        else{
+            Utils.debugLog("Sen2Cor invalid parameters");
+        }
 
     }
 
@@ -3122,7 +3158,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
     }
 
     /**
-     * @param oRepository
      * @param oProcessToKill
      * @throws IOException
      * @throws InterruptedException
@@ -3305,7 +3340,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
     /**
      * Download Processor on the local PC
      *
-     * @param oProcessor
+     *
      * @param sSessionId
      * @return
      */
