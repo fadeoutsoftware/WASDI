@@ -638,8 +638,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
         // 7 - Add file to wasdi(L2A.zip)
 
 
-        String sSen2CorePath = ConfigReader.getPropValue("SEN2CORE");
-        ProcessBuilder oProcess = new ProcessBuilder(sSen2CorePath + "/L2A_Process");
+        String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
+        ProcessBuilder oProcess = new ProcessBuilder(sSen2CorPath);
+        //ProcessBuilder oProcess = new ProcessBuilder("L2A_Process");
         oProcess.start();
         if(oProcess.redirectOutput().toString().contains("no L2A_Process")){
             s_oLogger.debug("LauncherMain.sen2Cor: L2A_Process not available on the host machine, checks installation and configuration");
