@@ -10,7 +10,7 @@ The results of the calculations will then be available for download, allowing lo
 
 Getting Started with WASDI
 ---------------------------
-WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources ! ! !
+WASDI web platform is the best starting point for your journey on Earth Observations (EO) resources !
 
 This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your EO research.
 
