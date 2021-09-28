@@ -44,6 +44,7 @@ public class ProviderAdapterFactory {
 			Supplier<ProviderAdapter> oSupplier = s_aoDownloaderSuppliers.get(sProviderAdapterType);
 			if(oSupplier != null ) {
 				oResult = oSupplier.get();
+				oResult.readConfig();
 			}
 		}
 		

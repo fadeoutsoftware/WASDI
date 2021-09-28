@@ -2,6 +2,7 @@ package wasdi.filebuffer;
 
 import java.io.IOException;
 
+import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
@@ -51,4 +52,10 @@ public class DhUSProviderAdapter extends ProviderAdapter {
     	// Get File Name via http
     	return getFileNameViaHttp(sFileURL);
     }
+    
+	@Override
+	public void readConfig() {
+		
+	}
+    
 }

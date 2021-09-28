@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
+import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
 import wasdi.shared.utils.LoggerWrapper;
@@ -39,12 +40,16 @@ import wasdi.shared.utils.Utils;
 public class CREODIASProviderAdapter extends ProviderAdapter {
 	
 	private String m_sOrderName = "";
+	
+	/**
+	 * Base path of the folder mounted with EO Data
+	 */
+	private String m_sProviderBasePath = "";
 
 	/**
-	 * 
+	 * Basic constructor
 	 */
 	public CREODIASProviderAdapter() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -52,10 +57,10 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 */
 	public CREODIASProviderAdapter(LoggerWrapper logger) {
 		super(logger);
-		// TODO Auto-generated constructor stub
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Get the size of the file to download/copy
 	 * @see wasdi.filebuffer.ProviderAdapter#GetDownloadFileSize(java.lang.String)
 	 */
 	@Override
@@ -510,4 +515,20 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		return null;
 	}
 
+	@Override
+	public void readConfig() {
+		
+		try {
+			m_sDefaultProtocol = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL", "https://");
+		} catch (IOException e) {
+			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+		}
+		
+		try {
+			m_sProviderBasePath = ConfigReader.getPropValue("CREODIAS_BASE_PATH", "/eodata/");
+		} catch (IOException e) {
+			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+		}
+		
+	}
 }

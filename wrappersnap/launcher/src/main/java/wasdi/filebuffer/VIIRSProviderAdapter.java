@@ -2,6 +2,7 @@ package wasdi.filebuffer;
 
 import java.io.File;
 
+import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
@@ -61,6 +62,11 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		}
 		
 		return sFileName;
+	}
+
+	@Override
+	public void readConfig() {
+		
 	}
 
 }

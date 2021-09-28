@@ -39,6 +39,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     protected String m_sProviderUser;
     protected String m_sProviderPassword;
     
+    protected String m_sDefaultProtocol = "https://";
+    
     ProcessWorkspace m_oProcessWorkspace;
     
     private List<ProcessWorkspaceUpdateSubscriber> m_aoSubscribers;
@@ -49,6 +51,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     public ProviderAdapter() {
 		this(LauncherMain.s_oLogger);	
 	}
+    
+    public abstract void readConfig();
     
     /**
      * Constructor with user defined logger

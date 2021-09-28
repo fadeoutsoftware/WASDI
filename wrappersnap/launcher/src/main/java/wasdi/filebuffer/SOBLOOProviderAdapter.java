@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
@@ -346,4 +347,10 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		String sBasicAuth = "Apikey " + m_sProviderPassword;
 		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
 	}
+	
+	@Override
+	public void readConfig() {
+		
+	}
+
 }

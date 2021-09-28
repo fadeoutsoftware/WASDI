@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.datamodel.Product;
 
+import wasdi.ConfigReader;
 import wasdi.io.WasdiProductReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
@@ -219,5 +220,11 @@ public class EODCProviderAdapter extends ProviderAdapter{
 		
 		return "";
 	}
+	
+	@Override
+	public void readConfig() {
+		
+	}
+	
 
 }

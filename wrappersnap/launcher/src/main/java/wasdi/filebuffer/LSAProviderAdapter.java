@@ -1,5 +1,8 @@
 package wasdi.filebuffer;
 
+import java.io.IOException;
+
+import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.lsa.LSAHttpUtils;
 import wasdi.shared.utils.Utils;
@@ -10,6 +13,11 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	 * Flag to know if we already authenticated to the LSA Data Center or no
 	 */
     boolean m_bAuthenticated = false;
+    
+	/**
+	 * Base path of the folder mounted with EO Data
+	 */
+	private String m_sProviderBasePath = "";    
 
 
 	@Override
@@ -77,5 +85,21 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		
 		return sFileName;
 	}
+	
+	@Override
+	public void readConfig() {
+		try {
+			m_sDefaultProtocol = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL", "https://");
+		} catch (IOException e) {
+			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+		}
+		
+		try {
+			m_sProviderBasePath = ConfigReader.getPropValue("LSA_BASE_PATH", "/mount/lucollgs/data_192/");
+		} catch (IOException e) {
+			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+		}		
+	}
+
 	
 }

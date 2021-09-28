@@ -439,4 +439,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		return "";
 	}
 
+	@Override
+	public void readConfig() {
+		
+	}
+
 }

@@ -26,6 +26,7 @@ import org.apache.commons.net.io.Util;
 import org.esa.snap.core.datamodel.Product;
 import org.json.JSONObject;
 
+import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
@@ -575,4 +576,9 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		return null;	
 	}
 	
+	@Override
+	public void readConfig() {
+		
+	}
+
 }
