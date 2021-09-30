@@ -506,7 +506,6 @@ public class WorkspaceResource {
 			//TODO test
 			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId);
 			
-			
 			//TODO test
 			//TODO move to service
 			//big list...

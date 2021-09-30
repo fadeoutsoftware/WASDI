@@ -1,6 +1,5 @@
 package it.fadeout;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -32,6 +30,7 @@ import java.util.logging.SimpleFormatter;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
@@ -45,6 +44,7 @@ import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import it.fadeout.services.AuthProviderService;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -77,6 +77,10 @@ public class Wasdi extends ResourceConfig {
 
 	@Context
 	ServletContext m_oContext;
+	
+	@Inject
+	static
+	AuthProviderService s_oAuthServiceProvider;
 
 
 	/**
@@ -605,9 +609,10 @@ public class Wasdi extends ResourceConfig {
 				oSession.setUserId(sUserId);
 
 				Boolean bNew = false;
-				//store the keycloak access token instead, so we can retrieve the user and perform a further check
+				//MAYBE store the keycloak access token instead, so we can retrieve the user and perform a further check
+				//if it is a root process, then create a new (old-style) session
 				if (Utils.isNullOrEmpty(sParentId)) {
-					sSessionId = UUID.randomUUID().toString();
+					sSessionId = s_oAuthServiceProvider.getOldStyleRandomSession();
 					bNew = true;
 				}
 				oSession.setSessionId(sSessionId);
@@ -621,6 +626,7 @@ public class Wasdi extends ResourceConfig {
 				} else {
 					bRet = oSessionRepo.touchSession(oSession);
 				}
+				
 				if (bRet) {
 					oParameter.setSessionID(oSession.getSessionId());
 				} else {

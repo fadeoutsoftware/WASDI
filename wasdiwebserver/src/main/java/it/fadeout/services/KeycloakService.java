@@ -2,6 +2,7 @@ package it.fadeout.services;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
@@ -207,6 +208,15 @@ public class KeycloakService implements AuthProviderService {
 		}
 		oNewUser.setUserId(sUserId);
 		return oNewUser;
+	}
+	
+	public String getOldStyleRandomSession() {
+		return UUID.randomUUID().toString();
+	}
+	
+	public String insertOldStyleSession(String sUserId){
+		
+		return "";
 	}
 }
 
