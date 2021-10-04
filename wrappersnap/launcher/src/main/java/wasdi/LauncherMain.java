@@ -667,21 +667,21 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
             s_oLogger.debug("LauncherMain.sen2Cor: Done");
 
-            if (oSen2CorParameters.isDeleteIntermediateFile()){
+            if (oSen2CorParameters.isDeleteIntermediateFile()) {
                 // deletes .SAFE directories and keeps the zip files
                 FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE"));
                 FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE"));
             }
 
-            // extract base parameter used to invoke this method
-            BaseParameter bp = oSen2CorParameters;
-            // prepare ingest file parameters
-            IngestFileParameter ingestFileParameter = (IngestFileParameter) bp;
-            ingestFileParameter.setFilePath(sDestinationPath + sL2ProductName + ".zip");
 
-            oProcessWorkspace.setProgressPerc(100);
-
-            executeOperation("INGEST", SerializationUtils.serializeObjectToStringXML(ingestFileParameter));
+            addProductToDbAndWorkspaceAndSendToRabbit(
+                    null,
+                    sDestinationPath + sL2ProductName + ".zip",
+                    oSen2CorParameters.getWorkspace(),
+                    oSen2CorParameters.getExchange(),
+                    String.valueOf(LauncherOperations.SEN2COR),
+                    null
+            );
 
 
         } else {
