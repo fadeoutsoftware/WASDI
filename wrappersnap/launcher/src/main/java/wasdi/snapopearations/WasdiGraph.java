@@ -197,7 +197,7 @@ public class WasdiGraph {
 			m_oLogger.info("WasdiGraph.execute: start");
 			
 	        //check input file
-	        String sWorkspaceDir = LauncherMain.getWorspacePath(m_oParams);
+	        String sWorkspaceDir = LauncherMain.getWorkspacePath(m_oParams);
 	        File oWorkspaceDir = new File(sWorkspaceDir);
 	        
 	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 

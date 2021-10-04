@@ -621,44 +621,70 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
     /**
      * Operation to make the conversion from Sentinel-2 L1 images to L2 images,
      * using the image correction algorithm L2A_Process from sen2core package.
-     * This commands, before launching the convertion itself, checks the availability
-     * of the L2A_Process on the host machine.
      *
      * @param oSen2CorParameters contains parameters to initialize Sen2Cor conversion
      */
-    private void sen2Cor(Sen2CorParameters oSen2CorParameters) throws Exception{
+    private void sen2Cor(Sen2CorParameters oSen2CorParameters) throws Exception {
 
-        // 0 - Create ad-hoc parameter
-        // 1 - Access workspace
-        // 2 - Checks whether the product file is present on FS
-        // 3 - Unzip -> obtain L1C.SAFE
-        // 4 - Convert -> obain L2A.SAFE
-        // 5 - ZipIt -> L2A.zip
-        // 6 - delete intermediary files
-        // 7 - Add file to wasdi(L2A.zip)
-
-
-        String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
-        ProcessBuilder oProcess = new ProcessBuilder(sSen2CorPath);
-        //ProcessBuilder oProcess = new ProcessBuilder("L2A_Process");
-        oProcess.start();
-        if(oProcess.redirectOutput().toString().contains("no L2A_Process")){
-            s_oLogger.debug("LauncherMain.sen2Cor: L2A_Process not available on the host machine, checks installation and configuration");
-            return; // interrupt execution
-        };
-
-        s_oLogger.info("Sen2Cor");
-        if (oSen2CorParameters == null ){
+        if (oSen2CorParameters == null) {
             s_oLogger.debug("LauncherMain.sen2Cor: Null pointer exception");
             m_oProcessWorkspaceLogger.log("Null parameters passed to Launcher for conversion");
             throw new NullPointerException("Null parameters passed to Launcher for conversion");
         }
-        if (oSen2CorParameters.isValid()){
-            String sProductId = oSen2CorParameters.getProductName();
+        if (oSen2CorParameters.isValid()) {
+            s_oLogger.debug("LauncherMain.sen2Cor: Start");
+            ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
+
+            String sDestinationPath = getWorkspacePath(oSen2CorParameters, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+            oProcessWorkspace.setProgressPerc(25);
+            // 2 - Checks whether the product file is present on FS
+            // 3 - Unzip -> obtain L1C.SAFE
+            String sL1ProductName = oSen2CorParameters.getProductName();
+            String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
+
+            s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
+            ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameters.getProcessObjId());
+            oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
+
+            // 4 - Convert -> obtain L2A.SAFE
+            String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
+            s_oLogger.debug("LauncherMain.sen2Cor: Extraction completed, begin conversion");
+            oProcessWorkspace.setProgressPerc(50);
+            ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
+
+            Process oProcess = oProcessBuilder
+                    .inheritIO() // this is enabled for debugging
+                    .start();
+            // Wait for the process to complete
+            oProcess.waitFor();
 
 
-        }
-        else{
+            // 5 - ZipIt -> L2A.zip
+            s_oLogger.debug("LauncherMain.sen2Cor: Conversion done, begin compression of L2 archive");
+            oProcessWorkspace.setProgressPerc(75);
+            oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
+
+
+            s_oLogger.debug("LauncherMain.sen2Cor: Done");
+
+            if (oSen2CorParameters.isDeleteIntermediateFile()){
+                // deletes .SAFE directories and keeps the zip files
+                FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE"));
+                FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE"));
+            }
+
+            // extract base parameter used to invoke this method
+            BaseParameter bp = oSen2CorParameters;
+            // prepare ingest file parameters
+            IngestFileParameter ingestFileParameter = (IngestFileParameter) bp;
+            ingestFileParameter.setFilePath(sDestinationPath + sL2ProductName + ".zip");
+
+            oProcessWorkspace.setProgressPerc(100);
+
+            executeOperation("INGEST", SerializationUtils.serializeObjectToStringXML(ingestFileParameter));
+
+
+        } else {
             Utils.debugLog("Sen2Cor invalid parameters");
         }
 
@@ -695,12 +721,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
      * @param oParameter Base Parameter
      * @return full workspace path
      */
-    public static String getWorspacePath(BaseParameter oParameter) {
+    public static String getWorkspacePath(BaseParameter oParameter) {
         try {
-            return getWorspacePath(oParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+            return getWorkspacePath(oParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
         } catch (IOException e) {
             e.printStackTrace();
-            return getWorspacePath(oParameter, "/data/wasdi");
+            return getWorkspacePath(oParameter, "/data/wasdi");
         }
     }
 
@@ -711,7 +737,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
      * @param sRootPath
      * @return full workspace path
      */
-    public static String getWorspacePath(BaseParameter oParameter, String sRootPath) {
+    public static String getWorkspacePath(BaseParameter oParameter, String sRootPath) {
         // Get Base Path
         String sWorkspacePath = sRootPath;
 
@@ -775,7 +801,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
             }
 
-            sDownloadPath = getWorspacePath(oParameter, sDownloadPath);
+            sDownloadPath = getWorkspacePath(oParameter, sDownloadPath);
 
             s_oLogger.debug("LauncherMain.DownloadPath: " + sDownloadPath);
 
@@ -1053,7 +1079,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
                 m_oProcessWorkspaceLogger.log("Moving " + oParam.getLocalFileName() + " to " + oParam.getFtpServer() + ":" + oParam.getPort().toString());
 
-                String sFullLocalPath = getWorspacePath(oParam) + oParam.getLocalFileName();
+                String sFullLocalPath = getWorkspacePath(oParam) + oParam.getLocalFileName();
 
                 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
                 File oFile = new File(sFullLocalPath);
@@ -1275,7 +1301,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 s_oLogger.error("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
             }
 
-            String sDestinationPath = getWorspacePath(oParameter, sRootPath);
+            String sDestinationPath = getWorkspacePath(oParameter, sRootPath);
 
             File oDstDir = new File(sDestinationPath);
 
@@ -1641,7 +1667,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             String sFile = oParameter.getFileName();
 
             // Generate full path name
-            String sPath = getWorspacePath(oParameter);
+            String sPath = getWorkspacePath(oParameter);
             sFile = sPath + sFile;
 
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -2115,7 +2141,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             SubsetSetting oSettings = (SubsetSetting) oParameter.getSettings();
 
             WasdiProductReader oReadProduct = new WasdiProductReader();
-            File oProductFile = new File(getWorspacePath(oParameter) + sSourceProduct);
+            File oProductFile = new File(getWorkspacePath(oParameter) + sSourceProduct);
             Product oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
 
             if (oInputProduct == null) {
@@ -2173,7 +2199,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
             }
 
-            String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
+            String sOutputPath = getWorkspacePath(oParameter) + sOutputProduct;
 
             ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
 
@@ -2312,8 +2338,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                     asArgs.add("BIGTIFF=YES");
                 }
 
-                asArgs.add(getWorspacePath(oParameter) + sSourceProduct);
-                asArgs.add(getWorspacePath(oParameter) + sOutputProduct);
+                asArgs.add(getWorkspacePath(oParameter) + sSourceProduct);
+                asArgs.add(getWorkspacePath(oParameter) + sOutputProduct);
 
                 // Execute the process
                 ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
@@ -2331,10 +2357,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
                 oProcess.waitFor();
 
-                File oTileFile = new File(getWorspacePath(oParameter) + sOutputProduct);
+                File oTileFile = new File(getWorkspacePath(oParameter) + sOutputProduct);
 
                 if (oTileFile.exists()) {
-                    String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
+                    String sOutputPath = getWorkspacePath(oParameter) + sOutputProduct;
 
                     s_oLogger.debug("LauncherMain.executeGDALMultiSubset done for index " + iTiles);
 
@@ -2429,7 +2455,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             RegridSetting oSettings = (RegridSetting) oParameter.getSettings();
             String sReferenceProduct = oSettings.getReferenceFile();
 
-            File oReferenceFile = new File(getWorspacePath(oParameter) + sReferenceProduct);
+            File oReferenceFile = new File(getWorkspacePath(oParameter) + sReferenceProduct);
 
             WasdiProductReader oRead = new WasdiProductReader(oReferenceFile);
 
@@ -2497,8 +2523,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             asArgs.add("" + dXEnd);
             asArgs.add("" + dYEnd);
 
-            asArgs.add(getWorspacePath(oParameter) + sSourceProduct);
-            asArgs.add(getWorspacePath(oParameter) + sDestinationProduct);
+            asArgs.add(getWorkspacePath(oParameter) + sSourceProduct);
+            asArgs.add(getWorkspacePath(oParameter) + sDestinationProduct);
 
             asArgs.add("-co");
             asArgs.add("COMPRESS=LZW");
@@ -2518,7 +2544,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
             oProcess.waitFor();
 
-            addProductToDbAndWorkspaceAndSendToRabbit(null, getWorspacePath(oParameter) + sDestinationProduct,
+            addProductToDbAndWorkspaceAndSendToRabbit(null, getWorkspacePath(oParameter) + sDestinationProduct,
                     oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.REGRID.name(), sBBox, false,
                     true);
             if (oProcessWorkspace != null) {
@@ -2594,7 +2620,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 m_oProcessWorkspaceLogger.log("Adding output file to the workspace");
 
                 // Get the full path of the output
-                String sFileOutputFullPath = getWorspacePath(oParameter) + oParameter.getDestinationProductName();
+                String sFileOutputFullPath = getWorkspacePath(oParameter) + oParameter.getDestinationProductName();
 
                 // And add it to the db
                 addProductToDbAndWorkspaceAndSendToRabbit(null, sFileOutputFullPath, oParameter.getWorkspace(),
@@ -3290,7 +3316,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
-            String sProductPath = LauncherMain.getWorspacePath(oReadMetadataParameter) + sProductName;
+            String sProductPath = LauncherMain.getWorkspacePath(oReadMetadataParameter) + sProductName;
 
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath);
             if (oDownloadedFile == null) {
@@ -3340,7 +3366,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
     /**
      * Download Processor on the local PC
-     *
      *
      * @param sSessionId
      * @return
