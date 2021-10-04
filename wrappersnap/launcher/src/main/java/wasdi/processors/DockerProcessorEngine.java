@@ -9,14 +9,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -340,7 +334,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 
             // Check workspace folder
-            String sWorkspacePath = LauncherMain.getWorspacePath(oParameter);
+            String sWorkspacePath = LauncherMain.getWorkspacePath(oParameter);
 
             File oWorkspacePath = new File(sWorkspacePath);
 
