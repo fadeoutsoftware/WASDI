@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -90,34 +92,28 @@ public class AuthResource {
 	public UserViewModel login(LoginInfo oLoginInfo) {
 		Utils.debugLog("AuthResource.Login");
 
-		if (oLoginInfo == null) {
-			Utils.debugLog("Auth.Login: login info null, user not authenticated");
-			return UserViewModel.getInvalid();
-		}
-
-		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
-			Utils.debugLog("Auth.Login: Login Info does not support Credential Policy, user " + oLoginInfo.getUserId() + " not authenticated" );
-			return UserViewModel.getInvalid();
-		}
-
 		try {
+			if (oLoginInfo == null) {
+				Utils.debugLog("Auth.Login: login info null, user not authenticated");
+				return UserViewModel.getInvalid();
+			}
+			if(Utils.isNullOrEmpty(oLoginInfo.getUserId())){
+				Utils.debugLog("Auth.Login: userId null or empty, user not authenticated");
+				return UserViewModel.getInvalid();	
+			}
+			if(Utils.isNullOrEmpty(oLoginInfo.getUserPassword())){
+				Utils.debugLog("Auth.Login: password null or empty, user not authenticated");
+				return UserViewModel.getInvalid();	
+			}
 
 			Utils.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
 
 			UserRepository oUserRepository = new UserRepository();
-
 			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
-
 			if( oUser == null ) {
 				Utils.debugLog("AuthResource.Login: user not found: " + oLoginInfo.getUserId() + ", aborting");
 				return UserViewModel.getInvalid();
 			}
-
-
-			/*if(!m_oCredentialPolicy.satisfies(oUser)) {
-				Utils.debugLog("AuthResource.Login: Wasdi user " + oUser.getUserId() + " does not satisfy Credential Policy, aborting");
-				return UserViewModel.getInvalid();
-			}*/
 
 			if(null == oUser.getValidAfterFirstAccess()) {
 				// this is to fix legacy users for which confirmation has never been activated
@@ -125,14 +121,10 @@ public class AuthResource {
 				oUser.setValidAfterFirstAccess(true);
 			}
 
-//			if(!oUser.getValidAfterFirstAccess() ) {
-//				Utils.debugLog("AuthResource.Login: user " + oUser.getUserId() + " tried to access but never validated her/his account. Aborting" );
-//				return UserViewModel.getInvalid(); 
-//			}
 
 			//authenticate against keycloak
 			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
-			String sSessionId = null;
+			
 
 			boolean bLoginSuccess = false;
 
@@ -146,17 +138,13 @@ public class AuthResource {
 				oUser.setLastLogin((new Date()).toString());
 				oUserRepository.updateUser(oUser);
 
+				
+				//SESSION
 				Wasdi.clearUserExpiredSessions(oUser);
-				UserSession oSession = new UserSession();
-				oSession.setUserId(oUser.getUserId());
-				//todo ensure a unique session 
-				sSessionId = UUID.randomUUID().toString();
-				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate((double) new Date().getTime());
-				oSession.setLastTouch((double) new Date().getTime());
-
-				SessionRepository oSessionRepo = new SessionRepository();
-				if (!oSessionRepo.insertSession(oSession)) {
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
+				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
+					Utils.debugLog("AuthResource.Login: could not insert session in DB, aborting");
 					return UserViewModel.getInvalid();
 				}
 				
@@ -166,9 +154,9 @@ public class AuthResource {
 				oUserVM.setSurname(oUser.getSurname());
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
-				oUserVM.setSessionId(sSessionId);
+				oUserVM.setSessionId(oSession.getSessionId());
 
-				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
+				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
 				return oUserVM;
 			} else {
@@ -187,25 +175,27 @@ public class AuthResource {
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
-
-		if(null == sSessionId) {
-			Utils.debugLog("AuthResource.CheckSession: SessionId is null");
-			return UserViewModel.getInvalid();
+		try {
+			if(Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("AuthResource.CheckSession: SessionId is null or empty");
+				return UserViewModel.getInvalid();
+			}
+	
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				Utils.debugLog("AuthResource.CheckSession: invalid session");
+				return UserViewModel.getInvalid();
+			}
+	
+			UserViewModel oUserVM = new UserViewModel();
+			oUserVM.setName(oUser.getName());
+			oUserVM.setSurname(oUser.getSurname());
+			oUserVM.setUserId(oUser.getUserId());
+			return oUserVM;
+		} catch (Exception oE) {
+			Utils.debugLog("AuthResource.CheckSession: " + oE);
 		}
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		//if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-		if (oUser == null ) {
-			Utils.debugLog("AuthResource.CheckSession: invalid session");
-			return UserViewModel.getInvalid();
-		}
-
-		UserViewModel oUserVM = new UserViewModel();
-		oUserVM.setName(oUser.getName());
-		oUserVM.setSurname(oUser.getSurname());
-		oUserVM.setUserId(oUser.getUserId());
-
-		return oUserVM;
+		return UserViewModel.getInvalid();
 	}	
 
 
@@ -255,43 +245,61 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Utils.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
-
-		if(!m_oCredentialPolicy.validEmail(sEmail)) {
+		if(Utils.isNullOrEmpty(sEmail)) {
+			Utils.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
-			return Response.status(Status.UNAUTHORIZED).build();
+		try {
+			InternetAddress emailAddr = new InternetAddress(sEmail);
+			emailAddr.validate();
+		} catch (AddressException oEx) {
+			Utils.debugLog("AuthResource.createSftpAccount: email is invalid, aborting");
+			return Response.status(Status.BAD_REQUEST).build();
 		}
-
-		// Get the User Id
-		String sAccount = oUser.getUserId();
-
-		// Search for the sftp service
-		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
-		if (wsAddress==null) {
-			wsAddress = "ws://localhost:6703";
+		
+		try {	
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			if (oUser == null) {
+				Utils.debugLog("AuthResource.createSftpAccount: session invalid or user not found, aborting");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// Get the User Id
+			String sAccount = oUser.getUserId();
+			if(Utils.isNullOrEmpty(sAccount)) {
+				Utils.debugLog("AuthResource.createSftpAccount: userid is null, aborting");
+				return Response.serverError().build();
+			}
+	
+			// Search for the sftp service
+			String sWsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+			if (Utils.isNullOrEmpty(sWsAddress)) {
+				sWsAddress = "ws://localhost:6703";
+				Utils.debugLog("AuthResource.createSftpAccount: sWsAddress is null or empty, defaulting to " + sWsAddress);
+			}
+	
+			// Manager instance
+			SFTPManager oManager = new SFTPManager(sWsAddress);
+			String sPassword = Utils.generateRandomPassword();
+	
+			// Try to create the account
+			if (!oManager.createAccount(sAccount, sPassword)) {
+	
+				Utils.debugLog("AuthService.CreateSftpAccount: error creating sftp account");
+				return Response.serverError().build();
+			}
+	
+			// Sent the credentials to the user
+			if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
+				return Response.serverError().build();
+			}
+	
+			// All is done
+			return Response.ok().build();
+		}catch (Exception oE) {
+			Utils.debugLog("AuthService.CreateSftpAccount: " + oE);
 		}
-
-		// Manager instance
-		SFTPManager oManager = new SFTPManager(wsAddress);
-		String sPassword = Utils.generateRandomPassword();
-
-		// Try to create the account
-		if (!oManager.createAccount(sAccount, sPassword)) {
-
-			Utils.debugLog("AuthService.CreateSftpAccount: error creating sftp account");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		// Sent the credentials to the user
-		if(!sendSftpPasswordEmail(sEmail, sAccount, sPassword)) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		// All is done
-		return Response.ok().build();
+		return Response.serverError().build();
 	}
 
 	@GET
@@ -420,7 +428,7 @@ public class AuthResource {
 		String sExt;
 		String sFileName;
 
-		User oUser = getUser(sSessionId);
+		User oUser = getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -453,7 +461,7 @@ public class AuthResource {
 	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
 
 
-		User oUser = getUser(sSessionId);
+		User oUser = getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -477,7 +485,7 @@ public class AuthResource {
 	@DELETE
 	@Path("/delete/userimage")
 	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
-		User oUser = getUser(sSessionId);
+		User oUser = getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -622,54 +630,41 @@ public class AuthResource {
 
 			Utils.debugLog("AuthService.UserRegistration: input is good");
 
+			Utils.debugLog("AuthService.UserRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi ");
 			UserRepository oUserRepository = new UserRepository();
-			Utils.debugLog("AuthService.UserRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi "); 
 			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
 
 			//do we already have this user in our DB?
 			if(oWasdiUser != null){
 				//yes, it's a well known user. Stop here
 				PrimitiveResult oResult = new PrimitiveResult();
-				oResult.setIntValue(403); //forbidden
+				//not modified
+				oResult.setIntValue(304);
 				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
 				return oResult;
 			} else {
 				Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " is a new user");
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
+				//otherwise someone might call this api even if the user is not registered on KC
 
-				//first: authenticate on keycloak as admin and get the token
-				String sKcTokenId = m_oKeycloakService.getToken();
+				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
-				// second: check the user exists on keycloak
-				String sBody = m_oKeycloakService.getUserData(sKcTokenId, oRegistrationInfoViewModel.getUserId());
+				User oNewUser = m_oKeycloakService.getUser(sUserId);
+				if(null==oNewUser) {
+					PrimitiveResult oResult = new PrimitiveResult();
+					//not found
+					oResult.setIntValue(404);
+					Utils.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " not found in keycloak, aborting");
+					return oResult;
+				}
 				
-
-				JSONArray oJsonArray = new JSONArray(sBody);
-				if(oJsonArray.length() < 1 ) {
-					//TODO this means no such user has been found, return 404
-					throw new IllegalStateException("Returned JSON array has 0 or less elements");
-				}
-				if(oJsonArray.length() > 1 ) {
-					throw new IllegalStateException("Returned JSON array has more than 1 element");
-				}
-				JSONObject oJsonResponse = (JSONObject)oJsonArray.get(0);
-				User oNewUser = new User();
-				if(oJsonResponse.has("firstName")) {
-					oNewUser.setName(oJsonResponse.optString("firstName", null));
-				}
-				if(oJsonResponse.has("lastName")) {
-					oNewUser.setSurname(oJsonResponse.optString("lastName", null));
-				}
-				if(oJsonResponse.has("createdTimestamp")) {
-					oNewUser.setRegistrationDate(TimeEpochUtils.fromEpochToDateString(oJsonResponse.optLong("createdTimestamp", 0l)));
-				}
+				//populate remaining fields
 				oNewUser.setValidAfterFirstAccess(true);
 				oNewUser.setAuthServiceProvider("keycloak");
 				Utils.debugLog("AuthResource.userRegistration: user details parsed");
 				
 				String sDefaultNode = "wasdi";
-				
 				try {					
 					sDefaultNode = m_oServletConfig.getInitParameter("USERS_DEFAULT_NODE");
 					if (Utils.isNullOrEmpty(sDefaultNode)) {
@@ -677,35 +672,26 @@ public class AuthResource {
 					}
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("Exception reading Users default node " + oEx.toString());
+					Utils.debugLog("Exception reading Users default node " + oEx);
 				}
-
-				//third: store user in DB
-				//create new user
-				oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
 				oNewUser.setDefaultNode(sDefaultNode);
-				oNewUser.setValidAfterFirstAccess(true);
+				
 
-				PrimitiveResult oResult = null;
+				//store user in DB
 				if(oUserRepository.insertUser(oNewUser)) {
 					//success: the user is stored in DB!
 					Utils.debugLog("AuthResource.userRegistration: user " + oNewUser.getUserId() + " added to wasdi");
-					oResult = new PrimitiveResult();
-					oResult.setBoolValue(true);
-					oResult.setStringValue(oNewUser.getUserId());
-					
 					notifyNewUserInWasdi(oNewUser, true);
-					
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);					
 					oResult.setIntValue(200);
 					oResult.setStringValue("Welcome to space");
 					return oResult;
 				} else {
 					//insert failed: log, mail and throw
 					String sMessage = "could not insert new user " + oNewUser.getUserId() + " in DB";
-					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", throwing");
-					
+					Utils.debugLog("AuthResource.userRegistration: " + sMessage + ", aborting");
 					notifyNewUserInWasdi(oNewUser, false);
-					
 					throw new RuntimeException(sMessage);
 				}
 			}
@@ -714,9 +700,11 @@ public class AuthResource {
 		}
 
 		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
 		return oResult;
 	}
+
 
 
 	@GET
@@ -884,64 +872,95 @@ public class AuthResource {
 	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
 
 		Utils.debugLog("AuthService.lostPassword: sUserId: " + sUserId);
+		try {
 
-		if(null == sUserId ) {
-			Utils.debugLog("User id is null");
-			return PrimitiveResult.getInvalid();
-		}
-
-		if(!m_oCredentialPolicy.validUserId(sUserId)) {
-			Utils.debugLog("User id not valid");
-			return PrimitiveResult.getInvalid();
-		}
-
-		UserRepository oUserRepository = new UserRepository();
-		User oUser = oUserRepository.getUser(sUserId);
-
-		if(null == oUser) {
-			Utils.debugLog("User not found");
-			PrimitiveResult oResult = PrimitiveResult.getInvalid();
-			//unauthorized
-			oResult.setIntValue(401);
-			return oResult;
-		} 
-		else {
-			if(null != oUser.getAuthServiceProvider()){
-				if( m_oCredentialPolicy.authenticatedByWasdi(oUser.getAuthServiceProvider()) ){
-
-					if(m_oCredentialPolicy.validEmail(oUser.getUserId()) ) {
-
-						String sPassword = Utils.generateRandomPassword();
-						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
-						oUser.setPassword(sHashedPassword);
-
-						if(oUserRepository.updateUser(oUser)) {
-
-							if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
-								return PrimitiveResult.getInvalid(); 
-							}
-
-							PrimitiveResult oResult = new PrimitiveResult();
-							oResult.setBoolValue(true);
-							oResult.setIntValue(0);
-							return oResult;
-						} 
-						else {
-							return PrimitiveResult.getInvalid();
-						}
-					} 
-					else {
-						//older users did not necessarily specified an email
-						return PrimitiveResult.getInvalid();
-					}
-				} 
-				else {
-					return PrimitiveResult.getInvalid();
-				}
-			} else {
-				return PrimitiveResult.getInvalid();
+			if(Utils.isNullOrEmpty(sUserId)) {
+				Utils.debugLog("AuthService.lostPassword: User id is null or empty, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Bad Request");
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
 			}
+
+			if(!m_oCredentialPolicy.validUserId(sUserId)) {
+				Utils.debugLog("AuthService.lostPassword: User id not valid, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Bad Request");
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
+
+		} catch (Exception oE) {
+			Utils.debugLog("AuthService.lostPassword: preliminary checks broken due to: " + oE + ", aborting");
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setStringValue("Internal Server Error");
+			oResult.setIntValue(500);
+			oResult.setBoolValue(false);
+			return oResult;
 		}
+
+		UserRepository oUserRepository = null;
+		User oUser = null;
+		try {
+			oUserRepository = new UserRepository();
+			oUser = oUserRepository.getUser(sUserId);
+
+			if(null == oUser) {
+				Utils.debugLog("AuthService.lostPassword: User not found, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Bad Request");
+				oResult.setIntValue(400);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
+			Utils.debugLog("AuthService.lostPassword: user " + sUserId + " found");
+
+			if(Utils.isNullOrEmpty(oUser.getAuthServiceProvider())) {
+				//todo check if user is on keycloak
+				Utils.debugLog("AuthService.lostPassword: auth service provider null or empty, aborting");
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue("Internal Server Error");
+				oResult.setIntValue(500);
+				oResult.setBoolValue(false);
+				return oResult;
+			}
+
+			//now, providers!
+			switch(oUser.getAuthServiceProvider().toUpperCase()) {
+			case "WASDI":
+				String sPassword = Utils.generateRandomPassword();
+				String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
+				oUser.setPassword(sHashedPassword);
+
+				if(oUserRepository.updateUser(oUser)) {
+					if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
+						return PrimitiveResult.getInvalid(); 
+					}
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					oResult.setIntValue(0);
+					return oResult;
+				}
+				//else nothing is returned here and in the end 500 is returned
+				break;
+			case "KEYCLOAK":
+				return m_oKeycloakService.requirePasswordUpdateViaEmail(sUserId);
+			default:
+				break;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("AuthService.lostPassword: could not complete the password recovery due to: " + oE);
+		}
+
+		//apparently things did not work well
+		Utils.debugLog("AuthService.lostPassword( " + sUserId + "): could not change user password, about to end");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setStringValue("Internal Server Error");
+		oResult.setIntValue(500);
+		oResult.setBoolValue(false);
+		return oResult;
 	}
 
 
@@ -1115,7 +1134,7 @@ public class AuthResource {
 		return true;
 	}
 
-	protected User getUser(String sSessionId){
+	protected User getUserFromSession(String sSessionId){
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return null;

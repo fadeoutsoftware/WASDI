@@ -196,7 +196,7 @@ var ImportController = (function() {
 
             oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
             oController.m_oScope.$apply();
-
+            // selects the first mission (S1)
             oController.updateMissionSelection(0);
         });
 
@@ -348,8 +348,18 @@ var ImportController = (function() {
 
     ImportController.prototype.toggleMissionSelection= function(mission, index, event)
     {
+
+        // Beforehand deselect all the missions -> the migrate this behaviour to tab selection (on active tabs)
+        let curMission = null;
+        for (var i = 0;i< this.m_aoMissions.length;i++){ 
+            curMission = this.m_aoMissions[i];
+            curMission.selected= false;
+        }
         mission.selected = !mission.selected;
         this.updateMissionSelection(index);
+        // also do the selection of the tab 
+        this.m_activeMissionTab = index;
+        
 
         // prevent tab selection when user click on the checkbox
         event.stopPropagation();
@@ -541,10 +551,9 @@ var ImportController = (function() {
         return true;
     };
 
-    ImportController.prototype.searchAndCount = function(oProvider, oThat)
+    ImportController.prototype.searchAndCount = function(oProvider)
     {
         var oController = this;
-        if(utilsIsObjectNullOrUndefined(oThat) === false) oController = oThat;
 
         if(oController.thereIsAtLeastOneProvider() === false) return false;
         if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;

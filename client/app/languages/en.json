@@ -14,7 +14,7 @@
     "LOGIN_LINK_REGISTER":"Register",
 
     "RECOVERY_EMAIL_BUTTON":"Send request",
-    "RECOVERY_EMAIL_TITLE":"Insert your email if you want to recover your password",
+    "RECOVERY_EMAIL_TITLE":"Please, insert your email and confirm.\n A message will be sent with further instructions to recover your account",
 
     "SIGN_IN_PLACEHOLDER_EMAIL":"Email Address",
     "SIGN_IN_PLACEHOLDER_PASSWORD":"Password",
@@ -418,5 +418,8 @@
     "DIALOG_WORKFLOW_TAB_BASE": "Workflow",
     "DIALOG_WORKFLOW_TAB_SHARE": "Share",
 
-    "DIALOG_PAYLOAD_COPY": "Copy payload"
+    "DIALOG_PAYLOAD_COPY": "Copy payload",
+
+    "DIALOG_WORKSPACE_DETAILS_APPLY" : "Apply",
+    "DIALOG_WORKSPACE_DETAILS_CLOSE": "Close"
 }

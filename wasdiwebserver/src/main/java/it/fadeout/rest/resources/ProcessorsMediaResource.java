@@ -38,15 +38,19 @@ import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorSharing;
+import wasdi.shared.business.Comment;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.data.AppsCategoriesRepository;
+import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AppCategoryViewModel;
+import wasdi.shared.viewmodels.CommentViewModel;
+import wasdi.shared.viewmodels.ListCommentsViewModel;
 import wasdi.shared.viewmodels.ListReviewsViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PublisherFilterViewModel;
@@ -617,6 +621,58 @@ public class ProcessorsMediaResource {
 		return Response.status(Status.OK).build();
 	}
 	
+	@DELETE
+	@Path("/comments/delete")
+	public Response deleteComment(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId, @QueryParam("commentId") String sCommentId ) {
+		
+		try {
+		    sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			Utils.debugLog("ProcessorsMediaResource.deleteComment excepion decoding parent review Id");
+		}
+		
+		try {
+			sCommentId = java.net.URLDecoder.decode(sCommentId, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			Utils.debugLog("ProcessorsMediaResource.deleteComment excepion decoding comment Id");
+		}		
+		
+		Utils.debugLog("ProcessorsMediaResource.deleteComment( sReviewId: " + sReviewId + " sCommentId: " + sCommentId + ")");
+		
+		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE COMMENT ************************//
+		
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if (oUser == null) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+
+		ReviewRepository oReviewRepository = new ReviewRepository();
+		Review oReview = oReviewRepository.getReview(sReviewId);
+
+
+		if (oReview != null && Utils.isNullOrEmpty(oReview.getTitle()) && Utils.isNullOrEmpty(oReview.getComment())) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		CommentRepository oCommentRepository = new CommentRepository();
+		
+		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+		if (!oCommentRepository.isTheOwnerOfTheComment(sReviewId, sCommentId, sUserId)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		int iDeletedCount = oCommentRepository.deleteComment(sReviewId, sCommentId);
+
+		if (iDeletedCount == 0) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		return Response.status(Status.OK).build();
+	}
+	
 	@POST
 	@Path("/reviews/update")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
@@ -649,6 +705,36 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		else {
+			return Response.status(Status.OK).build();
+		}
+	}
+	
+	@POST
+	@Path("/comments/update")
+	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentViewModel oCommentViewModel) {
+		
+		Utils.debugLog("ProcessorsMediaResource.updateComment");
+	
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if (oUser == null) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		String sUserId = oUser.getUserId();
+		
+		if (oCommentViewModel == null) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		CommentRepository oCommentRepository = new CommentRepository();
+				
+		Comment oComment = getCommentFromViewModel(oCommentViewModel, sUserId, oCommentViewModel.getCommentId());
+		
+		boolean isUpdated = oCommentRepository.updateComment(oComment);
+		if (isUpdated == false) {
+			return Response.status(Status.BAD_REQUEST).build();
+		} else {
 			return Response.status(Status.OK).build();
 		}
 	}
@@ -705,10 +791,52 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		// ADD ID 
-		oReview.setId(Utils.GetRandomName()); 
-		
 		oReviewRepository.addReview(oReview);
+		
+		return Response.status(Status.OK).build();
+	}
+	
+	@POST
+	@Path("/comments/add")
+	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentViewModel oCommentViewModel) {
+		
+		Utils.debugLog("ProcessorsMediaResource.addComment");
+	
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if (oUser == null) {
+			Utils.debugLog("ProcessorsMediaResource.addComment: invalid user");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		if (oCommentViewModel == null ) {
+			Utils.debugLog("ProcessorsMediaResource.addComment: invalid view model");
+			return Response.status(Status.BAD_REQUEST).build();
+		}		
+		
+		String sUserId = oUser.getUserId();
+		
+		String sReviewId = oCommentViewModel.getReviewId();
+		
+		if (Utils.isNullOrEmpty(sReviewId)) {
+			Utils.debugLog("ProcessorsMediaResource.addComment: invalid parent review id");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		ReviewRepository oReviewRepository = new ReviewRepository();
+		
+		Review oReview = oReviewRepository.getReview(sReviewId);
+		
+		if (oReview == null) {
+			Utils.debugLog("ProcessorsMediaResource.addComment: review null " + sReviewId);
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		CommentRepository oCommentRepository =  new CommentRepository();
+		
+		Comment oComment = getCommentFromViewModel(oCommentViewModel, sUserId, Utils.GetRandomName());
+		
+		oCommentRepository.addComment(oComment);
 		
 		return Response.status(Status.OK).build();
 	}
@@ -769,6 +897,65 @@ public class ProcessorsMediaResource {
 
 	}
 	
+	@GET
+	@Path("/comments/getlist")
+	public Response getCommentListByReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId) {
+		Utils.debugLog("ProcessorsMediaResource.getCommentListByReview");
+
+		User oUser = getUser(sSessionId);
+		// Check the user session
+		if (oUser == null) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+
+		ReviewRepository oReviewRepository = new ReviewRepository();
+		Review oReview = oReviewRepository.getReview(sReviewId);
+		
+		if (oReview == null || Utils.isNullOrEmpty(oReview.getId())) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		// Get all the comments
+		CommentRepository oCommentRepository = new CommentRepository();
+		List<Comment> aoReviewComments = oCommentRepository.getComments(oReview.getId());
+		
+		if (aoReviewComments == null || aoReviewComments.size() == 0) {
+			return Response.ok(new ListCommentsViewModel()).build();
+		}
+
+		// Cast in a list, computing all the statistics
+		ListCommentsViewModel oListCommentsViewModel = getListCommentsViewModel(aoReviewComments);
+
+	    return Response.ok(oListCommentsViewModel).build();
+	}
+	
+	/**
+	 * Fill the Comment Wrapper View Model result from a list of comments
+	 * @param aoCommentList
+	 * @return
+	 */
+	private ListCommentsViewModel getListCommentsViewModel(List<Comment> aoCommentList) {
+		ListCommentsViewModel oListComments = new ListCommentsViewModel();
+		List<CommentViewModel> aoComments = new ArrayList<CommentViewModel>();
+		if (aoCommentList == null) {
+			return null; 
+		}
+
+		for (Comment oComment : aoCommentList) {
+			CommentViewModel oCommentViewModel = new CommentViewModel();
+			oCommentViewModel.setCommentId(oComment.getCommentId());
+			oCommentViewModel.setReviewId(oComment.getReviewId());
+			oCommentViewModel.setUserId(oComment.getUserId());
+			oCommentViewModel.setDate(Utils.getDate(oComment.getDate().longValue()));
+			oCommentViewModel.setText(oComment.getText());
+			
+			aoComments.add(oCommentViewModel);
+		}
+		
+		oListComments.setComments(aoComments);
+
+		return oListComments;
+	}
 	
 	@GET
 	@Path("/publisher/getlist")
@@ -863,6 +1050,26 @@ public class ProcessorsMediaResource {
 			oReview.setUserId(sUserId);
 			oReview.setVote(oReviewViewModel.getVote());
 			return oReview;
+		}
+		return null;
+	}
+	
+	/**
+	 * Converts a Comment View Model in a Comment Entity
+	 * @param oCommentViewModel
+	 * @param sUserId
+	 * @param sId
+	 * @return
+	 */
+	private Comment getCommentFromViewModel(CommentViewModel oCommentViewModel, String sUserId, String sId) {
+		if (oCommentViewModel != null) {
+			Comment oComment = new Comment();
+			oComment.setCommentId(sId);
+			oComment.setReviewId(oCommentViewModel.getReviewId());
+			oComment.setUserId(sUserId);
+			oComment.setDate((double)(new Date()).getTime());
+			oComment.setText(oCommentViewModel.getText());
+			return oComment;
 		}
 		return null;
 	}

@@ -284,10 +284,13 @@ public class DockerUtils {
                 }
 
                 Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
+                
+                
             } else {
                 Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
             }
 
+            Thread.sleep(1000);
 
             Runtime.getRuntime().exec(sDeleteScriptFile);
 

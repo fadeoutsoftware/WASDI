@@ -29,8 +29,8 @@ public class LauncherOperationsUtils {
 	public boolean doesOperationLaunchDocker(String sOperation) {
 		switch(sOperation.toUpperCase()) {
 		case "RUNPROCESSOR":
-		//case "RUNIDL":
-		//case "RUNMATLAB":
+		case "RUNIDL":
+		case "RUNMATLAB":
 			return true;
 		default:
 			return false;

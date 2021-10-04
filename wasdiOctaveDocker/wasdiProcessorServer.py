@@ -21,19 +21,18 @@ def run(processId):
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))	
 	os.chdir(dir_path)
-	print("wasdiProcessorServer: processor folder set")
 	
 	try:
 		# Copy updated files from processor folder to the docker
 		copy_tree("/wasdi", "/home/wasdi", update=1)
-		print("wasdiProcessorServer: processors files updated")
+		print("[" + processId+ "] wasdiProcessorServer: processors files updated")
 	except:
-		print("wasdiProcessorServer: Unexpected error ", repr(sys.exc_info()[0]))
+		print("[" + processId+ "] wasdiProcessorServer: Unexpected error ", repr(sys.exc_info()[0]))
 	
 	# Check if this is a help request
 	if processId == '--help':
 		
-		print("wasdiProcessorServer Help Request: calling processor Help")
+		print("[" + processId+ "] wasdiProcessorServer Help Request: calling processor Help")
 		
 		sHelp = ""
 		
@@ -75,10 +74,9 @@ def run(processId):
 					sHelp = oHelpFile.read()
 								
 		except AttributeError:
-			print("wasdiProcessorServer Help not available")
+			print("[" + processId+ "] wasdiProcessorServer Help not available")
 			sHelp = "No help available. Just try."
 		
-		print("wasdiProcessorServer return received help " + sHelp)
 		# Return the available help			
 		return jsonify({'help': sHelp})
 	
@@ -87,15 +85,15 @@ def run(processId):
 		#Try to update the lib
 		try:
 			
-			print("Copy updated lib")
+			print("[" + processId+ "] Copy updated lib")
 			#oProcess = subprocess.Popen(["pip", "install", "--upgrade", "wasdi"])
 			#print("pip upgrade done")
 		except Exception as oEx:
-			print("wasdi.executeProcessor EXCEPTION")
+			print("[" + processId+ "] wasdi.executeProcessor EXCEPTION")
 			print(repr(oEx))
 			print(traceback.format_exc())
 		except:
-			print("wasdi.executeProcessor generic EXCEPTION")			
+			print("[" + processId+ "] wasdi.executeProcessor generic EXCEPTION")			
 		
 		# Return the result of the update
 		return jsonify({'update': '1'})	
@@ -108,20 +106,20 @@ def run(processId):
 			asKillParts = processId.split("_")
 			
 			#TODO safety check
-			print("Killing subprocess")
+			print("[" + processId+ "] Killing subprocess")
 			oProcess = subprocess.Popen(["kill", "-9", asKillParts[1]])
-			print("Subprocess killed")
+			print("[" + processId+ "] Subprocess killed")
 		except Exception as oEx:
-			print("wasdi.executeProcessor EXCEPTION")
+			print("[" + processId+ "] wasdi.executeProcessor EXCEPTION")
 			print(repr(oEx))
 			print(traceback.format_exc())
 		except:
-			print("wasdi.executeProcessor generic EXCEPTION")			
+			print("[" + processId+ "] wasdi.executeProcessor generic EXCEPTION")			
 		
 		# Return the result of the update
 		return jsonify({'kill': '1'})		
 	
-	print("wasdiProcessorServer run request")
+	print("[" + processId+ "] wasdiProcessorServer run request")
 	
 	# This is not a help request but a run request.
 	
@@ -133,31 +131,31 @@ def run(processId):
 	if (request.args.get('user') is not None):
 		parameters['user'] = request.args.get('user')
 	else:
-		print('USER arg not available')
+		print("[" + processId+ "] USER arg not available")
 
 	if (request.args.get('sessionid') is not None):
 		parameters['sessionid'] = request.args.get('sessionid')
 	else:
-		print('SESSION arg not available')
+		print("[" + processId+ "] SESSION arg not available")
 		
 	if (request.args.get('workspaceid') is not None):
 		parameters['workspaceid'] = request.args.get('workspaceid')
 	else:
-		print('WORKSPACE arg not available')
+		print("[" + processId+ "] WORKSPACE arg not available")
 	
 	#Try to get the user
 	try:
 		sUser = parameters['user']
 		wasdi.setUser(sUser)
-		print("wasdiProcessorServer User available in params. Got " + sUser)
+		print("[" + processId+ "] wasdiProcessorServer User available in params. Got " + sUser)
 	except:
-		print('wasdiProcessorServer user not available in parameters.')
+		print("[" + processId+ "] wasdiProcessorServer user not available in parameters.")
 		
 	#Try to get the password
 	try:
 		sPassword = parameters['password']
 		wasdi.setPassword(sPassword)
-		print("wasdiProcessorServer Pw available in params")
+		print("[" + processId+ "] wasdiProcessorServer Pw available in params")
 	except:
 		print('wasdiProcessorServer password not available in parameters.')
 		
@@ -165,47 +163,46 @@ def run(processId):
 	try:
 		sSessionId = parameters['sessionid']
 		wasdi.setSessionId(sSessionId)
-		print("wasdiProcessorServer Session available in params " + sSessionId)
+		print("[" + processId+ "] wasdiProcessorServer Session available in params " + sSessionId)
 	except:
-		print('wasdiProcessorServer Session not available in parameters.')		
+		print("[" + processId+ "] wasdiProcessorServer Session not available in parameters.")		
 	
 	#Try to set the proc id
 	try:
 		wasdi.setProcId(processId)
-		print("wasdiProcessorServer set Proc Id " + processId)
+		print("[" + processId+ "] wasdiProcessorServer set Proc Id " + processId)
 	except:
-		print('wasdiProcessorServer Proc Id not available')
+		print("[" + processId+ "] wasdiProcessorServer Proc Id not available")
 		
 	#Try to get the workspace id
 	try:
 		sWorkspaceId = parameters['workspaceid']
 		wasdi.openWorkspaceById(sWorkspaceId)
-		print("wasdiProcessorServer Workspace Id available in params " + sWorkspaceId)
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId)
 	except:
-		print('wasdiProcessorServer Workspace Id not available in parameters.')		
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.")		
 
 
 	#Try to get the base url
 	try:
 		sBaseUrl = parameters['baseurl']
 		wasdi.setBaseUrl(sBaseUrl)
-		print("wasdiProcessorServer Base Url in params " + sBaseUrl)
+		print("[" + processId+ "] wasdiProcessorServer Base Url in params " + sBaseUrl)
 	except:
-		print('wasdiProcessorServer Using default base url')		
+		print("[" + processId+ "] wasdiProcessorServer Using default base url")		
 
 	
 	#Init Wasdi
-	print("wasdiProcessorServer: init waspy lib")
+	print("[" + processId+ "] wasdiProcessorServer: init waspy lib")
 	wasdi.setIsOnServer(True)
 	wasdi.setDownloadActive(False)
 	
 	if wasdi.init() == False:
-		print("wasdiProcessorServer: init FAILED")
+		print("[" + processId+ "] wasdiProcessorServer: init FAILED")
 		return jsonify({'processId': 'ERROR', 'processorEngineVersion':'2'})
 	
 	#Run the processor
 	try:
-		wasdi.wasdiLog("wasdiProcessorServer RUN " + processId)
 		
 		sLocalPath = "/home/wasdi/"
 		sConfigFilePath = sLocalPath + "config.properties"

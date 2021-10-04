@@ -597,7 +597,11 @@ var RootController = (function() {
             templateUrl: "dialogs/workspace_processes_list/WorkspaceProcessesList.html",
             controller: "WorkspaceProcessesList"
         }).then(function(modal) {
-            modal.element.modal();
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+              });
+            //modal.element.modal();
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
             });
@@ -753,7 +757,7 @@ var RootController = (function() {
             oController.openProcessorLogsDialog(process);
             return true;
         }else{
-            console.error("Cannot find process ID " + processId + " in the processes list")
+        //    console.error("Cannot find process ID " + processId + " in the processes list") 
             return false;
         }
     };

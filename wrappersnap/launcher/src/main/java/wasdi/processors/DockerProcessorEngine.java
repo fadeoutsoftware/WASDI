@@ -893,9 +893,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
             String sOutputResult;
             String sOutputCumulativeResult = "";
-            Utils.debugLog("DockerProcessorEngine.libraryUpdate: Output from Server .... \n");
+            LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: Output from Server .... \n");
             while ((sOutputResult = oBufferedReader.readLine()) != null) {
-                Utils.debugLog("DockerProcessorEngine.libraryUpdate: " + sOutputResult);
+            	LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: " + sOutputResult);
 
                 if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
             }

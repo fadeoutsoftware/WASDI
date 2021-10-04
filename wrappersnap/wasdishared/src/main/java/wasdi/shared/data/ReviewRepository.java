@@ -32,7 +32,26 @@ public class ReviewRepository extends MongoRepository {
         return aoReturnList;
     }
     
-	
+    /**
+     * Get a review by Id
+     * @param sReviewId id of the review
+     * @return Entity
+     */
+    public Review getReview(String sReviewId) {
+
+        try {
+            Document oWSDocument = getCollection(m_sThisCollection).find(new Document("id", sReviewId)).first();
+
+            if (null != oWSDocument) {
+            	String sJSON = oWSDocument.toJson();
+            	return s_oMapper.readValue(sJSON, Review.class);
+            }
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  null;
+    }
     
 	public String addReview(Review oReview) {
 		return add(oReview,m_sThisCollection,"ReviewRepository.InsertReview");
