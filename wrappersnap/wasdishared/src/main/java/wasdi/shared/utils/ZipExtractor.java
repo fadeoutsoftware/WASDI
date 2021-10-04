@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
@@ -181,7 +182,7 @@ public class ZipExtractor {
 	/**
 	 * Instantiates a ZipExtractor with default parameters and initialize the logger
 	 * prefix
-	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
+	 * @param sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
 	public ZipExtractor(String sLoggerPrefix) {
 		if(!Utils.isNullOrEmpty(sLoggerPrefix)) {
@@ -195,7 +196,7 @@ public class ZipExtractor {
 	 * @param lToobigtotal  the total maximum size allowed for extraction
 	 * @param lToobigsingle the maximum single size for each file
 	 * @param lToomany      the maximum number of files allowed to be extracted
-	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
+	 * @param sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
 	public ZipExtractor(long lToobigtotal, long lToobigsingle, int lToomany, String sLoggerPrefix) {
 		this.m_lToobigtotal = lToobigtotal;
@@ -341,5 +342,32 @@ public class ZipExtractor {
 	public void setTOOMANY(int iTooMany) {
 		m_lToomany = iTooMany;
 	}
+
+
+	/**
+	 * Util method to zip a complete Path, traversing all the subdirectories, using java stream support
+	 * @param sourceDirPath The path to the directory that should be added
+	 * @param zipFilePath the destination Zip File path
+	 * @throws IOException
+	 */
+	public void zip(String sourceDirPath, String zipFilePath) throws IOException {
+		Path p = Files.createFile(Paths.get(zipFilePath));
+		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+			Path pp = Paths.get(sourceDirPath);
+			Files.walk(pp)
+					.filter(path -> !Files.isDirectory(path))
+					.forEach(path -> {
+						ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+						try {
+							zs.putNextEntry(zipEntry);
+							Files.copy(path, zs);
+							zs.closeEntry();
+						} catch (IOException e) {
+							s_oLogger.error(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
+						}
+					});
+		}
+	}
+
 
 }
