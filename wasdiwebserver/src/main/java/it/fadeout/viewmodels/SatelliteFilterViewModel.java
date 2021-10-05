@@ -2,10 +2,26 @@ package it.fadeout.viewmodels;
 
 import java.util.ArrayList;
 
+/**
+ * View Model of the filters for a single satellite used to query the 
+ * WASDI plan manager
+ * @author p.campanella
+ *
+ */
 public class SatelliteFilterViewModel {
+	/**
+	 * True if enabled, false otherwise
+	 */
 	private boolean enable;
+	/**
+	 * Name of the satellite
+	 */
 	private String satelliteName;
+	/**
+	 * List of sensors
+	 */
 	private ArrayList<SensorViewModel> satelliteSensors;
+	
 	public boolean isEnable() {
 		return enable;
 	}

@@ -2,10 +2,28 @@ package it.fadeout.viewmodels;
 
 import java.util.ArrayList;
 
+/**
+ * View Model of a sensor on board to a satellite.
+ * Used by plan manager of WASDI
+ * @author p.campanella
+ *
+ */
 public class SensorViewModel {
+	/**
+	 * Sensor description
+	 */
 	private String description;
+	
+	/**
+	 * True if enabled, false if not	
+	 */
 	private boolean enable;
+	
+	/**
+	 * List of available sensor modes
+	 */
 	private ArrayList<SensorModeViewModel> sensorModes;
+	
 	public String getDescription() {
 		return description;
 	}

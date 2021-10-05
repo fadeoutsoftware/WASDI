@@ -44,23 +44,8 @@ var RootController = (function() {
             else
             {
                 oController.m_isRabbitConnected = false;
-                if( connectionState == 2)
-                {
-                    if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
-                    {
-                        this.signalRabbitConnectionLost();
-                    }
-                }
             }
         };
-
-
-        this.signalRabbitConnectionLost = function()
-        {
-            //var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
-            //utilsVexCloseDialogAfter(5000, dialog);
-        };
-
 
         // Subscribe to 'rabbit service connection changes'
         var _this = this;
@@ -356,10 +341,7 @@ var RootController = (function() {
 
     RootController.prototype.isRabbitConnected = function()
     {
-        //console.debug("Rabbit is connected?", this.m_isRabbitConnected);
         return this.m_isRabbitConnected;
-        // return false;
-        // return true;
     }
 
     RootController.prototype.onClickProcess = function()
@@ -383,35 +365,6 @@ var RootController = (function() {
         {
         console.log("RootController - Exception " + e);
         }
-        //this.openLogoutModal();
-        /*this.m_oAuthService.logout()
-            .success(function (data, status) {
-                if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
-                {
-                    utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
-                    console.log("SERVER ERROR ON LOGOUT");
-                }
-
-                try
-                {
-                    _this.m_oConstantsService.setActiveWorkspace(null);
-                    _this.m_oConstantsService.logOut();
-                }catch(e)
-                {
-
-                }
-
-                //_this.closeLogoutModal();
-                _this.m_oState.go("home");
-            })
-            .error(function (data,status) {
-                utilsVexDialogAlertTop("ERROR IN LOGOUT");
-                _this.m_oConstantsService.logOut();
-                //_this.closeLogoutModal();
-                _this.m_oState.go("home");
-            });*/
-
-
     };
 
     RootController.prototype.getWorkspaceName = function()
@@ -503,19 +456,12 @@ var RootController = (function() {
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
     RootController.prototype.openEditorPage = function () {
-
-        //if(this.isWorkspacesPageOpen() === true) return false;
-
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         if(utilsIsObjectNullOrUndefined(oWorkspace.workspaceId)) return false;
         var oController = this;
         var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-    };
-
-    RootController.prototype.openCatalogPage = function()
-    {
-        this.m_oState.go("root.catalog", { });
+        //use workSpace when reload editor page
+        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });
     };
 
     RootController.prototype.openSearchorbit = function()
@@ -530,7 +476,6 @@ var RootController = (function() {
 
     RootController.prototype.openImportPage = function () {
         var oController = this;
-        // workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
         oController.m_oState.go("root.import", { });
     };
 
@@ -565,7 +510,6 @@ var RootController = (function() {
         var oController = this;
         // console.log("miao");
         this.m_oModalService.showModal({
-            // templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
             templateUrl: "dialogs/snake_dialog/SnakeDialogV2.html",
             controller: "SnakeController"
         }).then(function(modal) {
@@ -592,7 +536,7 @@ var RootController = (function() {
     RootController.prototype.openProcessLogsDialog = function()
     {
         var oController = this;
-        // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/workspace_processes_list/WorkspaceProcessesList.html",
             controller: "WorkspaceProcessesList"
@@ -601,7 +545,7 @@ var RootController = (function() {
                 backdrop: 'static',
                 keyboard: false
               });
-            //modal.element.modal();
+
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
             });

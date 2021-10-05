@@ -5,7 +5,7 @@
 
 'use strict';
 angular.module('wasdi.GlobeService', ['wasdi.ConstantsService']).
-service('GlobeService', ['$http',  'ConstantsService','SatelliteService', function ($http, oConstantsService) {
+service('GlobeService', ['$http',  'ConstantsService','SearchOrbitService', function ($http, oConstantsService) {
     this.m_oWasdiGlobe=null;
     var oController = this;
     this.m_aoLayers=null;

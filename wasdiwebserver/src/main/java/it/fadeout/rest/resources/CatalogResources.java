@@ -49,128 +49,34 @@ import wasdi.shared.viewmodels.FtpTransferViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 
+/**
+ * Catalog Resource
+ * Hosts APIs for:
+ * 	.download files from wasdi
+ * 	.send files to internal or external sftp
+ *  .check if a file is available on node
+ *  .ingest (add) a file uploaded in a workspace 
+ *   
+ * @author p.campanella
+ *
+ */
 @Path("/catalog")
 public class CatalogResources {
-
-	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-
+	
+	/**
+	 * Servlet config to access the web.xml 
+	 */
 	@Context
 	ServletConfig m_oServletConfig;
-
-
-	@GET
-	@Path("categories")
-	@Produces({"application/json"})
-	public ArrayList<String> getCategories(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("CatalogResources.GetCategories");
-		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
-		if (oUser == null) {
-			Utils.debugLog("CatalogResources.GetCategories: session invalid");
-			return null;
-		}
-
-		ArrayList<String> aoCategories = new ArrayList<String>();
-		for ( DownloadedFileCategory oCategory : DownloadedFileCategory.values()) {
-			aoCategories.add(oCategory.name());
-		}
-		
-		return aoCategories; 
-	}
-
-
-	@GET
-	@Path("entries")
-	@Produces({"application/json"})
-	public ArrayList<DownloadedFile> getEntries(@HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("from") String sFrom, 
-			@QueryParam("to") String sTo,
-			@QueryParam("freetext") String sFreeText,
-			@QueryParam("category") String sCategory
-			) {
-
-		Utils.debugLog("CatalogResources.GetEntries");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		String sUserId = oUser.getUserId();
-
-		SimpleDateFormat oDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
-		try {
-			Date dtFrom = (sFrom==null || sFrom.isEmpty())?null:oDateFormat.parse(sFrom);
-			Date dtTo = (sTo==null || sTo.isEmpty())?null:oDateFormat.parse(sTo);
-			return searchEntries(dtFrom, dtTo, sFreeText, sCategory, sUserId);
-		} catch (ParseException e) {
-			Utils.debugLog("CatalogResources.GetEntries: " + e);
-			throw new InternalServerErrorException("invalid date: " + e);
-		}		
-	}
-
-
-	@POST
-	@Path("downloadentry")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile oEntry) {
-
-		Utils.debugLog("CatalogResources.DownloadEntry");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			Utils.debugLog("CatalogResources.DownloadEntry: user not authorized");
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-
-		File oFile = new File(oEntry.getFilePath());
-
-		ResponseBuilder oResponseBuilder = null;
-		if (!oFile.canRead()) {
-			Utils.debugLog("CatalogResources.DownloadEntry: file not readable");
-			oResponseBuilder = Response.serverError();
-		} 
-		else {
-			Utils.debugLog("CatalogResources.DownloadEntry: file ok return content");
-			oResponseBuilder = Response.ok(oFile);
-			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oEntry.getFileName());
-		}
-
-		Utils.debugLog("CatalogResources.DownloadEntry: done, return");
-		return oResponseBuilder.build();
-	}
-
-
+	
 	/**
-	 * Get the entry file to download
-	 * @param sFileName
-	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable
+	 * Download a File from the name
+	 * @param sSessionId User session id, as available in headers
+	 * @param sTokenSessionId Same user session id that can be also in this case passed as a query param
+	 * @param sFileName name of the file to download 
+	 * @param sWorkspace workspace where the file is
+	 * @return Stream of the file
 	 */
-	private File getEntryFile(String sFileName, String sUserId, String sWorkspace)
-	{
-		Utils.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
-				
-		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
-
-		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
-
-		if (oDownloadedFile == null) 
-		{
-			Utils.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
-			return null;
-		}
-		
-		File oFile = new File(sTargetFilePath);
-
-		if( oFile.canRead() == true) {
-			return oFile;
-		}
-		else {
-			Utils.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
-			return null; 
-		}
-	}
-
-
 	@GET
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -183,7 +89,8 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResources.DownloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspace);
 		
 		try {
-						
+			
+			// Check session
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
 				sTokenSessionId = sSessionId;
 			}
@@ -195,38 +102,53 @@ public class CatalogResources {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			File oFile = this.getEntryFile(sFileName, oUser.getUserId(), sWorkspace);
+			// Get the File object
+			File oFile = this.getEntryFile(sFileName, sWorkspace);
 			
 			ResponseBuilder oResponseBuilder = null;
+			
 			if(oFile == null) {
+				// File invalid
 				Utils.debugLog("CatalogResources.DownloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
-			} else {
-				//InputStream oStream = null;
+			} 
+			else {
+				
+				// Ok send the file to the user
 				FileStreamingOutput oStream;
+				
+				// Some files, like .shp or .dim, are not sigle files but folders: see if we need to make a zip
 				boolean bMustZip = mustBeZipped(oFile); 
+				
 				if(bMustZip) {
+					// Yes, zip and stream on the fly
 					Utils.debugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + " must be zipped");
 					return zipOnTheFlyAndStream(oFile);
 				} else {
+					// No, just return the stream
 					Utils.debugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
 					oStream = new FileStreamingOutput(oFile);
-					//oStream = new FileInputStream(oFile);
 					Utils.debugLog("CatalogResources.DownloadEntryByName: file ok return content");
 					oResponseBuilder = Response.ok(oStream);
 					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 					//oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
 				}
 			}
+			
 			Utils.debugLog("CatalogResources.DownloadEntryByName: done, return");
-			Utils.debugLog(new EndMessageProvider().getGood());
+			
 			return oResponseBuilder.build();
 		} catch (Exception e) {
 			Utils.debugLog("CatalogResources.DownloadEntryByName: " + e);
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Zip a SNAP .dim file
+	 * @param oInitialFile File attached to the .dim
+	 * @return stream with the zipped file
+	 */
 	private Response zipBeanDimapFile(File oInitialFile) {
 		
 		Stack<File> aoFileStack = new Stack<File>();
@@ -305,7 +227,11 @@ public class CatalogResources {
 		return oResponseBuilder.build();
 	}
 	
-	
+	/**
+	 * Zip a shape file
+	 * @param oInitialFile file .shp
+	 * @return stream with the zipped shape file
+	 */
 	private Response zipShapeFile(File oInitialFile) {
 		
 		// Remove extension
@@ -369,8 +295,12 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResources.zipShapeFile: return ");
 		return oResponseBuilder.build();
 	}
-
-
+	
+	/**
+	 * Zip a file and return the stream 
+	 * @param oInitialFile File to zip
+	 * @return stream
+	 */
 	private Response zipOnTheFlyAndStream(File oInitialFile) {
 		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream");
 		if(null==oInitialFile) {
@@ -394,8 +324,12 @@ public class CatalogResources {
 		} 
 		return null;
 	}
-
-
+	
+	/**
+	 * Checks if the file must be zipped or not
+	 * @param oFile File to check
+	 * @return True if it must be zipped, false otherwise
+	 */
 	private boolean mustBeZipped(File oFile) {
 		Utils.debugLog("CatalogResources.mustBeZipped");
 		
@@ -418,8 +352,14 @@ public class CatalogResources {
 		}
 		return bRet;
 	}
-
-
+	
+	/**
+	 * Check if a file is present on the actual node
+	 * @param sSessionId User Session
+	 * @param sFileName File Name
+	 * @param sWorkspace Workspace where the file is
+	 * @return Primitive Result with boolValue = true if the file exist or false if not
+	 */
 	@GET
 	@Path("fileOnNode")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -446,6 +386,7 @@ public class CatalogResources {
 			
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(bExists);
+			
 			Utils.debugLog("CatalogResources.checkFileByNode " + sFileName + ": " + bExists);
 			
 			return Response.ok(oResult).build();					
@@ -456,6 +397,13 @@ public class CatalogResources {
 		}		
 	}
 	
+	/**
+	 * Check if a file exists on WASDI (this node for instance) or not
+	 * @param sSessionId User Session
+	 * @param sFileName File Name
+	 * @param sWorkspace Workspace Id
+	 * @return Primitive Result with boolValue = true if the file exists, false if not exists (is not added to WASDI and/or is not on this node)
+	 */
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -470,7 +418,7 @@ public class CatalogResources {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		File oFile = this.getEntryFile(sFileName, oUser.getUserId(),sWorkspace);
+		File oFile = this.getEntryFile(sFileName,sWorkspace);
 		
 		if(oFile == null) {
 			return Response.serverError().build();	
@@ -483,114 +431,12 @@ public class CatalogResources {
 	}
 
 	/**
-	 * Search entries in the internal WASDI Catalogue
-	 * @param oFrom Date From
-	 * @param oTo Date To
-	 * @param sFreeText Free Text query
-	 * @param sCategory Category
-	 * @param sUserId User calling
-	 * @return
-	 */
-	private ArrayList<DownloadedFile> searchEntries(Date oFrom, Date oTo, String sFreeText, String sCategory, String sUserId) {
-		ArrayList<DownloadedFile> aoEntries = new ArrayList<DownloadedFile>();
-
-		WorkspaceRepository oWorkspaceRepo = new WorkspaceRepository();
-		ProductWorkspaceRepository oProductWorkspaceRepo = new ProductWorkspaceRepository();
-		DownloadedFilesRepository oDownloadedFilesRepo = new DownloadedFilesRepository();
-
-		//get all my workspaces
-		List<Workspace> aoWorkspacesList = oWorkspaceRepo.getWorkspaceByUser(sUserId);
-		Map<String, Workspace> aoWorkspaces = new HashMap<String, Workspace>();
-		for (Workspace wks : aoWorkspacesList) {
-			aoWorkspaces.put(wks.getWorkspaceId(), wks);
-		}
-
-		//retrieve all compatible files
-		List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepo.search(oFrom, oTo, sFreeText, sCategory);
-
-		for (DownloadedFile oDownloadedFile : aoDownloadedFiles) {
-
-			//check if the product is in my workspace
-			ProductViewModel oProductViewModel = oDownloadedFile.getProductViewModel();
-
-			boolean bIsOwnedByUser = sCategory.equals(DownloadedFileCategory.PUBLIC.name());
-			if (!bIsOwnedByUser) {
-				if (oProductViewModel != null) {
-					oProductViewModel.setMetadata(null);
-					List<String> aoProductWorkspaces = oProductWorkspaceRepo.getWorkspaces(oProductViewModel.getFileName()); //TODO check if productName should be used					
-					for (String sProductWorkspace : aoProductWorkspaces) {
-						if (aoWorkspaces.containsKey(sProductWorkspace)) {
-							bIsOwnedByUser = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if (bIsOwnedByUser) {	
-				aoEntries.add(oDownloadedFile);
-			}
-
-		}
-
-		return aoEntries;
-	}
-
-
-	@GET
-	@Path("")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<CatalogViewModel> getCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
-
-		Utils.debugLog("CatalogResources.GetCatalogues");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		ArrayList<CatalogViewModel> aoCatalogList = new ArrayList<CatalogViewModel>();
-
-		try {
-			// Domain Check
-			if (oUser == null) {
-				return aoCatalogList;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return aoCatalogList;
-			}
-
-			// Create repo
-			CatalogRepository oRepository = new CatalogRepository();
-
-			// Get Process List
-			List<Catalog> aoCatalogs = oRepository.getCatalogs();
-
-			// For each
-			for (int iCatalog=0; iCatalog<aoCatalogs.size(); iCatalog++) {
-				// Create View Model
-				CatalogViewModel oViewModel = new CatalogViewModel();
-				Catalog oCatalog = aoCatalogs.get(iCatalog);
-
-				oViewModel.setDate(oCatalog.getDate());
-				oViewModel.setFilePath(oCatalog.getFilePath());
-				oViewModel.setFileName(oCatalog.getFileName());
-
-				aoCatalogList.add(oViewModel);
-
-			}
-
-		}
-		catch (Exception oEx) {
-			Utils.debugLog("CatalogResources.GetCatalogs: " + oEx);
-		}
-
-		return aoCatalogList;
-	}
-
-
-	/**
 	 * Ingest a new file from sftp in to a target Workspace
 	 * @param sSessionId User session token header
 	 * @param sFile name of the file to ingest
 	 * @param sWorkspace target workspace
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param sStyle Default style to use for the file
 	 * @return Http Response
 	 */
 	@PUT
@@ -656,6 +502,8 @@ public class CatalogResources {
 	 * @param sSessionId User Session token
 	 * @param sFile Name of the file to ingest
 	 * @param sWorkspace Id of the target workspace 
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param sStyle Default style to use for the file
 	 * @return Primitive Result with boolValue true or false and Http Code in intValue
 	 */
 	@GET
@@ -746,7 +594,9 @@ public class CatalogResources {
 	 * Copy a file from a workspace to the user sftp folder 
 	 * @param sSessionId User Session token
 	 * @param sFile Name of the file to copy
-	 * @param sWorkspace Id of the workspace 
+	 * @param sWorkspace Id of the workspace
+	 * @param sParentProcessWorkspaceId Proc Id of the parent Process 
+	 * @param sRelativePath relative path to use from the sftp home
 	 * @return Primitive Result with boolValue true or false and Http Code in intValue
 	 */
 	@GET
@@ -836,12 +686,21 @@ public class CatalogResources {
 		return oResult;
 	}
 	
+	/**
+	 * Send a file to an external SFTP server 
+	 * @param sSessionId User Session
+	 * @param sWorkspace Worksapce Id
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param oFtpTransferVM View Model of the info to move the file (filename, dest server address and credentials, paths..)
+	 * @return
+	 */
 	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId,
 			FtpTransferViewModel oFtpTransferVM) {
+		
 		Utils.debugLog("CatalogResource.ftpTransferFile");
 
 		//input validation
@@ -891,6 +750,38 @@ public class CatalogResources {
 			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
 			oRes.setStringValue(e.toString());
 			return oRes;
+		}
+	}
+	
+	/**
+	 * Get the file object corrisponding to the input requests.
+	 * It returns null if the file is not registered in WASDI and or if the file is not physically present
+	 * @param sFileName
+	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable
+	 */
+	private File getEntryFile(String sFileName, String sWorkspace)
+	{
+		Utils.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
+				
+		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+
+		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
+
+		if (oDownloadedFile == null) 
+		{
+			Utils.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
+			return null;
+		}
+		
+		File oFile = new File(sTargetFilePath);
+
+		if( oFile.canRead() == true) {
+			return oFile;
+		}
+		else {
+			Utils.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
+			return null; 
 		}
 	}
 

@@ -15,15 +15,18 @@ import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
+/**
+ * Implements the AuthService Provider for Keycloak
+ * @author p.campanella
+ *
+ */
 public class KeycloakService implements AuthProviderService {
 
 	@Context
 	ServletConfig m_oServletConfig;
 
 	private static final String s_sACCESS_TOKEN = "access_token";
-
-	//just to hide the implicit one
-	//private KeycloakService() {}
+	
 
 	public String getToken() {
 		try {

@@ -26,34 +26,69 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 import wasdi.shared.viewmodels.SearchProviderViewModel;
 
+/**
+ * Open Search Resource.
+ * Hosts API for:
+ * 	.query the Data Providers
+ * @author p.campanella
+ *
+ */
 @Path("/search")
 public class OpenSearchResource {
-
+	
+	/**
+	 * Query executor factory
+	 */
 	private static QueryExecutorFactory s_oQueryExecutorFactory;
+	
+	/**
+	 * Static reference to this class name for logs
+	 */
 	private static String s_sClassName;
+	
+	/**
+	 * Credentials of the different providers
+	 */
 	private Map<String,AuthenticationCredentials> m_aoCredentials;
 
 	static {
+		// Create instance of the factory
 		s_oQueryExecutorFactory = new QueryExecutorFactory();
+		// Set this class name
 		s_sClassName = "OpenSearchResource";
 	}
-
+	
+	/**
+	 * Constructor
+	 */
 	public OpenSearchResource() {
+		// Intialize the credentials dictionary
 		m_aoCredentials = new HashMap<>();
 	}
 
+	/**
+	 * Servlet config to access web.xml
+	 */
 	@Context
 	ServletConfig m_oServletConfig;
 	
-
+	/**
+	 * Get the number of total results for a query
+	 * @param sSessionId User Session Id
+	 * @param sQuery Query
+	 * @param sProviders Data Provider.
+	 * @return number of results. -1 in case of any problem
+	 */
 	@GET
 	@Path("/query/count")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
+	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("query") String sQuery,
 			@QueryParam("providers") String sProviders) {
 
 		Utils.debugLog(s_sClassName + ".getProductsCount( Query: " + sQuery + ", Providers: " + sProviders + " )");
 		try {
+			
+			// Check the session
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return -1;
 			}
@@ -64,14 +99,15 @@ public class OpenSearchResource {
 			}
 	
 			int iCounter = 0;
+			
 			if (sProviders != null) {
 				Utils.debugLog(s_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				try {
 					Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
 					
 					if (aiQueryCountResultsPerProvider != null) {
-						for (Integer count : aiQueryCountResultsPerProvider.values()) {
-							iCounter += count;
+						for (Integer iTotalCount : aiQueryCountResultsPerProvider.values()) {
+							iCounter += iTotalCount;
 						}						
 					}
 				} catch (NumberFormatException oE) {
@@ -85,10 +121,16 @@ public class OpenSearchResource {
 		}
 		return -1;
 	}
-
+	
+	/**
+	 * Get the total number of results of the query for different providers
+	 * @param sQuery Query
+	 * @param sProviders Providers, can be more than one if separated by , or ;
+	 * @return Dictionary with key the provider and value the total
+	 */
 	private Map<String, Integer> getQueryCountResultsPerProvider(String sQuery, String sProviders) {
 
-		Utils.debugLog(s_sClassName + ".getQueryCounters( Query: " + sQuery + ", Providers: " + sProviders + " )");
+		Utils.debugLog(s_sClassName + ".getQueryCounters for Provider: " + sProviders + " )");
 		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<>();
 		try {
 			String asProviders[] = sProviders.split(",|;");
@@ -130,12 +172,29 @@ public class OpenSearchResource {
 		}
 		return aiQueryCountResultsPerProvider;
 	}
-
+	
+	/**
+	 * Make a paginated query to a provider.
+	 * The API converts the input query in a query for the data provider.
+	 * It executes the query and get results from data provider.
+	 * Results are converted in a unique Query Result View Model
+	 * 
+	 * These operation are handled by specific Data Providers objects in wasdi.shared.opensearch 
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProviders Provider code. 
+	 * @param sQuery Query
+	 * @param sOffset results offset
+	 * @param sLimit number of elements 
+	 * @param sSortedBy sort column
+	 * @param sOrder Order by column
+	 * @return List of Query Result View Models
+	 */
 	@GET
 	@Path("/query")
 	@Produces({ "application/json", "text/html" })
 	public QueryResultViewModel[] search(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("providers") String sProviders, @QueryParam("sQuery") String sQuery,
+			@QueryParam("providers") String sProviders, @QueryParam("query") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		
@@ -274,7 +333,12 @@ public class OpenSearchResource {
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Get the list of Data Providers
+	 * @param sSessionId User Session
+	 * @return List of Search Provider View Models
+	 */
 	@GET
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
@@ -292,21 +356,25 @@ public class OpenSearchResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return null;
 			}
-
-			// TODO use the ProviderCatalog and map the business objects to the expected view models
-
+			
+			
 			ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
+			
 			String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
+			
 			if (sProviders != null && sProviders.length() > 0) {
+				
 				String[] asProviders = sProviders.split(",|;");
 	
 				for (int iProviders = 0; iProviders < asProviders.length; iProviders++) {
+					
 					SearchProviderViewModel oSearchProvider = new SearchProviderViewModel();
 					oSearchProvider.setCode(asProviders[iProviders]);
+					
 					String sDescription = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Description");
-					if (Utils.isNullOrEmpty(sDescription))
-						sDescription = asProviders[iProviders];
+					if (Utils.isNullOrEmpty(sDescription)) sDescription = asProviders[iProviders];
 					oSearchProvider.setDescription(sDescription);
+					
 					String sLink = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Link");
 					oSearchProvider.setLink(sLink);
 					aoRetProviders.add(oSearchProvider);
@@ -318,29 +386,41 @@ public class OpenSearchResource {
 			return null;
 		}
 	}
-
+	
+	/**
+	 * Get the total count of results for different queries
+	 * @param sSessionId User Session
+	 * @param sProviders Provider data provider
+	 * @param asQueries list of strings, each representing a query
+	 * @return Total number of products found
+	 */
 	@POST
 	@Path("/query/countlist")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	public int getListProductsCount(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders,
+			@QueryParam("providers") String sProviders,
 			ArrayList<String> asQueries) {
+		
+		String sQuery = "";
 
-		Utils.debugLog(s_sClassName + ".GetListProductsCount( Query: " + sQuery + ", Providers: " + sProviders + ", Queries: " + asQueries + " )");
+		Utils.debugLog(s_sClassName + ".GetListProductsCount( Providers: " + sProviders + ", Queries: " + asQueries + " )");
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session is null");
-				return -1;
-			}
+			
+			// Validate the input
+			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: invalid");
 				return -1;
 			}
+			
+			// We need query!
 			if(null==asQueries || asQueries.size() <= 0) {
 				Utils.debugLog(s_sClassName + ".GetListProductsCount, asQueries is null");
 				return -1;
 			}
+			
+			// Cycle for all the query
 			int iCounter = 0;
 	
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
@@ -366,17 +446,27 @@ public class OpenSearchResource {
 		}
 		return -1;
 	}
-
+	
+	/**
+	 * Make a NOT paginated query to a provider.
+	 * The API converts the input query in a query for the data provider.
+	 * It executes the query and get results from data provider.
+	 * Results are converted in a unique Query Result View Model
+	 * 
+	 * These operation are handled by specific Data Providers objects in wasdi.shared.opensearch 
+	 * 
+	 * @param sSessionId User Session
+	 * @param sProviders Data Provider
+	 * @param asQueries Array of strings with the query to execute
+	 * @return
+	 */
 	@POST
 	@Path("/querylist")
 	@Produces({ "application/json", "text/html" })
 	public QueryResultViewModel[] searchList(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("providers") String sProviders, @QueryParam("sQuery") String sQuery,
-			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
-			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
+			@QueryParam("providers") String sProviders, ArrayList<String> asQueries) {
 
-		Utils.debugLog(s_sClassName + ".SearchList( Providers: " + sProviders + ", Query: " + sQuery+
-				", Offset: " + sOffset + ", Limit: " + sLimit + ", Sorted: " + sSortedBy + ", Order: " + sOrder + ", Queries: " + asQueries + " )");
+		Utils.debugLog(s_sClassName + ".SearchList( Providers: " + sProviders + " )");
 		try { 
 			
 			// Validate the User
@@ -389,10 +479,14 @@ public class OpenSearchResource {
 				Utils.debugLog(s_sClassName + ".SearchList, null userId");
 				return null;
 			}
+			
+			// Check if we have a provider
 			if(Utils.isNullOrEmpty(sProviders)) {
 				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", sProviders is null");
 				return null;
 			}
+			
+			// Check if we have at least one query
 			if(null==asQueries || asQueries.size()<= 0) {
 				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
 				return null;
@@ -404,7 +498,9 @@ public class OpenSearchResource {
 			// For Each Input query
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
 				try {
-					sQuery = asQueries.get(iQueries);
+					String sQuery = asQueries.get(iQueries);
+					
+					Utils.debugLog(s_sClassName + ".SearchList; query = " + sQuery);
 					
 					// Get for each provider the total count
 					Map<String, Integer> aoCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
@@ -482,7 +578,7 @@ public class OpenSearchResource {
 							String sCurrentLimit = "" + iLimit;
 							
 							// Create the paginated Query
-							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder, sOriginalLimit);
+							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, null, null, sOriginalLimit);
 							// Log the query
 							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							
@@ -524,7 +620,7 @@ public class OpenSearchResource {
 						}
 					}
 				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".SearchList: (maybe your request was ill-formatted: " + sQuery + " ?). : " + oE);
+					Utils.debugLog(s_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
 					aoResults.add(null); 
 				}
 			}

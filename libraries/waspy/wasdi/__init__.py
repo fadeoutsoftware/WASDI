@@ -1909,7 +1909,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         else:
             sProvider = "LSA"
 
-    sQuery = "sQuery=" + sQuery + "&offset=0&limit=10&providers=" + sProvider
+    sQuery = "providers=" + sProvider
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
@@ -2098,14 +2098,14 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
         sProvider = "ONDA"
 
     sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?sFileUrl="
+    sUrl += "/filebuffer/download?fileUrl="
     sUrl += sFileUrl
-    sUrl += "&sProvider=" + sProvider
-    sUrl += "&sWorkspaceId="
+    sUrl += "&provider=" + sProvider
+    sUrl += "&workspaceId="
     sUrl += getActiveWorkspaceId()
 
     if sBoundingBox is not None:
-        sUrl += "&sBoundingBox="
+        sUrl += "&bbox="
         sUrl += sBoundingBox
 
     if m_bIsOnServer:
@@ -2161,14 +2161,14 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
         sProvider = "ONDA"
 
     sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?sFileUrl="
+    sUrl += "/filebuffer/download?fileUrl="
     sUrl += sFileUrl
-    sUrl += "&sProvider="
+    sUrl += "&provider="
     sUrl += sProvider
-    sUrl += "&sWorkspaceId="
+    sUrl += "&workspaceId="
     sUrl += getActiveWorkspaceId()
     if sBoundingBox is not None:
-        sUrl += "&sBoundingBox="
+        sUrl += "&bbox="
         sUrl += sBoundingBox
 
     if m_bIsOnServer:

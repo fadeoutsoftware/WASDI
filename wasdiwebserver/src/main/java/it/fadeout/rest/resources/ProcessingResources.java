@@ -98,14 +98,38 @@ import wasdi.shared.viewmodels.SnapWorkflowViewModel;
 import wasdi.shared.viewmodels.WorkflowSharingViewModel;
 import wasdi.shared.viewmodels.WpsViewModel;
 
+/**
+ * Processing Resource.
+ * Hosts the API for:
+ * 	.execute WASDI embedded operations
+ * 		.mosaic
+ * 		.subset
+ * 		.multisubset
+ * 		.regrid
+ * 	.upload, edit delete and run SNAP Workflows
+ * 	.route the execution of a generic process in the right computing node
+ * @author p.campanella
+ *
+ */
 @Path("/processing")
 public class ProcessingResources {
-
+	
+	/**
+	 * Servlet Config to access web.xml file
+	 */
     @Context
     ServletConfig m_oServletConfig;
-
-    CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-
+    
+    /**
+     * Trigger mosaic operation
+     * @param sSessionId User session id
+     * @param sDestinationProductName output file name
+     * @param sWorkspaceId Workspace
+     * @param sParentId Proc Id of the parent
+     * @param oSetting Mosaic Settings View Model
+     * @return
+     * @throws IOException
+     */
     @POST
     @Path("geometric/mosaic")
     @Produces({"application/xml", "application/json", "text/xml"})
@@ -114,7 +138,7 @@ public class ProcessingResources {
                                   @QueryParam("sWorkspaceId") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.Mosaic( Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-        return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
+        return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
     }
 
     @POST
@@ -125,7 +149,7 @@ public class ProcessingResources {
                                   @QueryParam("sWorkspaceId") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, RegridSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.Regrid( Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
-        return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
+        return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
     }
 
     @POST
@@ -137,7 +161,7 @@ public class ProcessingResources {
                                   @QueryParam("sWorkspaceId") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, SubsetSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.Subset( Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-        return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
+        return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
     }
 
     @POST
@@ -149,7 +173,7 @@ public class ProcessingResources {
                                        @QueryParam("sWorkspaceId") String sWorkspaceId,
                                        @QueryParam("parent") String sParentId, MultiSubsetSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.MultiSubset( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
-        return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
+        return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
 
@@ -1000,7 +1024,7 @@ public class ProcessingResources {
         sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
         oSettings.setGraphXml(sGraphXml);
 
-        return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
+        return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
 
     }
 
@@ -1113,7 +1137,7 @@ public class ProcessingResources {
                     sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
                 }
 
-                return executeOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
+                return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProdutName, sWorkspace, oGraphSettings, LauncherOperations.GRAPH, sParentProcessWorkspaceId);
             }
         } catch (Exception oEx) {
             Utils.debugLog("ProcessingResources.executeGraphFromWorkflowId: Error " + oEx.toString());
@@ -1186,303 +1210,7 @@ public class ProcessingResources {
 
         return null;
     }
-
-
-    @GET
-    @Path("/standardfilters")
-    @Produces({"application/json"})
-    public Map<String, Filter[]> getStandardFilters(@HeaderParam("x-session-token") String sSessionId) {
-
-        Utils.debugLog("ProcessingResources.GetStandardFilters");
-
-        Map<String, Filter[]> aoFiltersMap = new HashMap<String, Filter[]>();
-        try {
-            User oUser = Wasdi.getUserFromSession(sSessionId);
-            if (null == oUser) {
-                Utils.debugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " ): invalid session");
-                return aoFiltersMap;
-
-            }
-
-            aoFiltersMap.put("Detect Lines", StandardFilters.LINE_DETECTION_FILTERS);
-            aoFiltersMap.put("Detect Gradients (Emboss)", StandardFilters.GRADIENT_DETECTION_FILTERS);
-            aoFiltersMap.put("Smooth and Blurr", StandardFilters.SMOOTHING_FILTERS);
-            aoFiltersMap.put("Sharpen", StandardFilters.SHARPENING_FILTERS);
-            aoFiltersMap.put("Enhance Discontinuities", StandardFilters.LAPLACIAN_FILTERS);
-            aoFiltersMap.put("Non-Linear Filters", StandardFilters.NON_LINEAR_FILTERS);
-            aoFiltersMap.put("Morphological Filters", StandardFilters.MORPHOLOGICAL_FILTERS);
-        } catch (Exception oE) {
-            Utils.debugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " ): " + oE);
-        }
-        return aoFiltersMap;
-    }
-
-    @GET
-    @Path("/productmasks")
-    @Produces({"application/json"})
-    public ArrayList<ProductMaskViewModel> getProductMasks(@HeaderParam("x-session-token") String sSessionId,
-                                                           @QueryParam("file") String sProductFile, @QueryParam("band") String sBandName,
-                                                           @QueryParam("workspaceId") String sWorkspaceId) throws Exception {
-
-        Utils.debugLog("ProcessingResources.getProductMasks");
-
-        if (Utils.isNullOrEmpty(sSessionId)) return null;
-        User oUser = Wasdi.getUserFromSession(sSessionId);
-        if (oUser == null) {
-            Utils.debugLog("ProcessingResources.getProductMasks( " + sSessionId + ", " + sProductFile + ", " +
-                    sBandName + ", " + sWorkspaceId + " ): invalid session");
-            return null;
-        }
-        if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
-
-        Utils.debugLog("Params. File: " + sProductFile + " - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
-
-        String sProductFileFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
-                sWorkspaceId) + sProductFile;
-
-        Utils.debugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
-
-        ArrayList<ProductMaskViewModel> aoMasks = new ArrayList<ProductMaskViewModel>();
-
-        try {
-            Product product = ProductIO.readProduct(sProductFileFullPath);
-            Band band = product.getBand(sBandName);
-
-            final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-            for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-                final Mask mask = maskGroup.get(i);
-                if (mask.getRasterWidth() == band.getRasterWidth()
-                        && mask.getRasterHeight() == band.getRasterHeight()) {
-                    ProductMaskViewModel vm = new ProductMaskViewModel();
-                    vm.setName(mask.getName());
-                    vm.setDescription(mask.getDescription());
-                    vm.setMaskType(mask.getImageType().getName());
-                    vm.setColorRed(mask.getImageColor().getRed());
-                    vm.setColorGreen(mask.getImageColor().getGreen());
-                    vm.setColorBlue(mask.getImageColor().getBlue());
-                    aoMasks.add(vm);
-                }
-            }
-        } catch (Exception oEx) {
-            Utils.debugLog("ProcessingResources.getProductMasks: " + oEx);
-        }
-
-        return aoMasks;
-    }
-
-    @GET
-    @Path("/productcolormanipulation")
-    @Produces({"application/json"})
-    public ColorManipulationViewModel getColorManipulation(@HeaderParam("x-session-token") String sSessionId,
-                                                           @QueryParam("file") String sProductFile, @QueryParam("band") String sBandName,
-                                                           @QueryParam("accurate") boolean bAccurate, @QueryParam("workspaceId") String sWorkspaceId)
-            throws Exception {
-        try {
-            Utils.debugLog("ProcessingResources.getColorManipulation( Product: " + sProductFile + ", Band:" + sBandName + ", Accurate: " + bAccurate + ", WS: " + sWorkspaceId + " )");
-
-            if (Utils.isNullOrEmpty(sSessionId)) return null;
-            User oUser = Wasdi.getUserFromSession(sSessionId);
-
-            if (oUser == null) {
-                Utils.debugLog("ProcessingResources.getColorManipulation( Session: " + sSessionId +
-                        ", Product: " + sProductFile + ", Band:" + sBandName + ", Accurate: " + bAccurate +
-                        ", WS: " + sWorkspaceId + " ): invalid session");
-                return null;
-            }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
-
-
-            Utils.debugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile + " - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
-
-            String sProductFileFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
-
-            Utils.debugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
-
-            Product product = ProductIO.readProduct(sProductFileFullPath);
-            BandImageManager manager = new BandImageManager(product);
-            return manager.getColorManipulation(sBandName, bAccurate);
-        } catch (Exception oE) {
-            Utils.debugLog("ProcessingResources.getColorManipulation( Session: " + sSessionId + ", Product: " + sProductFile +
-                    ", Band:" + sBandName + ", Accurate: " + bAccurate + ", WS: " + sWorkspaceId + " ): " + oE);
-        }
-        return null;
-    }
-
-    @POST
-    @Path("/bandimage")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getBandImage(@HeaderParam("x-session-token") String sSessionId,
-                                 @QueryParam("workspace") String sWorkspace, BandImageViewModel oBandImageViewModel) throws IOException {
-
-        try {
-            Utils.debugLog("ProcessingResources.getBandImage( WS: " + sWorkspace + ", ... )");
-
-            // Check user session
-            String sUserId = acceptedUserAndSession(sSessionId);
-            if (Utils.isNullOrEmpty(sUserId)) {
-                Utils.debugLog("ProcessingResources.getBandImage( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... ): invalid session");
-                return Response.status(401).build();
-            }
-
-            // Init the registry for JAI
-            OperationRegistry oOperationRegistry = JAI.getDefaultInstance().getOperationRegistry();
-            RegistryElementDescriptor oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
-
-            if (oDescriptor == null) {
-                Utils.debugLog("getBandImage: REGISTER Descriptor!!!!");
-                try {
-                    oOperationRegistry.registerServices(this.getClass().getClassLoader());
-                } catch (Exception e) {
-                    Utils.debugLog("ProcessingResources.getBandImage: " + e);
-                }
-                oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
-
-                IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
-            }
-
-            String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
-            File oProductFile = new File(sProductPath + oBandImageViewModel.getProductFileName());
-
-            if (!oProductFile.exists()) {
-                Utils.debugLog("ProcessingResource.getBandImage: FILE NOT FOUND: " + oProductFile.getAbsolutePath());
-                return Response.status(500).build();
-            }
-
-            Product oSNAPProduct = ProductIO.readProduct(oProductFile);
-
-            if (oSNAPProduct == null) {
-                Utils.debugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
-                return Response.status(500).build();
-            } else {
-                Utils.debugLog("ProcessingResources.getBandImage: product read");
-            }
-
-            BandImageManager oBandImageManager = new BandImageManager(oSNAPProduct);
-
-            RasterDataNode oRasterDataNode = null;
-
-            if (oBandImageViewModel.getFilterVM() != null) {
-                Filter oFilter = oBandImageViewModel.getFilterVM().getFilter();
-                FilterBand oFilteredBand = oBandImageManager.getFilterBand(oBandImageViewModel.getBandName(), oFilter, oBandImageViewModel.getFilterIterationCount());
-
-                if (oFilteredBand == null) {
-                    Utils.debugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + oBandImageViewModel.getBandName());
-                    return Response.status(500).build();
-                }
-                oRasterDataNode = oFilteredBand;
-            } else {
-                oRasterDataNode = oSNAPProduct.getBand(oBandImageViewModel.getBandName());
-            }
-
-            if (oBandImageViewModel.getVp_x() < 0 || oBandImageViewModel.getVp_y() < 0
-                    || oBandImageViewModel.getImg_w() <= 0 || oBandImageViewModel.getImg_h() <= 0) {
-                Utils.debugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + oBandImageViewModel.getVp_x()
-                        + " VPY= " + oBandImageViewModel.getVp_y() + " VPW= " + oBandImageViewModel.getVp_w() + " VPH= "
-                        + oBandImageViewModel.getVp_h() + " OUTW = " + oBandImageViewModel.getImg_w() + " OUTH = "
-                        + oBandImageViewModel.getImg_h());
-                return Response.status(500).build();
-            } else {
-                Utils.debugLog("ProcessingResources.getBandImage: parameters OK");
-            }
-
-            Rectangle oRectangleViewPort = new Rectangle(oBandImageViewModel.getVp_x(), oBandImageViewModel.getVp_y(), oBandImageViewModel.getVp_w(), oBandImageViewModel.getVp_h());
-            Dimension oImgSize = new Dimension(oBandImageViewModel.getImg_w(), oBandImageViewModel.getImg_h());
-
-            // apply product masks
-            List<ProductMaskViewModel> aoProductMasksModels = oBandImageViewModel.getProductMasks();
-            if (aoProductMasksModels != null) {
-                for (ProductMaskViewModel oMaskModel : aoProductMasksModels) {
-                    Mask oMask = oSNAPProduct.getMaskGroup().get(oMaskModel.getName());
-                    if (oMask == null) {
-                        Utils.debugLog("ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
-                    } else {
-                        // set the user specified color
-                        oMask.setImageColor(new Color(oMaskModel.getColorRed(), oMaskModel.getColorGreen(), oMaskModel.getColorBlue()));
-                        oMask.setImageTransparency(oMaskModel.getTransparency());
-                        oRasterDataNode.getOverlayMaskGroup().add(oMask);
-                    }
-                }
-            }
-
-            // applying range masks
-            List<RangeMaskViewModel> aoRangeMasksModels = oBandImageViewModel.getRangeMasks();
-            if (aoRangeMasksModels != null) {
-                for (RangeMaskViewModel oMaskModel : aoRangeMasksModels) {
-
-                    Mask oMask = createMask(oSNAPProduct, oMaskModel, Mask.RangeType.INSTANCE);
-
-                    String sExternalName = Tokenizer.createExternalName(oBandImageViewModel.getBandName());
-                    PropertyContainer oImageConfig = oMask.getImageConfig();
-                    oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, oMaskModel.getMin());
-                    oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, oMaskModel.getMax());
-                    oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, sExternalName);
-                    oSNAPProduct.addMask(oMask);
-                    oRasterDataNode.getOverlayMaskGroup().add(oMask);
-                }
-            }
-
-            // applying math masks
-            List<MathMaskViewModel> aoMathMasksModels = oBandImageViewModel.getMathMasks();
-            if (aoMathMasksModels != null) {
-                for (MathMaskViewModel oMaskModel : aoMathMasksModels) {
-
-                    Mask oMask = createMask(oSNAPProduct, oMaskModel, Mask.BandMathsType.INSTANCE);
-
-                    PropertyContainer oImageConfig = oMask.getImageConfig();
-                    oImageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, oMaskModel.getExpression());
-                    oSNAPProduct.addMask(oMask);
-                    oRasterDataNode.getOverlayMaskGroup().add(oMask);
-                }
-            }
-
-            // applying color manipulation
-
-            ColorManipulationViewModel oColorManiputalionViewModel = oBandImageViewModel.getColorManiputalion();
-            if (oColorManiputalionViewModel != null) {
-                oBandImageManager.applyColorManipulation(oRasterDataNode, oColorManiputalionViewModel);
-            }
-
-            // creating the image
-            BufferedImage oBufferedImg;
-            try {
-                oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort, oColorManiputalionViewModel == null);
-            } catch (Exception e) {
-                Utils.debugLog("ProcessingResources.getBandImage: Exception: " + e.toString());
-                Utils.debugLog("ProcessingResources.getBandImage: ExMessage: " + e.getMessage());
-                e.printStackTrace();
-                return Response.status(500).build();
-            }
-
-            if (oBufferedImg == null) {
-                Utils.debugLog("ProcessingResource.getBandImage: img null");
-                return Response.status(500).build();
-            }
-
-            Utils.debugLog("ProcessingResource.getBandImage: Generated image for band " + oBandImageViewModel.getBandName()
-                    + " X= " + oBandImageViewModel.getVp_x() + " Y= " + oBandImageViewModel.getVp_y() + " W= "
-                    + oBandImageViewModel.getVp_w() + " H= " + oBandImageViewModel.getVp_h());
-
-            ByteArrayOutputStream oByteOutStream = new ByteArrayOutputStream();
-            ImageIO.write(oBufferedImg, "jpg", oByteOutStream);
-            byte[] ayImageData = oByteOutStream.toByteArray();
-
-            return Response.ok(ayImageData).build();
-        } catch (Exception oE) {
-            Utils.debugLog("ProcessingResources.getBandImage( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... ): " + oE);
-        }
-        return Response.serverError().build();
-    }
-
-    private Mask createMask(Product oSNAPProduct, MaskViewModel maskModel, Mask.ImageType type) {
-        Utils.debugLog("ProcessingResource.createMask( Product, MaskViewModel, Mask.ImageType )");
-        String maskName = UUID.randomUUID().toString();
-        Dimension maskSize = new Dimension(oSNAPProduct.getSceneRasterWidth(), oSNAPProduct.getSceneRasterHeight());
-        Mask mask = new Mask(maskName, maskSize.width, maskSize.height, type);
-        mask.setImageColor(new Color(maskModel.getColorRed(), maskModel.getColorGreen(), maskModel.getColorBlue()));
-        mask.setImageTransparency(maskModel.getTransparency());
-        return mask;
-    }
-
+    
     @GET
     @Path("/WPSlist")
     @Produces({"application/xml", "application/json", "text/xml"})
@@ -1548,7 +1276,7 @@ public class ProcessingResources {
      * @param sParentProcessWorkspaceId Id of the parent Process Workspace or null
      * @return
      */
-    private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName, String
+    private PrimitiveResult callExecuteSNAPOperation(String sSessionId, String sSourceProductName, String
             sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation, String
                                                      sParentProcessWorkspaceId) {
 

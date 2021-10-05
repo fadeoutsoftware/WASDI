@@ -26,7 +26,6 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SearchOrbitService',
     'wasdi.ResultsOfSearchService',
     'wasdi.SnapOperationService',
-    'wasdi.SatelliteService',
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.FilterService',
@@ -158,15 +157,6 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
-    //CATALOG
-    $stateProvider.state('root.catalog',{
-        url: '/catalog',
-
-        views:{
-            'maincontent' : { templateUrl : 'partials/catalog.html', controller  : 'CatalogController'}
-        }
-    });
-
     //MARKET PLACE
     $stateProvider.state('root.marketplace',{
         url: '/marketplace',
@@ -219,7 +209,6 @@ wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
 wasdiApp.controller("WorkspaceProcessesList",WorkspaceProcessesList);
 wasdiApp.controller("SnakeController",SnakeController);
-wasdiApp.controller("CatalogController",CatalogController);
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
 wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
 wasdiApp.controller("FilterBandController",FilterBandController);

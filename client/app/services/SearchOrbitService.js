@@ -13,11 +13,6 @@ service('SearchOrbitService', ['$http',  'ConstantsService', function ($http, oC
 
     this.searchOrbit = function (oData) {
 
-
-        //return this.m_oHttp.post('http://localhost:8080/wasdiwebserver/rest/searchorbit/search', oData, {
-        //    headers: { 'Content-Type': 'application/json;charset=utf-8'}
-        //});
-
         return this.m_oHttp.post(this.APIURL + '/searchorbit/search', oData, {
             headers: { 'Content-Type': 'application/json;charset=utf-8'}
         });
@@ -31,6 +26,14 @@ service('SearchOrbitService', ['$http',  'ConstantsService', function ($http, oC
     this.getSatellitesResources = function (oData) {
         return this.m_oHttp.get(this.APIURL + '/searchorbit/getsatellitesresource');
     }
+
+    this.getTrackSatellite = function(sNameInput){
+        return this.m_oHttp.get(this.APIURL + '/searchorbit/track/' + sNameInput);
+    }
+
+    this.getUpdatedTrackSatellite = function(sNameInput){
+        return this.m_oHttp.get(this.APIURL + '/searchorbit/updatetrack/' + sNameInput);
+    }    
 
 }]);
 

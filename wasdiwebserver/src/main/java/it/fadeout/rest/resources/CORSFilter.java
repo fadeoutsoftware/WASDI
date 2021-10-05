@@ -10,6 +10,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Standard CORS Filter: it adds CORS headers to all the call
+ * @author p.campanella
+ *
+ */
 public class CORSFilter implements Filter {
 	@Override
 	public void destroy() {		
@@ -31,8 +36,6 @@ public class CORSFilter implements Filter {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS,DELETE, X-XSRF-TOKEN");
         response.addHeader("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, content-type, X-Requested-With, accept, x-session-token, x-refdate");
-        //response.addHeader("Access-Control-Allow-Methods", "*");
-        //response.addHeader("Access-Control-Allow-Headers", "*");
         response.addHeader("Access-Control-Allow-Credentials", "true");
     }
 

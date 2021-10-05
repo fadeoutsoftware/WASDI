@@ -29,7 +29,7 @@ import org.esa.snap.core.gpf.graph.Node;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.Provider;
+import it.fadeout.business.DataProvider;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
@@ -48,23 +48,52 @@ import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
 
+/**
+ * File Buffer Resource.
+ * Hosts API for:
+ * 	.import new files in WASDI from data providers
+ *  .publish bands on geoserver
+ *  .handle geoserver styles
+ *  
+ * @author p.campanella
+ *
+ */
 @Path("/filebuffer")
 public class FileBufferResource {
-
+	
+	/**
+	 * Servlet Config to access web.xml
+	 */
 	@Context
 	ServletConfig m_oServletConfig;
-
-	@Inject
-	ProvidersCatalog m_oProviderCatalog;
 	
+	/**
+	 * Providers Catalogue
+	 */
+	@Inject
+	ProvidersCatalog m_oDataProviderCatalog;
+	
+	/**
+	 * Trigger a new import of an image in WASDI.
+	 * The method checks the input, create the parameter and call WASDI.runProcess
+	 * 
+	 * @param sSessionId User Session
+	 * @param sFileUrl Url of the file to import
+	 * @param sProvider Data Provider
+	 * @param sWorkspaceId Workspace Id
+	 * @param sBoundingBox if available, bbox of the product to import
+	 * @param sParentProcessWorkspaceId Proc Id of the Parent Process
+	 * @return
+	 * @throws IOException
+	 */
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
-									@QueryParam("sFileUrl") String sFileUrl,
-									@QueryParam("sProvider") String sProvider,
-									@QueryParam("sWorkspaceId") String sWorkspaceId,
-									@QueryParam("sBoundingBox") String sBoundingBox,
+									@QueryParam("fileUrl") String sFileUrl,
+									@QueryParam("provider") String sProvider,
+									@QueryParam("workspaceId") String sWorkspaceId,
+									@QueryParam("bbox") String sBoundingBox,
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException
 	{
@@ -97,11 +126,11 @@ public class FileBufferResource {
 			String sProcessObjId = Utils.GetRandomName();
 
 			// if the provider is not specified, we fallback on the node default provider
-			Provider oProvider = null;
+			DataProvider oProvider = null;
 			if (Utils.isNullOrEmpty(sProvider)) {
-				oProvider = m_oProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
+				oProvider = m_oDataProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
 			} else {
-				oProvider = m_oProviderCatalog.getProvider(sProvider);
+				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
 
 			Utils.debugLog("FileBufferResource.Download, provider: " + oProvider.getName());
@@ -133,15 +162,29 @@ public class FileBufferResource {
 		oResult.setIntValue(500);
 		return oResult;
 	}
-
+	
+	/**
+	 * Publish band: if the band had already been published, it returns immediatly the View Model required by rabbit.
+	 * If it is not, it creates the parameter and call Wasdi.runProcess to publish the band
+	 * 
+	 * @param sSessionId User Session
+	 * @param sFileUrl file name
+	 * @param sWorkspaceId Workspace id
+	 * @param sBand band to publish
+	 * @param sStyle default style
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @return Rabbit Message View Model: empty if the band must be published. If it is alredy published, the same view model that the launcher send to the client after the publish is done
+	 * @throws IOException
+	 */
 	@GET
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
-												@QueryParam("sFileUrl") String sFileUrl,
-												@QueryParam("sWorkspaceId") String sWorkspaceId,
-												@QueryParam("sBand") String sBand,
-												@QueryParam("sStyle") String sStyle, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException {
+												@QueryParam("fileUrl") String sFileUrl,
+												@QueryParam("workspaceId") String sWorkspaceId,
+												@QueryParam("band") String sBand,
+												@QueryParam("style") String sStyle, 
+												@QueryParam("parent") String sParentProcessWorkspaceId) throws IOException {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
@@ -236,55 +279,6 @@ public class FileBufferResource {
 
 	}
 	
-	
-	@GET
-	@Path("getbandlayerid")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
-	{
-		Utils.debugLog("FileBufferResource.GetBandLayerId");
-		PrimitiveResult oReturnValue = null;
-		try {
-			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.GetBandLayerId( " +
-						sSessionId + ", " +
-						sFileUrl + ", " + 
-						sWorkspaceId + ", " +
-						sBand + " ): session invalid");
-				return oReturnValue;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
-
-			Utils.debugLog("FileBufferResource.GetBandLayerId: read product workspaces " + sWorkspaceId);
-
-			oReturnValue = new PrimitiveResult();
-			// Get Product List
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			
-			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
-			
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath+sFileUrl);
-			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-			PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
-
-			if (oPublishBand != null){
-				Utils.debugLog("FileBufferResource.GetBandLayerId: band already published return " +oPublishBand.getLayerId() );
-				oReturnValue.setStringValue(oPublishBand.getLayerId());
-			} else {
-				Utils.debugLog("FileBufferResource.GetBandLayerId: band never published");
-			}
-		} catch (Exception e) {
-			Utils.debugLog("FileBufferResource.GetBandLayerId: " + e);
-			return oReturnValue;
-		}
-
-		return oReturnValue;
-	}
-	
-	
 	/**
 	 * Download a SLD style
 	 * @param sSessionId Session Token
@@ -349,13 +343,19 @@ public class FileBufferResource {
 		return null;
 	}
 	
-	
+	/**
+	 * Uplad a .sld file
+	 * @param fileInputStream File Input Stream
+	 * @param sSessionId User id
+	 * @param sName style name
+	 * @return std http response
+	 */
 	@POST
 	@Path("/uploadstyle")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadStyle(@FormDataParam("file") InputStream fileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName) throws Exception {
+			@QueryParam("name") String sName)  {
 
 		Utils.debugLog("FileBufferResource.uploadStyle( Name: " + sName);
 

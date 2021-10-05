@@ -27,8 +27,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -50,7 +48,6 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.ImageFile;
-import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.LoginInfo;
@@ -58,14 +55,29 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
-
+/**
+ * Authorization Resource.
+ * Hosts the API for:
+ * 	.User login management
+ *  .Sessions
+ *  .User sftp accounts
+ *  .User registration
+ *  
+ * @author p.campanella
+ *
+ */
 @Path("/auth")
 public class AuthResource {
-
-
+	
+	/**
+	 * Servlet Config to read web.xml
+	 */
 	@Context
 	ServletConfig m_oServletConfig;
 	
+	/**
+	 * Keycloak Auth Provider Service
+	 */
 	@Inject
 	AuthProviderService m_oKeycloakService;
 
@@ -77,15 +89,28 @@ public class AuthResource {
 	/**
 	 * Credential Policy
 	 */
-	//TODO get rid of these annoying policies once and for all
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-
-	final String[] IMAGE_PROCESSORS_ENABLE_EXTENSIONS = {"jpg", "png", "svg"};
-	final String USER_IMAGE_FOLDER_NAME = "userImage";			
+	
+	/**
+	 * List of extensions enabled to upload a user image
+	 */
+	final String[] USER_IMAGE_ENABLED_EXTENSIONS = {"jpg", "png", "svg"};
+	/**
+	 * default folder where user image is saved
+	 */
+	final String USER_IMAGE_FOLDER_NAME = "userImage";
+	/**
+	 * Default name for the user image
+	 */
 	final String DEFAULT_USER_IMAGE_NAME = "userimage";
-	final UserRepository m_oUserRepository = new UserRepository();
-
-
+	
+	/**
+	 * Login API
+	 * The system will try to login with Keycloak first. Then with the old WASDI login.
+	 * 
+	 * @param oLoginInfo LoginInfo object. View model with info to login
+	 * @return UserViewModel View Model of the user logged. Can be invalid if noit logged
+	 */
 	@POST
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -93,6 +118,7 @@ public class AuthResource {
 		Utils.debugLog("AuthResource.Login");
 
 		try {
+			// Validate inputs
 			if (oLoginInfo == null) {
 				Utils.debugLog("Auth.Login: login info null, user not authenticated");
 				return UserViewModel.getInvalid();
@@ -107,10 +133,13 @@ public class AuthResource {
 			}
 
 			Utils.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
-
+			
+			// Check if the user exists
 			UserRepository oUserRepository = new UserRepository();
 			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+			
 			if( oUser == null ) {
+				// User not in the db
 				Utils.debugLog("AuthResource.Login: user not found: " + oLoginInfo.getUserId() + ", aborting");
 				return UserViewModel.getInvalid();
 			}
@@ -122,27 +151,32 @@ public class AuthResource {
 			}
 
 
-			//authenticate against keycloak
+			// First try to Authenticate using keycloak
 			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			
-
 			boolean bLoginSuccess = false;
 
 			if(!Utils.isNullOrEmpty(sAuthResult)) { 
 				bLoginSuccess = true;
 			} else {
+				// Try to log in with the WASDI old password
 				bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oUser.getPassword() );
 			}
 			
+			
 			if(bLoginSuccess) {
+				// If the user is logged, update last login
 				oUser.setLastLogin((new Date()).toString());
 				oUserRepository.updateUser(oUser);
 
 				
-				//SESSION
+				//Clear all old, expired sessions
 				Wasdi.clearUserExpiredSessions(oUser);
+				
+				// Create a new session
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
+				
 				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
 					Utils.debugLog("AuthResource.Login: could not insert session in DB, aborting");
 					return UserViewModel.getInvalid();
@@ -170,23 +204,32 @@ public class AuthResource {
 		return UserViewModel.getInvalid();
 	}
 
-
+	/**
+	 * Check user session.
+	 * This check first in Keycloak and later with wasdi embedded
+	 * @param sSessionId Session id to check
+	 * @return User View Model associated to this session if valid, otherwise the invalid one
+	 */
 	@GET
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
 		try {
+			// Validate imputs
 			if(Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog("AuthResource.CheckSession: SessionId is null or empty");
 				return UserViewModel.getInvalid();
 			}
-	
+
+			// Check if we can see the user from the session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 				Utils.debugLog("AuthResource.CheckSession: invalid session");
 				return UserViewModel.getInvalid();
 			}
-	
+
+			// Ok session is valid
 			UserViewModel oUserVM = new UserViewModel();
 			oUserVM.setName(oUser.getName());
 			oUserVM.setSurname(oUser.getSurname());
@@ -197,19 +240,25 @@ public class AuthResource {
 		}
 		return UserViewModel.getInvalid();
 	}	
-
-
+	
+	/**
+	 * Log out a user
+	 * @param sSessionId Session id to logout
+	 * @return Primitive Result with boolValue = true if logout is ok, false otherwise
+	 */
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog("AuthResource.Logout");
-
+		
+		// Validate the session
 		if(null == sSessionId) {
 			Utils.debugLog("AuthResource.CheckSession: null sSessionId");
 			return PrimitiveResult.getInvalid();
 		}
-
+		
+		// Try to get the user
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -217,6 +266,8 @@ public class AuthResource {
 		}
 
 		PrimitiveResult oResult = null;
+		
+		// Check if we need to delete the WASDI session
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.getSession(sSessionId);
 		if(oSession != null) {
@@ -237,14 +288,21 @@ public class AuthResource {
 		}
 		return oResult;
 	}	
-
-
-
+	
+	/**
+	 * create an sftp account for the user
+	 * @param sSessionId User session
+	 * @param sEmail mail of the user
+	 * @return http response
+	 */
 	@POST
 	@Path("/upload/createaccount")
 	@Produces({"application/json", "text/xml"})
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+		
 		Utils.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
+		
+		// Validate the inputs
 		if(Utils.isNullOrEmpty(sEmail)) {
 			Utils.debugLog("AuthResource.createSftpAccount: email null or empty, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
@@ -258,6 +316,8 @@ public class AuthResource {
 		}
 		
 		try {	
+			
+			// Check the user
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog("AuthResource.createSftpAccount: session invalid or user not found, aborting");
@@ -301,7 +361,12 @@ public class AuthResource {
 		}
 		return Response.serverError().build();
 	}
-
+	
+	/**
+	 * Check if an sftp account exists for the user
+	 * @param sSessionId User session
+	 * @return true if exists, false otherwise
+	 */
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
@@ -328,8 +393,12 @@ public class AuthResource {
 		}
 		return bRes;
 	}
-
-
+	
+	/**
+	 * get the list of files in the sftp of the user
+	 * @param sSessionId user session
+	 * @return list of string, each representing the name of a file in the user sftp account
+	 */
 	@GET
 	@Path("/upload/list")
 	@Produces({"application/json", "text/xml"})
@@ -351,8 +420,12 @@ public class AuthResource {
 		// Return the list
 		return oManager.list(sAccount);
 	}
-
-
+	
+	/**
+	 * Remove the sftp account of the user
+	 * @param sSessionId user session
+	 * @return http standard response
+	 */
 	@DELETE
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
@@ -376,8 +449,14 @@ public class AuthResource {
 		// Remove the account
 		return oManager.removeAccount(sAccount) ? Response.ok().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
-
-
+	
+	/**
+	 * Update sftp password of a user: it creates a new password and 
+	 * send it to the mail received in input
+	 * @param sSessionId user session
+	 * @param sEmail user id /mail used for sftp account
+	 * @return std http response
+	 */
 	@POST
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
@@ -417,10 +496,16 @@ public class AuthResource {
 
 		return Response.ok().build();
 	}
-
-
+	
+	/**
+	 * Upload user image
+	 * @param fileInputStream input stream with the image
+	 * @param fileMetaData Metadata of the file
+	 * @param sSessionId User Session
+	 * @return std http response
+	 */
 	@POST
-	@Path("/upload/userimage")
+	@Path("/media/userimage")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadUserImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
 			@HeaderParam("x-session-token") String sSessionId ) {
@@ -428,7 +513,7 @@ public class AuthResource {
 		String sExt;
 		String sFileName;
 
-		User oUser = getUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -442,7 +527,7 @@ public class AuthResource {
 			return Response.status(400).build();
 		}
 
-		if (!ImageResourceUtils.isValidExtension(sExt, IMAGE_PROCESSORS_ENABLE_EXTENSIONS)) {
+		if (!ImageResourceUtils.isValidExtension(sExt, USER_IMAGE_ENABLED_EXTENSIONS)) {
 			return Response.status(400).build();
 		}
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
@@ -455,21 +540,26 @@ public class AuthResource {
 		}
 		return Response.status(200).build();
 	}
-
+	
+	/**
+	 * Get user image
+	 * @param sSessionId User Session
+	 * @return std http response
+	 */
 	@GET
-	@Path("/get/userimage")
+	@Path("/media/userimage")
 	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
 
 
-		User oUser = getUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
 		}
 
 		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
-		ImageFile oUserImage = ImageResourceUtils.getImageInFolder(sPath, IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
-		String sImageExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPath  , IMAGE_PROCESSORS_ENABLE_EXTENSIONS);
+		ImageFile oUserImage = ImageResourceUtils.getImageInFolder(sPath, USER_IMAGE_ENABLED_EXTENSIONS);
+		String sImageExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPath  , USER_IMAGE_ENABLED_EXTENSIONS);
 
 		//Check the image and extension
 		if(oUserImage == null || sImageExtension.isEmpty() ){
@@ -481,11 +571,16 @@ public class AuthResource {
 		return Response.ok(abImageLogo).build();
 
 	}
-
+	
+	/**
+	 * Delete user image
+	 * @param sSessionId User Session
+	 * @return sdt http response
+	 */
 	@DELETE
-	@Path("/delete/userimage")
+	@Path("/media/userimage")
 	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
-		User oUser = getUserFromSession(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(401).build();
@@ -495,117 +590,12 @@ public class AuthResource {
 		ImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
 		return Response.status(200).build();
 	}
-
-
-	@POST
-	@Path("/logingoogleuser")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public UserViewModel loginGoogleUser(LoginInfo oLoginInfo) {
-
-		Utils.debugLog("AuthResource.CheckGoogleUserId");
-
-		if (oLoginInfo == null) {
-			return UserViewModel.getInvalid();
-		}
-		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
-			return UserViewModel.getInvalid();
-		}
-
-		try {	
-			final NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-			final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-					// Specify the CLIENT_ID of the app that accesses the backend:
-					.setAudience(Collections.singletonList(oLoginInfo.getUserId()))
-					// Or, if multiple clients access the backend:
-					//.setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
-					.build();
-
-			// (Receive idTokenString by HTTPS POST)
-			GoogleIdToken oIdToken = verifier.verify(oLoginInfo.getGoogleIdToken());
-
-			//check id token
-			if (oIdToken != null) {
-				Payload oPayload = oIdToken.getPayload();
-
-				// Print user identifier
-				String sGoogleIdToken = oPayload.getSubject();
-
-				// Get profile information from payload
-				String sEmail = oPayload.getEmail();
-
-
-				// store profile information and create session
-				Utils.debugLog("AuthResource.LoginGoogleUser: requested access from " + sGoogleIdToken);
-
-
-				UserRepository oUserRepository = new UserRepository();
-				String sAuthProvider = "google";
-				User oWasdiUser = oUserRepository.getUser(sEmail);
-				//save new user 
-				if(oWasdiUser == null) {
-					User oUser = new User();
-					oUser.setAuthServiceProvider(sAuthProvider);
-					oUser.setUserId(sEmail);
-					oUser.setGoogleIdToken(sGoogleIdToken);
-					if(oUserRepository.insertUser(oUser) == true) {
-						//the user is stored in DB
-						//get user from database (i do it only for consistency)
-						oWasdiUser = oUserRepository.googleLogin(sGoogleIdToken , sEmail, sAuthProvider);
-
-						notifyNewUserInWasdi(oWasdiUser, true, true);
-					}
-				}
-
-				if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google")) {
-					//get all expired sessions
-					SessionRepository oSessionRepository = new SessionRepository();
-					List<UserSession> aoEspiredSessions = oSessionRepository.getAllExpiredSessions(oWasdiUser.getUserId());
-					for (UserSession oUserSession : aoEspiredSessions) {
-						//delete data base session
-						if (!oSessionRepository.deleteSession(oUserSession)) {
-							//XXX log instead
-							Utils.debugLog("AuthService.LoginGoogleUser: Error deleting session.");
-						}
-					}
-
-					UserViewModel oUserVM = new UserViewModel();
-					oUserVM.setName(oWasdiUser.getName());
-					oUserVM.setSurname(oWasdiUser.getSurname());
-					oUserVM.setUserId(oWasdiUser.getUserId());
-					oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
-
-					UserSession oSession = new UserSession();
-					oSession.setUserId(oWasdiUser.getUserId());
-					String sSessionId = UUID.randomUUID().toString();
-					oSession.setSessionId(sSessionId);
-					oSession.setLoginDate((double) new Date().getTime());
-					oSession.setLastTouch((double) new Date().getTime());
-
-					Boolean bRet = oSessionRepository.insertSession(oSession);
-					if (!bRet) {
-						return UserViewModel.getInvalid();
-					}
-					oUserVM.setSessionId(sSessionId);
-
-					Utils.debugLog("AuthService.LoginGoogleUser: access succeeded");
-					return oUserVM;
-				} else {
-					Utils.debugLog("AuthService.LoginGoogleUser: access failed");
-				}
-
-			} else {
-
-				Utils.debugLog("Invalid ID token.");
-				UserViewModel.getInvalid();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return UserViewModel.getInvalid();
-	}
-
+		
+	/**
+	 * Register a new user
+	 * @param oRegistrationInfoViewModel Registration Informations
+	 * @return Primitive Result: if all is ok it has boolValue = true, intValue = 200 and a welcome message in stringValue. Otherwise it has in intValue the http error code. 
+	 */
 	@POST
 	@Path("/register")
 	@Produces({"application/json", "text/xml"})
@@ -706,7 +696,12 @@ public class AuthResource {
 	}
 
 
-
+	/**
+	 * Validate the user registration: this is the landing of verification link
+	 * @param sUserId User Id
+	 * @param sToken Validation Token
+	 * @return Primitive Result with boolValue = true and stringValue = user id if all is ok
+	 */
 	@GET
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -755,8 +750,13 @@ public class AuthResource {
 		}
 		return PrimitiveResult.getInvalid();
 	}
-
-
+	
+	/**
+	 * Edit user info
+	 * @param sSessionId User Session
+	 * @param oInputUserVM View Model of user info
+	 * @return Updated User View Model
+	 */
 	@POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
@@ -809,7 +809,12 @@ public class AuthResource {
 	}
 
 
-
+	/**
+	 * Change WASDI Password
+	 * @param sSessionId Session Id 
+	 * @param oChangePasswordViewModel Change User Password View Model
+	 * @return Primitive Result with boolValue = true if ok
+	 */
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
@@ -864,8 +869,12 @@ public class AuthResource {
 		return PrimitiveResult.getInvalid();
 
 	} 	
-
-
+	
+	/**
+	 * Recover password
+	 * @param sUserId User Id
+	 * @return
+	 */
 	@GET
 	@Path("/lostPassword")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -964,7 +973,15 @@ public class AuthResource {
 	}
 
 
-
+	/**
+	 * Send the new password via mail.
+	 * To send the mail uses the Mercurius service installed at CIMA.
+	 * 
+	 * @param sRecipientEmail Recipient of the mail, should be the WASDI user
+	 * @param sAccount User Id, should be same of Recipient mail? 
+	 * @param sPassword New Password
+	 * @return
+	 */
 	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Utils.debugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
@@ -1007,8 +1024,14 @@ public class AuthResource {
 		}
 		return false;
 	}
-
-
+	
+	/**
+	 * Send the sftp password via mail
+	 * @param sRecipientEmail Mail recipient
+	 * @param sAccount user id
+	 * @param sPassword new password
+	 * @return
+	 */
 	private Boolean sendSftpPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Utils.debugLog("AuthResource.sendSFTPPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
@@ -1133,20 +1156,4 @@ public class AuthResource {
 		}
 		return true;
 	}
-
-	protected User getUserFromSession(String sSessionId){
-
-		if (Utils.isNullOrEmpty(sSessionId)) {
-			return null;
-		}
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) {
-			return null;
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			return null;
-		}
-		return oUser;	
-	}
-
 }

@@ -2352,7 +2352,7 @@ public class WasdiLib {
 		}
 
 		String sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"; 
-		sQuery = "sQuery=" + URLEncoder.encode(sQuery) + "&offset=0&limit=10&providers=" + getDefaultProvider();
+		sQuery = "providers=" + getDefaultProvider();
 
 
 		try {
@@ -2508,8 +2508,8 @@ public class WasdiLib {
 			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 
-			String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider="+
-					sProvider +"&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
+			String sUrl = m_sBaseUrl + "/filebuffer/download?fileUrl=" + sEncodedFileLink+"&provider="+
+					sProvider +"&workspaceId="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
 
 			// Call the server
 			String sResponse = httpGet(sUrl, getStandardHeaders());

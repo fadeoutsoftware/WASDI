@@ -1,18 +1,34 @@
 package it.fadeout.business;
 
 /**
- * Provider model
+ * Data Provider model
+ * It is used to show the list of data providers 
  */
-public class Provider {
-
+public class DataProvider {
+	
+	/**
+	 * Name of the Data Provider
+	 */
     private String m_sName;
-
+    
+    /**
+     * User Id Used by WASDI to contact the provider
+     */
     private String m_sOSUser;
-
+    
+    /**
+     * Password Used by WASDI to contact the provider
+     */
     private String m_sOSPassword;
-
+    
+    /**
+     * Data Provider Description
+     */
     private String m_sDescription;
-
+    
+    /**
+     * Link to the data provider
+     */
     private String m_sLink;
 
     /**

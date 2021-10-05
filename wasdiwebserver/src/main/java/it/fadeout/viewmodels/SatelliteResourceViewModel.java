@@ -4,8 +4,23 @@ import java.util.ArrayList;
 
 import org.nfs.orbits.sat.SatSensor;
 
+/**
+ * View Model of a a Satellite Resource.
+ * Used by plan manager of WASDI 
+ * 
+ * @author p.campanella
+ *
+ */
 public class SatelliteResourceViewModel {
+	
+	/**
+	 * Satellite/Mission name
+	 */
 	private String satelliteName;
+	
+	/**
+	 * List of sensors on board
+	 */
 	private ArrayList<SatSensor> satelliteSensors;
 	
 	public ArrayList<SatSensor> getSatelliteSensors() {

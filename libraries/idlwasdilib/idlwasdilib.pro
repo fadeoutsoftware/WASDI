@@ -1689,7 +1689,7 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   oUrl = OBJ_NEW('IDLnetUrl')
   sEncodedQuery = oUrl->URLEncode(sQuery)
 
-  sQuery = "sQuery=" + sEncodedQuery + "&offset=0&limit=10&providers=ONDA";
+  sQuery = "providers=ONDA";
   
   UrlPath = UrlPath + '?' + sQuery
     
@@ -1734,9 +1734,9 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
 
-	sProvider = "ONDA"
+	sProvider = "LSA"
 
-	sQuery = "sFileUrl=" + sEncodedLink + "&sProvider="+sProvider+"&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspaceId=" + activeworkspace + "&bbox=" + sEncodedBB
 
 	UrlPath = UrlPath + '?' + sQuery
 
@@ -2353,7 +2353,7 @@ FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
 
-	sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider=ONDA&workspaceId=" + activeworkspace + "&bbox=" + sEncodedBB
 
 	UrlPath = UrlPath + '?' + sQuery
 

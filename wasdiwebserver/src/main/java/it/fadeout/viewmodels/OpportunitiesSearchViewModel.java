@@ -2,10 +2,29 @@ package it.fadeout.viewmodels;
 
 import java.util.ArrayList;
 
+/**
+ * View Model of the whole Orbit Search client
+ * Sent by the client to the server to query the Plan Manager
+ * @author p.campanella
+ *
+ */
 public class OpportunitiesSearchViewModel {
+	
+	/**
+	 * List of satellites filters
+	 */
 	private ArrayList<SatelliteFilterViewModel> satelliteFilters;
+	/**
+	 * Area of interest
+	 */
 	private String polygon;
+	/**
+	 * Start time of search
+	 */
 	private String acquisitionStartTime;
+	/**
+	 * End time of search
+	 */
 	private String acquisitionEndTime;
 	
 	public ArrayList<SatelliteFilterViewModel> getSatelliteFilters() {
