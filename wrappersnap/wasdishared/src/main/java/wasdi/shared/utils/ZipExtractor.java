@@ -121,6 +121,7 @@ public class ZipExtractor {
 						}
 					}
 					else {
+						new File(sName).mkdir();
 						continue;
 					}
 					
@@ -159,7 +160,8 @@ public class ZipExtractor {
 					}					
 				}
 				catch (Exception e) {
-					s_oLogger.error(m_sLoggerPrefix + "unzip: error extraing entry: "+ e.toString());
+					s_oLogger.error(m_sLoggerPrefix + "unzip: error extracting entry: "+ e.toString());
+					throw e;
 				}
 				
 			}
@@ -269,7 +271,10 @@ public class ZipExtractor {
 					// removes the tmp-part from the destination files
 					File oDest = new File(oFile.getCanonicalPath().replace(sTemp, ""));
 					// checks the existence of the dir
-					if (oFile.isDirectory()) return; 
+					if (oFile.isDirectory()) {
+						oDest.mkdir();
+						return;
+					}
 					
 					if  (!oDest.getParentFile().exists()) {
 						oDest.mkdirs();
