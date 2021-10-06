@@ -121,7 +121,7 @@ public class ZipExtractor {
 						}
 					}
 					else {
-						new File(sName).mkdir();
+						new File(sName).mkdirs();
 						continue;
 					}
 					
