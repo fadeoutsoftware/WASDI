@@ -631,41 +631,53 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             m_oProcessWorkspaceLogger.log("Null parameters passed to Launcher for conversion");
             throw new NullPointerException("Null parameters passed to Launcher for conversion");
         }
+        String sDestinationPath = getWorkspacePath(oSen2CorParameters, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+        String sL1ProductName = oSen2CorParameters.getProductName();
+        String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
+
         if (oSen2CorParameters.isValid()) {
-            s_oLogger.debug("LauncherMain.sen2Cor: Start");
-            ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
-
-            String sDestinationPath = getWorkspacePath(oSen2CorParameters, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-            oProcessWorkspace.setProgressPerc(25);
-            // 2 - Checks whether the product file is present on FS
-            // 3 - Unzip -> obtain L1C.SAFE
-            String sL1ProductName = oSen2CorParameters.getProductName();
-            String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
-
-            s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
-            ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameters.getProcessObjId());
-            oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
-
-            // 4 - Convert -> obtain L2A.SAFE
-            String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
-            s_oLogger.debug("LauncherMain.sen2Cor: Extraction completed, begin conversion");
-            oProcessWorkspace.setProgressPerc(50);
-            ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
-
-            Process oProcess = oProcessBuilder
-                    .inheritIO() // this is enabled for debugging
-                    .start();
-            // Wait for the process to complete
-            oProcess.waitFor();
+            try {
+                s_oLogger.debug("LauncherMain.sen2Cor: Start");
+                ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
 
 
-            // 5 - ZipIt -> L2A.zip
-            s_oLogger.debug("LauncherMain.sen2Cor: Conversion done, begin compression of L2 archive");
-            oProcessWorkspace.setProgressPerc(75);
-            oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
+                oProcessWorkspace.setProgressPerc(25);
+                // 2 - Checks whether the product file is present on FS
+                // 3 - Unzip -> obtain L1C.SAFE
 
 
-            s_oLogger.debug("LauncherMain.sen2Cor: Done");
+                s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
+                ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameters.getProcessObjId());
+                oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
+
+                // 4 - Convert -> obtain L2A.SAFE
+                String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
+                s_oLogger.debug("LauncherMain.sen2Cor: Extraction completed, begin conversion");
+                oProcessWorkspace.setProgressPerc(50);
+                ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
+
+                Process oProcess = oProcessBuilder
+                        .inheritIO() // this is enabled for debugging
+                        .start();
+                // Wait for the process to complete
+                oProcess.waitFor();
+
+
+                // 5 - ZipIt -> L2A.zip
+                s_oLogger.debug("LauncherMain.sen2Cor: Conversion done, begin compression of L2 archive");
+                oProcessWorkspace.setProgressPerc(75);
+                oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
+
+
+                s_oLogger.debug("LauncherMain.sen2Cor: Done");
+            }
+            catch (Exception oe){
+                // if something went wrong delete the zip file and SAFE directories to return to original WorkSpace state
+                FileUtils.deleteQuietly(new File(sDestinationPath + sL2ProductName + ".zip")); // level2 zip, if exists
+                FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE")); // Level1 .Safe, if exists
+                FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE")); // Level2 .Safe, if exists
+                oe.printStackTrace();
+            }
 
             if (oSen2CorParameters.isDeleteIntermediateFile()) {
                 // deletes .SAFE directories and keeps the zip files
