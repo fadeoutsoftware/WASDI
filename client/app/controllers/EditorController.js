@@ -3,8 +3,8 @@
  */
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
-        oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-        oSnapOperationService, oModalService, oTranslate, oCatalogService,
+        oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
+        oModalService, oTranslate, oCatalogService,
         $window) {
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -16,10 +16,9 @@ var EditorController = (function () {
         this.m_oMapService = oMapService;
         this.m_oFileBufferService = oFileBufferService;
         this.m_oProductService = oProductService;
-        this.m_oSnapOperationService = oSnapOperationService;
         this.m_oGlobeService = oGlobeService;
         this.m_oState = $state;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oNodeService = oNodeService;
         this.m_oRabbitStompService = oRabbitStompService;
@@ -30,8 +29,6 @@ var EditorController = (function () {
         this.m_oCatalogService = oCatalogService;
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
-        // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
-        this.m_bIsActiveGeoraphicalMode = false;
         // Flag to know if the first zoom on band has been done
         this.m_bFirstZoomOnBandDone = false;
 
@@ -39,18 +36,8 @@ var EditorController = (function () {
         this.m_sTextQueryFilterInTree = "";
         this.m_bIsFilteredTree = false;
 
-        this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
-        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
-        this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
-        //Flag to know if the Preview Band Image is loaded or not (2D - Editor Mode)
-        this.m_bIsLoadedPreviewBandImage = true;
-        //Flag to know if the Band Image is loaded or not (2D - Editor Mode)
-        this.m_bIsLoadedViewBandImage = true;
-        //Flag to know if the actual band Image is coming from a Zoom or if it is a new image
-        this.m_bIsEditorZoomingOnExistingImage = false;
-        // Url of the Band Image (2D - Editor Mode)
-        this.m_sViewUrlSelectedBand = "";
+
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
         // Field used to control the opacity of the base layer in 2D map mode
         this.oBaseBand = {
@@ -118,7 +105,7 @@ var EditorController = (function () {
             }
         } else {
             // Load Processes
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            this.m_oProcessWorkspaceService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         }
 
         // Load products
@@ -424,7 +411,6 @@ var EditorController = (function () {
                         this.addLayerMap3DByServer(this.m_aoVisibleBands[iIndexLayer].layerId, this.m_aoVisibleBands[iIndexLayer].geoserverUrl);
                         var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox, this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
                         if (utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false) {
-                            // this.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayer].layerId);
                             var oLayer3DMap = {
                                 id: this.m_aoVisibleBands[iIndexLayer].layerId,
                                 rectangle: oRectangleIsNotGeoreferencedProduct
@@ -514,10 +500,7 @@ var EditorController = (function () {
 
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS' + sErrorDescription);
             utilsVexCloseDialogAfter(10000, oDialog);
-
-            // P.Campanella: 20191125: the loadProcessesFromServer is called by the rabbit stomp service
-            //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
-
+            
             if (oMessage.messageCode == "PUBLISHBAND") {
                 if (utilsIsObjectNullOrUndefined(oMessage.payload) == false) {
                     if (utilsIsObjectNullOrUndefined(oMessage.payload.productName) == false && utilsIsObjectNullOrUndefined(oMessage.payload.bandName) == false) {
@@ -628,51 +611,46 @@ var EditorController = (function () {
         this.setTreeNodeAsSelected(sNodeID);
         this.setTreeNodeAsPublished(sNodeID);
 
-        if (this.m_bIsActiveGeoraphicalMode == false) {
-            console.log("EditorController.receivedPublishBandMessage: we are not in geographical mode. Just update the band and return..");
-            return false;
-        } else {
-            // Add layer in list
-            // check if the background is in Editor Mode or in Georeferenced Mode
-            if (this.m_b2DMapModeOn == false) {
-                var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(oBand.geoserverBoundingBox, oBand.bbox, oBand.layerId);
-                if (utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false) {
-                    this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
-                    var oLayer3DMap = {
-                        id: oBand.layerId,
-                        rectangle: oRectangleIsNotGeoreferencedProduct
-                    };
-                    this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
-                }
-
-                //if we are in 3D put the layer on the globe
+        // Add layer in list
+        // check if the background is in Editor Mode or in Georeferenced Mode
+        if (this.m_b2DMapModeOn == false) {
+            var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(oBand.geoserverBoundingBox, oBand.bbox, oBand.layerId);
+            if (utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false) {
                 this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
-            } else {
-                var sColor = "#f22323";
-                var sGeoserverBBox = oBand.geoserverBoundingBox;
-                this.productIsNotGeoreferencedRectangle2DMap(sColor, sGeoserverBBox, oBand.bbox, oBand.layerId);
-                //if we are in 2D put it on the map
-                this.addLayerMap2DByServer(oBand.layerId, oBand.geoserverUrl);
-
+                var oLayer3DMap = {
+                    id: oBand.layerId,
+                    rectangle: oRectangleIsNotGeoreferencedProduct
+                };
+                this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
             }
-            // show the layer with full opacity at ther beginning
-            oBand.opacity = 100;
-            this.m_aoVisibleBands.unshift(oBand);
 
-            if (this.m_aoVisibleBands.length == 1) {
+            //if we are in 3D put the layer on the globe
+            this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
+        } else {
+            var sColor = "#f22323";
+            var sGeoserverBBox = oBand.geoserverBoundingBox;
+            this.productIsNotGeoreferencedRectangle2DMap(sColor, sGeoserverBBox, oBand.bbox, oBand.layerId);
+            //if we are in 2D put it on the map
+            this.addLayerMap2DByServer(oBand.layerId, oBand.geoserverUrl);
 
-                if (!this.m_bFirstZoomOnBandDone) {
-                    // Make auto zoom only once
-                    this.m_bFirstZoomOnBandDone = true;
+        }
+        // show the layer with full opacity at ther beginning
+        oBand.opacity = 100;
+        this.m_aoVisibleBands.unshift(oBand);
 
-                    //if there isn't Bounding Box is impossible to zoom
-                    if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
-                        this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                        this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                    } else {
-                        this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                        this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                    }
+        if (this.m_aoVisibleBands.length == 1) {
+
+            if (!this.m_bFirstZoomOnBandDone) {
+                // Make auto zoom only once
+                this.m_bFirstZoomOnBandDone = true;
+
+                //if there isn't Bounding Box is impossible to zoom
+                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox)) {
+                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                } else {
+                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
                 }
             }
         }
@@ -820,7 +798,7 @@ var EditorController = (function () {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
                     oController.getProductListByWorkspace();
-                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                     if (oController.m_oRabbitStompService.isSubscrbed() == false) {
                         //oController.m_oRabbitStompService.subscribe(oController.m_oActiveWorkspace.workspaceId);
@@ -871,43 +849,37 @@ var EditorController = (function () {
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
         var bAlreadyPublished = oBand.published;
 
-        var oLastActiveBand = this.m_oActiveBand;
-
         this.m_oActiveBand = oBand;
 
-        // CHECK THE ACTUAL MODE
-        if (this.m_bIsActiveGeoraphicalMode) {
+        // Geographical Mode On: geoserver publish band
+        this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).then(function (data, status) {
 
-            // Geographical Mode On: geoserver publish band
-            this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).then(function (data, status) {
+            if (!bAlreadyPublished) {
+                var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
+                utilsVexCloseDialogAfter(4000, oDialog);
+            }
 
-                if (!bAlreadyPublished) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                }
+            if (!utilsIsObjectNullOrUndefined(data.data) && data.data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.data.messageResult)) {
+                /*if the band was published*/
 
-                if (!utilsIsObjectNullOrUndefined(data.data) && data.data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.data.messageResult)) {
-                    /*if the band was published*/
-
-                    if (data.data.messageCode === "PUBLISHBAND") {
-                        // Already published: we already have the View Model
-                        oController.receivedPublishBandMessage(data.data);
-                    } else {
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        // It is publishing: we will receive Rabbit Message
-                        if (data.data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
-                    }
-
+                if (data.data.messageCode === "PUBLISHBAND") {
+                    // Already published: we already have the View Model
+                    oController.receivedPublishBandMessage(data.data);
                 } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
-                    oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
+                    oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    // It is publishing: we will receive Rabbit Message
+                    if (data.data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
                 }
-            }, (function (data, status) {
-                console.log('publish band error');
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
+
+            } else {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
                 oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
-            }));
-        } 
+            }
+        }, (function (data, status) {
+            console.log('publish band error');
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
+            oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
+        }));
     };
 
     /**
@@ -930,25 +902,21 @@ var EditorController = (function () {
         if (this.m_b2DMapModeOn) {
             // We are in 2d mode
 
-            // In georeferenced mode or not?
-            if (this.m_bIsActiveGeoraphicalMode == true) {
+            // Georeferenced: remove the band from the map
+            var oMap2D = this.m_oMapService.getMap();
 
-                // Georeferenced: remove the band from the map
-                var oMap2D = this.m_oMapService.getMap();
+            //remove layer in 2D map
+            oMap2D.eachLayer(function (layer) {
+                var sMapLayer = layer.options.layers;
+                var sMapLayer2 = "wasdi:" + layer.options.layers;
 
-                //remove layer in 2D map
-                oMap2D.eachLayer(function (layer) {
-                    var sMapLayer = layer.options.layers;
-                    var sMapLayer2 = "wasdi:" + layer.options.layers;
-
-                    if (utilsIsStrNullOrEmpty(sLayerId) === false && sMapLayer === sLayerId) {
-                        oMap2D.removeLayer(layer);
-                    }
-                    if (utilsIsStrNullOrEmpty(sLayerId) === false && sMapLayer2 === sLayerId) {
-                        oMap2D.removeLayer(layer);
-                    }
-                });
-            }
+                if (utilsIsStrNullOrEmpty(sLayerId) === false && sMapLayer === sLayerId) {
+                    oMap2D.removeLayer(layer);
+                }
+                if (utilsIsStrNullOrEmpty(sLayerId) === false && sMapLayer2 === sLayerId) {
+                    oMap2D.removeLayer(layer);
+                }
+            });
         }
         else {
             this.removeBandLayersIn3dMaps(sLayerId);
@@ -1033,32 +1001,6 @@ var EditorController = (function () {
         }
     };
 
-
-    /**
-     * Add layer on the 2D Map
-     * @param sLayerId
-     */
-    EditorController.prototype.addLayerMap2D = function (sLayerId) {
-
-        var oMap = this.m_oMapService.getMap();
-        var sUrl = this.m_oConstantsService.getWmsUrlGeoserver();//'http://localhost:8080/geoserver/ows?'
-
-        var wmsLayer = L.tileLayer.betterWms(sUrl, {
-            layers: 'wasdi:' + sLayerId,
-            format: 'image/png',
-            transparent: true,
-            noWrap: true,
-            opacity: 1
-        });
-
-        //it set the zindex of layer in map
-        wmsLayer.setZIndex(1000);
-        // .leaflet-tile { border: solid black 5px; }
-        wmsLayer.addTo(oMap);
-
-        return true;
-    };
-
     /**
      * Set the opacity for the layer identified by the index
      * @param {int} iOpacity level of opacity
@@ -1082,41 +1024,13 @@ var EditorController = (function () {
 
     }
 
-    EditorController.prototype.setAllLayersOpacity = function () {
-    }
-
-    /**
-     * Add layer for Cesium Globe
-     * @param sLayerId
-     */
-    EditorController.prototype.addLayerMap3D = function (sLayerId) {
-        var oGlobeLayers = this.m_oGlobeService.getGlobeLayers();
-        var sUrlGeoserver = this.m_oConstantsService.getWmsUrlGeoserver();
-        // wms options
-        var oWMSOptions = {
-            transparent: true,
-            format: 'image/png'
-        };//crossOriginKeyword: null
-
-        // WMS get GEOSERVER
-        var oProvider = new Cesium.WebMapServiceImageryProvider({
-            url: sUrlGeoserver,
-            layers: 'wasdi:' + sLayerId,
-            parameters: oWMSOptions
-        });
-
-        oGlobeLayers.addImageryProvider(oProvider);
-
-        return true;
-    };
-
     /**
      * Add layer on 3d map from a specific server
      * @param sLayerId
      */
     EditorController.prototype.addLayerMap3DByServer = function (sLayerId, sServer) {
         if (sLayerId == null) return false;
-        if (sServer == null) return this.addLayerMap3D(sLayerId);
+        if (sServer == null) sServer = this.m_oConstantsService.getWmsUrlGeoserver();
 
         var oGlobeLayers = this.m_oGlobeService.getGlobeLayers();
 
@@ -1142,8 +1056,8 @@ var EditorController = (function () {
      */
     EditorController.prototype.addLayerMap2DByServer = function (sLayerId, sServer) {
         // Chech input data
-        if (sServer == null) return this.addLayerMap2D(sLayerId);
         if (sLayerId == null) return false;
+        if (sServer == null) sServer = this.m_oConstantsService.getWmsUrlGeoserver();
 
         var oMap = this.m_oMapService.getMap();
 
@@ -1268,7 +1182,7 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -1332,7 +1246,7 @@ var EditorController = (function () {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -1755,8 +1669,7 @@ var EditorController = (function () {
                                         oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                                     }
                                 },
-                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
-                                "_disabled": (oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
+                                "_disabled": false
                             },
                             "Zoom3D": {
                                 "label": "Zoom Band 3D Map",
@@ -1765,8 +1678,7 @@ var EditorController = (function () {
                                         oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
                                     }
                                 },
-                                // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
-                                "_disabled": (oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode() === true)
+                                "_disabled": false
                             },
                             "Download": {
                                 "label": "Download",
@@ -2101,28 +2013,6 @@ var EditorController = (function () {
 
     };
 
-    EditorController.prototype.isEnable2DZoomInTreeInEditorMode = function () {
-        if (this.isActiveEditorMode()) {
-            return this.m_b2DMapModeOn;
-        }
-        return false;
-    };
-
-    EditorController.prototype.isEnable3DZoomInTreeInEditorMode = function () {
-        if (this.isActiveEditorMode()) {
-            return !this.m_b2DMapModeOn;
-        }
-        return false;
-    };
-
-    EditorController.prototype.isActiveEditorMode = function () {
-        return this.m_bIsActiveGeoraphicalMode === false;
-    };
-
-
-
-
-
     EditorController.prototype.filterTree = function (sTextQuery) {
 
         if (utilsIsObjectNullOrUndefined(sTextQuery) === true) {
@@ -2218,9 +2108,8 @@ var EditorController = (function () {
         'WorkspaceService',
         'NodeService',
         'GlobeService',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'RabbitStompService',
-        'SnapOperationService',
         'ModalService',
         '$translate',
         'CatalogService',

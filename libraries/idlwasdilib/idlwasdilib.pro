@@ -708,7 +708,7 @@ FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
+	UrlPath = '/wasdiwebserver/rest/process/byid?procws='+sProcessID
 
 	; Call get status
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -863,7 +863,7 @@ FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
 	ownerUserId = "";
 	
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/ws?sWorkspaceId=' + workspaceid
+	UrlPath = '/wasdiwebserver/rest/ws/getws?workspace=' + workspaceid
 
 	; Get the workpsace view model
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -940,7 +940,7 @@ FUNCTION WASDICHECKPRODUCTEXISTS, filename
 	workspaceId = "";
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/product/byname?name='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -1223,7 +1223,7 @@ FUNCTION WASDIGETWORKFLOWS
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/getgraphsbyusr'
+	UrlPath = '/wasdiwebserver/rest/workflows/getbyuser'
 
 	; Call API
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -1263,7 +1263,7 @@ FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWor
 	END
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/graph_id?workspace='+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/workflows/run?workspace='+activeworkspace
 
 	; Generate input file names JSON array
 	sInputFilesJSON = '['
@@ -1736,7 +1736,7 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
 
 	sProvider = "LSA"
 
-	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspaceId=" + activeworkspace + "&bbox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
 
 	UrlPath = UrlPath + '?' + sQuery
 
@@ -1775,7 +1775,7 @@ PRO WASDIUPDATEPROGRESS, iPerc
 		print, 'Progress Update ', sPerc.Trim()
 	END ELSE BEGIN
 		; API url
-		UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
+		UrlPath = '/wasdiwebserver/rest/process/updatebyid?procws='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
 		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 		; Read updated status
@@ -1806,7 +1806,7 @@ FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 	sPerc = STRTRIM(STRING(iPerc),2)
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+sPerc
+	UrlPath = '/wasdiwebserver/rest/process/updatebyid?procws='+sProcessID+'&status='+sStatus+'&perc='+sPerc
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 	; get the output status
@@ -2113,7 +2113,7 @@ FUNCTION WASDIDELETEWORKSPACE, sWorkspaceId
 	sessioncookie = token
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/ws/delete?sWorkspaceId=' + sWorkspaceId +'&bDeleteLayer=true&bDeleteFile=true'
+	UrlPath = '/wasdiwebserver/rest/ws/delete?workspace=' + sWorkspaceId +'&deletelayer=true&deletefile=true'
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
@@ -2246,7 +2246,7 @@ FUNCTION WASDISETPROCESSPAYLOAD, sProcessId, data
 	sPayload = oUrl->URLEncode(data)
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/setpayload?sProcessId='+sProcessId+'&payload='+sPayload
+	UrlPath = '/wasdiwebserver/rest/process/setpayload?procws='+sProcessId+'&payload='+sPayload
 
 	; Get the list of products
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -2353,7 +2353,7 @@ FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
 
-	sQuery = "fileUrl=" + sEncodedLink + "&provider=ONDA&workspaceId=" + activeworkspace + "&bbox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider=ONDA&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
 
 	UrlPath = UrlPath + '?' + sQuery
 
@@ -2727,7 +2727,7 @@ FUNCTION WASDIGETPROCESSESBYWORKSPACE, iStartIndex, iEndIndex, sStatus, sOperati
 	
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/byws?sWorkspaceId='+activeworkspace + '&startindex='+STRTRIM(STRING(iStartIndex),2) + '&endindex='+STRTRIM(STRING(iEndIndex),2)
+	UrlPath = '/wasdiwebserver/rest/process/byws?workspace='+activeworkspace + '&startindex='+STRTRIM(STRING(iStartIndex),2) + '&endindex='+STRTRIM(STRING(iEndIndex),2)
 	
 	IF (sStatus NE !NULL) THEN BEGIN
 		UrlPath = UrlPath + '&status='+sStatus

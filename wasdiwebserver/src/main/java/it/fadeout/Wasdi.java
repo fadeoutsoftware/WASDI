@@ -578,7 +578,8 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @param sParentId Id the the parent process
-	 * @return Primitive Result with the output status of the operation
+	 * @return Primitive Result with the output status of the operation: boolValue = true, intValue = 200, stringValue = processId if the operation is fine. 
+	 * 			otherwise boolValue = false, intValue = httpErrorCode.
 	 * @throws IOException
 	 */
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
@@ -1128,7 +1129,7 @@ public class Wasdi extends ResourceConfig {
 			
 			if (Utils.isNullOrEmpty(sNodeUrl)) { sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest"; }
 
-		    String sUrl = sBaseUrl + "/processing/downloadgraph?workflowId="+sWorkflowId;
+		    String sUrl = sBaseUrl + "/workflows/download?workflowId="+sWorkflowId;
 		    
 		    String sOutputFilePath = "";
 		    

@@ -216,7 +216,6 @@ var WappsController = (function() {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 

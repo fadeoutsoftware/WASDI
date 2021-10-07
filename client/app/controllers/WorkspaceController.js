@@ -4,7 +4,7 @@
 
 var WorkspaceController = (function () {
     function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
-                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oSearchOrbitService,
+                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oOpportunitySearchService,
                                  $interval) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
@@ -26,7 +26,7 @@ var WorkspaceController = (function () {
         this.m_oRootScope = $rootScope;
         this.m_oSelectedProduct = null;
         this.m_oWorkspaceSelected = null;
-        this.m_oSearchOrbitService = oSearchOrbitService;
+        this.m_oOpportunitySearchService = oOpportunitySearchService;
         this.m_aoSatellitePositions = [];
         this.m_aoSateliteInputTraks = [];
         this.m_oFakePosition = null;
@@ -199,7 +199,6 @@ var WorkspaceController = (function () {
         if (this.m_bOpeningWorkspace) return;
 
         this.m_bLoadingWSFiles = true;
-        //this.m_oWorkspaceSelected = null;
 
         if (utilsIsObjectNullOrUndefined(oWorkspace)) return false;
         if (utilsIsStrNullOrEmpty(oWorkspace.workspaceId)) return false;
@@ -217,12 +216,9 @@ var WorkspaceController = (function () {
 
 
         var oController = this;
-
         this.m_bIsVisibleFiles = true;
         this.m_bIsOpenInfo = false;
-
         var oWorkspaceId = oWorkspace.workspaceId;
-
         this.m_bIsVisibleFiles = true;
 
 
@@ -478,7 +474,7 @@ var WorkspaceController = (function () {
             var oActualSat = this.m_aoSateliteInputTraks[iSat];
 
 
-            this.m_oSearchOrbitService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
+            this.m_oOpportunitySearchService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
 
                 if (utilsIsObjectNullOrUndefined(response) === false) {
                     var oData = response.data;
@@ -552,7 +548,7 @@ var WorkspaceController = (function () {
 
         var oController = this;
 
-        this.m_oSearchOrbitService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
+        this.m_oOpportunitySearchService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
             if (utilsIsObjectNullOrUndefined(response) === false) {
                 var oData = response.data;
                 if (utilsIsObjectNullOrUndefined(oData) === false) {
@@ -641,7 +637,7 @@ var WorkspaceController = (function () {
         'RabbitStompService',
         'GlobeService',
         '$rootScope',
-        'SearchOrbitService',
+        'OpportunitySearchService',
         '$interval'
     ];
     return WorkspaceController;

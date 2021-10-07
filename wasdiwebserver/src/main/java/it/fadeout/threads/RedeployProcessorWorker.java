@@ -84,7 +84,7 @@ public class RedeployProcessorWorker extends Thread  {
 				if (!sUrl.endsWith("/")) sUrl += "/";
 				
 				// Compose the API string				
-				sUrl += "processors/redeploy?processorId="+m_sProcessorId+"&workspaceId="+m_sWorkspaceId;
+				sUrl += "processors/redeploy?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId;
 				
 				// Add the auth header				
 				Map<String, String> asHeaders = new HashMap<String, String>();

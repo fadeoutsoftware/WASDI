@@ -57,6 +57,7 @@ import wasdi.shared.viewmodels.UserViewModel;
 
 /**
  * Authorization Resource.
+ * 
  * Hosts the API for:
  * 	.User login management
  *  .Sessions

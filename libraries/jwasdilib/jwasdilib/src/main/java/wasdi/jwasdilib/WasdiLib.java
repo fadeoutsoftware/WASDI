@@ -880,7 +880,7 @@ public class WasdiLib {
 	public String getWorkspaceUrlByWsId(String sWorkspaceId) {
 		log("WasdiLib.getWorkspaceUrlByWsId( " + sWorkspaceId + " )");
 		try {
-			String sUrl = m_sBaseUrl + "/ws?sWorkspaceId=" + sWorkspaceId;
+			String sUrl = m_sBaseUrl + "/ws/getws?workspace=" + sWorkspaceId;
 
 			// Get all the Workspaces
 			String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -953,7 +953,7 @@ public class WasdiLib {
 		List<String> asProducts = new ArrayList<String>();
 		try {
 
-			String sUrl = m_sBaseUrl + "/product/byws?sWorkspaceId=" + sWorkspaceId;
+			String sUrl = m_sBaseUrl + "/product/byws?workspace=" + sWorkspaceId;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
@@ -979,7 +979,7 @@ public class WasdiLib {
 		List<String> asProducts = new ArrayList<String>();
 		try {
 
-			String sUrl = m_sBaseUrl + "/product/byws?sWorkspaceId=" + m_sActiveWorkspace;
+			String sUrl = m_sBaseUrl + "/product/byws?workspace=" + m_sActiveWorkspace;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
@@ -1238,7 +1238,7 @@ public class WasdiLib {
 	public List<Map<String, Object>> getWorkflows() {
 
 		try {
-			String sUrl = m_sBaseUrl + "/processing/getgraphsbyusr";
+			String sUrl = m_sBaseUrl + "/workflows/getbyuser";
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
@@ -1265,7 +1265,7 @@ public class WasdiLib {
 
 			String sProcessId = "";
 			String sWorkflowId = "";
-			String sUrl = m_sBaseUrl + "/processing/graph_id?workspace=" + m_sActiveWorkspace;
+			String sUrl = m_sBaseUrl + "/workflows/run?workspace=" + m_sActiveWorkspace;
 
 			List<Map<String,Object>> aoWorkflows = getWorkflows();
 
@@ -1343,7 +1343,7 @@ public class WasdiLib {
 		}
 		try {
 
-			String sUrl = getWorkspaceBaseUrl() + "/process/byid?sProcessId="+sProcessId;
+			String sUrl = getWorkspaceBaseUrl() + "/process/byid?procws="+sProcessId;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -1465,7 +1465,7 @@ public class WasdiLib {
 				System.out.println("sProcessId must not be empty");
 			}
 
-			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId="+sProcessId+"&status="+sStatus;
+			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?procws="+sProcessId+"&status="+sStatus;
 			if(iPerc >= 0 && iPerc <=100) {
 				sUrl += "&perc="+iPerc;
 			}
@@ -1508,7 +1508,7 @@ public class WasdiLib {
 
 			String sStatus = "RUNNING";
 
-			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId="+m_sMyProcId+"&status="+sStatus+"&perc="+iPerc + "&sendrabbit=1";
+			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?procws="+m_sMyProcId+"&status="+sStatus+"&perc="+iPerc + "&sendrabbit=1";
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -1695,7 +1695,7 @@ public class WasdiLib {
 
 			if (!m_bIsOnServer) return "RUNNING";
 
-			String sUrl = getWorkspaceBaseUrl() + "/process/setpayload?sProcessId="+sProcessId+"&payload="+sData;
+			String sUrl = getWorkspaceBaseUrl() + "/process/setpayload?procws="+sProcessId+"&payload="+sData;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -2509,7 +2509,7 @@ public class WasdiLib {
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 
 			String sUrl = m_sBaseUrl + "/filebuffer/download?fileUrl=" + sEncodedFileLink+"&provider="+
-					sProvider +"&workspaceId="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
+					sProvider +"&workspace="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
 
 			// Call the server
 			String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2809,7 +2809,7 @@ public class WasdiLib {
 		try {
 
 			// Build API URL
-			String sUrl = getWorkspaceBaseUrl() + "/product/delete?sProductName="+sProduct+"&bDeleteFile=true&sWorkspaceId="+m_sActiveWorkspace+"&bDeleteLayer=true";
+			String sUrl = getWorkspaceBaseUrl() + "/product/delete?name="+sProduct+"&deletefile=true&workspace="+m_sActiveWorkspace+"&deletelayer=true";
 
 			// Call API
 			String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -3673,8 +3673,8 @@ public class WasdiLib {
 		}
 		try {
 			StringBuilder oUrlBuilder = new StringBuilder()
-					.append(getBaseUrl()).append("/ws/delete?sWorkspaceId=").append(sWorkspaceId)
-					.append("&bDeleteLayer=").append(true).append("&bDeleteFile=").append(true);
+					.append(getBaseUrl()).append("/ws/delete?workspace=").append(sWorkspaceId)
+					.append("&deletelayer=").append(true).append("&deletefile=").append(true);
 
 			sResult = httpDelete(oUrlBuilder.toString(), getStandardHeaders());
 			if(null==sResult) {
@@ -3779,7 +3779,7 @@ public class WasdiLib {
 			StringBuilder oUrl = new StringBuilder()
 					.append(getWorkspaceBaseUrl())
 					.append("/process/byws?")
-					.append("sWorkspaceId=").append(getActiveWorkspace())
+					.append("workspace=").append(getActiveWorkspace())
 					.append("&startindex=").append(iStartIndex);
 			if(null!=iEndIndex && iEndIndex > iStartIndex) {
 				oUrl = oUrl.append("&endindex=").append(iEndIndex);
@@ -3842,7 +3842,7 @@ public class WasdiLib {
 			StringBuilder oUrl = new StringBuilder()
 					.append(getWorkspaceBaseUrl())
 					.append("/process/payload")
-					.append("?processObjId=").append(sProcessObjId);
+					.append("?procws=").append(sProcessObjId);
 			String sResponse = httpGet(oUrl.toString(), getStandardHeaders()); 
 			sResponse = java.net.URLDecoder.decode(sResponse, java.nio.charset.StandardCharsets.UTF_8.name());
 			return sResponse;
@@ -3862,7 +3862,7 @@ public class WasdiLib {
 		try {
 			StringBuilder oUrl = new StringBuilder()
 					.append(getBaseUrl())
-					.append("/product/byname?sProductName=").append(sFileName)
+					.append("/product/byname?name=").append(sFileName)
 					.append("&workspace=").append(getActiveWorkspace());
 			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 		}catch (Exception e) {
@@ -4131,7 +4131,7 @@ public class WasdiLib {
 			StringBuilder oUrl = new StringBuilder()
 					.append(getWorkspaceBaseUrl())
 					.append("/process/setsubpid?")
-					.append("sProcessId=").append(sProcessId)
+					.append("procws=").append(sProcessId)
 					.append("subpid").append(iSubPid);
 
 			sResponse = httpGet(oUrl.toString(), getStandardHeaders());

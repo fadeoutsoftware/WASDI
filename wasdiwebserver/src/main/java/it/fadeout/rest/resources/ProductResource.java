@@ -39,17 +39,40 @@ import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 
+/**
+ * Product Resource.
+ * 
+ * Hosts API for
+ * 	.Add and remove products to workspace 
+ * 	.Get list of products in workspace
+ * 	.Upload new products
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/product")
 public class ProductResource {
 
+	/**
+	 * Servlet Config to access web.xml
+	 */
     @Context
     ServletConfig m_oServletConfig;
-
+    
+    /**
+     * Add a product to a workspace. The file that is going to be added must 
+     * be present in the local node workspace folder BUT THIS API DOES NOT CHECK
+     * 
+     * @param sSessionId User Session Id
+     * @param sProductName Name of the product to add: it is the name of the file, included extension.
+     * @param sWorkspaceId Workspace Id
+     * @return Primitive Result with true of false
+     */
     @GET
     @Path("addtows")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId,
-                                                 @QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+                                                 @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
         try {
             Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
 
@@ -111,14 +134,21 @@ public class ProductResource {
         }
         return PrimitiveResult.getInvalid();
     }
-
+    
+    /**
+     * Get a product by the file name
+     * @param sSessionId User Session Id
+     * @param sProductName Product Name = file name with extension
+     * @param sWorkspaceId Workspace Id
+     * @return Georef Product View Model
+     */
     @GET
     @Path("byname")
     @Produces({"application/xml", "application/json", "text/xml"})
     public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
-                                                   @QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspace) {
+                                                   @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
         try {
-            Utils.debugLog("ProductResource.GetByProductName(Product: " + sProductName + ", WS: " + sWorkspace + " )");
+            Utils.debugLog("ProductResource.GetByProductName(Product: " + sProductName + ", WS: " + sWorkspaceId + " )");
 
             // Validate Session
             User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -129,7 +159,7 @@ public class ProductResource {
             }
             if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
-            String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+            String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Read the product from db
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -150,16 +180,23 @@ public class ProductResource {
                 Utils.debugLog("ProductResource.GetByProductName: product not found");
             }
         } catch (Exception oE) {
-            Utils.debugLog("ProductResource.GetByProductName( Product: " + sProductName + ", WS: " + sWorkspace + " ): " + oE);
+            Utils.debugLog("ProductResource.GetByProductName( Product: " + sProductName + ", WS: " + sWorkspaceId + " ): " + oE);
         }
         return null;
     }
-
+    
+    /**
+     * Get Metadata of a product from the name
+     * @param sSessionId User Session
+     * @param sProductName Product Name = file name with extension
+     * @param sWorkspaceId Workspace id
+     * @return Metadata View Model
+     */
     @GET
     @Path("metadatabyname")
     @Produces({"application/xml", "application/json", "text/xml"})
     public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
-                                                      @QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
+                                                      @QueryParam("name") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 
         Utils.debugLog("ProductResource.GetMetadataByProductName( Product: " + sProductName + ", WS: " + sWorkspaceId + " )");
 
@@ -249,24 +286,35 @@ public class ProductResource {
         // There was a problem
         return null;
     }
-
+    
+    /**
+     * Get the list of products in a workspace.
+     * 
+     * @param sSessionId User Session Id
+     * @param sWorkspaceId Workspace Id
+     * @return List of Georef Product View Models
+     */
     @GET
     @Path("/byws")
     @Produces({"application/xml", "application/json", "text/xml"})
     public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
-                                                           @QueryParam("sWorkspaceId") String sWorkspaceId) {
+                                                           @QueryParam("workspace") String sWorkspaceId) {
 
         Utils.debugLog("ProductResource.GetListByWorkspace( WS: " + sWorkspaceId + " )");
-
+        
+        // Prepare return object, empty to sart
         List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
-        if (Utils.isNullOrEmpty(sWorkspaceId)) {
-            Utils.debugLog("ProductResource.getListByWorkspace(" + sWorkspaceId + "): workspace is null or empty");
-            return aoProductList;
-        }
-
+        
         try {
+        	
+            // Validate input
+            if (Utils.isNullOrEmpty(sWorkspaceId)) {
+                Utils.debugLog("ProductResource.getListByWorkspace(" + sWorkspaceId + "): workspace is null or empty");
+                return aoProductList;
+            }        	
+        	
             User oUser = Wasdi.getUserFromSession(sSessionId);
-            // Domain Check
+            
             if (oUser == null) {
                 Utils.debugLog("ProductResource.GetListByWorkspace: invalid session");
                 return aoProductList;
@@ -274,19 +322,19 @@ public class ProductResource {
             if (Utils.isNullOrEmpty(oUser.getUserId())) {
                 return aoProductList;
             }
+            
+            // Get the list of products for workspace
 
             Utils.debugLog("ProductResource.GetListByWorkspace: products for " + sWorkspaceId);
 
-            // Create repo
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-
             List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getByWorkspace(sWorkspaceId);
 
             Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoDownloadedFiles.size());
 
             ArrayList<String> asAddedFiles = new ArrayList<String>();
 
-            // For each
+            // For each found product
             for (int iProducts = 0; iProducts < aoDownloadedFiles.size(); iProducts++) {
 
                 // Get the downloaded file
@@ -294,44 +342,21 @@ public class ProductResource {
 
                 // Add View model to return list
                 if (oDownloaded != null) {
-
+                	
+                	// Avoid duplication: should not happen, but this is a security code
                     if (asAddedFiles.contains(oDownloaded.getFilePath())) {
                         Utils.debugLog("ProductResource.GetListByWorkspace: " + oDownloaded.getFilePath() + " is a duplicate entry");
                         continue;
                     }
-
+                    
+                    // Get the View Model
                     ProductViewModel oProductViewModel = oDownloaded.getProductViewModel();
 
                     if (oProductViewModel != null) {
+                    	
+                    	// Convert the view model in Georef version
                         GeorefProductViewModel oGeoRefProductViewModel = new GeorefProductViewModel(oProductViewModel);
                         oGeoRefProductViewModel.setBbox(oDownloaded.getBoundingBox());
-
-//						if (oGeoRefProductViewModel.getBandsGroups() != null) {
-//							ArrayList<BandViewModel> aoBands = oGeoRefProductViewModel.getBandsGroups().getBands();
-//
-//							if (aoBands != null) {
-//								for (int iBands = 0; iBands < aoBands.size(); iBands++) {
-//
-//									BandViewModel oBand = aoBands.get(iBands);
-//
-//									if (oBand != null) {
-//										PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oGeoRefProductViewModel.getName(), oBand.getName());
-//
-//										if (oPublishBand != null) {
-//											oBand.setPublished(true);
-//											oBand.setLayerId(oPublishBand.getLayerId());
-//											oBand.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
-//											oBand.setGeoserverUrl(oPublishBand.getGeoserverUrl());
-//											
-//										} 
-//										else {
-//											oBand.setPublished(false);
-//										}
-//									}
-//
-//								}
-//							}
-//						}
 
                         oGeoRefProductViewModel.setMetadata(null);
                         aoProductList.add(oGeoRefProductViewModel);
@@ -348,25 +373,38 @@ public class ProductResource {
         } catch (Exception oEx) {
             Utils.debugLog("ProductResource.GetListByWorkspace: " + oEx);
         }
-
+        
+        // Return the list
         return aoProductList;
     }
-
-
+    
+    /**
+     * Get a light list of the products in a workspace. The light list 
+     * does not load all the Product View Model, but only the name and the bbox.
+     * It is used by the client to populate the first list of products in the editor
+     * 
+     * @param sSessionId User Session Id
+     * @param sWorkspaceId Workspace Id 
+     * @return List of Georef Product View Models
+     */
     @GET
     @Path("/bywslight")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+    public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 
         Utils.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " )");
-
+        
         List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
-        if (Utils.isNullOrEmpty(sWorkspaceId)) {
-            Utils.debugLog("ProductResource.getLightListByWorkspace(" + sWorkspaceId + "): workspace is null or empty");
-            return aoProductList;
-        }
 
         try {
+        	
+        	// Validate inputs
+        	
+            if (Utils.isNullOrEmpty(sWorkspaceId)) {
+                Utils.debugLog("ProductResource.getLightListByWorkspace(" + sWorkspaceId + "): workspace is null or empty");
+                return aoProductList;
+            }
+        	
             User oUser = Wasdi.getUserFromSession(sSessionId);
             // Domain Check
             if (oUser == null) {
@@ -405,12 +443,19 @@ public class ProductResource {
 
         return aoProductList;
     }
-
+    
+    /**
+     * Get a list of strings each representing the name of a product (file name with extension) in a workspace.
+     * 
+     * @param sSessionId User Session Id
+     * @param sWorkspaceId Workspace Id
+     * @return List of strings each representing the name of a product (file name with extension) in a workspace.
+     */
     @GET
     @Path("/namesbyws")
     @Produces({"application/xml", "application/json", "text/xml"})
     public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
-                                                 @QueryParam("sWorkspaceId") String sWorkspaceId) {
+                                                 @QueryParam("workspace") String sWorkspaceId) {
 
         Utils.debugLog("ProductResource.getNamesByWorkspace( WS: " + sWorkspaceId + " )");
 
@@ -462,22 +507,28 @@ public class ProductResource {
 
         return aoProductList;
     }
-
+    
+    /**
+     * Update a Product from the correspondig View Model
+     * @param sSessionId User Session
+     * @param sWorkspaceId Workspace Id
+     * @param oProductViewModel Product View Model
+     * @return std http response
+     */
     @POST
     @Path("/update")
     @Produces({"application/xml", "application/json", "text/xml"})
     public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId,
-                                           @QueryParam("workspace") String sWorkspace, ProductViewModel oProductViewModel) {
+                                           @QueryParam("workspace") String sWorkspaceId, ProductViewModel oProductViewModel) {
 
-        Utils.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspace + ", ... )");
-
+        Utils.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspaceId + ", ... )");
 
         try {
 
             // Domain Check
             User oUser = Wasdi.getUserFromSession(sSessionId);
             if (oUser == null) {
-                Utils.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspace + ", ... ): invalid session");
+                Utils.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspaceId + ", ... ): invalid session");
                 return Response.status(401).build();
             }
             if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -490,8 +541,8 @@ public class ProductResource {
 
             Utils.debugLog("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
 
-            String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace),
-                    sWorkspace);
+            String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
+                    sWorkspaceId);
 
             // Create repo
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -525,8 +576,19 @@ public class ProductResource {
 
         return Response.status(200).build();
     }
-
-
+    
+    /**
+     * Uplads a new file as a Product in a workspace.
+     * This API saves the files and trigger an ingest operation 
+     * in the launcher
+     * 
+     * @param fileInputStream File stream
+     * @param sSessionId User Session
+     * @param sWorkspaceId Workspace id
+     * @param sName File Name
+     * @return std http response
+     * @throws Exception
+     */
     @POST
     @Path("/uploadfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -565,6 +627,7 @@ public class ProductResource {
             Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
             return Response.status(403).build();
         }
+        
         // Take path
         String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
         String sPath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
@@ -617,7 +680,19 @@ public class ProductResource {
             return Response.status(500).build();
         }
     }
-
+    
+    /**
+     * Upload file to a workspace. This version is used from the libs:
+     * the difference is that does not trigger the ingestion operation
+     * of the launcher.
+     * 
+     * @param fileInputStream File Stream
+     * @param sSessionId User Session
+     * @param sWorkspaceId Workspace Id
+     * @param sName File Name
+     * @return std http response
+     * @throws Exception
+     */
     @POST
     @Path("/uploadfilebylib")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -683,13 +758,24 @@ public class ProductResource {
             return Response.status(500).build();
         }
     }
-
+    
+    /**
+     * Deletes a product from a workspace.
+     * This deletes also the file on the disk and all the published bands
+     * 
+     * @param sSessionId User Session Id
+     * @param sProductName Product Name (file name withe extension)
+     * @param bDeleteFile flag to confirm to delete also the file
+     * @param sWorkspaceId Workspace id
+     * @param bDeleteLayer flag to confirm to delete also the WxS layers
+     * @return Primitive Result with boolValue = true in case of success.
+     */
     @GET
     @Path("delete")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
-                                         @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile,
-                                         @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
+                                         @QueryParam("name") String sProductName, @QueryParam("deletefile") Boolean bDeleteFile,
+                                         @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer) {
 
         Utils.debugLog("ProductResource.DeleteProduct( Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + " )");
 
@@ -921,18 +1007,18 @@ public class ProductResource {
      * @param bDeleteFile    Flag to control the behaviour of deletion
      * @param sWorkspaceId   Id of the workspace in which the product is stored
      * @param bDeleteLayer   Flag to control the behaviour of deletion
-     * @param as_ProductList An array containing the list of product names to be deleted
+     * @param asProductList An array containing the list of product names to be deleted
      * @return Primitive result with 200 & TRUE in case all files was deleted. 207 & FALSE in case not all file was deleted
      */
     @POST
     @Path("deletelist")
     @Consumes(MediaType.APPLICATION_JSON)
-    public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("bDeleteFile") Boolean bDeleteFile,
-                                         @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer,
-                                         List<String> as_ProductList) {
+    public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("deletefile") Boolean bDeleteFile,
+                                         @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
+                                         List<String> asProductList) {
         // Support variable used to identify if deletions of one or more products failed
         AtomicBoolean bDirty = new AtomicBoolean(false);
-        as_ProductList.stream().forEach(sFile -> {
+        asProductList.stream().forEach(sFile -> {
             // if one deletion fail is detected the bDirty boolean becames true
             bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,sFile,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
         });

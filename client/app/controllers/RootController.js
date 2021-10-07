@@ -5,7 +5,7 @@ var RootController = (function() {
 
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
                             $timeout,oModalService,oRabbitStompService, $window) {
 
         this.m_oScope = $scope;
@@ -13,7 +13,7 @@ var RootController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oState=$state;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
@@ -85,14 +85,14 @@ var RootController = (function() {
             }
         }
 
-        this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
+        this.m_aoProcessesRunning = this.m_oProcessWorkspaceService.getProcesses();
 
         /*when ProcessLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
         $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
             // you could inspect the data to see
             if(data == true)
             {
-                var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+                var aoProcessesRunning = $scope.m_oController.m_oProcessWorkspaceService.getProcesses();
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
                 // Set the number of running processes
@@ -288,7 +288,7 @@ var RootController = (function() {
     RootController.prototype.getSummary = function()
     {
         var oController = this;
-        this.m_oProcessesLaunchedService.getSummary()
+        this.m_oProcessWorkspaceService.getSummary()
             .then(function (data, status) {
                 if(utilsIsObjectNullOrUndefined(data.data) === true || data.data.BoolValue === false)
                 {
@@ -525,7 +525,7 @@ var RootController = (function() {
 
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
-        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
+        this.m_oProcessWorkspaceService.deleteProcess(oProcessInput);
         return true;
     };
 
@@ -599,8 +599,6 @@ var RootController = (function() {
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
                 oController.m_oUser = oController.m_oConstantsService.getUser();
-                // if(result === 'delete')
-                //     oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
             });
         });
 
@@ -724,7 +722,7 @@ var RootController = (function() {
         'ConstantsService',
         'AuthService',
         '$state',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'WorkspaceService',
         '$timeout',
         'ModalService',

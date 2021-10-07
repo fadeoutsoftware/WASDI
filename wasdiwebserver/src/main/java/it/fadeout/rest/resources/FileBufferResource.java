@@ -92,7 +92,7 @@ public class FileBufferResource {
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
 									@QueryParam("fileUrl") String sFileUrl,
 									@QueryParam("provider") String sProvider,
-									@QueryParam("workspaceId") String sWorkspaceId,
+									@QueryParam("workspace") String sWorkspaceId,
 									@QueryParam("bbox") String sBoundingBox,
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException
@@ -181,7 +181,7 @@ public class FileBufferResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
 												@QueryParam("fileUrl") String sFileUrl,
-												@QueryParam("workspaceId") String sWorkspaceId,
+												@QueryParam("workspace") String sWorkspaceId,
 												@QueryParam("band") String sBand,
 												@QueryParam("style") String sStyle, 
 												@QueryParam("parent") String sParentProcessWorkspaceId) throws IOException {
@@ -208,6 +208,11 @@ public class FileBufferResource {
 			// Get the product
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullProductPath+sFileUrl);
+			
+			if (oDownloadedFile == null) {
+				Utils.debugLog("FileBufferResource.PublishBand: cannot find downloaded file, return");
+				return oReturnValue;
+			}
 			
 			// If the style is not set, look if there is a default one in the downloaded file
 			if (Utils.isNullOrEmpty(sStyle)) {

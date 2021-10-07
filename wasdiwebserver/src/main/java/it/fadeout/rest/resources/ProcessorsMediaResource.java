@@ -56,18 +56,59 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PublisherFilterViewModel;
 import wasdi.shared.viewmodels.ReviewViewModel;
 
+/**
+ * Processors Media Resource.
+ * 
+ * Hosts the API for:
+ * 	.upload and update processor logo and associated images
+ * 	.handle all the processor info related to the app-store (categories, prices...)
+ * 	.handle reviews and comments
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("processormedia")
 public class ProcessorsMediaResource {
 	
+	/**
+	 * Servlet config to access web.xml
+	 */
 	@Context
 	ServletConfig m_oServletConfig;
 	
+	/**
+	 * Max image size in Mb
+	 */
 	public static int MAX_IMAGE_MB_SIZE = 2;
+	/**
+	 * Accepted images extensions
+	 */
 	public static String[] IMAGE_PROCESSORS_EXTENSIONS = {"jpg", "png", "svg"};
+	/**
+	 * Default base name of the processor logo
+	 */
 	public static String DEFAULT_LOGO_PROCESSOR_NAME = "logo";
+	/**
+	 * Size of the logo in pixels
+	 */
 	public static Integer LOGO_SIZE = 540;
+	/**
+	 * Pre-defined names of images in the processor gallery
+	 */
 	public static String[] IMAGE_NAMES = { "1", "2", "3", "4", "5", "6" };
 	
+	/**
+	 * Upload a new processor Logo
+	 * Logos are saved in the web application folder, under assets/img/processors/[ProcessorName]
+	 * If the logo exists it is overwritten.
+	 * All logos are resized to support the LOGO_SIZE
+	 * 
+	 * @param oInputFileStream Stream of the logo image
+	 * @param oFileMetaData Info about the file
+	 * @param sSessionId User session
+	 * @param sProcessorId Processor Id
+	 * @return std http response
+	 */
 	@POST
 	@Path("/logo/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -212,6 +253,12 @@ public class ProcessorsMediaResource {
 		return Response.status(Status.OK).build();
 	}	
 	
+	/**
+	 * Gets the logo of a processor as a Byte Stream
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id
+	 * @return Logo byte stream
+	 */
 	@GET
 	@Path("/logo/get")
 	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
@@ -265,7 +312,14 @@ public class ProcessorsMediaResource {
 
 	}
 	
-	
+	/**
+	 * Get one of the gallery images of a processor
+	 * 
+	 * @param sSessionId User session Id
+	 * @param sProcessorId Processor Id 
+	 * @param sImageName Name of the image to get
+	 * @return Image byte stream or http error code
+	 */
 	@GET
 	@Path("/images/get")
 	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
@@ -319,6 +373,13 @@ public class ProcessorsMediaResource {
 
 	}
 	
+	/**
+	 * Deletes one of the gallery images of a processor
+	 * @param sSessionId User session Id
+	 * @param sProcessorId Processor Id
+	 * @param sImageName Image Name
+	 * @return std http response
+	 */
 	@DELETE
 	@Path("/images/delete")
 	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
@@ -402,6 +463,15 @@ public class ProcessorsMediaResource {
 	}
 	
 	
+	/**
+	 * Upload a new image for the gallery of the processor
+	 * 
+	 * @param fileInputStream Stream of the image file
+	 * @param fileMetaData File metadata
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id
+	 * @return std http response
+	 */
 	@POST
 	@Path("/images/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -546,13 +616,18 @@ public class ProcessorsMediaResource {
 		return Response.ok(oPrimitiveResult).build();
 	}
 	
+	/**
+	 * Get a list of all the available categories
+	 * @param sSessionId User session Id
+	 * @return a list of App Category View Models
+	 */
 	@GET
 	@Path("categories/get")
 	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		
 		Utils.debugLog("ProcessorsMediaResource.getCategories");
 		
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		AppsCategoriesRepository oAppCategoriesRepository = new AppsCategoriesRepository();
 		
@@ -569,6 +644,13 @@ public class ProcessorsMediaResource {
 
 	}
 	
+	/**
+	 * Delete a review of a processor
+	 * @param sSessionId User Id
+	 * @param sProcessorId Processor Id
+	 * @param sReviewId Review Id
+	 * @return std http response
+	 */
 	@DELETE
 	@Path("/reviews/delete")
 	public Response deleteReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("reviewId") String sReviewId ) {
@@ -587,9 +669,7 @@ public class ProcessorsMediaResource {
 		
 		Utils.debugLog("ProcessorsMediaResource.deleteReview( sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
 		
-		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE REVIEW ************************//
-		
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -621,6 +701,13 @@ public class ProcessorsMediaResource {
 		return Response.status(Status.OK).build();
 	}
 	
+	/**
+	 * Deletes a comment to a review
+	 * @param sSessionId User Session Id
+	 * @param sReviewId Parent Review Id 
+	 * @param sCommentId Comment Id
+	 * @return std http response
+	 */
 	@DELETE
 	@Path("/comments/delete")
 	public Response deleteComment(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId, @QueryParam("commentId") String sCommentId ) {
@@ -639,9 +726,8 @@ public class ProcessorsMediaResource {
 		
 		Utils.debugLog("ProcessorsMediaResource.deleteComment( sReviewId: " + sReviewId + " sCommentId: " + sCommentId + ")");
 		
-		//************************ TODO CHECK IF THE USER IS THE OWNER OF THE COMMENT ************************//
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
-		User oUser = getUser(sSessionId);
 		// Check the user session
 		if (oUser == null) {
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -673,13 +759,19 @@ public class ProcessorsMediaResource {
 		return Response.status(Status.OK).build();
 	}
 	
+	/**
+	 * Update a review
+	 * @param sSessionId User Session
+	 * @param oReviewViewModel Review View Model with updated information
+	 * @return std http response
+	 */
 	@POST
 	@Path("/reviews/update")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
 		
 		Utils.debugLog("ProcessorsMediaResource.updateReview");
 	
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -709,13 +801,19 @@ public class ProcessorsMediaResource {
 		}
 	}
 	
+	/**
+	 * Updates a comment
+	 * @param sSessionId User Session Id
+	 * @param oCommentViewModel Comment View Model
+	 * @return std http response
+	 */
 	@POST
 	@Path("/comments/update")
 	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentViewModel oCommentViewModel) {
 		
 		Utils.debugLog("ProcessorsMediaResource.updateComment");
 	
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -739,14 +837,19 @@ public class ProcessorsMediaResource {
 		}
 	}
 	
+	/**
+	 * Add a new review to a processor
+	 * @param sSessionId User session id
+	 * @param oReviewViewModel Review View Model
+	 * @return std http reponse
+	 */
 	@POST
 	@Path("/reviews/add")
-//	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
 		
 		Utils.debugLog("ProcessorsMediaResource.addReview");
 	
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			Utils.debugLog("ProcessorsMediaResource.addReview: invalid user");
@@ -796,13 +899,19 @@ public class ProcessorsMediaResource {
 		return Response.status(Status.OK).build();
 	}
 	
+	/**
+	 * Add a comment to a review
+	 * @param sSessionId User Session Id
+	 * @param oCommentViewModel Comment View Model
+	 * @return std http reponse
+	 */
 	@POST
 	@Path("/comments/add")
 	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentViewModel oCommentViewModel) {
 		
 		Utils.debugLog("ProcessorsMediaResource.addComment");
 	
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
 			Utils.debugLog("ProcessorsMediaResource.addComment: invalid user");
@@ -841,6 +950,14 @@ public class ProcessorsMediaResource {
 		return Response.status(Status.OK).build();
 	}
 	
+	/**
+	 * Get paginated list of reviews of a processor 
+	 * @param sSessionId User Session Id
+	 * @param sProcessorName processor name
+	 * @param iPage Page to get (1 based)
+	 * @param iItemsPerPage Items to get per page
+	 * @return List of List Review View Model, that represents the light version of the review
+	 */
 	@GET
 	@Path("/reviews/getlist")
 	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
@@ -848,7 +965,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.getReview");
 
 
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -897,12 +1014,18 @@ public class ProcessorsMediaResource {
 
 	}
 	
+	/**
+	 * Get the list of comments associated to a review
+	 * @param sSessionId User Session Id
+	 * @param sReviewId Review Id
+	 * @return List Comment View Model
+	 */
 	@GET
 	@Path("/comments/getlist")
 	public Response getCommentListByReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId) {
 		Utils.debugLog("ProcessorsMediaResource.getCommentListByReview");
 
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -957,6 +1080,11 @@ public class ProcessorsMediaResource {
 		return oListComments;
 	}
 	
+	/**
+	 * Get list of WASDI publishers
+	 * @param sSessionId User Session Id
+	 * @return list of Publisher Filter View Models
+	 */
 	@GET
 	@Path("/publisher/getlist")
 	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
@@ -964,7 +1092,7 @@ public class ProcessorsMediaResource {
 		Utils.debugLog("ProcessorsMediaResource.getPublishers");
 
 
-		User oUser = getUser(sSessionId);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -1153,22 +1281,5 @@ public class ProcessorsMediaResource {
 		
 		return aoAppCategoriesViewModel;
 	} 
-	
-	protected User getUser(String sSessionId){
-		
-		if (Utils.isNullOrEmpty(sSessionId)) {
-			return null;
-		}
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
-		if (oUser == null) {
-			return null;
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			return null;
-		}
-		return oUser;	
-	}
-
 }
 

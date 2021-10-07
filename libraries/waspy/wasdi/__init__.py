@@ -719,7 +719,7 @@ def deleteWorkspace(sWorkspaceId):
     openWorkspaceById(sWorkspaceId)
     
     try:
-        sUrl = getWorkspaceBaseUrl() + '/ws/delete?sWorkspaceId='+sWorkspaceId+'&bDeleteLayer='+str(bDeleteLayer) + "&bDeleteFile=" + str(bDeleteFile)
+        sUrl = getWorkspaceBaseUrl() + '/ws/delete?workspace='+sWorkspaceId+'&deletelayer='+str(bDeleteLayer) + "&deletefile=" + str(bDeleteFile)
         
         try:
             oResult = requests.delete(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -841,7 +841,7 @@ def getWorkspaceUrlByWsId(sWsId):
 
     asHeaders = _getStandardHeaders()
 
-    sUrl = m_sBaseUrl + '/ws?sWorkspaceId=' + sWsId
+    sUrl = m_sBaseUrl + '/ws/getws?workspace=' + sWsId
 
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -922,7 +922,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
 
     m_sActiveWorkspace = sWorkspaceId
     asHeaders = _getStandardHeaders()
-    payload = {'sWorkspaceId': sWorkspaceId}
+    payload = {'workspace': sWorkspaceId}
 
     sUrl = m_sBaseUrl + '/product/namesbyws'
 
@@ -1067,7 +1067,7 @@ def getProcessStatus(sProcessId):
         return "ERROR"    
 
     asHeaders = _getStandardHeaders()
-    payload = {'processObjId': sProcessId}
+    payload = {'procws': sProcessId}
 
     sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
 
@@ -1141,7 +1141,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
     global m_sSessionId
 
     asHeaders = _getStandardHeaders()
-    payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
+    payload = {'procws': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     sUrl = getWorkspaceBaseUrl() + '/process/updatebyid'
 
@@ -1318,7 +1318,7 @@ def updateProgressPerc(iPerc):
                 return ''
         
         sStatus = "RUNNING"
-        sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
+        sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?procws=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
         asHeaders = _getStandardHeaders()
         
         try:
@@ -1354,7 +1354,7 @@ def setProcessPayload(sProcessId, data):
 
     try:
         asHeaders = _getStandardHeaders()
-        payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
+        payload = {'procws': sProcessId, 'payload': json.dumps(data)}
 
         sUrl = getWorkspaceBaseUrl() + '/process/setpayload'
         
@@ -1410,7 +1410,7 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
             wasdiLog('[WARNING] waspy.getProcessorPayload: process obj id is None, aborting')
             return None
         sUrl = getWorkspaceBaseUrl() + '/process/payload'
-        asParams = {'processObjId': sProcessObjId}
+        asParams = {'procws': sProcessObjId}
         asHeaders = _getStandardHeaders()
         
         try:
@@ -1457,7 +1457,7 @@ def setSubPid(sProcessId, iSubPid):
 
     try:
         asHeaders = _getStandardHeaders()
-        payload = {'sProcessId': sProcessId, 'subpid': iSubPid}
+        payload = {'procws': sProcessId, 'subpid': iSubPid}
 
         sUrl = getWorkspaceBaseUrl() + '/process/setsubpid'
         
@@ -1663,11 +1663,11 @@ def deleteProduct(sProduct):
 
     asHeaders = _getStandardHeaders()
     sUrl = getWorkspaceBaseUrl()
-    sUrl += "/product/delete?sProductName="
+    sUrl += "/product/delete?name="
     sUrl += sProduct
-    sUrl += "&bDeleteFile=true&sWorkspaceId="
+    sUrl += "&deletefile=true&workspace="
     sUrl += m_sActiveWorkspace
-    sUrl += "&bDeleteLayer=true"
+    sUrl += "&deletelayer=true"
     
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -2042,7 +2042,7 @@ def getProductBBOX(sFileName):
     """
 
     sUrl = getBaseUrl()
-    sUrl += "/product/byname?sProductName="
+    sUrl += "/product/byname?name="
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
@@ -2101,7 +2101,7 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     sUrl += "/filebuffer/download?fileUrl="
     sUrl += sFileUrl
     sUrl += "&provider=" + sProvider
-    sUrl += "&workspaceId="
+    sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
 
     if sBoundingBox is not None:
@@ -2165,7 +2165,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
     sUrl += sFileUrl
     sUrl += "&provider="
     sUrl += sProvider
-    sUrl += "&workspaceId="
+    sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
     if sBoundingBox is not None:
         sUrl += "&bbox="
@@ -2813,7 +2813,7 @@ def getWorkflows():
 
     asHeaders = _getStandardHeaders()
 
-    sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
+    sUrl = m_sBaseUrl + '/workflows/getbyuser'
     
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -3137,7 +3137,7 @@ def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperatio
     
     sWorkspaceId = getActiveWorkspaceId() 
     asHeaders = _getStandardHeaders()
-    aoPayload = {'sWorkspaceId': sWorkspaceId, 'startindex': iStartIndex, 'endindex': iEndIndex}
+    aoPayload = {'workspace': sWorkspaceId, 'startindex': iStartIndex, 'endindex': iEndIndex}
     
     if sStatus is not None:
         aoPayload['status'] = sStatus
@@ -3516,7 +3516,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         return ''
 
     sProcessId = ''
-    sUrl = getBaseUrl() + "/processing/graph_id?workspace=" + getActiveWorkspaceId()
+    sUrl = getBaseUrl() + "/workflows/run?workspace=" + getActiveWorkspaceId()
 
     if m_bIsOnServer:
         sUrl += "&parent="

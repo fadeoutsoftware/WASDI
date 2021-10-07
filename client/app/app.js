@@ -13,7 +13,6 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ConstantsService',
     'wasdi.sessionInjector',
     'wasdi.AuthService',
-    'wasdi.AuthServiceFacebook',
     'wasdi.MapService',
     'wasdi.GlobeService',
     'wasdi.WorkspaceService',
@@ -21,20 +20,19 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ProductService',
     'wasdi.ConfigurationService',
     'wasdi.OpenSearchService',
-    'wasdi.ProcessesLaunchedService',
+    'wasdi.ProcessWorkspaceService',
     'wasdi.RabbitStompService',
-    'wasdi.SearchOrbitService',
+    'wasdi.OpportunitySearchService',
     'wasdi.ResultsOfSearchService',
-    'wasdi.SnapOperationService',
+    'wasdi.ProcessingService',
     'wasdi.CatalogService',
     'wasdi.PagesService',
-    'wasdi.FilterService',
     'wasdi.ProcessorService',
-//    'wasdi.AuthServiceGoogle',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
     'wasdi.NodeService',
+    'wasdi.WorkflowService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -46,9 +44,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MultiselectDropdownMenuDirective',
     'wasdi.SquaresDirective',
     'wasdi.MultiRadioButtonDropdownMenuDirective',
-    'wasdi.ImagePreviewDirective',
     'wasdi.ToggleSwitch',
-    'wasdi.ImageEditorDirective',
     'wasdi.DropdownMenuDirective',
     'wasdi.wapTextBox',
     'wasdi.wapSelectArea',
@@ -202,38 +198,30 @@ wasdiApp.controller("WasdiApplicationDetailsController",WasdiApplicationDetailsC
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);
 wasdiApp.controller("ProductInfoController",ProductInfoController);
 wasdiApp.controller("GetCapabilitiesController",GetCapabilitiesController);
-wasdiApp.controller("MergeProductsController",MergeProductsController);
 wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
 wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
 wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
 wasdiApp.controller("WorkspaceProcessesList",WorkspaceProcessesList);
 wasdiApp.controller("SnakeController",SnakeController);
-wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
 wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
-wasdiApp.controller("FilterBandController",FilterBandController);
-wasdiApp.controller("MaskManagerController",MaskManagerController);
 wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersController);
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
 wasdiApp.controller("WorkflowController", WorkflowController);
 wasdiApp.controller("WorkspaceDetailsController", WorkspaceDetailsController);
-wasdiApp.controller("WpsController", WpsController);
 wasdiApp.controller("WappsController", WappsController);
 wasdiApp.controller("EditUserController", EditUserController);
 wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("UploadController", UploadController);
 wasdiApp.controller("MosaicController", MosaicController);
-wasdiApp.controller("EditPanelController", EditPanelController);
 wasdiApp.controller("ProcessorLogsController", ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
-wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);
-
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 

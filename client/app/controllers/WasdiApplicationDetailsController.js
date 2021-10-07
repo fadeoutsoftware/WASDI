@@ -14,10 +14,10 @@ var WasdiApplicationDetailsController = (function() {
      * @param oAuthService
      * @param oProcessorService
      * @param oModalService
-     * @param oProcessesLaunchedService
+     * @param oProcessWorkspaceService
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessesLaunchedService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessWorkspaceService) {
         /**
          * Angular Scope
          */
@@ -57,7 +57,7 @@ var WasdiApplicationDetailsController = (function() {
         /**
          * Process Workspaces service
          */
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
 
         /**
          * Flat to decide to show or not more reviews link
@@ -225,7 +225,7 @@ var WasdiApplicationDetailsController = (function() {
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessesLaunchedService.getProcessorStatistics(this.m_sSelectedApplication).then(function (data) {
+        this.m_oProcessWorkspaceService.getProcessorStatistics(this.m_sSelectedApplication).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_oStats = data.data;
@@ -571,7 +571,7 @@ var WasdiApplicationDetailsController = (function() {
         'ProcessorService',
         'ProcessorMediaService',
         'ModalService',
-        'ProcessesLaunchedService'
+        'ProcessWorkspaceService'
     ];
 
     return WasdiApplicationDetailsController;

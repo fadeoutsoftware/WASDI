@@ -51,6 +51,7 @@ import wasdi.shared.viewmodels.ProductViewModel;
 
 /**
  * Catalog Resource
+ * 
  * Hosts APIs for:
  * 	.download files from wasdi
  * 	.send files to internal or external sftp
@@ -74,7 +75,7 @@ public class CatalogResources {
 	 * @param sSessionId User session id, as available in headers
 	 * @param sTokenSessionId Same user session id that can be also in this case passed as a query param
 	 * @param sFileName name of the file to download 
-	 * @param sWorkspace workspace where the file is
+	 * @param sWorkspaceId workspace where the file is
 	 * @return Stream of the file
 	 */
 	@GET
@@ -83,10 +84,10 @@ public class CatalogResources {
 	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName,
-			@QueryParam("workspace") String sWorkspace)
+			@QueryParam("workspace") String sWorkspaceId)
 	{			
 
-		Utils.debugLog("CatalogResources.DownloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspace);
+		Utils.debugLog("CatalogResources.DownloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspaceId);
 		
 		try {
 			
@@ -103,7 +104,7 @@ public class CatalogResources {
 			}
 			
 			// Get the File object
-			File oFile = this.getEntryFile(sFileName, sWorkspace);
+			File oFile = this.getEntryFile(sFileName, sWorkspaceId);
 			
 			ResponseBuilder oResponseBuilder = null;
 			
@@ -357,13 +358,13 @@ public class CatalogResources {
 	 * Check if a file is present on the actual node
 	 * @param sSessionId User Session
 	 * @param sFileName File Name
-	 * @param sWorkspace Workspace where the file is
+	 * @param sWorkspaceId Workspace where the file is
 	 * @return Primitive Result with boolValue = true if the file exist or false if not
 	 */
 	@GET
 	@Path("fileOnNode")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspace)
+	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{	
 		
 		Utils.debugLog("CatalogResources.checkFileByNode");
@@ -376,7 +377,7 @@ public class CatalogResources {
 		}
 		
 		try {
-			String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+			String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
 
 			File oFile = new File(sTargetFilePath);
 			
@@ -401,13 +402,13 @@ public class CatalogResources {
 	 * Check if a file exists on WASDI (this node for instance) or not
 	 * @param sSessionId User Session
 	 * @param sFileName File Name
-	 * @param sWorkspace Workspace Id
+	 * @param sWorkspaceId Workspace Id
 	 * @return Primitive Result with boolValue = true if the file exists, false if not exists (is not added to WASDI and/or is not on this node)
 	 */
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspace)
+	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{
 		Utils.debugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
 
@@ -418,7 +419,7 @@ public class CatalogResources {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		File oFile = this.getEntryFile(sFileName,sWorkspace);
+		File oFile = this.getEntryFile(sFileName,sWorkspaceId);
 		
 		if(oFile == null) {
 			return Response.serverError().build();	
@@ -434,7 +435,7 @@ public class CatalogResources {
 	 * Ingest a new file from sftp in to a target Workspace
 	 * @param sSessionId User session token header
 	 * @param sFile name of the file to ingest
-	 * @param sWorkspace target workspace
+	 * @param sWorkspaceId target workspace
 	 * @param sParentProcessWorkspaceId Proc Id of the parent process
 	 * @param sStyle Default style to use for the file
 	 * @return Http Response
@@ -442,12 +443,12 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
-	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
 		
 		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
 		if (Utils.isNullOrEmpty(sStyle)) sStyle = "";
 
-		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspace + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
+		Utils.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspaceId + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
 
 		// Check user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -471,13 +472,13 @@ public class CatalogResources {
 			
 			// Ingest file parameter
 			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspace);
+			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspace);
+			oParameter.setExchange(sWorkspaceId);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			oParameter.setStyle(sStyle);
 			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
@@ -501,7 +502,7 @@ public class CatalogResources {
 	 * Ingest a file already existing in a Workspace 
 	 * @param sSessionId User Session token
 	 * @param sFile Name of the file to ingest
-	 * @param sWorkspace Id of the target workspace 
+	 * @param sWorkspaceId Id of the target workspace 
 	 * @param sParentProcessWorkspaceId Proc Id of the parent process
 	 * @param sStyle Default style to use for the file
 	 * @return Primitive Result with boolValue true or false and Http Code in intValue
@@ -509,12 +510,12 @@ public class CatalogResources {
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
 
-		Utils.debugLog("CatalogResource.IngestFileInWorkspace: file " + sFile + " workspace: " + sWorkspace);
+		Utils.debugLog("CatalogResource.IngestFileInWorkspace: file " + sFile + " workspace: " + sWorkspaceId);
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -528,7 +529,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		Utils.debugLog("CatalogResource.IngestFileInWorkspace: computed file path: " + sFilePath);
 		
@@ -545,7 +546,7 @@ public class CatalogResources {
 				Utils.debugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -569,14 +570,14 @@ public class CatalogResources {
 			String sProcessObjId = Utils.GetRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspace);
+			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspace);
+			oParameter.setExchange(sWorkspaceId);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			oParameter.setStyle(sStyle);
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
@@ -594,7 +595,7 @@ public class CatalogResources {
 	 * Copy a file from a workspace to the user sftp folder 
 	 * @param sSessionId User Session token
 	 * @param sFile Name of the file to copy
-	 * @param sWorkspace Id of the workspace
+	 * @param sWorkspaceId Id of the workspace
 	 * @param sParentProcessWorkspaceId Proc Id of the parent Process 
 	 * @param sRelativePath relative path to use from the sftp home
 	 * @return Primitive Result with boolValue true or false and Http Code in intValue
@@ -602,12 +603,12 @@ public class CatalogResources {
 	@GET
 	@Path("/copytosfpt")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
+	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
 		
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
 
-		Utils.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspace);
+		Utils.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspaceId);
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -621,7 +622,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		Utils.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
 		
@@ -638,7 +639,7 @@ public class CatalogResources {
 				Utils.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -664,15 +665,15 @@ public class CatalogResources {
 			String sProcessObjId = Utils.GetRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspace);
+			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspace);
+			oParameter.setExchange(sWorkspaceId);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			if (!Utils.isNullOrEmpty(sRelativePath)) {
 				oParameter.setRelativePath(sRelativePath);
 			}
 			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
@@ -689,7 +690,7 @@ public class CatalogResources {
 	/**
 	 * Send a file to an external SFTP server 
 	 * @param sSessionId User Session
-	 * @param sWorkspace Worksapce Id
+	 * @param sWorkspaceId Worksapce Id
 	 * @param sParentProcessWorkspaceId Proc Id of the parent process
 	 * @param oFtpTransferVM View Model of the info to move the file (filename, dest server address and credentials, paths..)
 	 * @return
@@ -698,7 +699,7 @@ public class CatalogResources {
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sWorkspace, @QueryParam("parent") String sParentProcessWorkspaceId,
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId,
 			FtpTransferViewModel oFtpTransferVM) {
 		
 		Utils.debugLog("CatalogResource.ftpTransferFile");
@@ -736,10 +737,10 @@ public class CatalogResources {
 			oParam.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
 			
 			oParam.setLocalFileName(sFileName);
-			oParam.setExchange(sWorkspace);
-			oParam.setWorkspace(sWorkspace);
+			oParam.setExchange(sWorkspaceId);
+			oParam.setWorkspace(sWorkspaceId);
 			oParam.setProcessObjId(sProcessObjId);
-			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
+			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 						

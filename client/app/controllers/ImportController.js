@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
+                              oProcessWorkspaceService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
         // Service references
         this.m_oScope = $scope;
         this.m_oConstantsService = oConstantsService;
@@ -22,7 +22,7 @@ var ImportController = (function() {
         this.m_oFileBufferService = oFileBufferService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oProductService = oProductService;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oWorkspaceService=oWorkspaceService;
         this.m_oResultsOfSearchService = oResultsOfSearchService;
         this.m_oModalService = oModalService;
@@ -162,7 +162,7 @@ var ImportController = (function() {
         else
         {
             /*Load elements by Service if there was a previous search i load*/
-            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessWorkspaceService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             var oWorkspaceByResultService = this.m_oResultsOfSearchService.getActiveWorkspace();
             //if the workspace id saved in ResultService but the id it's differet to actual workspace id clean ResultService
@@ -1583,7 +1583,7 @@ var ImportController = (function() {
                     /*Start Rabbit WebStomp*/
                     // oController.m_oRabbitStompService.initWebStomp("ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
-                    if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
             }
         },function (data,status) {
@@ -1653,7 +1653,7 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
         // if(oLayer.isDisabledToDoDownload)
-        if(this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()) === true)
+        if(this.m_oProcessWorkspaceService.checkIfFileIsDownloading(oLayer,this.m_oProcessWorkspaceService.getTypeOfProcessProductDownload()) === true)
         {
             bReturnValue = true;
             oLayer.isDisabledToDoDownload = false;
@@ -2498,7 +2498,7 @@ var ImportController = (function() {
         'FileBufferService',
         'RabbitStompService',
         'ProductService',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'WorkspaceService',
         'ResultsOfSearchService',
         'ModalService',

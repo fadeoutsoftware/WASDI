@@ -5,7 +5,7 @@
 
 var GetListOfWorkspacesController = (function() {
 
-    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService,oSnapOperationService,oModalService) {
+    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService,oWorkflowsService,oModalService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras
@@ -19,7 +19,7 @@ var GetListOfWorkspacesController = (function() {
         this.m_bIsCreatingWorskapce = false;
         this.m_oConstantsService = oConstantsService;
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oWorkflowsService = oWorkflowsService;
         this.m_oSelectedWorkflow = "";
         this.m_oModalService = oModalService;
         this.m_oClose = oClose;
@@ -190,7 +190,7 @@ var GetListOfWorkspacesController = (function() {
         // this.m_bIsLoadingWorkflows = true;
         oController.m_bisLoadingWorkflows = true;
 
-        this.m_oSnapOperationService.getWorkflowsByUser().then(function (data) {
+        this.m_oWorkflowsService.getWorkflowsByUser().then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 oController.m_aoWorkflows = data.data;
@@ -245,9 +245,7 @@ var GetListOfWorkspacesController = (function() {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-
                 oController.getWorkflowsByUser();
-                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -269,7 +267,7 @@ var GetListOfWorkspacesController = (function() {
         'WorkspaceService',
         'extras',
         'ConstantsService',
-        'SnapOperationService',
+        'WorkflowsService',
         'ModalService'
     ];
     return GetListOfWorkspacesController;

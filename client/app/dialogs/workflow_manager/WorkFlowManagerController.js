@@ -6,12 +6,12 @@
 
 var WorkFlowManagerController = (function () {
 
-    function WorkFlowManagerController($scope, oClose, oExtras, oSnapOperationService, oConstantsService, oHttp, oModalService) {
+    function WorkFlowManagerController($scope, oClose, oExtras, oWorkflowService, oConstantsService, oHttp, oModalService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oWorkflowService = oWorkflowService;
         this.m_oModalService = oModalService;
         this.m_oFile = null;
         this.m_aoProducts = this.m_oExtras.products;
@@ -79,7 +79,7 @@ var WorkFlowManagerController = (function () {
     WorkFlowManagerController.prototype.getWorkflowsByUser = function () {
         var oController = this;
         this.m_bIsLoadingWorkflows = true;
-        this.m_oSnapOperationService.getWorkflowsByUser().then(function (data) {
+        this.m_oWorkflowService.getWorkflowsByUser().then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.m_aoWorkflows = data.data;
             } else {
@@ -209,7 +209,7 @@ var WorkFlowManagerController = (function () {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId, oObjectWorkFlow).then(function (data) {
+        this.m_oWorkflowService.executeGraphFromWorkflowId(sWorkspaceId, oObjectWorkFlow).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 oController.cleanAllExecuteWorkflowFields();
             } else {
@@ -239,7 +239,7 @@ var WorkFlowManagerController = (function () {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.deleteWorkflow(oWorkflow.workflowId).then(function (data) {
+        this.m_oWorkflowService.deleteWorkflow(oWorkflow.workflowId).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.getWorkflowsByUser();
             } else {
@@ -293,7 +293,7 @@ var WorkFlowManagerController = (function () {
         }
         this.isUploadingWorkflow = true;
         var oController = this;
-        this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId, sName, sDescription, oBody, bIsPublic).then(function (data) {
+        this.m_oWorkflowService.uploadByFile(this.m_sWorkspaceId, sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
                 oController.getWorkflowsByUser();
@@ -447,8 +447,7 @@ var WorkFlowManagerController = (function () {
             return false;
         }
 
-
-        this.m_oSnapOperationService.downloadWorkflow(oWorkflow.workflowId);
+        this.m_oWorkflowService.downloadWorkflow(oWorkflow.workflowId);
         return true;
     };
 
@@ -475,7 +474,7 @@ var WorkFlowManagerController = (function () {
         '$scope',
         'close',
         'extras',
-        'SnapOperationService',
+        'WorkflowService',
         'ConstantsService',
         '$http',
         'ModalService',
