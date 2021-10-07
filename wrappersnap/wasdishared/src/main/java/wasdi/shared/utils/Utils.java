@@ -46,12 +46,7 @@ public class Utils {
 	}
 	
 	public static boolean isNullOrEmpty(String sString) {
-		if (sString == null)
-			return true;
-		if (sString.isEmpty())
-			return true;
-
-		return false;
+		return sString == null || sString.isEmpty();
 	}
 
 	//adapted from:

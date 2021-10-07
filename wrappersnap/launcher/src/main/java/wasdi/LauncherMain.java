@@ -330,6 +330,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			LauncherMain.s_oSendToRabbit.Free();
+			
+			try {
+				Engine.getInstance().stop();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -725,6 +731,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			m_oProcessWorkspaceLogger.log("Fetch Start - PROVIDER " + oParameter.getProvider());
 
 			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
+			oProviderAdapter.readConfig();
 
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);

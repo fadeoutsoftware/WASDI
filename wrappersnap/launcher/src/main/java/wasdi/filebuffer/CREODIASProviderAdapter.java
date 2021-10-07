@@ -7,6 +7,7 @@
 package wasdi.filebuffer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,14 +72,22 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			return 0l;
 		}
 
-		long lSizeInBytes = 0;
-		String sResult = "";
-		try {
-			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
-			lSizeInBytes = Long.parseLong(sResult);
-			m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: file size is: " + sResult);
-		} catch (Exception oE) {
-			m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
+		long lSizeInBytes = 0L;
+
+		if (isFileProtocol(sFileURL)) {
+			String sPath = removePrefixFile(sFileURL);
+			File oSourceFile = new File(sPath);
+
+			lSizeInBytes = getSourceFileLength(oSourceFile);
+		} else if(isHttpsProtocol(sFileURL)) {
+			String sResult = "";
+			try {
+				sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
+				lSizeInBytes = Long.parseLong(sResult);
+				m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: file size is: " + sResult);
+			} catch (Exception oE) {
+				m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
+			}
 		}
 
 		return lSizeInBytes;
@@ -95,118 +104,125 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty, aborting");
 			return null;
 		}
-		try {
-			//todo check availability
-			boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
-			if(bShallWeOrderIt) {
-				m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
-				JSONObject oJsonStatus = orderProduct(sFileURL, sDownloadUser, sDownloadPassword);
-				if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
-					throw new NullPointerException("Order failed: JSON status is null, aborting");
-				}
-				m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: product ordered");
-				boolean bLoop = true;
-				String sStatus = oJsonStatus.getString("status");
-				if(sStatus.equals("done")) {
-					m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: good news! The requested file is already available :-)");
-					bLoop = false;
-				}
-				boolean bInit = true;
-				
-				int iMaxAttemps = 10;
-				int iAttemps = 0;
 
-				while(bLoop) {
-					
-					if (iAttemps > iMaxAttemps) {
-						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: made " + iAttemps + ", this is really too much");
-						break;
-					}
-					//todo tune waiting times
-					long lWaitStep = 60l;
-					long lUp = 300l;
-					long lLo = 60l;
-					//get, not opt: we want it to throw an exception if it is not present
-					sStatus = oJsonStatus.getString("status");
-					switch(sStatus) {
-					case "done_with_error":
-						//todo shall we download it anyway?
-						m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed with status: done_with_error: " + oJsonStatus);
-						break;
-					case "cancelled":
-						m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed: " + oJsonStatus);
-						return null;
-					case "done":
-						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: order complete :-) proceeding to download");
-						bLoop = false;
-						break;
-					default:
-						m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: status is: " + sStatus);
-						//todo replace this polling using a callback
-						//todo set processor status to waiting
-						if(bInit) {
-							Long lFirstWait = 360l;
-							m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete, sleep for " + lFirstWait);
-							TimeUnit.SECONDS.sleep(lFirstWait);
-							bInit = false;
-						} else {
-							long lRandomWaitSeconds = new SecureRandom().longs(lLo, lUp).findFirst().getAsLong();
-							//prepare to wait longer next time
-							lLo = lRandomWaitSeconds;
-							lUp += lWaitStep;
-							m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
-							TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
-						}
-						oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
-						if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
-							throw new NullPointerException("JSON status is null, aborting");
-						}
-					}
-					
-					iAttemps ++;
-				}
-			}
-
-		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could not check order status due to: " + oE);
-			return null;
-		}
-
-
-		//proceed as usual and download it
 		String sResult = null;
-		long lWaitStep = 10l;
-		long lUp = 10;
-		long lLo = 0l;
-		int iAttempt = 0;
-		while(iAttempt < iMaxRetry) {
+
+		if (isFileProtocol(sFileURL)) {
+			// implement the local-copy of the file
+		} else if(isHttpsProtocol(sFileURL)) {
 			try {
-				m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: attempt " + iAttempt + " at downloading from " + sFileURL ); 
-				//todo check product availability
-				String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
-				//reconstruct appropriate url
-				StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL) );
-				oUrl.append("?token=").append(sKeyCloakToken);
-				sResult = downloadViaHttp(oUrl.toString(), sDownloadUser, sDownloadPassword, sSaveDirOnServer);
-				if(Utils.isNullOrEmpty(sResult)) {
-					//try again
-					++iAttempt;
-					long lRandomWaitSeconds = new SecureRandom().longs(lLo, lUp).findFirst().getAsLong();
-					//prepare to wait longer next time
-					lLo = lRandomWaitSeconds;
-					lUp += lWaitStep;
-					m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
-					//todo set the processor as waiting
-					TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
-				} else {
-					//we're done
-					m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: download completed: " + sResult);
-					break;
+				//todo check availability
+				boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
+				if(bShallWeOrderIt) {
+					m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
+					JSONObject oJsonStatus = orderProduct(sFileURL, sDownloadUser, sDownloadPassword);
+					if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
+						throw new NullPointerException("Order failed: JSON status is null, aborting");
+					}
+					m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: product ordered");
+					boolean bLoop = true;
+					String sStatus = oJsonStatus.getString("status");
+					if(sStatus.equals("done")) {
+						m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: good news! The requested file is already available :-)");
+						bLoop = false;
+					}
+					boolean bInit = true;
+				
+					int iMaxAttemps = 10;
+					int iAttemps = 0;
+
+					while(bLoop) {
+					
+						if (iAttemps > iMaxAttemps) {
+							m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: made " + iAttemps + ", this is really too much");
+							break;
+						}
+						//todo tune waiting times
+						long lWaitStep = 60l;
+						long lUp = 300l;
+						long lLo = 60l;
+						//get, not opt: we want it to throw an exception if it is not present
+						sStatus = oJsonStatus.getString("status");
+						switch(sStatus) {
+						case "done_with_error":
+							//todo shall we download it anyway?
+							m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed with status: done_with_error: " + oJsonStatus);
+							break;
+						case "cancelled":
+							m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed: " + oJsonStatus);
+							return null;
+						case "done":
+							m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: order complete :-) proceeding to download");
+							bLoop = false;
+							break;
+						default:
+							m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: status is: " + sStatus);
+							//todo replace this polling using a callback
+							//todo set processor status to waiting
+							if(bInit) {
+								Long lFirstWait = 360l;
+								m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete, sleep for " + lFirstWait);
+								TimeUnit.SECONDS.sleep(lFirstWait);
+								bInit = false;
+							} else {
+								long lRandomWaitSeconds = new SecureRandom().longs(lLo, lUp).findFirst().getAsLong();
+								//prepare to wait longer next time
+								lLo = lRandomWaitSeconds;
+								lUp += lWaitStep;
+								m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+								TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
+							}
+							oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
+							if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
+								throw new NullPointerException("JSON status is null, aborting");
+							}
+						}
+					
+						iAttemps ++;
+					}
 				}
+
 			} catch (Exception oE) {
-				m_oLogger.error("CREODIASProviderAdapter.executeDownloadFile: " + oE);
+				m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could not check order status due to: " + oE);
+				return null;
+			}
+
+
+			//proceed as usual and download it
+			long lWaitStep = 10l;
+			long lUp = 10;
+			long lLo = 0l;
+			int iAttempt = 0;
+			while(iAttempt < iMaxRetry) {
+				try {
+					m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: attempt " + iAttempt + " at downloading from " + sFileURL ); 
+					//todo check product availability
+					String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
+					//reconstruct appropriate url
+					StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL) );
+					oUrl.append("?token=").append(sKeyCloakToken);
+					sResult = downloadViaHttp(oUrl.toString(), sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+					if(Utils.isNullOrEmpty(sResult)) {
+						//try again
+						++iAttempt;
+						long lRandomWaitSeconds = new SecureRandom().longs(lLo, lUp).findFirst().getAsLong();
+						//prepare to wait longer next time
+						lLo = lRandomWaitSeconds;
+						lUp += lWaitStep;
+						m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+						//todo set the processor as waiting
+						TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
+					} else {
+						//we're done
+						m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: download completed: " + sResult);
+						break;
+					}
+				} catch (Exception oE) {
+					m_oLogger.error("CREODIASProviderAdapter.executeDownloadFile: " + oE);
+				}
 			}
 		}
+
 		return sResult;
 	}
 
