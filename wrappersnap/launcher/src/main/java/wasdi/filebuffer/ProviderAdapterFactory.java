@@ -36,18 +36,32 @@ public class ProviderAdapterFactory {
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 
-	public ProviderAdapter supplyProviderAdapter(String sProviderAdapterType) {
-		ProviderAdapter oResult = null;
-		if(Utils.isNullOrEmpty(sProviderAdapterType)) {
-			throw new NullPointerException("ProviderAdapterSupplier.supplyProviderAdapter: a null String has been passed");
-		} else {
-			Supplier<ProviderAdapter> oSupplier = s_aoDownloaderSuppliers.get(sProviderAdapterType);
-			if(oSupplier != null ) {
-				oResult = oSupplier.get();
-				oResult.readConfig();
-			}
+	/**
+	 * Check that the provided type is not null and that is a valid one. Throws an exception if it is not.
+	 * @param sProviderAdapterType the type of the provider adapter
+	 */
+	public void validateProviderAdapterType(String sProviderAdapterType) {
+		if (Utils.isNullOrEmpty(sProviderAdapterType)) {
+			throw new NullPointerException("ProviderAdapterSupplier.validateProviderAdapterType: a null String has been passed");
 		}
-		
+
+		if (!s_aoDownloaderSuppliers.containsKey(sProviderAdapterType)) {
+			throw new IllegalArgumentException("ProviderAdapterSupplier.validateProviderAdapterType: Provider Adapter is null. Check the provider name");
+		}
+	}
+
+	/**
+	 * Supply a provider adapter based on the requested type.
+	 * @param sProviderAdapterType the type of the provider adapter
+	 * @return a provider adapter that matches the requested type
+	 */
+	public ProviderAdapter supplyProviderAdapter(String sProviderAdapterType) {
+		validateProviderAdapterType(sProviderAdapterType);
+
+		Supplier<ProviderAdapter> oSupplier = s_aoDownloaderSuppliers.get(sProviderAdapterType);
+		ProviderAdapter oResult = oSupplier.get();
+
 		return oResult;
 	}
+
 }
