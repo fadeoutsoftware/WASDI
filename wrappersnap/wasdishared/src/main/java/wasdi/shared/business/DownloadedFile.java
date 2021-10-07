@@ -5,11 +5,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
  * Downloaded File Entity
- * Represents a EO File ingested in WASDI
+ * Represents a EO File ingested in WASDI and all the products generated.
+ * 
+ * 
+ * 
  * Created by p.campanella on 11/11/2016.
  * 
  */

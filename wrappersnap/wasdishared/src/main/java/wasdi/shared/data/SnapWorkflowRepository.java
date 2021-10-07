@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -15,7 +14,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.SnapWorkflow;
-import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.utils.Utils;
 
 public class SnapWorkflowRepository extends MongoRepository {

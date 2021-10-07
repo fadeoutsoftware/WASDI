@@ -42,7 +42,6 @@ import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
 import it.fadeout.viewmodels.SatelliteResourceViewModel;
 import satLib.astro.time.Time;
 import wasdi.shared.business.User;
-import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
 /**

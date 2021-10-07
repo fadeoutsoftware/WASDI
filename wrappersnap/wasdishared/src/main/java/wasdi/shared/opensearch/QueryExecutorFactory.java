@@ -15,6 +15,8 @@ import wasdi.shared.opensearch.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.opensearch.eodc.QueryExecutorEODC;
 import wasdi.shared.opensearch.lsa.QueryExecutorLSA;
 import wasdi.shared.opensearch.onda.QueryExecutorONDA;
+import wasdi.shared.opensearch.probav.QueryExecutorPROBAV;
+import wasdi.shared.opensearch.sentinelhub.QueryExecutorSENTINEL;
 import wasdi.shared.opensearch.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.opensearch.viirs.QueryExecutorVIIRS;
 import wasdi.shared.utils.AuthenticationCredentials;
@@ -34,15 +36,15 @@ public class QueryExecutorFactory {
 
 		aoMap.put("ONDA", QueryExecutorONDA::new);
 		aoMap.put("SENTINEL", QueryExecutorSENTINEL::new);
-		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
-		aoMap.put("FEDEO", QueryExecutorFEDEO::new);
 		aoMap.put("SOBLOO", QueryExecutorSOBLOO::new);
 		aoMap.put("EODC", QueryExecutorEODC::new);
 		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
 		aoMap.put("LSA", QueryExecutorLSA::new);
 		aoMap.put("VIIRS", QueryExecutorVIIRS::new);
+		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
+		
 		Utils.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
 		for (String sKey : s_aoExecutors.keySet()) {
 			Utils.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sKey);
@@ -50,8 +52,6 @@ public class QueryExecutorFactory {
 	}
 
 	private QueryExecutor supply(String sProvider) {
-		
-		//Utils.debugLog("QueryExecutorFactory.QueryExecutor( "+sProvider+" )");
 		
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {

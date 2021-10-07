@@ -15,7 +15,7 @@ import wasdi.shared.opensearch.QueryTranslationParser;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
  * @author c.nattero

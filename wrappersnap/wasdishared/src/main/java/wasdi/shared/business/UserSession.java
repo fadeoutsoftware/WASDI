@@ -3,6 +3,7 @@ package wasdi.shared.business;
 /**
  * User Session Entity
  * Represent an active WASDI Session
+ * 
  * Created by p.campanella on 21/10/2016.
  */
 public class UserSession {

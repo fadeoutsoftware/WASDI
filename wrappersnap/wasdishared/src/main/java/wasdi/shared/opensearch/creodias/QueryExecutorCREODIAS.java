@@ -17,8 +17,8 @@ import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
  * @author c.nattero

@@ -35,11 +35,11 @@ import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.AppStatsViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessHistoryViewModel;
-import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
-import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
+import wasdi.shared.viewmodels.processors.AppStatsViewModel;
+import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
 /**
  * Process Workspace Resource.

@@ -40,10 +40,6 @@ public final class PasswordAuthentication
 	  private final SecureRandom m_oSecureRandom;
 
 	  private final int m_iCost;
-
-	  /*public static void setAlgorithm(String sAlgorithmInput){
-		  ALGORITHM = sAlgorithmInput;
-	  }*/
 	  
 	  public PasswordAuthentication()
 	  {

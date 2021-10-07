@@ -20,8 +20,8 @@ import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorLSA extends QueryExecutor {
 	

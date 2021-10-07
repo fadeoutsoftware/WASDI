@@ -23,12 +23,12 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.AttributeViewModel;
-import wasdi.shared.viewmodels.BandViewModel;
-import wasdi.shared.viewmodels.GeorefProductViewModel;
-import wasdi.shared.viewmodels.MetadataViewModel;
-import wasdi.shared.viewmodels.NodeGroupViewModel;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.AttributeViewModel;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.GeorefProductViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
  * Read SNAP Product utility class

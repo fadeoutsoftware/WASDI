@@ -38,14 +38,14 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
+import wasdi.shared.parameters.settings.GraphSetting;
 import wasdi.shared.payload.ExecuteGraphPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 
 /**

@@ -3,7 +3,7 @@ package wasdi.shared.opensearch.viirs;
 import java.util.List;
 
 import wasdi.shared.opensearch.DiasResponseTranslator;
-import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class DiasResponseTranslatorVIIRS extends DiasResponseTranslator {
 

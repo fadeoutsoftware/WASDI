@@ -57,8 +57,8 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.BandViewModel;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class dbUtils {
 

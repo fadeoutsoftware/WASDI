@@ -79,14 +79,14 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipExtractor;
-import wasdi.shared.viewmodels.AppDetailViewModel;
-import wasdi.shared.viewmodels.AppFilterViewModel;
-import wasdi.shared.viewmodels.AppListViewModel;
-import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessorLogViewModel;
-import wasdi.shared.viewmodels.ProcessorSharingViewModel;
-import wasdi.shared.viewmodels.RunningProcessorViewModel;
+import wasdi.shared.viewmodels.processors.AppDetailViewModel;
+import wasdi.shared.viewmodels.processors.AppFilterViewModel;
+import wasdi.shared.viewmodels.processors.AppListViewModel;
+import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
+import wasdi.shared.viewmodels.processors.ProcessorLogViewModel;
+import wasdi.shared.viewmodels.processors.ProcessorSharingViewModel;
+import wasdi.shared.viewmodels.processworkspace.RunningProcessorViewModel;
 
 /**
  * Processors Resource.

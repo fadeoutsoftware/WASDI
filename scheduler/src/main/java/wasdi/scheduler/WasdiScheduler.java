@@ -3,7 +3,6 @@ package wasdi.scheduler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -11,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;

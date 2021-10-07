@@ -24,7 +24,7 @@ import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class DiasResponseTranslatorLSA extends DiasResponseTranslator {
 

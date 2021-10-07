@@ -48,13 +48,13 @@ import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.AppCategoryViewModel;
-import wasdi.shared.viewmodels.CommentViewModel;
-import wasdi.shared.viewmodels.ListCommentsViewModel;
-import wasdi.shared.viewmodels.ListReviewsViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.PublisherFilterViewModel;
-import wasdi.shared.viewmodels.ReviewViewModel;
+import wasdi.shared.viewmodels.processors.AppCategoryViewModel;
+import wasdi.shared.viewmodels.processors.CommentViewModel;
+import wasdi.shared.viewmodels.processors.ListCommentsViewModel;
+import wasdi.shared.viewmodels.processors.ListReviewsViewModel;
+import wasdi.shared.viewmodels.processors.PublisherFilterViewModel;
+import wasdi.shared.viewmodels.processors.ReviewViewModel;
 
 /**
  * Processors Media Resource.

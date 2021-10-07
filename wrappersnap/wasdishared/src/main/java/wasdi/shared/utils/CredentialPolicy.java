@@ -4,10 +4,10 @@ package wasdi.shared.utils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import wasdi.shared.business.User;
-import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
-import wasdi.shared.viewmodels.LoginInfo;
-import wasdi.shared.viewmodels.RegistrationInfoViewModel;
-import wasdi.shared.viewmodels.UserViewModel;
+import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
+import wasdi.shared.viewmodels.users.LoginInfo;
+import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.UserViewModel;
 
 public class CredentialPolicy {
 

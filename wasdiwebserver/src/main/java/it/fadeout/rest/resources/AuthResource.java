@@ -2,10 +2,7 @@ package it.fadeout.rest.resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
@@ -28,13 +25,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
@@ -49,11 +39,11 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
-import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.RegistrationInfoViewModel;
-import wasdi.shared.viewmodels.UserViewModel;
+import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
+import wasdi.shared.viewmodels.users.LoginInfo;
+import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
  * Authorization Resource.

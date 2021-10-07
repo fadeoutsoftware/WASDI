@@ -51,12 +51,12 @@ import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkflowSharingRepository;
 import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
 import wasdi.shared.parameters.OperatorParameter;
+import wasdi.shared.parameters.settings.GraphSetting;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.SnapWorkflowViewModel;
-import wasdi.shared.viewmodels.WorkflowSharingViewModel;
+import wasdi.shared.viewmodels.workflows.SnapWorkflowViewModel;
+import wasdi.shared.viewmodels.workflows.WorkflowSharingViewModel;
 
 /**
  * Worflows resource.

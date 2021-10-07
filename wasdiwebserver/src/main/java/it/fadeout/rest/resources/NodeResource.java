@@ -14,10 +14,8 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.User;
 import wasdi.shared.data.NodeRepository;
-import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WorkspacePolicy;
-import wasdi.shared.viewmodels.NodeViewModel;
+import wasdi.shared.viewmodels.products.NodeViewModel;
 
 /**
  * Node Resource.

@@ -11,8 +11,7 @@ import java.util.Arrays;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
  * Generic DIAS Query Translator Convert the WASDI query in a query supported by

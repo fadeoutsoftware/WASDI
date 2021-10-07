@@ -125,9 +125,6 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.UPDATEPROCESSES.name())) {
 			oParam = new ProcessorParameter();
 		}
-		else if (sOperationType.equals(LauncherOperations.WPS.name())) {
-			oParam = new WpsParameters();
-		}
 		else if (sOperationType.equals(LauncherOperations.REDEPLOYPROCESSOR.name())) {
 			oParam = new ProcessorParameter();
 		}

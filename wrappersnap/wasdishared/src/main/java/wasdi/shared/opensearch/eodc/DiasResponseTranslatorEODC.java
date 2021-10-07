@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.opensearch.DiasResponseTranslator;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * @author c.nattero

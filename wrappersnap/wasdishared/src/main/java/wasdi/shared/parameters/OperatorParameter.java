@@ -1,5 +1,7 @@
 package wasdi.shared.parameters;
 
+import wasdi.shared.parameters.settings.ISetting;
+
 /**
  * Created by s.adamo on 17/03/2017.
  */

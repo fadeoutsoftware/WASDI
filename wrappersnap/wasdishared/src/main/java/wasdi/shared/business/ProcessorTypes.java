@@ -16,6 +16,11 @@ public class ProcessorTypes {
 	public static String OCTAVE = "octave";
 	public static String CONDA = "conda";
 	
+	/**
+	 * Obtains the name of the subfolder where the docker template is stored.
+	 * @param sProcessorType Processor Type
+	 * @return Folder Name (that has to be contatenated to the base processors path)
+	 */
 	public static String getTemplateFolder(String sProcessorType) {
 		if (sProcessorType.equals(IDL)) return "idl";
 		else if (sProcessorType.equals(UBUNTU_PYTHON27_SNAP)) return "python27";

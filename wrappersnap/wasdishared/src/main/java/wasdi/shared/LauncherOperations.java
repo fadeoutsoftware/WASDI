@@ -17,7 +17,6 @@ public enum LauncherOperations {
     MOSAIC,
     SUBSET,
     MULTISUBSET,
-    WPS,
     REGRID,
     DELETEPROCESSOR,
     INFO,

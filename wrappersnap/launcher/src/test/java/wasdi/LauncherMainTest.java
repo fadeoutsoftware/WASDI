@@ -37,7 +37,7 @@ import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

@@ -2,20 +2,13 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -30,24 +23,14 @@ import it.fadeout.Wasdi;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.Catalog;
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.User;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.data.CatalogRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
-import wasdi.shared.utils.CredentialPolicy;
-import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.CatalogViewModel;
-import wasdi.shared.viewmodels.FtpTransferViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.FtpTransferViewModel;
 
 /**
  * Catalog Resource

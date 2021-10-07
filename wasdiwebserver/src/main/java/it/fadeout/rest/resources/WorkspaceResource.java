@@ -42,14 +42,12 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
-import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WorkspacePolicy;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.WorkspaceEditorViewModel;
-import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
-import wasdi.shared.viewmodels.WorkspaceSharingViewModel;
+import wasdi.shared.viewmodels.workspaces.WorkspaceEditorViewModel;
+import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
+import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
 
 /**
  * Workspace Resource.

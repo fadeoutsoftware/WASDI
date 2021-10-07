@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;

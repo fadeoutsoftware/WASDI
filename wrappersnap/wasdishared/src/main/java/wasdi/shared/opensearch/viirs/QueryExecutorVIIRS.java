@@ -26,8 +26,8 @@ import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorVIIRS extends QueryExecutor {
 	

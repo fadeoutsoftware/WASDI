@@ -4,6 +4,7 @@ package wasdi.shared.business;
  * Workflow Sharing Entity
  * Represent the association between a workflow, his owner and the user that can access it
  * Workflows are referred as "snapWorkflow" or "Graphs" in the code
+ * 
  * @author M.Menapace on 29/04/2021 
  *
  */

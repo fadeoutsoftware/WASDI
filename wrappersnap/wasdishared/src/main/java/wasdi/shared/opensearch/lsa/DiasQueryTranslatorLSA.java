@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class DiasQueryTranslatorLSA extends DiasQueryTranslator {
 	

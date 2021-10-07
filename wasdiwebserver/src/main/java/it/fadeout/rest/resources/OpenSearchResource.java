@@ -23,8 +23,8 @@ import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.SearchProviderViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.SearchProviderViewModel;
 
 /**
  * Open Search Resource.
@@ -647,10 +647,10 @@ public class OpenSearchResource {
 	
 				String sParserConfigPath = m_oServletConfig.getInitParameter(sProvider+".parserConfig");
 				String sAppConfigPath = m_oServletConfig.getInitParameter("MissionsConfigFilePath");
+				
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
 						oCredentials,
-						//TODO change into config method
 						sDownloadProtocol, sGetMetadata,
 						sParserConfigPath, sAppConfigPath);
 				

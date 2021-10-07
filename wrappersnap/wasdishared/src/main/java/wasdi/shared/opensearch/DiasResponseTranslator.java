@@ -11,7 +11,7 @@ import java.util.List;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * @author c.nattero

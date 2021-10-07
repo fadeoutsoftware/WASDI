@@ -2,11 +2,9 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
@@ -23,9 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.esa.snap.core.gpf.graph.Graph;
-import org.esa.snap.core.gpf.graph.GraphIO;
-import org.esa.snap.core.gpf.graph.Node;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
@@ -35,17 +30,15 @@ import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PublishedBand;
-import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
+import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 
 /**

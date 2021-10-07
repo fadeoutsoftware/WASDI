@@ -34,10 +34,10 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.GeorefProductViewModel;
-import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.GeorefProductViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
  * Product Resource.

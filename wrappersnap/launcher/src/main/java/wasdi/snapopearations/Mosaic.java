@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.parameters.MosaicParameter;
-import wasdi.shared.parameters.MosaicSetting;
+import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 

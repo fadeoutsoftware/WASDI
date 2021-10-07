@@ -36,8 +36,7 @@ import org.apache.commons.net.io.Util;
 
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public abstract class QueryExecutor {
 
@@ -63,7 +62,6 @@ public abstract class QueryExecutor {
 	
 	public int executeCount(String sQuery) throws IOException {
 		try {
-			//Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
 			sQuery = encodeAsRequired(sQuery); 
 			String sUrl = getCountUrl(sQuery);
 			String sResponse = httpGetResults(sUrl, "count");
@@ -96,7 +94,6 @@ public abstract class QueryExecutor {
 	}
 	
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		//Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
 		if(null == oQuery) {
 			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
 			return null;
@@ -155,13 +152,11 @@ public abstract class QueryExecutor {
 	}
 
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-		//Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
 		return executeAndRetrieve(oQuery,true);
 	}
 
 
 	public void setDownloadProtocol(String sDownloadProtocol) {
-		//Utils.debugLog("QueryExecutor.setDownloadProtocol");
 		m_sDownloadProtocol = sDownloadProtocol;
 		if(null==m_sDownloadProtocol) {
 			m_sDownloadProtocol = "https:";
@@ -169,7 +164,6 @@ public abstract class QueryExecutor {
 	}
 
 	public void setCredentials(AuthenticationCredentials oCredentials) {
-		//Utils.debugLog("QueryExecutor.setCredentials");
 		if(null!=oCredentials) {
 			setUser(oCredentials.getUser());
 			setPassword(oCredentials.getPassword());
@@ -562,23 +556,6 @@ public abstract class QueryExecutor {
 
 	protected void setPassword(String m_sPassword) {
 		this.m_sPassword = m_sPassword;
-	}
-	
-
-	public static void main(String[] args) {
-
-		QueryExecutorFactory oFactory = new QueryExecutorFactory();
-		//change the following with your user and password (and don't commit them!)
-		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
-		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials, "", "true", null, null);
-
-		try {
-			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
-
-			Utils.debugLog(""+oExecutor.executeCount(sQuery));			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }

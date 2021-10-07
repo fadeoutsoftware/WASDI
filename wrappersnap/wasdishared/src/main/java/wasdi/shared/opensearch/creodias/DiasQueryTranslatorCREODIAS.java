@@ -13,11 +13,10 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
-import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryTranslationParser;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.viewmodels.QueryViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
  * @author c.nattero
