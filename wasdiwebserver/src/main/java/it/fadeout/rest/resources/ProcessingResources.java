@@ -7,11 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -152,6 +150,45 @@ public class ProcessingResources {
         return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
+    @POST
+    @Path("conversion/sen2cor")
+    @Produces({"application/xml", "application/json", "text/xml"})
+    public PrimitiveResult sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
+                                             @QueryParam("productName") String productName,
+                                             @QueryParam("workspace") String workspace) {
+
+
+        PrimitiveResult primitiveResult = new PrimitiveResult();
+        if (productName == null || workspace == null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
+            primitiveResult.setStringValue("Null values");
+            primitiveResult.setIntValue(500);
+            return primitiveResult;
+        }
+
+        if (productName != null && workspace != null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + productName + ", Level 2 : " + productName.replace("L1", "L2") + ", Ws:" + workspace + " )");
+
+
+            try {
+                // Check authorization
+                if (Utils.isNullOrEmpty(sSessionId)) {
+                    Utils.debugLog("ProcessingResources.sen2CorConversion: invalid session");
+                    primitiveResult.setIntValue(401);
+                    return primitiveResult;
+                }
+
+                return executeOperation(sSessionId, productName, null, workspace, null, LauncherOperations.SEN2COR, null);
+            } catch (Exception oe) {
+                oe.printStackTrace();
+            }
+
+        }
+        primitiveResult.setIntValue(500);
+        primitiveResult.setStringValue("sen2CorConversion: execution failed");
+        return primitiveResult;
+    }
+
 
     /**
      * Upload and save a new SNAP Workflow XML
@@ -176,7 +213,7 @@ public class ProcessingResources {
         try {
             // Check authorization
             if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessingResources.uploadGraph: invalid session");
+                Utils.debugLog("ProcessingResources.uploadGraph: invalid session");
                 return Response.status(401).build();
             }
             User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -391,20 +428,20 @@ public class ProcessingResources {
             // Check that the workflow exists on db
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
-            
+
             if (oWorkflow == null) {
                 Utils.debugLog("ProcessingResources.updateGraphfile: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found, please check parameters").build();
             }
-            
+
             // Checks that user can modify the workflow
             WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            
+
             if (!oUser.getUserId().equals(oWorkflow.getUserId()) && !oWorkflowSharingRepository.isSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
                 Utils.debugLog("ProcessingResources.updateGraphfile: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
                 return Response.status(Status.UNAUTHORIZED).build();
             }
-            
+
             // original xml file
             File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
             // new xml file
@@ -1621,7 +1658,7 @@ public class ProcessingResources {
     public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
                                       @QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String
                                               sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String
-                                              sOperationSubType, String sParameter) throws IOException {
+                                              sOperationSubType, String sParameter) {
 
         if (Utils.isNullOrEmpty(sOperationSubType)) {
             sOperationSubType = "";

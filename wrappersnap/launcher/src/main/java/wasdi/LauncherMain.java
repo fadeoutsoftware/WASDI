@@ -424,8 +424,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
     /**
      * Call the right method to execute sOperation with sParameter
      *
-     * @param sOperation Operation to be done
-     * @param sParameter Parameter
+     * @param sOperation Operation to be done validated above the ones from enumeration
+     * @param sParameter Parameter passed as file location of the parameter
      */
     public void executeOperation(String sOperation, String sParameter) {
 
