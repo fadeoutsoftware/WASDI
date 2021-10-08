@@ -157,7 +157,7 @@ public class ProcessingResources {
                                              @QueryParam("productName") String sProductName,
                                              @QueryParam("workspace") String sWorkspace) {
 
-
+        Utils.debugLog("ProcessingResources.sen2CorConversion, Received request");
         PrimitiveResult primitiveResult = new PrimitiveResult();
         if (sProductName == null || sWorkspace == null) {
             Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
@@ -177,7 +177,7 @@ public class ProcessingResources {
                     primitiveResult.setIntValue(401);
                     return primitiveResult;
                 }
-
+                Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
                 return executeOperation(sSessionId, sProductName, null, sWorkspace, null, LauncherOperations.SEN2COR, null);
             } catch (Exception oe) {
                 oe.printStackTrace();
