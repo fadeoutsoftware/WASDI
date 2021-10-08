@@ -154,20 +154,20 @@ public class ProcessingResources {
     @Path("conversion/sen2cor")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
-                                             @QueryParam("productName") String productName,
-                                             @QueryParam("workspace") String workspace) {
+                                             @QueryParam("productName") String sProductName,
+                                             @QueryParam("workspace") String sWorkspace) {
 
 
         PrimitiveResult primitiveResult = new PrimitiveResult();
-        if (productName == null || workspace == null) {
+        if (sProductName == null || sWorkspace == null) {
             Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
             primitiveResult.setStringValue("Null values");
             primitiveResult.setIntValue(500);
             return primitiveResult;
         }
 
-        if (productName != null && workspace != null) {
-            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + productName + ", Level 2 : " + productName.replace("L1", "L2") + ", Ws:" + workspace + " )");
+        if (sProductName != null && sWorkspace != null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspace + " )");
 
 
             try {
@@ -178,7 +178,7 @@ public class ProcessingResources {
                     return primitiveResult;
                 }
 
-                return executeOperation(sSessionId, productName, null, workspace, null, LauncherOperations.SEN2COR, null);
+                return executeOperation(sSessionId, sProductName, null, sWorkspace, null, LauncherOperations.SEN2COR, null);
             } catch (Exception oe) {
                 oe.printStackTrace();
             }
