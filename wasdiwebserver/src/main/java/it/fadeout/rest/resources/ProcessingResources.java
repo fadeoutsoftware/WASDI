@@ -68,19 +68,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkflowSharingRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
-import wasdi.shared.parameters.BaseParameter;
-import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
-import wasdi.shared.parameters.ISetting;
-import wasdi.shared.parameters.MosaicParameter;
-import wasdi.shared.parameters.MosaicSetting;
-import wasdi.shared.parameters.MultiSubsetParameter;
-import wasdi.shared.parameters.MultiSubsetSetting;
-import wasdi.shared.parameters.OperatorParameter;
-import wasdi.shared.parameters.RegridParameter;
-import wasdi.shared.parameters.RegridSetting;
-import wasdi.shared.parameters.SubsetParameter;
-import wasdi.shared.parameters.SubsetSetting;
+import wasdi.shared.parameters.*;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
@@ -152,18 +140,18 @@ public class ProcessingResources {
 
     @POST
     @Path("conversion/sen2cor")
-    @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
+    //@Produces({"application/xml", "application/json", "text/xml"})
+    public Response sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
                                              @QueryParam("productName") String sProductName,
                                              @QueryParam("workspace") String sWorkspace) {
 
+        ResponseBuilder oResponseBuilder = null;
         Utils.debugLog("ProcessingResources.sen2CorConversion, Received request");
-        PrimitiveResult primitiveResult = new PrimitiveResult();
+
         if (sProductName == null || sWorkspace == null) {
             Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
-            primitiveResult.setStringValue("Null values");
-            primitiveResult.setIntValue(500);
-            return primitiveResult;
+            oResponseBuilder.status(Status.BAD_REQUEST);
+            return oResponseBuilder.build();
         }
 
         if (sProductName != null && sWorkspace != null) {
@@ -174,19 +162,34 @@ public class ProcessingResources {
                 // Check authorization
                 if (Utils.isNullOrEmpty(sSessionId)) {
                     Utils.debugLog("ProcessingResources.sen2CorConversion: invalid session");
-                    primitiveResult.setIntValue(401);
-                    return primitiveResult;
+                    oResponseBuilder.status(Status.UNAUTHORIZED);
+                    return oResponseBuilder.build();
                 }
+
+                User oUser = Wasdi.getUserFromSession(sSessionId);
+                if (oUser == null ){
+                    Utils.debugLog("ProcessingResources.sen2CorConversion: user not found");
+                    oResponseBuilder.status(Status.UNAUTHORIZED);
+                    return oResponseBuilder.build();
+
+                }
+                Sen2CorParameter oParameter = new Sen2CorParameter();
+                oParameter.setProductName(sProductName);
+                oParameter.setWorkspace(sWorkspace);
                 Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
-                return executeOperation(sSessionId, sProductName, null, sWorkspace, null, LauncherOperations.SEN2COR, null);
+                String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+                //(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+
+                PrimitiveResult primitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, null);
+                return oResponseBuilder.status(primitiveResult.getIntValue()).build();
             } catch (Exception oe) {
                 oe.printStackTrace();
             }
 
         }
-        primitiveResult.setIntValue(500);
-        primitiveResult.setStringValue("sen2CorConversion: execution failed");
-        return primitiveResult;
+        oResponseBuilder.status(Status.INTERNAL_SERVER_ERROR);
+        Utils.debugLog("ProcessingResources.sen2CorConversion, conversion failed");
+        return oResponseBuilder.build();
     }
 
 
@@ -1613,7 +1616,7 @@ public class ProcessingResources {
             sProcessObjId = Utils.GetRandomName();
 
             // Create Operator instance
-            OperatorParameter oParameter = getParameter(oOperation);
+            OperatorParameter oParameter = getOperatorParameter(oOperation);
 
             if (oParameter == null) {
                 Utils.debugLog("ProsessingResources.ExecuteOperation: impossible to create the parameter from the operation");
@@ -1720,10 +1723,10 @@ public class ProcessingResources {
     /**
      * Get the parameter Object for a specific Launcher Operation
      *
-     * @param oOperation
-     * @return
+     * @param oOperation A Launcher operatio from the ones enumerated
+     * @return An object of the appropriate class in correlation with the operation specified
      */
-    private OperatorParameter getParameter(LauncherOperations oOperation) {
+    private OperatorParameter getOperatorParameter(LauncherOperations oOperation) {
         Utils.debugLog("ProcessingResources.OperatorParameter(  LauncherOperations )");
         switch (oOperation) {
             case GRAPH:

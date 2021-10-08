@@ -600,8 +600,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 }
                 break;
                 case SEN2COR: {
-                    Sen2CorParameters oSen2CorParameters = (Sen2CorParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-                    sen2Cor(oSen2CorParameters);
+                    Sen2CorParameter oSen2CorParameter = (Sen2CorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    sen2Cor(oSen2CorParameter);
                 }
                 break;
                 default:
@@ -622,20 +622,20 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
      * Operation to make the conversion from Sentinel-2 L1 images to L2 images,
      * using the image correction algorithm L2A_Process from sen2core package.
      *
-     * @param oSen2CorParameters contains parameters to initialize Sen2Cor conversion
+     * @param oSen2CorParameter contains parameters to initialize Sen2Cor conversion
      */
-    private void sen2Cor(Sen2CorParameters oSen2CorParameters) throws Exception {
+    private void sen2Cor(Sen2CorParameter oSen2CorParameter) throws Exception {
 
-        if (oSen2CorParameters == null) {
+        if (oSen2CorParameter == null) {
             s_oLogger.debug("LauncherMain.sen2Cor: Null pointer exception");
             m_oProcessWorkspaceLogger.log("Null parameters passed to Launcher for conversion");
             throw new NullPointerException("Null parameters passed to Launcher for conversion");
         }
-        String sDestinationPath = getWorkspacePath(oSen2CorParameters, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-        String sL1ProductName = oSen2CorParameters.getProductName();
+        String sDestinationPath = getWorkspacePath(oSen2CorParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+        String sL1ProductName = oSen2CorParameter.getProductName();
         String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
 
-        if (oSen2CorParameters.isValid()) {
+        if (oSen2CorParameter.isValid()) {
             try {
                 s_oLogger.debug("LauncherMain.sen2Cor: Start");
                 ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
@@ -647,7 +647,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
                 s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
-                ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameters.getProcessObjId());
+                ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameter.getProcessObjId());
                 oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
 
                 // 4 - Convert -> obtain L2A.SAFE
@@ -679,7 +679,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 oe.printStackTrace();
             }
 
-            if (oSen2CorParameters.isDeleteIntermediateFile()) {
+            if (oSen2CorParameter.isDeleteIntermediateFile()) {
                 // deletes .SAFE directories and keeps the zip files
                 FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE"));
                 FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE"));
@@ -689,8 +689,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             addProductToDbAndWorkspaceAndSendToRabbit(
                     null,
                     sDestinationPath + sL2ProductName + ".zip",
-                    oSen2CorParameters.getWorkspace(),
-                    oSen2CorParameters.getExchange(),
+                    oSen2CorParameter.getWorkspace(),
+                    oSen2CorParameter.getExchange(),
                     String.valueOf(LauncherOperations.SEN2COR),
                     null
             );

@@ -3,7 +3,7 @@ package wasdi.shared.parameters;
 /**
  * Class that hold the parameters to start SEN2COR launcher operations
  */
-public class Sen2CorParameters extends BaseParameter {
+public class Sen2CorParameter extends BaseParameter {
 
 
     private String productName;
@@ -18,13 +18,13 @@ public class Sen2CorParameters extends BaseParameter {
         this.version = version;
     }
 
-    public Sen2CorParameters() {
+    public Sen2CorParameter() {
         super();
         this.version = "2.5.5"; // default version
         deleteIntermediateFile = true; // default is to delete the intermediate files
     }
 
-    public Sen2CorParameters(String productName, String Version, boolean deleteIntermediateFile) {
+    public Sen2CorParameter(String productName, String Version, boolean deleteIntermediateFile) {
         this.productName = productName;
         this.version = Version;
         this.deleteIntermediateFile = deleteIntermediateFile;

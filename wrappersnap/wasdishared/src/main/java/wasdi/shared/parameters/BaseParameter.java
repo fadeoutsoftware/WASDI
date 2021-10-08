@@ -144,7 +144,7 @@ public class BaseParameter {
 			oParam = new ReadMetadataParameter();
 		}
 		else if (sOperationType.equals(LauncherOperations.SEN2COR.name())){
-			oParam = new Sen2CorParameters();
+			oParam = new Sen2CorParameter();
 		}
 
 			return oParam;
