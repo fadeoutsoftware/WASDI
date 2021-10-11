@@ -142,54 +142,60 @@ public class ProcessingResources {
     @Path("conversion/sen2cor")
     //@Produces({"application/xml", "application/json", "text/xml"})
     public Response sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
-                                             @QueryParam("productName") String sProductName,
-                                             @QueryParam("workspace") String sWorkspace) {
+                                      @QueryParam("productName") String sProductName,
+                                      @QueryParam("workspace") String sWorkspaceId,
+                                      @QueryParam("parentId") String sParentId) {
 
-        ResponseBuilder oResponseBuilder = null;
         Utils.debugLog("ProcessingResources.sen2CorConversion, Received request");
 
-        if (sProductName == null || sWorkspace == null) {
+        if (sProductName == null || sWorkspaceId == null) {
             Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
-            oResponseBuilder.status(Status.BAD_REQUEST);
-            return oResponseBuilder.build();
+
+            return Response.status(Status.BAD_REQUEST).build();
         }
 
-        if (sProductName != null && sWorkspace != null) {
-            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspace + " )");
+        if (sProductName != null && sWorkspaceId != null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");
 
 
             try {
                 // Check authorization
                 if (Utils.isNullOrEmpty(sSessionId)) {
                     Utils.debugLog("ProcessingResources.sen2CorConversion: invalid session");
-                    oResponseBuilder.status(Status.UNAUTHORIZED);
-                    return oResponseBuilder.build();
+
+                    return Response.status(Status.UNAUTHORIZED).build();
                 }
 
                 User oUser = Wasdi.getUserFromSession(sSessionId);
-                if (oUser == null ){
+                if (oUser == null) {
                     Utils.debugLog("ProcessingResources.sen2CorConversion: user not found");
-                    oResponseBuilder.status(Status.UNAUTHORIZED);
-                    return oResponseBuilder.build();
+
+                    return Response.status(Status.UNAUTHORIZED).build();
 
                 }
+                String sProcessObjId = Utils.GetRandomName();
                 Sen2CorParameter oParameter = new Sen2CorParameter();
                 oParameter.setProductName(sProductName);
-                oParameter.setWorkspace(sWorkspace);
+                oParameter.setWorkspace(sWorkspaceId);
+                oParameter.setProcessObjId(sProcessObjId);
+                oParameter.setUserId(oUser.getUserId());
+                oParameter.setExchange(sWorkspaceId);
+
                 Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
                 String sPath = m_oServletConfig.getInitParameter("SerializationPath");
                 //(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
 
-                PrimitiveResult primitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, null);
-                return oResponseBuilder.status(primitiveResult.getIntValue()).build();
+                PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
+                Utils.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
+                return Response.ok(oPrimitiveResult).build();
             } catch (Exception oe) {
                 oe.printStackTrace();
             }
 
         }
-        oResponseBuilder.status(Status.INTERNAL_SERVER_ERROR);
+
         Utils.debugLog("ProcessingResources.sen2CorConversion, conversion failed");
-        return oResponseBuilder.build();
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
 
