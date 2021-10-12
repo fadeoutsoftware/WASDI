@@ -2,6 +2,15 @@ package wasdi.shared.viewmodels.processors;
 
 import java.util.ArrayList;
 
+/**
+ * App Stats View Model
+ * 
+ * Reports only the stats of an application
+ * Stats are server-generated with a query to all nodes
+ * 
+ * @author p.campanella
+ *
+ */
 public class AppStatsViewModel {
 	private String applicationName; 
 	private int runs=0;

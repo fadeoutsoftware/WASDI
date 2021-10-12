@@ -1,5 +1,14 @@
 package wasdi.shared.viewmodels.processors;
 
+/**
+ * Process History View Model
+ * 
+ * Single line of process history to let the user
+ * re-open the old workspace used.
+ * 
+ * @author p.campanella
+ *
+ */
 public class ProcessHistoryViewModel {
     private String processorName;
     private String operationDate;

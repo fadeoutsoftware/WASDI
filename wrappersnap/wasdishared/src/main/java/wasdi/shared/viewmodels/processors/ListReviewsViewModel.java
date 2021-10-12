@@ -3,6 +3,16 @@ package wasdi.shared.viewmodels.processors;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * List Reviews View Model
+ * 
+ * List of reviews for an application with also the summary
+ * of the voting received.
+ * Used by app detail page
+ * 
+ * @author p.campanella
+ *
+ */
 public class ListReviewsViewModel {
 	private List<ReviewViewModel> reviews = new ArrayList<ReviewViewModel>();
 	float avgVote=-1.0f;

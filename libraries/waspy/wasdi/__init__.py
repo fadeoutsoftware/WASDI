@@ -2676,8 +2676,8 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
               '  ******************************************************************************')
         return ''
 
-    sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
-           sOutputFile + "&sWorkspaceId=" + m_sActiveWorkspace
+    sUrl = m_sBaseUrl + "/processing/subset?source=" + sInputFile + "&name=" + \
+           sOutputFile + "&workspace=" + m_sActiveWorkspace
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2751,8 +2751,8 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
               '  ******************************************************************************')
         return ''
 
-    sUrl = m_sBaseUrl + "/processing/geometric/multisubset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
-           sInputFile + "&sWorkspaceId=" + m_sActiveWorkspace
+    sUrl = m_sBaseUrl + "/processing/geometric/multisubset?source=" + sInputFile + "&name=" + \
+           sInputFile + "&workspace=" + m_sActiveWorkspace
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2854,7 +2854,7 @@ def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
 
 
-def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None):
+def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None):
     """
     Start a mosaic out of a set of images in asynch way
 
@@ -2866,13 +2866,18 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     :param iNoDataValue: Value to use as noData. Use -1 to ignore
 
     :param iIgnoreInputValue: Value to ignore from the input files of the mosaic. Use -1 to ignore
+    
+    :param fPixelSizeX: double value of the output pixel X resolution
+    
+    :param fPixelSizeY: double value of the output pixel Y resolution
+
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
 
     return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, True)
 
 
-def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, bAsynch=False):
+def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None, bAsynch=False):
     """
     Creates a mosaic out of a set of images
 
@@ -2884,26 +2889,21 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     :param iNoDataValue: Value to use as noData. Use -1 to ignore
 
     :param iIgnoreInputValue: Value to ignore from the input files of the mosaic. Use -1 to ignore
+    
+    :param fPixelSizeX: double value of the output pixel X resolution
+    
+    :param fPixelSizeY: double value of the output pixel Y resolution
 
     :param bAsynch: True to return after the triggering, False to wait the process to finish
+    
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
-    asBands = []
-    fPixelSizeX = -1.0
-    fPixelSizeY = -1.0
-    sCrs = None
-    fSouthBound = -1.0
-    fNorthBound = -1.0
-    fEastBound = -1.0
-    fWestBound = -1.0
-    sOverlappingMethod = "MOSAIC_TYPE_OVERLAY"
-    bShowSourceProducts = False
-    sElevationModelName = "ASTER 1sec GDEM"
-    sResamplingName = "Nearest"
-    bUpdateMode = False
-    bNativeResolution = True
-    sCombine = "OR"
-
+    if fPixelSizeX is None:
+        fPixelSizeX = -1.0
+    
+    if fPixelSizeY is None:
+        fPixelSizeY = -1.0
+    
     _log('[INFO]  waspy.mosaic( ' +
          str(asInputFiles) + ', ' +
          str(sOutputFile) + ', ' +
@@ -2930,7 +2930,7 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
         wasdiLog('[ERROR] waspy.mosaic: output file name is empty, aborting')
         return ''
 
-    sUrl = getBaseUrl() + "/processing/geometric/mosaic?sDestinationProductName=" + sOutputFile + "&sWorkspaceId=" + \
+    sUrl = getBaseUrl() + "/processing/mosaic?name=" + sOutputFile + "&workspace=" + \
            getActiveWorkspaceId()
 
     if m_bIsOnServer:
@@ -2942,32 +2942,16 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
         sOutputFormat = "BEAM-DIMAP"
     if (sOutputFile.endswith(".vrt")):
         sOutputFormat = "VRT"
-
-    if sCrs is None:
-        sCrs = _getDefaultCRS()
-
+        
     # todo check input type is appropriate
     try:
         aoMosaicSettings = {
-            'crs': sCrs,
-            'southBound': fSouthBound,
-            'eastBound': fEastBound,
-            'westBound': fWestBound,
-            'northBound': fNorthBound,
             'pixelSizeX': fPixelSizeX,
             'pixelSizeY': fPixelSizeY,
             'noDataValue': iNoDataValue,
             'inputIgnoreValue': iIgnoreInputValue,
-            'overlappingMethod': sOverlappingMethod,
-            'showSourceProducts': bShowSourceProducts,
-            'elevationModelName': sElevationModelName,
-            'resamplingName': sResamplingName,
-            'updateMode': bUpdateMode,
-            'nativeResolution': bNativeResolution,
-            'combine': sCombine,
             'outputFormat': sOutputFormat,
             'sources': asInputFiles,
-            'variableNames': asBands,
             'variableExpressions': []
         }
     except:

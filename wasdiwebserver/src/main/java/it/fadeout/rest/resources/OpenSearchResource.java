@@ -669,7 +669,7 @@ public class OpenSearchResource {
 	 * @return AuthenticationCredentials entity
 	 */
 	private AuthenticationCredentials getCredentials(String sProvider) {
-		//Utils.debugLog(s_sClassName + ".getCredentials( Provider: " + sProvider + " )");
+		
 		AuthenticationCredentials oCredentials = null;
 		try {
 			oCredentials = m_aoCredentials.get(sProvider);

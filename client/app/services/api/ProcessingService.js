@@ -16,20 +16,9 @@ service('ProcessingService', ['$http', 'ConstantsService', function ($http, oCon
         headers: { 'Content-Type': undefined }
     };
 
-    this.Operation = function (sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput) {
-        var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
-        var oConfig = { header: "" };
-        sUrl = sUrl.replace("{sOperation}", sOperation);
-        return this.m_oHttp.post(sUrl, oOptionsInput, oConfig);
-    };
-
-    this.getWPSList = function () {
-        return this.m_oHttp.get(this.APIURL + '/processing/WPSlist');
-    };
-
     this.geometricMosaic = function (sWorkspaceId, sDestinationProductName, oMosaic) {
-        return this.m_oHttp.post(this.APIURL + '/processing/geometric/mosaic?sWorkspaceId=' + sWorkspaceId
-            + "&sDestinationProductName=" + sDestinationProductName, oMosaic);
+        return this.m_oHttp.post(this.APIURL + '/processing/mosaic?workspace=' + sWorkspaceId
+            + "&name=" + sDestinationProductName, oMosaic);
     }
 }]);
 

@@ -63,11 +63,11 @@ public class ProcessingResources {
      * @throws IOException
      */
     @POST
-    @Path("geometric/mosaic")
+    @Path("mosaic")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId,
-                                  @QueryParam("sDestinationProductName") String sDestinationProductName,
-                                  @QueryParam("sWorkspaceId") String sWorkspaceId,
+                                  @QueryParam("name") String sDestinationProductName,
+                                  @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.Mosaic( Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
@@ -84,11 +84,11 @@ public class ProcessingResources {
      * @throws IOException
      */
     @POST
-    @Path("geometric/regrid")
+    @Path("regrid")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult regrid(@HeaderParam("x-session-token") String sSessionId,
-                                  @QueryParam("sDestinationProductName") String sDestinationProductName,
-                                  @QueryParam("sWorkspaceId") String sWorkspaceId,
+                                  @QueryParam("name") String sDestinationProductName,
+                                  @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, RegridSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.Regrid( Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
@@ -107,12 +107,12 @@ public class ProcessingResources {
      * @throws IOException
      */
     @POST
-    @Path("geometric/subset")
+    @Path("subset")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult subset(@HeaderParam("x-session-token") String sSessionId,
-                                  @QueryParam("sSourceProductName") String sSourceProductName,
-                                  @QueryParam("sDestinationProductName") String sDestinationProductName,
-                                  @QueryParam("sWorkspaceId") String sWorkspaceId,
+                                  @QueryParam("source") String sSourceProductName,
+                                  @QueryParam("name") String sDestinationProductName,
+                                  @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, SubsetSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.Subset( Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
@@ -131,12 +131,12 @@ public class ProcessingResources {
      * @throws IOException
      */
     @POST
-    @Path("geometric/multisubset")
+    @Path("multisubset")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult multiSubset(@HeaderParam("x-session-token") String sSessionId,
-                                       @QueryParam("sSourceProductName") String sSourceProductName,
-                                       @QueryParam("sDestinationProductName") String sDestinationProductName,
-                                       @QueryParam("sWorkspaceId") String sWorkspaceId,
+                                       @QueryParam("source") String sSourceProductName,
+                                       @QueryParam("name") String sDestinationProductName,
+                                       @QueryParam("workspace") String sWorkspaceId,
                                        @QueryParam("parent") String sParentId, MultiSubsetSetting oSetting) throws IOException {
         Utils.debugLog("ProcessingResources.MultiSubset( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
@@ -229,7 +229,7 @@ public class ProcessingResources {
      * The main node should instead call this API on computing node that host the workspace in other case 
      *  
      * @param sSessionId User Session
-     * @param sOperationId LauncherOperation value
+     * @param sOperationType LauncherOperation value
      * @param sProductName Product Name as specified in the Parameter
      * @param sParentProcessWorkspaceId Proc id of the parent
      * @param sOperationSubType Operation sub type when available
@@ -241,7 +241,7 @@ public class ProcessingResources {
     @Path("run")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
-                                      @QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String
+                                      @QueryParam("operation") String sOperationType, @QueryParam("name") String
                                               sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String
                                               sOperationSubType, String sParameter) throws IOException {
     	
@@ -252,14 +252,14 @@ public class ProcessingResources {
         if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
         
         // Log intro
-        Utils.debugLog("ProsessingResources.runProcess( Operation: " + sOperationId + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId + ")");
+        Utils.debugLog("ProsessingResources.runProcess( Operation: " + sOperationType + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId + ")");
         
         PrimitiveResult oResult = new PrimitiveResult();
 
         try {
         	
         	// Validate the Launcher Operation
-            if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+            if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationType)) {
                 // Bad request
                 oResult.setIntValue(400);
                 oResult.setBoolValue(false);
@@ -281,7 +281,7 @@ public class ProcessingResources {
             }
             
             // Get an instance of the right parameter
-            BaseParameter oParameter = BaseParameter.getParameterFromOperationType(sOperationId);
+            BaseParameter oParameter = BaseParameter.getParameterFromOperationType(sOperationType);
 
             if (oParameter == null) {
                 // Error
@@ -297,7 +297,7 @@ public class ProcessingResources {
             String sPath = m_oServletConfig.getInitParameter("SerializationPath");
             
             // Make Wasdi handle this request: this should be in this node...
-            return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationId, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+            return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationType, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
         } catch (Exception oE) {
             Utils.debugLog("ProcessingResources.runProcess: " + oE);
             oE.printStackTrace();
@@ -313,15 +313,14 @@ public class ProcessingResources {
 
     /**
      * Get the parameter Object for a specific Launcher Operation
+     * This supports only the operations that can be triggered by this API resource
      *
-     * @param oOperation
-     * @return
+     * @param oOperation Type of operation
+     * @return Operator Parameter for the input Type Operation 
      */
     private OperatorParameter getParameter(LauncherOperations oOperation) {
-        Utils.debugLog("ProcessingResources.OperatorParameter(  LauncherOperations )");
+    	
         switch (oOperation) {
-            case GRAPH:
-                return new GraphParameter();
             case MOSAIC:
                 return new MosaicParameter();
             case SUBSET:

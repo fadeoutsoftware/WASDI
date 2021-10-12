@@ -528,15 +528,15 @@ public class Wasdi extends ResourceConfig {
 	 *  
 	 * @param sUserId requesting the operation
 	 * @param sSessionId User session
-	 * @param sOperationId Id of the Launcher Operation
+	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
 	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @return
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
-		return runProcess(sUserId, sSessionId, sOperationId, sProductName, sSerializationPath, oParameter, null);
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationType, sProductName, sSerializationPath, oParameter, null);
 	}
 	
 	/**
@@ -550,7 +550,7 @@ public class Wasdi extends ResourceConfig {
 	 *  
 	 * @param sUserId User requesting the operation
 	 * @param sSessionId User session
-	 * @param sOperationId Id of the Launcher Operation
+	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
 	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
@@ -558,8 +558,8 @@ public class Wasdi extends ResourceConfig {
 	 * @return Primitive Result with the output status of the operation
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
-		return runProcess(sUserId, sSessionId, sOperationId, null, sProductName, sSerializationPath, oParameter, sParentId);
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationType, null, sProductName, sSerializationPath, oParameter, sParentId);
 	}
 
 	/**
@@ -572,7 +572,7 @@ public class Wasdi extends ResourceConfig {
 	 *
 	 * @param sUserId User requesting the operation
 	 * @param sSessionId User session
-	 * @param sOperationId Id of the Launcher Operation
+	 * @param sOperationType Id of the Launcher Operation
 	 * @param sOperationSubId Sub Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
 	 * @param sSerializationPath Node Serialisation Path
@@ -582,9 +582,9 @@ public class Wasdi extends ResourceConfig {
 	 * 			otherwise boolValue = false, intValue = httpErrorCode.
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
 
-		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationType)) {
 			// Bad request
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setIntValue(400);
@@ -597,7 +597,7 @@ public class Wasdi extends ResourceConfig {
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
 		if(null == oUser) {
-			Utils.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationId + ", " + sProductName + ", ... ): session not valid, aborting");
+			Utils.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
 			return oResult;
@@ -649,7 +649,7 @@ public class Wasdi extends ResourceConfig {
 				String sUrl = oDestinationNode.getNodeBaseAddress();
 				Utils.debugLog("Wasdi.runProcess: base url is: " + sUrl );
 				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
+				sUrl += "processing/run?operation=" + sOperationType + "&name=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
@@ -731,7 +731,7 @@ public class Wasdi extends ResourceConfig {
 
 				try {
 					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
-					oProcess.setOperationType(sOperationId);
+					oProcess.setOperationType(sOperationType);
 					oProcess.setOperationSubType(sOperationSubId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());

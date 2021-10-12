@@ -1,5 +1,13 @@
 package wasdi.shared.viewmodels.processors;
 
+/**
+ * Processor Log View Model
+ * 
+ * Single line of log of an app
+ * 
+ * @author p.campanella
+ *
+ */
 public class ProcessorLogViewModel {
 	/**
 	 * Log Date

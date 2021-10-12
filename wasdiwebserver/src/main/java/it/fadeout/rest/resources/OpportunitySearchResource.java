@@ -253,12 +253,10 @@ public class OpportunitySearchResource {
 
 				if (oSwath.getTimeStart() != null) {
 					GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
-					// oVM.AcquisitionStartTime = oCalendar.getTime();
 					oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
 				}
 				if (oSwath.getTimeEnd() != null) {
 					GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
-					// oVM.AcquisitionEndTime = oCalendar.getTime();
 					oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
 				}
 

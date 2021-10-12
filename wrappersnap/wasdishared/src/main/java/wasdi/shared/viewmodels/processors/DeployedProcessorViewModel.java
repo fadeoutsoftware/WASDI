@@ -1,5 +1,14 @@
 package wasdi.shared.viewmodels.processors;
 
+/**
+ * Deployed Processor View Model
+ * 
+ * Used by the technical view of the applications.
+ * It can be used also to update the processor entity on the server.
+ * 
+ * @author p.campanella
+ *
+ */
 public class DeployedProcessorViewModel {
 	private String processorId;
 	private String processorName;

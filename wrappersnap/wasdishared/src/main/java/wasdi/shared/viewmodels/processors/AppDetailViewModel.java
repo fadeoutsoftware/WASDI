@@ -2,6 +2,14 @@ package wasdi.shared.viewmodels.processors;
 
 import java.util.ArrayList;
 
+/**
+ * Application Detail view model.
+ * Used by the client detailed app view, contains all the related info
+ * This includes also app stats that are server-generated with a query to all the nodes
+ * 
+ * @author p.campanella
+ *
+ */
 public class AppDetailViewModel {
 	private String processorId;
 	private String processorName;

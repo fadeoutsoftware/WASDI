@@ -2,6 +2,14 @@ package wasdi.shared.viewmodels.processors;
 
 import java.util.Date;
 
+/**
+ * Comment View Model
+ * 
+ * Represents a comment to a review
+ * 
+ * @author p.campanella
+ *
+ */
 public class CommentViewModel {
 
 	private String commentId;

@@ -1,5 +1,15 @@
 package wasdi.shared.viewmodels.processors;
 
+
+/**
+ * Publisher Filter View Model
+ * 
+ * Represents all the publishers: users that deployed at least one application.
+ * Used in the marketplace
+ * 
+ * @author p.campanella
+ *
+ */
 public class PublisherFilterViewModel {
 	private String publisher;
 	private int appCount;

@@ -2,6 +2,14 @@ package wasdi.shared.viewmodels.processors;
 
 import java.util.Date;
 
+/**
+ * Review View Model
+ * 
+ * Representa a review to a processor
+ * 
+ * @author p.campanella
+ *
+ */
 public class ReviewViewModel {
 	private String id;
 	private String processorId;

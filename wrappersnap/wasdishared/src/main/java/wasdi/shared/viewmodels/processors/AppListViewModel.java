@@ -1,5 +1,13 @@
 package wasdi.shared.viewmodels.processors;
 
+/**
+ * App List View Model
+ * 
+ * Ligth view of an application, used for the marketplace landing page
+ * 
+ * @author p.campanella
+ *
+ */
 public class AppListViewModel {
 	private String processorId;
 	private String processorName;

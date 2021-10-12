@@ -2,6 +2,16 @@ package wasdi.shared.viewmodels.processors;
 
 import java.util.ArrayList;
 
+/**
+ * App filter view model
+ * 
+ * Contains all the filters that are available to search for an application.
+ * 
+ * Used by the marketplace
+ * 
+ * @author p.campanella
+ *
+ */
 public class AppFilterViewModel {
 	
 	/**

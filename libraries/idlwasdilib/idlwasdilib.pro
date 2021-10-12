@@ -1413,7 +1413,7 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreV
 
 
   ; API url
-  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?name='+sOutputFile+"&workspace="+activeworkspace
  
   ; Generate input file names JSON array
   sInputFilesJSON = '['
@@ -1447,7 +1447,7 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreV
   END
  
   ; compose the full MosaicSetting JSON View Model
-  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '"'
+  sMosaicSettingsString='{  "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "sources":'+sInputFilesJSON +', "outputFormat":"' + sOutputFormat + '"'
   
   if (sNoDataValue NE !NULL) THEN BEGIN
 	sMosaicSettingsString = sMosaicSettingsString + ', "noDataValue":' + sNoDataValue
@@ -1496,7 +1496,7 @@ FUNCTION WASDISUBSET, sInputFile, sOutputFile, sLatN, sLonW, sLatS, sLonE
 
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/geometric/subset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/processing/subset?source='+sInputFile+'&name='+sOutputFile+"&workspace="+activeworkspace
 
 	; compose the full SubsetSetting JSON View Model
 	sSubsetSettingsString='{  "latN": '+ sLatN +',  "lonW": '+ sLonW +',"latS": '+ sLatS +', "lonE": '+ sLonE +'}'
@@ -2471,7 +2471,7 @@ FUNCTION WASDIASYNCHMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputI
   END
  
   ; compose the full MosaicSetting JSON View Model
-  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '"'
+  sMosaicSettingsString='{ "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "sources":'+sInputFilesJSON +', "outputFormat":"' + sOutputFormat + '"'
   
   if (sNoDataValue NE !NULL) THEN BEGIN
 	sMosaicSettingsString = sMosaicSettingsString + ', "noDataValue":' + sNoDataValue
