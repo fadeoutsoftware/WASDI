@@ -290,6 +290,22 @@ service('ConstantsService', [function () {
     }
 
     /**
+     * Set the Id of the review selected in the store
+     * @param sReviewId
+     */
+    this.setSelectedReviewId = function (sReviewId) {
+        this.m_sSelectedReviewId = sReviewId;
+    }
+
+    /**
+     * Get the Id of the review selected in the store
+     * @returns {string}
+     */
+    this.getSelectedReviewId = function () {
+        return this.m_sSelectedReviewId;
+    }
+
+    /**
      * Get the STOMP URL
      * @returns {string}
      */

@@ -2268,7 +2268,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				// Translate
 				String sGdalTranslateCommand = "gdal_translate";
-
+				
+				sGdalTranslateCommand = LauncherMain.adjustGdalFolder(sGdalTranslateCommand);
+				
 				ArrayList<String> asArgs = new ArrayList<String>();
 				asArgs.add(sGdalTranslateCommand);
 
@@ -2460,6 +2462,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// STRING(yOrigin, Format='(D)'), STRING(xEnd, Format='(D)'), STRING(yEnd,
 			// Format='(D)'), flood_in, flood_temp,'-co','COMPRESS=LZW'], /NOSHELL
 			String sGdalWarpCommand = "gdalwarp";
+			
+			sGdalWarpCommand = LauncherMain.adjustGdalFolder(sGdalWarpCommand);
 
 			ArrayList<String> asArgs = new ArrayList<String>();
 			asArgs.add(sGdalWarpCommand);
@@ -3099,7 +3103,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				}
 				
 				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
-				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcessToKill.getOperationType());
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
 				if(!bCanSpawnChildren) {
 					s_oLogger.debug("killProcessTree: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
 					continue;
@@ -3423,7 +3427,30 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			oEx.printStackTrace();
 			return "";
 		}		
-	}	
+	}
+	
+	public static String adjustGdalFolder(String sGdalCommand) {
+		try {
+			String sGdalPath = ConfigReader.getPropValue("GDAL_PATH", "");
+			
+			if (!Utils.isNullOrEmpty(sGdalPath)) {
+				File oGdalFolder = new File(sGdalPath);
+				if (oGdalFolder.exists()) {
+					if (oGdalFolder.isDirectory()) {
+						if (!sGdalPath.endsWith(""+File.separatorChar)) sGdalPath = sGdalPath + File.separatorChar;
+						sGdalCommand = sGdalPath + sGdalCommand;
+					}
+				}
+			}			
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		
+		
+		return sGdalCommand;
+		
+	}
 	
 	
 }

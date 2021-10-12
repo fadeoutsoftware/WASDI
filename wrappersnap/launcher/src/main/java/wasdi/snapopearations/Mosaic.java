@@ -129,6 +129,8 @@ public class Mosaic {
 				bVrt = true;
 			}
 			
+			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
+			
 			ArrayList<String> asArgs = new ArrayList<String>();
 			asArgs.add(sGdalCommand);
 			

@@ -162,9 +162,9 @@
                                     <div class="container-fluid-v4"><label>Select missions</label></div>
                                     <ul class="nav-v4 nav-v4-tabs nav-v4-fill">
                                         <li class="nav-v4-item" ng-repeat="mission in $ctrl.getMissions()"
-                                            ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.selectTabMission(mission, $index, $event)">
+                                            ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.toggleMissionSelection(mission, $index, $event)">
                                             <div class="nav-v4-link" ng-class="{active: $ctrl.m_activeMissionTab === $index}">
-                                                <i class="mr-2 fa" aria-hidden="true" ng-class="{'fa-square-o' : mission.selected != true, 'fa-check-square' : mission.selected == true}" ng-click="$ctrl.toggleMissionSelection(mission, $index, $event)"></i>
+                                               <!-- <i class="mr-2 fa" aria-hidden="true" ng-class="{'fa-square-o' : mission.selected != true, 'fa-check-square' : mission.selected == true}" ></i>  -->
                                                 <span>{{mission.name}}</span>
                                             </div>
                                         </li>
