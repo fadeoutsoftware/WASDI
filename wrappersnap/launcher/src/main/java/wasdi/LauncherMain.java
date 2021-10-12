@@ -634,17 +634,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
         String sDestinationPath = getWorkspacePath(oSen2CorParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
         String sL1ProductName = oSen2CorParameter.getProductName();
         String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
+        ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
         if (oSen2CorParameter.isValid()) {
             try {
                 s_oLogger.debug("LauncherMain.sen2Cor: Start");
                 ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
-
-
-                oProcessWorkspace.setProgressPerc(25);
-                // 2 - Checks whether the product file is present on FS
-                // 3 - Unzip -> obtain L1C.SAFE
-
+                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
                 s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
                 ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameter.getProcessObjId());
@@ -653,7 +649,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                 // 4 - Convert -> obtain L2A.SAFE
                 String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
                 s_oLogger.debug("LauncherMain.sen2Cor: Extraction completed, begin conversion");
-                oProcessWorkspace.setProgressPerc(50);
+                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
                 ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
 
                 Process oProcess = oProcessBuilder
@@ -665,11 +661,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
                 // 5 - ZipIt -> L2A.zip
                 s_oLogger.debug("LauncherMain.sen2Cor: Conversion done, begin compression of L2 archive");
-                oProcessWorkspace.setProgressPerc(75);
+                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
                 oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
 
 
                 s_oLogger.debug("LauncherMain.sen2Cor: Done");
+                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
             }
             catch (Exception oe){
                 // if something went wrong delete the zip file and SAFE directories to return to original WorkSpace state
