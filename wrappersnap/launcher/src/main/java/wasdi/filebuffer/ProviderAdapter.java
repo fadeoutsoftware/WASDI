@@ -621,7 +621,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	/**
 	 * Check if the protocol of the URL is <strong>https</strong>.
 	 * @param sFileURL the URL of the file
-	 * @return true if the protocol it <strong>https</strong>, false otherwise
+	 * @return true if the protocol is <strong>https</strong>, false otherwise
 	 */
 	protected boolean isHttpsProtocol(String sFileURL) {
 		return sFileURL.startsWith("https:");
@@ -630,10 +630,67 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	/**
 	 * Check if the protocol of the URL is <strong>file</strong>.
 	 * @param sFileURL the URL of the file
-	 * @return true if the protocol it <strong>file</strong>, false otherwise
+	 * @return true if the protocol is <strong>file</strong>, false otherwise
 	 */
 	protected boolean isFileProtocol(String sFileURL) {
 		return sFileURL.startsWith("file:");
+	}
+
+	/**
+	 * Check if the file name corresponds to a <strong>.zip</strong> file.
+	 * @param sFileName the name of the file
+	 * @return true if the file is <strong>.zip</strong>, false otherwise
+	 */
+	protected boolean isZipFile(String sFileName) {
+		return sFileName.endsWith(".zip");
+	}
+
+	/**
+	 * Check if the file name corresponds to a <strong>.SAFE</strong> directory.
+	 * @param sFileName the name of the file
+	 * @return true if the file is <strong>.SAFE</strong> directory, false otherwise
+	 */
+	protected boolean isSafeDirectory(String sFileName) {
+		return sFileName.endsWith(".SAFE");
+	}
+
+	/**
+	 * Remove the .zip extension from the name, if it exists.
+	 * @param sName the name of the file
+	 * @return the name of the file without the .zip extension
+	 */
+	protected String removeZipExtension(String sName) {
+		if (sName == null || !sName.endsWith(".zip")) {
+			return sName;
+		} else {
+			return sName.replace(".zip", "");
+		}
+	}
+
+	/**
+	 * Add the .zip extension to the name, if it does not yet exists.
+	 * @param sName the name of the file
+	 * @return the name of the file with the .zip extension
+	 */
+	protected String addZipExtension(String sName) {
+		if (sName == null || sName.endsWith(".zip")) {
+			return sName;
+		} else {
+			return sName.concat(".zip");
+		}
+	}
+
+	/**
+	 * Remove the .SAFE termination from the name, if it exists.
+	 * @param sName the name of the directory
+	 * @return the name of the directory without the .SAFE termination
+	 */
+	protected String removeSafeTermination(String sName) {
+		if (sName == null || !sName.endsWith(".SAFE")) {
+			return sName;
+		} else {
+			return sName.replace(".SAFE", "");
+		}
 	}
 
 	/**
@@ -681,7 +738,17 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @return the length, in bytes, of the source-file, or 0L if the file does not exist
 	 */
 	protected long getSourceFileLength(File oSourceFile) {
-		long lLenght = oSourceFile.length();
+		long lLenght;
+		if (oSourceFile.isDirectory()) {
+			lLenght = 0L;
+
+			for (File f : oSourceFile.listFiles()) {
+				lLenght += getSourceFileLength(f);
+			}
+		} else {
+			lLenght = oSourceFile.length();
+		}
+		
 		if (!oSourceFile.exists()) {
 			m_oLogger.debug("ProviderAdapter.getSourceFileLength: FILE DOES NOT EXISTS");
 		}

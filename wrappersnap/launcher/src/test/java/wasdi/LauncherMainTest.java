@@ -5,12 +5,10 @@ import static org.junit.Assert.fail;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,10 +18,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.UserSession;
@@ -39,34 +33,27 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
-@Ignore
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class LauncherMainTest {
+public abstract class LauncherMainTest {
 
 	private static QueryExecutorFactory s_oQueryExecutorFactory;
 	private static String s_sClassName;
 	private static Map<String, AuthenticationCredentials> m_aoCredentials;
 
-	private static String SERIALIZATION_PATH;
-	private static String DOWNLOAD_ROOT_PATH;
+	protected static String SERIALIZATION_PATH;
+	protected static String DOWNLOAD_ROOT_PATH;
 
-	private static String m_sProviderBasePath = "";
-
-	private static String URL_DOMAIN = "https://collgs.lu/repository/";
-
-//	String processObjId = "9208f841-075c-4c5d-b32d-139f3b384ed3"; // LSA DOWNLOAD HTTPS & file - OK
-	String processObjId = "f83ddb30-4ed0-47fa-a72d-d79d8c0a1a7b"; // LSA DOWNLOAD HTTPS & file - OK
-
+	protected final int BUFFER_SIZE = 4096;
 
 	@BeforeClass
-    public static void setUp() throws Exception {
-		s_oQueryExecutorFactory = new QueryExecutorFactory();
+    public static void setUpParent() throws Exception {
 		s_sClassName = "LauncherMainTest";
+		Utils.debugLog(s_sClassName + ".setUp");
+
+		s_oQueryExecutorFactory = new QueryExecutorFactory();
 		m_aoCredentials = new HashMap<>();
 
 		SERIALIZATION_PATH = ConfigReader.getPropValue("SERIALIZATION_PATH");
 		DOWNLOAD_ROOT_PATH = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-		m_sProviderBasePath = ConfigReader.getPropValue("LSA_BASE_PATH", "/mount/lucollgs/data_192/");
 
 		MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
 		MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
@@ -76,117 +63,53 @@ public class LauncherMainTest {
 		MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
 	}
 
-	@Test
-	/**
-	 * Download LSA with file protocol but with missing file. should switch on download https.
-	 * @throws Exception
-	 */
-	public void testDownloadLsa_0_file_without_file() throws Exception {
+	protected void copyDownloadFileToFileSystemPath(String sourceFilePath, String targetDirectoryPath, String targetFileName) {
+		String sSaveFilePath = targetDirectoryPath + targetFileName;
 
-		changeConfigPropLsaDefaultProtocolToFile();
+		File oTargetDir = new File(targetDirectoryPath);
+		oTargetDir.mkdirs();
 
-		// -operation DOWNLOAD -parameter C:/temp/wasdi/params/9208f841-075c-4c5d-b32d-139f3b384ed3
-		String[] args = ("-operation DOWNLOAD -parameter " + SERIALIZATION_PATH + processObjId).split(" ");
+		FileInputStream oInputStream = null;
+		FileOutputStream oOutputStream = null;
 
-		String parameterFilePath = args[3];
+		int iBytesRead = -1;
+		byte[] abBuffer = new byte[BUFFER_SIZE];
+		
 
-		String parameterFileName = extractFileNameFromFilePath(parameterFilePath);
+		try {
+			oInputStream = new FileInputStream(sourceFilePath);
+			oOutputStream = new FileOutputStream(sSaveFilePath);
 
-		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
-
-		String expectedDownloadFilePath = buildExpectedDownloadFilePath(oDownloadFileParameter);
-
-		if (doesFileExist(expectedDownloadFilePath)) {
-			deleteFile(expectedDownloadFilePath);
+			while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+				oOutputStream.write(abBuffer, 0, iBytesRead);
+			}
+			
 		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		finally {
+			if (oOutputStream != null) {
+				try {
+					oOutputStream.close();
+					oOutputStream = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 
-		LauncherMain.main(args);
-
-		assertTrue("Expected download file does not exist", doesFileExist(expectedDownloadFilePath));
-
-		String sourceFilePath = expectedDownloadFilePath;
-		String targetDirectoryPath = parseHttpsUrlToFilePath(oDownloadFileParameter.getUrl()).replace(extractFileNameFromFilePath(sourceFilePath), "");
-		copyDownloadFileToFileSystemPath(sourceFilePath, targetDirectoryPath);
+			if (oInputStream != null) {
+				try {
+					oInputStream.close();
+					oInputStream = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
-	@Test
-	/**
-	 * Download LSA with https protocol.
-	 * @throws Exception
-	 */
-	public void testDownloadLsa_1_https() throws Exception {
-
-		changeConfigPropLsaDefaultProtocolToHttps();
-
-		// -operation DOWNLOAD -parameter C:/temp/wasdi/params/9208f841-075c-4c5d-b32d-139f3b384ed3
-		String[] args = ("-operation DOWNLOAD -parameter " + SERIALIZATION_PATH + processObjId).split(" ");
-
-		String parameterFilePath = args[3];
-
-		String parameterFileName = extractFileNameFromFilePath(parameterFilePath);
-
-		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
-
-		String expectedDownloadFilePath = buildExpectedDownloadFilePath(oDownloadFileParameter);
-
-		if (doesFileExist(expectedDownloadFilePath)) {
-			deleteFile(expectedDownloadFilePath);
-		}
-
-		LauncherMain.main(args);
-
-		assertTrue("Expected download file does not exist", doesFileExist(expectedDownloadFilePath));
-
-		String sourceFilePath = expectedDownloadFilePath;
-		String targetDirectoryPath = parseHttpsUrlToFilePath(oDownloadFileParameter.getUrl()).replace(extractFileNameFromFilePath(sourceFilePath), "");
-		copyDownloadFileToFileSystemPath(sourceFilePath, targetDirectoryPath);
-	}
-
-	@Test
-	/**
-	 * Download LSA with file protocol. The file should have been created by the previous test (download https).
-	 * @throws Exception
-	 */
-	public void testDownloadLsa_2_file_with_file() throws Exception {
-
-		changeConfigPropLsaDefaultProtocolToFile();
-
-		// -operation DOWNLOAD -parameter C:/temp/wasdi/params/9208f841-075c-4c5d-b32d-139f3b384ed3
-		String[] args = ("-operation DOWNLOAD -parameter " + SERIALIZATION_PATH + processObjId).split(" ");
-
-		String parameterFilePath = args[3];
-
-		String parameterFileName = extractFileNameFromFilePath(parameterFilePath);
-
-		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
-
-		String expectedOutputFilePath = buildExpectedDownloadFilePath(oDownloadFileParameter);
-
-		if (doesFileExist(expectedOutputFilePath)) {
-			deleteFile(expectedOutputFilePath);
-		}
-
-		LauncherMain.main(args);
-
-		assertTrue("Expected output file does not exist", doesFileExist(expectedOutputFilePath));
-	}
-
-	private void copyDownloadFileToFileSystemPath(String sourceFilePath, String targetDirectoryPath) throws IOException {
-		Path sourceFile = Paths.get(sourceFilePath);
-		Path targetDirectory = Paths.get(targetDirectoryPath);
-
-		if (Files.notExists(targetDirectory)) {
-			Files.createDirectories(targetDirectory);
-		}
-
-		String targetFileName = extractFileNameFromFilePath(sourceFilePath);
-
-		Path targetFile = Paths.get(targetDirectoryPath + targetFileName);
-
-		Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-	}
-
-	private DownloadFileParameter readOrCreateDownloadFileParameter(String parameterFilePath, String parameterFileName)
+	protected DownloadFileParameter readOrCreateDownloadFileParameter(String parameterFilePath, String parameterFileName)
 			throws Exception {
 		DownloadFileParameter oDownloadFileParameter;
 		if (doesFileExist(parameterFilePath)) {
@@ -198,69 +121,12 @@ public class LauncherMainTest {
 		return oDownloadFileParameter;
 	}
 
-    //TODO replace with LauncherMain's getWorspacePath
-	/**
-	 * Build the full path of the expected download file.
-	 * @param oDownloadFileParameter the download file parameter object
-	 * @return the full path of the file
-	 */
-	private String buildExpectedDownloadFilePath(DownloadFileParameter oDownloadFileParameter) {
-		String expectedOutputFileName = DOWNLOAD_ROOT_PATH // C:/Users/PetruPetrescu/.wasdi
-				+ "/"
-				+ oDownloadFileParameter.getWorkspaceOwnerId() // "pbpetrescu@gmail.com"
-				+ "/"
-				+ oDownloadFileParameter.getWorkspace() // "94217473-e353-46e3-8ec5-c3e649a94e00"
-				+ "/"
-				+ extractFileNameFromUrl(oDownloadFileParameter.getUrl()); // "S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip";
-		return expectedOutputFileName;
-	}
-
-	/**
-	 * Parse the HTTPS URL to a file-system path.
-	 * @param sHttpsURL (i.e. https://collgs.lu/repository/data_192/Sentinel-1/B/SAR-C/L1/GRD/2021/09/29/S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip)
-	 * @return the file path (i.e. C:/temp/wasdi/mount/lucollgs/data_192/Sentinel-1/B/SAR-C/L1/GRD/2021/09/29/S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip)
-	 */
-	private String parseHttpsUrlToFilePath(String sHttpsURL) {
-		String filesystemPath = m_sProviderBasePath + sHttpsURL.replace(URL_DOMAIN, "");
-
-		Utils.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
-		Utils.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: file path: " + filesystemPath);
-
-		return filesystemPath;
-	}
-
-	/**
-	 * Change the config property LSA_DEFAULT_PROTOCOL value to <b>https://</b>
-	 * @throws IOException in case of any issue reading the configuratio file
-	 */
-	private void changeConfigPropLsaDefaultProtocolToHttps() throws IOException {
-		String LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
-
-		if (LSA_DEFAULT_PROTOCOL.equals("file://")) {
-			ConfigReader.m_aoProperties.put("LSA_DEFAULT_PROTOCOL", "https://");
-			LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
-		}
-	}
-
-	/**
-	 * Change the config property LSA_DEFAULT_PROTOCOL value to <b>file://</b>
-	 * @throws IOException in case of any issue reading the configuratio file
-	 */
-	private void changeConfigPropLsaDefaultProtocolToFile() throws IOException {
-		String LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
-
-		if (LSA_DEFAULT_PROTOCOL.equals("https://")) {
-			ConfigReader.m_aoProperties.put("LSA_DEFAULT_PROTOCOL", "file://");
-			LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
-		}
-	}
-
 	/**
 	 * Extract the file name from the full file path.
 	 * @param sFilePath the full file path (i.e. C:/temp/wasdi/params/9208f841-075c-4c5d-b32d-139f3b384ed3)
 	 * @return the file name (i.e. 9208f841-075c-4c5d-b32d-139f3b384ed3)
 	 */
-	private String extractFileNameFromFilePath(String sFilePath) {
+	protected String extractFileNameFromFilePath(String sFilePath) {
 		if (sFilePath == null) {
 			return null;
 		}
@@ -277,31 +143,23 @@ public class LauncherMainTest {
 		return sFileName;
 	}
 
-	/**
-	 * Extract the file name from the HTTP URL.
-	 * @param sUrl (i.e. https://collgs.lu/repository/data_192/Sentinel-1/B/SAR-C/L1/GRD/2021/09/29/S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip)
-	 * @return the file name without the path (i.e. S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip)
-	 */
-	private String extractFileNameFromUrl(String sUrl) {
-		if (sUrl == null) {
-			return null;
-		}
-
-		String sFileName = sUrl.substring(sUrl.lastIndexOf("/") + 1);
-		return sFileName;
-	}
-
-	private boolean doesFileExist(String filePath) {
+	protected boolean doesFileExist(String filePath) {
 		File file = new File(filePath);
 
 		return file != null && file.exists();
 	}
 
-	private boolean deleteFile(String filePath) {
+	protected boolean deleteFile(String filePath) {
 		assertTrue("The file should exist", doesFileExist(filePath));
 
 		File file = new File(filePath);
 		File parentDirectory = file.getParentFile();
+
+		if (file.isDirectory()) {
+			for (File child : file.listFiles()) {
+				deleteFile(child.getPath());
+			}
+		}
 
 		boolean fileDeleted = file.delete();
 		boolean parentDirectoryDeleted = parentDirectory.delete();
@@ -309,7 +167,7 @@ public class LauncherMainTest {
 		return fileDeleted && parentDirectoryDeleted;
 	}
 
-	private boolean writeFile(String filePath, String fileContent) {
+	protected boolean writeFile(String filePath, String fileContent) {
 		boolean fileCreated = false;
 
 		if (!doesFileExist(filePath)) {
@@ -348,8 +206,9 @@ public class LauncherMainTest {
 			return null;
 		}
 
-		String sProductName = removeZipExtension(oProcessWorkspace.getProductName());
+		String sProductName = removeSafeTermination(removeZipExtension(oProcessWorkspace.getProductName()));
 		String sProvider = oProcessWorkspace.getOperationSubType();
+
 		QueryResultViewModel oFileInfoFromCatalog = readFileInfoFromCatalog(sProductName, sProvider);
 
 		if (oFileInfoFromCatalog == null) {
@@ -379,11 +238,27 @@ public class LauncherMainTest {
 		return oParameter;
 	}
 
-	private String removeZipExtension(String sProductName) {
+	protected String removeZipExtension(String sProductName) {
 		if (sProductName == null || !sProductName.endsWith(".zip")) {
 			return sProductName;
 		} else {
 			return sProductName.replace(".zip", "");
+		}
+	}
+
+	protected String removeSafeTermination(String sProductName) {
+		if (sProductName == null || !sProductName.endsWith(".SAFE")) {
+			return sProductName;
+		} else {
+			return sProductName.replace(".SAFE", "");
+		}
+	}
+
+	protected String addSafeTermination(String sProductName) {
+		if (sProductName == null || sProductName.endsWith(".SAFE")) {
+			return sProductName;
+		} else {
+			return sProductName.concat(".SAFE");
 		}
 	}
 
@@ -395,10 +270,6 @@ public class LauncherMainTest {
 	}
 
 	private QueryResultViewModel readFileInfoFromCatalog(String sProductName, String sProvider) {
-//		"S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA AND ( beginPosition:[2021-09-28T00:00:00.000Z TO 2021-10-05T23:59:59.999Z] AND endPosition:[2021-09-28T00:00:00.000Z TO 2021-10-05T23:59:59.999Z] ) AND   (platformname:Sentinel-1)"
-//		String sQuery = sProductName;
-//		String sQuery = sProductName + " AND ( beginPosition:[2021-09-28T00:00:00.000Z TO 2021-10-05T23:59:59.999Z] AND endPosition:[2021-09-28T00:00:00.000Z TO 2021-10-05T23:59:59.999Z] ) AND   (platformname:Sentinel-1)";
-//		String sQuery = sProductName + " AND ( beginPosition:[2021-09-28T00:00:00.000Z TO 2021-10-05T23:59:59.999Z] AND endPosition:[2021-09-28T00:00:00.000Z TO 2021-10-05T23:59:59.999Z] )";
 		String sQuery = sProductName + " AND ( beginPosition:[1970-01-01T00:00:00.000Z TO 2099-12-31T23:59:59.999Z] AND endPosition:[1970-01-01T00:00:00.000Z TO 2099-12-31T23:59:59.999Z] )";
 		String sProviders = sProvider;
 

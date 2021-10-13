@@ -10,9 +10,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -55,7 +62,7 @@ public class WasdiFileUtils {
 				while ((iLength = oFis.read(bytes)) >= 0) {
 					oZipOut.write(bytes, 0, iLength);
 				}
-				oFis.close();				
+//				oFis.close();				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -114,6 +121,51 @@ public class WasdiFileUtils {
 	public static String fixPathSeparator(String sPathString) {
 	return sPathString.replace("/",File.separator).replace("\\",File.separator);
 		
+	}
+
+	/**
+	 * Extract the zip-file into the declared directory.
+	 * 
+	 * <pre>
+	 * The processing in streaming mode of zip-files that are not compressed/deflated 
+	 * (see CREODIAS downloads) might end up in an error:
+	 * java.util.zip.ZipException: only DEFLATED entries can have EXT descriptor
+	 * 
+	 * Due to this fact, an alternative solution based on Apache's commons-compress was used.
+	 * For more details see the following page:
+	 * https://stackoverflow.com/questions/47208272/android-zipinputstream-only-deflated-entries-can-have-ext-descriptor
+	 * </pre>
+	 * @param zipFile the zip-file to be extracted
+	 * @param destDir the destination directory
+	 * @throws IOException if an error occurs
+	 */
+	public static void unzipFile(File zipFile, File destDir) throws IOException {
+		String destDirectory = destDir.getAbsolutePath();
+
+		try (ArchiveInputStream i = new ZipArchiveInputStream(new FileInputStream(zipFile), "UTF-8", false, true)) {
+			ArchiveEntry entry = null;
+			while ((entry = i.getNextEntry()) != null) {
+				if (!i.canReadEntryData(entry)) {
+					Utils.debugLog("Utils.GetFileNameExtension: Can't read entry: " + entry);
+					continue;
+				}
+				String name = destDirectory + File.separator + entry.getName();
+				File f = new File(name);
+				if (entry.isDirectory()) {
+					if (!f.isDirectory() && !f.mkdirs()) {
+						throw new IOException("failed to create directory " + f);
+					}
+				} else {
+					File parent = f.getParentFile();
+					if (!parent.isDirectory() && !parent.mkdirs()) {
+						throw new IOException("failed to create directory " + parent);
+					}
+					try (OutputStream o = Files.newOutputStream(f.toPath())) {
+						IOUtils.copy(i, o);
+					}
+				}
+			}
+		}
 	}
 	
 }

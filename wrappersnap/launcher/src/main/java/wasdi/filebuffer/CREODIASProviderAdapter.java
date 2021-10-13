@@ -8,6 +8,7 @@ package wasdi.filebuffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,8 +19,8 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.net.io.Util;
 import org.json.JSONArray;
@@ -33,6 +34,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * @author c.nattero
@@ -74,16 +76,40 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 		long lSizeInBytes = 0L;
 
-		if (isFileProtocol(sFileURL)) {
-			String sPath = removePrefixFile(sFileURL);
-			File oSourceFile = new File(sPath);
+		if (isFileProtocol(m_sDefaultProtocol)) {
+			String sPath = null;
+			if (isFileProtocol(sFileURL)) {
+				sPath = removePrefixFile(sFileURL);
+			} else if(isHttpsProtocol(sFileURL)) {
+				sPath = extractFilePathFromHttpsUrl(sFileURL);
+			} else {
+				Utils.debugLog("CREODIASProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
+			}
 
-			lSizeInBytes = getSourceFileLength(oSourceFile);
-		} else if(isHttpsProtocol(sFileURL)) {
+			if (sPath != null) {
+				File oSourceFile = new File(sPath);
+
+				if (oSourceFile != null && oSourceFile.exists()) {
+					lSizeInBytes = getSourceFileLength(oSourceFile);
+
+					return lSizeInBytes;
+				}
+			}
+		}
+
+		if (isHttpsProtocol(sFileURL)) {
 			String sResult = "";
 			try {
-				sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_SIZEINBYTES];
-				lSizeInBytes = Long.parseLong(sResult);
+				String sDownloadUser = m_sProviderUser;
+				String sDownloadPassword = m_sProviderPassword;
+
+				String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
+				//reconstruct appropriate url
+				StringBuilder oUrl = new StringBuilder(getZipperUrl(sFileURL) );
+				oUrl.append("?token=").append(sKeyCloakToken);
+				sFileURL = oUrl.toString();
+
+				lSizeInBytes = getDownloadFileSizeViaHttp(sFileURL);
 				m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: file size is: " + sResult);
 			} catch (Exception oE) {
 				m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
@@ -91,6 +117,21 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		}
 
 		return lSizeInBytes;
+	}
+
+	/**
+	 * Extract the file-system path of the file out of an HTTPS URL.
+	 * @param sHttpsURL the HTTPS URL containing the product identifier (i.e. /eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
+	 * @return the file-system path (i.e. C:/temp/wasdi//eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
+	 */
+	private String extractFilePathFromHttpsUrl(String sHttpsURL) {
+		String sProductIdentifier = extractProductIdentifierFromURL(sHttpsURL);
+		String filesystemPath = m_sProviderBasePath + sProductIdentifier;
+
+		Utils.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sProductIdentifier);
+		Utils.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: file path: " + filesystemPath);
+
+		return filesystemPath;
 	}
 
 	/* (non-Javadoc)
@@ -107,9 +148,28 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 		String sResult = null;
 
-		if (isFileProtocol(sFileURL)) {
-			// implement the local-copy of the file
-		} else if(isHttpsProtocol(sFileURL)) {
+		if (isFileProtocol(m_sDefaultProtocol)) {
+			String filesystemPath = null;
+			if (isFileProtocol(sFileURL)) {
+				filesystemPath = removePrefixFile(sFileURL);
+			} else if (isHttpsProtocol(sFileURL)) {
+				filesystemPath = extractFilePathFromHttpsUrl(sFileURL);
+			} else {
+				Utils.debugLog("CREODIASProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
+			}
+
+			if (filesystemPath != null) {
+				File oSourceFile = new File(filesystemPath);
+
+				if (oSourceFile != null && oSourceFile.exists()) {
+					sResult = copyFile("file:" + filesystemPath, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace, iMaxRetry);
+
+					return sResult;
+				}
+			}
+		}
+
+		if(isHttpsProtocol(sFileURL)) {
 			try {
 				//todo check availability
 				boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
@@ -224,6 +284,56 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		}
 
 		return sResult;
+	}
+	
+	private String copyFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
+			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
+
+		String sResult = "";
+		// Domain check
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			m_oLogger.debug("CREODIASProviderAdapter.ExecuteDownloadFile: sFileURL is null");
+			return "";
+		}
+		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
+			m_oLogger.debug("CREODIASProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
+			return "";
+		}
+		
+		m_oLogger.debug("CREODIASProviderAdapter.ExecuteDownloadFile: start");
+		
+		setProcessWorkspace(oProcessWorkspace);
+
+		if (isFileProtocol(sFileURL)) {
+			if (isZipFile(sFileURL)) {
+				sResult = localFileCopy(sFileURL, sSaveDirOnServer, iMaxRetry);
+			} else if (isSafeDirectory(sFileURL)) {
+				String sourceFile = removePrefixFile(sFileURL);
+				String destinationFile = getFileName(sFileURL);
+
+				// set the destination folder
+				if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
+				destinationFile = sSaveDirOnServer + destinationFile;
+
+				destinationFile = addZipExtension(removeSafeTermination(destinationFile));
+
+				downloadZipFile(sourceFile, destinationFile);
+				
+				sResult = destinationFile;
+			}
+		} 
+
+		return sResult;
+	}
+
+	private void downloadZipFile(String sourceFile, String destinationFile) throws Exception {
+        FileOutputStream fos = new FileOutputStream(destinationFile);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        File fileToZip = new File(sourceFile);
+
+        WasdiFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+        zipOut.close();
+        fos.close();
 	}
 
 	private JSONObject checkStatus(JSONObject oJsonOrder, String sDownloadUser, String sDownloadPassword) {
@@ -461,6 +571,18 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		return null;
 	}
 
+	private String extractProductIdentifierFromURL(String sFileURL) {
+		Preconditions.checkNotNull(sFileURL, "URL is null");
+		try {
+			String[] asParts = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
+			String sProductIdentifier = asParts[DiasResponseTranslatorCREODIAS.IPOSITIONOF_PRODUCTIDENTIFIER];
+			return sProductIdentifier;
+		} catch (Exception oE) {
+			m_oLogger.error("CREODIASProviderAdapter.extractProductIdentifierFromURL: " + oE);
+		}
+		return null;
+	}
+
 	private String getZipperUrl(String sFileURL) {
 		String sResult = "";
 		try {
@@ -484,11 +606,19 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 
 		String sResult = "";
-		try {
-			String[] asTokens = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); 
-			sResult = asTokens[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
-		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.GetFileName: " + oE);
+		if (isHttpsProtocol(sFileURL)) {
+			try {
+				String[] asTokens = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); 
+				sResult = asTokens[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
+			} catch (Exception oE) {
+				m_oLogger.error("CREODIASProviderAdapter.GetFileName: " + oE);
+			}
+		} else if (isFileProtocol(sFileURL)) {
+			String[] asParts = sFileURL.split("/");
+
+			if (asParts != null && asParts.length > 1) {
+				sResult = asParts[asParts.length-1];
+			}
 		}
 
 		return sResult;
