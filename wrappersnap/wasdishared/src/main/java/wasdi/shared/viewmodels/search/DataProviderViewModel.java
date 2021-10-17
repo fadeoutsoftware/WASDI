@@ -1,6 +1,11 @@
 package wasdi.shared.viewmodels.search;
 
-public class SearchProviderViewModel {
+/**
+ * Represents a Data Provider 
+ * @author p.campanella
+ *
+ */
+public class DataProviderViewModel {
 	private String code;
 	private String description;
 	private String link;

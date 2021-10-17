@@ -297,8 +297,8 @@ var RootController = (function() {
                 else
                 {
                     oController.m_oSummary = data.data;
-                    oController.m_iNumberOfProcesses = data.data.userProcessRunning + data.data.userDownloadRunning + data.data.userIDLRunning;
-                    oController.m_iWaitingProcesses = data.data.userProcessWaiting + data.data.userDownloadWaiting + data.data.userIDLWaiting;
+                    oController.m_iNumberOfProcesses = data.data.userProcessRunning;
+                    oController.m_iWaitingProcesses = data.data.userProcessWaiting;
                 }
 
             },(function (data,status) {

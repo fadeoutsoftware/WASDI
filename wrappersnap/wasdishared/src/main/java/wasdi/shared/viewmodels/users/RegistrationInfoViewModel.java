@@ -1,6 +1,8 @@
 package wasdi.shared.viewmodels.users;
 
 /**
+ * Registration info View Model 
+ * 
  * Created by c.nattero on 2018.10.26
  */
 

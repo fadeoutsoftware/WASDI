@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the download operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class DownloadPayload extends OperationPayload {
 	
 	public DownloadPayload() {

@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the Delete Processor Operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class DeleteProcessorPayload extends OperationPayload {
 	
 	String processorName;

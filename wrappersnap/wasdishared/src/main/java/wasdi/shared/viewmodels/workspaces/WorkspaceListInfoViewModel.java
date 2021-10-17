@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents basic info of a Workspace, used by the summary shown in the workspaces section
+ * 
  * Created by p.campanella on 25/10/2016.
  */
 public class WorkspaceListInfoViewModel {

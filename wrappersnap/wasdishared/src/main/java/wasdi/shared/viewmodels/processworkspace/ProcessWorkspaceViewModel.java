@@ -1,6 +1,8 @@
 package wasdi.shared.viewmodels.processworkspace;
 
 /**
+ * Represents a Process Workspace
+ * 
  * Created by s.adamo on 31/01/2017.
  */
 public class ProcessWorkspaceViewModel {

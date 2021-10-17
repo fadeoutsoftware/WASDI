@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the Deploy Processor Operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class DeployProcessorPayload extends OperationPayload {
 	
 	private String processorName;

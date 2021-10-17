@@ -7,6 +7,9 @@
 package wasdi.shared.viewmodels.products;
 
 /**
+ * Wraps the info to request a transfer to sfpt of a product.
+ * Used by the realtive client dialog window.
+ * 
  * @author c.nattero
  *
  */

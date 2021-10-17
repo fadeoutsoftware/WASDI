@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * Review View Model
  * 
- * Representa a review to a processor
+ * Represents a review to a processor
  * 
  * @author p.campanella
  *

@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Represents the Workspace representation as requested by the client Editor Section.
+ * 
  * Created by p.campanella on 26/10/2016.
  */
 public class WorkspaceEditorViewModel {

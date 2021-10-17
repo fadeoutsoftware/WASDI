@@ -3,6 +3,9 @@ package wasdi.shared.viewmodels.products;
 import java.util.ArrayList;
 
 /**
+ * Represents a node group of a product. 
+ * In the client editor product tree, node groups are groups of bands.
+ * 
  * Created by s.adamo on 23/05/2016.
  */
 public class NodeGroupViewModel {

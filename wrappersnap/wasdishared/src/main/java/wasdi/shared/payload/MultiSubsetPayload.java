@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the Multi Sub set operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class MultiSubsetPayload extends OperationPayload {
 	
 	String inputFile;

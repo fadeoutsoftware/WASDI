@@ -1,5 +1,10 @@
 package wasdi.shared.payload;
 
+/**
+ * Publish band operation payload
+ * @author p.campanella
+ *
+ */
 public class PublishBandPayload extends OperationPayload {
 	public PublishBandPayload() {
 		operation = "PUBLISHBAND";

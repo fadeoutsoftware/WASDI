@@ -1,6 +1,8 @@
-package wasdi.shared.viewmodels.products;
+package wasdi.shared.viewmodels;
 
 /**
+ * Represents a WASDI Node.
+ * 
  * Created by m.menapace on 11/02/2021
  */
 public class NodeViewModel {

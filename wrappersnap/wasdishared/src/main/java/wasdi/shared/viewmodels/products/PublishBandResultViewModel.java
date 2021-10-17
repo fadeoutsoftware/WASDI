@@ -1,6 +1,10 @@
 package wasdi.shared.viewmodels.products;
 
 /**
+ * Represents a published bands with the info
+ * of the bbox and of the url to use to get the 
+ * layer in wms
+ * 
  * Created by p.campanella on 04/11/2016.
  */
 public class PublishBandResultViewModel {

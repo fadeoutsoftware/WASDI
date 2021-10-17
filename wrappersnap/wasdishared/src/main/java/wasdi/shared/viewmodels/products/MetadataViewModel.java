@@ -3,6 +3,10 @@ package wasdi.shared.viewmodels.products;
 import java.util.ArrayList;
 
 /**
+ * Represents the Metadata of a Product.
+ * It contains a list of sub-elements that are also MetadataViewModel and 
+ * a list of leaf attributes (AttributeViewModel). 
+ * 
  * Created by s.adamo on 18/05/2016.
  */
 public class MetadataViewModel {

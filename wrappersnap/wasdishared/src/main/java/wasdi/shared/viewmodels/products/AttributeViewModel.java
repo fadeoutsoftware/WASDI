@@ -1,13 +1,14 @@
 package wasdi.shared.viewmodels.products;
 
 /**
+ * Represents a single attribute of a product metadata view model
+ *  
  * Created by s.adamo on 18/05/2016.
  */
 public class AttributeViewModel {
 
     private int dataType;
     private long numElems;
-    //private String name;
     private String description;
     private String data;
     
@@ -23,12 +24,7 @@ public class AttributeViewModel {
     public void setNumElems(long numElems) {
         this.numElems = numElems;
     }
-//    public String getName() {
-//        return name;
-//    }
-//    public void setName(String name) {
-//        this.name = name;
-//    }
+
     public String getDescription() {
         return description;
     }

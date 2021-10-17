@@ -3,6 +3,8 @@ package wasdi.shared.viewmodels.users;
 import wasdi.shared.utils.Utils;
 
 /**
+ * User View Model: represents basic info about the user
+ * 
  * Created by p.campanella on 21/10/2016.
  */
 public class UserViewModel {

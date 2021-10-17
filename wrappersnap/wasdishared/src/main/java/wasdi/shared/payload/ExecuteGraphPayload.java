@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the GRAPH Operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class ExecuteGraphPayload extends OperationPayload {
 	public ExecuteGraphPayload() {
 		operation = "GRAPH";

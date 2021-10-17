@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the Mosaic Operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class MosaicPayload extends OperationPayload {
 	private String [] inputs;
 	private String output;

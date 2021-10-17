@@ -1,5 +1,11 @@
 package wasdi.shared.payload;
 
+/**
+ * Payload of the FTP Upload Operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class FTPUploadPayload extends OperationPayload {
 	
 	public FTPUploadPayload() {

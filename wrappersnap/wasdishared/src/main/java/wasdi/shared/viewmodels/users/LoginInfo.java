@@ -5,6 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import wasdi.shared.utils.Utils;
 
 /**
+ * View Model for access info of classic WASDI login
+ * 
  * Created by p.campanella on 21/10/2016.
  */
 @XmlRootElement

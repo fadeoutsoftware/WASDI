@@ -24,7 +24,7 @@ import wasdi.shared.opensearch.QueryExecutorFactory;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
-import wasdi.shared.viewmodels.search.SearchProviderViewModel;
+import wasdi.shared.viewmodels.search.DataProviderViewModel;
 
 /**
  * Open Search Resource.
@@ -342,7 +342,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
-	public ArrayList<SearchProviderViewModel> getSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<DataProviderViewModel> getDataProviders(@HeaderParam("x-session-token") String sSessionId) {
 		Utils.debugLog(s_sClassName + ".getSearchProviders");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
@@ -358,7 +358,7 @@ public class OpenSearchResource {
 			}
 			
 			
-			ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
+			ArrayList<DataProviderViewModel> aoRetProviders = new ArrayList<>();
 			
 			String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
 			
@@ -368,7 +368,7 @@ public class OpenSearchResource {
 	
 				for (int iProviders = 0; iProviders < asProviders.length; iProviders++) {
 					
-					SearchProviderViewModel oSearchProvider = new SearchProviderViewModel();
+					DataProviderViewModel oSearchProvider = new DataProviderViewModel();
 					oSearchProvider.setCode(asProviders[iProviders]);
 					
 					String sDescription = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Description");

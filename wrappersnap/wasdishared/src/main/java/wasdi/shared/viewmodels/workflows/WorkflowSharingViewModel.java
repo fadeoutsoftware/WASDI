@@ -2,6 +2,11 @@ package wasdi.shared.viewmodels.workflows;
 
 import wasdi.shared.business.WorkflowSharing;
 
+/**
+ * Represents the sharing of a workflow with a user
+ * @author p.campanella
+ *
+ */
 public class WorkflowSharingViewModel {
 	private String userId;
 

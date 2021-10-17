@@ -1,6 +1,8 @@
 package wasdi.shared.viewmodels.products;
 
 /**
+ * Represents a band in a product.
+ * 
  * Created by s.adamo on 20/05/2016.
  */
 public class BandViewModel {

@@ -1,5 +1,13 @@
 package wasdi.shared.viewmodels.processworkspace;
 
+/**
+ * Used by the processor resource to return info about the new started
+ * application. It merges name and id of the processor with the process workspace id,
+ *  the status and the result (payload) when availalbe.
+ * 
+ * @author p.campanella
+ *
+ */
 public class RunningProcessorViewModel {
 	private String processorId;
 	private String name;

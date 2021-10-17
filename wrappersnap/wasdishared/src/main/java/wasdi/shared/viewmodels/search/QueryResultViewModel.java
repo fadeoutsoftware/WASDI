@@ -7,6 +7,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import wasdi.shared.utils.Utils;
 
+/**
+ * Result of a search to a data provider.
+ * 
+ * Basic info are:
+ * 	.Title -> Name of the file
+ * 	.Summary -> Description
+ * 	.Id -> Provider unique id
+ * 	.Link -> Link to download the file
+ * 	.Footprint -> Bounding box
+ * 	.Provider -> Provider used to get this info.
+ * 
+ * Properties is a dictionary filled with all the properties supported by the data provider.
+ * Can be seen with the "info" button in the client.
+ * 
+ * The libs searchs for a property called relativeOrbit
+ * 
+ * @author p.campanella
+ *
+ */
 @XmlRootElement
 public class QueryResultViewModel {
 	

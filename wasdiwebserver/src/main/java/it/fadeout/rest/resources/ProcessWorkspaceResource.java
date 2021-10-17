@@ -708,12 +708,9 @@ public class ProcessWorkspaceResource {
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
 		try {
-			if(Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessWorkspaceResource.GetSummary: session is null");
-				return oSummaryViewModel;
-			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
 			// Domain Check
 			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);

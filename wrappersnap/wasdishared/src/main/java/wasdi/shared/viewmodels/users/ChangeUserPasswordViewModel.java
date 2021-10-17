@@ -1,6 +1,8 @@
 package wasdi.shared.viewmodels.users;
 
 /**
+ * Used to request a password change
+ * 
  * Created by c.nattero on 2018.10.26
  */
 

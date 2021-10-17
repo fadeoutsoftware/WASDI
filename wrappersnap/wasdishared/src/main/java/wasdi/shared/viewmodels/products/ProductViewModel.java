@@ -1,6 +1,18 @@
 package wasdi.shared.viewmodels.products;
 
 /**
+ * Product View Model.
+ * Used as entry to fill the client editor product tree. 
+ * 
+ * Contains product name, file and links to metadata and band groups.
+ *
+ * This View Model is SAVED DIRECTLY IN THE DB. It is the only case, for historical reason: this
+ * VM contains all the tree of the product bands that are not saved by wasdi in any other way.
+ * 
+ * Here .name is the file name without extension
+ * 		.fileName is the file name with extension
+ * 		.productFriendlyName is a name that the user can assign to this product
+ * 
  * Created by s.adamo on 18/05/2016.
  */
 public class ProductViewModel {

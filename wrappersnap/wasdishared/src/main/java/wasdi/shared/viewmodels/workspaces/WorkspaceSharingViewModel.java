@@ -1,5 +1,11 @@
 package wasdi.shared.viewmodels.workspaces;
 
+/**
+ * Represents the sharing of a workspace.
+ * 
+ * @author p.campanella
+ *
+ */
 public class WorkspaceSharingViewModel {
 	/**
 	 * Workspace Id

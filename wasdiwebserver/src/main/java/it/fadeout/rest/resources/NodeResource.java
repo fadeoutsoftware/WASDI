@@ -15,7 +15,7 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.User;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.products.NodeViewModel;
+import wasdi.shared.viewmodels.NodeViewModel;
 
 /**
  * Node Resource.
