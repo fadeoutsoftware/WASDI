@@ -3,6 +3,17 @@ package wasdi.shared.parameters;
 import wasdi.shared.LauncherOperations;
 
 /**
+ * Base Parameter.
+ * 
+ * Parameters are a set of class that represents the input needed by each Launcher Operation
+ * 
+ * Each Operation is triggered from an API; this API collects the data needed by the launcher to execute the operation.
+ * All these info are stored in a parameter.
+ * 
+ * Parameters are stored in the file system using the SerializationUtils.
+ * 
+ * Almost each operation has its own parameter, even if some operations can share the same param.
+ * 
  * Created by s.adamo on 16/03/2017.
  */
 public class BaseParameter {

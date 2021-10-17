@@ -2,6 +2,7 @@ package wasdi.shared.viewmodels.search;
 
 /**
  * Represent a query to the data providers
+ * 
  * @author p.campanella
  *
  */
@@ -9,27 +10,27 @@ public class QueryViewModel {
 	/**
 	 * Actual Offset
 	 */
-	public int offset=-1;
+	public int offset = -1;
 	/**
 	 * Max elements
 	 */
-	public int limit=-1;
+	public int limit = -1;
 	/**
 	 * North
 	 */
-	public Double north=null;
+	public Double north = null;
 	/**
 	 * South
 	 */
-	public Double south=null;
+	public Double south = null;
 	/**
 	 * East
 	 */
-	public Double east=null;
+	public Double east = null;
 	/**
 	 * West
 	 */
-	public Double west=null;
+	public Double west = null;
 	/**
 	 * Start Date from
 	 */
@@ -46,7 +47,7 @@ public class QueryViewModel {
 	 * End Date to
 	 */
 	public String endToDate;
-	
+
 	/**
 	 * Platform type
 	 */
@@ -58,7 +59,7 @@ public class QueryViewModel {
 	/**
 	 * Relative Orbit
 	 */
-	public int relativeOrbit=-1;
+	public int relativeOrbit = -1;
 	/**
 	 * Cloud coverage from
 	 */
@@ -71,12 +72,12 @@ public class QueryViewModel {
 	 * Sensor mode
 	 */
 	public String sensorMode;
-	
+
 	/**
 	 * Free text search, used when a specific product name is given
 	 */
 	public String productName = null;
-	
+
 	/**
 	 * Timeliness (ie Sentinel 3 filter)
 	 */

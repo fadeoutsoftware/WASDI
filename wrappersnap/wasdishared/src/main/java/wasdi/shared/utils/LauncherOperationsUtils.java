@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.shared.launcherOperations;
+package wasdi.shared.utils;
 
 import org.apache.commons.lang3.EnumUtils;
 
