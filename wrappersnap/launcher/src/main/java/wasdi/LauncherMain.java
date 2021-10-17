@@ -65,6 +65,8 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import sun.management.VMManagement;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterFactory;
@@ -183,6 +185,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+		
+		NetcdfFile oFile = NetcdfFile.open("C:\\Users\\p.campanella\\.wasdi\\paolo\\e07f313f-640b-44ca-b887-e5e90858c50d\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249.nc");
+		
+	    List<Variable> variables =  oFile.getVariables();
+	    for (Variable v : variables) {
+	       System.out.println("\n" + v.toString());
+	    }
 
 		try {
 			Security.setProperty("crypto.policy", "unlimited");
@@ -889,8 +898,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						s_oLogger.info("LauncherMain.download: bounding box not available in the parameter");
 					}
 					
-					if (oProduct.getStartTime()!=null) {
-						oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+					if (oProduct != null) {
+						if (oProduct.getStartTime()!=null) {
+							oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+						}						
 					}
 					
 					oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());

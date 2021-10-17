@@ -239,7 +239,7 @@
                 {
                     "indexname": "productlevel ",
                     "indexlabel": "Product Level ",
-                    "indexvalues":"L1B|L2",
+                    "indexvalues":"LEVEL1B|LEVEL2",
                     "regex": ".*"
 
                 },
