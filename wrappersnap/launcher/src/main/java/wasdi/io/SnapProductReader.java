@@ -111,6 +111,8 @@ public class SnapProductReader extends WasdiProductReader {
 	}
 	@Override
 	public MetadataViewModel getProductMetadataViewModel() {
+		m_oProduct = getSnapProduct();
+		if (m_oProduct == null) return null;
 		return  getSnapProductMetadataViewModel(m_oProduct.getMetadataRoot(), new MetadataViewModel("Metadata"));
 	}
 	

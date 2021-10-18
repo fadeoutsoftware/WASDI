@@ -26,6 +26,9 @@ public class ShapeProductReader extends WasdiProductReader{
 
 	@Override
 	public ProductViewModel getProductViewModel() {
+		
+		if (m_oProductFile == null) return null;
+		
     	// Create the return value
     	GeorefProductViewModel oRetViewModel = null;
     	
@@ -100,6 +103,8 @@ public class ShapeProductReader extends WasdiProductReader{
 	public String getProductBoundingBox() {
 		String sBbox = "";
 		ShapefileDataStore oShpFileDataStore = null;
+		
+		if (m_oProductFile == null) return null;
 		
 		try {
 			// Open the data store

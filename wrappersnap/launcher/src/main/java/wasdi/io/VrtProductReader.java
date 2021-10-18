@@ -19,6 +19,9 @@ public class VrtProductReader extends WasdiProductReader {
 
 	@Override
 	public ProductViewModel getProductViewModel() {
+		
+		if (m_oProductFile == null) return null;
+		
     	// Create the return value
     	GeorefProductViewModel oRetViewModel = null;
     	
@@ -61,7 +64,6 @@ public class VrtProductReader extends WasdiProductReader {
 
 	@Override
 	public String getProductBoundingBox() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
