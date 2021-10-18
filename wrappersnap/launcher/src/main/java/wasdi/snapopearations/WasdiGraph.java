@@ -29,6 +29,7 @@ import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessStatus;
@@ -461,8 +462,8 @@ public class WasdiGraph {
         }
         
         // Read the View Model
-        WasdiProductReader oReadProduct = new WasdiProductReader();
-		ProductViewModel oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
+        WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
+		ProductViewModel oVM = oReadProduct.getProductViewModel();
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -480,24 +481,8 @@ public class WasdiGraph {
             oOutputProduct.setFilePath(oProductFile.getAbsolutePath());
             oOutputProduct.setProductViewModel(oVM);
             oOutputProduct.setBoundingBox(sBBox);
-            
-    		// Write Metadata to file system
-            try {
-                // Get Metadata Path a Random File Name
-                String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
-        		if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
-        		String sMetadataFileName = Utils.GetRandomName();
-
-    			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel(oProductFile));
-    			
-    			oOutputProduct.getProductViewModel().setMetadataFileReference(sMetadataFileName);
-    			
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    		}            
-            
+            oOutputProduct.getProductViewModel().setMetadataFileReference(null);
+                        
             if (!oDownloadedRepo.insertDownloadedFile(oOutputProduct)) {
             	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }
@@ -506,17 +491,9 @@ public class WasdiGraph {
             }
         }
         
-        //if (bAddProductToWS) {
         addProductToWorkspace(oProductFile.getAbsolutePath(),sBBox);
-        //}
-        //else {
-        //	m_oLogger.error("Product NOT added to the Workspace");
-        //}
         
         m_oLogger.debug("OK DONE");
-        
-        //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
-        //oVM.setMetadata(null);
 
         if (m_oRabbitSender!=null) m_oRabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), m_oParams.getWorkspace(), oVM, m_oParams.getExchange());
     }

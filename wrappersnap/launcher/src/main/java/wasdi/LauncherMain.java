@@ -72,6 +72,7 @@ import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterFactory;
 import wasdi.geoserver.Publisher;
 import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
 import wasdi.io.WasdiProductWriter;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -857,12 +858,23 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						sFileName = sFolderName + "/" + "xfdumanifest.xml";
 						s_oLogger.debug("LauncherMain.download: File Name changed in: " + sFileName);
 					}
+					
+					if (sFileNameWithoutPath.startsWith("S5P") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
+						s_oLogger.debug("LauncherMain.download: File is a Sentinel 5P image, start unzip");
+						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
+						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", "");
+						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
+						sFileName = sFolderName + "/" + sFolderName + ".nc";
+						s_oLogger.debug("LauncherMain.download: File Name changed in: " + sFileName);
+					}					
 
 					// Get The product view Model
-					WasdiProductReader oReadProduct = new WasdiProductReader();
 					File oProductFile = new File(sFileName);
-					Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
-					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
+					WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
+					
+					Product oProduct = oReadProduct.getSnapProduct();
+					oVM = oReadProduct.getProductViewModel();
 					
 					if (oVM != null) {
 						// Snap set the name of geotiff files as geotiff: let replace with the file name
@@ -1284,8 +1296,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			boolean bUnzipAfterCopy = false;
 
 			// Try to read the Product view Model
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-			ProductViewModel oImportProductViewModel = oReadProduct.getProductViewModel(oFileToIngestPath);
+			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
+			ProductViewModel oImportProductViewModel = oReadProduct.getProductViewModel();
 
 			String sDestinationFileName = oFileToIngestPath.getName();
 
@@ -1312,8 +1324,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						if (Utils.isNullOrEmpty(sShapeFileTest) == false) {
 							// Ok, we have our file
 							File oShapeFileIngestPath = new File(oFileToIngestPath.getParent() + "/" + sShapeFileTest);
+							
+							WasdiProductReader oReadShapeProduct = WasdiProductReaderFactory.getProductReader(oShapeFileIngestPath);
+							
 							// Now get the view model again
-							oImportProductViewModel = oReadProduct.getProductViewModel(oShapeFileIngestPath);
+							oImportProductViewModel = oReadShapeProduct.getProductViewModel();
 							bUnzipAfterCopy = true;
 							s_oLogger.info("Ok, zipped shape file found");
 							
@@ -1743,8 +1758,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			m_oProcessWorkspaceLogger.log("Generate Band Image");
 
 			// Read the product
-			WasdiProductReader oReadProduct = new WasdiProductReader();
-			Product oProduct = oReadProduct.readSnapProduct(oFile, null);
+			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFile);
+			Product oProduct = oReadProduct.getSnapProduct();
 
 			if (oProduct == null) {
 
@@ -2108,9 +2123,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			SubsetSetting oSettings = (SubsetSetting) oParameter.getSettings();
 
-			WasdiProductReader oReadProduct = new WasdiProductReader();
+			
 			File oProductFile = new File(getWorspacePath(oParameter) + sSourceProduct);
-			Product oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
+			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
+			Product oInputProduct = oReadProduct.getSnapProduct();
 
 			if (oInputProduct == null) {
 				s_oLogger.error("LauncherMain.executeSubset: product is not a SNAP product ");
@@ -2427,7 +2443,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			File oReferenceFile = new File(getWorspacePath(oParameter) + sReferenceProduct);
 
-			WasdiProductReader oRead = new WasdiProductReader(oReferenceFile);
+			WasdiProductReader oRead = WasdiProductReaderFactory.getProductReader(oReferenceFile);
 
 			if (oRead.getSnapProduct() == null) {
 				s_oLogger.error("LauncherMain.executeGDALRegrid: product is not a SNAP product ");
@@ -2886,7 +2902,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		File oFile = new File(sFullPathFileName);
 
-		WasdiProductReader oReadProduct = new WasdiProductReader(oFile);
+		WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFile);
 
 		// Get the Bounding Box
 		if(Utils.isNullOrEmpty(sBBox)) {
