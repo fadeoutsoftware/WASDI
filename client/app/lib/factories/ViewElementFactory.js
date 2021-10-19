@@ -3,7 +3,7 @@ function ViewElementFactory() {
     /**
      * Creates a single view element from a control in input.
      * @param oControl Control Description: minimum properties are param, type, label
-     * @returns {TextBox|SelectArea|ProductList|CheckBox|SearchEOImage|DateTimePicker|*}
+     * @returns {TextBox|SelectArea|ProductList|ProductsCombo|CheckBox|SearchEOImage|DateTimePicker|*}
      */
     this.createViewElement = function (oControl) {
 
@@ -387,6 +387,7 @@ let ProductsCombo = function () {
     this.oOnClickFunction = null;
     this.bEnableSearchFilter = true;
     this.sDropdownName = "";
+    this.bShowExtension = true;
 
     /**
      * Get the selected value

@@ -111,6 +111,13 @@ var WasdiApplicationUIController = (function () {
          */
         this.m_aoProducts = [];
 
+
+        /**
+         * List of products in the selected workspace complete with their extension 
+         * @type {*[]}
+         */
+        this.m_aoProductsFile = [];
+
         /**
          * Get the selected application
          * @type {string}
@@ -323,7 +330,7 @@ var WasdiApplicationUIController = (function () {
                 oController.m_oConstantsService.setActiveWorkspace(null);
 
                 // Move to the editor
-                oController.m_oState.go("root.editor", {workSpace: oWorkspace.workspaceId});
+                oController.m_oState.go("root.editor", { workSpace: oWorkspace.workspaceId });
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
             }
@@ -426,20 +433,20 @@ var WasdiApplicationUIController = (function () {
             // Create a new Workspace
             this.m_oWorkspaceService.createWorkspace(sWorkspaceName).then(function (data, status) {
 
-                    // Get the new workpsace Id
-                    let sWorkspaceId = data.data.stringValue;
+                // Get the new workpsace Id
+                let sWorkspaceId = data.data.stringValue;
 
-                    // Get the view model of this workspace
-                    oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (oData) {
-                        if (utilsIsObjectNullOrUndefined(oData.data) == false) {
-                            // Ok execute
-                            oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, oData.data);
-                        }
-                    }, function () {
-                        utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
-                    });
+                // Get the view model of this workspace
+                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (oData) {
+                    if (utilsIsObjectNullOrUndefined(oData.data) == false) {
+                        // Ok execute
+                        oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, oData.data);
+                    }
+                }, function () {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
+                });
 
-                }
+            }
                 , function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
                 });
@@ -575,7 +582,7 @@ var WasdiApplicationUIController = (function () {
      */
     WasdiApplicationUIController.prototype.historyClicked = function (sWorkspaceId) {
         this.m_oConstantsService.setActiveWorkspace(null);
-        this.m_oState.go("root.editor", {workSpace: sWorkspaceId});
+        this.m_oState.go("root.editor", { workSpace: sWorkspaceId });
     }
     /**
      * Get the name of a category from the id
@@ -645,13 +652,17 @@ var WasdiApplicationUIController = (function () {
                 //push all products
                 for (var iIndex = 0; iIndex < data.data.length; iIndex++) {
 
-                    let oProductItem = {value: "", id: ""};
+                    let oProductItem = { value: "", id: "" };
+                    let oProductItemFile = { value: "", id: "" };
 
                     oProductItem.name = data.data[iIndex].name;
                     oProductItem.id = data.data[iIndex].name;
+                    oProductItemFile.name = data.data[iIndex].fileName;
+                    oProductItemFile.id = data.data[iIndex].name;
 
                     // Add the product to the list
                     oController.m_aoProducts.push(oProductItem);
+                    oController.m_aoProductsFile.push(oProductItemFile);
                 }
             }
 
@@ -662,7 +673,12 @@ var WasdiApplicationUIController = (function () {
 
                 for (var iControl = 0; iControl < aoControls.length; iControl++) {
                     if (aoControls[iControl].type == "productscombo") {
-                        aoControls[iControl].asListValues = oController.m_aoProducts;
+                        if (aoControls[iControl].bShowExtension) {
+                            aoControls[iControl].asListValues = oController.m_aoProductsFile;
+                        }
+                        else {
+                            aoControls[iControl].asListValues = oController.m_aoProducts;
+                        }
                     }
                 }
             }
