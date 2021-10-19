@@ -186,13 +186,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		
-		NetcdfFile oFile = NetcdfFile.open("C:\\Users\\p.campanella\\.wasdi\\paolo\\e07f313f-640b-44ca-b887-e5e90858c50d\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249.nc");
-		
-	    List<Variable> variables =  oFile.getVariables();
-	    for (Variable v : variables) {
-	       System.out.println("\n" + v.toString());
-	    }
 
 		try {
 			Security.setProperty("crypto.policy", "unlimited");
@@ -340,6 +333,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			LauncherMain.s_oSendToRabbit.Free();
+			
+			try {
+				Engine.getInstance().stop();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -864,11 +863,20 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					
 					if (sFileNameWithoutPath.startsWith("S5P") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
 						s_oLogger.debug("LauncherMain.download: File is a Sentinel 5P image, start unzip");
-						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
-						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
+//						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+//						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
+
+						String sourceFilePath = sDownloadPath + File.separator + sFileNameWithoutPath;
+						String targetDirectoryPath = sDownloadPath;
+
+						File sourceFile = new File(sourceFilePath);
+						File targetDirectory = new File(targetDirectoryPath);
+						WasdiFileUtils.cleanUnzipFile(sourceFile, targetDirectory);
+
 						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", "");
 						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
-						sFileName = sFolderName + "/" + sFolderName + ".nc";
+//						sFileName = sFolderName + "/" + sFolderName + ".nc";
+						sFileName = sFolderName + ".nc";
 						s_oLogger.debug("LauncherMain.download: File Name changed in: " + sFileName);
 					}					
 

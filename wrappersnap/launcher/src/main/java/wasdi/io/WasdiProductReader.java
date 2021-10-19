@@ -130,7 +130,7 @@ public abstract class WasdiProductReader {
             
             return oProduct;
             
-        } catch (Exception oEx) {
+        } catch (Throwable oEx) {
             oEx.printStackTrace();
             LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: exception: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
