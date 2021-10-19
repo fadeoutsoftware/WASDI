@@ -446,6 +446,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			else {
 				m_bNotifyDownloadUpdateActive = false;
 			}
+			
+			
+			convertSentinel5PtoGeotiff("C:\\Users\\p.campanella\\.wasdi\\paolo\\e07f313f-640b-44ca-b887-e5e90858c50d\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249.nc","sulfurdioxide_total_vertical_column.tif","sulfurdioxide_total_vertical_column");
 
 		} catch (Throwable oEx) {
 			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -1759,19 +1762,38 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Read the product
 			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFile);
+			
 			Product oProduct = oReadProduct.getSnapProduct();
+			
+			String sEPSG = "EPSG:4326";
 
 			if (oProduct == null) {
-
+				
+				boolean bContinue = false;
+				
+				if (sInputFileNameOnly.startsWith("S5P")) {
+					bContinue = convertSentinel5PtoGeotiff(oFile.getAbsolutePath(), oParameter.getBandName() + ".tif", oParameter.getBandName());
+					
+					String sNewPath = oFile.getParentFile().getPath();
+					if (!sNewPath.endsWith("/")) sNewPath += "/";
+					sNewPath += oParameter.getBandName() + ".tif";
+					
+					oFile = new File(sNewPath);
+				}
+				
 				// TODO: HERE CHECK IF IT IS A SHAPE FILE!!!!!
 				
-				m_oProcessWorkspaceLogger.log("Impossible to read the input file sorry");
+				if (!bContinue)  {
+					
+					m_oProcessWorkspaceLogger.log("Impossible to read the input file sorry");
+					s_oLogger.error("Not a SNAP Product Return empyt layer id for [" + sFile + "]");
+					return sLayerId;					
+				}
 
-				s_oLogger.error("Not a SNAP Product Return empyt layer id for [" + sFile + "]");
-				return sLayerId;
 			}
-
-			String sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(), true);
+			else {
+				sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(), true);
+			}
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
@@ -3477,6 +3499,97 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		
 		return sGdalCommand;
 		
+	}
+	
+	public boolean convertSentinel5PtoGeotiff(String sInputFile, String sOutputFile, String sBand) {
+		try {
+			
+			if (Utils.isNullOrEmpty(sInputFile)) return false;
+			if (Utils.isNullOrEmpty(sOutputFile)) return false;
+			if (Utils.isNullOrEmpty(sBand)) return false;
+			
+			String sInputPath = "";
+			File oFile = new File(sInputFile);
+			sInputPath = oFile.getParentFile().getPath();
+			if (!sInputPath.endsWith("/")) sInputPath += "/";
+			
+			String sGdalCommand = "gdal_translate";
+			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
+			
+			ArrayList<String> asArgs = new ArrayList<String>();
+			asArgs.add(sGdalCommand);
+			
+			asArgs.add("-co");
+			asArgs.add("WRITE_BOTTOMUP=NO");
+			
+			asArgs.add("-of");
+			asArgs.add("VRT");
+			
+			String sGdalInput = "NETCDF:\""+sInputFile+"\":/PRODUCT/"+sBand;
+			
+			asArgs.add(sGdalInput);
+			asArgs.add(sInputPath + sBand + ".vrt");
+
+			// Execute the process
+			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
+			Process oProcess;
+		
+			String sCommand = "";
+			for (String sArg : asArgs) {
+				sCommand += sArg + " ";
+			}
+			
+			s_oLogger.debug("convertSentinel5PtoGeotiff: Command 1 = " + sCommand);
+			
+			oProcessBuidler.redirectErrorStream(true);
+			oProcess = oProcessBuidler.start();
+			
+			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+			String sLine;
+			while ((sLine = oReader.readLine()) != null)
+				s_oLogger.debug("[gdal]: " + sLine);
+			
+			oProcess.waitFor();			
+			
+			asArgs = new ArrayList<String>();
+			sGdalCommand = "gdalwarp";
+			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
+			
+			asArgs.add(sGdalCommand);
+			asArgs.add("-geoloc");
+			asArgs.add("-t_srs");
+			asArgs.add("EPSG:4326");
+			asArgs.add("-overwrite");
+			asArgs.add(sInputPath + sBand+ ".vrt");
+			asArgs.add(sInputPath + sOutputFile);
+			
+			oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
+		
+			sCommand = "";
+			for (String sArg : asArgs) {
+				sCommand += sArg + " ";
+			}
+			
+			s_oLogger.debug("convertSentinel5PtoGeotiff: Command 2 = " + sCommand);
+			
+			oProcessBuidler.redirectErrorStream(true);
+			oProcess = oProcessBuidler.start();
+			
+			oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+			while ((sLine = oReader.readLine()) != null)
+				s_oLogger.debug("[gdal]: " + sLine);
+			
+			oProcess.waitFor();
+			
+			if (new File(sInputPath + sOutputFile).exists()) return true;
+			else return false;
+		}
+		catch (Exception oEx) {
+			
+			s_oLogger.debug("convertSentinel5PtoGeotiff: Exception = " + oEx.toString());
+			
+			return false;
+		}
 	}
 	
 	
