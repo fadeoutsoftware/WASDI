@@ -137,7 +137,7 @@ public class Mosaic {
 			if (!bVrt) {
 				// Output file
 				asArgs.add("-o");
-				asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				asArgs.add(LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
 				// Output format
@@ -207,13 +207,13 @@ public class Mosaic {
 				}
 				
 			
-				asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				asArgs.add(LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
 			}
 						
 			// Get Base Path
-			String sWorkspacePath = LauncherMain.getWorspacePath(m_oMosaicParameter);
+			String sWorkspacePath = LauncherMain.getWorkspacePath(m_oMosaicParameter);
 			
 			// for each product
 			for (int iProducts = 0; iProducts<m_oMosaicSetting.getSources().size(); iProducts ++) {
@@ -267,7 +267,7 @@ public class Mosaic {
 		} 
         catch (Throwable e) {
         	processWorkspaceLog("There was an exception...");
-			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 			m_oLogger.error("Mosaic.runGDALMosaic: " + e.toString());
 			return false;
 		}

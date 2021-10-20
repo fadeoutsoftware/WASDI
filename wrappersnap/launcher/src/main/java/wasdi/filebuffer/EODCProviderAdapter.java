@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
@@ -114,9 +115,9 @@ public class EODCProviderAdapter extends ProviderAdapter{
 							
 							try {
 								// Product Reader will be used to test if the image has been downloaded with success.
-								WasdiProductReader oReadProduct = new WasdiProductReader();
+								WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oDestionationFile);
 								
-								Product oProduct = oReadProduct.readSnapProduct(oDestionationFile, null);
+								Product oProduct = oReadProduct.getSnapProduct();
 								
 								if (oProduct != null)  {
 									// Break the retry attempt cycle

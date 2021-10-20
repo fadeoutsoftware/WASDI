@@ -428,6 +428,14 @@
 		    <version>1.13</version>
 		</dependency>
 		
+		<!-- https://mvnrepository.com/artifact/edu.ucar/netcdfAll -->
+		<dependency>
+		    <groupId>edu.ucar</groupId>
+		    <artifactId>netcdfAll</artifactId>
+		    <version>5.3.1</version>
+		</dependency>
+		
+		
 	</dependencies>	
 
 	<repositories>

@@ -56,9 +56,17 @@ public class QueryViewModel {
 	 */
 	public String productType;
 	/**
+	 * Product Level
+	 */
+	public String productLevel;
+	/**
 	 * Relative Orbit
 	 */
 	public int relativeOrbit=-1;
+	/**
+	 * Absolute Orbit
+	 */
+	public int absoluteOrbit=-1;
 	/**
 	 * Cloud coverage from
 	 */

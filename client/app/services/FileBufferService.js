@@ -24,6 +24,12 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
             sProtocol = 'file';
         }
 
+        if (utilsIsStrNullOrEmpty(sBounds) == false) {
+            if (sBounds.length > 1000) {
+                sBounds =""
+            }
+        }
+
         var sTest = sUrl.substring(iCut, sUrl.length);
         var sEncodedUri = encodeURIComponent(sTest);
         sEncodedUri = sProtocol + sEncodedUri;
