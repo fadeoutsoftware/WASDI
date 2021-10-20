@@ -119,6 +119,11 @@ public abstract class WasdiProductReader {
         	return null;
         }
         
+        if (m_oProductFile.getName().toUpperCase().startsWith("S5P")) {
+        	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
+        	return null;        	
+        }
+        
         try {
             LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: begin read " + m_oProductFile.getAbsolutePath());
             

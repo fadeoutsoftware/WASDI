@@ -926,20 +926,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					
 					if (sFileNameWithoutPath.startsWith("S5P") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
 						s_oLogger.debug("LauncherMain.download: File is a Sentinel 5P image, start unzip");
+						
 //						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
 //						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
 
-						String sourceFilePath = sDownloadPath + File.separator + sFileNameWithoutPath;
-						String targetDirectoryPath = sDownloadPath;
+						String sSourceFilePath = sDownloadPath + File.separator + sFileNameWithoutPath;
+						String sTargetDirectoryPath = sDownloadPath;
 
-						File sourceFile = new File(sourceFilePath);
-						File targetDirectory = new File(targetDirectoryPath);
-						WasdiFileUtils.cleanUnzipFile(sourceFile, targetDirectory);
+						File oSourceFile = new File(sSourceFilePath);
+						File oTargetDirectory = new File(sTargetDirectoryPath);
+						WasdiFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
 
 						String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", "");
 						s_oLogger.debug("LauncherMain.download: Unzip done, folder name: " + sFolderName);
-//						sFileName = sFolderName + "/" + sFolderName + ".nc";
+						
 						sFileName = sFolderName + ".nc";
+						sFileNameWithoutPath = sFileNameWithoutPath.replace(".zip", ".nc");
 						s_oLogger.debug("LauncherMain.download: File Name changed in: " + sFileName);
 					}					
 
@@ -1811,28 +1813,29 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			String sEPSG = "EPSG:4326";
 
             if (oProduct == null) {
+            	
+            	boolean bContinue = false;
+            	
+    			if (sInputFileNameOnly.toUpperCase().startsWith("S5P")) {
+    				
+    				if (convertSentinel5PtoGeotiff(oFile.getAbsolutePath(), oParameter.getBandName() + ".tif", oParameter.getBandName())) {
+    					String sNewPath = oFile.getParentFile().getPath();
+    					if (!sNewPath.endsWith("/")) sNewPath += "/";
+    					sNewPath += oParameter.getBandName() + ".tif";
+    					sFile = sNewPath;
+    					oFile = new File(sFile);
+    					
+    					bContinue = true;
+    				}
+    				
+    			}
 				
-				boolean bContinue = false;
-				
-				if (sInputFileNameOnly.startsWith("S5P")) {
-					bContinue = convertSentinel5PtoGeotiff(oFile.getAbsolutePath(), oParameter.getBandName() + ".tif", oParameter.getBandName());
-					
-					String sNewPath = oFile.getParentFile().getPath();
-					if (!sNewPath.endsWith("/")) sNewPath += "/";
-					sNewPath += oParameter.getBandName() + ".tif";
-					sFile = sNewPath;
-					oFile = new File(sFile);
-				}
-				
-                // TODO: HERE CHECK IF IT IS A SHAPE FILE!!!!!
-
-				if (!bContinue)  {
-					
-				m_oProcessWorkspaceLogger.log("Impossible to read the input file sorry");
-				s_oLogger.error("Not a SNAP Product Return empyt layer id for [" + sFile + "]");
-				return sLayerId;
-			}
-
+    			if (!bContinue) {
+                    // TODO: HERE CHECK IF IT IS A SHAPE FILE!!!!!					
+    				m_oProcessWorkspaceLogger.log("Impossible to read the input file sorry");
+    				s_oLogger.error("Not a SNAP Product Return empyt layer id for [" + sFile + "]");
+    				return sLayerId;    				
+    			}
 			}
 			else {
 				sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(), true);
@@ -2111,8 +2114,32 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             sStyle = "frisk";
         }
         // Hard Coded set rgb Style - STYLES HAS TO BE MANAGED
-        if (sFile.toUpperCase().contains("_rgb")) {
+        if (sFile.toUpperCase().contains("_RGB")) {
             sStyle = "wasdi_s2_rgb";
+        }
+        
+        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_CH4_")) {
+            sStyle = "s5p_ch4";
+        }
+        
+        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_CO_")) {
+            sStyle = "s5p_co";
+        }
+        
+        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_HCHO_")) {
+            sStyle = "s5p_hcho";
+        }
+        
+        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_NO2_")) {
+            sStyle = "s5p_no2";
+        }
+        
+        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_O3_")) {
+            sStyle = "s5p_o3";
+        }
+        
+        if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_SO2_")) {
+            sStyle = "s5p_so2";
         }
         
         return sStyle;
