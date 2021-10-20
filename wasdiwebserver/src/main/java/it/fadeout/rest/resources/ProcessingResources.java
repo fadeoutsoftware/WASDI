@@ -7,11 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -70,19 +68,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkflowSharingRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.launcherOperations.LauncherOperationsUtils;
-import wasdi.shared.parameters.BaseParameter;
-import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
-import wasdi.shared.parameters.ISetting;
-import wasdi.shared.parameters.MosaicParameter;
-import wasdi.shared.parameters.MosaicSetting;
-import wasdi.shared.parameters.MultiSubsetParameter;
-import wasdi.shared.parameters.MultiSubsetSetting;
-import wasdi.shared.parameters.OperatorParameter;
-import wasdi.shared.parameters.RegridParameter;
-import wasdi.shared.parameters.RegridSetting;
-import wasdi.shared.parameters.SubsetParameter;
-import wasdi.shared.parameters.SubsetSetting;
+import wasdi.shared.parameters.*;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
@@ -152,6 +138,66 @@ public class ProcessingResources {
         return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
+    @POST
+    @Path("conversion/sen2cor")
+    //@Produces({"application/xml", "application/json", "text/xml"})
+    public Response sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
+                                      @QueryParam("productName") String sProductName,
+                                      @QueryParam("workspace") String sWorkspaceId,
+                                      @QueryParam("parentId") String sParentId) {
+
+        Utils.debugLog("ProcessingResources.sen2CorConversion, Received request");
+
+        if (sProductName == null || sWorkspaceId == null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
+
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
+        if (sProductName != null && sWorkspaceId != null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");
+
+
+            try {
+                // Check authorization
+                if (Utils.isNullOrEmpty(sSessionId)) {
+                    Utils.debugLog("ProcessingResources.sen2CorConversion: invalid session");
+
+                    return Response.status(Status.UNAUTHORIZED).build();
+                }
+
+                User oUser = Wasdi.getUserFromSession(sSessionId);
+                if (oUser == null) {
+                    Utils.debugLog("ProcessingResources.sen2CorConversion: user not found");
+
+                    return Response.status(Status.UNAUTHORIZED).build();
+
+                }
+                String sProcessObjId = Utils.GetRandomName();
+                Sen2CorParameter oParameter = new Sen2CorParameter();
+                oParameter.setProductName(sProductName);
+                oParameter.setWorkspace(sWorkspaceId);
+                oParameter.setProcessObjId(sProcessObjId);
+                oParameter.setUserId(oUser.getUserId());
+                oParameter.setExchange(sWorkspaceId);
+
+                Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
+                String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+                //(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+
+                PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
+                Utils.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
+                return Response.ok(oPrimitiveResult).build();
+            } catch (Exception oe) {
+                oe.printStackTrace();
+            }
+
+        }
+
+        Utils.debugLog("ProcessingResources.sen2CorConversion, conversion failed");
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+
 
     /**
      * Upload and save a new SNAP Workflow XML
@@ -176,7 +222,7 @@ public class ProcessingResources {
         try {
             // Check authorization
             if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessingResources.uploadGraph: invalid session");
+                Utils.debugLog("ProcessingResources.uploadGraph: invalid session");
                 return Response.status(401).build();
             }
             User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -391,20 +437,20 @@ public class ProcessingResources {
             // Check that the workflow exists on db
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
-            
+
             if (oWorkflow == null) {
                 Utils.debugLog("ProcessingResources.updateGraphfile: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found, please check parameters").build();
             }
-            
+
             // Checks that user can modify the workflow
             WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            
+
             if (!oUser.getUserId().equals(oWorkflow.getUserId()) && !oWorkflowSharingRepository.isSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
                 Utils.debugLog("ProcessingResources.updateGraphfile: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
                 return Response.status(Status.UNAUTHORIZED).build();
             }
-            
+
             // original xml file
             File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
             // new xml file
@@ -1576,7 +1622,7 @@ public class ProcessingResources {
             sProcessObjId = Utils.GetRandomName();
 
             // Create Operator instance
-            OperatorParameter oParameter = getParameter(oOperation);
+            OperatorParameter oParameter = getOperatorParameter(oOperation);
 
             if (oParameter == null) {
                 Utils.debugLog("ProsessingResources.ExecuteOperation: impossible to create the parameter from the operation");
@@ -1621,7 +1667,7 @@ public class ProcessingResources {
     public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
                                       @QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String
                                               sProductName, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("subtype") String
-                                              sOperationSubType, String sParameter) throws IOException {
+                                              sOperationSubType, String sParameter) {
 
         if (Utils.isNullOrEmpty(sOperationSubType)) {
             sOperationSubType = "";
@@ -1683,10 +1729,10 @@ public class ProcessingResources {
     /**
      * Get the parameter Object for a specific Launcher Operation
      *
-     * @param oOperation
-     * @return
+     * @param oOperation A Launcher operatio from the ones enumerated
+     * @return An object of the appropriate class in correlation with the operation specified
      */
-    private OperatorParameter getParameter(LauncherOperations oOperation) {
+    private OperatorParameter getOperatorParameter(LauncherOperations oOperation) {
         Utils.debugLog("ProcessingResources.OperatorParameter(  LauncherOperations )");
         switch (oOperation) {
             case GRAPH:

@@ -18,7 +18,7 @@ public class BaseParameter {
     private String workspace;
     
     /**
-     * Workspace Onwer
+     * Workspace Owner
      */
     private String workspaceOwnerId;
 
@@ -143,8 +143,11 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.READMETADATA.name())) {
 			oParam = new ReadMetadataParameter();
 		}
-		
-		return oParam;
+		else if (sOperationType.equals(LauncherOperations.SEN2COR.name())){
+			oParam = new Sen2CorParameter();
+		}
+
+			return oParam;
 	}
 	
 	
