@@ -2826,6 +2826,79 @@ def getWorkflows():
     else:
         return None
 
+
+def executeSen2Cor(sProductName):
+    """
+    Synchronous execution of the sen2Cor convertion on the product specified
+    :return:final status of the executed Sen2Cor
+    """
+
+    return _internalExecuteSen2Cor(sProductName,"", False)
+
+
+def asynchExecuteSen2Cor(sProductName):
+    """
+    Execute the sen2Cor convertion on the product specified
+    :return: The processId of the conversion
+    """
+
+    return _internalExecuteSen2Cor(sProductName,"", True)
+
+
+def _internalExecuteSen2Cor(sProductName, sWorkspaceId, bAsynch):
+    _log('[INFO] waspy._internalExecuteSen2Cor( ' + str(sProductName) + ', ' +
+         str(sWorkspaceId) + ', ' + str(bAsynch) + ')')
+
+    if sProductName is None:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: no product specified, aborting' +
+                 '  ******************************************************************************')
+        return ''
+
+    if sWorkspaceId is None:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: no workspace specified, aborting' +
+                 '  ******************************************************************************')
+        return ''
+
+    sProcessId = ''
+    sUrl = getBaseUrl() + "/processing/conversion/sen2cor?workspace=" + getActiveWorkspaceId()
+
+    sUrl += "&productName="
+    sUrl += sProductName
+    if m_bIsOnServer:
+        sUrl += "&parentId="
+        sUrl += getProcId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResponse = requests.post(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+
+    if oResponse is None:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: communication with the server failed, aborting' +
+                 '  ******************************************************************************')
+        return ''
+    elif oResponse.ok is True:
+        _log('[INFO] waspy._internalExecuteSen2Cor: server replied OK')
+        asJson = oResponse.json()
+        if "stringValue" in asJson:
+            sProcessId = asJson["stringValue"]
+            if bAsynch is True:
+                return sProcessId
+            else:
+                return waitProcess(sProcessId)
+        else:
+            wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: cannot find process ID in response, aborting' +
+                     '  ******************************************************************************')
+            return ''
+    else:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: server returned status ' + str(oResponse.status_code) +
+                 '  ******************************************************************************')
+        wasdiLog(oResponse.content)
+        return ''
+
+
 def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     """
     Execute a SNAP Workflow available in WASDI (you can use WASDI to upload your SNAP Graph XML and use from remote)
