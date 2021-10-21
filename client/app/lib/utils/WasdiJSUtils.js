@@ -481,14 +481,21 @@ function utilsProjectGetContainerSize(sIdContainer){
     {
         return null;
     }
-    var elementMapContainer = angular.element(document.querySelector(sIdContainer));
-    var heightMapContainer = elementMapContainer[0].offsetHeight;
-    var widthMapContainer = elementMapContainer[0].offsetWidth;
 
-    return {
-        height:heightMapContainer,
-        width:widthMapContainer
-    };
+    try {
+        var elementMapContainer = angular.element(document.querySelector(sIdContainer));
+        var heightMapContainer = elementMapContainer[0].offsetHeight;
+        var widthMapContainer = elementMapContainer[0].offsetWidth;
+    
+        return {
+            height:heightMapContainer,
+            width:widthMapContainer
+        };
+    }
+    catch (error) {
+        return null;
+    }
+
 }
 
 function utilsProjectGetPolygonArray(sPolygonString){

@@ -781,6 +781,9 @@ public class ProductResource {
 
         PrimitiveResult oReturn = new PrimitiveResult();
         oReturn.setBoolValue(false);
+        
+        if (bDeleteFile == null) bDeleteFile = true;
+        if (bDeleteLayer == null) bDeleteLayer = true;
 
         // before any operation check that this is not an injection attempt from the user
         if (sProductName.contains("/") || sProductName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
@@ -934,7 +937,7 @@ public class ProductResource {
                 oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspaceId);
                 oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
             } catch (Exception oEx) {
-                Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+                Utils.debugLog("ProductResource.DeleteProduct: error deleting product-workspace related records on db and the Downloaded File Entry " + oEx);
                 oReturn.setIntValue(500);
                 oReturn.setStringValue(oEx.toString());
                 return oReturn;
@@ -957,7 +960,7 @@ public class ProductResource {
                     }
 
                 } catch (Exception oEx) {
-                    Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+                    Utils.debugLog("ProductResource.DeleteProduct: error deleting Metadata " + oEx);
                     oReturn.setIntValue(500);
                     oReturn.setStringValue(oEx.toString());
                     return oReturn;
@@ -986,6 +989,7 @@ public class ProductResource {
 
         } catch (Exception oEx) {
             Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+            oEx.printStackTrace();
             oReturn.setIntValue(500);
             oReturn.setStringValue(oEx.toString());
             return oReturn;
@@ -1018,19 +1022,28 @@ public class ProductResource {
                                          List<String> asProductList) {
         // Support variable used to identify if deletions of one or more products failed
         AtomicBoolean bDirty = new AtomicBoolean(false);
-        asProductList.stream().forEach(sFile -> {
-            // if one deletion fail is detected the bDirty boolean becames true
-            bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,sFile,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
-        });
-
         PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+        
+        if (asProductList != null) {
+            asProductList.stream().forEach(sFile -> {
+                // if one deletion fail is detected the bDirty boolean becames true
+                bDirty.set(bDirty.get() || ! deleteProduct(sSessionId,sFile,bDeleteFile,sWorkspaceId,bDeleteLayer).getBoolValue());
+            });
 
-        if (bDirty.get()) oPrimitiveResult.setIntValue(207);
-        else oPrimitiveResult.setIntValue(200);
-        // returns the opposite value of Dirty
-        oPrimitiveResult.setBoolValue(!bDirty.get());
+            
 
-        return oPrimitiveResult;
+            if (bDirty.get()) oPrimitiveResult.setIntValue(207);
+            else oPrimitiveResult.setIntValue(200);
+            // returns the opposite value of Dirty
+            oPrimitiveResult.setBoolValue(!bDirty.get());
+
+            return oPrimitiveResult;        	
+        }
+        else {
+        	oPrimitiveResult.setIntValue(500);
+        	oPrimitiveResult.setBoolValue(false);
+        	return oPrimitiveResult;
+        }
     }
 
 }

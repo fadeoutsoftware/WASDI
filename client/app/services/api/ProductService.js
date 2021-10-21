@@ -9,20 +9,12 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
         this.m_oConstantsService = oConstantsService;
         this.m_oHttp = $http;
 
-        this.getProductByName = function (sProductName) {
-            return this.m_oHttp.get(this.APIURL + '/product/byname?name=' + sProductName + '&workspace=' + oConstantsService.getActiveWorkspace().workspaceId);
-        };
-
         this.getProductListByWorkspace = function (sWorkspaceId) {
             return this.m_oHttp.get(this.APIURL + '/product/byws?workspace=' + sWorkspaceId);
         };
 
         this.getProductLightListByWorkspace = function (sWorkspaceId) {
             return this.m_oHttp.get(this.APIURL + '/product/bywslight?workspace=' + sWorkspaceId);
-        };
-
-        this.addProductToWorkspace = function (sProductName, sWorkspaceId) {
-            return this.m_oHttp.get(this.APIURL + '/product/addtows?name=' + sProductName + '&workspace=' + sWorkspaceId);
         };
 
         this.deleteProductFromWorkspace = function (sProductName, sWorkspaceId, bDeleteFile, bDeleteLayer) {

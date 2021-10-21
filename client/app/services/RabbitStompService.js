@@ -208,6 +208,15 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
                     console.log('RabbitStompService: WEB STOMP ERROR, message:' + sMessage + ' [' + utilsGetTimeStamp() + ']');
 
+                    if (!(typeof sMessage === 'string' || sMessage instanceof String)) {
+                        if (!utilsIsObjectNullOrUndefined(sMessage.body)) {
+                            sMessage = sMessage.body;
+                        }
+                        else {
+                            return;
+                        }
+                    }
+
                     if (sMessage == "LOST_CONNECTION" || sMessage.includes("Whoops! Lost connection to"))
                     {
                         console.log('RabbitStompService: Web Socket Connection Lost');

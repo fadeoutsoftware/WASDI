@@ -428,9 +428,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
             } else {
                 m_bNotifyDownloadUpdateActive = false;
             }
-			
-			
-			convertSentinel5PtoGeotiff("C:\\Users\\p.campanella\\.wasdi\\paolo\\e07f313f-640b-44ca-b887-e5e90858c50d\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249\\S5P_NRTI_L2__SO2____20211005T110836_20211005T111336_20615_02_020201_20211005T120249.nc","sulfurdioxide_total_vertical_column.tif","sulfurdioxide_total_vertical_column");
 
         } catch (Throwable oEx) {
             s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -641,77 +638,86 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
      * @param oSen2CorParameter contains parameters to initialize Sen2Cor conversion
      */
     private void sen2Cor(Sen2CorParameter oSen2CorParameter) throws Exception {
-
-        if (oSen2CorParameter == null) {
-            s_oLogger.debug("LauncherMain.sen2Cor: Null pointer exception");
-            m_oProcessWorkspaceLogger.log("Null parameters passed to Launcher for conversion");
-            throw new NullPointerException("Null parameters passed to Launcher for conversion");
-        }
-        String sDestinationPath = getWorkspacePath(oSen2CorParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-        String sL1ProductName = oSen2CorParameter.getProductName();
-        String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
-        ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-
-        if (oSen2CorParameter.isValid()) {
-            try {
-                s_oLogger.debug("LauncherMain.sen2Cor: Start");
-                ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
-                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
-
-                s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
-                ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameter.getProcessObjId());
-                oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
-
-                // 4 - Convert -> obtain L2A.SAFE
-                String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
-                s_oLogger.debug("LauncherMain.sen2Cor: Extraction completed, begin conversion");
-                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
-                ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
-
-                Process oProcess = oProcessBuilder
-                        .inheritIO() // this is enabled for debugging
-                        .start();
-                // Wait for the process to complete
-                oProcess.waitFor();
-
-
-                // 5 - ZipIt -> L2A.zip
-                s_oLogger.debug("LauncherMain.sen2Cor: Conversion done, begin compression of L2 archive");
-                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
-                oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
-
-
-                s_oLogger.debug("LauncherMain.sen2Cor: Done");
-                updateProcessStatus(oRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+    	
+    	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+    	ProcessWorkspace oProcessWorkspace = s_oProcessWorkspace;
+    	
+    	try {
+            if (oSen2CorParameter == null) {
+                s_oLogger.debug("LauncherMain.sen2Cor: Parameter is null");
+                m_oProcessWorkspaceLogger.log("Null parameters passed to Launcher for conversion");
+                return;
             }
-            catch (Exception oe){
-                // if something went wrong delete the zip file and SAFE directories to return to original WorkSpace state
-                FileUtils.deleteQuietly(new File(sDestinationPath + sL2ProductName + ".zip")); // level2 zip, if exists
-                FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE")); // Level1 .Safe, if exists
-                FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE")); // Level2 .Safe, if exists
-                oe.printStackTrace();
-            }
+            String sDestinationPath = getWorkspacePath(oSen2CorParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+            String sL1ProductName = oSen2CorParameter.getProductName();
+            String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
+            
 
-            if (oSen2CorParameter.isDeleteIntermediateFile()) {
-                // deletes .SAFE directories and keeps the zip files
-                FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE"));
-                FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE"));
-            }
+            if (oSen2CorParameter.isValid()) {
+                try {
+                    s_oLogger.debug("LauncherMain.sen2Cor: Start");
+                    
+                    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
+
+                    s_oLogger.debug("LauncherMain.sen2Cor: Extraction of " + sL1ProductName + " product");
+                    ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameter.getProcessObjId());
+                    oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
+
+                    // 4 - Convert -> obtain L2A.SAFE
+                    String sSen2CorPath = ConfigReader.getPropValue("SEN2CORPATH");
+                    s_oLogger.debug("LauncherMain.sen2Cor: Extraction completed, begin conversion");
+                    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+                    ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
+
+                    Process oProcess = oProcessBuilder
+                            .inheritIO() // this is enabled for debugging
+                            .start();
+                    // Wait for the process to complete
+                    oProcess.waitFor();
 
 
-            addProductToDbAndWorkspaceAndSendToRabbit(
-                    null,
-                    sDestinationPath + sL2ProductName + ".zip",
-                    oSen2CorParameter.getWorkspace(),
-                    oSen2CorParameter.getExchange(),
-                    String.valueOf(LauncherOperations.SEN2COR),
-                    null
-            );
+                    // 5 - ZipIt -> L2A.zip
+                    s_oLogger.debug("LauncherMain.sen2Cor: Conversion done, begin compression of L2 archive");
+                    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
+                    oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
 
 
-        } else {
-            Utils.debugLog("Sen2Cor invalid parameters");
-        }
+                    s_oLogger.debug("LauncherMain.sen2Cor: Done");
+                    updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+                }
+                catch (Exception oe){
+                    // if something went wrong delete the zip file and SAFE directories to return to original WorkSpace state
+                    FileUtils.deleteQuietly(new File(sDestinationPath + sL2ProductName + ".zip")); // level2 zip, if exists
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE")); // Level1 .Safe, if exists
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE")); // Level2 .Safe, if exists
+                    oe.printStackTrace();
+                }
+
+                if (oSen2CorParameter.isDeleteIntermediateFile()) {
+                    // deletes .SAFE directories and keeps the zip files
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE"));
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE"));
+                }
+
+
+                addProductToDbAndWorkspaceAndSendToRabbit(
+                        null,
+                        sDestinationPath + sL2ProductName + ".zip",
+                        oSen2CorParameter.getWorkspace(),
+                        oSen2CorParameter.getExchange(),
+                        String.valueOf(LauncherOperations.SEN2COR),
+                        null
+                );
+
+
+            } else {
+                Utils.debugLog("Sen2Cor invalid parameters");
+            }    		
+    	}
+    	finally {
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+
 
     }
 

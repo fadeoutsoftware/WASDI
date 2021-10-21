@@ -40,10 +40,6 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return this.m_oHttp.delete(sUrl + '/ws/delete?workspace=' + oWorkspace.workspaceId + '&deletefile=' + bDeleteFile + '&deletelayer=' + bDeleteLayer);
     };
 
-    this.getWorkspaceListByProductName = function(sProductName){
-        return this.m_oHttp.get(this.APIURL + '/ws/workspacelistbyproductname?productname=' + sProductName);
-    };
-
     this.putShareWorkspace = function(sWorkspaceId,sUserId){
         return this.m_oHttp.put(this.APIURL + '/ws/share/add?workspace=' + sWorkspaceId + "&userId=" + sUserId);
     };

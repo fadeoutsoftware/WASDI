@@ -29,7 +29,6 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
     };
 
     this.uploadFTPFile = function(oFtpTransferFile,sWorkspaceId){
-
         return this.m_oHttp.put(this.APIURL + '/catalog/upload/ftp?workspace='+sWorkspaceId,oFtpTransferFile);
     };
 }]);

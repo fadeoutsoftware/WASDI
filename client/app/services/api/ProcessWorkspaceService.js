@@ -22,15 +22,7 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
 
     /* ATTENTION!!! THE ORDER OF TYPE PROCESS IS IMPORTANT !! */
     this.TYPE_OF_PROCESS=["DOWNLOAD","PUBLISHBAND","PUBLISH","UPDATEPROCESSES"];
-
-        /**
-         * Returns the count of processworkspace instances with the workspaceId passed as argument
-         * @param sWorkspaceId the workspace Id to be searched
-         * @returns {*}
-         */
-        this.getCountByWorkspace = function (sWorkspaceId) {
-            return this.m_oHttp.get((this.APIURL) + '/process/countbyws?sWorkspaceId='+sWorkspaceId);
-        };
+    
         /**
          * Load the last 5 processes of a workspace
          * @param sWorkSpaceId

@@ -208,14 +208,6 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     };
 
     /**
-     * Get GDACS triggers
-     * @returns {*}
-     */
-    this.readGDACS = function () {
-        return this.m_oHttp.get("https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP?eventtypes=FL");
-    };
-
-    /**
      * Share a processor
      * @param sProcessorId
      * @param sUserId

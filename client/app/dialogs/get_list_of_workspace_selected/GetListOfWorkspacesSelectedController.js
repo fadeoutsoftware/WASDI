@@ -5,7 +5,7 @@
 
 var GetListOfWorkspacesController = (function() {
 
-    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService,oWorkflowsService,oModalService) {
+    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService,oWorkflowService,oModalService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras
@@ -19,7 +19,7 @@ var GetListOfWorkspacesController = (function() {
         this.m_bIsCreatingWorskapce = false;
         this.m_oConstantsService = oConstantsService;
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        this.m_oWorkflowsService = oWorkflowsService;
+        this.m_oWorkflowService = oWorkflowService;
         this.m_oSelectedWorkflow = "";
         this.m_oModalService = oModalService;
         this.m_oClose = oClose;
@@ -190,7 +190,7 @@ var GetListOfWorkspacesController = (function() {
         // this.m_bIsLoadingWorkflows = true;
         oController.m_bisLoadingWorkflows = true;
 
-        this.m_oWorkflowsService.getWorkflowsByUser().then(function (data) {
+        this.m_oWorkflowService.getWorkflowsByUser().then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 oController.m_aoWorkflows = data.data;
@@ -267,7 +267,7 @@ var GetListOfWorkspacesController = (function() {
         'WorkspaceService',
         'extras',
         'ConstantsService',
-        'WorkflowsService',
+        'WorkflowService',
         'ModalService'
     ];
     return GetListOfWorkspacesController;

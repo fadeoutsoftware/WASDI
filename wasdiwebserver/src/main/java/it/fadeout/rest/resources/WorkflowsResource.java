@@ -993,10 +993,12 @@ public class WorkflowsResource {
                 String sDestinationProdutName = "";
 
                 if (oSnapWorkflowViewModel.getInputFileNames().size() > 0) {
-                	
                     sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
-                    sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
-                    
+                    sDestinationProdutName = Utils.getFileNameWithoutLastExtension(sSourceProductName) + "_" + sWorkFlowName + Utils.GetFileNameExtension(sSourceProductName); 
+                }
+                
+                if (oGraphSettings.getOutputFileNames().size()>0) {
+                	sDestinationProdutName = oSnapWorkflowViewModel.getOutputFileNames().get(0);
                 }
 
                 try {
@@ -1013,6 +1015,9 @@ public class WorkflowsResource {
                     oParameter.setExchange(sWorkspaceId);
                     oParameter.setProcessObjId(sProcessObjId);
                     oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+                    
+                    // Set Graph Settings
+                    oParameter.setSettings(oGraphSettings);
 
                     // Serialization Path
                     String sPath = m_oServletConfig.getInitParameter("SerializationPath");
