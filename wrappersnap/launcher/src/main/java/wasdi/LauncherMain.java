@@ -871,11 +871,27 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
                         File oAlreadyDownloadedFileCheck = new File(oAlreadyDownloaded.getFilePath());
 
                         if (oAlreadyDownloadedFileCheck.exists() == false) {
-                            s_oLogger.debug("LauncherMain.Download: Product already found in the database but the file does not exists in the node");
-                            oAlreadyDownloaded = null;
-                        } else {
-                            s_oLogger.debug("LauncherMain.Download: Product already found in the node");
-                        }
+
+                    	  // If the case is S5P, check also the existence of the .nc file
+                    	  if (sFileNameWithoutPath.startsWith("S5P")) {
+                      		String sNcFilePath = oAlreadyDownloaded.getFilePath().replace(".zip", ".nc");
+                      		oAlreadyDownloadedFileCheck = new File(sNcFilePath);
+
+                      		if (oAlreadyDownloadedFileCheck.exists() == false) {
+                      			s_oLogger.debug("LauncherMain.Download: Product already found in the database but the file does not exists in the node");
+                      			oAlreadyDownloaded = null;
+                      		} else {
+                      			s_oLogger.debug("LauncherMain.Download: Product already found in the node with the .nc extension");
+                      		}
+                    	  
+                    	  } else {
+                        	  s_oLogger.debug("LauncherMain.Download: Product already found in the database but the file does not exists in the node");
+    	                      oAlreadyDownloaded = null;
+                    	  }
+	                  } else {
+	                      s_oLogger.debug("LauncherMain.Download: Product already found in the node");
+	                  }
+                        
                     }
                 }
 
