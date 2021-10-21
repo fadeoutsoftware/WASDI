@@ -1,7 +1,6 @@
 package wasdi.snapopearations;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -25,7 +24,6 @@ import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 
 import sun.management.VMManagement;
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
@@ -38,15 +36,14 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.settings.GraphSetting;
+import wasdi.shared.parameters.settings.*;
+import wasdi.shared.parameters.*;
 import wasdi.shared.payload.ExecuteGraphPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LoggerWrapper;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.products.ProductViewModel;
+import wasdi.shared.viewmodels.products.*;
 
 
 /**

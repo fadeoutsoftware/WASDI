@@ -65,9 +65,9 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	}
 
 	/**
-	 * Extract the file-system path of the file
-	 * @param sHttpsURL
-	 * @return
+	 * Extract the file-system path of the file out of an HTTPS URL.
+	 * @param sHttpsURL the HTTPS URL (i.e. https://collgs.lu/repository/data_192/Sentinel-1/B/SAR-C/L1/GRD/2021/09/29/S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip)
+	 * @return the file-system path (i.e. C:/temp/wasdi/mount/lucollgs/data_192/Sentinel-1/B/SAR-C/L1/GRD/2021/09/29/S1B_IW_GRDH_1SDV_20210929T153558_20210929T153623_028915_037365_9ADA.zip)
 	 */
 	private String extractFilePathFromHttpsUrl(String sHttpsURL) {
 		String filesystemPath = m_sProviderBasePath + sHttpsURL.replace(m_sProviderUrlDomain, "");

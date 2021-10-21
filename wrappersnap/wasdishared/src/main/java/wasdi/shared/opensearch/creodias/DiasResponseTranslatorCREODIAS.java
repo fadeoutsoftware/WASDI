@@ -33,6 +33,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	public static final int IPOSITIONOF_SIZEINBYTES = 2;
 	public static final int IPOSITIONOF_STATUS = 3;
 	public static final int IPOSITIONOF_REL = 3;
+	public static final int IPOSITIONOF_PRODUCTIDENTIFIER = 5;
 
 	//private string constants
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
@@ -48,6 +49,7 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 	private static final String STYPE = "type";
 	private static final String SSELF = "self";
 	private static final String STITLE = "title";
+	private static final String SPRODUCTIDENTIFIER = "productIdentifier";
 
 
 	@Override
@@ -511,7 +513,13 @@ public class DiasResponseTranslatorCREODIAS extends DiasResponseTranslator {
 				sItem = "";
 			} 
 			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //4
-	
+			
+			sItem = oResult.getProperties().get(DiasResponseTranslatorCREODIAS.SPRODUCTIDENTIFIER);
+			if(null==sItem) {
+				sItem = "";
+			} 
+			oLink.append(sItem).append(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //5
+
 			oResult.getProperties().put(DiasResponseTranslatorCREODIAS.SLINK, oLink.toString());
 			oResult.setLink(oLink.toString());
 		} catch (Exception oE) {
