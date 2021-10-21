@@ -1,6 +1,6 @@
 {
-  "USER": "write your WASDI userId here",
-  "PASSWORD": "write your WASDI password here",
-  "WORKSPACE": "write the name of the workspace here",
-  "PARAMETERSFILEPATH": "./parameters.json"
+  "USER": "m.menapace@fadeout.it",
+  "PASSWORD": "zRFjwzps5jm943R",
+  "WORKSPACE": "TestSen2CorOnda-1",
+  "PARAMETERSFILEPATH": "./params.json"
 }
