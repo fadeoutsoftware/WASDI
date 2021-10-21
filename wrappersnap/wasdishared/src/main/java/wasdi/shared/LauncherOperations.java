@@ -27,5 +27,6 @@ public enum LauncherOperations {
     REDEPLOYPROCESSOR,
     LIBRARYUPDATE,
     KILLPROCESSTREE,
-    READMETADATA
+    READMETADATA,
+    SEN2COR
 }

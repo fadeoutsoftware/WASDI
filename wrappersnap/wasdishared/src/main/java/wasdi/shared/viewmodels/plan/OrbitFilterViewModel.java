@@ -1,4 +1,4 @@
-package it.fadeout.viewmodels;
+package wasdi.shared.viewmodels.plan;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

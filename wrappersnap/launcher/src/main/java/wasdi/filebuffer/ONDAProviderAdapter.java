@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -227,9 +228,10 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 							
 							try {
 								// Product Reader will be used to test if the image has been downloaded with success.
-								WasdiProductReader oReadProduct = new WasdiProductReader();
+								WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
 								
-								Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
+								Product oProduct = oReadProduct.getSnapProduct();
+								
 								if (oProduct != null)  {
 									m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished result [attemp#" + (iMaxRetry-iAttempts+1) + "]: " + sResult);
 									// Break the retry attempt cycle

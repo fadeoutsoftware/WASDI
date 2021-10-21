@@ -6,6 +6,7 @@
  */
 package wasdi.shared.opensearch.creodias;
 
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.opensearch.DiasQueryTranslator;
+import wasdi.shared.opensearch.Platforms;
 import wasdi.shared.opensearch.QueryTranslationParser;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -41,86 +43,144 @@ public class DiasQueryTranslatorCREODIAS extends DiasQueryTranslator {
 		try {
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
 			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			
 			//from:
 			//( footprint:"intersects(POLYGON((91.76001774389503 9.461419178814332,91.76001774389503 29.23273110342357,100.90070010891878 29.23273110342357,100.90070010891878 9.461419178814332,91.76001774389503 9.461419178814332)))" ) AND ( beginPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] AND endPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:99)
 			//to:
 			//https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?maxRecords=10&startDate=2020-07-01T00%3A00%3A00Z&completionDate=2020-07-31T23%3A59%3A59Z&productType=GRD&relativeOrbitNumber=9&sortParam=startDate&sortOrder=descending&status=all&geometry=POLYGON((92.65416040497227+26.088955768777822%2C99.6675662125083+26.233334945401936%2C99.79625057598854+16.91245056850053%2C93.04021840440677+16.881668352246322%2C92.65416040497227+26.088955768777822))&dataset=ESA-DATASET
+			
 			String sQuery = this.prepareQuery(sQueryFromClient);
-			//todo reformulate cloud cover intervals
-			//			int iStart = 0;
-			//			String sQueryPart = sQuery;
-			//			while(sQueryPart.contains(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE)) {
-			//				iStart = sQuery.indexOf(DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE, iStart);
-			//				iStart += DiasQueryTranslatorCREODIAS.SCLOUDCOVERPERCENTAGE.length();
-			//				iStart = sQuery.indexOf('[', iStart);
-			//				int iEnd = sQuery.indexOf(" TO ", iStart);
-			//				
-			//			}
-			String sCloud = "cloudcoverpercentage:[";
-			int iCloudStart = sQuery.indexOf(sCloud);
-			if(iCloudStart > 0) {
-				iCloudStart += sCloud.length();
-				iCloudStart = sQuery.indexOf("<", iCloudStart);
-				if(iCloudStart > 0) {
-					StringBuilder oBuilder = new StringBuilder();
-					oBuilder.append(sQuery.substring(0, iCloudStart));
-					oBuilder.append(",");
-					oBuilder.append(sQuery.substring(iCloudStart+1));
-					sQuery = oBuilder.toString();
-				}
-			}
+			
 			sResult = "";
+			
 			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQueryFromClient);
 			
-			if(!oAppConf.has("missions")) {
-				//infer collection from free text
-				if(Utils.isNullOrEmpty(oQueryViewModel.platformName)) {
-					throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
-				} else {
-					//since mission is not specified in the query, add /search.json here
-					sResult += oQueryViewModel.platformName.replace("-", "") + "/search.json?";
+			// P.Campanella: add support to Sentinel5P, using the new Query View Model
+			if (oQueryViewModel.platformName==Platforms.SENTINEL5P) {
+				
+				// Set start and end date
+				String sTimeStart = oQueryViewModel.startFromDate.substring(0, 10);
+				String sTimeEnd = oQueryViewModel.endToDate.substring(0, 10);
+				//increment the end day by one, because the upper limit is excluded:
+				sTimeEnd = LocalDate.parse(sTimeEnd).plusDays(1).toString();
+				
+				String sTimePeriod = "&startDate=" + sTimeStart + "&completionDate="+ sTimeEnd;
+				
+				sResult = "Sentinel5P/search.json?" + sTimePeriod;
+				
+				if (oQueryViewModel.limit>0) {
+					String sCount = "&maxRecords=" + oQueryViewModel.limit;
+					sResult = sCount + sTimePeriod;
 				}
-			}
-			//first things first: append mission name + /search.json? 
-
-			for (Object oMissionObject : oAppConf.optJSONArray("missions")) {
-				JSONObject oWasdiMissionJson = (JSONObject) oMissionObject;
-				String sName = oWasdiMissionJson.optString("indexname", null);
-				String sValue = oWasdiMissionJson.optString("indexvalue", null);
-				String sToken = sName + ':' + sValue; 
-				if(sQuery.contains(sToken)) {
-					//todo isolate relevant portion of query
-					int iStart = Math.max(0, sQuery.indexOf(sToken));
-					int iEnd = sQuery.indexOf(')', iStart);
-					if(0>iEnd) {
-						iEnd = sQuery.length();
-					}
-					String sQueryPart = sQuery.substring(iStart, iEnd).trim();
+				
+				// Set the start index:
+				if (oQueryViewModel.offset>=0) {
+					int iOffset = oQueryViewModel.offset + 1;
+					String sOffset= "&startIndex="+	iOffset;
+					sResult = sOffset + sResult;
+				}
+				
+				// Set the Bbox
+				String sBbox="";
+				
+				if (oQueryViewModel.north!=null && oQueryViewModel.south!=null && oQueryViewModel.east!=null && oQueryViewModel.west!=null) {
+					sBbox = "&geometry=POLYGON((" + oQueryViewModel.west  +" " + oQueryViewModel.south + ", " + oQueryViewModel.east +" " + oQueryViewModel.south + ", " + oQueryViewModel.east + " " + oQueryViewModel.north + ", " + oQueryViewModel.west + " " + oQueryViewModel.north+ ", " + oQueryViewModel.west  +" " + oQueryViewModel.south + "))";
+				}
+				
+				sResult += sBbox;
+				
+				// Set Product Level if present
+				if (!Utils.isNullOrEmpty(oQueryViewModel.productLevel)) {
+					sResult += "&processingLevel=" + oQueryViewModel.productLevel;
+				}
+				
+				// Set Product Type if present
+				if (!Utils.isNullOrEmpty(oQueryViewModel.productType)) {
+					sResult += "&productType=" + oQueryViewModel.productType;
 					
-					try {
-						QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
-						String sLocalPart = oParser.parse(sQueryPart); 
-						sResult += sLocalPart;						
+					if (Utils.isNullOrEmpty(oQueryViewModel.productLevel)) {
+						if (oQueryViewModel.productType.contains("L1")) {
+							sResult += "&processingLevel=LEVEL1B";
+						}
+						else {
+							sResult += "&processingLevel=LEVEL2";
+						}
 					}
-					catch (Exception oQueryException) {
-						// Try to continue
-					}
-
 				}
+				
+				// Set Timeliness if present
+				if (!Utils.isNullOrEmpty(oQueryViewModel.timeliness)) {
+					sResult += "&timeliness=" + oQueryViewModel.timeliness.replace(" ", "+");
+				}				
+				
 			}
-			if(Utils.isNullOrEmpty(sResult)) {
-				sResult = oQueryViewModel.platformName.replace("-", "")+ "/search.json?";
-			}
-			sResult += parseFootPrint(sQuery);
-			sResult += parseTimeFrame(sQuery);
-			sResult += "&status=all";
+			else {
+				
+				String sCloud = "cloudcoverpercentage:[";
+				int iCloudStart = sQuery.indexOf(sCloud);
+				if(iCloudStart > 0) {
+					iCloudStart += sCloud.length();
+					iCloudStart = sQuery.indexOf("<", iCloudStart);
+					if(iCloudStart > 0) {
+						StringBuilder oBuilder = new StringBuilder();
+						oBuilder.append(sQuery.substring(0, iCloudStart));
+						oBuilder.append(",");
+						oBuilder.append(sQuery.substring(iCloudStart+1));
+						sQuery = oBuilder.toString();
+					}
+				}
+				
+				if(!oAppConf.has("missions")) {
+					//infer collection from free text
+					if(Utils.isNullOrEmpty(oQueryViewModel.platformName)) {
+						throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
+					} else {
+						//since mission is not specified in the query, add /search.json here
+						sResult += oQueryViewModel.platformName.replace("-", "") + "/search.json?";
+					}
+				}
+				
+				//first things first: append mission name + /search.json? 
+				for (Object oMissionObject : oAppConf.optJSONArray("missions")) {
+					JSONObject oWasdiMissionJson = (JSONObject) oMissionObject;
+					String sName = oWasdiMissionJson.optString("indexname", null);
+					String sValue = oWasdiMissionJson.optString("indexvalue", null);
+					String sToken = sName + ':' + sValue; 
+					if(sQuery.contains(sToken)) {
+						//todo isolate relevant portion of query
+						int iStart = Math.max(0, sQuery.indexOf(sToken));
+						int iEnd = sQuery.indexOf(')', iStart);
+						if(0>iEnd) {
+							iEnd = sQuery.length();
+						}
+						String sQueryPart = sQuery.substring(iStart, iEnd).trim();
+						
+						try {
+							QueryTranslationParser oParser = new QueryTranslationParser(oParseConf.optJSONObject(sValue), oWasdiMissionJson);
+							String sLocalPart = oParser.parse(sQueryPart); 
+							sResult += sLocalPart;						
+						}
+						catch (Exception oQueryException) {
+							// Try to continue
+						}
 
-//			if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
-//				sResult += "&timeliness=Fast-24h";
-//			}
-			String sFree = parseProductName(sQueryFromClient);
-			if(!Utils.isNullOrEmpty(sFree)) {
-				sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
+					}
+				}
+				if(Utils.isNullOrEmpty(sResult)) {
+					sResult = oQueryViewModel.platformName.replace("-", "")+ "/search.json?";
+				}
+				sResult += parseFootPrint(sQuery);
+				sResult += parseTimeFrame(sQuery);
+				sResult += "&status=all";
+
+//				if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
+//					sResult += "&timeliness=Fast-24h";
+//				}
+				
+				String sFree = parseProductName(sQueryFromClient);
+				if(!Utils.isNullOrEmpty(sFree)) {
+					sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
+				}
 			}
 
 		} catch (Exception oE) {

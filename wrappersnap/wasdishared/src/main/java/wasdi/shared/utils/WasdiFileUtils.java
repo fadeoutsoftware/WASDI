@@ -10,8 +10,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -115,5 +123,200 @@ public class WasdiFileUtils {
 	return sPathString.replace("/",File.separator).replace("\\",File.separator);
 		
 	}
-	
+
+	/**
+	 * Extract the zip-file into the declared directory.
+	 * 
+	 * <pre>
+	 * The processing in streaming mode of zip-files that are not compressed/deflated 
+	 * (see CREODIAS downloads) might end up in an error:
+	 * java.util.zip.ZipException: only DEFLATED entries can have EXT descriptor
+	 * 
+	 * Due to this fact, an alternative solution based on Apache's commons-compress was used.
+	 * For more details see the following page:
+	 * https://stackoverflow.com/questions/47208272/android-zipinputstream-only-deflated-entries-can-have-ext-descriptor
+	 * </pre>
+	 * @param zipFile the zip-file to be extracted
+	 * @param destDir the destination directory
+	 * @throws IOException if an error occurs
+	 */
+	public static void unzipFile(File zipFile, File destDir) throws IOException {
+		if (zipFile == null) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
+			return;
+		} else if (!zipFile.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
+		}
+
+		if (destDir == null) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
+			return;
+		} else if (!destDir.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
+		}
+
+		String destDirectory = destDir.getAbsolutePath();
+
+		try (ArchiveInputStream i = new ZipArchiveInputStream(new FileInputStream(zipFile), "UTF-8", false, true)) {
+			ArchiveEntry entry = null;
+			while ((entry = i.getNextEntry()) != null) {
+				if (!i.canReadEntryData(entry)) {
+					Utils.debugLog("Utils.GetFileNameExtension: Can't read entry: " + entry);
+					continue;
+				}
+				String name = destDirectory + File.separator + entry.getName();
+				File f = new File(name);
+				if (entry.isDirectory()) {
+					if (!f.isDirectory() && !f.mkdirs()) {
+						throw new IOException("failed to create directory " + f);
+					}
+				} else {
+					File parent = f.getParentFile();
+					if (!parent.isDirectory() && !parent.mkdirs()) {
+						throw new IOException("failed to create directory " + parent);
+					}
+					try (OutputStream o = Files.newOutputStream(f.toPath())) {
+						IOUtils.copy(i, o);
+					}
+				}
+			}
+		}
+	}
+
+	public static void cleanUnzipFile(File zipFile, File destDir) throws IOException {
+		if (zipFile == null) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
+			return;
+		} else if (!zipFile.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
+		}
+
+		if (destDir == null) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
+			return;
+		} else if (!destDir.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
+		}
+
+		unzipFile(zipFile, destDir);
+
+		String dirPath = completeDirPath(destDir.getAbsolutePath());
+		String fileZipPath = dirPath + zipFile.getName();
+
+		String expectedUnzippedDirectoryPath = dirPath + removeZipExtension(zipFile.getName());
+
+		if (doesFileExist(expectedUnzippedDirectoryPath)) {
+			boolean filesMovedFlag = moveFiles(expectedUnzippedDirectoryPath, dirPath);
+
+			if (filesMovedFlag) {
+				deleteFile(expectedUnzippedDirectoryPath);
+				deleteFile(fileZipPath);
+			}
+		}
+	}
+
+	public static String removeZipExtension(String sProductName) {
+		if (sProductName == null || !sProductName.endsWith(".zip")) {
+			return sProductName;
+		} else {
+			return sProductName.replace(".zip", "");
+		}
+	}
+
+	public static boolean doesFileExist(String filePath) {
+		if (filePath == null) {
+			Utils.log("ERROR", "WasdiFileUtils.doesFileExist: filePath is null");
+			return false;
+		}
+
+		File file = new File(filePath);
+
+		return file != null && file.exists();
+	}
+
+	private static boolean moveFiles(String sourcePath, String destinationDirectoryPath) {
+		if (sourcePath == null) {
+			Utils.log("ERROR", "WasdiFileUtils.moveFiles: sourcePath is null");
+			return false;
+		}
+
+		if (destinationDirectoryPath == null) {
+			Utils.log("ERROR", "WasdiFileUtils.moveFiles: destinationDirectoryPath is null");
+			return false;
+		}
+
+		File sourceFile = new File(sourcePath);
+		if (sourceFile == null || !sourceFile.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.moveFiles: sourceFile does not exist");
+			return false;
+		}
+
+		boolean outcome = true;
+
+		if (sourceFile.isDirectory()) {
+			for (File file : sourceFile.listFiles()) {
+				outcome = outcome & moveFile(file.getAbsolutePath(), destinationDirectoryPath);
+			}
+		}
+
+		return outcome;
+	}
+
+	private static boolean moveFile(String sourcePath, String destinationDirectoryPath) {
+		if (sourcePath == null) {
+			Utils.log("ERROR", "WasdiFileUtils.moveFile: sourcePath is null");
+			return false;
+		}
+
+		if (destinationDirectoryPath == null) {
+			Utils.log("ERROR", "WasdiFileUtils.moveFile: destinationDirectoryPath is null");
+			return false;
+		}
+
+		File sourceFile = new File(sourcePath);
+		if (sourceFile == null || !sourceFile.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.moveFile: sourceFile does not exist");
+			return false;
+		}
+
+		File destinationDirectory = new File(destinationDirectoryPath);
+		if (!destinationDirectory.exists()) {
+			destinationDirectory.mkdirs();
+		}
+
+		File destinationFile = new File(destinationDirectoryPath + sourceFile.getName());
+		return sourceFile.renameTo(destinationFile);
+	}
+
+	private static boolean deleteFile(String filePath) {
+		if (filePath == null) {
+			Utils.log("ERROR", "WasdiFileUtils.deleteFile: filePath is null");
+			return false;
+		} else if (!doesFileExist(filePath)) {
+			Utils.log("ERROR", "WasdiFileUtils.deleteFile: file does not exist: " + filePath);
+		}
+
+		File file = new File(filePath);
+		File parentDirectory = file.getParentFile();
+
+		if (file.isDirectory()) {
+			for (File child : file.listFiles()) {
+				deleteFile(child.getPath());
+			}
+		}
+
+		boolean fileDeleted = file.delete();
+		boolean parentDirectoryDeleted = parentDirectory.delete();
+
+		return fileDeleted && parentDirectoryDeleted;
+	}
+
+	public static String completeDirPath(String dirPath) {
+		if (dirPath == null || dirPath.endsWith("/")) {
+			return dirPath;
+		}
+
+		return dirPath + "/";
+	}
+
 }

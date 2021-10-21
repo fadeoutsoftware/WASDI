@@ -38,6 +38,7 @@ public class QueryExecutorCREODIAS extends QueryExecutor {
 		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
 		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
 		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
+		m_asSupportedPlatforms.add(Platforms.SENTINEL5P);
 		m_asSupportedPlatforms.add(Platforms.LANDSAT8);
 		m_asSupportedPlatforms.add(Platforms.ENVISAT);
 	}

@@ -1,8 +1,6 @@
-package it.fadeout.viewmodels;
+package wasdi.shared.viewmodels.plan;
 
 import java.util.ArrayList;
-
-import org.nfs.orbits.sat.SatSensor;
 
 /**
  * View Model of a a Satellite Resource.
@@ -21,12 +19,12 @@ public class SatelliteResourceViewModel {
 	/**
 	 * List of sensors on board
 	 */
-	private ArrayList<SatSensor> satelliteSensors;
+	private ArrayList<SensorViewModel> satelliteSensors;
 	
-	public ArrayList<SatSensor> getSatelliteSensors() {
+	public ArrayList<SensorViewModel> getSatelliteSensors() {
 		return satelliteSensors;
 	}
-	public void setSatelliteSensors(ArrayList<SatSensor> satelliteSensors) {
+	public void setSatelliteSensors(ArrayList<SensorViewModel> satelliteSensors) {
 		this.satelliteSensors = satelliteSensors;
 	}
 	public String getSatelliteName() {

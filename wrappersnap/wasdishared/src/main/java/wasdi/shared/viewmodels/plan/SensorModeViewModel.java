@@ -1,4 +1,4 @@
-package it.fadeout.viewmodels;
+package wasdi.shared.viewmodels.plan;
 
 /**
  * View Model of a differeny sensor modes that of a sensor on board to a satellite.

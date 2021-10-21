@@ -1,6 +1,6 @@
 package it.fadeout.services;
 
-import it.fadeout.business.DataProvider;
+import wasdi.shared.business.DataProvider;
 
 /**
  * Holds information about the registered providers

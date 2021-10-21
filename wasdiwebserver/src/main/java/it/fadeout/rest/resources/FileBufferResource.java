@@ -24,10 +24,10 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.DataProvider;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;

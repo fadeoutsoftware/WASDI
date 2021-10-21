@@ -19,12 +19,12 @@ import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SensorMode;
 
-import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
-import it.fadeout.viewmodels.SatelliteFilterViewModel;
-import it.fadeout.viewmodels.SensorModeViewModel;
-import it.fadeout.viewmodels.SensorViewModel;
 import satLib.astro.time.Time;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.plan.OpportunitiesSearchViewModel;
+import wasdi.shared.viewmodels.plan.SatelliteFilterViewModel;
+import wasdi.shared.viewmodels.plan.SensorModeViewModel;
+import wasdi.shared.viewmodels.plan.SensorViewModel;
 
 /**
  * Static methods to make a query to the Plan Manager. The main method is 

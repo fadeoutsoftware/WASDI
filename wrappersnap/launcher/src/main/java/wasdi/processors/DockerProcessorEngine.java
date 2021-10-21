@@ -334,7 +334,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 
             // Check workspace folder
-            String sWorkspacePath = LauncherMain.getWorspacePath(oParameter);
+            String sWorkspacePath = LauncherMain.getWorkspacePath(oParameter);
 
             File oWorkspacePath = new File(sWorkspacePath);
 

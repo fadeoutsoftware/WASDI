@@ -1,4 +1,4 @@
-package it.fadeout.business;
+package wasdi.shared.business;
 
 /**
  * Data Provider model

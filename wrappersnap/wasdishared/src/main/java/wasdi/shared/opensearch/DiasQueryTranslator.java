@@ -47,6 +47,10 @@ public class DiasQueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_SENTINEL_3 = "platformname:Sentinel-3";	
 	/**
+	 * Token of S5P platform
+	 */
+	private static final String s_sPLATFORMNAME_SENTINEL_5P = "platformname:Sentinel-5P";	
+	/**
 	 * Token of Landsat platform
 	 */
 	private static final String s_sPLATFORMNAME_LANDSAT = "platformname:Landsat-*";
@@ -71,6 +75,10 @@ public class DiasQueryTranslator {
 	 */
 	private static final String s_sPRODUCTTYPE = "producttype:";
 	/**
+	 * Token of product level (S5)
+	 */
+	private static final String s_sPRODUCTLEVEL = "productlevel:";
+	/**
 	 * Token of Landsat product type
 	 */
 	private static final String s_sLANDSATPRODUCTTYPE = "name:";
@@ -82,6 +90,10 @@ public class DiasQueryTranslator {
 	 * Token of the relative orbit
 	 */
 	private static final String s_sRELATIVEORBITNUMBER = "relativeorbitnumber:";
+	/**
+	 * Token of the absolute orbit
+	 */
+	private static final String s_sABSOLUTEORBITNUMBER = "absoluteorbit:";
 	/**
 	 * Token of sensor mode
 	 */
@@ -411,6 +423,9 @@ public class DiasQueryTranslator {
 			
 			// Try to get info about Copernicus Marine
 			parseCopernicusMarine(sQuery, oResult);
+			
+			// Try to get Info about Sentinel 5P
+			parseSentinel5P(sQuery, oResult);			
 
 		} catch (Exception oEx) {
 			Utils.debugLog("DiasQueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
@@ -790,7 +805,11 @@ public class DiasQueryTranslator {
 		}
 	}	
 	
-	
+	/**
+	 * Parse Sentinel 3 info
+	 * @param sQuery
+	 * @param oResult
+	 */
 	private void parseSentinel3(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_SENTINEL_3)) {
@@ -863,6 +882,129 @@ public class DiasQueryTranslator {
 						}
 					} catch (Exception oE) {
 						Utils.debugLog("DiasQueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("DiasQueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+		}
+	}
+	
+	/**
+	 * Parse Sentinel 5P Info
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseSentinel5P(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(DiasQueryTranslator.s_sPLATFORMNAME_SENTINEL_5P)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_5P);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_SENTINEL_5P.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.SENTINEL5P;
+
+					// check for product type
+					try {
+						if (sQuery.contains(DiasQueryTranslator.s_sPRODUCTLEVEL)) {
+							iStart = sQuery.indexOf(s_sPRODUCTLEVEL);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find product level");
+							}
+							iStart += s_sPRODUCTLEVEL.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								// the types are all of ten letters
+								iEnd = iStart + 10;
+							}
+							String sLevel = sQuery.substring(iStart, iEnd);
+							sLevel = sLevel.trim();
+
+							oResult.productLevel = sLevel;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
+					}
+
+					// check for timeliness
+					try {
+						if (sQuery.contains(DiasQueryTranslator.s_s_TIMELINESS)) {
+							iStart = sQuery.indexOf(s_s_TIMELINESS);
+							if (iStart < 0) {
+								throw new IllegalArgumentException("Could not find sensor mode");
+							}
+							iStart += s_s_TIMELINESS.length();
+							iEnd = sQuery.indexOf(" AND ", iStart);
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(')', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = sQuery.indexOf(' ', iStart);
+							}
+							if (iEnd < 0) {
+								iEnd = iStart + 12;
+							}
+							String sTimeliness = sQuery.substring(iStart, iEnd);
+							sTimeliness = sTimeliness.trim();
+
+							oResult.timeliness = sTimeliness;
+						}
+					} catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
+					}
+					
+					
+					try {
+						// check for relative orbit
+						if (sQuery.contains(DiasQueryTranslator.s_sABSOLUTEORBITNUMBER)) {
+							try {
+								iStart = sQuery.indexOf(s_sABSOLUTEORBITNUMBER);
+								if (iStart < 0) {
+									throw new IllegalArgumentException("Could not find absolute orbit number");
+								}
+								iStart += s_sABSOLUTEORBITNUMBER.length();
+								iEnd = sQuery.indexOf(" AND ", iStart);
+								if (iEnd < 0) {
+									iEnd = sQuery.indexOf(')');
+								}
+								if (iEnd < 0) {
+									iEnd = sQuery.indexOf(' ', iStart);
+								}
+								if (iEnd < 0) {
+									// if anything else failed, skip digits
+									iEnd = iStart;
+									while (iEnd < sQuery.length() && Character.isDigit(sQuery.charAt(iEnd))) {
+										iEnd++;
+									}
+								}
+								String sOrbit = sQuery.substring(iStart, iEnd);
+								int iOrbit = Integer.parseInt(sOrbit);
+
+								oResult.absoluteOrbit = iOrbit;
+
+							} catch (Exception oE) {
+								Utils.debugLog("DiasQueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
+							}
+						}						
+					}
+					catch (Exception oE) {
+						Utils.debugLog("DiasQueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
 					}
 				}
 			}

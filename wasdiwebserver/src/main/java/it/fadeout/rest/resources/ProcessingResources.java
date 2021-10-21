@@ -9,22 +9,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.User;
-import wasdi.shared.parameters.BaseParameter;
-import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.MosaicParameter;
-import wasdi.shared.parameters.MultiSubsetParameter;
-import wasdi.shared.parameters.OperatorParameter;
-import wasdi.shared.parameters.RegridParameter;
-import wasdi.shared.parameters.SubsetParameter;
-import wasdi.shared.parameters.settings.ISetting;
-import wasdi.shared.parameters.settings.MosaicSetting;
-import wasdi.shared.parameters.settings.MultiSubsetSetting;
-import wasdi.shared.parameters.settings.RegridSetting;
-import wasdi.shared.parameters.settings.SubsetSetting;
+import wasdi.shared.parameters.*;
+import wasdi.shared.parameters.settings.*;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -142,6 +134,66 @@ public class ProcessingResources {
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
+    @POST
+    @Path("conversion/sen2cor")
+    //@Produces({"application/xml", "application/json", "text/xml"})
+    public Response sen2CorConversion(@HeaderParam("x-session-token") String sSessionId,
+                                      @QueryParam("productName") String sProductName,
+                                      @QueryParam("workspace") String sWorkspaceId,
+                                      @QueryParam("parentId") String sParentId) {
+
+        Utils.debugLog("ProcessingResources.sen2CorConversion, Received request");
+
+        if (sProductName == null || sWorkspaceId == null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
+
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
+        if (sProductName != null && sWorkspaceId != null) {
+            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");
+
+
+            try {
+                // Check authorization
+                if (Utils.isNullOrEmpty(sSessionId)) {
+                    Utils.debugLog("ProcessingResources.sen2CorConversion: invalid session");
+
+                    return Response.status(Status.UNAUTHORIZED).build();
+                }
+
+                User oUser = Wasdi.getUserFromSession(sSessionId);
+                if (oUser == null) {
+                    Utils.debugLog("ProcessingResources.sen2CorConversion: user not found");
+
+                    return Response.status(Status.UNAUTHORIZED).build();
+
+                }
+                String sProcessObjId = Utils.GetRandomName();
+                Sen2CorParameter oParameter = new Sen2CorParameter();
+                oParameter.setProductName(sProductName);
+                oParameter.setWorkspace(sWorkspaceId);
+                oParameter.setProcessObjId(sProcessObjId);
+                oParameter.setUserId(oUser.getUserId());
+                oParameter.setExchange(sWorkspaceId);
+
+                Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
+                String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+                //(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+
+                PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
+                Utils.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
+                return Response.ok(oPrimitiveResult).build();
+            } catch (Exception oe) {
+                oe.printStackTrace();
+            }
+
+        }
+
+        Utils.debugLog("ProcessingResources.sen2CorConversion, conversion failed");
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+	
     /**
      * Trigger the execution in the launcher of a generic SNAP Operation
      *

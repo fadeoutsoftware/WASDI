@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -23,6 +24,7 @@ import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
+import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
 
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
@@ -36,13 +38,15 @@ import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.StyleState;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
-import it.fadeout.viewmodels.CoverageSwathResultViewModel;
-import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
-import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
-import it.fadeout.viewmodels.SatelliteResourceViewModel;
 import satLib.astro.time.Time;
 import wasdi.shared.business.User;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.plan.CoverageSwathResultViewModel;
+import wasdi.shared.viewmodels.plan.OpportunitiesSearchViewModel;
+import wasdi.shared.viewmodels.plan.SatelliteOrbitResultViewModel;
+import wasdi.shared.viewmodels.plan.SatelliteResourceViewModel;
+import wasdi.shared.viewmodels.plan.SensorModeViewModel;
+import wasdi.shared.viewmodels.plan.SensorViewModel;
 
 /**
  * Opportunity Search Resource.
@@ -612,10 +616,32 @@ public class OpportunitySearchResource {
 					String satres = InstanceFinder.getOrbitSatsMap().get(asSatellites[iIndexSarellite]);
 					Satellite oSatellite = SatFactory.buildSat(satres);
 					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
-
+					
+					// Convert the Sat Sensor List in the view model
 					SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
 					oSatelliteResource.setSatelliteName(oSatellite.getName());
-					oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
+					
+					ArrayList<SensorViewModel> aoSensorViewModels = new ArrayList<SensorViewModel>();
+					
+					for (SatSensor oSatSensor : aoSatelliteSensors) {
+						SensorViewModel oSensorViewModel = new SensorViewModel();
+						oSensorViewModel.setDescription(oSatSensor.getDescription());
+						oSensorViewModel.setEnable(oSatSensor.isEnabled());
+						
+						for (SensorMode oMode : oSatSensor.getSensorModes()) {
+							SensorModeViewModel oSensorModeViewModel = new SensorModeViewModel();
+							
+							oSensorModeViewModel.setEnable(oMode.isEnabled());
+							oSensorModeViewModel.setName(oMode.getName());
+							
+							oSensorViewModel.getSensorModes().add(oSensorModeViewModel);
+							
+						}
+						
+						aoSensorViewModels.add(oSensorViewModel);
+					}
+					
+					oSatelliteResource.setSatelliteSensors(aoSensorViewModels);
 					aaoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
 					Utils.debugLog("getSatellitesResources Exception: " + oE);

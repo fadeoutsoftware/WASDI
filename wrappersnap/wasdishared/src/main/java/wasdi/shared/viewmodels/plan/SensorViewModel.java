@@ -1,4 +1,4 @@
-package it.fadeout.viewmodels;
+package wasdi.shared.viewmodels.plan;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class SensorViewModel {
 	/**
 	 * List of available sensor modes
 	 */
-	private ArrayList<SensorModeViewModel> sensorModes;
+	private ArrayList<SensorModeViewModel> sensorModes = new ArrayList<SensorModeViewModel>();
 	
 	public String getDescription() {
 		return description;

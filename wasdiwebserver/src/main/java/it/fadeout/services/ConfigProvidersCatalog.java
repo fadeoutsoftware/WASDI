@@ -1,13 +1,12 @@
 package it.fadeout.services;
 
+import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.Node;
 import wasdi.shared.data.NodeRepository;
 
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
-
-import it.fadeout.business.DataProvider;
 
 import java.util.Arrays;
 
