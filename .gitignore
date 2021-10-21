@@ -1215,3 +1215,6 @@ docs/build/html/java/package-index.html
 docs/build/html/java/WasdiLib.html
 wasdiIDLDocker/.pydevproject
 wasdiOctaveDocker/.pydevproject
+client/app/assets/img/space-market-logo_old.png
+wasdiCondaDocker/.pydevproject
+wasdiwebserver/WebContent/webTEST.xml
