@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.filebuffer;
+package wasdi.dataproviders;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -64,7 +64,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 	/**
 	 * Get the size of the file to download/copy
-	 * @see wasdi.filebuffer.ProviderAdapter#GetDownloadFileSize(java.lang.String)
+	 * @see wasdi.dataproviders.ProviderAdapter#GetDownloadFileSize(java.lang.String)
 	 */
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {

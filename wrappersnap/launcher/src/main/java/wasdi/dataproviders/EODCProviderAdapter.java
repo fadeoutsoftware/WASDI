@@ -1,8 +1,7 @@
-package wasdi.filebuffer;
+package wasdi.dataproviders;
 
 import java.io.File;
 
-import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 

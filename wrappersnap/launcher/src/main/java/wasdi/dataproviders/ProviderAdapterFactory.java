@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.filebuffer;
+package wasdi.dataproviders;
 
 import java.util.Collections;
 import java.util.HashMap;

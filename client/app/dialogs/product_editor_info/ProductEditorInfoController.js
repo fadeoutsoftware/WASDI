@@ -49,7 +49,7 @@ var ProductEditorInfoController = (function() {
             return false;
 
 
-        this.m_oProductService.updateProduct(this.m_oProduct, this.workspaceId).then(function (data, status)
+        this.m_oProductService.updateProduct(this.m_oProduct, this.workspaceId).then(function (data)
         {
             if(data.data === "") {
                 _this.m_oProduct.metadata = oOldMetadata;
@@ -60,7 +60,7 @@ var ProductEditorInfoController = (function() {
             else
                 console.log("Error update product: there was an error to the server");
 
-        },function (data,status) {
+        },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE TO UPDATE THE PRODUCT");
 
             // restore product friendly name due to update failed
