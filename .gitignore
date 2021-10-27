@@ -1215,3 +1215,7 @@ docs/build/html/java/package-index.html
 docs/build/html/java/WasdiLib.html
 wasdiIDLDocker/.pydevproject
 wasdiOctaveDocker/.pydevproject
+libraries/waspy/test/config.json
+libraries/waspy/test/256x256.tif
+wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestUtils.java
+wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestWorkspaceResource.java
