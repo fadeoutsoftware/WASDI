@@ -2712,13 +2712,16 @@ var EditorController = (function () {
                 "show_only_matches_children": true
             },
             "contextmenu": { // my right click menu
-                "select_node": false,
+                // this method deselect all the other nodes so the node selection will be triggered by open menu 
+                "select_node": false, 
                 "items": function ($node) {
-
+                    // select the current node 
+                  //  $node.state.selected = trues
+                    oController.selectClickedNode($node)
                     //only the band has property $node.original.band
-                    // menu showed when a band is selected
+                    // menu showed when a band is selecte
                     var oReturnValue = null;
-                    if (utilsIsObjectNullOrUndefined($node.original.band) == false) {
+                    if (utilsIsObjectNullOrUndefined($node.original.band) == false) { 
                         //******************************** BAND *************************************
                         var oBand = $node.original.band;
 
@@ -3134,8 +3137,34 @@ var EditorController = (function () {
             }
 
         })
-        console.log("done");
+    }
 
+
+    /**
+     * Utils method to select the node clicked
+     * all or nothing only of visible nodes
+     * @param {*} sTextQuery
+     */
+     EditorController.prototype.selectClickedNode = function (oNodeIn) {
+        if (oNodeIn == null) return;
+        // gather all nodes from tree
+        var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
+        let oController = this;
+        // get only the parents
+        var idList = [];
+        $.each(jsonNodes, function (i, val) {
+            let sClass = val.a_attr.class;
+            if (sClass == undefined) { // only parents <-> other instances have class "no_checkbox"
+                
+                    if ($(val).attr('id') == oNodeIn.id) { $('#jstree').jstree(true).select_node($(val).attr('id')); }
+                
+                if (val.state.hidden == true) { // hidden must be de-selected
+                    $('#jstree').jstree(true).deselect_node($(val).attr('id'));
+                }
+
+            }
+
+        })
     }
 
     /**
