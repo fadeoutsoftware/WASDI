@@ -4,6 +4,8 @@ A config file is required in the current directory
 '''
 
 import unittest
+from datetime import date, timedelta
+
 import wasdi
 
 
@@ -112,8 +114,36 @@ class testWaspy(unittest.TestCase):
             sStatus = "somethingisbroken"
         else:
             sStatus = wasdi.waitProcess(processID)
-
         self.assertTrue(sStatus in {"DONE", "STOPPED", "ERROR"})
+
+    def test_importProduct(self):
+        '''
+        This test checks the capabilities of WASDI to gather
+        images. This implies the search and the download of at least
+        one image on a 10 day timespan
+        '''
+
+        oFromDate = date.today() - timedelta(days=15)
+        sFromDate = oFromDate.strftime('%Y-%m-%d')
+
+        oToDate = date.today() - timedelta(days=5)
+        sToDate = oToDate.strftime('%Y-%m-%d')
+
+        eo_images = wasdi.searchEOImages("S2", sFromDate, sToDate,
+                                             None, None, None, None, None, None, None, None,
+                                             "LSA", "46.69,12.44,45.60,13.93")
+        self.assertIsNotNone(eo_images)
+        self.assertTrue(len(eo_images) > 0)
+        # In case assertion isn't violated
+        productName = eo_images[0].get("title")
+        if(len(eo_images) > 0):
+            wasdi.importProduct(eo_images[0], "LSA")
+            # The file should be available in the active workspace
+            self.assertTrue(wasdi.getProductsByActiveWorkspace().__contains__(productName))
+
+
+
+
 
     def test_setProcessPayload(self):
         '''Warning the setup for this test is not fully automated.
