@@ -55,7 +55,7 @@ public class App
         //testImportProductList(oLib);
         
         
-        testImportAndPreprocess(oLib);
+//        testImportAndPreprocess(oLib);
         
         //testCreateWorkspace(oLib);
         //testDeleteWorkspace(oLib);
@@ -63,15 +63,16 @@ public class App
         //testGetProcessesByWorkspace(oLib);
         //testGetProductsByWorkspace(oLib);
 
-        testGetPayload(oLib);
+//        testGetPayload(oLib);
 
         //testgetProductBbox(oLib);
         
         //testCopyFileToSftp(oLib);
-        //testMultisubset(oLib);
+        testMultisubset(oLib);
         
         
         //testGetParamsAsJsonString(oLib);
+        
         
         System.out.println("JWasdiLib Test Done");
         oLib.updateStatus("DONE");
@@ -394,11 +395,13 @@ public class App
 			adBbox.add(Double.parseDouble(sCoord));
 		}
 
+    	//just init the extremes, we'll get the right ones next... 
     	double dN = adBbox.get(0);
     	double dS = adBbox.get(0);
     	double dE = adBbox.get(1);
     	double dW = adBbox.get(1);
     	
+    	//find the extreme points
     	for(int i=0; i<9; ++i) {
     		if(i%2 == 0) {
     			//EVEN: North and South

@@ -2766,22 +2766,36 @@ public class WasdiLib {
 			oPostOutputStream.close(); 
 
 			oConnection.connect();
-
-			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String sInputLine;
-			StringBuffer sResponse = new StringBuffer();
-
-			while ((sInputLine = oInputBuffer.readLine()) != null) {
-				sResponse.append(sInputLine);
+			
+			if(oConnection.getResponseCode() >= 200 && oConnection.getResponseCode() <= 299 ) {
+				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+				return bufferToString(oInputBuffer);
+			} else {
+				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getErrorStream()));
+				wasdiLog(bufferToString(oInputBuffer));
+				return "";
 			}
-			oInputBuffer.close();
-
-			return sResponse.toString();
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
 			return "";
 		}
+	}
+
+	/**
+	 * @param oInputBuffer
+	 * @return
+	 * @throws IOException
+	 */
+	private String bufferToString(BufferedReader oInputBuffer) throws IOException {
+		String sInputLine;
+		StringBuffer oResponse = new StringBuffer();
+
+		while ((sInputLine = oInputBuffer.readLine()) != null) {
+			oResponse.append(sInputLine);
+		}
+		oInputBuffer.close();
+		return oResponse.toString();
 	}
 
 	/*
@@ -3860,7 +3874,7 @@ public class WasdiLib {
 		try {
 			oUrl = new StringBuilder()
 					.append(getBaseUrl())
-					.append("/processing/geometric/multisubset?source=").append(sInputFile)
+					.append("/processing/multisubset?source=").append(sInputFile)
 					.append("&name=").append(sInputFile)
 					.append("&workspace=").append(getActiveWorkspace());
 
