@@ -6,9 +6,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.net.io.Util;
 
@@ -30,6 +34,7 @@ public class App
         
         System.out.println(oLib.getProcessorPath());
       
+        testExecuteWorkflow(oLib);
         
         //testConnection(oLib);
         
@@ -61,7 +66,7 @@ public class App
         //testDeleteWorkspace(oLib);
         
         //testGetProcessesByWorkspace(oLib);
-        //testGetProductsByWorkspace(oLib);
+        testGetProductsByWorkspace(oLib);
 
 //        testGetPayload(oLib);
 
@@ -78,6 +83,16 @@ public class App
         oLib.updateStatus("DONE");
         
     }    
+
+	private static void testExecuteWorkflow(WasdiLib oLib) {
+		String sInput = oLib.getProductsByActiveWorkspace().stream().filter(t-> t.startsWith("S1A") || t.startsWith("S1B")).findFirst().orElse("");
+		if(!sInput.isEmpty()) {
+			String[] asInputFileName = new String[]{sInput};
+			String[] asOutputFileName = new String[]{sInput+"_preproc.tif"};
+			oLib.executeWorkflow(asInputFileName, asOutputFileName, "LISTSinglePreproc2");
+		}
+		
+	}
 
 	private static void testSetBasePath(WasdiLib oLib) {
 		//fail
@@ -96,7 +111,7 @@ public class App
 
 
 	private static void testGetProductsByWorkspace(WasdiLib oLib) {
-		List<String> asProductsByName = oLib.getProductsByWorkspace("TESTLIB");
+		List<String> asProductsByName = oLib.getProductsByWorkspace("testWasdiLib");
 		System.out.println(asProductsByName.size());
 	}
 
