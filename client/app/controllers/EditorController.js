@@ -346,6 +346,8 @@ var EditorController = (function () {
 
         if (this.m_b2DMapModeOn == false) {
 
+            this.setActiveTab(0);
+
             // We are going in 3D MAP
             this.m_oMapService.clearMap();
             this.m_oGlobeService.clearGlobe();
