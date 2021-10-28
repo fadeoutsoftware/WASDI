@@ -142,6 +142,12 @@ class testWaspy(unittest.TestCase):
             self.assertTrue(wasdi.getProductsByActiveWorkspace().__contains__(productName))
 
 
+    def test_WaitForProcessesEmptyList(self):
+        ''' Checks that, if the list passed to the methods is empty,
+         liveness conditions holds '''
+        wasdiProcIDList = [] #creates and empty list of procIDs
+        wasdi.waitProcesses(wasdiProcIDList)
+        self.assertTrue(True); #find a better way to check timeout with assertions
 
 
 
