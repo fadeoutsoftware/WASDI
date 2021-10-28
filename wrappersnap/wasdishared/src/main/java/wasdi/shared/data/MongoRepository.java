@@ -74,6 +74,10 @@ public class MongoRepository {
      */
     protected String m_sRepoDb = "wasdi";
     
+    /**
+     * Flag to notify with a log if the repository has no local connection and 
+     * reverts to the default wasdi connection
+     */
     private static boolean s_bDbSwitchLogged = false;
     
 	/**

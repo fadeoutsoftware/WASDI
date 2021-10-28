@@ -1,4 +1,4 @@
-package wasdi.filebuffer;
+package wasdi.dataproviders;
 
 public class LocalFileDescriptor {
 	public String m_sCode;

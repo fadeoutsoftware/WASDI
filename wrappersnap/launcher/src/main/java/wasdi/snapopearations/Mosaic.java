@@ -29,10 +29,6 @@ public class Mosaic {
 	 */
 	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
 	
-	/**
-	 * Local WASDI base path
-	 */
-	private String m_sBasePath = "";
 	
 	/**
 	 * Output file format
@@ -52,31 +48,14 @@ public class Mosaic {
     protected static final String PROPERTY_MAX_VALUE = "maxValue";
     protected static final String PROPERTY_MIN_VALUE = "minValue";	
 	
-	public Mosaic(MosaicParameter oParameter, String sBasePath) {
+	public Mosaic(MosaicParameter oParameter) {
 		m_oMosaicSetting = (MosaicSetting) oParameter.getSettings();
 		m_oMosaicParameter = oParameter;
-		m_sBasePath = sBasePath;
 		m_sOuptutFile = oParameter.getDestinationProductName();
 		
 		if (!Utils.isNullOrEmpty(m_oMosaicSetting.getOutputFormat())) {
 			m_sOutputFileFormat = m_oMosaicSetting.getOutputFormat();
 		}
-	}
-	
-	/**
-	 * Get Base Path
-	 * @return
-	 */
-	public String getBasePath() {
-		return m_sBasePath;
-	}
-
-	/** 
-	 * Set Base Path
-	 * @param sBasePath
-	 */
-	public void setBasePath(String sBasePath) {
-		this.m_sBasePath = sBasePath;
 	}
 
 	/**

@@ -28,6 +28,9 @@ public class Send {
 	String m_sExchangeName = "amq.topic";
 	
 	public Send(String sExchange) {
+		
+		if (sExchange == null) return;
+		
 		//create connection to the server
         try {
             m_oConnection = RabbitFactory.getConnectionFactory().newConnection();
@@ -65,6 +68,7 @@ public class Send {
      */
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
+    	if (m_oConnection == null) return false;
     	if (m_oChannel == null) return false;
     	
         try {        	
@@ -91,6 +95,8 @@ public class Send {
     public boolean SendUpdateProcessMessage(ProcessWorkspace oProcess) throws JsonProcessingException {  
     	
     	if (oProcess==null) return false;
+    	if (m_oConnection == null) return false;
+    	if (m_oChannel == null) return false;
     	
         RabbitMessageViewModel oUpdateProcessMessage = new RabbitMessageViewModel();
         oUpdateProcessMessage.setMessageCode(LauncherOperations.UPDATEPROCESSES.name());
@@ -115,6 +121,9 @@ public class Send {
      * @return
      */
     public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sExchangeId) {
+    	
+    	if (m_oConnection == null) return false;
+    	if (m_oChannel == null) return false;
 
         try {
             RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();

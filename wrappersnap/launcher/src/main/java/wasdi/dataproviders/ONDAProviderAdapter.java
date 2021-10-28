@@ -4,7 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.filebuffer;
+package wasdi.dataproviders;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
