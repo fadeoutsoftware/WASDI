@@ -59,7 +59,7 @@ public class WasdiLibTest {
 		List<Double> adLonE = Arrays.asList(0.27378950000000124, 0.8213685000000037);
 		boolean bBigTiff = true;
 
-		String sUrl = "https://www.wasdi.net/wasdiwebserver/rest/processing/multisubset?source=compressedBaghdad.tif&name=compressedBaghdad.tif&workspace=";
+		String sUrl = wasdiLib.getBaseUrl() + "/processing/multisubset?source=compressedBaghdad.tif&name=compressedBaghdad.tif&workspace=";
 		String sPayload = "{\"lonEList\":[0.27378950000000124,0.8213685000000037],\"latNList\":[0.7091242500000039,0.2363747500000013],\"latSList\":[0.2363747500000013,0.2363747500000013],\"outputNames\":[\"left.tif\",\"right.tif\"],\"bigTiff\":true,\"lonWList\":[0.27378950000000124,0.27378950000000124]}";
 
 
@@ -101,13 +101,13 @@ public class WasdiLibTest {
 	public void executeWorkflowTest() {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
-		String sGetUrl = "https://www.wasdi.net/wasdiwebserver/rest/workflows/getbyuser";
+		String sGetUrl = wasdiLib.getBaseUrl() + "/workflows/getbyuser";
 		String fixedGetResponse = getWorkflowsResponse;
 
 		doReturn(fixedGetResponse).when(wasdiLib).httpGet(sGetUrl, asHeaders);
 
 
-		String sPostUrl = "https://www.wasdi.net/wasdiwebserver/rest/workflows/run?workspace=";
+		String sPostUrl = wasdiLib.getBaseUrl() + "/workflows/run?workspace=";
 		String sPayload = "{\"name\":\"LISTSinglePreproc2\", \"description\":\"\",\"workflowId\":\"a93af948-36d6-4a55-aed7-7a084e4f8b4d\", \"inputNodeNames\": [], \"inputFileNames\": [\"S1A_IW_GRDH_1SDV_20211022T172457_20211022T172522_040235_04C439_5855.zip\"], \"outputNodeNames\":[], \"outputFileNames\":[\"S1A_IW_GRDH_1SDV_20211022T172457_20211022T172522_040235_04C439_5855.zip_preproc.tif\"]}";
 
 
@@ -167,7 +167,7 @@ public class WasdiLibTest {
 		String sSensorOperationalMode = null;
 		String sCloudCoverage = "[0 TO 30]";
 
-		String sUrl = "https://www.wasdi.net/wasdiwebserver/rest/search/querylist?providers=LSA";
+		String sUrl = wasdiLib.getBaseUrl() + "/search/querylist?providers=LSA";
 		String sPayload = "[\"( footprint:\\\"intersects(POLYGON(( 8.5 45.7,8.5 45.9,8.7 45.9,8.7 45.7,8.5 45.7)))\\\") AND ( platformname:Sentinel-2  AND producttype:S2MSI1C) AND ( beginPosition:[2020-10-05T00:00:00.000Z TO 2020-10-25T23:59:59.999Z]AND ( endPosition:[2020-10-05T00:00:00.000Z TO 2020-10-25T23:59:59.999Z]) \"]";
 
 		String fixedPostResponse = searchEOImagesResponse;
@@ -176,7 +176,7 @@ public class WasdiLibTest {
 		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sUrl, sPayload, asHeaders);
 
 
-		List<Map<String, Object>> expectedResponse = wasdiLib.s_oMapper.readValue(searchEOImagesResponse, new TypeReference<List<Map<String,Object>>>(){});
+		List<Map<String, Object>> expectedResponse = WasdiLib.s_oMapper.readValue(searchEOImagesResponse, new TypeReference<List<Map<String,Object>>>(){});
 
 		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon,
 				sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
