@@ -322,11 +322,8 @@ public class WasdiLibTest {
 
 		String workspaceId = "some workspaceId";
 		String workspaceName = "some workspaceName";
-//		String ownerUserId = wasdiLib.getUser();
 		String ownerUserId = "some ownerUserId";
 		String apiUrl = "http://some.apiUrl";
-
-		System.out.println("ownerUserId: " + ownerUserId);
 
 		String sGetListByUserUrl = wasdiLib.getBaseUrl() + "/ws/byuser";
 		String fixedGetListByUserResponse = "[{\"workspaceId\":\"" + workspaceId + "\",\"workspaceName\":\"" + workspaceName + "\",\"ownerUserId\":\"" + ownerUserId + "\"}]";
@@ -334,16 +331,12 @@ public class WasdiLibTest {
 		doReturn(fixedGetListByUserResponse)
 		.when(wasdiLib).httpGet(sGetListByUserUrl, asHeaders);
 
-
 		String sGetWorkspaceEditorViewModelUrl = wasdiLib.getBaseUrl() + "/ws/getws?workspace=" + workspaceId;
 		String fixedGetWorkspaceEditorViewModelResponse = "{\"apiUrl\":\"" + apiUrl + "\"}";
 
 		doReturn(fixedGetWorkspaceEditorViewModelResponse)
 		.when(wasdiLib).httpGet(sGetWorkspaceEditorViewModelUrl, asHeaders);
-		
-		
-		
-		
+
 		wasdiLib.openWorkspace(workspaceName);
 
 		String sInputFile = "mosaicFromLib.tif";
@@ -356,12 +349,14 @@ public class WasdiLibTest {
 		String sPostUrl = wasdiLib.getBaseUrl() + "/processing/subset?source=" + sInputFile + "&name=" + sOutputFile + "&workspace=" + wasdiLib.getActiveWorkspace();
 		String sPayload = "{ \"latN\":56.2, \"lonW\":-4.0, \"latS\":54.9, \"lonE\":-2.0 }";
 
-
 //		String dynamicProcessObjId = "a93af948-36d6-4a55-aed7-7a084e4f8b4d";
 		String dynamicProcessObjId = "UUID_corresponding_to_the_process_workspace_ID";
 		String fixedPostResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"stringValue\":\"" + dynamicProcessObjId + "\"}";
 
-		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sPostUrl, sPayload, asHeaders);		String sGetStatusUrl = wasdiLib.getWorkspaceBaseUrl() + "/process/byid?procws=" + dynamicProcessObjId;
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sPostUrl, sPayload, asHeaders);
+
+
+		String sGetStatusUrl = wasdiLib.getWorkspaceBaseUrl() + "/process/byid?procws=" + dynamicProcessObjId;
 
 		String fixedGetStatusRunningResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"RUNNING\"}";
 		String fixedGetStatusWaitingResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"WAITING\"}";
@@ -381,17 +376,69 @@ public class WasdiLibTest {
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
-		
+
 
 		Assert.assertEquals(expectedResponse, actualResponse);
 
 		verify(wasdiLib, times(3)).httpGet(sGetListByUserUrl, asHeaders);
-
 		verify(wasdiLib, times(1)).httpGet(sGetWorkspaceEditorViewModelUrl, asHeaders);
+		verify(wasdiLib, times(1)).httpPost(sPostUrl, sPayload, asHeaders);
+		verify(wasdiLib, times(5)).httpGet(sGetStatusUrl, asHeaders);
+	}
+
+	@Test
+	public void mosaicTest() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		ArrayList<String> asInputs = new ArrayList<>();
+		asInputs.add("S1B_IW_GRDH_1SDV_20190416T230853_20190416T230907_015838_01DBE2_3BF4_preproc.tif");
+		asInputs.add("S1B_IW_GRDH_1SDV_20190416T230828_20190416T230853_015838_01DBE2_EBAA_preproc.tif");
+		String sOutputFile = "mosaicFromLibNoCount.tif";
+
+		String activeWorkspace = "";
+//		String activeWorkspace = "some activeWorkspace";
+//		wasdiLib.setActiveWorkspace(activeWorkspace);
+
+		String sPostUrl = wasdiLib.getBaseUrl() + "/processing/mosaic?name=" + sOutputFile + "&workspace=" + activeWorkspace;
+		String sPayload = "{\"pixelSizeX\":-1.0,\"pixelSizeY\":-1.0,\"noDataValue\":null,\"inputIgnoreValue\":null,\"outputFormat\":\"GeoTIFF\",\"sources\":[\"S1B_IW_GRDH_1SDV_20190416T230853_20190416T230907_015838_01DBE2_3BF4_preproc.tif\",\"S1B_IW_GRDH_1SDV_20190416T230828_20190416T230853_015838_01DBE2_EBAA_preproc.tif\"]}";
+
+//		String dynamicProcessObjId = "a93af948-36d6-4a55-aed7-7a084e4f8b4d";
+		String dynamicProcessObjId = "UUID_corresponding_to_the_process_workspace_ID";
+		String fixedPostResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"stringValue\":\"" + dynamicProcessObjId + "\"}";
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sPostUrl, sPayload, asHeaders);
+
+
+		String sGetStatusUrl = wasdiLib.getWorkspaceBaseUrl() + "/process/byid?procws=" + dynamicProcessObjId;
+
+		String fixedGetStatusRunningResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"RUNNING\"}";
+		String fixedGetStatusWaitingResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"WAITING\"}";
+		String fixedGetStatusReadyResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"READY\"}";
+		String fixedGetStatusDoneResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"DONE\"}";
+
+		doReturn(fixedGetStatusRunningResponse)
+		.doReturn(fixedGetStatusWaitingResponse)
+		.doReturn(fixedGetStatusReadyResponse)
+		.doReturn(fixedGetStatusRunningResponse)
+		.doReturn(fixedGetStatusDoneResponse)
+		.when(wasdiLib).httpGet(sGetStatusUrl, asHeaders);
+
+
+		String expectedResponse = "DONE";
+		String actualResponse = wasdiLib.mosaic(asInputs, sOutputFile);
+
+//		wasdiLib.addFileToWASDI(sOutputFile);
+//		String sMosaic = wasdiLib.getFullProductPath(sOutputFile);
+
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+
+
+		Assert.assertEquals(expectedResponse, actualResponse);
 
 		verify(wasdiLib, times(1)).httpPost(sPostUrl, sPayload, asHeaders);
-
 		verify(wasdiLib, times(5)).httpGet(sGetStatusUrl, asHeaders);
+
 	}
 
 }
