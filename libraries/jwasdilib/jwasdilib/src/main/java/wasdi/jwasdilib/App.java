@@ -28,7 +28,7 @@ public class App
         WasdiLib oLib = new WasdiLib();
                 
         String sWorkingDirectory = System.getProperty("user.dir");
-        oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
+        oLib.init(sWorkingDirectory + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "myConfig.properties");
 
         oLib.printStatus();
         
