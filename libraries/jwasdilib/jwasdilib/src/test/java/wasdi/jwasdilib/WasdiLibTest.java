@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -95,6 +96,7 @@ public class WasdiLibTest {
 		String actualResponse = wasdiLib.asynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff);
 		
 		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(1)).httpPost(any(String.class), any(String.class), anyMap());
 	}
 
 	@Test
@@ -186,6 +188,210 @@ public class WasdiLibTest {
 
 		verify(wasdiLib, times(1)).httpPost(sUrl, sPayload, asHeaders);
 		verify(wasdiLib, times(0)).httpPost("", "", new HashMap<>());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenNullPlatform() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages(null, null, null, null, null, null, null, null, null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenUnknownPlatform() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S3", null, null, null, null, null, null, null, null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenS1AndNullProductType() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", null, null, null, null, null, null, null, null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenS2AndNullProductType() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S2", null, null, null, null, null, null, null, null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenNullDateFrom() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", null, null, null, null, null, null, "UnknownProductType", null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenNInvalidDateFrom() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "Invalid", null, null, null, null, null, "SLC", null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenNullDateTo() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", null, null, null, null, null, "GRD", null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenInvalidDateTo() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", "Invalid", null, null, null, null, "OCN", null, null, null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(0)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenS1MissingCoordinates() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		String fixedPostResponse = "[]";
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(any(String.class), any(String.class), anyMap());
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", "2020-10-25", 0D, null, null, null, "S2MSI1C", 1, "SensorOperationalMode", null);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(1)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void searchEOImages_shouldReturnEmpty_whenS2MissingCoordinates() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		String fixedPostResponse = "[]";
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(any(String.class), any(String.class), anyMap());
+
+		List<Map<String, Object>> expectedResponse = new ArrayList<>();
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S2", "2020-10-05", "2020-10-25", null, 0D, null, null, "S2MSI2Ap", 1, null, "CloudCoverage");
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		verify(wasdiLib, times(1)).httpPost(any(String.class), any(String.class), anyMap());
+	}
+
+	@Test
+	public void subsetTest() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		String workspaceId = "some workspaceId";
+		String workspaceName = "some workspaceName";
+//		String ownerUserId = wasdiLib.getUser();
+		String ownerUserId = "some ownerUserId";
+		String apiUrl = "http://some.apiUrl";
+
+		System.out.println("ownerUserId: " + ownerUserId);
+
+		String sGetListByUserUrl = wasdiLib.getBaseUrl() + "/ws/byuser";
+		String fixedGetListByUserResponse = "[{\"workspaceId\":\"" + workspaceId + "\",\"workspaceName\":\"" + workspaceName + "\",\"ownerUserId\":\"" + ownerUserId + "\"}]";
+
+		doReturn(fixedGetListByUserResponse)
+		.when(wasdiLib).httpGet(sGetListByUserUrl, asHeaders);
+
+
+		String sGetWorkspaceEditorViewModelUrl = wasdiLib.getBaseUrl() + "/ws/getws?workspace=" + workspaceId;
+		String fixedGetWorkspaceEditorViewModelResponse = "{\"apiUrl\":\"" + apiUrl + "\"}";
+
+		doReturn(fixedGetWorkspaceEditorViewModelResponse)
+		.when(wasdiLib).httpGet(sGetWorkspaceEditorViewModelUrl, asHeaders);
+		
+		
+		
+		
+		wasdiLib.openWorkspace(workspaceName);
+
+		String sInputFile = "mosaicFromLib.tif";
+		String sOutputFile = "subsetFromLib2.tif";
+		double dLatN = 56.2;
+		double dLonW = -4.0;
+		double dLatS = 54.9;
+		double dLonE = -2.0;
+
+		String sPostUrl = wasdiLib.getBaseUrl() + "/processing/subset?source=" + sInputFile + "&name=" + sOutputFile + "&workspace=" + wasdiLib.getActiveWorkspace();
+		String sPayload = "{ \"latN\":56.2, \"lonW\":-4.0, \"latS\":54.9, \"lonE\":-2.0 }";
+
+
+//		String dynamicProcessObjId = "a93af948-36d6-4a55-aed7-7a084e4f8b4d";
+		String dynamicProcessObjId = "UUID_corresponding_to_the_process_workspace_ID";
+		String fixedPostResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"stringValue\":\"" + dynamicProcessObjId + "\"}";
+
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sPostUrl, sPayload, asHeaders);		String sGetStatusUrl = wasdiLib.getWorkspaceBaseUrl() + "/process/byid?procws=" + dynamicProcessObjId;
+
+		String fixedGetStatusRunningResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"RUNNING\"}";
+		String fixedGetStatusWaitingResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"WAITING\"}";
+		String fixedGetStatusReadyResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"READY\"}";
+		String fixedGetStatusDoneResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"status\":\"DONE\"}";
+
+		doReturn(fixedGetStatusRunningResponse)
+		.doReturn(fixedGetStatusWaitingResponse)
+		.doReturn(fixedGetStatusReadyResponse)
+		.doReturn(fixedGetStatusRunningResponse)
+		.doReturn(fixedGetStatusDoneResponse)
+		.when(wasdiLib).httpGet(sGetStatusUrl, asHeaders);
+
+		String expectedResponse = "DONE";
+
+		String actualResponse = wasdiLib.subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE);
+
+		Assert.assertNotNull(actualResponse);
+		Assert.assertEquals(expectedResponse, actualResponse);
+		
+
+		Assert.assertEquals(expectedResponse, actualResponse);
+
+		verify(wasdiLib, times(3)).httpGet(sGetListByUserUrl, asHeaders);
+
+		verify(wasdiLib, times(1)).httpGet(sGetWorkspaceEditorViewModelUrl, asHeaders);
+
+		verify(wasdiLib, times(1)).httpPost(sPostUrl, sPayload, asHeaders);
+
+		verify(wasdiLib, times(5)).httpGet(sGetStatusUrl, asHeaders);
 	}
 
 }

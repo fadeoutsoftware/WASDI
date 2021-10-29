@@ -207,7 +207,7 @@ public class WasdiLib {
 		log("WasdiLib.setActiveWorkspace( " + sNewActiveWorkspaceId + " )");
 		this.m_sActiveWorkspace = sNewActiveWorkspaceId;
 
-		if (m_sActiveWorkspace != null && !m_sActiveWorkspace.equals("")) {
+		if (m_sActiveWorkspace != null && !m_sActiveWorkspace.isEmpty()) {
 			m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sNewActiveWorkspaceId);
 		}
 	}
@@ -786,9 +786,9 @@ public class WasdiLib {
 
 			// Search the one by name
 			for (Map<String, Object> oWorkspace : aoJSONMap) {
-				if (oWorkspace.get("workspaceName").toString().equals(sWorkspaceName)) {
+				if (((String) oWorkspace.get("workspaceName")).equals(sWorkspaceName)) {
 					// Found
-					return (String) oWorkspace.get("workspaceId").toString();
+					return (String) oWorkspace.get("workspaceId");
 				}
 			}
 
@@ -858,9 +858,9 @@ public class WasdiLib {
 
 			// Search the one by name
 			for (Map<String, Object> oWorkspace : aoJSONMap) {
-				if (oWorkspace.get("workspaceId").toString().equals(sWorkspaceId)) {
+				if (((String) oWorkspace.get("workspaceId")).equals(sWorkspaceId)) {
 					// Found
-					return (String) oWorkspace.get("ownerUserId").toString();
+					return (String) oWorkspace.get("ownerUserId");
 				}
 			}
 
