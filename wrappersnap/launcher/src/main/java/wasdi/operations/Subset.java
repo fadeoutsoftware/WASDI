@@ -42,11 +42,7 @@ public class Subset extends Operation {
         try {
         	
         	SubsetParameter oParameter = (SubsetParameter) oParam;
-
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-            }
-
+        	
             String sSourceProduct = oParameter.getSourceProductName();
             String sOutputProduct = oParameter.getDestinationProductName();
 
@@ -59,14 +55,12 @@ public class Subset extends Operation {
 
             if (oInputProduct == null) {
                 m_oLocalLogger.error("Subset.executeOperation: product is not a SNAP product ");
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;
             }
 
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
-            }
-
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 30);
+            
             // Take the Geo Coding
             final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
 
@@ -105,12 +99,10 @@ public class Subset extends Operation {
             oSubsetDef.setNodeNames(oInputProduct.getBandNames());
             oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
 
-            Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct,
-                    oInputProduct.getDescription());
+            Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct, oInputProduct.getDescription());
 
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
-            }
+            
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
             String sOutputPath = LauncherMain.getWorkspacePath(oParameter) + sOutputProduct;
 
@@ -118,30 +110,23 @@ public class Subset extends Operation {
 
             m_oLocalLogger.debug("Subset.executeOperation done");
 
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-            }
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 
             m_oLocalLogger.debug("Subset.executeOperation adding product to Workspace");
 
-            addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(),
-                    oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
+            addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
 
             m_oLocalLogger.debug("Subset.executeOperation: product added to workspace");
             
             return true;
 
         } catch (Exception oEx) {
-            m_oLocalLogger.error("Subset.executeOperation: exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            if (oProcessWorkspace != null)
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+            m_oLocalLogger.error("Subset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            
+            oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SUBSET.name(), oParam.getWorkspace(),
-                        sError, oParam.getExchange());
-
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         }
         
         return false;

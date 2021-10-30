@@ -18,16 +18,13 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sun.management.VMManagement;
@@ -36,12 +33,10 @@ import wasdi.operations.Operation;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
@@ -185,6 +180,7 @@ public class LauncherMain  {
             s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
             s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+            s_oProcessWorkspace.setProgressPerc(0);
             s_oProcessWorkspace.setPid(getProcessId());
 
             if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
@@ -400,12 +396,16 @@ public class LauncherMain  {
         	
         	// Call the execute operation method
         	boolean bOperationResult = oOperation.executeOperation(oBaseParameter, s_oProcessWorkspace);
-        	        	
+        	
+        	// Check the result of the operation and set the status
+        	if (bOperationResult) s_oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+        	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+        	
         	s_oLogger.debug("LauncherMain.executeOperation: Operation Result " + bOperationResult);
 
         } 
         catch (Exception oEx) {
-            
+        	            
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
             
             s_oLogger.error("LauncherMain.executeOperation Exception ", oEx);
@@ -490,10 +490,20 @@ public class LauncherMain  {
 
         return sWorkspacePath;
     }
-
+    
+    /**
+     * Static helper function to update status and progress of a Process Workspace.
+     * Used mainly by Operation class, that has a wrapper, can be used also by other classes not
+     * directly derived from Operation, like the DataProviders or the Processor Hierarcy.
+     * 
+     * @param oProcessWorkspaceRepository Repo to access db
+     * @param oProcessWorkspace Process Workspace Object
+     * @param oProcessStatus Updated Status
+     * @param iProgressPerc Updated Progress percentage
+     */
     public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
-                                           ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc)
-            throws JsonProcessingException {
+                                           ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) 
+    {
 
         if (oProcessWorkspace == null) {
             s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
@@ -503,18 +513,23 @@ public class LauncherMain  {
             s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
             return;
         }
-
-        oProcessWorkspace.setStatus(oProcessStatus.name());
-        oProcessWorkspace.setProgressPerc(iProgressPerc);
         
-        // update the process
-        if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
-            s_oLogger.debug("Error during process update");
+        try {
+            oProcessWorkspace.setStatus(oProcessStatus.name());
+            oProcessWorkspace.setProgressPerc(iProgressPerc);
+            
+            // update the process
+            if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
+                s_oLogger.debug("Error during process update");
+            }
+            
+            if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                s_oLogger.debug("Error sending rabbitmq message to update process list");
+            }        	
         }
-        
-        if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-            s_oLogger.debug("Error sending rabbitmq message to update process list");
-        }
+        catch (Exception oEx) {
+        	s_oLogger.debug("LauncherMain.updateProcessStatus Exception "+oEx.toString());
+		}
     }
 
     /**
@@ -542,65 +557,6 @@ public class LauncherMain  {
             s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Exception closing process workspace "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
-    }
-
-    /**
-     * Set the file size to the process Object
-     *
-     * @param oFile             File to read the size from
-     * @param oProcessWorkspace Process to update
-     */
-    public static void setFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
-
-        if (oFile == null) {
-            s_oLogger.error("LauncherMain.SetFileSizeToProcess: input file is null");
-            return;
-        }
-
-        if (!oFile.exists()) {
-            s_oLogger.error("LauncherMain.SetFileSizeToProcess: input file does not exists");
-            return;
-        }
-
-        // Take file size
-        long lSize = oFile.length();
-
-        // Check if it is a ".dim" file
-        if (oFile.getName().endsWith(".dim")) {
-            try {
-                // Ok so the real size is the folder
-                String sFolder = oFile.getAbsolutePath();
-
-                // Get folder path
-                sFolder = sFolder.replace(".dim", ".data");
-                File oDataFolder = new File(sFolder);
-
-                // Get folder size
-                lSize = FileUtils.sizeOfDirectory(oDataFolder);
-            } catch (Exception oEx) {
-                s_oLogger.error("LauncherMain.SetFileSizeToProcess: Error computing folder size");
-                oEx.printStackTrace();
-            }
-        }
-
-        setFileSizeToProcess(lSize, oProcessWorkspace);
-    }
-
-    /**
-     * Set the file size to the process Object
-     *
-     * @param lSize             Size
-     * @param oProcessWorkspace Process to update
-     */
-    public static void setFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
-
-        if (oProcessWorkspace == null) {
-            s_oLogger.error("LauncherMain.SetFileSizeToProcess: input process is null");
-            return;
-        }
-
-        s_oLogger.debug("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.GetFormatFileDimension(lSize));
-        oProcessWorkspace.setFileSize(Utils.GetFormatFileDimension(lSize));
     }
     
     /**
@@ -630,26 +586,6 @@ public class LauncherMain  {
 
         return iPid;
     }
-    
-
-    public static String snapFormat2GDALFormat(String sFormatName) {
-
-        if (Utils.isNullOrEmpty(sFormatName)) {
-            return "";
-        }
-
-        switch (sFormatName) {
-            case GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME:
-                return "GTiff";
-            case "BEAM-DIMAP":
-                return "DIMAP";
-            case "VRT":
-                return "VRT";
-            default:
-                return "GTiff";
-        }
-    }
-
 
     /**
      * Wait for a process to be resumed in a state like RUNNING, ERROR or DONE

@@ -42,7 +42,7 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.PublishBandParameter;
-import wasdi.shared.payload.PublishBandPayload;
+import wasdi.shared.payloads.PublishBandPayload;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
@@ -66,55 +66,48 @@ public class Publishband extends Operation {
 			m_oLocalLogger.error("Process Workspace is null");
 			return false;
 		}
-        
-        PublishBandParameter oParameter = null;
 
         try {
         	
-        	oParameter = (PublishBandParameter) oParam;
+        	PublishBandParameter oParameter = (PublishBandParameter) oParam;
 
             if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
             }
 
             // Read File Name
             String sFile = oParameter.getFileName();
-
-            // Generate full path name
-            String sPath = LauncherMain.getWorkspacePath(oParameter);
-            sFile = sPath + sFile;
-
-            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFile);
-
-            if (oDownloadedFile == null) {
-                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sFile + "]");
-                return false;
-            }
-
-            // Keep the product name
-            String sProductName = oDownloadedFile.getProductViewModel().getName();
-
-            m_oProcessWorkspaceLogger.log("Publish Band " + sProductName + " - " + oParameter.getBandName());
-
+            
             // Check integrity
             if (Utils.isNullOrEmpty(sFile)) {
-                // File not good!!s
+                // File not good!!
                 m_oLocalLogger.debug("Publishband.executeOperation: file is null or empty");
                 String sError = "Input File path is null";
 
                 m_oProcessWorkspaceLogger.log("Input file is null...");
 
                 // Send KO to Rabbit
-                if (m_oSendToRabbit != null) {
-                    m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
-                }
+                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
 
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                return false;
+            }            
 
+            // Generate full path name
+            sFile = LauncherMain.getWorkspacePath(oParameter) + sFile;
+
+            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFile);
+
+            if (oDownloadedFile == null) {
+                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sFile + "]");
+                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Cannot find product to publish", oParameter.getExchange());
                 return false;
             }
 
+            // Get the product name
+            String sProductName = oDownloadedFile.getProductViewModel().getName();
+
+            m_oProcessWorkspaceLogger.log("Publish Band " + sProductName + " - " + oParameter.getBandName());
             m_oLocalLogger.debug("Publishband.executeOperation:  File = " + sFile);
 
             // Create file object
@@ -133,7 +126,7 @@ public class Publishband extends Operation {
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
             PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sFile, oParameter.getBandName());
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 10);
 
             if (oAlreadyPublished != null) {
                 // Yes !!
@@ -147,12 +140,8 @@ public class Publishband extends Operation {
                 oVM.setProductName(sProductName);
                 oVM.setLayerId(sLayerId);
 
-                boolean bRet = m_oSendToRabbit != null && m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
-
-                if (!bRet) {
-                    m_oLocalLogger.debug("Publishband.executeOperation: Error sending Rabbit Message");
-                }
-
+                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
+                
                 return true;
             }
 
@@ -207,7 +196,7 @@ public class Publishband extends Operation {
 				sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(), true);
 			}
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
             // write the data directly to GeoServer Data Dir
             String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
@@ -295,7 +284,7 @@ public class Publishband extends Operation {
 
             m_oProcessWorkspaceLogger.log("Publish on geoserver");
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
             // Ok publish
             GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
@@ -349,7 +338,7 @@ public class Publishband extends Operation {
 
             m_oLocalLogger.debug("Publishband.executeOperation: Obtained sLayerId = " + sLayerId);
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 90);
 
             boolean bResultPublishBand = true;
 
@@ -406,49 +395,32 @@ public class Publishband extends Operation {
                 // process
                 Thread.sleep(5000);
 
-                boolean bRet = m_oSendToRabbit != null && m_oSendToRabbit.SendRabbitMessage(bResultPublishBand, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
-
-                if (bRet == false) {
-                    m_oLocalLogger.debug("Publishband.executeOperation: Error sending Rabbit Message");
-                }
-
+                m_oSendToRabbit.SendRabbitMessage(bResultPublishBand, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
+                
                 m_oProcessWorkspaceLogger.log("Band published " + new EndMessageProvider().getGood());
 
-                try {
-                    PublishBandPayload oPayload = new PublishBandPayload();
+                PublishBandPayload oPayload = new PublishBandPayload();
 
-                    oPayload.setBand(oParameter.getBandName());
-                    oPayload.setProduct(sProductName);
-                    oPayload.setLayerId(sLayerId);
+                oPayload.setBand(oParameter.getBandName());
+                oPayload.setProduct(sProductName);
+                oPayload.setLayerId(sLayerId);
+                
+                setPayload(oProcessWorkspace, oPayload);
 
-                    String sPayload = LauncherMain.s_oMapper.writeValueAsString(oPayload);
-                    oProcessWorkspace.setPayload(sPayload);
-                } catch (Exception oPayloadEx) {
-                    m_oLocalLogger.error("Publishband.executeOperation: payload exception: " + oPayloadEx.toString());
-                }
-
-
-                if (oProcessWorkspace != null)
-                    oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+                oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
             }
+            
+            return true;
+            
         } catch (Exception oEx) {
 
             m_oProcessWorkspaceLogger.log("Exception");
 
             m_oLocalLogger.error("Publishband.executeOperation: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            oEx.printStackTrace();
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
-            boolean bRet = m_oSendToRabbit != null && m_oSendToRabbit.SendRabbitMessage(false,
-                    LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
-
-            if (bRet == false) {
-                m_oLocalLogger.error("Publishband.executeOperation:  Error sending exception Rabbit Message");
-            }
-
-            if (oProcessWorkspace != null)
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParam.getWorkspace(), sError, oParam.getExchange());            
         } 
         finally {
             BandImageManager.stopCacheThread();

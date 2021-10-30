@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.opensearch.lsa.LSAHttpUtils;
+import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
 import wasdi.shared.utils.Utils;
 
 public class LSAProviderAdapter extends ProviderAdapter {

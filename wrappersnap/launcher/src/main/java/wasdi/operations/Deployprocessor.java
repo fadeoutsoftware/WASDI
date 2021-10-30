@@ -6,6 +6,17 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 
+/**
+ * Deploy Processor Operation
+ * 
+ * Takes a ProcessorParameter.
+ * 
+ * This operation deploys a Processor on the local node.
+ * It uses the Processors class hierarcy.
+ * 
+ * @author p.campanella
+ *
+ */
 public class Deployprocessor extends Operation {
 
 	@Override

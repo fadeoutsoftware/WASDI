@@ -13,7 +13,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
-import wasdi.shared.payload.IngestPayload;
+import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.ShapeFileUtils;
 import wasdi.shared.utils.Utils;
@@ -56,7 +56,7 @@ public class Ingest extends Operation {
             // set file size
             setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
             // Update status
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
             String sDestinationPath = LauncherMain.getWorkspacePath(oParameter);
 
@@ -131,7 +131,7 @@ public class Ingest extends Operation {
                 throw new IOException("Unable to get the product view model");
             }
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
             // copy file to workspace directory
             if (!oFileToIngestPath.getParent().equals(oDstDir.getAbsolutePath())) {
@@ -158,7 +158,7 @@ public class Ingest extends Operation {
 
             File oDstFile = new File(oDstDir, sDestinationFileName);
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 75);
 
             // Snap set the name of geotiff files as geotiff: let replace with the file name
             if (oImportProductViewModel.getName().equals("geotiff")) {
@@ -169,18 +169,13 @@ public class Ingest extends Operation {
             addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(),
                     oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null, true, true, oParameter.getStyle());
 
-            try {
-                IngestPayload oPayload = new IngestPayload();
-                oPayload.setFile(oFileToIngestPath.getName());
-                oPayload.setWorkspace(oParameter.getWorkspace());
-
-                String sPayload = LauncherMain.s_oMapper.writeValueAsString(oPayload);
-                oProcessWorkspace.setPayload(sPayload);
-            } catch (Exception oPayloadEx) {
-                m_oLocalLogger.error("Ingest.executeOperation: payload exception: " + oPayloadEx.toString());
-            }
-
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+            IngestPayload oPayload = new IngestPayload();
+            oPayload.setFile(oFileToIngestPath.getName());
+            oPayload.setWorkspace(oParameter.getWorkspace());
+            
+            setPayload(oProcessWorkspace, oPayload);
+            
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 
             m_oProcessWorkspaceLogger.log("Ingestion Done (Burp) - " + new EndMessageProvider().getGood());
 
@@ -188,21 +183,16 @@ public class Ingest extends Operation {
 
         } 
         catch (Throwable e) {
-            String sMsg = "Ingest.executeOperation: ERROR: Exception occurrend during file ingestion";
-
+            m_oLocalLogger.error("Ingest.executeOperation: ERROR: Exception occurrend during file ingestion");
+            
+            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+            m_oLocalLogger.error("Ingest.executeOperation: " + sError);
+            
             m_oProcessWorkspaceLogger.log("Exception ingesting the file");
 
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-            m_oLocalLogger.error("Ingest.executeOperation: " + sMsg);
-            m_oLocalLogger.error("Ingest.executeOperation: " + sError);
-
-            if (oProcessWorkspace != null) {
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            }
-            if (m_oSendToRabbit != null) {
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParam.getWorkspace(), sError, oParam.getExchange());
-            }
-
+            oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParam.getWorkspace(), sError, oParam.getExchange());
+            
         }
         
 		return false;

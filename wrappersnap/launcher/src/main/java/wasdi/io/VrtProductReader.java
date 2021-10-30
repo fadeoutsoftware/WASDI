@@ -68,4 +68,9 @@ public class VrtProductReader extends WasdiProductReader {
 		return new MetadataViewModel("Metadata");
 	}
 
+	@Override
+	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+		return sDownloadedFileFullPath;
+	}
+
 }

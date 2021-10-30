@@ -15,7 +15,12 @@ import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.products.*;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.GeorefProductViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class Sentinel5ProductReader extends WasdiProductReader {
 
@@ -246,6 +251,37 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		}
 
 		return new float[] {minf, maxf};
+	}
+
+	@Override
+	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+		
+		String sFileName = sDownloadedFileFullPath;
+		
+		try {
+			if (sDownloadedFileFullPath.startsWith("S5P") && sDownloadedFileFullPath.toLowerCase().endsWith(".zip")) {
+				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File is a Sentinel 5P image, start unzip");
+				String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
+				
+				String sTargetDirectoryPath = sDownloadPath;
+
+				File oSourceFile = new File(sDownloadedFileFullPath);
+				File oTargetDirectory = new File(sTargetDirectoryPath);
+				WasdiFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
+
+				String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", "");
+				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+				
+				sFileName = sFolderName + ".nc";
+				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+			}			
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("Sentinel5ProductReader.adjustFileAfterDownload: error ", oEx);
+		}
+		
+		
+		return sFileName;
 	}
 
 }

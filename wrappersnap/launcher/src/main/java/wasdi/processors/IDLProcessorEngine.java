@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -246,7 +245,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 					
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				}
-			} catch (JsonProcessingException e) {
+			} catch (Exception e) {
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.DeployProcessor Exception", e);
 			}
 			return false;
@@ -529,7 +528,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			try {
 				if (oProcessWorkspace != null) oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-			} catch (JsonProcessingException e) {
+			} catch (Exception e) {
 				LauncherMain.s_oLogger.error("IDLProcessorEngine.run Exception", e);
 			}
 			return false;

@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
+
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.parameters.MosaicParameter;
@@ -100,7 +102,7 @@ public class Mosaic {
 		try {
 			String sGdalCommand = "gdal_merge.py";
 			
-			String sOutputFormat = LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat);
+			String sOutputFormat = snapFormat2GDALFormat(m_sOutputFileFormat);
 			Boolean bVrt = false;
 			
 			if (sOutputFormat.equals("VRT")) {
@@ -280,6 +282,25 @@ public class Mosaic {
 			m_oProcessWorkspaceLogger.log(sLog);
 		}
 	}
+	
+    public String snapFormat2GDALFormat(String sFormatName) {
+
+        if (Utils.isNullOrEmpty(sFormatName)) {
+            return "";
+        }
+
+        switch (sFormatName) {
+            case GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME:
+                return "GTiff";
+            case "BEAM-DIMAP":
+                return "DIMAP";
+            case "VRT":
+                return "VRT";
+            default:
+                return "GTiff";
+        }
+    }
+	
 	
 	
 	

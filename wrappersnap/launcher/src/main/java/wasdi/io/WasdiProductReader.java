@@ -95,7 +95,13 @@ public abstract class WasdiProductReader {
 	 * @return
 	 * @throws IOException
 	 */
-    public abstract MetadataViewModel getProductMetadataViewModel();	
+    public abstract MetadataViewModel getProductMetadataViewModel();
+    
+    /**
+     * 
+     * @return
+     */
+    public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider);
 	
 	
     /**

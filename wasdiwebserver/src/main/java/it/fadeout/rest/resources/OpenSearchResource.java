@@ -1,6 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,13 +17,13 @@ import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
-import wasdi.shared.opensearch.PaginatedQuery;
-import wasdi.shared.opensearch.QueryExecutor;
-import wasdi.shared.opensearch.QueryExecutorFactory;
+import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.DataProviderViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * Open Search Resource.
@@ -152,10 +151,6 @@ public class OpenSearchResource {
 						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NumberFormatException: " + oNumberFormatException);
 						iProviderCountResults = -1;
 					} 
-					catch (IOException oIOException) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught IOException: " + oIOException);
-						iProviderCountResults = -1;
-					}
 					catch (NullPointerException oNp) {
 						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NullPointerException: " +oNp);
 						iProviderCountResults = -1;
@@ -317,12 +312,7 @@ public class OpenSearchResource {
 					catch (NumberFormatException oNumberFormatException) {
 						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
 						aoResults.add(null);
-					} 
-					catch (IOException oIOException) {
-						Utils.debugLog(s_sClassName + ".search: " + oIOException);
-						aoResults.add(null);
-					}
-					
+					} 					
 				}
 				catch (Exception oE) {
 					Utils.debugLog(s_sClassName + ".search: " + oE);

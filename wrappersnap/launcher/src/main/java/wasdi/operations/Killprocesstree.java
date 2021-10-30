@@ -106,7 +106,9 @@ public class Killprocesstree extends Operation {
 
             ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
 
-            updateProcessStatus(oRepository, oMyProcess, ProcessStatus.DONE, 100);
+            updateProcessStatus(oMyProcess, ProcessStatus.DONE, 100);
+            
+            return true;
 
         } catch (Exception oE) {
             m_oLocalLogger.error("Killprocesstree.executeOperation: " + oE);

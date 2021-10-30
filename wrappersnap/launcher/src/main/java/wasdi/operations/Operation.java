@@ -1,12 +1,11 @@
 package wasdi.operations;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
@@ -19,6 +18,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
@@ -133,45 +133,9 @@ public abstract class Operation {
 	public abstract boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace);
 	
 
-    public void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) {
-
-		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Operation.updateProcessStatus oProcessWorkspace is null");
-			return;
-		}
-		
-		if (oProcessWorkspaceRepository == null) {
-			m_oLocalLogger.error("Operation.updateProcessStatus oProcessWorkspace is null");
-			return;
-		}
-		
-		try {
-			oProcessWorkspace.setStatus(oProcessStatus.name());
-			oProcessWorkspace.setProgressPerc(iProgressPerc);
-			
-			// update the process
-			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
-				m_oLocalLogger.debug("Operation.updateProcessStatus  Error during process update");
-			}
-			
-			// send update process message
-			if (null == m_oSendToRabbit) {
-				try {
-					m_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
-				} catch (IOException e) {
-					m_oLocalLogger.debug("Operation.updateProcessStatus Error creating Rabbit Send " + e.toString());
-				}
-			}
-			
-			if (m_oSendToRabbit != null) {
-				if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-					m_oLocalLogger.debug("Operation.updateProcessStatus Error sending rabbitmq message to update process list");
-				}
-			}			
-		}
-		catch (Exception oEx) {
-			m_oLocalLogger.debug("Operation.updateProcessStatus Exception "+oEx.toString());
-		}
+    public void updateProcessStatus(ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) {
+    	
+    	LauncherMain.updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, oProcessStatus, iProgressPerc);
 
     }
     
@@ -181,7 +145,7 @@ public abstract class Operation {
      * @param oFile             File to read the size from
      * @param oProcessWorkspace Process to update
      */
-    protected void setFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
+    public void setFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
 
         if (oFile == null) {
             m_oLocalLogger.error("LauncherMain.SetFileSizeToProcess: input file is null");
@@ -443,6 +407,21 @@ public abstract class Operation {
         }
 
         return false;
+    }
+    
+    /**
+     * Set a payload to a Process Workspace
+     * @param oProcessWorkspace
+     * @param oPayload
+     */
+    protected void setPayload(ProcessWorkspace oProcessWorkspace, OperationPayload oPayload) {
+        try {
+            String sPayload = LauncherMain.s_oMapper.writeValueAsString(oPayload);
+            oProcessWorkspace.setPayload(sPayload);
+        } catch (Exception oPayloadEx) {
+            m_oLocalLogger.error("Operation.setPayload: payload exception: " + oPayloadEx.toString());
+        }
+    	
     }
 
 }

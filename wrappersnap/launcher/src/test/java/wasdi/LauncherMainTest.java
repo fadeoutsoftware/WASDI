@@ -24,10 +24,10 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
-import wasdi.shared.opensearch.PaginatedQuery;
-import wasdi.shared.opensearch.QueryExecutor;
-import wasdi.shared.opensearch.QueryExecutorFactory;
 import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -425,11 +425,6 @@ public abstract class LauncherMainTest {
 						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
 						aoResults.add(null);
 					} 
-					catch (IOException oIOException) {
-						Utils.debugLog(s_sClassName + ".search: " + oIOException);
-						aoResults.add(null);
-					}
-					
 				}
 				catch (Exception oE) {
 					Utils.debugLog(s_sClassName + ".search: " + oE);
