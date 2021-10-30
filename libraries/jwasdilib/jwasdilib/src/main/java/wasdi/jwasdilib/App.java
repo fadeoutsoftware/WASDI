@@ -6,9 +6,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.net.io.Util;
 
@@ -24,12 +28,13 @@ public class App
         WasdiLib oLib = new WasdiLib();
                 
         String sWorkingDirectory = System.getProperty("user.dir");
-        oLib.init(sWorkingDirectory + File.separator + "resources" + File.separator + "myConfig.properties");
+        oLib.init(sWorkingDirectory + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "myConfig.properties");
 
         oLib.printStatus();
         
         System.out.println(oLib.getProcessorPath());
       
+        testExecuteWorkflow(oLib);
         
         //testConnection(oLib);
         
@@ -55,28 +60,39 @@ public class App
         //testImportProductList(oLib);
         
         
-        testImportAndPreprocess(oLib);
+//        testImportAndPreprocess(oLib);
         
         //testCreateWorkspace(oLib);
         //testDeleteWorkspace(oLib);
         
         //testGetProcessesByWorkspace(oLib);
-        //testGetProductsByWorkspace(oLib);
+        testGetProductsByWorkspace(oLib);
 
-        testGetPayload(oLib);
+//        testGetPayload(oLib);
 
         //testgetProductBbox(oLib);
         
         //testCopyFileToSftp(oLib);
-        //testMultisubset(oLib);
+        testMultisubset(oLib);
         
         
         //testGetParamsAsJsonString(oLib);
+        
         
         System.out.println("JWasdiLib Test Done");
         oLib.updateStatus("DONE");
         
     }    
+
+	private static void testExecuteWorkflow(WasdiLib oLib) {
+		String sInput = oLib.getProductsByActiveWorkspace().stream().filter(t-> t.startsWith("S1A") || t.startsWith("S1B")).findFirst().orElse("");
+		if(!sInput.isEmpty()) {
+			String[] asInputFileName = new String[]{sInput};
+			String[] asOutputFileName = new String[]{sInput+"_preproc.tif"};
+			oLib.executeWorkflow(asInputFileName, asOutputFileName, "LISTSinglePreproc2");
+		}
+		
+	}
 
 	private static void testSetBasePath(WasdiLib oLib) {
 		//fail
@@ -95,7 +111,7 @@ public class App
 
 
 	private static void testGetProductsByWorkspace(WasdiLib oLib) {
-		List<String> asProductsByName = oLib.getProductsByWorkspace("TESTLIB");
+		List<String> asProductsByName = oLib.getProductsByWorkspace("testWasdiLib");
 		System.out.println(asProductsByName.size());
 	}
 
@@ -394,11 +410,13 @@ public class App
 			adBbox.add(Double.parseDouble(sCoord));
 		}
 
+    	//just init the extremes, we'll get the right ones next... 
     	double dN = adBbox.get(0);
     	double dS = adBbox.get(0);
     	double dE = adBbox.get(1);
     	double dW = adBbox.get(1);
     	
+    	//find the extreme points
     	for(int i=0; i<9; ++i) {
     		if(i%2 == 0) {
     			//EVEN: North and South

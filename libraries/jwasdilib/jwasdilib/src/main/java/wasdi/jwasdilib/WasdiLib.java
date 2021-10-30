@@ -207,7 +207,7 @@ public class WasdiLib {
 		log("WasdiLib.setActiveWorkspace( " + sNewActiveWorkspaceId + " )");
 		this.m_sActiveWorkspace = sNewActiveWorkspaceId;
 
-		if (m_sActiveWorkspace != null && !m_sActiveWorkspace.equals("")) {
+		if (m_sActiveWorkspace != null && !m_sActiveWorkspace.isEmpty()) {
 			m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sNewActiveWorkspaceId);
 		}
 	}
@@ -786,9 +786,9 @@ public class WasdiLib {
 
 			// Search the one by name
 			for (Map<String, Object> oWorkspace : aoJSONMap) {
-				if (oWorkspace.get("workspaceName").toString().equals(sWorkspaceName)) {
+				if (((String) oWorkspace.get("workspaceName")).equals(sWorkspaceName)) {
 					// Found
-					return (String) oWorkspace.get("workspaceId").toString();
+					return (String) oWorkspace.get("workspaceId");
 				}
 			}
 
@@ -858,9 +858,9 @@ public class WasdiLib {
 
 			// Search the one by name
 			for (Map<String, Object> oWorkspace : aoJSONMap) {
-				if (oWorkspace.get("workspaceId").toString().equals(sWorkspaceId)) {
+				if (((String) oWorkspace.get("workspaceId")).equals(sWorkspaceId)) {
 					// Found
-					return (String) oWorkspace.get("ownerUserId").toString();
+					return (String) oWorkspace.get("ownerUserId");
 				}
 			}
 
@@ -2766,22 +2766,36 @@ public class WasdiLib {
 			oPostOutputStream.close(); 
 
 			oConnection.connect();
-
-			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String sInputLine;
-			StringBuffer sResponse = new StringBuffer();
-
-			while ((sInputLine = oInputBuffer.readLine()) != null) {
-				sResponse.append(sInputLine);
+			
+			if(oConnection.getResponseCode() >= 200 && oConnection.getResponseCode() <= 299 ) {
+				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+				return bufferToString(oInputBuffer);
+			} else {
+				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getErrorStream()));
+				wasdiLog(bufferToString(oInputBuffer));
+				return "";
 			}
-			oInputBuffer.close();
-
-			return sResponse.toString();
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
 			return "";
 		}
+	}
+
+	/**
+	 * @param oInputBuffer
+	 * @return
+	 * @throws IOException
+	 */
+	private String bufferToString(BufferedReader oInputBuffer) throws IOException {
+		String sInputLine;
+		StringBuffer oResponse = new StringBuffer();
+
+		while ((sInputLine = oInputBuffer.readLine()) != null) {
+			oResponse.append(sInputLine);
+		}
+		oInputBuffer.close();
+		return oResponse.toString();
 	}
 
 	/*
@@ -3860,7 +3874,7 @@ public class WasdiLib {
 		try {
 			oUrl = new StringBuilder()
 					.append(getBaseUrl())
-					.append("/processing/geometric/multisubset?source=").append(sInputFile)
+					.append("/processing/multisubset?source=").append(sInputFile)
 					.append("&name=").append(sInputFile)
 					.append("&workspace=").append(getActiveWorkspace());
 
