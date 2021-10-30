@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
 import wasdi.shared.utils.Utils;
 
@@ -197,23 +200,16 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	
 	@Override
 	public void readConfig() {
-		try {
-			m_sDefaultProtocol = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL", "https://");
-		} catch (IOException e) {
-			m_oLogger.error("LSAProviderAdapter: Config reader is null");
-		}
 		
 		try {
-			m_sProviderBasePath = ConfigReader.getPropValue("LSA_BASE_PATH", "/mount/lucollgs/data_192/");
-		} catch (IOException e) {
-			m_oLogger.error("LSAProviderAdapter: Config reader is null");
+			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("LSA");
+			m_sDefaultProtocol = oConfig.defaultProtocol; 
+			m_sProviderBasePath = oConfig.base_path;
+			m_sProviderUrlDomain = oConfig.urldomain;
+			
+		} catch (Exception e) {
+			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
 		}		
-
-		try {
-			m_sProviderUrlDomain = ConfigReader.getPropValue("LSA_URL_DOMAIN", "https://collgs.lu/repository/");
-		} catch (IOException e) {
-			m_oLogger.error("LSAProviderAdapter: Config reader is null");
-		}
 	}
 
 	

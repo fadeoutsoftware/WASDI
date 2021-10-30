@@ -8,6 +8,7 @@ import wasdi.asynch.SaveMetadataThread;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
@@ -95,7 +96,7 @@ public class Readmetadata extends Operation {
         try {
 
             // Get Metadata Path a Random File Name
-            String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
+            String sMetadataPath = WasdiConfig.s_oConfig.paths.METADATA_PATH;
             if (!sMetadataPath.endsWith("/"))
                 sMetadataPath += "/";
             String sMetadataFileName = Utils.GetRandomName();
@@ -109,9 +110,6 @@ public class Readmetadata extends Operation {
 
             return sMetadataFileName;
 
-        } catch (IOException e) {
-            m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
-            e.printStackTrace();
         } catch (Exception e) {
             m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
             e.printStackTrace();

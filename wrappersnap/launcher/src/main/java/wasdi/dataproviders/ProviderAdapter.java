@@ -29,6 +29,8 @@ import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
@@ -185,9 +187,20 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			}
 
 			String sReturnFilePath = "";
-
-			String sUser = ConfigReader.getPropValue("DHUS_USER");
-			String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+			
+	        String sUser = "";
+	        String sPassword = "";
+	        
+	        // TODO: Still needed? Really?
+			try {
+				DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("DHUS");
+				
+				sUser = oConfig.OSUser;
+				sPassword = oConfig.OSPwd;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 
 			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
 			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
@@ -211,8 +224,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
 
-			String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
-			String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
+			String sConnectionTimeout = WasdiConfig.s_oConfig.CONNECTION_TIMEOUT;
+			String sReadTimeOut = WasdiConfig.s_oConfig.READ_TIMEOUT;
 
 			int iConnectionTimeOut = 10000;
 			int iReadTimeOut = 10000;
@@ -543,10 +556,14 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         
         String sUser = "";
         String sPassword = "";
+        
+        // TODO: Still needed? Really?
 		try {
-			sUser = ConfigReader.getPropValue("DHUS_USER");
-			sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
-		} catch (IOException e) {
+			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("DHUS");
+			
+			sUser = oConfig.OSUser;
+			sPassword = oConfig.OSPwd;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
         

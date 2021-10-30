@@ -30,7 +30,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
@@ -665,16 +668,11 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public void readConfig() {
 		
 		try {
-			m_sDefaultProtocol = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL", "https://");
-		} catch (IOException e) {
+			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("CREODIAS");
+			m_sDefaultProtocol = oConfig.defaultProtocol; 
+			m_sProviderBasePath = oConfig.base_path;
+		} catch (Exception e) {
 			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
 		}
-		
-		try {
-			m_sProviderBasePath = ConfigReader.getPropValue("CREODIAS_BASE_PATH", "/eodata/");
-		} catch (IOException e) {
-			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
-		}
-		
 	}
 }

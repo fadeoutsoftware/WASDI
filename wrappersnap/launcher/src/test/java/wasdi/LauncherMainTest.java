@@ -442,16 +442,12 @@ public abstract class LauncherMainTest {
 		try {
 			if(null!=sProvider) {
 				AuthenticationCredentials oCredentials = getCredentials(sProvider);
-				String sDownloadProtocol = ConfigReader.getPropValue(sProvider+".downloadProtocol");
-				String sGetMetadata = ConfigReader.getPropValue("getProductMetadata");
 	
 				String sParserConfigPath = ConfigReader.getPropValue(sProvider+".parserConfig");
 				String sAppConfigPath = ConfigReader.getPropValue("MissionsConfigFilePath");
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
 						oCredentials,
-						//TODO change into config method
-						sDownloadProtocol, sGetMetadata,
 						sParserConfigPath, sAppConfigPath);
 				
 				oExecutor.init();

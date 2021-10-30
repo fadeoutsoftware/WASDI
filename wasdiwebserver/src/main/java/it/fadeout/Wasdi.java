@@ -197,9 +197,6 @@ public class Wasdi extends ResourceConfig {
 		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", null);
 		s_sClientId = getInitParameter("keycloak_confidentialClient", null);
 		s_sClientSecret = getInitParameter("keycloak_clientSecret", null);
-		s_KeyCloakUser = getInitParameter("keycloak_admin", null);
-		s_KeyCloakPw = getInitParameter("keycloak_pw", null); // keycloak_brrrSecret
-		s_KeyBearerSecret = getInitParameter("keycloak_brrrSecret", null); //
 		
 		// Computational nodes need to configure also the local dababase
 		try {

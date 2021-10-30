@@ -65,10 +65,8 @@ public class QueryExecutorFactory {
 		return oExecutor;	
 	}
 
-	public QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials,
-			String sDownloadProtocol, String sGetMetadata, String sParserConfigPath, String sAppConfigPath) {
+	public QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials, String sParserConfigPath, String sAppConfigPath) {
 		
-		//Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + ", <credentials>, " + sDownloadProtocol + ", " + sGetMetadata + " )...");
 		QueryExecutor oExecutor = null;
 
 		try {

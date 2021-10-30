@@ -1,8 +1,10 @@
 package wasdi.operations;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 
@@ -40,9 +42,9 @@ public class Deleteprocessor extends Operation {
 	        // Delete User Processor
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
-	                ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-	                ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
-	                ConfigReader.getPropValue("TOMCAT_USER", "tomcat8"));
+	        		WasdiConfig.s_oConfig.paths.DownloadRootPath,
+	        		WasdiConfig.s_oConfig.paths.DOCKER_TEMPLATE_PATH,
+	        		WasdiConfig.s_oConfig.TOMCAT_USER);
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);

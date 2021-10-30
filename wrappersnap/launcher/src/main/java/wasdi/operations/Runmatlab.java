@@ -5,9 +5,10 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 
@@ -32,13 +33,13 @@ public class Runmatlab extends Operation {
         	
         	MATLABProcParameters oParameter = (MATLABProcParameters) oParam; 
         	
-            String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+            String sBasePath = WasdiConfig.s_oConfig.paths.DownloadRootPath;
 
             if (!sBasePath.endsWith("/")) sBasePath += "/";
 
             String sRunPath = sBasePath + "processors/" + oParameter.getProcessorName() + "/run_" + oParameter.getProcessorName() + ".sh";
 
-            String sMatlabRunTimePath = ConfigReader.getPropValue("MATLAB_RUNTIME_PATH", "/usr/local/MATLAB/MATLAB_Runtime/v95");
+            String sMatlabRunTimePath = WasdiConfig.s_oConfig.paths.MATLAB_RUNTIME_PATH;
             String sConfigFilePath = sBasePath + "processors/" + oParameter.getProcessorName() + "/config.properties";
 
             String asCmd[] = new String[]{sRunPath, sMatlabRunTimePath, sConfigFilePath};

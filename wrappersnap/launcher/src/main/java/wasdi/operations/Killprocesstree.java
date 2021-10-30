@@ -13,9 +13,11 @@ import java.util.List;
 import com.google.common.base.Preconditions;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -151,7 +153,7 @@ public class Killprocesstree extends Operation {
 
             if (iPid > 0) {
                 // Pid exists, kill the process
-                String sShellExString = ConfigReader.getPropValue("KillCommand");
+                String sShellExString = WasdiConfig.s_oConfig.scheduler.KillCommand;
                 if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
                 sShellExString += " " + iPid;
 

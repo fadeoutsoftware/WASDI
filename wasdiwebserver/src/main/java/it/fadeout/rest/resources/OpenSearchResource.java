@@ -632,8 +632,6 @@ public class OpenSearchResource {
 		try {
 			if(null!=sProvider) {
 				AuthenticationCredentials oCredentials = getCredentials(sProvider);
-				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
-				String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
 	
 				String sParserConfigPath = m_oServletConfig.getInitParameter(sProvider+".parserConfig");
 				String sAppConfigPath = m_oServletConfig.getInitParameter("MissionsConfigFilePath");
@@ -641,7 +639,6 @@ public class OpenSearchResource {
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
 						oCredentials,
-						sDownloadProtocol, sGetMetadata,
 						sParserConfigPath, sAppConfigPath);
 				
 				oExecutor.init();
