@@ -356,24 +356,10 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			final String sFinalPassword = m_sProviderPassword;
 
 			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
-
-			String sConnectionTimeout = WasdiConfig.Current.connectionTimeout;
-			String sReadTimeOut = WasdiConfig.Current.readTimeout;
-
-			int iConnectionTimeOut = 10000;
-			int iReadTimeOut = 10000;
-
-			try {
-				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
-			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			}
-			try {
-				iReadTimeOut = Integer.parseInt(sReadTimeOut);
-			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			}
-
+			
+			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
+			int iReadTimeOut = WasdiConfig.Current.readTimeout;
+			
 			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: Connection Created");

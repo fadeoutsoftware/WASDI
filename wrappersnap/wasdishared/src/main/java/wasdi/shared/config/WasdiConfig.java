@@ -49,12 +49,12 @@ public class WasdiConfig {
 	/**
 	 * Connection timeout when we call a third party API
 	 */
-	public String connectionTimeout = "10000";
+	public int connectionTimeout = 10000;
 	
 	/**
 	 * Read timout when we call a third party API
 	 */
-	public String readTimeout = "10000";
+	public int readTimeout = 10000;
 	
 	/**
 	 * Mongo db Configuration

@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the GRAPH Operation
  * 
@@ -7,14 +9,26 @@ package wasdi.shared.payloads;
  *
  */
 public class ExecuteGraphPayload extends OperationPayload {
-	public ExecuteGraphPayload() {
-		operation = "GRAPH";
-	}
 	
+	/**
+	 * Name of the workflow
+	 */
 	private String workflowName;
+	
+	/**
+	 * List of input files
+	 */
 	private String [] inputFiles;
+	
+	/**
+	 * Name of ouptut files
+	 */
 	private String [] outputFiles;
 	
+	public ExecuteGraphPayload() {
+		operation = LauncherOperations.GRAPH.name();
+	}
+		
 	public String getWorkflowName() {
 		return workflowName;
 	}

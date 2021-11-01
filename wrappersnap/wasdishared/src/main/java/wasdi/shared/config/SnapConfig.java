@@ -13,11 +13,11 @@ public class SnapConfig {
 	/**
 	 * Flag to activate snap logs in the launcher
 	 */
-	public String launcherLogActive = "1";
+	public boolean launcherLogActive = true;
 	/**
 	 * Flag to activate snap logs in the web server
 	 */
-	public String webLogActive = "1";
+	public boolean webLogActive = true;
 	/**
 	 * Snap Launcher log file
 	 */

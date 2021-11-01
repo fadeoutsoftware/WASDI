@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the Delete Processor Operation
  * 
@@ -8,11 +10,18 @@ package wasdi.shared.payloads;
  */
 public class DeleteProcessorPayload extends OperationPayload {
 	
+	/**
+	 * Name of the processor
+	 */
 	String processorName;
+	
+	/**
+	 * Processor Id
+	 */
 	String processorId;
 	
 	public DeleteProcessorPayload() {
-		this.operation = "DELETEPROCESSOR";
+		this.operation = LauncherOperations.DELETEPROCESSOR.name();
 	}	
 	
 	public String getProcessorName() {

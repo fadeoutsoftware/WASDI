@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the download operation
  * 
@@ -8,12 +10,19 @@ package wasdi.shared.payloads;
  */
 public class DownloadPayload extends OperationPayload {
 	
-	public DownloadPayload() {
-		operation = "DOWNLOAD";
-	}
-	
+	/**
+	 * Name of the Data Provider
+	 */
 	private String provider;
+	
+	/**
+	 * File Name
+	 */
 	private String fileName;
+	
+	public DownloadPayload() {
+		operation = LauncherOperations.DOWNLOAD.name();
+	}
 	
 	public String getProvider() {
 		return provider;

@@ -213,7 +213,7 @@ public abstract class QueryExecutor {
 	}
 	
 	protected String standardHttpGETQuery(String sUrl) {
-		Utils.debugLog("QueryExecutor.standardHttpGETQuery( " + sUrl + " )");
+		Utils.debugLog("QueryExecutor.standardHttpGETQuery start");
 		String sResult = null;
 		long lStart = 0l;
 		int iResponseSize = -1;

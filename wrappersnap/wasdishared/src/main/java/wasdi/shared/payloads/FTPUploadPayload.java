@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the FTP Upload Operation
  * 
@@ -8,15 +10,31 @@ package wasdi.shared.payloads;
  */
 public class FTPUploadPayload extends OperationPayload {
 	
-	public FTPUploadPayload() {
-		operation = "FTPUPLOAD";
-	}
-	
+	/**
+	 * Name of uploaded file
+	 */
 	private String file;
+	
+	/**
+	 * Ftp server address
+	 */
 	private String server;
+	
+	/**
+	 * Remote path used
+	 */
 	private String remotePath;
+	
+	/**
+	 * Ftp server port
+	 */
 	private int port;
 	
+	
+	public FTPUploadPayload() {
+		operation = LauncherOperations.FTPUPLOAD.name();
+	}
+		
 	public int getPort() {
 		return port;
 	}

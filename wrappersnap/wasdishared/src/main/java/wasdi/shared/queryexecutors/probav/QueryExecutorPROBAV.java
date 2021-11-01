@@ -46,13 +46,8 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
  *
  */
 public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
-	
-	static {
-		s_sClassName = "QueryExecutorPROBAV";
-	}
 
 	public QueryExecutorPROBAV(){
-		Utils.debugLog("QueryExecutorPROBAV");
 		m_sProvider = "PROBAV";
 		m_oQueryTranslator = new QueryTranslatorProbaV();
 		
@@ -61,14 +56,11 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 	@Override
 	protected String[] getUrlPath() {
-		Utils.debugLog("QueryExecutorPROBAV.getUrlPath");
 		return new String[] {"openSearch/findProducts"};
 	}
 
 	@Override
 	protected Template getTemplate() {
-		Utils.debugLog("QueryExecutorPROBAV.getTemplate");
-		
 		// Sample
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return new Template("{scheme}://{-append|.|host}www.vito-eodata.be{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
@@ -76,7 +68,6 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		Utils.debugLog("QueryExecutorPROBAV.getCountUrl");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return "http://www.vito-eodata.be/openSearch/count?filter=" + sQuery;
 	}

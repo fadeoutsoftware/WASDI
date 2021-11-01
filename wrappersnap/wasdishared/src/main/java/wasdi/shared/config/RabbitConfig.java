@@ -25,7 +25,7 @@ public class RabbitConfig {
 	/**
 	 * Rabbit Port
 	 */
-	public String port;
+	public int port;
 	
 	/**
 	 * Rabbit Exchange

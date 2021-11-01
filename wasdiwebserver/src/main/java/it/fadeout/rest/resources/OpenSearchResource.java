@@ -43,7 +43,7 @@ public class OpenSearchResource {
 	/**
 	 * Static reference to this class name for logs
 	 */
-	private static String s_sClassName;
+	private String m_sClassName;
 	
 	/**
 	 * Credentials of the different providers
@@ -53,14 +53,15 @@ public class OpenSearchResource {
 	static {
 		// Create instance of the factory
 		s_oQueryExecutorFactory = new QueryExecutorFactory();
-		// Set this class name
-		s_sClassName = "OpenSearchResource";
+
 	}
 	
 	/**
 	 * Constructor
 	 */
 	public OpenSearchResource() {
+		// Set this class name
+		m_sClassName = "OpenSearchResource";		
 		// Intialize the credentials dictionary
 		m_aoCredentials = new HashMap<>();
 	}
@@ -77,40 +78,43 @@ public class OpenSearchResource {
 	@Produces({ "application/xml", "application/json", "text/html" })
 	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("query") String sQuery,
 			@QueryParam("providers") String sProviders) {
-
-		Utils.debugLog(s_sClassName + ".getProductsCount( Query: " + sQuery + ", Providers: " + sProviders + " )");
+		
 		try {
 			
 			// Check the session
-			if (Utils.isNullOrEmpty(sSessionId)) {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+			
+			if (oUser == null) {
+				Utils.debugLog(m_sClassName + ".getProductsCount: invalid session");
 				return -1;
 			}
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".getProductsCount: invalid session");
-				return -1;
+			
+			// Check the Data Provider
+			if (Utils.isNullOrEmpty(sProviders)) {
+				Utils.debugLog(m_sClassName + ".getProductsCount: providers null or empty");
+				return -1;				
 			}
 	
 			int iCounter = 0;
 			
-			if (sProviders != null) {
-				Utils.debugLog(s_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
-				try {
-					Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
-					
-					if (aiQueryCountResultsPerProvider != null) {
-						for (Integer iTotalCount : aiQueryCountResultsPerProvider.values()) {
-							iCounter += iTotalCount;
-						}						
-					}
-				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
-					return -1;
+			Utils.debugLog(m_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
+			
+			try {
+				Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
+				
+				if (aiQueryCountResultsPerProvider != null) {
+					for (Integer iTotalCount : aiQueryCountResultsPerProvider.values()) {
+						iCounter += iTotalCount;
+					}						
 				}
+			} catch (NumberFormatException oE) {
+				Utils.debugLog(m_sClassName + ".getProductsCount: " + oE);
+				return -1;
 			}
+
 			return iCounter;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
+			Utils.debugLog(m_sClassName + ".getProductsCount: " + oE);
 		}
 		return -1;
 	}
@@ -123,7 +127,7 @@ public class OpenSearchResource {
 	 */
 	private Map<String, Integer> getQueryCountResultsPerProvider(String sQuery, String sProviders) {
 
-		Utils.debugLog(s_sClassName + ".getQueryCounters for Provider: " + sProviders + " )");
+		Utils.debugLog(m_sClassName + ".getQueryCounters for: " + sProviders);
 		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<>();
 		try {
 			String asProviders[] = sProviders.split(",|;");
@@ -133,31 +137,22 @@ public class OpenSearchResource {
 					QueryExecutor oExecutor = getExecutor(sProvider);
 					
 					if (oExecutor == null) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: Query Executor = null ");
+						Utils.debugLog(m_sClassName + ".getQueryCountResultsPerProvider: Query Executor = null ");
 						aiQueryCountResultsPerProvider.put(sProvider, -1);
 						continue;
 					}
 					
-					try {
-						iProviderCountResults = oExecutor.executeCount(sQuery);
-					} 
-					catch (NumberFormatException oNumberFormatException) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NumberFormatException: " + oNumberFormatException);
-						iProviderCountResults = -1;
-					} 
-					catch (NullPointerException oNp) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NullPointerException: " +oNp);
-						iProviderCountResults = -1;
-					}
+					iProviderCountResults = oExecutor.executeCount(sQuery);
+					
 				} catch (Exception oE) {
-					Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+					Utils.debugLog(m_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 					iProviderCountResults = -1;
 				}
 				aiQueryCountResultsPerProvider.put(sProvider, iProviderCountResults);
 			}
 			return aiQueryCountResultsPerProvider;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+			Utils.debugLog(m_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 		}
 		return aiQueryCountResultsPerProvider;
 	}
@@ -187,13 +182,13 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		
-		Utils.debugLog(s_sClassName + ".search( Providers: " + sProviders + ", Query: " +
+		Utils.debugLog(m_sClassName + ".search( Providers: " + sProviders + ", Query: " +
 				sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
 		
 		// Domain Check
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog(s_sClassName + ".search: invalid session");
+			Utils.debugLog(m_sClassName + ".search: invalid session");
 			return null;
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -229,7 +224,7 @@ public class OpenSearchResource {
 				iLimit = Integer.parseInt(sLimit);
 			} 
 			catch (NumberFormatException oE1) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
+				Utils.debugLog(m_sClassName + ".search: caught NumberFormatException: " + oE1);
 				return null;
 			}
 			
@@ -244,7 +239,7 @@ public class OpenSearchResource {
 				iOffset = Integer.parseInt(sOffset);
 			} 
 			catch (NumberFormatException oE2) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
+				Utils.debugLog(m_sClassName + ".search: caught NumberFormatException: " + oE2);
 				return null;
 			}
 			
@@ -259,7 +254,7 @@ public class OpenSearchResource {
 					aiCounterMap.put(sProvider, iProviderCountResults);
 				}
 			} catch (Exception oE) {
-				Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+				Utils.debugLog(m_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 			}
 			
 			// For each provider
@@ -274,14 +269,14 @@ public class OpenSearchResource {
 				String sCurrentOffset = "" + iCurrentOffset;
 				
 				
-				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
+				Utils.debugLog(m_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
 				
 				try {
 					// Get the query executor
 					QueryExecutor oExecutor = getExecutor(sProvider);
 					
 					if (oExecutor == null) {
-						Utils.debugLog(s_sClassName + ".search: executor null for Provider: " + sProvider);
+						Utils.debugLog(m_sClassName + ".search: executor null for Provider: " + sProvider);
 						aoResults.add(null);
 						continue;
 					}
@@ -296,20 +291,20 @@ public class OpenSearchResource {
 						if (aoTmp != null && !aoTmp.isEmpty()) {
 							// Yes perfect add all
 							aoResults.addAll(aoTmp);
-							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
+							Utils.debugLog(m_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
 						} 
 						else {
 							// Nothing to add
-							Utils.debugLog(s_sClassName + ".search: no results found for " + sProvider);
+							Utils.debugLog(m_sClassName + ".search: no results found for " + sProvider);
 						}
 					} 
 					catch (NumberFormatException oNumberFormatException) {
-						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
+						Utils.debugLog(m_sClassName + ".search: " + oNumberFormatException);
 						aoResults.add(null);
 					} 					
 				}
 				catch (Exception oE) {
-					Utils.debugLog(s_sClassName + ".search: " + oE);
+					Utils.debugLog(m_sClassName + ".search: " + oE);
 					aoResults.add(null);
 				}
 			}
@@ -327,14 +322,14 @@ public class OpenSearchResource {
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
 	public ArrayList<DataProviderViewModel> getDataProviders(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog(s_sClassName + ".getSearchProviders");
+		Utils.debugLog(m_sClassName + ".getSearchProviders");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return null;
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".getSearchProviders: invalid session");
+				Utils.debugLog(m_sClassName + ".getSearchProviders: invalid session");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -359,7 +354,7 @@ public class OpenSearchResource {
 			
 			return aoRetProviders;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getSearchProviders: " + oE);
+			Utils.debugLog(m_sClassName + ".getSearchProviders: " + oE);
 			return null;
 		}
 	}
@@ -380,20 +375,20 @@ public class OpenSearchResource {
 		
 		String sQuery = "";
 
-		Utils.debugLog(s_sClassName + ".GetListProductsCount( Providers: " + sProviders + ", Queries: " + asQueries + " )");
+		Utils.debugLog(m_sClassName + ".GetListProductsCount( Providers: " + sProviders + ", Queries: " + asQueries + " )");
 		try {
 			
 			// Validate the input
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: invalid");
+				Utils.debugLog(m_sClassName + ".GetListProductsCount, session: invalid");
 				return -1;
 			}
 			
 			// We need query!
 			if(null==asQueries || asQueries.size() <= 0) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, asQueries is null");
+				Utils.debugLog(m_sClassName + ".GetListProductsCount, asQueries is null");
 				return -1;
 			}
 			
@@ -413,13 +408,13 @@ public class OpenSearchResource {
 						}
 					}
 				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: " + sQuery + " ?): " + oE);
+					Utils.debugLog(m_sClassName + ".getListProductsCount (maybe your request was ill-formatted: " + sQuery + " ?): " + oE);
 					return -1;
 				}
 			}
 			return iCounter;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
+			Utils.debugLog(m_sClassName + ".getListProductsCount (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
 		}
 		return -1;
 	}
@@ -443,29 +438,29 @@ public class OpenSearchResource {
 	public QueryResultViewModel[] searchList(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("providers") String sProviders, ArrayList<String> asQueries) {
 
-		Utils.debugLog(s_sClassName + ".SearchList( Providers: " + sProviders + " )");
+		Utils.debugLog(m_sClassName + ".SearchList( Providers: " + sProviders + " )");
 		try { 
 			
 			// Validate the User
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".SearchList, session is invalid");
+				Utils.debugLog(m_sClassName + ".SearchList, session is invalid");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".SearchList, null userId");
+				Utils.debugLog(m_sClassName + ".SearchList, null userId");
 				return null;
 			}
 			
 			// Check if we have a provider
 			if(Utils.isNullOrEmpty(sProviders)) {
-				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", sProviders is null");
+				Utils.debugLog(m_sClassName + ".SearchList, user: "+oUser.getUserId()+", sProviders is null");
 				return null;
 			}
 			
 			// Check if we have at least one query
 			if(null==asQueries || asQueries.size()<= 0) {
-				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
+				Utils.debugLog(m_sClassName + ".SearchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
 				return null;
 			}
 	
@@ -477,13 +472,13 @@ public class OpenSearchResource {
 				try {
 					String sQuery = asQueries.get(iQueries);
 					
-					Utils.debugLog(s_sClassName + ".SearchList; query = " + sQuery);
+					Utils.debugLog(m_sClassName + ".SearchList; query = " + sQuery);
 					
 					// Get for each provider the total count
 					Map<String, Integer> aoCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 					
 					if (aoCounterMap == null) {
-						Utils.debugLog(s_sClassName + ".SearchList aoCounterMap null ");
+						Utils.debugLog(m_sClassName + ".SearchList aoCounterMap null ");
 						aoResults.add(null);
 						continue;
 					}
@@ -523,7 +518,7 @@ public class OpenSearchResource {
 						QueryExecutor oExecutor = getExecutor(sProvider);
 						
 						if (oExecutor == null) {
-							Utils.debugLog(s_sClassName + ".SearchList: Executor Null for Provider: " + sProvider);
+							Utils.debugLog(m_sClassName + ".SearchList: Executor Null for Provider: " + sProvider);
 							continue;
 						}
 						
@@ -531,7 +526,7 @@ public class OpenSearchResource {
 						float fMaxPages = iTotalResultsForProviders / (float)iLimit;
 						int iMaxPages = (int) Math.ceil(fMaxPages);
 						iMaxPages *= 2;
-						Utils.debugLog(s_sClassName + ".SearchList: Augmentented Max Pages: " + iMaxPages + " Total Results: " + iTotalResultsForProviders + " Limit " + iLimit);
+						Utils.debugLog(m_sClassName + ".SearchList: Augmentented Max Pages: " + iMaxPages + " Total Results: " + iTotalResultsForProviders + " Limit " + iLimit);
 						
 						
 						int iActualPage = 0;
@@ -540,7 +535,7 @@ public class OpenSearchResource {
 						while (iObtainedResults < iTotalResultsForProviders) {
 							
 							if (iActualPage>iMaxPages) {
-								Utils.debugLog(s_sClassName + ".SearchList: cycle running out of control, actual page " + iActualPage + " , Max " + iMaxPages + " break");
+								Utils.debugLog(m_sClassName + ".SearchList: cycle running out of control, actual page " + iActualPage + " , Max " + iMaxPages + " break");
 								break;
 							}
 							
@@ -559,7 +554,7 @@ public class OpenSearchResource {
 							// Create the paginated Query
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, null, null, sOriginalLimit);
 							// Log the query
-							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
+							Utils.debugLog(m_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							
 							try {
 								// Execute the query
@@ -583,29 +578,29 @@ public class OpenSearchResource {
 											iAddedResults++;
 										}
 										else {
-											Utils.debugLog(s_sClassName + ".SearchList: found duplicate image " + oTempResult.getTitle());
+											Utils.debugLog(m_sClassName + ".SearchList: found duplicate image " + oTempResult.getTitle());
 										}
 									}
 									
-									Utils.debugLog(s_sClassName + ".SearchList added " + iAddedResults + " results for Query#" + iQueries +" for " + sProvider);
+									Utils.debugLog(m_sClassName + ".SearchList added " + iAddedResults + " results for Query#" + iQueries +" for " + sProvider);
 								} else {
-									Utils.debugLog(s_sClassName + ".SearchList, NO results found for " + sProvider);
+									Utils.debugLog(m_sClassName + ".SearchList, NO results found for " + sProvider);
 								}
 							} catch (Exception oEx) {
-								Utils.debugLog(s_sClassName + ".SearchList: " + oEx);
+								Utils.debugLog(m_sClassName + ".SearchList: " + oEx);
 							}
 							
 							iActualPage ++;
 						}
 					}
 				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
+					Utils.debugLog(m_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
 					aoResults.add(null); 
 				}
 			}
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".SearchList: " + oE);
+			Utils.debugLog(m_sClassName + ".SearchList: " + oE);
 		}
 		return null;
 	}
@@ -616,7 +611,7 @@ public class OpenSearchResource {
 	 * @return QueryExecutor of the specific provider
 	 */
 	private QueryExecutor getExecutor(String sProvider) {
-		Utils.debugLog(s_sClassName + ".getExecutor, provider: " + sProvider);
+		Utils.debugLog(m_sClassName + ".getExecutor, provider: " + sProvider);
 		QueryExecutor oExecutor = null;
 		try {
 			if(null!=sProvider) {
@@ -635,7 +630,7 @@ public class OpenSearchResource {
 				oExecutor.init();
 			}
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
+			Utils.debugLog(m_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
 		}
 		return oExecutor;
 
@@ -660,7 +655,7 @@ public class OpenSearchResource {
 				m_aoCredentials.put(sProvider, oCredentials);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
+			Utils.debugLog(m_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
 		}
 		return oCredentials;
 	}

@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the Deploy Processor Operation
  * 
@@ -8,11 +10,18 @@ package wasdi.shared.payloads;
  */
 public class DeployProcessorPayload extends OperationPayload {
 	
+	/**
+	 * Processor Name
+	 */
 	private String processorName;
+	
+	/**
+	 * Processor Type
+	 */
 	private String type;
 	
 	public DeployProcessorPayload() {
-		this.operation = "DEPLOYPROCESSOR";
+		this.operation = LauncherOperations.DEPLOYPROCESSOR.name();
 	}	
 	
 	public String getProcessorName() {

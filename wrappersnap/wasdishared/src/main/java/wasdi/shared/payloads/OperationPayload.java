@@ -15,6 +15,10 @@ package wasdi.shared.payloads;
  *
  */
 public class OperationPayload {
+	
+	/**
+	 * LauncherOperation Code
+	 */
 	protected String operation;
 	
 	public String getOperation() {

@@ -357,11 +357,8 @@ public class LauncherMain  {
             // Init Snap
             SystemUtils.init3rdPartyLibs(null);
             Engine.start(false);
-
-            // Snap Log: is activated or not?
-            String sSnapLogActive = WasdiConfig.Current.snap.launcherLogActive;
             
-            if (Utils.doesThisStringMeansTrue(sSnapLogActive)) {
+            if (WasdiConfig.Current.snap.launcherLogActive) {
 
                 String sSnapLogLevel = WasdiConfig.Current.snap.launcherLogLevel;
                 String sSnapLogFile = WasdiConfig.Current.snap.launcherLogFile;

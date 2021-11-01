@@ -1,19 +1,33 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Publish band operation payload
  * @author p.campanella
  *
  */
 public class PublishBandPayload extends OperationPayload {
-	public PublishBandPayload() {
-		operation = "PUBLISHBAND";
-	}
 	
+	/**
+	 * Name of the product
+	 */
 	private String product;
+	
+	/**
+	 * Band published
+	 */
 	private String band;
+	
+	/**
+	 * Geoserver Layer ID
+	 */
 	private String layerId;
 	
+	public PublishBandPayload() {
+		operation = LauncherOperations.PUBLISHBAND.name();
+	}
+		
 	public String getProduct() {
 		return product;
 	}

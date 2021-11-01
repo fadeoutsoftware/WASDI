@@ -31,14 +31,8 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
  *
  */
 public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
-
-	
-	static {
-		s_sClassName = "QueryExecutorSENTINEL";
-	}
 	
 	public QueryExecutorSENTINEL() {
-		Utils.debugLog(s_sClassName);
 		m_sProvider = "SENTINEL";
 		m_oQueryTranslator = new QueryTranslatorSentinelHub();
 		
@@ -79,7 +73,7 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 			}
 			
 			
-			Utils.debugLog(s_sClassName + ".executeCount ( " + sQuery + " )");
+			Utils.debugLog("QueryExecutorSENTINEL.executeCount ( " + sQuery + " )");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 			String sUrl = getSearchUrl(oQuery);
 			//create abdera client
@@ -110,13 +104,14 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 				oOptions.setAuthorization(sBasicAuth);			
 			}
+			
 			Document<Feed> oDocument = null;
 			String sResultAsString = null;
 			
 			sResultAsString = standardHttpGETQuery(sUrl);
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
-				Utils.debugLog(s_sClassName + ".executeCount: Document response null, aborting");
+				Utils.debugLog("QueryExecutorSENTINEL.executeCount: Document response null, aborting");
 				return -1;
 			}
 			
@@ -131,7 +126,7 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 					
 			return Integer.parseInt(sText);
 		} catch (NullPointerException oE) {
-			Utils.debugLog(s_sClassName + "executeCount: " + oE);
+			Utils.debugLog("QueryExecutorSENTINEL.executeCount: " + oE);
 		}
 		return -1;
 	}

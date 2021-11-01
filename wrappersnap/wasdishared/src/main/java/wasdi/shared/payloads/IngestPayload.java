@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the Ingest Operation
  * 
@@ -7,13 +9,21 @@ package wasdi.shared.payloads;
  *
  */
 public class IngestPayload extends OperationPayload {
-	public IngestPayload() {
-		operation = "INGEST";
-	}
 	
+	/**
+	 * Name of ingested file 
+	 */
 	private String file;
+	
+	/**
+	 * Destination Workspace
+	 */
 	private String workspace;
 	
+	public IngestPayload() {
+		operation = LauncherOperations.INGEST.name();
+	}
+		
 	public String getFile() {
 		return file;
 	}

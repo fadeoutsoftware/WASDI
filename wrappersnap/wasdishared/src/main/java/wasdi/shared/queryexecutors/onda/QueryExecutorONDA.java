@@ -30,13 +30,8 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
  *
  */
 public class QueryExecutorONDA extends QueryExecutorOpenSearch {
-
-	static {
-		s_sClassName = "QueryExecutorONDA";
-	}
 	
 	public QueryExecutorONDA() {
-		Utils.debugLog(s_sClassName);
 		m_sProvider="ONDA";
 		this.m_oQueryTranslator = new QueryTranslatorONDA();
 		this.m_oResponseTranslator = new ResponseTranslatorONDA();
@@ -72,9 +67,8 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 	 */
 	@Override
 	protected String getCountUrl(String sQuery) {
-		//Utils.debugLog(s_sClassName + "getCountUrl");
 		if(Utils.isNullOrEmpty(sQuery)) {
-			Utils.debugLog(s_sClassName + ".getCountUrl: sQuery is null");
+			Utils.debugLog("QueryExecutorONDA.getCountUrl: sQuery is null");
 		}
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncodeParams(sQuery);
@@ -84,9 +78,8 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 
 	@Override
 	protected String getSearchUrl(PaginatedQuery oQuery){
-		//Utils.debugLog(s_sClassName + ".BuildUrl( " + oQuery + " )");
 		if(null==oQuery) {
-			Utils.debugLog(s_sClassName + ".buildUrl: oQuery is null");
+			Utils.debugLog("QueryExecutorONDA.getSearchUrl: oQuery is null");
 		}
 		String sUrl = buildUrlPrefix(oQuery);		
 
@@ -100,9 +93,8 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 
 	@Override
 	protected String getSearchListUrl(PaginatedQuery oQuery) {
-		//Utils.debugLog(s_sClassName + ".buildUrlForList( " + oQuery + " )");
 		if(null==oQuery) {
-			Utils.debugLog(s_sClassName + ".buildUrlForList: oQuery is null");
+			Utils.debugLog("QueryExecutorONDA.getSearchListUrl: oQuery is null");
 		}
 		String sUrl = buildUrlPrefix(oQuery);
 
@@ -113,9 +105,8 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 	}
 
 	private String buildUrlPrefix(PaginatedQuery oQuery) {
-		//Utils.debugLog(s_sClassName + ".BuildBaseUrl( " + oQuery + " )");
 		if(null==oQuery) {
-			throw new NullPointerException(s_sClassName + ".buildBaseUrl: oQuery is null");
+			throw new NullPointerException("QueryExecutorONDA.buildUrlPrefix: oQuery is null");
 		}
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncodeParams(oQuery.getQuery()) + "%22";
@@ -123,7 +114,6 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 	}
 
 	protected String buildUrlSuffix(PaginatedQuery oQuery, String sInUrl) {
-		//Utils.debugLog(s_sClassName + ".BuildUrlSuffix( " + oQuery + ", " + sInUrl + " )");
 		String sUrl = sInUrl;
 		sUrl+="&$top=" + oQuery.getLimit() + "&$skip="+ oQuery.getOffset();
 
@@ -187,30 +177,30 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 			if(!Utils.isNullOrEmpty(sResult)) {
 				aoResult = buildResultViewModel(sResult, bFullViewModel);
 				if(null==aoResult) {
-					throw new NullPointerException(s_sClassName + ".executeAndRetrieve: aoResult is null"); 
+					throw new NullPointerException("QueryExecutorONDA.executeAndRetrieve: aoResult is null"); 
 				}
 			} else {
-				Utils.debugLog(s_sClassName + ".executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
+				Utils.debugLog("QueryExecutorONDA.executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
 			}
 			return aoResult;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".executeAndRetrieve(2 args, with sUrl=" + sUrl + "): " + oE);
+			Utils.debugLog("QueryExecutorONDA.executeAndRetrieve(2 args, with sUrl=" + sUrl + "): " + oE);
 		}
 		return null;
 	}
 	
 	@Override
 	protected List<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
-		Utils.debugLog(s_sClassName + ".buildResultViewModel( sJson, " + bFullViewModel + " )");
+		Utils.debugLog("QueryExecutorONDA.buildResultViewModel( sJson, " + bFullViewModel + " )");
 		if(null==sJson ) {
-			Utils.debugLog(s_sClassName + ".buildResultLightViewModel: passed a null string");
-			throw new NullPointerException(s_sClassName + ".buildResultLightViewModel: passed a null string");
+			Utils.debugLog("QueryExecutorONDA.buildResultLightViewModel: passed a null string");
+			throw new NullPointerException("QueryExecutorONDA.buildResultLightViewModel: passed a null string");
 		}
 		
 		List<QueryResultViewModel> aoResult = m_oResponseTranslator.translateBatch(sJson, bFullViewModel);
 		
 		if(null == aoResult || aoResult.isEmpty()) {
-			Utils.debugLog(s_sClassName + ".buildResultViewModel: no results");
+			Utils.debugLog("QueryExecutorONDA.buildResultViewModel: no results");
 		}
 		return aoResult;
 	}

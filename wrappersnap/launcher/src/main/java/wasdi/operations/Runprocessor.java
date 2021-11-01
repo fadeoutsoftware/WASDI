@@ -2,7 +2,6 @@ package wasdi.operations;
 
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 

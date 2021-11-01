@@ -1,5 +1,7 @@
 package wasdi.shared.payloads;
 
+import wasdi.shared.LauncherOperations;
+
 /**
  * Payload of the Mosaic Operation
  * 
@@ -7,11 +9,19 @@ package wasdi.shared.payloads;
  *
  */
 public class MosaicPayload extends OperationPayload {
+	
+	/**
+	 * List of input files
+	 */
 	private String [] inputs;
+	
+	/**
+	 * Output file
+	 */
 	private String output;
 	
 	public MosaicPayload() {
-		this.operation="MOSAIC";
+		this.operation= LauncherOperations.MOSAIC.name();
 	}
 
 	public String[] getInputs() {

@@ -247,9 +247,7 @@ public class Wasdi extends ResourceConfig {
 			SystemUtils.init3rdPartyLibs(null);
 			SystemUtils.LOG.setLevel(Level.ALL);
 
-			String sSnapLogActive = WasdiConfig.Current.snap.webLogActive;
-
-			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
+			if (WasdiConfig.Current.snap.webLogActive) {
 				String sSnapLogFolder = WasdiConfig.Current.snap.webLogFile;
 
 				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
