@@ -25,7 +25,6 @@ import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.geotools.referencing.CRS;
 
 import wasdi.LauncherMain;
-import wasdi.geoserver.Publisher;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.io.WasdiProductWriter;
@@ -40,6 +39,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.geoserver.Publisher;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.payloads.PublishBandPayload;
@@ -199,7 +199,7 @@ public class Publishband extends Operation {
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
             // write the data directly to GeoServer Data Dir
-            String sGeoServerDataDir = WasdiConfig.s_oConfig.paths.GEOSERVER_DATADIR;
+            String sGeoServerDataDir = WasdiConfig.Current.paths.geoserverDataDir;
             String sTargetDir = sGeoServerDataDir;
 
             if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\"))) sTargetDir += "/";
@@ -280,13 +280,13 @@ public class Publishband extends Operation {
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
             // Ok publish
-            GeoServerManager oGeoServerManager = new GeoServerManager(WasdiConfig.s_oConfig.geoserver.GS_URL, WasdiConfig.s_oConfig.geoserver.GS_USER, WasdiConfig.s_oConfig.geoserver.GS_PASSWORD);
+            GeoServerManager oGeoServerManager = new GeoServerManager();
 
             // Do we have the style in this Geoserver?
             if (!oGeoServerManager.styleExists(sStyle)) {
 
                 // Not yet: obtain styles root path
-                String sStylePath = WasdiConfig.s_oConfig.paths.DownloadRootPath;
+                String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
                 if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
                 sStylePath += "styles" + File.separator;
 
@@ -320,7 +320,7 @@ public class Publishband extends Operation {
             Publisher oPublisher = new Publisher();
 
             try {
-                oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(WasdiConfig.s_oConfig.geoserver.MAX_GEOTIFF_DIMENSION_PYRAMID);
+                oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(WasdiConfig.Current.geoserver.maxGeotiffDimensionPyramid);
             } catch (Exception e) {
                 m_oLocalLogger.error("Publishband.executeOperation: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 1024");
                 oPublisher.m_lMaxMbTiffPyramid = 1024L;

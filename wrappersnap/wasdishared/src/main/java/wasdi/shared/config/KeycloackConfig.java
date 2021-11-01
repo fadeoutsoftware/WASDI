@@ -1,12 +1,49 @@
 package wasdi.shared.config;
 
+/**
+ * Keycloack authorization server Configuration
+ * @author p.campanella
+ *
+ */
 public class KeycloackConfig {
-	public String keycloak_server;
-	public String keycloak_CLI_Secret;
-	public String keycloak_auth;
-	public String keycloak_introspect;
-	public String keycloak_confidentialClient;
-	public String keycloak_client;
-	public String keycloak_clientSecret;
-	public String keycloak_realm;
+	
+	/**
+	 * Server Address
+	 */
+	public String address;
+	
+	/**
+	 * CLI Secret
+	 */
+	public String cliSecret;
+	
+	/**
+	 * Token API address
+	 */
+	public String authTokenAddress;
+	
+	/**
+	 * Introspect APi address
+	 */
+	public String introspectAddress;
+	
+	/**
+	 * Confidential client name
+	 */
+	public String confidentialClient;
+	
+	/**
+	 * Client Name
+	 */
+	public String client;
+	
+	/**
+	 * Client Secret
+	 */
+	public String clientSecret;
+	
+	/**
+	 * Realm
+	 */
+	public String realm;
 }

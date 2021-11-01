@@ -3,12 +3,10 @@ package it.fadeout.rest.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
@@ -27,11 +25,6 @@ import wasdi.shared.viewmodels.NodeViewModel;
 @Path("/node")
 public class NodeResource {
 	
-	/**
-	 * Servlet config to access web.xml file
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
 	
 	/**
 	 * Get the list of WASDI Nodes

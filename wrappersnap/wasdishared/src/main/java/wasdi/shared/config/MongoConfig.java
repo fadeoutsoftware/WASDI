@@ -1,10 +1,34 @@
 package wasdi.shared.config;
 
+/**
+ * Mongo Database Configuration
+ * @author p.campanella
+ *
+ */
 public class MongoConfig {
 	
-	public String MONGO_ADDRESS;
-	public int MONGO_PORT;
-	public String MONGO_DBNAME;
-	public String MONGO_DBUSER;
-	public String MONGO_DBPWD;
+	/**
+	 * Server Address
+	 */
+	public String address;
+	
+	/**
+	 * Server Port
+	 */
+	public int port;
+	
+	/**
+	 * Database name
+	 */
+	public String dbName;
+	
+	/**
+	 * Db user
+	 */
+	public String user;
+	
+	/**
+	 * Db Password
+	 */
+	public String password;
 }

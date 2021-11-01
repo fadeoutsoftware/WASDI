@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.queryexecutors.QueryExecutorFactory;
@@ -64,12 +64,6 @@ public class OpenSearchResource {
 		// Intialize the credentials dictionary
 		m_aoCredentials = new HashMap<>();
 	}
-
-	/**
-	 * Servlet config to access web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
 	
 	/**
 	 * Get the number of total results for a query
@@ -350,26 +344,19 @@ public class OpenSearchResource {
 			
 			ArrayList<DataProviderViewModel> aoRetProviders = new ArrayList<>();
 			
-			String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
-			
-			if (sProviders != null && sProviders.length() > 0) {
+			for (DataProviderConfig oDataProviderConfig: WasdiConfig.Current.dataProviders) {
+				DataProviderViewModel oSearchProvider = new DataProviderViewModel();
+				oSearchProvider.setCode(oDataProviderConfig.name);
 				
-				String[] asProviders = sProviders.split(",|;");
-	
-				for (int iProviders = 0; iProviders < asProviders.length; iProviders++) {
-					
-					DataProviderViewModel oSearchProvider = new DataProviderViewModel();
-					oSearchProvider.setCode(asProviders[iProviders]);
-					
-					String sDescription = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Description");
-					if (Utils.isNullOrEmpty(sDescription)) sDescription = asProviders[iProviders];
-					oSearchProvider.setDescription(sDescription);
-					
-					String sLink = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Link");
-					oSearchProvider.setLink(sLink);
-					aoRetProviders.add(oSearchProvider);
-				}
+				String sDescription = oDataProviderConfig.description;
+				if (Utils.isNullOrEmpty(sDescription)) sDescription = oDataProviderConfig.name;
+				oSearchProvider.setDescription(sDescription);
+				
+				String sLink = oDataProviderConfig.link;
+				oSearchProvider.setLink(sLink);
+				aoRetProviders.add(oSearchProvider);
 			}
+			
 			return aoRetProviders;
 		} catch (Exception oE) {
 			Utils.debugLog(s_sClassName + ".getSearchProviders: " + oE);
@@ -517,7 +504,9 @@ public class OpenSearchResource {
 						// Page size
 						int iLimit = 100;
 						
-						String sProviderLimit = m_oServletConfig.getInitParameter(sProvider+".SearchListPageSize");
+						DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+						
+						String sProviderLimit = oDataProviderConfig.searchListPageSize;
 						
 						if (!Utils.isNullOrEmpty(sProviderLimit)) {
 							try {
@@ -632,9 +621,11 @@ public class OpenSearchResource {
 		try {
 			if(null!=sProvider) {
 				AuthenticationCredentials oCredentials = getCredentials(sProvider);
+				
+				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
 	
-				String sParserConfigPath = m_oServletConfig.getInitParameter(sProvider+".parserConfig");
-				String sAppConfigPath = m_oServletConfig.getInitParameter("MissionsConfigFilePath");
+				String sParserConfigPath = oDataProviderConfig.parserConfig;
+				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
 				
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
@@ -661,9 +652,11 @@ public class OpenSearchResource {
 		try {
 			oCredentials = m_aoCredentials.get(sProvider);
 			if(null == oCredentials) {
-				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
-				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
-				oCredentials = new AuthenticationCredentials(sUser, sPassword);
+				
+				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+				
+				oCredentials = new AuthenticationCredentials(oDataProviderConfig.user, oDataProviderConfig.password);
+				
 				m_aoCredentials.put(sProvider, oCredentials);
 			}
 		} catch (Exception oE) {

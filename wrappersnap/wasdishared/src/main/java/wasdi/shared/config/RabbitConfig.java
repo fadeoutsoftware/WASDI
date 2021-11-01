@@ -1,9 +1,34 @@
 package wasdi.shared.config;
 
+/**
+ * RabbitMQ configuration
+ * @author p.campanella
+ *
+ */
 public class RabbitConfig {
-	public String RABBIT_QUEUE_USER;
-	public String RABBIT_QUEUE_PWD;
-	public String RABBIT_HOST;
-	public String RABBIT_QUEUE_PORT;
-	public String RABBIT_EXCHANGE;
+	
+	/**
+	 * Rabbit User
+	 */
+	public String user;
+	
+	/**
+	 * Rabbit Password
+	 */
+	public String password;
+	
+	/**
+	 * Rabbit Host
+	 */
+	public String host;
+	
+	/**
+	 * Rabbit Port
+	 */
+	public String port;
+	
+	/**
+	 * Rabbit Exchange
+	 */
+	public String exchange;
 }

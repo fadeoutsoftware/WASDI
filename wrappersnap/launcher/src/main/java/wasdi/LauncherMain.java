@@ -1,7 +1,6 @@
 package wasdi;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -28,7 +27,6 @@ import org.esa.snap.runtime.EngineConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sun.management.VMManagement;
-import wasdi.geoserver.Publisher;
 import wasdi.operations.Operation;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -39,6 +37,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.geoserver.Publisher;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
@@ -57,6 +56,7 @@ import wasdi.shared.utils.Utils;
  * 
  * -operation -> Uppercase Name of the WASDI Operation. ie "DOWNLOAD" 
  * -parameter -> Path of the parameter file. ie /usr/lib/wasdi/params/fab5028a-341b-4bd3-ba7e-a321d6eb54ca
+ * -config -> Path of te WASDI JSON Config file. ie /data/wasdi/config.json
  * 
  * The parameter file should be named as guid that is the same guid of the corresponding ProcessWorkspace.
  * 
@@ -89,7 +89,9 @@ public class LauncherMain  {
     protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger;
 
     /**
-     * Object mapper to convert Java - JSON
+     * Object mapper to convert Java - JSON. This is an heavy object
+     * so it is istanciated once as static object to be reused where ever
+     * it is needed
      */
     public static ObjectMapper s_oMapper = new ObjectMapper();
     
@@ -101,13 +103,17 @@ public class LauncherMain  {
     /**
      * WASDI Launcher Main Entry Point
      *
-     * @param args -o <operation> -p <parameterfile>
+     * @param args -o <operation> -p <parameterfile> -c <configfile>
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
     	
         try {
+        	// Set crypto Policy for sftp connections
             Security.setProperty("crypto.policy", "unlimited");
+            
+            // Serach the local log4j file
+            
             // get jar directory
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             // configure log
@@ -120,17 +126,23 @@ public class LauncherMain  {
         }
 
         s_oLogger.debug("WASDI Launcher Main Start");
+        
+        // We need to read the command line parameters.
 
         // create the parser
         CommandLineParser oParser = new DefaultParser();
 
         // create Options object
         Options oOptions = new Options();
-
+        
+        // Operation to be executed
         oOptions.addOption("o", "operation", true, "WASDI Launcher Operation");
+        // Parameter file path
         oOptions.addOption("p", "parameter", true, "WASDI Operation Parameter");
+        // Config file path
         oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
-
+        
+        // Default initialization
         String sOperation = "ND";
         String sParameter = "ND";
         String sConfigFilePath = "/data/wasdi/config.json";
@@ -138,31 +150,34 @@ public class LauncherMain  {
         // parse the command line arguments
         CommandLine oLine = oParser.parse(oOptions, args);
 
+        // Get the Operation Code
         if (oLine.hasOption("operation")) {
-            // Get the Operation Code
             sOperation = oLine.getOptionValue("operation");
         }
-
-        if (oLine.hasOption("parameter")) {
-            // Get the Parameter File
-            sParameter = oLine.getOptionValue("parameter");
-        }
-
-        if (oLine.hasOption("config")) {
-            // Get the Parameter File
-        	sConfigFilePath = oLine.getOptionValue("config");
-        }
-
-        if (sParameter.equals("ND")) {
-            System.err.println("Launcher Main - parameter file not available. Exit");
-            System.exit(-1);
-        }
         
+        // Check if it is available
         if (sOperation.equals("ND")) {
             System.err.println("Launcher Main - operation not available. Exit");
             System.exit(-1);
-        }        
+        }                
 
+        // Get the Parameter File
+        if (oLine.hasOption("parameter")) {
+            sParameter = oLine.getOptionValue("parameter");
+        }
+        
+        // Check if it is available
+        if (sParameter.equals("ND")) {
+            System.err.println("Launcher Main - parameter file not available. Exit");
+            System.exit(-1);
+        }        
+        
+        // Get the Config File
+        if (oLine.hasOption("config")) {
+        	sConfigFilePath = oLine.getOptionValue("config");
+        }
+        
+        // Check if it is available
         if (!WasdiConfig.readConfig(sConfigFilePath)) {
             System.err.println("Launcher Main - config file not found. Exit");
             System.exit(-1);        	
@@ -171,30 +186,36 @@ public class LauncherMain  {
         try {
 
             // Set Rabbit Factory Params
-            RabbitFactory.s_sRABBIT_QUEUE_USER = WasdiConfig.s_oConfig.rabbit.RABBIT_QUEUE_USER;
-            RabbitFactory.s_sRABBIT_QUEUE_PWD = WasdiConfig.s_oConfig.rabbit.RABBIT_QUEUE_PWD;
-            RabbitFactory.s_sRABBIT_HOST = WasdiConfig.s_oConfig.rabbit.RABBIT_HOST;
-            RabbitFactory.s_sRABBIT_QUEUE_PORT = WasdiConfig.s_oConfig.rabbit.RABBIT_QUEUE_PORT;
+        	RabbitFactory.readConfig();
+            
+            // Set the Mongo Config
+            MongoRepository.readConfig();
 
+            // Create the Rabbit Sender Object. The object is safe: in case of any problem
+            // It does not send to rabbit but only logs on console.
+            LauncherMain.s_oSendToRabbit = new Send(WasdiConfig.Current.rabbit.exchange);
+            
             // Create Launcher Instance
-            LauncherMain.s_oSendToRabbit = new Send(WasdiConfig.s_oConfig.rabbit.RABBIT_EXCHANGE);
             LauncherMain oLauncher = new LauncherMain();
 
-            // Deserialize the parameter referring the base class
+            // Deserialize the parameter 
             BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+            
+            // Read the Process Workspace from the db
             ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
             s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
-
+            
+            // This is the operation we have to do, it must exists
             if (s_oProcessWorkspace == null) {
                 s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Exit");
                 System.exit(-1);
             }
 
-            // Set the process object id as Logger Prefix
+            // Set the process object id as Logger Prefix: it will help to filter logs
             s_oLogger.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 
-            // Set the process as running
+            // Set the ProcessWorspace STATUS as running
             s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
             s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
@@ -207,19 +228,23 @@ public class LauncherMain  {
                 s_oLogger.debug("LauncherMain: RUNNING state and operationStartDate updated");
             }
 
-            // And Run
+            // Run the operation
             oLauncher.executeOperation(sOperation, sParameter);
-
+            
+            // Operation Done
             s_oLogger.debug(getBye());
             
         } 
         catch (Throwable oException) {
+        	
+        	// ERROR: we need to put the ProcessWorkspace in a end-state, error in this case
             s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
 
             try {
                 System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
 
                 if (s_oProcessWorkspace != null) {
+                	
                     s_oProcessWorkspace.setProgressPerc(100);
                     s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
                     s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
@@ -234,11 +259,12 @@ public class LauncherMain  {
                 s_oLogger.error("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
             }
             
+            // Exit with error
             System.exit(-1);
             
         } finally {
 
-            // Final Check of the Process Workspace Status
+            // Final Check of the Process Workspace Status: it is in safe state?
             if (s_oProcessWorkspace != null) {
             	
             	// Read again the process workspace
@@ -247,12 +273,15 @@ public class LauncherMain  {
                 s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(s_oProcessWorkspace.getProcessObjId());
 
                 s_oLogger.error("Launcher Main FINAL: process status [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
-
+                
+                // If it is not in a runnig state
                 if (s_oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
 
+                	
+                	// Force the closing
                     s_oLogger.error("Launcher Main FINAL: process status not closed [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
                     s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + s_oProcessWorkspace.getProcessObjId() + "]");
 
@@ -263,16 +292,17 @@ public class LauncherMain  {
                     }
                 }
             }
-
+            
+            // Free Rabbit resources
             LauncherMain.s_oSendToRabbit.Free();
 			
 			try {
+				// Stop SNAP Engine
 				Engine.getInstance().stop();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
         }
-
     }
 
     /**
@@ -289,33 +319,37 @@ public class LauncherMain  {
      */
     public LauncherMain() {
         try {
-
-            // Set Global Settings
-            Publisher.GDAL_Retile_Command = WasdiConfig.s_oConfig.gdal.GDAL_RETILE;
-            MongoRepository.SERVER_ADDRESS = WasdiConfig.s_oConfig.mongo.MONGO_ADDRESS;
-            MongoRepository.SERVER_PORT = WasdiConfig.s_oConfig.mongo.MONGO_PORT;
-            MongoRepository.DB_NAME = WasdiConfig.s_oConfig.mongo.MONGO_DBNAME;
-            MongoRepository.DB_USER = WasdiConfig.s_oConfig.mongo.MONGO_DBUSER;
-            MongoRepository.DB_PWD = WasdiConfig.s_oConfig.mongo.MONGO_DBPWD;
-
+            
             // Read this node code
-            LauncherMain.s_sNodeCode = WasdiConfig.s_oConfig.NODECODE;
-
+            LauncherMain.s_sNodeCode = WasdiConfig.Current.nodeCode;
             s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
 
             // If this is not the main node
             if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
-            	
             	// Configure also the local connection: by default is the "wasdi" port + 1
                 s_oLogger.debug("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT + 1, MongoRepository.DB_NAME);
             }
             
             // Set the java/system user home folder
-            System.setProperty("user.home", WasdiConfig.s_oConfig.paths.USER_HOME);
+            System.setProperty("user.home", WasdiConfig.Current.paths.userHomePath);
             
+            // Configure SNAP
+            configureSNAP();
+
+        } catch (Throwable oEx) {
+            s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        }
+    }
+    
+    /**
+     * Configure SNAP: it set needed system variables and configure
+     * the specific Logger
+     */
+    protected void configureSNAP() {
+    	try {
             // Configure snap to read aux data folder
-            String sSnapAuxProperties = WasdiConfig.s_oConfig.snap.SNAP_AUX_PROPERTIES;
+            String sSnapAuxProperties = WasdiConfig.Current.snap.auxPropertiesFile;
             Path oPropFile = Paths.get(sSnapAuxProperties);
             Config.instance("snap.auxdata").load(oPropFile);
             Config.instance().load();
@@ -325,12 +359,12 @@ public class LauncherMain  {
             Engine.start(false);
 
             // Snap Log: is activated or not?
-            String sSnapLogActive = WasdiConfig.s_oConfig.snap.SNAP_LAUNCHER_LOG_ACTIVE;
+            String sSnapLogActive = WasdiConfig.Current.snap.launcherLogActive;
+            
+            if (Utils.doesThisStringMeansTrue(sSnapLogActive)) {
 
-            if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
-
-                String sSnapLogLevel = WasdiConfig.s_oConfig.snap.SNAP_LAUNCHER_LOG_LEVEL;
-                String sSnapLogFile = WasdiConfig.s_oConfig.snap.SNAP_LAUNCHER_LOG_FILE;
+                String sSnapLogLevel = WasdiConfig.Current.snap.launcherLogLevel;
+                String sSnapLogFile = WasdiConfig.Current.snap.launcherLogFile;
 
                 s_oLogger.debug("SNAP Log file active with level " + sSnapLogLevel + " file: " + sSnapLogFile);
 
@@ -339,7 +373,7 @@ public class LauncherMain  {
                 try {
                     oLogLevel = Level.parse(sSnapLogLevel);
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain Constructor: exception configuring SNAP log file Level " + oEx.toString());
+                    System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file Level " + oEx.toString());
                 }
 
                 try {
@@ -358,14 +392,14 @@ public class LauncherMain  {
                     oSnapLogger.addHandler(oFileHandler);
 
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain Constructor: exception configuring SNAP log file " + oEx.toString());
+                    System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
                 }
             } else {
                 s_oLogger.debug("SNAP Log file not active");
-            }
-
-        } catch (Throwable oEx) {
-            s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            }        		
+    	}
+    	catch (Throwable oEx) {
+            s_oLogger.error("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -470,7 +504,7 @@ public class LauncherMain  {
      */
     public static String getWorkspacePath(BaseParameter oParameter) {
         try {
-            return getWorkspacePath(oParameter, WasdiConfig.s_oConfig.paths.DownloadRootPath);
+            return getWorkspacePath(oParameter, WasdiConfig.Current.paths.downloadRootPath);
         } catch (Exception e) {
             e.printStackTrace();
             return getWorkspacePath(oParameter, "/data/wasdi");
@@ -630,7 +664,7 @@ public class LauncherMain  {
     
     public static String adjustGdalFolder(String sGdalCommand) {
         try {
-            String sGdalPath = WasdiConfig.s_oConfig.gdal.GDAL_PATH;
+            String sGdalPath = WasdiConfig.Current.paths.gdalPath;
 
             if (!Utils.isNullOrEmpty(sGdalPath)) {
                 File oGdalFolder = new File(sGdalPath);

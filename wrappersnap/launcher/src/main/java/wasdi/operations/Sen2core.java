@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
@@ -51,7 +50,7 @@ public class Sen2core extends Operation {
                     oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
 
                     // 4 - Convert -> obtain L2A.SAFE
-                    String sSen2CorPath = WasdiConfig.s_oConfig.paths.SEN2CORPATH;
+                    String sSen2CorPath = WasdiConfig.Current.paths.sen2CorePath;
                     m_oLocalLogger.debug("Sen2core.executeOperation: Extraction completed, begin conversion");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
                     ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");

@@ -1,4 +1,4 @@
-package wasdi.geoserver;
+package wasdi.shared.geoserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;

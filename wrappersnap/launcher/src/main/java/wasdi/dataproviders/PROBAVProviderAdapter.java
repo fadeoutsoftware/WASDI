@@ -11,8 +11,6 @@ import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.ConfigReader;
-import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -29,9 +27,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		super();
 
 		try {
-			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("PROBAV");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("PROBAV");
 			
-			String sFile = oConfig.filedescriptors;
+			String sFile = oConfig.fileDescriptors;
 
 			m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);
 
@@ -359,8 +357,8 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
 
-			String sConnectionTimeout = WasdiConfig.s_oConfig.CONNECTION_TIMEOUT;
-			String sReadTimeOut = WasdiConfig.s_oConfig.READ_TIMEOUT;
+			String sConnectionTimeout = WasdiConfig.Current.connectionTimeout;
+			String sReadTimeOut = WasdiConfig.Current.readTimeout;
 
 			int iConnectionTimeOut = 10000;
 			int iReadTimeOut = 10000;

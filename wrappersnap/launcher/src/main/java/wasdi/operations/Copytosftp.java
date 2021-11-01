@@ -4,8 +4,6 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.ConfigReader;
-import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -70,7 +68,7 @@ public class Copytosftp extends Operation {
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 5);
             
             // Destination Base Path
-            String sDestinationPath = WasdiConfig.s_oConfig.paths.SFTP_ROOT_PATH;
+            String sDestinationPath = WasdiConfig.Current.paths.sftpRootPath;
             if (!sDestinationPath.endsWith("/")) sDestinationPath += "/";
 
             // Is there a relative path? Note: relative Path can be a simple path or user;path 

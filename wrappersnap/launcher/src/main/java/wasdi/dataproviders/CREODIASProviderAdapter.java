@@ -29,8 +29,6 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
-import wasdi.ConfigReader;
-import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -668,9 +666,9 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public void readConfig() {
 		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("CREODIAS");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("CREODIAS");
 			m_sDefaultProtocol = oConfig.defaultProtocol; 
-			m_sProviderBasePath = oConfig.base_path;
+			m_sProviderBasePath = oConfig.localFilesBasePath;
 		} catch (Exception e) {
 			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
 		}

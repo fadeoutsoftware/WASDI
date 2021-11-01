@@ -1,10 +1,7 @@
 package wasdi.dataproviders;
 
 import java.io.File;
-import java.io.IOException;
 
-import wasdi.ConfigReader;
-import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -202,10 +199,10 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	public void readConfig() {
 		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("LSA");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("LSA");
 			m_sDefaultProtocol = oConfig.defaultProtocol; 
-			m_sProviderBasePath = oConfig.base_path;
-			m_sProviderUrlDomain = oConfig.urldomain;
+			m_sProviderBasePath = oConfig.localFilesBasePath;
+			m_sProviderUrlDomain = oConfig.urlDomain;
 			
 		} catch (Exception e) {
 			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");

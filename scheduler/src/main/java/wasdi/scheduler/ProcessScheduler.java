@@ -12,6 +12,8 @@ import java.util.Map;
 
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.SchedulerQueueConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
 
@@ -97,7 +99,7 @@ public class ProcessScheduler {
 			m_sLogPrefix = m_sSchedulerKey + ": ";
 			
 			//Read the Serialisation Path
-			File oFolder = new File(ConfigReader.getPropValue("SerializationPath", "/usr/lib/wasdi/params/"));
+			File oFolder = new File(WasdiConfig.Current.paths.serializationPath);
 			
 			if (!oFolder.isDirectory()) {
 				WasdiScheduler.error(m_sLogPrefix + ".init: cannot access parameters folder: " + oFolder.getAbsolutePath());
@@ -106,9 +108,11 @@ public class ProcessScheduler {
 			// Save the path 
 			m_oParametersFilesFolder = oFolder;
 			
+			SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sSchedulerKey);
+			
 			// Read Max Size of Concurrent Processes of this scheduler 
 			try {
-				int iMaxConcurrents = Integer.parseInt(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_MAX_QUEUE"));
+				int iMaxConcurrents = Integer.parseInt(oSchedulerQueueConfig.maxQueue);
 				if (iMaxConcurrents>0) {
 					m_iNumberOfConcurrentProcess = iMaxConcurrents;
 					WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
@@ -119,7 +123,7 @@ public class ProcessScheduler {
 			
 			// Read Timeout of this scheduler 
 			try {
-				long lTimeout = Long.parseLong(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_TIMEOUT_MS"));
+				long lTimeout = Long.parseLong(oSchedulerQueueConfig.timeoutMs);
 				if (lTimeout>0) {
 					m_lTimeOutMs = lTimeout;
 					WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
@@ -130,7 +134,7 @@ public class ProcessScheduler {
 			// Read Operation Type supported 
 			try {
 				// Get the string from config
-				String sOperationTypes = ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_OP_TYPES", "");
+				String sOperationTypes = oSchedulerQueueConfig.opTypes;
 				
 				// Split on comma
 				String [] asTypes = sOperationTypes.split(",");
@@ -145,7 +149,7 @@ public class ProcessScheduler {
 					// If there is only one type
 					if (asTypes.length == 1) {
 						// Read if there is a Subtype
-						String sOperationSubType = ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_OP_SUB_TYPE", "");
+						String sOperationSubType = oSchedulerQueueConfig.opSubType;
 						
 						if (!Utils.isNullOrEmpty(sOperationSubType)) {
 							// Save the subtype
@@ -159,7 +163,7 @@ public class ProcessScheduler {
 			}
 			
 			try {
-				long iStartWaitSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadWaitStartMS", "2000"));
+				long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 				if (iStartWaitSleep>0) {
 					m_lWaitProcessStartMS = iStartWaitSleep;
 					WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
@@ -169,13 +173,13 @@ public class ProcessScheduler {
 			}
 			
 			// Read the Lancher Path
-			m_sLauncherPath = ConfigReader.getPropValue("LauncherPath", "/usr/lib/wasdi/launcher/launcher.jar");
+			m_sLauncherPath = WasdiConfig.Current.scheduler.launcherPath;
 			// Read Java Exe Path
-			m_sJavaExePath = ConfigReader.getPropValue("JavaExe", "java");
+			m_sJavaExePath = WasdiConfig.Current.scheduler.javaExe;
 			// Read Wasdi Node Id
-			m_sWasdiNode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			m_sWasdiNode = WasdiConfig.Current.nodeCode;
 			// Read the Kill command
-			m_sKillCommand = ConfigReader.getPropValue("KILL_COMMAND", "kill -9 ");
+			m_sKillCommand = WasdiConfig.Current.scheduler.killCommand;
 			
 			// Create the Repo
 			m_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

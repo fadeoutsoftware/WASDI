@@ -50,6 +50,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -152,14 +153,16 @@ public class Wasdi extends ResourceConfig {
 
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 		
-		// Read the default validity of sessions in minutes
-		try {
-			Utils.s_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
-			Utils.debugLog("-------Session Validity [minutes]: " + Utils.s_iSessionValidityMinutes);
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
+		String sConfigFilePath = "/data/wasdi/config.json"; 
+		
+		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
+			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
 		}
-
+		
+		if (!WasdiConfig.readConfig(sConfigFilePath)) {
+			Utils.debugLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
+		}
+		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
 		String sNfsFolder = System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD);
@@ -171,11 +174,7 @@ public class Wasdi extends ResourceConfig {
 		// Read MongoDb Configuration
 		try {
 
-			MongoRepository.SERVER_ADDRESS = getInitParameter("MONGO_ADDRESS", "127.0.0.1");
-			MongoRepository.SERVER_PORT = Integer.parseInt(getInitParameter("MONGO_PORT", "27017"));
-			MongoRepository.DB_NAME = getInitParameter("MONGO_DBNAME", Wasdi.s_sWASDINAME);
-			MongoRepository.DB_USER = getInitParameter("MONGO_DBUSER", "mongo");
-			MongoRepository.DB_PWD = getInitParameter("MONGO_DBPWD", "mongo");
+            MongoRepository.readConfig();
 
 			Utils.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
 
@@ -186,7 +185,7 @@ public class Wasdi extends ResourceConfig {
 		// Read the code of this Node
 		try {
 
-			s_sMyNodeCode = getInitParameter("NODECODE", Wasdi.s_sWASDINAME);
+			s_sMyNodeCode = WasdiConfig.Current.nodeCode;
 			Utils.debugLog("-------Node Code " + s_sMyNodeCode);
 
 		} catch (Throwable e) {
@@ -194,9 +193,9 @@ public class Wasdi extends ResourceConfig {
 		}
 		
 		// Read the configuration of KeyCloak		
-		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", null);
-		s_sClientId = getInitParameter("keycloak_confidentialClient", null);
-		s_sClientSecret = getInitParameter("keycloak_clientSecret", null);
+		s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
+		s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
+		s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
 		
 		// Computational nodes need to configure also the local dababase
 		try {
@@ -214,7 +213,7 @@ public class Wasdi extends ResourceConfig {
 		
 		// Local path the the web application
 		try {
-			String sLocalTomcatWebAppFolder = getInitParameter("TOMCAT_WEBAPP_FOLDER", null);
+			String sLocalTomcatWebAppFolder = WasdiConfig.Current.paths.tomcatWebAppPath;
 			if (!Utils.isNullOrEmpty(sLocalTomcatWebAppFolder)) {
 				
 				ImageResourceUtils.s_sWebAppBasePath = sLocalTomcatWebAppFolder;
@@ -228,14 +227,9 @@ public class Wasdi extends ResourceConfig {
 		
 		// Configure Rabbit
 		try {
-
-			RabbitFactory.s_sRABBIT_QUEUE_USER = getInitParameter("RABBIT_QUEUE_USER", "guest");
-			RabbitFactory.s_sRABBIT_QUEUE_PWD = getInitParameter("RABBIT_QUEUE_PWD", "guest");
-			RabbitFactory.s_sRABBIT_HOST = getInitParameter("RABBIT_HOST", "127.0.0.1");
-			RabbitFactory.s_sRABBIT_QUEUE_PORT = getInitParameter("RABBIT_QUEUE_PORT", "5672");
-
-			Utils.debugLog("-------Rabbit User " + RabbitFactory.s_sRABBIT_QUEUE_USER);
-
+			RabbitFactory.readConfig();
+			
+			Utils.debugLog("-------Rabbit Initialized ");
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -244,7 +238,7 @@ public class Wasdi extends ResourceConfig {
 		Utils.debugLog("-------initializing snap...");
 
 		try {
-			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
+			String snapAuxPropPath = WasdiConfig.Current.snap.auxPropertiesFile;
 			Utils.debugLog("snap aux properties file: " + snapAuxPropPath);
 			Path propFile = Paths.get(snapAuxPropPath);
 			Config.instance("snap.auxdata").load(propFile);
@@ -253,10 +247,10 @@ public class Wasdi extends ResourceConfig {
 			SystemUtils.init3rdPartyLibs(null);
 			SystemUtils.LOG.setLevel(Level.ALL);
 
-			String sSnapLogActive = getInitParameter("SNAP_LOG_ACTIVE", "1");
+			String sSnapLogActive = WasdiConfig.Current.snap.webLogActive;
 
 			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
-				String sSnapLogFolder = getInitParameter("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snapweb.log");
+				String sSnapLogFolder = WasdiConfig.Current.snap.webLogFile;
 
 				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
 				oFileHandler.setLevel(Level.ALL);
@@ -292,7 +286,7 @@ public class Wasdi extends ResourceConfig {
 				oWorkspace.setLastEditDate((double) new Date().getTime());
 				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
 				// Leave this at "no user"
-				oWorkspace.setWorkspaceId(Utils.GetRandomName());
+				oWorkspace.setWorkspaceId(Utils.getRandomName());
 				oWorkspace.setNodeCode(Wasdi.s_sMyNodeCode);
 				
 				// Insert in the db
@@ -342,38 +336,7 @@ public class Wasdi extends ResourceConfig {
 			oE.printStackTrace();
 		}
 	}
-
-	/**
-	 * Safe Read Init Parameter
-	 * 
-	 * @param sParmaneter
-	 * @param sDefault
-	 * @return
-	 */
-	private String getInitParameter(String sParmaneter, String sDefault) {
-		String sParameterValue = m_oServletConfig.getInitParameter(sParmaneter);
-		return sParameterValue == null ? sDefault : sParameterValue;
-	}
-
-	/**
-	 * Get Safe Random file name
-	 * 
-	 * @return
-	 */
-	public static String GetSerializationFileName() {
-		return UUID.randomUUID().toString();
-	}
-
-	/**
-	 * Get Common Date Time Format
-	 * 
-	 * @param oDate
-	 * @return
-	 */
-	public static String getFormatDate(Date oDate) {
-		return Utils.getFormatDate(oDate);
-	}
-
+	
 	/**
 	 * Get the User object from the session Id
 	 * It checks first in Key Cloak and later on the local session mechanism.
@@ -457,14 +420,13 @@ public class Wasdi extends ResourceConfig {
 
 	/**
 	 * Obtain the local workspace path from configuration (base path), user and worksapce id
-	 * @param oServletConfig Servlet config to access web.xml file
 	 * @param sUserId User Id
 	 * @param sWorkspace Workspace
 	 * @return full workspace local path with the ending / included
 	 */
-	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
+	public static String getWorkspacePath(String sUserId, String sWorkspace) {
 		// Take path
-		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
 
 		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
 			sDownloadRootPath = "/data/wasdi/";
@@ -480,12 +442,12 @@ public class Wasdi extends ResourceConfig {
 	
 	/**
 	 * Get the root path of download folder of WASDI 
-	 * @param oServletConfig
+	 * 
 	 * @return base download local path with the ending / included
 	 */
-	public static String getDownloadPath(ServletConfig oServletConfig) {
+	public static String getDownloadPath() {
 		// Take path
-		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
 
 		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
 			sDownloadRootPath = "/data/wasdi/";
@@ -727,7 +689,8 @@ public class Wasdi extends ResourceConfig {
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 
 				try {
-					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
+					
+					oProcess.setOperationDate(Utils.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationType);
 					oProcess.setOperationSubType(sOperationSubId);
 					oProcess.setProductName(sProductName);
@@ -1114,7 +1077,7 @@ public class Wasdi extends ResourceConfig {
 	 * @param sWorkflowId File Name
 	 * @return Full Path
 	 */
-	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId, ServletConfig oServletConfig) {
+	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId) {
 		try {
 			
 			if (Utils.isNullOrEmpty(sWorkflowId)) {
@@ -1167,7 +1130,7 @@ public class Wasdi extends ResourceConfig {
 					}
 					
 
-					String sSavePath = getDownloadPath(oServletConfig) + "workflows/";
+					String sSavePath = getDownloadPath() + "workflows/";
 					sOutputFilePath = sSavePath + sWorkflowId+".xml";
 					
 					File oTargetFile = new File(sOutputFilePath);

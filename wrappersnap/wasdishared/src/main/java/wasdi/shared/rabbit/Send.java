@@ -68,22 +68,23 @@ public class Send {
      */
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
-    	if (m_oConnection == null) return false;
-    	if (m_oChannel == null) return false;
+    	if (m_oConnection == null || m_oChannel == null) {
+    		Utils.debugLog("Send.SendMgs: impossibile to send " + sMessageAttribute + " to " + sRoutingKey);
+    		return false;
+    	}
     	
         try {        	
             m_oChannel.basicPublish(m_sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
+            return true;
+            
         } catch (IOException e) {
-        	Utils.debugLog("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        	Utils.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
         catch (Exception e) {
-        	Utils.debugLog("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        	Utils.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
-        //LauncherMain.s_oLogger.debug(" [x] Sent '" + sMessageAttribute + "' to " + sRoutingKey);
-        return true;
-
     }
 
     /**

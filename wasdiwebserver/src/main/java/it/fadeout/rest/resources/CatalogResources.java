@@ -6,14 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -25,6 +23,7 @@ import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.User;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
@@ -46,13 +45,7 @@ import wasdi.shared.viewmodels.products.FtpTransferViewModel;
  */
 @Path("/catalog")
 public class CatalogResources {
-	
-	/**
-	 * Servlet config to access the web.xml 
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
-	
+		
 	/**
 	 * Download a File from the name
 	 * @param sSessionId User session id, as available in headers
@@ -360,7 +353,7 @@ public class CatalogResources {
 		}
 		
 		try {
-			String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
+			String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
 
 			File oFile = new File(sTargetFilePath);
 			
@@ -439,7 +432,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();		
 
 		// Find the sftp folder
-		String sUserBaseDir = m_oServletConfig.getInitParameter("sftpManagementUserDir");
+		String sUserBaseDir = WasdiConfig.Current.paths.sftpRootPath;
 
 		File oUserBaseDir = new File(sUserBaseDir);
 		File oFilePath = new File(new File(new File(oUserBaseDir, sUserId), "uploads"), sFile);
@@ -451,7 +444,7 @@ public class CatalogResources {
 		}
 		try {						
 			// Generate the unique process id
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
 			// Ingest file parameter
 			IngestFileParameter oParameter = new IngestFileParameter();
@@ -463,7 +456,7 @@ public class CatalogResources {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 			
 			if (oRes.getBoolValue()) {
@@ -512,7 +505,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		Utils.debugLog("CatalogResource.IngestFileInWorkspace: computed file path: " + sFilePath);
 		
@@ -529,7 +522,7 @@ public class CatalogResources {
 				Utils.debugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -550,7 +543,7 @@ public class CatalogResources {
 		}
 		
 		try {
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspaceId);
@@ -562,7 +555,7 @@ public class CatalogResources {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 
 		} catch (Exception e) {
@@ -605,7 +598,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		Utils.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
 		
@@ -622,7 +615,7 @@ public class CatalogResources {
 				Utils.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -645,7 +638,7 @@ public class CatalogResources {
 		try {
 			
 			// Crete the ingest parameter
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspaceId);
@@ -658,7 +651,7 @@ public class CatalogResources {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 
 		} catch (Exception e) {
@@ -708,7 +701,7 @@ public class CatalogResources {
 		try {
 			Utils.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			String sFileName = oFtpTransferVM.getFileName();
 			
 			FtpUploadParameters oParam = new FtpUploadParameters();
@@ -725,7 +718,7 @@ public class CatalogResources {
 			oParam.setProcessObjId(sProcessObjId);
 			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 						
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParam, sParentProcessWorkspaceId);
 
@@ -747,7 +740,7 @@ public class CatalogResources {
 	{
 		Utils.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
 				
-		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+		String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);

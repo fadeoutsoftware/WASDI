@@ -12,8 +12,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 
@@ -26,13 +28,17 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 	private static String m_sProviderBasePath = "";
 
 	String processObjId = "dcdd342a-9d71-4eb9-a9e9-7986e55ebe77";
+	
+	private static DataProviderConfig m_oCreodiasConfig;
 
 	@BeforeClass
     public static void setUp() throws Exception {
 		s_sClassName = "LauncherMainCreodiasTest";
 		Utils.debugLog(s_sClassName + ".setUp");
+		
+		m_oCreodiasConfig = WasdiConfig.Current.getDataProviderConfig("CREODIAS");
 
-		m_sProviderBasePath = ConfigReader.getPropValue("CREODIAS_BASE_PATH", "/eodata/");
+		m_sProviderBasePath = m_oCreodiasConfig.localFilesBasePath;
 	}
 
 	/**
@@ -164,11 +170,11 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 	 * @throws IOException in case of any issue reading the configuration file
 	 */
 	private void changeConfigPropCreodiasDefaultProtocolToHttps() throws IOException {
-		String CREODIAS_DEFAULT_PROTOCOL = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL");
+		String CREODIAS_DEFAULT_PROTOCOL =  m_oCreodiasConfig.defaultProtocol;
 
 		if (CREODIAS_DEFAULT_PROTOCOL.equals("file://")) {
-			ConfigReader.m_aoProperties.put("CREODIAS_DEFAULT_PROTOCOL", "https://");
-			CREODIAS_DEFAULT_PROTOCOL = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL");
+			m_oCreodiasConfig.defaultProtocol = "https://";
+			CREODIAS_DEFAULT_PROTOCOL = m_oCreodiasConfig.defaultProtocol;
 		}
 	}
 
@@ -177,11 +183,11 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 	 * @throws IOException in case of any issue reading the configuration file
 	 */
 	private void changeConfigPropCreodiasDefaultProtocolToFile() throws IOException {
-		String CREODIAS_DEFAULT_PROTOCOL = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL");
+		String CREODIAS_DEFAULT_PROTOCOL = m_oCreodiasConfig.defaultProtocol;
 
 		if (CREODIAS_DEFAULT_PROTOCOL.equals("https://")) {
-			ConfigReader.m_aoProperties.put("CREODIAS_DEFAULT_PROTOCOL", "file://");
-			CREODIAS_DEFAULT_PROTOCOL = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL");
+			m_oCreodiasConfig.defaultProtocol = "file://";
+			CREODIAS_DEFAULT_PROTOCOL = m_oCreodiasConfig.defaultProtocol;
 		}
 	}
 

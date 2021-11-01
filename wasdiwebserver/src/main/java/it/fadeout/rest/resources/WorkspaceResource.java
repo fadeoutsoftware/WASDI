@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,7 +14,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -32,6 +30,7 @@ import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -62,12 +61,6 @@ import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
  */
 @Path("/ws")
 public class WorkspaceResource {
-	
-	/**
-	 * Servlet Config to access web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
 	
 	/**
 	 * Get a list of workspaces of a user
@@ -315,7 +308,7 @@ public class WorkspaceResource {
 		oWorkspace.setLastEditDate((double) new Date().getTime());
 		oWorkspace.setName(sName);
 		oWorkspace.setUserId(oUser.getUserId());
-		oWorkspace.setWorkspaceId(Utils.GetRandomName());
+		oWorkspace.setWorkspaceId(Utils.getRandomName());
 		
 		if (Utils.isNullOrEmpty(sNodeCode)) {
 			//get user's default nodeCode
@@ -453,7 +446,7 @@ public class WorkspaceResource {
 			}
 
 			// get workspace path
-			String sWorkspacePath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
+			String sWorkspacePath = Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -469,10 +462,7 @@ public class WorkspaceResource {
 						Utils.debugLog("ProductResource.DeleteProduct: Deleting workspace layers");
 
 						// GeoServer Manager Object
-						GeoServerManager oGeoServerManager = new GeoServerManager(
-								m_oServletConfig.getInitParameter("GS_URL"),
-								m_oServletConfig.getInitParameter("GS_USER"),
-								m_oServletConfig.getInitParameter("GS_PASSWORD"));
+						GeoServerManager oGeoServerManager = new GeoServerManager();
 
 						// For each product in the workspace, if is unique, delete published bands and metadata file ref
 						for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
@@ -714,7 +704,7 @@ public class WorkspaceResource {
 		oResult.setBoolValue(true);
 		
 		try {
-			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 			
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: sMercuriusAPIAddress is null");
@@ -730,7 +720,7 @@ public class WorkspaceResource {
 				
 				oMessage.setTilte(sTitle);
 				
-				String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
 				if (sSender==null) {
 					sSender = "wasdi@wasdi.net";
 				}

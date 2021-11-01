@@ -10,6 +10,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.utils.Utils;
 
@@ -24,15 +26,19 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 
 	String processObjId = "9208f841-075c-4c5d-b32d-139f3b384ed3";
 //	String processObjId = "f83ddb30-4ed0-47fa-a72d-d79d8c0a1a7b";
+	
+	private static DataProviderConfig m_oLSAConfig;
 
 
 	@BeforeClass
     public static void setUp() throws Exception {
 		s_sClassName = "LauncherMainLsaTest";
 		Utils.debugLog(s_sClassName + ".setUp");
+		
+		m_oLSAConfig = WasdiConfig.Current.getDataProviderConfig("LSA");
 
-		m_sProviderBasePath = ConfigReader.getPropValue("LSA_BASE_PATH", "/mount/lucollgs/data_192/");
-		m_sProviderUrlDomain = ConfigReader.getPropValue("LSA_URL_DOMAIN", "https://collgs.lu/repository/");
+		m_sProviderBasePath = m_oLSAConfig.localFilesBasePath;
+		m_sProviderUrlDomain = m_oLSAConfig.urlDomain;
 	}
 
 	/**
@@ -154,11 +160,11 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 	 * @throws IOException in case of any issue reading the configuration file
 	 */
 	private void changeConfigPropLsaDefaultProtocolToHttps() throws IOException {
-		String LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
+		String LSA_DEFAULT_PROTOCOL = m_oLSAConfig.defaultProtocol;
 
 		if (LSA_DEFAULT_PROTOCOL.equals("file://")) {
-			ConfigReader.m_aoProperties.put("LSA_DEFAULT_PROTOCOL", "https://");
-			LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
+			m_oLSAConfig.defaultProtocol = "https://";
+			LSA_DEFAULT_PROTOCOL = m_oLSAConfig.defaultProtocol;
 		}
 	}
 
@@ -167,11 +173,11 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 	 * @throws IOException in case of any issue reading the configuration file
 	 */
 	private void changeConfigPropLsaDefaultProtocolToFile() throws IOException {
-		String LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
+		String LSA_DEFAULT_PROTOCOL = m_oLSAConfig.defaultProtocol;
 
 		if (LSA_DEFAULT_PROTOCOL.equals("https://")) {
-			ConfigReader.m_aoProperties.put("LSA_DEFAULT_PROTOCOL", "file://");
-			LSA_DEFAULT_PROTOCOL = ConfigReader.getPropValue("LSA_DEFAULT_PROTOCOL");
+			m_oLSAConfig.defaultProtocol = "file://";
+			LSA_DEFAULT_PROTOCOL = m_oLSAConfig.defaultProtocol;
 		}
 	}
 

@@ -21,6 +21,8 @@ import org.junit.BeforeClass;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
@@ -52,14 +54,14 @@ public abstract class LauncherMainTest {
 		s_oQueryExecutorFactory = new QueryExecutorFactory();
 		m_aoCredentials = new HashMap<>();
 
-		SERIALIZATION_PATH = ConfigReader.getPropValue("SERIALIZATION_PATH");
-		DOWNLOAD_ROOT_PATH = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+		SERIALIZATION_PATH = WasdiConfig.Current.paths.serializationPath;
+		DOWNLOAD_ROOT_PATH = WasdiConfig.Current.paths.downloadRootPath;
 
-		MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
-		MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
-		MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
-		MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
-		MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+		MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongo.address;
+		MongoRepository.SERVER_PORT = WasdiConfig.Current.mongo.port;
+		MongoRepository.DB_NAME = WasdiConfig.Current.mongo.dbName;
+		MongoRepository.DB_USER = WasdiConfig.Current.mongo.user;
+		MongoRepository.DB_PWD = WasdiConfig.Current.mongo.password;
 		MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
 	}
 
@@ -442,9 +444,14 @@ public abstract class LauncherMainTest {
 		try {
 			if(null!=sProvider) {
 				AuthenticationCredentials oCredentials = getCredentials(sProvider);
+				
+				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+				
 	
-				String sParserConfigPath = ConfigReader.getPropValue(sProvider+".parserConfig");
-				String sAppConfigPath = ConfigReader.getPropValue("MissionsConfigFilePath");
+				String sParserConfigPath = oConfig.parserConfig;
+				
+				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
+				
 				oExecutor = s_oQueryExecutorFactory.getExecutor(
 						sProvider,
 						oCredentials,
@@ -464,8 +471,11 @@ public abstract class LauncherMainTest {
 		try {
 			oCredentials = m_aoCredentials.get(sProvider);
 			if(null == oCredentials) {
-				String sUser = ConfigReader.getPropValue(sProvider+".OSUser");
-				String sPassword = ConfigReader.getPropValue(sProvider+".OSPwd");
+				
+				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+				
+				String sUser = oConfig.user;
+				String sPassword = oConfig.password;
 				oCredentials = new AuthenticationCredentials(sUser, sPassword);
 				m_aoCredentials.put(sProvider, oCredentials);
 			}

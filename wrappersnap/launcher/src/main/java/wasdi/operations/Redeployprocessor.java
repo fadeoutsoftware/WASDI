@@ -1,6 +1,5 @@
 package wasdi.operations;
 
-import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
@@ -27,10 +26,7 @@ public class Redeployprocessor extends Operation {
 		try {
 	        // redeploy User Processor
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
-	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
-	        		WasdiConfig.s_oConfig.paths.DownloadRootPath,
-	        		WasdiConfig.s_oConfig.paths.DOCKER_TEMPLATE_PATH,
-	        		WasdiConfig.s_oConfig.TOMCAT_USER);
+	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);

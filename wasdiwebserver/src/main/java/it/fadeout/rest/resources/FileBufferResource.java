@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.inject.Inject;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,7 +14,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -31,6 +29,7 @@ import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
@@ -53,13 +52,7 @@ import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
  */
 @Path("/filebuffer")
 public class FileBufferResource {
-	
-	/**
-	 * Servlet Config to access web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
-	
+		
 	/**
 	 * Providers Catalogue
 	 */
@@ -116,7 +109,7 @@ public class FileBufferResource {
 
 			String sUserId = oUser.getUserId();
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 
 			// if the provider is not specified, we fallback on the node default provider
 			DataProvider oProvider = null;
@@ -142,7 +135,7 @@ public class FileBufferResource {
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
@@ -196,7 +189,7 @@ public class FileBufferResource {
 			Utils.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", workspace: " + sWorkspaceId);
 			
 			// Get the full product path
-			String sFullProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+			String sFullProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			// Get the product
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -246,7 +239,7 @@ public class FileBufferResource {
 				return oReturnValue;
 			}
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 
 			PublishBandParameter oParameter = new PublishBandParameter();
 			oParameter.setQueue(sSessionId);
@@ -259,7 +252,7 @@ public class FileBufferResource {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
@@ -308,7 +301,7 @@ public class FileBufferResource {
 			}
 
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 			String sStyleSldPath = sDownloadRootPath + "styles/" + sStyle + ".sld";
 
 			File oFile = new File(sStyleSldPath);
@@ -369,7 +362,7 @@ public class FileBufferResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 
 			File oStylesPath = new File(sDownloadRootPath + "styles/");
 

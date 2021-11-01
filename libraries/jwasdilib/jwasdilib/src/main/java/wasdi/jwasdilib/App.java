@@ -6,18 +6,14 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.net.io.Util;
 
 /**
- * Hello world!
+ * Hello world!<6
  *
  */
 public class App 
@@ -190,7 +186,7 @@ public class App
         System.out.println(oLib.getWorkflows());
         System.out.println(oLib.getProductsByWorkspace(".dim"));
 
-        String sPath = oLib.getFullProductPath("S2A_MSIL1C_20190321T004701_N0207_R102_T53HPA_20190321T020838_NDVI.dim");
+        String sPath = oLib.getPath("S2A_MSIL1C_20190321T004701_N0207_R102_T53HPA_20190321T020838_NDVI.dim");
         System.out.println("File Path " + sPath);
         
         oLib.openWorkspace("FirstWS");
@@ -201,7 +197,7 @@ public class App
         System.out.println(oLib.getParam("MANCA"));
         
         long lStartTime = System.currentTimeMillis();
-        sPath = oLib.getFullProductPath("out.tif");
+        sPath = oLib.getPath("out.tif");
         System.out.println("Donwload Time: " + (System.currentTimeMillis() - lStartTime) + " ms");
         
         System.out.println("File Path " + sPath);
@@ -220,7 +216,7 @@ public class App
         
         oLib.setProcessPayload("3ed62fce-cb13-4da4-8ff7-a1d3e7f27fc6", "ciao");
         
-        System.out.println(oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190101T171426_20190101T171451_025287_02CC09_757C.zip"));
+        System.out.println(oLib.getPath("S1A_IW_GRDH_1SDV_20190101T171426_20190101T171451_025287_02CC09_757C.zip"));
           	
     }
     
@@ -241,7 +237,7 @@ public class App
     	    	
     	    	oLib.mosaic(asInputs, sOutputFile);
     	    	oLib.addFileToWASDI(sOutputFile);
-    	    	String sMosaic = oLib.getFullProductPath(sOutputFile);
+    	    	String sMosaic = oLib.getPath(sOutputFile);
     	    	System.out.println("Mosaic File : " + sMosaic);
     		}
     	}
@@ -267,7 +263,7 @@ public class App
     	
     	oLib.mosaic(asInputs, sOutputFile);
     	oLib.addFileToWASDI(sOutputFile);
-    	String sMosaic = oLib.getFullProductPath(sOutputFile);
+    	String sMosaic = oLib.getPath(sOutputFile);
     	System.out.println("Mosaic File : " + sMosaic);
     }
     
@@ -338,9 +334,9 @@ public class App
 //    	System.out.println(sResult);
 //    	sResult = oLib.getFullProductPath("S1A_WV_OCN__2SSV_20190117T081609_20190117T082514_025514_02D447_B7E3.zip");
 //    	System.out.println(sResult);
-    	sResult = oLib.getFullProductPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6.zip");
+    	sResult = oLib.getPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6.zip");
     	System.out.println(sResult);
-    	sResult = oLib.getFullProductPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6_ApplyOrbit.dim");
+    	sResult = oLib.getPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6_ApplyOrbit.dim");
     	System.out.println(sResult);
     }
     

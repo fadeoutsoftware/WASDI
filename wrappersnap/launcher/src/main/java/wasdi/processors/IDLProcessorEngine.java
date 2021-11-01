@@ -45,6 +45,12 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
     static  {
         s_oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
+    
+    public IDLProcessorEngine() {
+    	super();
+		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
+		m_sDockerTemplatePath += "idl";	    	
+    }
 
 	
 	public IDLProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {

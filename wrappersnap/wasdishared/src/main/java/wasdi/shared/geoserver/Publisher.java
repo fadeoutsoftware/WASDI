@@ -1,4 +1,4 @@
-package wasdi.geoserver;
+package wasdi.shared.geoserver;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 
@@ -21,8 +21,6 @@ public class Publisher {
     // Define a static logger variable so that it references the
     // Logger instance named "MyApp".
     static Logger s_oLogger = Logger.getLogger(Publisher.class);
-
-    public static String GDAL_Retile_Command = "gdal_retile.py -r bilinear -levels 4 -ps 2048 2048 -co TILED=YES";
     
     public long m_lMaxMbTiffPyramid = 50L;
 
@@ -59,7 +57,7 @@ public class Publisher {
             //fix permission
             Utils.fixUpPermissions(oTargetPath);
                             
-            String sCmd = String.format("%s -targetDir %s %s", GDAL_Retile_Command, sTargetDir, sInputFile);
+            String sCmd = String.format("%s -targetDir %s %s", WasdiConfig.Current.geoserver.gdalRetileCommand, sTargetDir, sInputFile);
 
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
 

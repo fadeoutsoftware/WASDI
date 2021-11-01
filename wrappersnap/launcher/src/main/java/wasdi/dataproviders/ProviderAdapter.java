@@ -22,7 +22,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
@@ -193,10 +192,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	        
 	        // TODO: Still needed? Really?
 			try {
-				DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("DHUS");
+				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
 				
-				sUser = oConfig.OSUser;
-				sPassword = oConfig.OSPwd;
+				sUser = oConfig.user;
+				sPassword = oConfig.password;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -224,8 +223,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
 
-			String sConnectionTimeout = WasdiConfig.s_oConfig.CONNECTION_TIMEOUT;
-			String sReadTimeOut = WasdiConfig.s_oConfig.READ_TIMEOUT;
+			String sConnectionTimeout = WasdiConfig.Current.connectionTimeout;
+			String sReadTimeOut = WasdiConfig.Current.readTimeout;
 
 			int iConnectionTimeOut = 10000;
 			int iReadTimeOut = 10000;
@@ -559,10 +558,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         
         // TODO: Still needed? Really?
 		try {
-			DataProviderConfig oConfig = WasdiConfig.s_oConfig.getDataProviderConfig("DHUS");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
 			
-			sUser = oConfig.OSUser;
-			sPassword = oConfig.OSPwd;
+			sUser = oConfig.user;
+			sPassword = oConfig.password;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -4,7 +4,6 @@ import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -25,12 +24,10 @@ import java.util.stream.Stream;
 
 // email, IP addresses (v4 and v6), domains and URL validators:
 import org.apache.commons.validator.routines.DomainValidator;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.UserSession;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -69,7 +66,7 @@ public class Utils {
     		.toString();
 	}
 	
-	public static String GetRandomName() {
+	public static String getRandomName() {
 		return UUID.randomUUID().toString();
 	}
 
@@ -81,24 +78,6 @@ public class Utils {
 
 	public static Date getDate(Long oLong) {
 		return new Date(oLong);
-	}
-
-	public static boolean isValidSession(UserSession oSession) {
-
-		if (oSession == null)
-			return false;
-		if (isNullOrEmpty(oSession.getUserId()))
-			return false;
-
-		Date oLastTouch = getDate(oSession.getLastTouch());
-
-		long lNow = new Date().getTime();
-		long lLastTouch = oLastTouch.getTime();
-
-		if ((lNow - lLastTouch) > s_iSessionValidityMinutes * 60 * 1000)
-			return false;
-
-		return true;
 	}
 
 	/**
@@ -162,17 +141,7 @@ public class Utils {
 			}
 		}
 	}
-
-	// XXX remove if not used
-	public static boolean isValidEmail(String sEmail) {
-		boolean bIsValid = false;
-		if (!isNullOrEmpty(sEmail)) {
-			bIsValid = EmailValidator.getInstance().isValid(sEmail);
-		}
-		return bIsValid;
-
-	}
-
+	
 	public static String getFormatDate(Date oDate) {
 
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
@@ -290,13 +259,6 @@ public class Utils {
 		return sPassword;
 	}
 
-	public static Boolean isFilePathPlausible(String sFullPath) {
-		if (isNullOrEmpty(sFullPath)) {
-			return false;
-		}
-
-		return true;
-	}
 
 	public static boolean isServerNamePlausible(String sServer) {
 		if (isNullOrEmpty(sServer)) {
@@ -356,20 +318,7 @@ public class Utils {
 				sString.equalsIgnoreCase("y")
 		);
 	}
-
-	public static void printToFile(String sFilePath, String sToBePrinted) {
-		if(null == sFilePath || null == sToBePrinted) {
-			throw new NullPointerException("printToFile: null pointer");
-		}
-		try( FileWriter oFileWeriter = new FileWriter(sFilePath) ) {
-			oFileWeriter.write(sToBePrinted);
-			oFileWeriter.flush();
-			//note: no need to close: closing resources is handled automatically by the try with resources
-		} catch (Exception oE) {
-			debugLog( "Utils.printToFile: " + oE );
-		}
-	}
-
+	
 	/**
 	 * Confert a Polygon WKT String in a set of Lat Lon Points comma separated
 	 * 
@@ -408,14 +357,6 @@ public class Utils {
 		return sOutput;
 
 	}
-
-	public static boolean isPlausibleHttpUrl(String sUrl) {
-		if (isNullOrEmpty(sUrl)) {
-			return false;
-		}
-		return (sUrl.startsWith("https://") || sUrl.startsWith("http://"));
-	}
-	
 	
 	//////////////////////// All about log
 	

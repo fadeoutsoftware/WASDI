@@ -1,8 +1,5 @@
 package wasdi.operations;
 
-import java.io.IOException;
-
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.shared.LauncherOperations;
@@ -96,10 +93,10 @@ public class Readmetadata extends Operation {
         try {
 
             // Get Metadata Path a Random File Name
-            String sMetadataPath = WasdiConfig.s_oConfig.paths.METADATA_PATH;
+            String sMetadataPath = WasdiConfig.Current.paths.metadataPath;
             if (!sMetadataPath.endsWith("/"))
                 sMetadataPath += "/";
-            String sMetadataFileName = Utils.GetRandomName();
+            String sMetadataFileName = Utils.getRandomName();
 
             m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: file = " + sMetadataFileName);
 

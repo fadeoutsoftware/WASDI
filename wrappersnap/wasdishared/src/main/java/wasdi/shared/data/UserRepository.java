@@ -228,7 +228,7 @@ public class UserRepository extends  MongoRepository{
     }
 
 	public long countUsers() {
-		return getCollection(m_sThisCollection).count();
+		return getCollection(m_sThisCollection).countDocuments();
 		
 	}
 

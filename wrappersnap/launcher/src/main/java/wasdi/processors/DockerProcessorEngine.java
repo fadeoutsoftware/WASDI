@@ -34,6 +34,10 @@ import wasdi.shared.utils.ZipExtractor;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
+	public DockerProcessorEngine() {
+		super();
+	}
+	
     public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
         super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
     }
