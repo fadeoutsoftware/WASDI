@@ -205,7 +205,6 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 		
 		String sUrl = "";
 		try {
-			//sQuery = URLEncoder.encode(sQuery, "UTF-8");
 			sUrl = "https://sobloo.eu/api/v1/services/explore/explore/catalog/_count?" + translateAndEncodeParams(sQuery);
 		} catch (Exception oE) {
 			Utils.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
