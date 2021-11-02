@@ -563,7 +563,7 @@ public class WasdiLib {
 			m_oParametersReader = new ParametersReader(m_sParametersFilePath);
 			m_aoParams = m_oParametersReader.getParameters();
 
-			if (internalInit()) {
+			if (internalInit(getUser(), getPassword(), getSessionId())) {
 
 				if (m_sActiveWorkspace == null || m_sActiveWorkspace.equals("")) {
 
@@ -602,26 +602,29 @@ public class WasdiLib {
 	 * Base Path
 	 * User
 	 * Password or SessionId
+	 * @param sUser
+	 * @param sPassword
+	 * @param sSessionId
 	 * @return
 	 */
-	public boolean internalInit() {
+	public boolean internalInit(String sUser, String sPassword, String sSessionId) {
 		log("WasdiLib.internalInit");
 		try {
 
 			log("jWASDILib Init");
 
 			// User Name Needed 
-			if (m_sUser == null) return false;
+			if (sUser == null) return false;
 
-			log("User not null " + m_sUser);
+			log("User not null " + sUser);
 
 			// Is there a password?
-			if (m_sPassword != null && !m_sPassword.equals("")) {
+			if (sPassword != null && !sPassword.equals("")) {
 
 				log("Password not null. Try to login");
 
 				// Try to log in
-				String sResponse = login(m_sUser, m_sPassword);
+				String sResponse = login(sUser, sPassword);
 
 				// Get JSON
 				Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -630,19 +633,19 @@ public class WasdiLib {
 
 				if (aoJSONMap.containsKey("sessionId")) {
 					// Got Session
-					m_sSessionId = (String) aoJSONMap.get("sessionId");
+					sSessionId = (String) aoJSONMap.get("sessionId");
 
-					log("User logged: session ID " + m_sSessionId);
+					log("User logged: session ID " + sSessionId);
 
 					return true;
 				}				
 			}
-			else if (m_sSessionId != null) {
+			else if (sSessionId != null) {
 
-				log("Check Session: session ID " + m_sSessionId);
+				log("Check Session: session ID " + sSessionId);
 
 				// Check User supplied Session
-				String sResponse = checkSession(m_sSessionId);
+				String sResponse = checkSession(sSessionId);
 
 				// Get JSON
 				Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
@@ -653,7 +656,7 @@ public class WasdiLib {
 
 				// Check if session and user id are the same
 				if (aoJSONMap.containsKey("userId")) {
-					if (((String)aoJSONMap.get("userId")).equals(m_sUser)) {
+					if (((String)aoJSONMap.get("userId")).equals(sUser)) {
 						log("Check Session: session ID OK");
 						return true;
 					}
@@ -706,11 +709,11 @@ public class WasdiLib {
 	 * @param sPassword
 	 * @return
 	 */
-	public String login(String sUser, String sPassword) {
+	protected String login(String sUser, String sPassword) {
 		try {
-			String sUrl = m_sBaseUrl + "/auth/login";
+			String sUrl = getBaseUrl() + "/auth/login";
 
-			String sPayload = "{\"userId\":\"" + m_sUser + "\",\"userPassword\":\"" + m_sPassword + "\" }";
+			String sPayload = "{\"userId\":\"" + sUser + "\",\"userPassword\":\"" + sPassword + "\" }";
 
 			Map<String, String> aoHeaders = new HashMap<String, String>();
 
