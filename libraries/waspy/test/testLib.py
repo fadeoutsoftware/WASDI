@@ -27,7 +27,9 @@ class testWaspy(unittest.TestCase):
     def setUp(self):
         # init library
         wasdi.init("./config.json")
-        wasdi.setBaseUrl("https://test.wasdi.net/wasdiwebserver/rest")
+        URL = "https://test.wasdi.net/wasdiwebserver/rest"
+        print("swapping Base url to " + URL)
+        wasdi.setBaseUrl(URL)
         wasdi.setWorkspaceBaseUrl("https://test.wasdi.net/wasdiwebserver/rest")
 
     def test_createAndDeleteWorkspace(self):
@@ -139,8 +141,12 @@ class testWaspy(unittest.TestCase):
         if(len(eo_images) > 0):
             wasdi.importProduct(eo_images[0], "LSA")
             # The file should be available in the active workspace
+            # this is problematic -> it requires a bit of time to complete so need
             self.assertTrue(wasdi.getProductsByActiveWorkspace().__contains__(productName))
 
+    def test_CheckProdcutExistOnWasdi(self):
+        aoProductList = wasdi.getProductsByActiveWorkspace()
+        self.assertTrue("S2B_MSIL1C_20211015T101029_N0301_R022_T32TQR_20211015T121549.zip" in aoProductList)
 
     def test_WaitForProcessesEmptyList(self):
         ''' Checks that, if the list passed to the methods is empty,
