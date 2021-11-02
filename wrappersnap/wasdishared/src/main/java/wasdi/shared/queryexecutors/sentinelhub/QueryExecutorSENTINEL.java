@@ -43,7 +43,7 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 	
 	@Override
 	protected Template getTemplate() {
-		return new Template("{scheme}://{-append|.|host}scihub.copernicus.eu{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
+		return new Template("{scheme}://{-append|.|host}apihub.copernicus.eu{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 	}
 
 	@Override	
@@ -58,7 +58,7 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		return "https://scihub.copernicus.eu/dhus/search?q=" + sQuery; 
+		return "https://apihub.copernicus.eu/dhus/search?q=" + sQuery; 
 	}
 
 	@Override
