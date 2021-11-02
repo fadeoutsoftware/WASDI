@@ -2751,7 +2751,7 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
               '  ******************************************************************************')
         return ''
 
-    sUrl = m_sBaseUrl + "/processing/geometric/multisubset?source=" + sInputFile + "&name=" + \
+    sUrl = m_sBaseUrl + "/processing/multisubset?source=" + sInputFile + "&name=" + \
            sInputFile + "&workspace=" + m_sActiveWorkspace
 
     if m_bIsOnServer:
