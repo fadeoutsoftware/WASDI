@@ -441,4 +441,61 @@ public class WasdiLibTest {
 
 	}
 
+	@Test
+	public void wasdiLogTest() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+		wasdiLib.setIsOnServer(true);
+
+		String sWorkspaceBaseUrl = wasdiLib.getBaseUrl();
+		wasdiLib.setWorkspaceBaseUrl(sWorkspaceBaseUrl);
+
+		String sMyProcId = "someProcessId";
+		wasdiLib.setMyProcId(sMyProcId);
+
+		String sLogRow = "some log row";
+
+		String sPostUrl =  wasdiLib.getBaseUrl() + "/processors/logs/add?processworkspace=" + sMyProcId;
+		String sPayload = sLogRow;
+
+		String fixedPostResponse = "";
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sPostUrl, sPayload, asHeaders);
+
+		wasdiLib.wasdiLog(sLogRow);
+
+		verify(wasdiLib, times(1)).httpPost(sPostUrl, sPayload, asHeaders);
+	}
+
+	@Test
+	public void loginTest() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+//		wasdiLib.setIsOnServer(true);
+
+//		String sWorkspaceBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest/";
+//		wasdiLib.setWorkspaceBaseUrl(sWorkspaceBaseUrl);
+
+		String sUser = "someUser";
+		String sPassword = "somePassword";
+		String sName = "Name";
+		String sSurname = "Surname";
+		String sEmail = "name.surname@wasdi.cloud";
+		String sSessionId = "some-session-id";
+
+		String sPostUrl =  wasdiLib.getBaseUrl() + "/auth/login";
+		String sPayload = "{\"userId\":\"" + sUser + "\",\"userPassword\":\"" + sPassword + "\" }";
+		
+
+		Map<String, String> asHeaders = new HashMap<>();
+		asHeaders.put("Content-Type", "application/json");
+
+		String fixedPostResponse = "{\"authProvider\":\"keycloak\",\"description\":null,\"link\":null,\"name\":\"" + sName + "\",\"sessionId\":\"" + sSessionId + "\",\"surname\":\"" + sSurname + "\",\"userId\":\"" + sEmail + "\"}";
+		doReturn(fixedPostResponse).when(wasdiLib).httpPost(sPostUrl, sPayload, asHeaders);
+
+		String expectedResponse = fixedPostResponse;
+		String actualResponse = wasdiLib.login(sUser, sPassword);
+
+		Assert.assertEquals(expectedResponse, actualResponse);
+
+		verify(wasdiLib, times(1)).httpPost(sPostUrl, sPayload, asHeaders);
+	}
+
 }
