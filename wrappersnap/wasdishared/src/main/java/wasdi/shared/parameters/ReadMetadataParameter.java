@@ -1,5 +1,11 @@
 package wasdi.shared.parameters;
 
+/**
+ * Parameter of the READMETADATA Operation
+ * 
+ * @author p.campanella
+ *
+ */
 public class ReadMetadataParameter extends BaseParameter {
 	
 	/**

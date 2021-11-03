@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -26,7 +25,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -47,6 +45,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.WorkflowSharing;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkflowSharingRepository;
@@ -75,12 +74,6 @@ import wasdi.shared.viewmodels.workflows.WorkflowSharingViewModel;
  */
 @Path("workflows")
 public class WorkflowsResource {
-	
-	/**
-	 * Servlet Config to access web.xml file
-	 */
-    @Context
-    ServletConfig m_oServletConfig;
     
     /**
      * Upload and save a new SNAP Workflow using a XML file
@@ -117,7 +110,7 @@ public class WorkflowsResource {
             String sUserId = oUser.getUserId();
 
             // Get Download Path
-            String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+            String sDownloadRootPath = Wasdi.getDownloadPath();
 
             File oWorkflowsPath = new File(sDownloadRootPath + "workflows/");
 
@@ -229,7 +222,7 @@ public class WorkflowsResource {
             if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
             // Get Download Path
-            String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+            String sDownloadRootPath = Wasdi.getDownloadPath();
 
             Utils.debugLog("WorkflowsResource.updateFile: download path " + sDownloadRootPath);
 
@@ -372,7 +365,7 @@ public class WorkflowsResource {
             }
 
             // Get Download Path
-            String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+            String sDownloadRootPath = Wasdi.getDownloadPath();
 
             File oWorkflowsFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
 
@@ -586,7 +579,7 @@ public class WorkflowsResource {
                 return Response.status(Status.FORBIDDEN).build();
             }
             // Get Download Path on the current WASDI instance
-            String sBasePath = Wasdi.getDownloadPath(m_oServletConfig);
+            String sBasePath = Wasdi.getDownloadPath();
             sBasePath += "workflows/";
             String sWorkflowFilePath = sBasePath + oWorkflow.getWorkflowId() + ".xml";
 
@@ -713,7 +706,7 @@ public class WorkflowsResource {
             Utils.debugLog("WorkflowsResource.shareWorkflow: Workflow" + sWorkflowId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
             try {
-                String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+                String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
                 if (Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
                     Utils.debugLog("WorkflowsResource.shareWorkflow: sMercuriusAPIAddress is null");
@@ -725,7 +718,7 @@ public class WorkflowsResource {
 
                     oMessage.setTilte(sTitle);
 
-                    String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+                    String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
                     if (sSender == null) {
                         sSender = "wasdi@wasdi.net";
                     }
@@ -958,14 +951,14 @@ public class WorkflowsResource {
                 }
             }
 
-            String sBasePath = Wasdi.getDownloadPath(m_oServletConfig);
+            String sBasePath = Wasdi.getDownloadPath();
             String sWorkflowPath = sBasePath + "workflows/" + oWF.getWorkflowId() + ".xml";
             File oWorkflowFile = new File(sWorkflowPath);
 
             if (!oWorkflowFile.exists()) {
                 Utils.debugLog("WorkflowsResource.run: Workflow file not on this node. Try 	to download it");
 
-                String sDownloadedWorkflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId, m_oServletConfig);
+                String sDownloadedWorkflowPath = Wasdi.downloadWorkflow(oWF.getNodeUrl(), oWF.getWorkflowId(), sSessionId);
 
                 if (Utils.isNullOrEmpty(sDownloadedWorkflowPath)) {
                     Utils.debugLog("Error downloading workflow. Return error");
@@ -1002,7 +995,7 @@ public class WorkflowsResource {
                 }
 
                 try {
-                    String sProcessObjId = Utils.GetRandomName();
+                    String sProcessObjId = Utils.getRandomName();
 
                     // Create Operator instance
                     OperatorParameter oParameter = new GraphParameter();
@@ -1020,7 +1013,7 @@ public class WorkflowsResource {
                     oParameter.setSettings(oGraphSettings);
 
                     // Serialization Path
-                    String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+                    String sPath = WasdiConfig.Current.paths.serializationPath;
 
                     return Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.GRAPH.toString(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
 
@@ -1077,7 +1070,7 @@ public class WorkflowsResource {
             SnapWorkflow oSnapWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
             // Take path
-            String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+            String sDownloadRootPath = Wasdi.getDownloadPath();
             String sWorkflowXmlPath = sDownloadRootPath + "workflows/" + sWorkflowId + ".xml";
 
             File oFile = new File(sWorkflowXmlPath);

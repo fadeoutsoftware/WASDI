@@ -1,6 +1,5 @@
 package wasdi.operations;
 
-import wasdi.ConfigReader;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
@@ -26,10 +25,7 @@ public class Runprocessor extends Operation {
 		try {
 	        // Execute User Processor
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
-	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
-	                ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-	                ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
-	                ConfigReader.getPropValue("TOMCAT_USER", "tomcat8"));
+	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);

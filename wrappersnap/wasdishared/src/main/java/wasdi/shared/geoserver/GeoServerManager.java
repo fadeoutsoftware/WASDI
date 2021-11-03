@@ -18,6 +18,7 @@ import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -44,6 +45,10 @@ public class GeoServerManager {
     	if (!m_oGsReader.existsWorkspace(m_sWorkspace)) {
     		m_oGsPublisher.createWorkspace(m_sWorkspace);
     	}
+    }
+    
+    public GeoServerManager() throws MalformedURLException {
+    	this(WasdiConfig.Current.geoserver.address, WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
     }
     
     public String getLayerBBox(String sLayerId) {

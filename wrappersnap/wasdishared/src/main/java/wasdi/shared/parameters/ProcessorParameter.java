@@ -4,6 +4,17 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Parameter for the Processor related Operations:
+ * 	.RUNPROCESSOR
+ * 	.DEPLOYPROCESSOR
+ * 	.RUNIDL	
+ * 	.REDEPLOYPROCESSOR
+ * 	.LIBRARYUPDATE
+ * 	.DELETEPROCESSOR
+ * @author p.campanella
+ *
+ */
 public class ProcessorParameter extends BaseParameter {
 	/**
 	 * Name of the processor

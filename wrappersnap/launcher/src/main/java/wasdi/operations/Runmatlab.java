@@ -5,10 +5,9 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-import wasdi.ConfigReader;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 
@@ -32,26 +31,14 @@ public class Runmatlab extends Operation {
         try {
         	
         	MATLABProcParameters oParameter = (MATLABProcParameters) oParam; 
-
-            if (oProcessWorkspace != null) {
-
-                oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
-                oProcessWorkspace.setProgressPerc(0);
-                // update the process
-                m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
-                // send update process message
-                if (m_oSendToRabbit != null && !m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-                    m_oLocalLogger.debug("Runmatlab.executeOperation: Error sending rabbitmq message to update process list");
-                }
-            }
-
-            String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+        	
+            String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
 
             if (!sBasePath.endsWith("/")) sBasePath += "/";
 
             String sRunPath = sBasePath + "processors/" + oParameter.getProcessorName() + "/run_" + oParameter.getProcessorName() + ".sh";
 
-            String sMatlabRunTimePath = ConfigReader.getPropValue("MATLAB_RUNTIME_PATH", "/usr/local/MATLAB/MATLAB_Runtime/v95");
+            String sMatlabRunTimePath = WasdiConfig.Current.paths.matlabRuntimePath;
             String sConfigFilePath = sBasePath + "processors/" + oParameter.getProcessorName() + "/config.properties";
 
             String asCmd[] = new String[]{sRunPath, sMatlabRunTimePath, sConfigFilePath};
@@ -74,28 +61,20 @@ public class Runmatlab extends Operation {
             if (oProc.waitFor() == 0) {
                 // ok
                 m_oLocalLogger.debug("Runmatlab.executeOperation: process done with code 0");
-                if (oProcessWorkspace != null)
-                    oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
                 
                 return true;
             } else {
                 // error
                 m_oLocalLogger.debug("Runmatlab.executeOperation: process done with code != 0");
-                if (oProcessWorkspace != null)
-                    oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
                 
                 return false;
-
             }
 
         } catch (Exception oEx) {
             m_oLocalLogger.error("Runmatlab.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            if (oProcessWorkspace != null)
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.RUNMATLAB.name(), oParam.getWorkspace(), sError, oParam.getExchange());
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.RUNMATLAB.name(), oParam.getWorkspace(), sError, oParam.getExchange());
 
         } 
         

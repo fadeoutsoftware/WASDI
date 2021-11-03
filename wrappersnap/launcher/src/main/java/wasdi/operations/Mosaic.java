@@ -7,7 +7,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
-import wasdi.shared.payload.MosaicPayload;
+import wasdi.shared.payloads.MosaicPayload;
 import wasdi.shared.utils.EndMessageProvider;
 
 public class Mosaic extends Operation {
@@ -30,23 +30,16 @@ public class Mosaic extends Operation {
         try {
         	MosaicParameter oParameter = (MosaicParameter) oParam;
         	
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-            }
-
-            m_oProcessWorkspaceLogger.log("Creating Mosaic Util");
-
-            wasdi.snapopearations.Mosaic oMosaic = new wasdi.snapopearations.Mosaic(oParameter);
+        	wasdi.snapopearations.Mosaic oMosaic = new wasdi.snapopearations.Mosaic(oParameter);
             // Set the proccess workspace logger
             oMosaic.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 
             // Run the gdal mosaic
             if (oMosaic.runGDALMosaic()) {
                 m_oLocalLogger.debug("Mosaic.executeOperation done");
-                if (oProcessWorkspace != null) {
-                    oProcessWorkspace.setProgressPerc(100);
-                    oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-                }
+                
+                oProcessWorkspace.setProgressPerc(100);
+                oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
                 // Log here and to the user
                 m_oLocalLogger.debug("Mosaic.executeOperation adding product to Workspace");
@@ -68,7 +61,9 @@ public class Mosaic extends Operation {
                     MosaicSetting oSettings = (MosaicSetting) oParameter.getSettings();
                     oMosaicPayload.setOutput(oParameter.getDestinationProductName());
                     oMosaicPayload.setInputs(oSettings.getSources().toArray(new String[0]));
-                    oProcessWorkspace.setPayload(LauncherMain.s_oMapper.writeValueAsString(oMosaicPayload));
+                    
+                    setPayload(oProcessWorkspace, oMosaicPayload);
+                    
                 } catch (Exception oPayloadException) {
                     m_oLocalLogger.error("Mosaic.executeOperation: Exception creating operation payload: ", oPayloadException);
                 }
@@ -79,22 +74,19 @@ public class Mosaic extends Operation {
             } else {
                 // error
                 m_oLocalLogger.debug("Mosaic.executeOperation: error");
-                if (oProcessWorkspace != null)
-                    oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
                 
                 return false;
             }
 
-        } catch (Exception oEx) {
-            m_oLocalLogger.error("Mosaic.executeOperation: exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            if (oProcessWorkspace != null)
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+        } 
+        catch (Exception oEx) {
+            m_oLocalLogger.error("Mosaic.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            
+            oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MOSAIC.name(), oParam.getWorkspace(),
-                        sError, oParam.getExchange());
+            
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MOSAIC.name(), oParam.getWorkspace(), sError, oParam.getExchange());
 
         }
         

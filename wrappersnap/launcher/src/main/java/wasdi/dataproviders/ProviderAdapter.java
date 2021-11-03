@@ -22,13 +22,14 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
@@ -185,9 +186,20 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			}
 
 			String sReturnFilePath = "";
-
-			String sUser = ConfigReader.getPropValue("DHUS_USER");
-			String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+			
+	        String sUser = "";
+	        String sPassword = "";
+	        
+	        // TODO: Still needed? Really?
+			try {
+				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
+				
+				sUser = oConfig.user;
+				sPassword = oConfig.password;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 
 			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
 			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
@@ -210,24 +222,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			});
 
 			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
-
-			String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
-			String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
-
-			int iConnectionTimeOut = 10000;
-			int iReadTimeOut = 10000;
-
-			try {
-				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
-			} catch (Exception oEx) {
-				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: connection timed out: " + oEx);
-			}
-			try {
-				iReadTimeOut = Integer.parseInt(sReadTimeOut);
-			} catch (Exception oEx) {
-				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: read timed out: " + oEx);
-			}
-
+			
+			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
+			int iReadTimeOut = WasdiConfig.Current.readTimeout;
+			
 			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connection Created");
@@ -543,10 +541,14 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         
         String sUser = "";
         String sPassword = "";
+        
+        // TODO: Still needed? Really?
 		try {
-			sUser = ConfigReader.getPropValue("DHUS_USER");
-			sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
-		} catch (IOException e) {
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
+			
+			sUser = oConfig.user;
+			sPassword = oConfig.password;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
         

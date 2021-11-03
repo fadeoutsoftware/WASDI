@@ -11,8 +11,9 @@ import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -26,7 +27,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		super();
 
 		try {
-			String sFile = ConfigReader.getPropValue("PROBAV_FILE_DESCRIPTORS");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("PROBAV");
+			
+			String sFile = oConfig.fileDescriptors;
 
 			m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);
 
@@ -353,24 +356,10 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			final String sFinalPassword = m_sProviderPassword;
 
 			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
-
-			String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
-			String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
-
-			int iConnectionTimeOut = 10000;
-			int iReadTimeOut = 10000;
-
-			try {
-				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
-			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			}
-			try {
-				iReadTimeOut = Integer.parseInt(sReadTimeOut);
-			} catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			}
-
+			
+			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
+			int iReadTimeOut = WasdiConfig.Current.readTimeout;
+			
 			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: Connection Created");

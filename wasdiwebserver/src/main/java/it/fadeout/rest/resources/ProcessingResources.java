@@ -2,21 +2,30 @@ package it.fadeout.rest.resources;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.User;
-import wasdi.shared.parameters.*;
-import wasdi.shared.parameters.settings.*;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.parameters.MosaicParameter;
+import wasdi.shared.parameters.MultiSubsetParameter;
+import wasdi.shared.parameters.OperatorParameter;
+import wasdi.shared.parameters.RegridParameter;
+import wasdi.shared.parameters.Sen2CorParameter;
+import wasdi.shared.parameters.SubsetParameter;
+import wasdi.shared.parameters.settings.ISetting;
+import wasdi.shared.parameters.settings.MosaicSetting;
+import wasdi.shared.parameters.settings.MultiSubsetSetting;
+import wasdi.shared.parameters.settings.RegridSetting;
+import wasdi.shared.parameters.settings.SubsetSetting;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -36,12 +45,6 @@ import wasdi.shared.viewmodels.PrimitiveResult;
  */
 @Path("/processing")
 public class ProcessingResources {
-	
-	/**
-	 * Servlet Config to access web.xml file
-	 */
-    @Context
-    ServletConfig m_oServletConfig;
     
     /**
      * Trigger mosaic operation
@@ -169,7 +172,7 @@ public class ProcessingResources {
                     return Response.status(Status.UNAUTHORIZED).build();
 
                 }
-                String sProcessObjId = Utils.GetRandomName();
+                String sProcessObjId = Utils.getRandomName();
                 Sen2CorParameter oParameter = new Sen2CorParameter();
                 oParameter.setProductName(sProductName);
                 oParameter.setWorkspace(sWorkspaceId);
@@ -178,8 +181,7 @@ public class ProcessingResources {
                 oParameter.setExchange(sWorkspaceId);
 
                 Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
-                String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-                //(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+                String sPath = WasdiConfig.Current.paths.serializationPath;
 
                 PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
                 Utils.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
@@ -230,7 +232,7 @@ public class ProcessingResources {
         try {
             // Update process list
 
-            sProcessObjId = Utils.GetRandomName();
+            sProcessObjId = Utils.getRandomName();
 
             // Create Operator instance
             OperatorParameter oParameter = getParameter(oOperation);
@@ -255,7 +257,7 @@ public class ProcessingResources {
             if (oSetting != null) oParameter.setSettings(oSetting);
 
             // Serialization Path
-            String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+            String sPath = WasdiConfig.Current.paths.serializationPath;
 
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
 
@@ -346,7 +348,7 @@ public class ProcessingResources {
             // Deserialize the parameter received in the Body
             oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
             
-            String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+            String sPath = WasdiConfig.Current.paths.serializationPath;
             
             // Make Wasdi handle this request: this should be in this node...
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationType, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);

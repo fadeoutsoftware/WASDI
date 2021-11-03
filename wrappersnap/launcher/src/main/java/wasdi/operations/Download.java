@@ -21,13 +21,32 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
-import wasdi.shared.payload.DownloadPayload;
+import wasdi.shared.payloads.DownloadPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
+/**
+ * Download Operation
+ * 
+ * Use a DownloadFileParameter
+ * 
+ * This operation takes in input the url and credentials of a data provider 
+ * and get the image from there.
+ * 
+ * First the operation search for an already existing copy of the file in the local node and 
+ * if it is present it just makes a copy.
+ * 
+ * If not available the DataProvider object is demanded to take the file.
+ * 
+ * After the file is available, the operation try to read to the file to get the View Model.
+ * 
+ * If everything is ok the file is added to the Db in DownloadedFile table and is added to the workspace.
+ * 
+ * @author p.campanella
+ *
+ */
 public class Download extends Operation implements ProcessWorkspaceUpdateSubscriber {
 
 	@Override
@@ -51,9 +70,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         	
         	DownloadFileParameter oParameter = (DownloadFileParameter) oParam;
         	
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-
-            m_oLocalLogger.debug("Download.executeOperation: Download Start");
             m_oProcessWorkspaceLogger.log("Fetch Start - PROVIDER " + oParameter.getProvider());
 
             ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
@@ -67,6 +83,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
             
             oProviderAdapter.setProcessWorkspace(oProcessWorkspace);
+            
             // get file size
             long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
             // set file size
@@ -74,8 +91,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             
             String sDownloadPath = LauncherMain.getWorkspacePath(oParameter);
-
-            m_oLocalLogger.debug("Download.executeOperationPath: " + sDownloadPath);
 
             // Product view Model
             ProductViewModel oVM = null;
@@ -87,16 +102,19 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             DownloadedFile oAlreadyDownloaded = null;
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-
+            
+            // If we have the name of the file
             if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
 
                 // First check if it is already in this workspace:
                 oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
 
                 if (oAlreadyDownloaded == null) {
-
+                	
+                	// Check if it is already downloaded, in any workpsace
+                	
                     m_oLocalLogger.debug("Download.executeOperation: Product NOT found in the workspace, search in other workspaces");
-                    // Check if it is already downloaded, in any workpsace
+                    
                     List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
 
                     // Check if any of this is in this node
@@ -108,33 +126,16 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                             break;
                         }
                     }
-
-                } else {
-
-                    File oAlreadyDownloadedFileCheck = new File(oAlreadyDownloaded.getFilePath());
-
-                    if (oAlreadyDownloadedFileCheck.exists() == false) {
-
-                	  // If the case is S5P, check also the existence of the .nc file
-                	  if (sFileNameWithoutPath.startsWith("S5P")) {
-                  		String sNcFilePath = oAlreadyDownloaded.getFilePath().replace(".zip", ".nc");
-                  		oAlreadyDownloadedFileCheck = new File(sNcFilePath);
-
-                  		if (oAlreadyDownloadedFileCheck.exists() == false) {
-                  			m_oLocalLogger.debug("Download.executeOperation: Product already found in the database but the file does not exists in the node");
-                  			oAlreadyDownloaded = null;
-                  		} else {
-                  			m_oLocalLogger.debug("Download.executeOperation: Product already found in the node with the .nc extension");
-                  		}
-                	  
-                	  } else {
-                    	  m_oLocalLogger.debug("Download.executeOperation: Product already found in the database but the file does not exists in the node");
-	                      oAlreadyDownloaded = null;
-                	  }
-                  } else {
-                      m_oLocalLogger.debug("Download.executeOperation: Product already found in the node");
-                  }
-                    
+                }
+                else {
+                	File oAlreadyDownloadedFileCheck = new File(oAlreadyDownloaded.getFilePath());
+                	if (oAlreadyDownloadedFileCheck.exists() == false) {
+                  	  	m_oLocalLogger.debug("Download.executeOperation: Product found in the database but the file does not exists in the node");
+                  	  	oAlreadyDownloaded = null;
+                	}
+                	else {
+                		m_oLocalLogger.debug("Download.executeOperation: Product already found in the node");
+                	}
                 }
             }
 
@@ -148,14 +149,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         m_oLocalLogger.debug("Download.executeOperation: Error during process update with file name");
 
                     // send update process message
-                    if (m_oSendToRabbit != null && !m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                    if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
                         m_oLocalLogger.debug("Download.executeOperation: Error sending rabbitmq message to update process list");
                     }
                 } else {
                     m_oLocalLogger.error("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
                 }
 
-                // No: it isn't: download it
+                // Download the File
                 sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
                 if (Utils.isNullOrEmpty(sFileName)) {
@@ -180,59 +181,18 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 // Control Check for the file Name
                 sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
 
-                if (sFileNameWithoutPath.startsWith("S3") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
-                    m_oLocalLogger.debug("Download.executeOperation: File is a Sentinel 3 image, start unzip");
-                    ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
-                    oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
-                    String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", ".SEN3");
-                    m_oLocalLogger.debug("Download.executeOperation: Unzip done, folder name: " + sFolderName);
-                    sFileName = sFolderName + "/" + "xfdumanifest.xml";
-                    m_oLocalLogger.debug("Download.executeOperation: File Name changed in: " + sFileName);
-                }
-				
-				if (sFileNameWithoutPath.startsWith("S5P") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
-					m_oLocalLogger.debug("Download.executeOperation: File is a Sentinel 5P image, start unzip");
-					
-//						ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
-//						oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameWithoutPath, sDownloadPath);
-
-					String sSourceFilePath = sDownloadPath + File.separator + sFileNameWithoutPath;
-					String sTargetDirectoryPath = sDownloadPath;
-
-					File oSourceFile = new File(sSourceFilePath);
-					File oTargetDirectory = new File(sTargetDirectoryPath);
-					WasdiFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
-
-					String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", "");
-					m_oLocalLogger.debug("Download.executeOperation: Unzip done, folder name: " + sFolderName);
-					
-					sFileName = sFolderName + ".nc";
-					sFileNameWithoutPath = sFileNameWithoutPath.replace(".zip", ".nc");
-					m_oLocalLogger.debug("Download.executeOperation: File Name changed in: " + sFileName);
-				}					
-
                 // Get The product view Model
-                File oProductFile = new File(sFileName);
-				WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
+				WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(new File(sFileName));
+				sFileName = oReadProduct.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
+				File oProductFile = new File(sFileName);
+				
+				//P.Campanella 24/10/2021: this can lead to an error for S3 images. All are named xfdumanifest.xml
+				// Need to be checked and fixed some how
+				sFileNameWithoutPath = oProductFile.getName(); 
 				
 				Product oProduct = oReadProduct.getSnapProduct();
 				oVM = oReadProduct.getProductViewModel();
-
-                if (oVM != null) {
-                    // Snap set the name of geotiff files as geotiff: let replace with the file name
-                    if (oVM.getName().equals("geotiff")) {
-                        oVM.setName(oVM.getFileName());
-                    }
-                }
-
-                // Save Metadata
-                //oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
-
-                if (Utils.isNullOrEmpty(sFileNameWithoutPath)) {
-                    sFileNameWithoutPath = oProductFile.getName();
-                    m_oLocalLogger.debug("Download.executeOperation: sFileNameWithoutPath still null, forced to: " + sFileNameWithoutPath);
-                }
-
+				
                 // Save it in the register
                 oAlreadyDownloaded = new DownloadedFile();
                 oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
@@ -259,6 +219,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                 oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());
                 oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
+                
             } else {
                 m_oLocalLogger.debug("Download.executeOperation: File already downloaded: make a copy");
 
@@ -285,8 +246,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 }
 
             } 
-
+            
+            // Final Check: do we have at the end a valid file name?
             if (Utils.isNullOrEmpty(sFileName)) {
+            	
+            	// No, we are in error
                 m_oLocalLogger.debug("Download.executeOperation: file is null there must be an error");
 
                 String sError = "The name of the file to download result null";
@@ -294,34 +258,26 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
                 
                 return false;
-            } else {
+            } 
+            
+            // Ok, add the product to the db
+            addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
 
-                addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
+            m_oProcessWorkspaceLogger.log("Operation Completed");
+            m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
 
-                m_oLocalLogger.debug("Download.executeOperation: Add Product to Db and Send to Rabbit Done");
+            DownloadPayload oDownloadPayload = new DownloadPayload();
+            oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
+            oDownloadPayload.setProvider(oParameter.getProvider());
 
-                m_oLocalLogger.debug("Download.executeOperation: Set process workspace state as done");
-
-                oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-
-                m_oProcessWorkspaceLogger.log("Operation Completed");
-                m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
-
-                DownloadPayload oDownloadPayload = new DownloadPayload();
-                oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
-                oDownloadPayload.setProvider(oParameter.getProvider());
-
-                try {
-                    String sPayload = LauncherMain.s_oMapper.writeValueAsString(oDownloadPayload);
-                    oProcessWorkspace.setPayload(sPayload);
-                } catch (Exception oPayloadEx) {
-                    m_oLocalLogger.error("Download.executeOperation: payload exception: " + oPayloadEx.toString());
-                }
-
-                m_oLocalLogger.debug("Download.executeOperation: Set process workspace passed");
-            }
+            setPayload(oProcessWorkspace, oDownloadPayload);
+            
+            m_oLocalLogger.debug("Download.executeOperation: operation done");
+            
+            return true;
+            
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	
             m_oLocalLogger.error("Download.executeOperation: Exception "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
@@ -333,7 +289,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
         m_oLocalLogger.debug("Download.executeOperation: return file name " + sFileName);
 
-        return true;		
+        return false;
 		
 	}
 	

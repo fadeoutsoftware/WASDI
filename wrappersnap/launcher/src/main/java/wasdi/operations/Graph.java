@@ -3,7 +3,6 @@ package wasdi.operations;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.snapopearations.WasdiGraph;
@@ -26,10 +25,9 @@ public class Graph extends Operation {
 		}
 		
         try {
-        	
         	GraphParameter oGraphParams = (GraphParameter) oParam;
         	
-            WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, m_oSendToRabbit, m_oProcessWorkspaceLogger, oProcessWorkspace);
+            WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, this, oProcessWorkspace);
             oGraphManager.execute();
             
             return true;
@@ -39,12 +37,9 @@ public class Graph extends Operation {
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
             // P.Campanella 2018/03/30: handle exception and close the process
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.ERROR, 100);
 
-            if (m_oSendToRabbit != null) {
-            	m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oParam.getWorkspace(), sError, oParam.getExchange());
-            }
-
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         }
         
 		return false;

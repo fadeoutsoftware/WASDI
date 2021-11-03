@@ -9,9 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.servlet.ServletConfig;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -24,6 +28,7 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
@@ -52,12 +57,6 @@ import wasdi.shared.viewmodels.products.ProductViewModel;
  */
 @Path("/product")
 public class ProductResource {
-
-	/**
-	 * Servlet Config to access web.xml
-	 */
-    @Context
-    ServletConfig m_oServletConfig;
     
     /**
      * Add a product to a workspace. The file that is going to be added must 
@@ -85,7 +84,7 @@ public class ProductResource {
             if (Utils.isNullOrEmpty(oUser.getUserId()))
                 return null;
 
-            String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Create the entity
             ProductWorkspace oProductWorkspace = new ProductWorkspace();
@@ -159,7 +158,7 @@ public class ProductResource {
             }
             if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
-            String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sFullPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Read the product from db
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -207,7 +206,7 @@ public class ProductResource {
         if (Utils.isNullOrEmpty(oUser.getUserId()))
             return null;
 
-        String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+        String sProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
         // Read the product from db
         DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -222,9 +221,9 @@ public class ProductResource {
                 try {
                     String sMetadataPath = "";
 
-                    if (m_oServletConfig.getInitParameter("MetadataPath") != null) {
-                        sMetadataPath = m_oServletConfig.getInitParameter("MetadataPath");
-                        if (!m_oServletConfig.getInitParameter("MetadataPath").endsWith("/"))
+                    if (WasdiConfig.Current.paths.metadataPath != null) {
+                        sMetadataPath = WasdiConfig.Current.paths.metadataPath;
+                        if (!sMetadataPath.endsWith("/"))
                             sMetadataPath += "/";
                     }
 
@@ -244,7 +243,7 @@ public class ProductResource {
                             String sUserId = oUser.getUserId();
 
                             // Create an Operation Id
-                            String sProcessObjId = Utils.GetRandomName();
+                            String sProcessObjId = Utils.getRandomName();
 
                             // Create the Parameter
                             ReadMetadataParameter oParameter = new ReadMetadataParameter();
@@ -255,7 +254,7 @@ public class ProductResource {
                             oParameter.setProductName(sProductName);
                             oParameter.setUserId(sUserId);
 
-                            String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+                            String sPath = WasdiConfig.Current.paths.serializationPath;
 
                             // Trigger the Launcher Operation
                             Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, sPath, oParameter, null);
@@ -541,8 +540,7 @@ public class ProductResource {
 
             Utils.debugLog("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
 
-            String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
-                    sWorkspaceId);
+            String sFullPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Create repo
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -619,7 +617,7 @@ public class ProductResource {
         // Check the file name
         if (Utils.isNullOrEmpty(sName) || sName.isEmpty()) {
             //get a random name
-            sName = "defaultName-" + Utils.GetRandomName();
+            sName = "defaultName-" + Utils.getRandomName();
         }
 
         // If workspace is not found in DB returns bad request
@@ -630,7 +628,7 @@ public class ProductResource {
         
         // Take path
         String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
-        String sPath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
+        String sPath = Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
         File oOutputFilePath = new File(sPath + sName);
 
@@ -655,7 +653,7 @@ public class ProductResource {
 
         // Start ingestion
         try {
-            String sProcessObjId = Utils.GetRandomName();
+            String sProcessObjId = Utils.getRandomName();
 
             IngestFileParameter oParameter = new IngestFileParameter();
             oParameter.setWorkspace(sWorkspaceId);
@@ -665,7 +663,7 @@ public class ProductResource {
             oParameter.setProcessObjId(sProcessObjId);
             oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-            sPath = m_oServletConfig.getInitParameter("SerializationPath");
+            sPath = WasdiConfig.Current.paths.serializationPath;
 
             PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oOutputFilePath.getName(), sPath, oParameter);
 
@@ -732,7 +730,7 @@ public class ProductResource {
 
         try {
             // Take path
-            String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             File oOutputFilePath = new File(sPath + sName);
 
@@ -826,7 +824,7 @@ public class ProductResource {
 
 
             // Get the file path
-            String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sDownloadPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
             String sFilePath = sDownloadPath + sProductName;
 
             Utils.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);
@@ -903,7 +901,7 @@ public class ProductResource {
             	
             	try {
                     // Delete layerId on Geoserver
-                    GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), m_oServletConfig.getInitParameter("GS_PASSWORD"));
+                    GeoServerManager oGeoServerManager = new GeoServerManager();
 
                     // For all the published bands
                     for (PublishedBand oPublishedBand : aoPublishedBands) {
@@ -971,7 +969,7 @@ public class ProductResource {
 
             try {
                 // Search for exchange name
-                String sExchange = m_oServletConfig.getInitParameter("RABBIT_EXCHANGE");
+                String sExchange = WasdiConfig.Current.rabbit.exchange;
 
                 // Set default if is empty
                 if (Utils.isNullOrEmpty(sExchange)) {

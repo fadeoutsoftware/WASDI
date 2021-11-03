@@ -1,11 +1,22 @@
 package wasdi.operations;
 
-import wasdi.ConfigReader;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 
+/**
+ * Delete Processor Operation
+ * 
+ * Takes a ProcessorParameter.
+ * 
+ * This operation deletes a Processor on the local node.
+ * It uses the Processors class hierarcy.
+ * 
+ * 
+ * @author p.campanella
+ *
+ */
 public class Deleteprocessor extends Operation {
 
 	@Override
@@ -27,10 +38,7 @@ public class Deleteprocessor extends Operation {
 		try {		
 	        // Delete User Processor
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
-	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType(),
-	                ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"),
-	                ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"),
-	                ConfigReader.getPropValue("TOMCAT_USER", "tomcat8"));
+	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);

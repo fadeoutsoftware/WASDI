@@ -3,8 +3,6 @@ package wasdi.operations;
 import java.io.File;
 import java.io.IOException;
 
-import com.google.common.base.Preconditions;
-
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
@@ -13,7 +11,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
-import wasdi.shared.payload.FTPUploadPayload;
+import wasdi.shared.payloads.FTPUploadPayload;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.Utils;
 
@@ -39,7 +37,7 @@ public class Ftpupload extends Operation {
         	FtpUploadParameters oParameter = (FtpUploadParameters) oParam;
         	
             try {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
                 //check server parameters are OK before trying connection
                 if (!Utils.isServerNamePlausible(oParameter.getFtpServer())) {
@@ -53,13 +51,13 @@ public class Ftpupload extends Operation {
                     throw new Exception("FTP server port \"" + oParameter.getPort() + "\" not plausible");
                 }
                 
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 2);
 
                 m_oProcessWorkspaceLogger.log("Moving " + oParameter.getLocalFileName() + " to " + oParameter.getFtpServer() + ":" + oParameter.getPort().toString());
 
                 String sFullLocalPath = LauncherMain.getWorkspacePath(oParam) + oParameter.getLocalFileName();
 
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 3);
                 File oFile = new File(sFullLocalPath);
                 if (!oFile.exists()) {
                     throw new IOException("local file " + oFile.getName() + "does not exist ");
@@ -84,12 +82,12 @@ public class Ftpupload extends Operation {
                         oClient.authPassword(oParameter.getUsername(), oParameter.getPassword());
 
                         try (SFTPClient sftpClient = oClient.newSFTPClient()) {
-                            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+                            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 4);
                             m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP: transferring file");
                             m_oProcessWorkspaceLogger.log("Start transfer");
                             sftpClient.put(sFullLocalPath, oParameter.getRemotePath() + oParameter.getLocalFileName());
                             //todo check that the file is there
-                            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+                            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 95);
                             m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP: closing SFTP client");
                             sftpClient.close();
                             oClient.disconnect();
@@ -109,7 +107,7 @@ public class Ftpupload extends Operation {
                     if (!oFtpClient.open()) {
                         throw new IOException("could not connect to FTP");
                     }
-                    updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+                    updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 4);
 
                     m_oLocalLogger.debug("Ftpupload.executeOperation: FTP: transferring file");
                     m_oProcessWorkspaceLogger.log("Start transfer");
@@ -119,7 +117,7 @@ public class Ftpupload extends Operation {
                     if (!bPut) {
                         throw new IOException("put failed");
                     }
-                    updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+                    updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 95);
                     // String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
                     String sRemotePath = ".";
                     m_oLocalLogger.debug("Ftpupload.executeOperation: FTP: checking the file is on server");
@@ -135,20 +133,14 @@ public class Ftpupload extends Operation {
                     m_oProcessWorkspaceLogger.log("Transfer done");
                 }
 
-                try {
-                    FTPUploadPayload oPayload = new FTPUploadPayload();
-                    oPayload.setFile(oParameter.getLocalFileName());
-                    oPayload.setRemotePath(oParameter.getRemotePath());
-                    oPayload.setServer(oParameter.getFtpServer());
-                    oPayload.setPort(oParameter.getPort());
-
-                    String sPayload = LauncherMain.s_oMapper.writeValueAsString(oPayload);
-                    oProcessWorkspace.setPayload(sPayload);
-                } catch (Exception oPayloadEx) {
-                    m_oLocalLogger.error("Ftpupload.executeOperation: payload exception: " + oPayloadEx.toString());
-                }
-
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+                FTPUploadPayload oPayload = new FTPUploadPayload();
+                oPayload.setFile(oParameter.getLocalFileName());
+                oPayload.setRemotePath(oParameter.getRemotePath());
+                oPayload.setServer(oParameter.getFtpServer());
+                oPayload.setPort(oParameter.getPort());
+                setPayload(oProcessWorkspace, oPayload);
+                
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
                 m_oLocalLogger.info("Ftpupload.executeOperation: completed successfully");
                 
                 return true;

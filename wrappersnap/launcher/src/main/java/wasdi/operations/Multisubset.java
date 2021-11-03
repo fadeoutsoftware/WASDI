@@ -10,7 +10,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.settings.MultiSubsetSetting;
-import wasdi.shared.payload.MultiSubsetPayload;
+import wasdi.shared.payloads.MultiSubsetPayload;
 import wasdi.shared.utils.EndMessageProvider;
 
 public class Multisubset extends Operation {
@@ -34,10 +34,6 @@ public class Multisubset extends Operation {
         	
         	MultiSubsetParameter oParameter = (MultiSubsetParameter) oParam;
         	
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-            }
-
             m_oProcessWorkspaceLogger.log("Starting multisubset");
 
             String sSourceProduct = oParameter.getSourceProductName();
@@ -48,7 +44,6 @@ public class Multisubset extends Operation {
             if (iTileCount > 15) {
                 m_oProcessWorkspaceLogger.log("Sorry, no more than 15 tiles... " + new EndMessageProvider().getBad());
                 m_oLocalLogger.error("Multisubset.executeOperation: More than 15 tiles: it hangs, need to refuse");
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;
             }
 
@@ -160,49 +155,37 @@ public class Multisubset extends Operation {
                     m_oLocalLogger.debug("Multisubset.executeOperation Subset null for index " + iTiles);
                 }
 
-                if (oProcessWorkspace != null) {
-                    iProgress = iProgress + iStepPerTile;
-                    if (iProgress > 100) iProgress = 100;
-                    updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, iProgress);
-                }
+                iProgress = iProgress + iStepPerTile;
+                if (iProgress > 100) iProgress = 100;
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, iProgress);
 
             }
 
             m_oProcessWorkspaceLogger.log("All tiles done");
+            
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+            
+            try {
+                MultiSubsetPayload oMultiSubsetPayload = new MultiSubsetPayload();
+                oMultiSubsetPayload.setInputFile(sSourceProduct);
+                oMultiSubsetPayload.setOutputFiles(oSettings.getOutputNames().toArray(new String[0]));
 
-            if (oProcessWorkspace != null) {
-                oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-
-                try {
-                    MultiSubsetPayload oMultiSubsetPayload = new MultiSubsetPayload();
-                    oMultiSubsetPayload.setInputFile(sSourceProduct);
-                    oMultiSubsetPayload.setOutputFiles(oSettings.getOutputNames().toArray(new String[0]));
-
-                    oProcessWorkspace.setPayload(LauncherMain.s_oMapper.writeValueAsString(oMultiSubsetPayload));
-                } catch (Exception oPayloadException) {
-                    m_oLocalLogger.error("Multisubset.executeOperation: Error creating operation payload: ", oPayloadException);
-                }
+                setPayload(oProcessWorkspace, oMultiSubsetPayload);
+            } catch (Exception oPayloadException) {
+                m_oLocalLogger.error("Multisubset.executeOperation: Error creating operation payload: ", oPayloadException);
             }
 
 
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(), "Multisubset Done", oParameter.getExchange());
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(), "Multisubset Done", oParameter.getExchange());
             
             return true;
         } catch (Exception oEx) {
 
             m_oLocalLogger.error("Multisubset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
-            if (oProcessWorkspace != null) {
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            }
-
-
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
-            if (m_oSendToRabbit != null) {
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
-            }
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         } 
         
         return false;

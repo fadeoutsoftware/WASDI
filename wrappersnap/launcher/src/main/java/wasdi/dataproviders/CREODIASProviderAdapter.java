@@ -29,9 +29,10 @@ import org.json.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
-import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.opensearch.creodias.DiasResponseTranslatorCREODIAS;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -375,13 +376,13 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		Preconditions.checkArgument(!sDownloadPassword.isEmpty(), "password is empty");
 
 
-		String[] sTokens = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
+		String[] sTokens = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
 		if(sTokens.length < 1) {
 			m_oLogger.error("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): not enough tokens, aborting" ); 
 			return null;
 		}
 
-		String sProductName = sTokens[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
+		String sProductName = sTokens[ResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 		if(sProductName.isEmpty()) {
 			m_oLogger.error("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): product name is empty, aborting" );
 			return null;
@@ -562,8 +563,8 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	private String extractStatusFromURL(String sFileURL) {
 		Preconditions.checkNotNull(sFileURL, "URL is null");
 		try {
-			String[] asParts = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
-			String sStatus = asParts[DiasResponseTranslatorCREODIAS.IPOSITIONOF_STATUS];
+			String[] asParts = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
+			String sStatus = asParts[ResponseTranslatorCREODIAS.IPOSITIONOF_STATUS];
 			return sStatus;
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASProviderAdapter.extractStatusFromURL: " + oE);
@@ -574,8 +575,8 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	private String extractProductIdentifierFromURL(String sFileURL) {
 		Preconditions.checkNotNull(sFileURL, "URL is null");
 		try {
-			String[] asParts = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
-			String sProductIdentifier = asParts[DiasResponseTranslatorCREODIAS.IPOSITIONOF_PRODUCTIDENTIFIER];
+			String[] asParts = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
+			String sProductIdentifier = asParts[ResponseTranslatorCREODIAS.IPOSITIONOF_PRODUCTIDENTIFIER];
 			return sProductIdentifier;
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASProviderAdapter.extractProductIdentifierFromURL: " + oE);
@@ -586,7 +587,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	private String getZipperUrl(String sFileURL) {
 		String sResult = "";
 		try {
-			sResult = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[DiasResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
+			sResult = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[ResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
 		} catch (Exception oE) {
 			m_oLogger.error("CREODIASProviderAdapter.getZipperUrl: " + oE);
 		}
@@ -608,8 +609,8 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		String sResult = "";
 		if (isHttpsProtocol(sFileURL)) {
 			try {
-				String[] asTokens = sFileURL.split(DiasResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); 
-				sResult = asTokens[DiasResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
+				String[] asTokens = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); 
+				sResult = asTokens[ResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 			} catch (Exception oE) {
 				m_oLogger.error("CREODIASProviderAdapter.GetFileName: " + oE);
 			}
@@ -665,16 +666,11 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public void readConfig() {
 		
 		try {
-			m_sDefaultProtocol = ConfigReader.getPropValue("CREODIAS_DEFAULT_PROTOCOL", "https://");
-		} catch (IOException e) {
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("CREODIAS");
+			m_sDefaultProtocol = oConfig.defaultProtocol; 
+			m_sProviderBasePath = oConfig.localFilesBasePath;
+		} catch (Exception e) {
 			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
 		}
-		
-		try {
-			m_sProviderBasePath = ConfigReader.getPropValue("CREODIAS_BASE_PATH", "/eodata/");
-		} catch (IOException e) {
-			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
-		}
-		
 	}
 }

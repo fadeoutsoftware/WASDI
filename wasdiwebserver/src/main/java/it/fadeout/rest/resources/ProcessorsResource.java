@@ -24,7 +24,6 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,7 +33,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -64,6 +62,7 @@ import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.MongoRepository;
@@ -100,13 +99,7 @@ import wasdi.shared.viewmodels.processworkspace.RunningProcessorViewModel;
  *
  */
 @Path("/processors")
-public class ProcessorsResource  {
-	
-	/**
-	 * Servlet Config to access web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
+public class ProcessorsResource  {	
 	
 	/**
 	 * Upload a new processor in Wasdi
@@ -195,7 +188,7 @@ public class ProcessorsResource  {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
 			
 			// Create folders
@@ -280,7 +273,7 @@ public class ProcessorsResource  {
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, "wasdi");
 
 			// Schedule the processworkspace to deploy the processor
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
 			ProcessorParameter oDeployProcessorParameter = new ProcessorParameter();
 			oDeployProcessorParameter.setName(sName);
@@ -292,7 +285,7 @@ public class ProcessorsResource  {
 			oDeployProcessorParameter.setProcessorType(sType);
 			oDeployProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DEPLOYPROCESSOR.name(), sName, sPath, oDeployProcessorParameter);
 			
@@ -855,9 +848,9 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(sName);
@@ -1096,7 +1089,7 @@ public class ProcessorsResource  {
 			
 			ProcessorLog oLog = new ProcessorLog();
 			
-			oLog.setLogDate(Wasdi.getFormatDate(new Date()));
+			oLog.setLogDate(Utils.getFormatDate(new Date()));
 			oLog.setProcessWorkspaceId(sProcessWorkspaceId);
 			oLog.setLogRow(sLog);
 			
@@ -1277,8 +1270,8 @@ public class ProcessorsResource  {
 			String sUserId = oUser.getUserId();
 			
 			// Schedule the process to delete the processor
-			String sProcessObjId = Utils.GetRandomName();
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sProcessObjId = Utils.getRandomName();
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 						
 			// Trigger the processor delete operation on this specific node
 			Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is a computing node, just execute Delete here");
@@ -1387,8 +1380,8 @@ public class ProcessorsResource  {
 			}
 
 			// Schedule the process to delete the processor
-			String sProcessObjId = Utils.GetRandomName();
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sProcessObjId = Utils.getRandomName();
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			// Start a thread to update all the computing nodes
 			try {
@@ -1529,9 +1522,9 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToReDeploy.getName());
@@ -1606,9 +1599,9 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
@@ -1783,7 +1776,7 @@ public class ProcessorsResource  {
 			}			
 			
 			// Set the processor path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName()).toAbsolutePath().normalize();
 			File oProcessorPath = oDirPath.toFile();
@@ -1902,10 +1895,10 @@ public class ProcessorsResource  {
 					oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
 					oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 					oProcessorParameter.setName(oProcessorToUpdate.getName());
-					oProcessorParameter.setProcessObjId(Utils.GetRandomName());
+					oProcessorParameter.setProcessObjId(Utils.getRandomName());
 					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
 					
-					String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+					String sPath = WasdiConfig.Current.paths.serializationPath;
 					
 					// Trigger the library update in this node
 					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), sPath, oProcessorParameter);
@@ -2042,7 +2035,7 @@ public class ProcessorsResource  {
 			String sProcessorName = oProcessor.getName();
 			
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 			if(!oDirFile.isDirectory()) {
@@ -2088,7 +2081,7 @@ public class ProcessorsResource  {
 
 			int iBaseLen = sBasePath.length();
 
-			String sProcTemplatePath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sProcTemplatePath = Wasdi.getDownloadPath();
 			sProcTemplatePath += "dockertemplate/";
 			sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
 
@@ -2331,7 +2324,7 @@ public class ProcessorsResource  {
 			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 			
 			try {
-				String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+				String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 				
 				if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 					Utils.debugLog("ProcessorsResource.shareProcessor: sMercuriusAPIAddress is null");
@@ -2344,7 +2337,7 @@ public class ProcessorsResource  {
 					
 					oMessage.setTilte(sTitle);
 					
-					String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+					String sSender =  WasdiConfig.Current.notifications.sftpManagementMailSender;
 					if (sSender==null) {
 						sSender = "wasdi@wasdi.net";
 					}

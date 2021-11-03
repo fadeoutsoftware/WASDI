@@ -4,14 +4,30 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.ConfigReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Copy to SFTP Operation.
+ * 
+ * Uses an IngestFileParameter.
+ * 
+ * This operation makes a copy of a file in a workspace to the user sftp folder on the local node.
+ * The user must have created and sftp local account.
+ * Destination folder can have a relative path and, also, can support a "special" syntax: user;path
+ * to copy the file to another users' sftp account folder.
+ * 
+ * The operation checks that params are ok and file exists, and makes a copy
+ * 
+ * 
+ * @author p.campanella
+ *
+ */
 public class Copytosftp extends Operation {
 
 	@Override
@@ -29,30 +45,33 @@ public class Copytosftp extends Operation {
 			return false;
 		}
 
-        
-		IngestFileParameter oParameter = (IngestFileParameter) oParam;
 		
-        File oFileToMovePath = new File(oParameter.getFilePath());
-
-        if (!oFileToMovePath.canRead()) {
-            String sMsg = "Copytosftp.executeOperation: ERROR: unable to access file to Move " + oFileToMovePath.getAbsolutePath();
-            m_oLocalLogger.error(sMsg);
-            return false;
-        }
-
         try {
-            // get file size
+        	// Convert the parameter
+        	IngestFileParameter oParameter = (IngestFileParameter) oParam;
+        	
+        	// Create the object of the file to move
+            File oFileToMovePath = new File(oParameter.getFilePath());
+            
+            // It must exists and be readable
+            if (!oFileToMovePath.canRead()) {
+                String sMsg = "Copytosftp.executeOperation: ERROR: unable to access file to Move " + oFileToMovePath.getAbsolutePath();
+                m_oLocalLogger.error(sMsg);
+                
+                return false;
+            }
+        	
+            // get file size and send it to the client
             long lFileSizeByte = oFileToMovePath.length();
-
-            // set file size
             setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 5);
-
-            String sDestinationPath = ConfigReader.getPropValue("SFTP_ROOT_PATH", "/data/sftpuser");
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 5);
+            
+            // Destination Base Path
+            String sDestinationPath = WasdiConfig.Current.paths.sftpRootPath;
             if (!sDestinationPath.endsWith("/")) sDestinationPath += "/";
 
-            // Is there a relative path?
+            // Is there a relative path? Note: relative Path can be a simple path or user;path 
             String sRelativePath = oParameter.getRelativePath();
 
             if (Utils.isNullOrEmpty(sRelativePath)) {
@@ -76,14 +95,15 @@ public class Copytosftp extends Operation {
 
                 // Add the user
                 sDestinationPath += sUserPath;
+                
                 // Add the path
                 if (!sRelativePart.startsWith("/")) sDestinationPath += "/";
                 sDestinationPath += sRelativePart;
                 if (!sDestinationPath.endsWith("/")) sDestinationPath += "/";
 
             }
-
-
+            
+            // Create the destination dir
             File oDstDir = new File(sDestinationPath);
 
             if (!oDstDir.exists()) {
@@ -95,7 +115,7 @@ public class Copytosftp extends Operation {
                 return false;
             }
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
             // copy file to workspace directory
             if (!oFileToMovePath.getParent().equals(oDstDir.getAbsolutePath())) {
@@ -105,33 +125,19 @@ public class Copytosftp extends Operation {
                 m_oLocalLogger.debug("Copytosftp.executeOperation: File already in place");
             }
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 
             return true;
 
-        } catch (Exception e) {
-            String sMsg = "Copytosftp.executeOperation: ERROR: Exception in copy file to sftp";
-            System.out.println(sMsg);
-            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-            m_oLocalLogger.error(sMsg);
-            m_oLocalLogger.error(sError);
-            e.printStackTrace();
-
-            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
-
         } catch (Throwable e) {
-            String sMsg = "Copytosftp.executeOperation: ERROR: Throwable occurrend during file ingestion";
-            System.out.println(sMsg);
+        	
+            m_oLocalLogger.error("Copytosftp.executeOperation: ERROR: Throwable occurrend moving the file to sftp server");
+            
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-            m_oLocalLogger.error(sMsg);
-            m_oLocalLogger.error(sError);
-            e.printStackTrace();
+            m_oLocalLogger.error("Copytosftp.executeOperation: " + sError);
 
-            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.INGEST.name(), oParam.getWorkspace(), sError, oParam.getExchange());
+            oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.COPYTOSFTP.name(), oParam.getWorkspace(), sError, oParam.getExchange());
         } 
         
 		return false;

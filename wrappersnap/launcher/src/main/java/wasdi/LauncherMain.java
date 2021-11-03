@@ -1,7 +1,6 @@
 package wasdi;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -18,31 +17,27 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sun.management.VMManagement;
-import wasdi.geoserver.Publisher;
 import wasdi.operations.Operation;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.geoserver.Publisher;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
@@ -61,6 +56,7 @@ import wasdi.shared.utils.Utils;
  * 
  * -operation -> Uppercase Name of the WASDI Operation. ie "DOWNLOAD" 
  * -parameter -> Path of the parameter file. ie /usr/lib/wasdi/params/fab5028a-341b-4bd3-ba7e-a321d6eb54ca
+ * -config -> Path of te WASDI JSON Config file. ie /data/wasdi/config.json
  * 
  * The parameter file should be named as guid that is the same guid of the corresponding ProcessWorkspace.
  * 
@@ -93,7 +89,9 @@ public class LauncherMain  {
     protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger;
 
     /**
-     * Object mapper to convert Java - JSON
+     * Object mapper to convert Java - JSON. This is an heavy object
+     * so it is istanciated once as static object to be reused where ever
+     * it is needed
      */
     public static ObjectMapper s_oMapper = new ObjectMapper();
     
@@ -101,17 +99,21 @@ public class LauncherMain  {
      * Actual Process Workspace
      */
     protected static ProcessWorkspace s_oProcessWorkspace;
-
+    
     /**
      * WASDI Launcher Main Entry Point
      *
-     * @param args -o <operation> -p <parameterfile>
+     * @param args -o <operation> -p <parameterfile> -c <configfile>
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
     	
         try {
+        	// Set crypto Policy for sftp connections
             Security.setProperty("crypto.policy", "unlimited");
+            
+            // Serach the local log4j file
+            
             // get jar directory
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             // configure log
@@ -124,67 +126,100 @@ public class LauncherMain  {
         }
 
         s_oLogger.debug("WASDI Launcher Main Start");
+        
+        // We need to read the command line parameters.
 
         // create the parser
         CommandLineParser oParser = new DefaultParser();
 
         // create Options object
         Options oOptions = new Options();
-
+        
+        // Operation to be executed
         oOptions.addOption("o", "operation", true, "WASDI Launcher Operation");
+        // Parameter file path
         oOptions.addOption("p", "parameter", true, "WASDI Operation Parameter");
-
+        // Config file path
+        oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
+        
+        // Default initialization
         String sOperation = "ND";
         String sParameter = "ND";
+        String sConfigFilePath = "/data/wasdi/config.json";
 
         // parse the command line arguments
         CommandLine oLine = oParser.parse(oOptions, args);
 
+        // Get the Operation Code
         if (oLine.hasOption("operation")) {
-            // Get the Operation Code
             sOperation = oLine.getOptionValue("operation");
         }
+        
+        // Check if it is available
+        if (sOperation.equals("ND")) {
+            System.err.println("Launcher Main - operation not available. Exit");
+            System.exit(-1);
+        }                
 
+        // Get the Parameter File
         if (oLine.hasOption("parameter")) {
-            // Get the Parameter File
             sParameter = oLine.getOptionValue("parameter");
         }
-
+        
+        // Check if it is available
         if (sParameter.equals("ND")) {
             System.err.println("Launcher Main - parameter file not available. Exit");
             System.exit(-1);
+        }        
+        
+        // Get the Config File
+        if (oLine.hasOption("config")) {
+        	sConfigFilePath = oLine.getOptionValue("config");
         }
-
+        
+        // Check if it is available
+        if (!WasdiConfig.readConfig(sConfigFilePath)) {
+            System.err.println("Launcher Main - config file not found. Exit");
+            System.exit(-1);        	
+        }
+        
         try {
 
             // Set Rabbit Factory Params
-            RabbitFactory.s_sRABBIT_QUEUE_USER = ConfigReader.getPropValue("RABBIT_QUEUE_USER");
-            RabbitFactory.s_sRABBIT_QUEUE_PWD = ConfigReader.getPropValue("RABBIT_QUEUE_PWD");
-            RabbitFactory.s_sRABBIT_HOST = ConfigReader.getPropValue("RABBIT_HOST");
-            RabbitFactory.s_sRABBIT_QUEUE_PORT = ConfigReader.getPropValue("RABBIT_QUEUE_PORT");
+        	RabbitFactory.readConfig();
+            
+            // Set the Mongo Config
+            MongoRepository.readConfig();
 
+            // Create the Rabbit Sender Object. The object is safe: in case of any problem
+            // It does not send to rabbit but only logs on console.
+            LauncherMain.s_oSendToRabbit = new Send(WasdiConfig.Current.rabbit.exchange);
+            
             // Create Launcher Instance
-            LauncherMain.s_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
             LauncherMain oLauncher = new LauncherMain();
 
-            // Deserialize the parameter referring the base class
+            // Deserialize the parameter 
             BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+            
+            // Read the Process Workspace from the db
             ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
             s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
-
+            
+            // This is the operation we have to do, it must exists
             if (s_oProcessWorkspace == null) {
                 s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Exit");
                 System.exit(-1);
             }
 
-            // Set the process object id as Logger Prefix
+            // Set the process object id as Logger Prefix: it will help to filter logs
             s_oLogger.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 
-            // Set the process as running
+            // Set the ProcessWorspace STATUS as running
             s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
             s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+            s_oProcessWorkspace.setProgressPerc(0);
             s_oProcessWorkspace.setPid(getProcessId());
 
             if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
@@ -193,19 +228,23 @@ public class LauncherMain  {
                 s_oLogger.debug("LauncherMain: RUNNING state and operationStartDate updated");
             }
 
-            // And Run
+            // Run the operation
             oLauncher.executeOperation(sOperation, sParameter);
-
+            
+            // Operation Done
             s_oLogger.debug(getBye());
             
         } 
         catch (Throwable oException) {
+        	
+        	// ERROR: we need to put the ProcessWorkspace in a end-state, error in this case
             s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
 
             try {
                 System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
 
                 if (s_oProcessWorkspace != null) {
+                	
                     s_oProcessWorkspace.setProgressPerc(100);
                     s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
                     s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
@@ -220,11 +259,12 @@ public class LauncherMain  {
                 s_oLogger.error("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
             }
             
+            // Exit with error
             System.exit(-1);
             
         } finally {
 
-            // Final Check of the Process Workspace Status
+            // Final Check of the Process Workspace Status: it is in safe state?
             if (s_oProcessWorkspace != null) {
             	
             	// Read again the process workspace
@@ -233,12 +273,15 @@ public class LauncherMain  {
                 s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(s_oProcessWorkspace.getProcessObjId());
 
                 s_oLogger.error("Launcher Main FINAL: process status [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
-
+                
+                // If it is not in a runnig state
                 if (s_oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
 
+                	
+                	// Force the closing
                     s_oLogger.error("Launcher Main FINAL: process status not closed [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
                     s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + s_oProcessWorkspace.getProcessObjId() + "]");
 
@@ -249,16 +292,17 @@ public class LauncherMain  {
                     }
                 }
             }
-
+            
+            // Free Rabbit resources
             LauncherMain.s_oSendToRabbit.Free();
 			
 			try {
+				// Stop SNAP Engine
 				Engine.getInstance().stop();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
         }
-
     }
 
     /**
@@ -275,33 +319,37 @@ public class LauncherMain  {
      */
     public LauncherMain() {
         try {
-
-            // Set Global Settings
-            Publisher.GDAL_Retile_Command = ConfigReader.getPropValue("GDAL_RETILE", Publisher.GDAL_Retile_Command);
-            MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
-            MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
-            MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
-            MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
-            MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
-
+            
             // Read this node code
-            LauncherMain.s_sNodeCode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
-
+            LauncherMain.s_sNodeCode = WasdiConfig.Current.nodeCode;
             s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
 
             // If this is not the main node
             if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
-            	
             	// Configure also the local connection: by default is the "wasdi" port + 1
                 s_oLogger.debug("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT + 1, MongoRepository.DB_NAME);
             }
             
             // Set the java/system user home folder
-            System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
+            System.setProperty("user.home", WasdiConfig.Current.paths.userHomePath);
             
+            // Configure SNAP
+            configureSNAP();
+
+        } catch (Throwable oEx) {
+            s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        }
+    }
+    
+    /**
+     * Configure SNAP: it set needed system variables and configure
+     * the specific Logger
+     */
+    protected void configureSNAP() {
+    	try {
             // Configure snap to read aux data folder
-            String sSnapAuxProperties = ConfigReader.getPropValue("SNAP_AUX_PROPERTIES");
+            String sSnapAuxProperties = WasdiConfig.Current.snap.auxPropertiesFile;
             Path oPropFile = Paths.get(sSnapAuxProperties);
             Config.instance("snap.auxdata").load(oPropFile);
             Config.instance().load();
@@ -309,14 +357,11 @@ public class LauncherMain  {
             // Init Snap
             SystemUtils.init3rdPartyLibs(null);
             Engine.start(false);
+            
+            if (WasdiConfig.Current.snap.launcherLogActive) {
 
-            // Snap Log: is activated or not?
-            String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "1");
-
-            if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
-
-                String sSnapLogLevel = ConfigReader.getPropValue("SNAPLOGLEVEL", "SEVERE");
-                String sSnapLogFile = ConfigReader.getPropValue("SNAPLOGFOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+                String sSnapLogLevel = WasdiConfig.Current.snap.launcherLogLevel;
+                String sSnapLogFile = WasdiConfig.Current.snap.launcherLogFile;
 
                 s_oLogger.debug("SNAP Log file active with level " + sSnapLogLevel + " file: " + sSnapLogFile);
 
@@ -325,7 +370,7 @@ public class LauncherMain  {
                 try {
                     oLogLevel = Level.parse(sSnapLogLevel);
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain Constructor: exception configuring SNAP log file Level " + oEx.toString());
+                    System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file Level " + oEx.toString());
                 }
 
                 try {
@@ -343,18 +388,15 @@ public class LauncherMain  {
 
                     oSnapLogger.addHandler(oFileHandler);
 
-                    //SystemUtils.LOG.setLevel(oLogLevel);
-                    //SystemUtils.LOG.addHandler(oFileHandler);
-
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain Constructor: exception configuring SNAP log file " + oEx.toString());
+                    System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
                 }
             } else {
                 s_oLogger.debug("SNAP Log file not active");
-            }
-
-        } catch (Throwable oEx) {
-            s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            }        		
+    	}
+    	catch (Throwable oEx) {
+            s_oLogger.error("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -400,12 +442,16 @@ public class LauncherMain  {
         	
         	// Call the execute operation method
         	boolean bOperationResult = oOperation.executeOperation(oBaseParameter, s_oProcessWorkspace);
-        	        	
+        	
+        	// Check the result of the operation and set the status
+        	if (bOperationResult) s_oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+        	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+        	
         	s_oLogger.debug("LauncherMain.executeOperation: Operation Result " + bOperationResult);
 
         } 
         catch (Exception oEx) {
-            
+        	            
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
             
             s_oLogger.error("LauncherMain.executeOperation Exception ", oEx);
@@ -455,8 +501,8 @@ public class LauncherMain  {
      */
     public static String getWorkspacePath(BaseParameter oParameter) {
         try {
-            return getWorkspacePath(oParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-        } catch (IOException e) {
+            return getWorkspacePath(oParameter, WasdiConfig.Current.paths.downloadRootPath);
+        } catch (Exception e) {
             e.printStackTrace();
             return getWorkspacePath(oParameter, "/data/wasdi");
         }
@@ -490,10 +536,20 @@ public class LauncherMain  {
 
         return sWorkspacePath;
     }
-
+    
+    /**
+     * Static helper function to update status and progress of a Process Workspace.
+     * Used mainly by Operation class, that has a wrapper, can be used also by other classes not
+     * directly derived from Operation, like the DataProviders or the Processor Hierarcy.
+     * 
+     * @param oProcessWorkspaceRepository Repo to access db
+     * @param oProcessWorkspace Process Workspace Object
+     * @param oProcessStatus Updated Status
+     * @param iProgressPerc Updated Progress percentage
+     */
     public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
-                                           ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc)
-            throws JsonProcessingException {
+                                           ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) 
+    {
 
         if (oProcessWorkspace == null) {
             s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
@@ -503,18 +559,23 @@ public class LauncherMain  {
             s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
             return;
         }
-
-        oProcessWorkspace.setStatus(oProcessStatus.name());
-        oProcessWorkspace.setProgressPerc(iProgressPerc);
         
-        // update the process
-        if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
-            s_oLogger.debug("Error during process update");
+        try {
+            oProcessWorkspace.setStatus(oProcessStatus.name());
+            oProcessWorkspace.setProgressPerc(iProgressPerc);
+            
+            // update the process
+            if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
+                s_oLogger.debug("Error during process update");
+            }
+            
+            if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                s_oLogger.debug("Error sending rabbitmq message to update process list");
+            }        	
         }
-        
-        if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-            s_oLogger.debug("Error sending rabbitmq message to update process list");
-        }
+        catch (Exception oEx) {
+        	s_oLogger.debug("LauncherMain.updateProcessStatus Exception "+oEx.toString());
+		}
     }
 
     /**
@@ -542,65 +603,6 @@ public class LauncherMain  {
             s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Exception closing process workspace "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
-    }
-
-    /**
-     * Set the file size to the process Object
-     *
-     * @param oFile             File to read the size from
-     * @param oProcessWorkspace Process to update
-     */
-    public static void setFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
-
-        if (oFile == null) {
-            s_oLogger.error("LauncherMain.SetFileSizeToProcess: input file is null");
-            return;
-        }
-
-        if (!oFile.exists()) {
-            s_oLogger.error("LauncherMain.SetFileSizeToProcess: input file does not exists");
-            return;
-        }
-
-        // Take file size
-        long lSize = oFile.length();
-
-        // Check if it is a ".dim" file
-        if (oFile.getName().endsWith(".dim")) {
-            try {
-                // Ok so the real size is the folder
-                String sFolder = oFile.getAbsolutePath();
-
-                // Get folder path
-                sFolder = sFolder.replace(".dim", ".data");
-                File oDataFolder = new File(sFolder);
-
-                // Get folder size
-                lSize = FileUtils.sizeOfDirectory(oDataFolder);
-            } catch (Exception oEx) {
-                s_oLogger.error("LauncherMain.SetFileSizeToProcess: Error computing folder size");
-                oEx.printStackTrace();
-            }
-        }
-
-        setFileSizeToProcess(lSize, oProcessWorkspace);
-    }
-
-    /**
-     * Set the file size to the process Object
-     *
-     * @param lSize             Size
-     * @param oProcessWorkspace Process to update
-     */
-    public static void setFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
-
-        if (oProcessWorkspace == null) {
-            s_oLogger.error("LauncherMain.SetFileSizeToProcess: input process is null");
-            return;
-        }
-
-        s_oLogger.debug("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.GetFormatFileDimension(lSize));
-        oProcessWorkspace.setFileSize(Utils.GetFormatFileDimension(lSize));
     }
     
     /**
@@ -630,26 +632,6 @@ public class LauncherMain  {
 
         return iPid;
     }
-    
-
-    public static String snapFormat2GDALFormat(String sFormatName) {
-
-        if (Utils.isNullOrEmpty(sFormatName)) {
-            return "";
-        }
-
-        switch (sFormatName) {
-            case GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME:
-                return "GTiff";
-            case "BEAM-DIMAP":
-                return "DIMAP";
-            case "VRT":
-                return "VRT";
-            default:
-                return "GTiff";
-        }
-    }
-
 
     /**
      * Wait for a process to be resumed in a state like RUNNING, ERROR or DONE
@@ -679,7 +661,7 @@ public class LauncherMain  {
     
     public static String adjustGdalFolder(String sGdalCommand) {
         try {
-            String sGdalPath = ConfigReader.getPropValue("GDAL_PATH", "");
+            String sGdalPath = WasdiConfig.Current.paths.gdalPath;
 
             if (!Utils.isNullOrEmpty(sGdalPath)) {
                 File oGdalFolder = new File(sGdalPath);

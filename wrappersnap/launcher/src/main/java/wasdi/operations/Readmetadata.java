@@ -1,16 +1,12 @@
 package wasdi.operations;
 
-import java.io.IOException;
-
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
 import wasdi.shared.utils.Utils;
@@ -39,7 +35,6 @@ public class Readmetadata extends Operation {
 
             if (sProductName == null) {
                 m_oLocalLogger.error("Readmetadata.executeOperation: Product Path is null");
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
                 return false;
             }
 
@@ -48,23 +43,20 @@ public class Readmetadata extends Operation {
             String sProductPath = LauncherMain.getWorkspacePath(oReadMetadataParameter) + sProductName;
 
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath);
+            
             if (oDownloadedFile == null) {
                 m_oLocalLogger.error("Readmetadata.executeOperation: Downloaded file not found for path " + sProductPath);
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
                 return false;
             }
 
             if (oDownloadedFile.getProductViewModel() == null) {
                 m_oLocalLogger.error("Readmetadata.executeOperation: Product View Model is null");
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
                 return false;
 
             }
 
-            if (LauncherMain.s_oSendToRabbit != null) {
-                String sInfo = "Read Metadata Operation<br>Retriving File Metadata<br>Try again later";
-                LauncherMain.s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), oProcessWorkspace.getWorkspaceId(), sInfo, oProcessWorkspace.getWorkspaceId());
-            }
+            String sInfo = "Read Metadata Operation<br>Retriving File Metadata<br>Try again later";
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), oProcessWorkspace.getWorkspaceId(), sInfo, oProcessWorkspace.getWorkspaceId());
 
             if (Utils.isNullOrEmpty(oDownloadedFile.getProductViewModel().getMetadataFileReference())) {
                 if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
@@ -84,9 +76,10 @@ public class Readmetadata extends Operation {
                 m_oLocalLogger.info("Readmetadata.executeOperation: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
             }
 
-            updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-
             m_oLocalLogger.info("Readmetadata.executeOperation: done, bye");
+            
+            return true;
+            
         } catch (Exception oEx) {
             m_oLocalLogger.error("Readmetadata.executeOperation Exception " + oEx.toString());
         }
@@ -100,10 +93,10 @@ public class Readmetadata extends Operation {
         try {
 
             // Get Metadata Path a Random File Name
-            String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
+            String sMetadataPath = WasdiConfig.Current.paths.metadataPath;
             if (!sMetadataPath.endsWith("/"))
                 sMetadataPath += "/";
-            String sMetadataFileName = Utils.GetRandomName();
+            String sMetadataFileName = Utils.getRandomName();
 
             m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: file = " + sMetadataFileName);
 
@@ -114,9 +107,6 @@ public class Readmetadata extends Operation {
 
             return sMetadataFileName;
 
-        } catch (IOException e) {
-            m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
-            e.printStackTrace();
         } catch (Exception e) {
             m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
             e.printStackTrace();

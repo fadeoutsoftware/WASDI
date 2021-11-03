@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,7 +21,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -36,9 +34,9 @@ import com.google.common.io.Files;
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.AppCategory;
+import wasdi.shared.business.Comment;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorSharing;
-import wasdi.shared.business.Comment;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.data.AppsCategoriesRepository;
@@ -69,12 +67,6 @@ import wasdi.shared.viewmodels.processors.ReviewViewModel;
  */
 @Path("processormedia")
 public class ProcessorsMediaResource {
-	
-	/**
-	 * Servlet config to access web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
 	
 	/**
 	 * Max image size in Mb
@@ -358,7 +350,7 @@ public class ProcessorsMediaResource {
 		}
 		
 		
-		String sPathLogoFolder = Wasdi.getDownloadPath(m_oServletConfig) + "/processors/" + oProcessor.getName();
+		String sPathLogoFolder = Wasdi.getDownloadPath() + "/processors/" + oProcessor.getName();
 		ImageFile oImage = ImageResourceUtils.getImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );
 		String sLogoExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPathLogoFolder + sImageName,IMAGE_PROCESSORS_EXTENSIONS );;
 		
@@ -887,7 +879,7 @@ public class ProcessorsMediaResource {
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
-		Review oReview = getReviewFromViewModel(oReviewViewModel,sUserId, Utils.GetRandomName());
+		Review oReview = getReviewFromViewModel(oReviewViewModel,sUserId, Utils.getRandomName());
 		
 		//LIMIT THE NUMBER OF COMMENTS
 		if(oReviewRepository.alreadyVoted(oReviewViewModel.getProcessorId(), sUserId) == true){
@@ -943,7 +935,7 @@ public class ProcessorsMediaResource {
 		
 		CommentRepository oCommentRepository =  new CommentRepository();
 		
-		Comment oComment = getCommentFromViewModel(oCommentViewModel, sUserId, Utils.GetRandomName());
+		Comment oComment = getCommentFromViewModel(oCommentViewModel, sUserId, Utils.getRandomName());
 		
 		oCommentRepository.addComment(oComment);
 		

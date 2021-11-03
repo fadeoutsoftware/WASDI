@@ -117,18 +117,6 @@ public class CredentialPolicy {
 		}
 	}
 
-	private boolean validAuthServiceProvider(String sAuthServiceProvider) {
-		if(isNullOrEmpty(sAuthServiceProvider)) {
-			return false;
-		} else {
-			return( sAuthServiceProvider.toLowerCase().equals("wasdi") ||
-					sAuthServiceProvider.toLowerCase().equals("keycloak") ||
-					sAuthServiceProvider.toLowerCase().equals("google")
-			);
-		}
-	}
-
-
 	public Boolean validFirstAccessUUID(String sUUID) {
 		if(isNullOrEmpty(sUUID)) {
 			return false;

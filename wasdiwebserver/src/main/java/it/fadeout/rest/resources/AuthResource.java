@@ -7,7 +7,6 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -16,7 +15,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -34,6 +32,7 @@ import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
@@ -59,13 +58,7 @@ import wasdi.shared.viewmodels.users.UserViewModel;
  */
 @Path("/auth")
 public class AuthResource {
-	
-	/**
-	 * Servlet Config to read web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
-	
+		
 	/**
 	 * Keycloak Auth Provider Service
 	 */
@@ -323,7 +316,7 @@ public class AuthResource {
 			}
 	
 			// Search for the sftp service
-			String sWsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+			String sWsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
 			if (Utils.isNullOrEmpty(sWsAddress)) {
 				sWsAddress = "ws://localhost:6703";
 				Utils.debugLog("AuthResource.createSftpAccount: sWsAddress is null or empty, defaulting to " + sWsAddress);
@@ -371,7 +364,7 @@ public class AuthResource {
 		String sAccount = oUser.getUserId();		
 
 		// Get the service address
-		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
@@ -404,7 +397,7 @@ public class AuthResource {
 		String sAccount = oUser.getUserId();		
 
 		// Get Service Address
-		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
@@ -433,7 +426,7 @@ public class AuthResource {
 		String sAccount = oUser.getUserId();
 
 		// Get service address
-		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
@@ -468,7 +461,7 @@ public class AuthResource {
 		String sAccount = oUser.getUserId();
 
 		// Get the service address
-		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		String wsAddress = WasdiConfig.Current.sftp.sftpManagementWSServiceAddress;
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
@@ -521,7 +514,7 @@ public class AuthResource {
 		if (!ImageResourceUtils.isValidExtension(sExt, USER_IMAGE_ENABLED_EXTENSIONS)) {
 			return Response.status(400).build();
 		}
-		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
+		String sPath = WasdiConfig.Current.paths.downloadRootPath + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
 		ImageResourceUtils.createDirectory(sPath);
 		String sOutputFilePath = sPath + "/" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
 		ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
@@ -548,7 +541,7 @@ public class AuthResource {
 			return Response.status(401).build();
 		}
 
-		String sPath = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
+		String sPath = WasdiConfig.Current.paths.downloadRootPath + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
 		ImageFile oUserImage = ImageResourceUtils.getImageInFolder(sPath, USER_IMAGE_ENABLED_EXTENSIONS);
 		String sImageExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPath  , USER_IMAGE_ENABLED_EXTENSIONS);
 
@@ -577,7 +570,7 @@ public class AuthResource {
 			return Response.status(401).build();
 		}
 
-		String sPathFolder = m_oServletConfig.getInitParameter("DownloadRootPath") + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
+		String sPathFolder = WasdiConfig.Current.paths.downloadRootPath + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
 		ImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
 		return Response.status(200).build();
 	}
@@ -647,7 +640,7 @@ public class AuthResource {
 				
 				String sDefaultNode = "wasdi";
 				try {					
-					sDefaultNode = m_oServletConfig.getInitParameter("USERS_DEFAULT_NODE");
+					sDefaultNode = WasdiConfig.Current.usersDefaultNode;
 					if (Utils.isNullOrEmpty(sDefaultNode)) {
 						sDefaultNode = "wasdi";
 					}
@@ -980,12 +973,12 @@ public class AuthResource {
 			return false;
 		}
 		//send email with new password
-		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+		String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
 
 
 		Message oMessage = new Message();
-		String sTitle = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_TITLE");
+		String sTitle = WasdiConfig.Current.notifications.pwRecoveryMailTitle;
 
 		if (Utils.isNullOrEmpty(sTitle)) {
 			sTitle = "WASDI Password Recovery";
@@ -993,11 +986,11 @@ public class AuthResource {
 		oMessage.setTilte(sTitle);
 
 
-		String sSender = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_SENDER");
+		String sSender = WasdiConfig.Current.notifications.pwRecoveryMailSender;
 		if (sSender==null) sSender = "wasdi@wasdi.net";
 		oMessage.setSender(sSender);
 
-		String sMessage = m_oServletConfig.getInitParameter("PW_RECOVERY_MAIL_TEXT");
+		String sMessage = WasdiConfig.Current.notifications.pwRecoveryMailText;
 
 		if (Utils.isNullOrEmpty(sMessage)) {
 			sMessage = "Your password has been regenerated. Please find here your new credentials:";
@@ -1030,12 +1023,12 @@ public class AuthResource {
 			return false;
 		}
 		//send email with new password
-		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+		String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
 
 
 		Message oMessage = new Message();
-		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+		String sTitle = WasdiConfig.Current.notifications.sftpMailTitle;
 
 		if (Utils.isNullOrEmpty(sTitle)) {
 			sTitle = "WASDI SFTP Account";
@@ -1043,11 +1036,11 @@ public class AuthResource {
 		oMessage.setTilte(sTitle);
 
 
-		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+		String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
 		if (sSender==null) sSender = "wasdi@wasdi.net";
 		oMessage.setSender(sSender);
 
-		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
+		String sMessage = WasdiConfig.Current.notifications.sftpMailText;
 
 		if (Utils.isNullOrEmpty(sMessage)) {
 			sMessage = "Your password has been regenerated. Please find here your new credentials:";
@@ -1092,7 +1085,7 @@ public class AuthResource {
 
 		try {
 
-			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				Utils.debugLog("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
@@ -1108,7 +1101,7 @@ public class AuthResource {
 
 			oMessage.setTilte(sTitle);
 
-			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+			String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
 			if (sSender==null) {
 				sSender = "wasdi@wasdi.net";
 			}
@@ -1126,7 +1119,7 @@ public class AuthResource {
 
 			Integer iPositiveSucceded = 0;
 
-			String sWasdiAdminMail = m_oServletConfig.getInitParameter("WasdiAdminMail");
+			String sWasdiAdminMail = WasdiConfig.Current.notifications.wasdiAdminMail;
 
 			if (Utils.isNullOrEmpty(sWasdiAdminMail)) {
 				sWasdiAdminMail = "info@fadeout.biz";

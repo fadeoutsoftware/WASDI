@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -14,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.nfs.orbits.CoverageTool.Polygon;
@@ -39,6 +37,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import satLib.astro.time.Time;
 import wasdi.shared.business.User;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.plan.CoverageSwathResultViewModel;
 import wasdi.shared.viewmodels.plan.OpportunitiesSearchViewModel;
@@ -60,11 +59,6 @@ import wasdi.shared.viewmodels.plan.SensorViewModel;
 @Path("/searchorbit")
 public class OpportunitySearchResource {
 	
-	/**
-	 * Servlet Config to access web.xml file
-	 */
-	@Context
-	ServletConfig m_oServletConfig;
 	
 	/**
 	 * Search new acquisition possibilities
@@ -600,8 +594,7 @@ public class OpportunitySearchResource {
 
 			String[] asSatellites = null;
 
-			// String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
-			String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
+			String sSatellites = WasdiConfig.Current.plan.listOfSatellites;
 			if (sSatellites != null && sSatellites.length() > 0) {
 				asSatellites = sSatellites.split(",|;");
 			}

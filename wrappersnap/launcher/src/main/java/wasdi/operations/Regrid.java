@@ -34,11 +34,7 @@ public class Regrid extends Operation {
         try {
         	
         	RegridParameter oParameter = (RegridParameter) oParam;
-
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-            }
-
+        	
             String sSourceProduct = oParameter.getSourceProductName();
             String sDestinationProduct = oParameter.getDestinationProductName();
 
@@ -51,7 +47,6 @@ public class Regrid extends Operation {
 
             if (oRead.getSnapProduct() == null) {
                 m_oLocalLogger.error("Regrid.executeOperation: product is not a SNAP product ");
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;
             }
 
@@ -85,7 +80,7 @@ public class Regrid extends Operation {
             double dYScale = (dYEnd - dYOrigin) / oDim.getHeight();
 
             if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
             }
 
             // SPAWN, ['gdalwarp', '-r', 'near', '-tr', STRING(xscale, Format='(D)'),
@@ -137,28 +132,18 @@ public class Regrid extends Operation {
             addProductToDbAndWorkspaceAndSendToRabbit(null, LauncherMain.getWorkspacePath(oParameter) + sDestinationProduct,
                     oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.REGRID.name(), sBBox, false,
                     true);
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(m_oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 100);
-            }
+            
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 100);
 
-            if (oProcessWorkspace != null)
-                oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(),
-                        oParameter.getWorkspace(), "Regrid Done", oParameter.getExchange());
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(), "Regrid Done", oParameter.getExchange());
             
             return true;
         } catch (Exception oEx) {
-            m_oLocalLogger.error("Regrid.executeOperation: exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            if (oProcessWorkspace != null)
-                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-
+            m_oLocalLogger.error("Regrid.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-            if (m_oSendToRabbit != null)
-                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(),
-                        oParam.getWorkspace(), sError, oParam.getExchange());
+            
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
 
         }
         

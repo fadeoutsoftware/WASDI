@@ -7,14 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -26,6 +24,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -65,12 +64,6 @@ import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
  */
 @Path("/process")
 public class ProcessWorkspaceResource {
-	
-	/**
-	 * Servlet Config to access web.xml
-	 */
-	@Context
-	ServletConfig m_oServletConfig;	
 
 	/**
 	 * Get a filtered paginated list of processworkspaces.
@@ -805,8 +798,8 @@ public class ProcessWorkspaceResource {
 			
 			
 			//create the operation parameter
-			String sDeleteObjId = Utils.GetRandomName();
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sDeleteObjId = Utils.getRandomName();
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
 			oKillProcessParameter.setProcessObjId(sDeleteObjId);
 			oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
@@ -1020,7 +1013,7 @@ public class ProcessWorkspaceResource {
 				if (sSendToRabbit.equals("1") || sSendToRabbit.equals("true")) {
 					
 					// Search for exchange name
-					String sExchange = m_oServletConfig.getInitParameter("RABBIT_EXCHANGE");
+					String sExchange = WasdiConfig.Current.rabbit.exchange;
 					
 					// Set default if is empty
 					if (Utils.isNullOrEmpty(sExchange)) {

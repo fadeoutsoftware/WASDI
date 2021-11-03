@@ -264,7 +264,7 @@ public class ProcessorRepository extends  MongoRepository {
 	}
 
 	public long countProcessors() {
-		return getCollection(m_sThisCollection).count();
+		return getCollection(m_sThisCollection).countDocuments();
 	}
 	
 	public long countProcessors(boolean bPublicOnly) {
@@ -287,15 +287,15 @@ public class ProcessorRepository extends  MongoRepository {
 			}
 			
 			if(null==oPublicOnlyQuery && null==oInStoreOnlyQuery) {
-				return getCollection(m_sThisCollection).count();
+				return getCollection(m_sThisCollection).countDocuments();
 			}
 			
 			if(null!=oPublicOnlyQuery && null==oInStoreOnlyQuery) {
-				return getCollection(m_sThisCollection).count(oPublicOnlyQuery);
+				return getCollection(m_sThisCollection).countDocuments(oPublicOnlyQuery);
 			}
 			
 			if(null==oPublicOnlyQuery && null!=oInStoreOnlyQuery) {
-				return getCollection(m_sThisCollection).count(oInStoreOnlyQuery);
+				return getCollection(m_sThisCollection).countDocuments(oInStoreOnlyQuery);
 			}
 			
 			if(null!=oPublicOnlyQuery && null!=oInStoreOnlyQuery) {
@@ -303,7 +303,7 @@ public class ProcessorRepository extends  MongoRepository {
 				aoAndList.add(oPublicOnlyQuery);
 				aoAndList.add(oInStoreOnlyQuery);
 				oQuery.put("$and", aoAndList);
-				return getCollection(m_sThisCollection).count(oQuery);
+				return getCollection(m_sThisCollection).countDocuments(oQuery);
 			}
 	
 		} catch (Exception oE) {

@@ -6,23 +6,24 @@ package wasdi.shared.viewmodels.products;
  * Created by s.adamo on 20/05/2016.
  */
 public class BandViewModel {
-
-    public BandViewModel() {
-
-    }
-    public BandViewModel(String sBandName)
-    {
-        this.name = sBandName;
-    }
-
+	
     private String name;
     private Boolean published = false;
     private int width = 0;
     private int height = 0;
     private String layerId;
     private String geoserverBoundingBox;
-    private String geoserverUrl;
+    private String geoserverUrl;	
 
+    public BandViewModel() {
+
+    }
+    
+    public BandViewModel(String sBandName)
+    {
+        this.name = sBandName;
+    }
+    
     public String getGeoserverUrl() {
 		return geoserverUrl;
 	}

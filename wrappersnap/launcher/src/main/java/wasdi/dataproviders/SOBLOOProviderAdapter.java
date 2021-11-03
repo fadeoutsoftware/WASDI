@@ -21,7 +21,6 @@ import wasdi.shared.utils.Utils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
-	private static final String s_sFileNamePrefix = "filename=";
 	private static final String s_sSEPARATOR = "\\|\\|\\|";
 	private static final int s_iUrl = 0;
 	private static final int s_iName = 1;
