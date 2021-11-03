@@ -634,6 +634,7 @@ public class WasdiLib {
 				if (aoJSONMap.containsKey("sessionId")) {
 					// Got Session
 					sSessionId = (String) aoJSONMap.get("sessionId");
+					setSessionId(sSessionId);
 
 					log("User logged: session ID " + sSessionId);
 
