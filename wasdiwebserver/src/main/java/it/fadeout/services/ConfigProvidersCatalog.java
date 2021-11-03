@@ -2,6 +2,8 @@ package it.fadeout.services;
 
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.Node;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 
 import javax.inject.Inject;
@@ -15,14 +17,7 @@ import java.util.Arrays;
  * @author p.campanella
  *
  */
-public class ConfigProvidersCatalog implements ProvidersCatalog {
-	
-	/**
-	 * Local servlet config to access web.xml file
-	 */
-    @Context
-    ServletConfig m_oServletConfig;
-    
+public class ConfigProvidersCatalog implements ProvidersCatalog {    
     /**
      * Nodes Repository
      */
@@ -38,19 +33,15 @@ public class ConfigProvidersCatalog implements ProvidersCatalog {
         DataProvider oProvider = new DataProvider();
 
         // if it's a registered provider, fill the object with the data from the configuration file
-        String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
+        DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sName); 
         
-        if (sProviders != null && sProviders.length() > 0) {
-            String[] asProviders = sProviders.split(",|;");
 
-            boolean bIsRegistered = Arrays.stream(asProviders).anyMatch(x -> x.equals(sName));
-            if (bIsRegistered) {
-                oProvider.setName(sName);
-                oProvider.setOSUser(m_oServletConfig.getInitParameter(sName + ".OSUser"));
-                oProvider.setOSPassword(m_oServletConfig.getInitParameter(sName + ".OSPwd"));
-                oProvider.setDescription(m_oServletConfig.getInitParameter(sName + ".Description"));
-                oProvider.setLink(m_oServletConfig.getInitParameter(sName + ".Link"));
-            }
+        if (oDataProviderConfig != null) {
+            oProvider.setName(sName);
+            oProvider.setOSUser(oDataProviderConfig.user);
+            oProvider.setOSPassword(oDataProviderConfig.password);
+            oProvider.setDescription(oDataProviderConfig.description);
+            oProvider.setLink(oDataProviderConfig.link);
         }
 
         return oProvider;
