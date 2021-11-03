@@ -1,16 +1,12 @@
 package it.fadeout.services;
 
+import javax.inject.Inject;
+
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.Node;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
-
-import javax.inject.Inject;
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
-
-import java.util.Arrays;
 
 /**
  * Catalog of the WASDI Data Providers

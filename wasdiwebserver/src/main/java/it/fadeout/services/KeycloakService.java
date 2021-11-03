@@ -3,9 +3,6 @@ package it.fadeout.services;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 

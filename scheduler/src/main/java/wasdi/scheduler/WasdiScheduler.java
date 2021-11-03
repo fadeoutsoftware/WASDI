@@ -86,12 +86,12 @@ public class WasdiScheduler
 	        }			
 		}
 		catch (Exception oEx) {
-            System.err.println("Db Utils - Exception paring args " + oEx.toString());			
+            System.err.println("WasdiScheduler.main - Exception paring args " + oEx.toString());			
 		}
 		
     	
         if (!WasdiConfig.readConfig(sConfigFilePath)) {
-            System.err.println("Db Utils - config file not available. Exit");
+            System.err.println("WasdiScheduler.main - config file not available. Exit");
             System.exit(-1);            	
         }		
 
@@ -127,6 +127,20 @@ public class WasdiScheduler
 		}
 		s_oLogger.info("main: Mongo configured :-)\n");
 		
+		// Computational nodes need to configure also the local dababase
+		try {
+			// If this is not the main node
+			if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
+				Utils.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
+			}			
+		}
+		catch (Throwable oEx) {
+			s_oLogger.fatal("main: Mongo configuration failed. Reason: " + oEx);
+			oEx.printStackTrace();
+		}		
 		
 		// Read the list of configured schedulers
 		ArrayList<String> asSchedulers = new ArrayList<String>();

@@ -207,7 +207,7 @@ public class LauncherMain  {
             
             // This is the operation we have to do, it must exists
             if (s_oProcessWorkspace == null) {
-                s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Exit");
+                s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Are you sure the configured Node is correct? Exit");
                 System.exit(-1);
             }
 
