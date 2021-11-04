@@ -602,6 +602,20 @@ public class WasdiLib {
 	 * Base Path
 	 * User
 	 * Password or SessionId
+	 * @return
+	 */
+	public boolean internalInit() {
+		log("WasdiLib.internalInit");
+
+		return internalInit(getUser(), getPassword(), getSessionId());
+	}
+
+	/**
+	 * Call this after base parameters settings to init the system
+	 * Needed at least:
+	 * Base Path
+	 * User
+	 * Password or SessionId
 	 * @param sUser
 	 * @param sPassword
 	 * @param sSessionId
@@ -634,6 +648,7 @@ public class WasdiLib {
 				if (aoJSONMap.containsKey("sessionId")) {
 					// Got Session
 					sSessionId = (String) aoJSONMap.get("sessionId");
+					setSessionId(sSessionId);
 
 					log("User logged: session ID " + sSessionId);
 

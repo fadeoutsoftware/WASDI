@@ -115,12 +115,14 @@ public class WasdiGraph {
 	 */
 	public WasdiGraph(GraphParameter oParams, Operation oOperation,ProcessWorkspace oProcessWorkspace) throws Exception {
 		
+		// Set operation member
+		this.m_oOperation = oOperation;
+		//set the graph parameters
+		this.m_oParams = oParams;		
 		
+		// Set the proc workspace logger
 		this.m_oProcessWorkspaceLogger = m_oOperation.getProcessWorkspaceLogger();
-		
-		//set the pgraph parameters
-		this.m_oParams = oParams;
-		
+				
 		//set the rabbit sender
 		this.m_oRabbitSender = m_oOperation.getSendToRabbit();
 		
