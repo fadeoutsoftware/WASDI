@@ -40,4 +40,4 @@ class TestSearch(unittest.TestCase):
         eo_images = wasdi.searchEOImages(sPlatform, sDateFrom, sDateTo, None, None, None, None, None, None, None, None,
                                          oProvider, oBoundingBox)
         self.assertIsNotNone(eo_images)
-        self.assert_(len(eo_images) > 0)
+        self.assertTrue(len(eo_images) > 0)
