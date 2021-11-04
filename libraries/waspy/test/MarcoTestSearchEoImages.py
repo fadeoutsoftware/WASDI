@@ -26,7 +26,7 @@ import wasdi
 '''
 
 
-class TestSearch(unittest.TestCase):
+class MarcoTestSearchEOImages(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         wasdi.init("./config.json")

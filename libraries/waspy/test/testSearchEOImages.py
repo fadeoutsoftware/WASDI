@@ -11,28 +11,34 @@ Tested with : Python 3.8
 Created on 7 May 2021
 """
 
-import wasdi
-from Vars import Vars
 import unittest
-from unittest.mock import patch
-import requests
 from unittest.mock import Mock
+from unittest.mock import patch
+
+import requests
+
+import wasdi
+from SearchEOImagesVars import SearchEOImagesVars
 
 __author__ = "Linda Cademartori, Carola Lo Monaco"
 
 
 class TestSearchEOImages(unittest.TestCase):
 
-    def testSearchEoImages(self):
+    def testSearchEoImages_allParametersAreCorrect_responseIsMeaningful(self):
         """
         Test for searchEOImages() in the case that all parameters are correct
         """
         wasdi.setVerbose(False)
-        self.assertEqual(wasdi.searchEOImages(sPlatform="S1", sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType="GRD", sProvider="CREODIAS"),
-                         Vars().S1_2021_03_16_2021_03_16)
+        self.assertEqual(
+            wasdi.searchEOImages(
+                sPlatform="S1", sDateFrom="2021-03-16", sDateTo="2021-03-16",
+                fULLat=49.41145140497633, fULLon=1.854752483603064,
+                fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                sProductType="GRD", sProvider="CREODIAS"
+            ),
+            SearchEOImagesVars().S1_2021_03_16_2021_03_16
+        )
 
     def testSearchEOImages_sPlatform_None(self):
         """
@@ -41,10 +47,15 @@ class TestSearchEOImages(unittest.TestCase):
         :return: ok if searchEOImages() returns an empty array
         """
         wasdi.setVerbose(False)
-        self.assertEqual(wasdi.searchEOImages(sPlatform=None, sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType="GRD", sProvider="CREODIAS"), [])
+        self.assertEqual(
+            wasdi.searchEOImages(
+                sPlatform=None, sDateFrom="2021-03-16", sDateTo="2021-03-16",
+                fULLat=49.41145140497633, fULLon=1.854752483603064,
+                fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                sProductType="GRD", sProvider="CREODIAS"
+            ),
+            []
+        )
 
     def testSearchEOImages_sPlatform_S3(self):
         """
@@ -54,9 +65,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S3', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType="GRD", sProvider="CREODIAS"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType="GRD", sProvider="CREODIAS"), [])
 
     """sProductType"""
 
@@ -68,10 +79,10 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType=None, sProvider="CREODIAS"),
-                         Vars().S1_2021_03_16_2021_03_16_sProductType_None)
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType=None, sProvider="CREODIAS"),
+                         SearchEOImagesVars().S1_2021_03_16_2021_03_16_sProductType_None)
 
     def testSearchEOImages_sProductType_pippo(self):
         """
@@ -81,9 +92,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType='pippo', sProvider="CREODIAS"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType='pippo', sProvider="CREODIAS"), [])
 
     def testSearchEOImages_sDateFrom_None(self):
         """
@@ -93,9 +104,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom=None, sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType='GRD', sProvider="CREODIAS"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType='GRD', sProvider="CREODIAS"), [])
 
     def testSearchEOImages_sDateFrom_wrong_format(self):
         """
@@ -105,9 +116,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="16-03-2021", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType='GRD', sProvider="CREODIAS"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType='GRD', sProvider="CREODIAS"), [])
 
     def testSearchEOImages_sDateTo_None(self):
         """
@@ -117,9 +128,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo=None,
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType='GRD', sProvider="CREODIAS"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType='GRD', sProvider="CREODIAS"), [])
 
     def testSearchEOImages_sDateTo_wrong_format(self):
         """
@@ -129,9 +140,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="16-03-2021",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType='GRD', sProvider="CREODIAS"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType='GRD', sProvider="CREODIAS"), [])
 
     def testSearchEOImages_sProvider_None_LSA(self):
         """
@@ -141,10 +152,10 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType="GRD", sProvider=None),
-                         Vars().S1_2021_03_16_2021_03_16_LSA)
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType="GRD", sProvider=None),
+                         SearchEOImagesVars().S1_2021_03_16_2021_03_16_LSA)
 
     def testSearchEOImages_sProvider_pippo(self):
         """
@@ -154,9 +165,9 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType="GRD", sProvider="pippo"), [])
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType="GRD", sProvider="pippo"), [])
 
     """searchEOImagesAfterPost"""
 
@@ -172,16 +183,16 @@ class TestSearchEOImages(unittest.TestCase):
         def res():
             r = Mock()
             r.status_code.return_value = 200
-            r.json.return_value = Vars().S1_2021_03_16_2021_03_16_oResponseJson
+            r.json.return_value = SearchEOImagesVars().S1_2021_03_16_2021_03_16_oResponseJson
             return r
 
         wasdi.setVerbose(False)
         mock_request_post.return_value = res()
         self.assertEqual(wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                                  fULLat=49.41145140497633, fULLon=1.854752483603064,
-                                                  fLRLat=48.51693720209968, fLRLon=3.045217797594174,
-                                                  sProductType="GRD", sProvider="CREODIAS"),
-                         Vars().S1_2021_03_16_2021_03_16_After_post)
+                                              fULLat=49.41145140497633, fULLon=1.854752483603064,
+                                              fLRLat=48.51693720209968, fLRLon=3.045217797594174,
+                                              sProductType="GRD", sProvider="CREODIAS"),
+                         SearchEOImagesVars().S1_2021_03_16_2021_03_16_After_post)
 
     @patch('requests.post')
     def testPost(self, post):
@@ -193,12 +204,12 @@ class TestSearchEOImages(unittest.TestCase):
         """
         wasdi.setVerbose(False)
         wasdi.searchEOImages(sPlatform='S1', sDateFrom="2021-03-16", sDateTo="2021-03-16",
-                                 fULLat=49.41145140497633, fULLon=1.854752483603064, fLRLat=48.51693720209968,
-                                 fLRLon=3.045217797594174,
-                                 sProductType="GRD", sProvider="CREODIAS")
+                             fULLat=49.41145140497633, fULLon=1.854752483603064, fLRLat=48.51693720209968,
+                             fLRLon=3.045217797594174,
+                             sProductType="GRD", sProvider="CREODIAS")
         post.assert_called_with(
-            Vars().sUrl_S1_2021_03_16_2021_03_16,
-            data=Vars().sQueryBody_S1_2021_03_16_2021_03_16,
+            SearchEOImagesVars().sUrl_S1_2021_03_16_2021_03_16,
+            data=SearchEOImagesVars().sQueryBody_S1_2021_03_16_2021_03_16,
             headers=wasdi._getStandardHeaders())
 
 
