@@ -3483,7 +3483,7 @@ public class WasdiLib {
 			// get the workspace id
 			sReturn = (String) aoJSONMap.get("stringValue"); 
 			if(null!=sReturn) {
-				openWorkspace(sReturn);
+				openWorkspaceById(sReturn);
 			} else {
 				log("createWorkspace: creation failed.");
 			}
