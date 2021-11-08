@@ -17,6 +17,7 @@ import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class WasdiLibTest {
 
 	private static String getWorkflowsResponse;
@@ -496,6 +498,26 @@ public class WasdiLibTest {
 		Assert.assertEquals(expectedResponse, actualResponse);
 
 		verify(wasdiLib, times(1)).httpPost(sPostUrl, sPayload, asHeaders);
+	}
+
+	@Test
+	public void deleteProductTest() {
+		WasdiLib wasdiLib = spy(WasdiLib.class);
+
+		String sProduct = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525.zip";
+		String activeWorkspace = wasdiLib.getActiveWorkspace();
+
+		String sGetUrl = wasdiLib.getWorkspaceBaseUrl() + "/product/delete?name=" + sProduct + "&deletefile=true&workspace=" + activeWorkspace + "&deletelayer=true";
+		String fixedGetResponse = "{\"boolValue\":true,\"doubleValue\":null,\"intValue\":200,\"stringValue\":null}";
+
+		doReturn(fixedGetResponse).when(wasdiLib).httpGet(sGetUrl, asHeaders);
+
+		String expectedResponse = fixedGetResponse;
+		String actualResponse = wasdiLib.deleteProduct(sProduct);
+
+		Assert.assertEquals(expectedResponse, actualResponse);
+
+		verify(wasdiLib, times(1)).httpGet(sGetUrl, asHeaders);
 	}
 
 }
