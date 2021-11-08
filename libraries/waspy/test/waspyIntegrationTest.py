@@ -16,6 +16,7 @@ class WaspyIntegrationTests(unittest.TestCase):
     workspace initialized a the beginning of each test.
     To test everything please create a non empty ws and set it in config.json for initialization
     '''
+    # todo create unique workspace name each time
     CONST_WORKSPACE_NAME = "OS2TIhDJyRlOGgzV"
 
     # todo test writing username and password from stdin
