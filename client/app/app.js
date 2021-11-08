@@ -52,6 +52,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ImageEditorDirective',
     'wasdi.DropdownMenuDirective',
     'wasdi.wapTextBox',
+    'wasdi.wapNumericBox',
     'wasdi.wapSelectArea',
     'wasdi.wapDateTimePicker',
     'wasdi.wapProductList',
