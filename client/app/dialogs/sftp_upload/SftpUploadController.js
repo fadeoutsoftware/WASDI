@@ -169,11 +169,6 @@ var SftpUploadController = (function() {
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
         this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).then(function (data, status) {
-            // if (data != null) {
-            //     if (data != undefined) {
-            //
-            //     }
-            // }
         },function (data, status) {
             if(data.data)
             {

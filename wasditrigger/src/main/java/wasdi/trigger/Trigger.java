@@ -14,6 +14,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import wasdi.jwasdilib.WasdiLib;
 import wasdi.shared.business.Schedule;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ScheduleRepository;
 import wasdi.shared.data.SessionRepository;
@@ -39,13 +40,10 @@ public class Trigger {
 	public Trigger() {
 		try {
 			// Read Mongo configuration
-			MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
-			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
-			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
-			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+			MongoRepository.readConfig();
 			// Read base path and url
-			m_sBasePath = ConfigReader.getPropValue("BASE_PATH", "/data/wasdi/");
-			m_sBaseUrl = ConfigReader.getPropValue("BASE_URL", "https://www.wasdi.net/wasdiwebserver/rest/");
+			m_sBasePath = WasdiConfig.Current.paths.downloadRootPath;
+			m_sBaseUrl = WasdiConfig.Current.baseUrl;
 		} 
 		catch (Throwable oEx) {
 			oEx.printStackTrace();
@@ -81,8 +79,10 @@ public class Trigger {
 		Options oOptions = new Options();
 		
 		oOptions.addOption("s","scheduleid", true, "schedule object id");
+		oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
 		String sScheduleId = "";
+		String sConfigFilePath = "/data/wasdi/config.json";
 
 		try {
 
@@ -95,7 +95,19 @@ public class Trigger {
 			}
 			else {
 				s_oLogger.debug("No Schedule ID No party. Bye");
+				System.exit(-1);
 			}
+			
+	        if (oLine.hasOption("config")) {
+	            // Get the Parameter File
+	        	sConfigFilePath = oLine.getOptionValue("config");
+	        }
+			
+	        if (!WasdiConfig.readConfig(sConfigFilePath)) {
+	            System.err.println("Trigger - config file not found. Exit");
+	            System.exit(-1);        	
+	        }	        
+			
 						
 			Trigger oTrigger = new Trigger();
 
@@ -131,7 +143,7 @@ public class Trigger {
 
 		// Create the session
 		UserSession oUserSession = new UserSession();
-		oUserSession.setSessionId(Utils.GetRandomName());
+		oUserSession.setSessionId(Utils.getRandomName());
 		oUserSession.setUserId(oSchedule.getUserId());
 		oUserSession.setLoginDate((double) new Date().getTime());
 		oUserSession.setLastTouch((double) new Date().getTime());

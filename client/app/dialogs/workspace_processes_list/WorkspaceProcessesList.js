@@ -4,13 +4,13 @@
 'use strict';
 var WorkspaceProcessesList = (function () {
 
-    function WorkspaceProcessesList($scope, oClose, oProcessesLaunchedService, oConstantsService, oModalService, oProcessorService, $interval) {//,oExtras
+    function WorkspaceProcessesList($scope, oClose, oProcessWorkspaceService, oConstantsService, oModalService, oProcessorService, $interval) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oModalService = oModalService;
         this.m_oProcessorService = oProcessorService;
         this.hasError = false;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_aoProcessesLogs = [];
         this.filterTable = "";
         this.m_bAreProcessesLoaded = false;
@@ -123,7 +123,7 @@ var WorkspaceProcessesList = (function () {
         }
 
         // retrieves the last 40 processor Logs considering the current state of the filters
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessWorkspaceService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
@@ -156,8 +156,7 @@ var WorkspaceProcessesList = (function () {
 
         this.m_bAreProcessesLoaded = false;
 
-        //this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessWorkspaceService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data, status) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
@@ -352,7 +351,7 @@ var WorkspaceProcessesList = (function () {
 
 
     WorkspaceProcessesList.prototype.deleteProcess = function (oProcessInput) {
-        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
+        this.m_oProcessWorkspaceService.deleteProcess(oProcessInput);
         return true;
     };
 
@@ -364,7 +363,7 @@ var WorkspaceProcessesList = (function () {
     WorkspaceProcessesList.$inject = [
         '$scope',
         'close',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'ConstantsService',
         'ModalService',
         'ProcessorService',

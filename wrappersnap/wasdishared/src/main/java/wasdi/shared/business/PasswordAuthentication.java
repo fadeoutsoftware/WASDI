@@ -37,13 +37,9 @@ public final class PasswordAuthentication
 
 	  private static final Pattern layout = Pattern.compile("\\$513\\$(\\d\\d?)\\$(.{43})");
 
-	  private final SecureRandom random;
+	  private final SecureRandom m_oSecureRandom;
 
-	  private final int cost;
-
-	  /*public static void setAlgorithm(String sAlgorithmInput){
-		  ALGORITHM = sAlgorithmInput;
-	  }*/
+	  private final int m_iCost;
 	  
 	  public PasswordAuthentication()
 	  {
@@ -58,8 +54,8 @@ public final class PasswordAuthentication
 	  public PasswordAuthentication(int cost)
 	  {
 	    iterations(cost); /* Validate cost */
-	    this.cost = cost;
-	    this.random = new SecureRandom();
+	    this.m_iCost = cost;
+	    this.m_oSecureRandom = new SecureRandom();
 	  }
 
 	  private static int iterations(int cost)
@@ -77,13 +73,13 @@ public final class PasswordAuthentication
 	  public String hash(char[] password)
 	  {
 	    byte[] salt = new byte[SIZE / 8];
-	    random.nextBytes(salt);
-	    byte[] dk = pbkdf2(password, salt, 1 << cost);
+	    m_oSecureRandom.nextBytes(salt);
+	    byte[] dk = pbkdf2(password, salt, 1 << m_iCost);
 	    byte[] hash = new byte[salt.length + dk.length];
 	    System.arraycopy(salt, 0, hash, 0, salt.length);
 	    System.arraycopy(dk, 0, hash, salt.length, dk.length);
 	    Base64.Encoder enc = Base64.getUrlEncoder().withoutPadding();
-	    return ID + cost + '$' + enc.encodeToString(hash);
+	    return ID + m_iCost + '$' + enc.encodeToString(hash);
 	  }
 
 	  /**

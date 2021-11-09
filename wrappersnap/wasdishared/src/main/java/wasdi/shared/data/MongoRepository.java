@@ -22,6 +22,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -74,7 +75,19 @@ public class MongoRepository {
      */
     protected String m_sRepoDb = "wasdi";
     
+    /**
+     * Flag to notify with a log if the repository has no local connection and 
+     * reverts to the default wasdi connection
+     */
     private static boolean s_bDbSwitchLogged = false;
+    
+    public static void readConfig() {
+        MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongo.address;
+        MongoRepository.SERVER_PORT = WasdiConfig.Current.mongo.port;
+        MongoRepository.DB_NAME = WasdiConfig.Current.mongo.dbName;
+        MongoRepository.DB_USER = WasdiConfig.Current.mongo.user;
+        MongoRepository.DB_PWD = WasdiConfig.Current.mongo.password;    	
+    }
     
 	/**
      * Add a new Mongo Connection
@@ -213,6 +226,7 @@ public class MongoRepository {
 		    }
 		});
 	}
+    
 	public String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
 		String sResult = "";
 		if(oNewDocument != null) {
@@ -263,32 +277,5 @@ public class MongoRepository {
 
         return  false;
     }
-//	public void uploadImage (File oImageFile){
-//		
-//		GridFS gfsPhoto = new GridFS( s_oMongoClient.getDB(dbName), "userphotos");
-//
-//		String newFileName = "userimage";
-//		try {
-//			GridFSInputFile gfsFile = gfsPhoto.createFile(oImageFile);
-//			gfsFile.setFilename(newFileName);
-//			gfsFile.save();
-//
-//		} catch (IOException e) {
-//			Utils.debugLog("MongoRepository.uploadImage:" + e);
-//			e.printStackTrace();
-//		}
-//	}
-//	public void getImage (){
-//		GridFS gfsPhoto = new GridFS((DB) s_oMongoDatabase, "photo");
-//		String newFileName = "userimage";
-//		GridFSDBFile imageForOutput = gfsPhoto.findOne(newFileName);
-//		// save it into a new image file
-//		try {
-//			imageForOutput.writeTo("C:\\temp\\wasdi\\data\\alessio");
-//		} catch (IOException e) {
-//			Utils.debugLog("MongoRepository.getImage:" + e);
-//			e.printStackTrace();
-//		}
-//	}
 	
 }

@@ -2,14 +2,11 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -17,54 +14,72 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.esa.snap.core.gpf.graph.Graph;
-import org.esa.snap.core.gpf.graph.GraphIO;
-import org.esa.snap.core.gpf.graph.Node;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.Provider;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PublishedBand;
-import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
+import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 
+/**
+ * File Buffer Resource.
+ * Hosts API for:
+ * 	.import new files in WASDI from data providers
+ *  .publish bands on geoserver
+ *  .handle geoserver styles
+ *  
+ * @author p.campanella
+ *
+ */
 @Path("/filebuffer")
 public class FileBufferResource {
-
-	@Context
-	ServletConfig m_oServletConfig;
-
+		
+	/**
+	 * Providers Catalogue
+	 */
 	@Inject
-	ProvidersCatalog m_oProviderCatalog;
+	ProvidersCatalog m_oDataProviderCatalog;
 	
+	/**
+	 * Trigger a new import of an image in WASDI.
+	 * The method checks the input, create the parameter and call WASDI.runProcess
+	 * 
+	 * @param sSessionId User Session
+	 * @param sFileUrl Url of the file to import
+	 * @param sProvider Data Provider
+	 * @param sWorkspaceId Workspace Id
+	 * @param sBoundingBox if available, bbox of the product to import
+	 * @param sParentProcessWorkspaceId Proc Id of the Parent Process
+	 * @return
+	 * @throws IOException
+	 */
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
-									@QueryParam("sFileUrl") String sFileUrl,
-									@QueryParam("sProvider") String sProvider,
-									@QueryParam("sWorkspaceId") String sWorkspaceId,
-									@QueryParam("sBoundingBox") String sBoundingBox,
+									@QueryParam("fileUrl") String sFileUrl,
+									@QueryParam("provider") String sProvider,
+									@QueryParam("workspace") String sWorkspaceId,
+									@QueryParam("bbox") String sBoundingBox,
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException
 	{
@@ -94,14 +109,14 @@ public class FileBufferResource {
 
 			String sUserId = oUser.getUserId();
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 
 			// if the provider is not specified, we fallback on the node default provider
-			Provider oProvider = null;
+			DataProvider oProvider = null;
 			if (Utils.isNullOrEmpty(sProvider)) {
-				oProvider = m_oProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
+				oProvider = m_oDataProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
 			} else {
-				oProvider = m_oProviderCatalog.getProvider(sProvider);
+				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
 
 			Utils.debugLog("FileBufferResource.Download, provider: " + oProvider.getName());
@@ -120,7 +135,7 @@ public class FileBufferResource {
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
@@ -133,15 +148,29 @@ public class FileBufferResource {
 		oResult.setIntValue(500);
 		return oResult;
 	}
-
+	
+	/**
+	 * Publish band: if the band had already been published, it returns immediatly the View Model required by rabbit.
+	 * If it is not, it creates the parameter and call Wasdi.runProcess to publish the band
+	 * 
+	 * @param sSessionId User Session
+	 * @param sFileUrl file name
+	 * @param sWorkspaceId Workspace id
+	 * @param sBand band to publish
+	 * @param sStyle default style
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @return Rabbit Message View Model: empty if the band must be published. If it is alredy published, the same view model that the launcher send to the client after the publish is done
+	 * @throws IOException
+	 */
 	@GET
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
-												@QueryParam("sFileUrl") String sFileUrl,
-												@QueryParam("sWorkspaceId") String sWorkspaceId,
-												@QueryParam("sBand") String sBand,
-												@QueryParam("sStyle") String sStyle, @QueryParam("parent") String sParentProcessWorkspaceId) throws IOException {
+												@QueryParam("fileUrl") String sFileUrl,
+												@QueryParam("workspace") String sWorkspaceId,
+												@QueryParam("band") String sBand,
+												@QueryParam("style") String sStyle, 
+												@QueryParam("parent") String sParentProcessWorkspaceId) throws IOException {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
@@ -160,11 +189,16 @@ public class FileBufferResource {
 			Utils.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", workspace: " + sWorkspaceId);
 			
 			// Get the full product path
-			String sFullProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+			String sFullProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			// Get the product
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullProductPath+sFileUrl);
+			
+			if (oDownloadedFile == null) {
+				Utils.debugLog("FileBufferResource.PublishBand: cannot find downloaded file, return");
+				return oReturnValue;
+			}
 			
 			// If the style is not set, look if there is a default one in the downloaded file
 			if (Utils.isNullOrEmpty(sStyle)) {
@@ -205,7 +239,7 @@ public class FileBufferResource {
 				return oReturnValue;
 			}
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 
 			PublishBandParameter oParameter = new PublishBandParameter();
 			oParameter.setQueue(sSessionId);
@@ -218,7 +252,7 @@ public class FileBufferResource {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			
@@ -235,55 +269,6 @@ public class FileBufferResource {
 		return oReturnValue;
 
 	}
-	
-	
-	@GET
-	@Path("getbandlayerid")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl,
-			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
-	{
-		Utils.debugLog("FileBufferResource.GetBandLayerId");
-		PrimitiveResult oReturnValue = null;
-		try {
-			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.GetBandLayerId( " +
-						sSessionId + ", " +
-						sFileUrl + ", " + 
-						sWorkspaceId + ", " +
-						sBand + " ): session invalid");
-				return oReturnValue;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
-
-			Utils.debugLog("FileBufferResource.GetBandLayerId: read product workspaces " + sWorkspaceId);
-
-			oReturnValue = new PrimitiveResult();
-			// Get Product List
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			
-			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
-			
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath+sFileUrl);
-			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-			PublishedBand oPublishBand = oPublishedBandsRepository.getPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
-
-			if (oPublishBand != null){
-				Utils.debugLog("FileBufferResource.GetBandLayerId: band already published return " +oPublishBand.getLayerId() );
-				oReturnValue.setStringValue(oPublishBand.getLayerId());
-			} else {
-				Utils.debugLog("FileBufferResource.GetBandLayerId: band never published");
-			}
-		} catch (Exception e) {
-			Utils.debugLog("FileBufferResource.GetBandLayerId: " + e);
-			return oReturnValue;
-		}
-
-		return oReturnValue;
-	}
-	
 	
 	/**
 	 * Download a SLD style
@@ -316,7 +301,7 @@ public class FileBufferResource {
 			}
 
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 			String sStyleSldPath = sDownloadRootPath + "styles/" + sStyle + ".sld";
 
 			File oFile = new File(sStyleSldPath);
@@ -349,13 +334,19 @@ public class FileBufferResource {
 		return null;
 	}
 	
-	
+	/**
+	 * Uplad a .sld file
+	 * @param fileInputStream File Input Stream
+	 * @param sSessionId User id
+	 * @param sName style name
+	 * @return std http response
+	 */
 	@POST
 	@Path("/uploadstyle")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadStyle(@FormDataParam("file") InputStream fileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName) throws Exception {
+			@QueryParam("name") String sName)  {
 
 		Utils.debugLog("FileBufferResource.uploadStyle( Name: " + sName);
 
@@ -371,7 +362,7 @@ public class FileBufferResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 
 			File oStylesPath = new File(sDownloadRootPath + "styles/");
 

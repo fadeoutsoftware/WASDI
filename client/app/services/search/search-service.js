@@ -166,7 +166,7 @@ angular
                 }
 
                 // Call the API with the list of queries
-                return $http.post(OpenSearchService.getApiProductsListWithProviders(self.createSearchRequest(filter, self.offset, self.limit,self.providers)), asFilters);
+                return $http.post(OpenSearchService.getApiProductsListWithProviders(self.providers), asFilters);
             },
             getProductsListCount: function (asTimeQueries) {
 
@@ -189,7 +189,7 @@ angular
                         asFilters.push(filter);
                     }
                 }
-                return $http.post(OpenSearchService.getApiProductListCountWithProviders("*",this.providers), asFilters);
+                return $http.post(OpenSearchService.getApiProductListCountWithProviders(this.providers), asFilters);
             },
             gotoPage: function (pageNumber) {
                 this.setOffset((pageNumber * this.limit) - this.limit);

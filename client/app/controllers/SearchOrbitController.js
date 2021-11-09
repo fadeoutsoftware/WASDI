@@ -9,7 +9,7 @@
 
 var SearchOrbitController = (function() {
     function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
-                                   oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,
+                                   oMapService, oOpportunitySearchService,oProcessWorkspaceService,oWorkspaceService,
                                    oRabbitStompService,oModalService, oProductService,$filter ,oTreeService) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
@@ -19,14 +19,14 @@ var SearchOrbitController = (function() {
         this.m_oScope.m_oController = this;
         this.m_oConfigurationService = oConfigurationService;
         this.m_oMapService = oMapService;
-        this.m_oSearchOrbitService = oSearchOrbitService;
+        this.m_oOpportunitySearchService = oOpportunitySearchService;
         this.m_oConfiguration = null;
         this.m_oGeoJSON = null;
         this.m_oSelectedSensorType = [];
         this.m_oSelectedResolutionType = [];
         this.m_oSelectedSatellite = [];
         this.m_aoOrbits = null;
-        this.m_oProcessesLaunchedService=oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService=oProcessWorkspaceService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oModalService = oModalService;
@@ -67,7 +67,7 @@ var SearchOrbitController = (function() {
         }
         else
         {
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            this.m_oProcessWorkspaceService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         }
 
         /*Hook to Rabbit WebStomp Service*/
@@ -174,7 +174,7 @@ var SearchOrbitController = (function() {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
                     // oController.m_oRabbitStompService.initWebStomp("SearchOrbitController",oController);
-                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                 }
             }
@@ -286,7 +286,7 @@ var SearchOrbitController = (function() {
         var sText = oNode.text;
         var sFootPrint = oNode.original.FrameFootPrint;
         console.log(sFootPrint);
-        this.m_oSearchOrbitService.getKML(sText,sFootPrint)
+        this.m_oOpportunitySearchService.getKML(sText,sFootPrint)
             .then(function(data,state){
                 if( utilsIsObjectNullOrUndefined(data.data) === false )
                 {
@@ -613,7 +613,7 @@ var SearchOrbitController = (function() {
     SearchOrbitController.prototype.getSatellitesResources = function()
     {
         var oController = this;
-        this.m_oSearchOrbitService.getSatellitesResources()
+        this.m_oOpportunitySearchService.getSatellitesResources()
             .then(function(data,status){
                 if(utilsIsObjectNullOrUndefined(data.data) === false || status !== 200)
                 {
@@ -822,7 +822,7 @@ var SearchOrbitController = (function() {
         // ify(oJSON);
         this.m_isDisabledSearchButton = true;
 
-        this.m_oSearchOrbitService.searchOrbit(oJSON)
+        this.m_oOpportunitySearchService.searchOrbit(oJSON)
             .then(function (data, status, headers, config) {
                 if(!utilsIsObjectNullOrUndefined(data.data))
                 {
@@ -1161,8 +1161,8 @@ var SearchOrbitController = (function() {
         '$state',
         'ConfigurationService',
         'MapService',
-        'SearchOrbitService',
-        'ProcessesLaunchedService',
+        'OpportunitySearchService',
+        'ProcessWorkspaceService',
         'WorkspaceService',
         'RabbitStompService',
         'ModalService',

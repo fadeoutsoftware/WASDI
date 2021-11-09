@@ -9,19 +9,43 @@ package wasdi.shared.parameters;
 import wasdi.shared.utils.Utils;
 
 /**
+ * Parameter of the FTP Upload Operation
  * @author c.nattero
  *
  */
 public class FtpUploadParameters extends BaseParameter {
 	
-	//FTP server-side info
+	/**
+	 * Target ftp server
+	 */
 	String ftpServer;
+	/**
+	 * Remote Port
+	 */
 	Integer m_iPort;
+	/**
+	 * Flag to detect an sftp connection
+	 */
 	Boolean m_bSftp=true;
+	/**
+	 * Target server user name
+	 */
 	String m_sUsername;
+	/**
+	 * Target server user password
+	 */
 	String m_sPassword;
+	/**
+	 * Remote path where to put the file
+	 */
 	String m_sRemotePath;	
+	/**
+	 * Local file name to move
+	 */
 	String m_sLocalFileName;
+	/**
+	 * Local file path
+	 */
 	String m_sLocalPath;
 	
 	public String getFtpServer() {

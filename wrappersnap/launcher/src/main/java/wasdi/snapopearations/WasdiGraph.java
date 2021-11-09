@@ -1,7 +1,6 @@
 package wasdi.snapopearations;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -25,11 +24,11 @@ import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 
 import sun.management.VMManagement;
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
+import wasdi.operations.Operation;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessStatus;
@@ -38,15 +37,14 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
-import wasdi.shared.payload.ExecuteGraphPayload;
+import wasdi.shared.parameters.settings.*;
+import wasdi.shared.payloads.ExecuteGraphPayload;
+import wasdi.shared.parameters.*;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LoggerWrapper;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.*;
 
 
 /**
@@ -103,6 +101,11 @@ public class WasdiGraph {
 	private ProcessWorkspaceLogger m_oProcessWorkspaceLogger;
 	
 	/**
+	 * Father operation that is running the Graph
+	 */
+	private Operation m_oOperation;
+	
+	/**
 	 * Construct the Graph object
 	 * @param oParams Parameters 
 	 * @param oRabbitSender Rabbit Sender
@@ -110,21 +113,22 @@ public class WasdiGraph {
 	 * @param oProcessWorkspace Process Workspace Entity
 	 * @throws Exception
 	 */
-	public WasdiGraph(GraphParameter oParams, Send oRabbitSender, ProcessWorkspaceLogger oLogger, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public WasdiGraph(GraphParameter oParams, Operation oOperation,ProcessWorkspace oProcessWorkspace) throws Exception {
 		
+		// Set operation member
+		this.m_oOperation = oOperation;
+		//set the graph parameters
+		this.m_oParams = oParams;		
 		
-		this.m_oProcessWorkspaceLogger = oLogger;
-		
-		//set the pgraph parameters
-		this.m_oParams = oParams;
-		
+		// Set the proc workspace logger
+		this.m_oProcessWorkspaceLogger = m_oOperation.getProcessWorkspaceLogger();
+				
 		//set the rabbit sender
-		this.m_oRabbitSender = oRabbitSender;
+		this.m_oRabbitSender = m_oOperation.getSendToRabbit();
 		
 		GraphSetting oGraphSettings = (GraphSetting) oParams.getSettings();
 		
 		m_oProcessWorkspaceLogger.log("Execute SNAP graph " + oGraphSettings.getWorkflowName());
-		
 		
 		//build snap graph object
 		m_oGraph = GraphIO.read(new StringReader(((GraphSetting)(oParams.getSettings())).getGraphXml()));
@@ -296,7 +300,7 @@ public class WasdiGraph {
 			
 			// P.Campanella 16/06/2017: should add real file size to the Process Log
             //set file size     
-            LauncherMain.setFileSizeToProcess(m_oInputFile, m_oProcess);
+            m_oOperation.setFileSizeToProcess(m_oInputFile, m_oProcess);
 			
 			//build the snap graph context and processor
 			GraphContext oContext = new GraphContext(m_oGraph);		

@@ -17,6 +17,7 @@ import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 
@@ -28,6 +29,11 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sTomcatUser;
 	ProcessorParameter m_oParameter;
 	protected ProcessWorkspace m_oProcessWorkspace= null;
+	
+	public static WasdiProcessorEngine getProcessorEngine(String sType) { 
+		return getProcessorEngine(sType, WasdiConfig.Current.paths.downloadRootPath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
+	}
+	
 	
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
@@ -53,6 +59,15 @@ public abstract class WasdiProcessorEngine {
 		else {
 			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
+	}
+
+	/**
+	 * Create a Processor Engine using paths and tomcat user from config
+	 */
+	public WasdiProcessorEngine() {
+		m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
+		m_sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
+		m_sTomcatUser = WasdiConfig.Current.tomcatUser;
 	}
 	
 	/**

@@ -316,7 +316,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public long countByWorkspace(String sWorkspaceId) {
     	try {
-    		long lCount = getCollection(m_sThisCollection).count(new Document("workspaceId", sWorkspaceId));
+    		long lCount = getCollection(m_sThisCollection).countDocuments(new Document("workspaceId", sWorkspaceId));
     		return lCount;
     	}
     	catch (Exception oEx) {
@@ -333,7 +333,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public long countByProcessor(String sProcessorName) {
     	try {
-    		long lCount = getCollection(m_sThisCollection).count(new Document("productName", sProcessorName));
+    		long lCount = getCollection(m_sThisCollection).countDocuments(new Document("productName", sProcessorName));
     		return lCount;
     	}
     	catch (Exception oEx) {

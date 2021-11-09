@@ -1,7 +1,7 @@
  var ProcessorLogsController = (function() {
 
     function ProcessorLogsController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,
-                                              oProcessorService,$interval, oProcessesLaunchedService) {
+                                              oProcessorService,$interval, oProcessWorkspaceService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
@@ -9,7 +9,7 @@
         this.m_oConstantsService = oConstantsService;
         this.m_oProcess = oExtras.process;
         this.m_oProcessorService = oProcessorService;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oInterval = $interval;
         this.m_aoLogs = [];
         this.m_sSearch="";
@@ -237,7 +237,7 @@
              utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PROCESSOR LOGS');
          });
 
-         this.m_oProcessesLaunchedService.getProcessWorkspaceById(oProcessObjId).then(function (data, status) {
+         this.m_oProcessWorkspaceService.getProcessWorkspaceById(oProcessObjId).then(function (data, status) {
             oController.m_oProcess = data.data;
         },function (data,status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR REFRESHING PROCESSOR STATUS');
@@ -292,7 +292,7 @@
         'CatalogService',
         'ProcessorService',
         '$interval',
-        'ProcessesLaunchedService'
+        'ProcessWorkspaceService'
     ];
     return ProcessorLogsController;
 })();

@@ -13,6 +13,12 @@ import com.mongodb.client.result.DeleteResult;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.utils.Utils;
 
+/**
+ * AppCategory Repository
+ * 
+ * @author p.campanella
+ *
+ */
 public class AppsCategoriesRepository extends MongoRepository {
 	
 	public AppsCategoriesRepository() {

@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
-import org.geotools.data.wms.xml.ogcElement;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
-import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.utils.Utils;
 
