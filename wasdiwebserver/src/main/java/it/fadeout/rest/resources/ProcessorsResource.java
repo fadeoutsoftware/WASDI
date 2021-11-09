@@ -462,9 +462,13 @@ public class ProcessorsResource  {
 					}
 				}
 				
-				// Check and apply name filter
+				// Check and apply name filter taking in account both friendly and app name.
+				// Friendly name was added on the check to have a coherent behaviour for the users
 				if (!Utils.isNullOrEmpty(oFilters.getName())) {
-					if (!oProcessor.getName().contains(oFilters.getName())) continue;
+					String sLowerProcessorName = oProcessor.getName().toLowerCase();
+					String sLowerProcessorFriendlyName = oProcessor.getFriendlyName().toLowerCase();
+					String sLowerFiltername = oFilters.getName().toLowerCase();
+					if (!(sLowerProcessorName.contains(sLowerFiltername) || sLowerProcessorFriendlyName.contains(sLowerFiltername))) continue;
 				}
 				
 				// Check and apply category filter
