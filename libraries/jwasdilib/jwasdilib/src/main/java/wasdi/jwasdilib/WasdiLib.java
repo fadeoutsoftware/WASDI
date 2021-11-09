@@ -1565,9 +1565,12 @@ public class WasdiLib {
 			}
 		}
 
-		waitForResume();
+		if (waitForResume()) {
+			return sStatus;
+		} else {
+			return "";
+		}
 
-		return sStatus;
 	}
 
 
@@ -1606,7 +1609,7 @@ public class WasdiLib {
 				bDone = true;	
 
 				List<String> asStatus = getProcessesStatusAsList(asIds);
-				if(null==asIds) {
+				if(null==asStatus) {
 					log("WasdiLib.waitProcesses: status list after getProcessesStatusAsList is null, aborting");
 					waitForResume();
 					return null;
@@ -1618,9 +1621,14 @@ public class WasdiLib {
 				
 				if (asStatus.size()<=0) {
 					log("WasdiLib.waitProcesses: status list after getProcessesStatusAsList is empty, please check the IDs you passed. Aborting");
-					waitForResume();
-					//return an empty list
-					return new ArrayList<>(asIds.size());
+
+					if (waitForResume()) {
+						//return an empty list
+						return new ArrayList<>(asIds.size());
+					} else {
+						return null;
+					}
+
 				}
 				
 				// ok we're good, check the statuses
@@ -1645,10 +1653,14 @@ public class WasdiLib {
 						e.printStackTrace();
 					}
 				}
-			}		
-			waitForResume();
+			}
 
-			return getProcessesStatusAsList(asIds);
+			if (waitForResume()) {
+				return getProcessesStatusAsList(asIds);
+			} else {
+				return null;
+			}
+
 		} catch (Exception oE) {
 			log("WasdiLib.waitProcesses: " + oE);
 			return null;
@@ -1656,23 +1668,44 @@ public class WasdiLib {
 	}
 
 	/**
-	 * Wait for a process to finish
-	 * @param sProcessId
-	 * @return
+	 * Wait for a process to finish.
+	 * @param sProcessId the id of the process
+	 * @return true if "RUNNING", false otherwise
 	 */
-	protected void waitForResume() {
+	protected boolean waitForResume() {
 
-		if (!m_bIsOnServer) return;
+		if (!m_bIsOnServer) return true;
 
 		String sStatus = "READY";
 		updateStatus(sStatus);
 
-		while ( ! (sStatus.equals("RUNNING"))) {
+		while (true) {
 			sStatus = getProcessStatus(getMyProcId());
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+
+			switch (sStatus) {
+			case "WAITING":
+			case "CREATED":
+				wasdiLog("WasdiLib.waitForResume: " + "found status " + sStatus + " and this should not be.");
+				sStatus = "READY";
+				updateStatus(sStatus);
+			case "READY":
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				break;
+			case "RUNNING":
+				return true;
+			case "DONE":
+			case "ERROR":
+			case "STOPPED":
+				wasdiLog("WasdiLib.waitForResume: " + "found status " + sStatus + " and this should not be.");
+				return false;
+			default:
+				wasdiLog("WasdiLib.waitForResume: " + "found unknown status " + sStatus + ". Please report this issue to the WASDI admin.");
+				return false;
 			}
 		}
 	}
