@@ -29,10 +29,11 @@ function ViewElementFactory() {
         else if (oControl.type === "numeric") {
 
             // Text box
-            oViewElement = new TextBox();
+            oViewElement = new NumericBox();
 
             // See if we have a default
             if (oControl.default) {
+                oViewElement.m_sValue = oControl.default;
                 oViewElement.m_sText = oControl.default;
             }
         }
@@ -308,6 +309,7 @@ let TextBox = function () {
  */
  let NumericBox = function () {
     this.m_sValue = 0;
+    this.m_sText = this.m_sValue.toString();
 
     /**
      * Get the value of the numericbox
@@ -322,7 +324,7 @@ let TextBox = function () {
      * @returns {string} String in the numericbox
      */
     this.getStringValue = function () {
-        return this.m_sValue.toString;
+        return this.m_sValue.toString();
     }
 };
 
