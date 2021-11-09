@@ -305,8 +305,15 @@ public class JavaWasdiLibTest {
 		Map<String, Object> asParams = new HashMap<>();
 		asParams.put("NAME", "Tester");
 
-		String status = wasdi.executeProcessor(sProcName, asParams);
-		assertEquals("DONE", status);
+		String sProcessObjId = wasdi.asynchExecuteProcessor(sProcName, asParams);
+		String sStatus = wasdi.waitProcess(sProcessObjId);
+		assertEquals("DONE", sStatus);
+
+		LOGGER.info("payload");
+
+		wasdi.getProcessorPayload(sProcessObjId);
+//		Map<String, Object> map = wasdi.getProcessorPayload(sProcessObjId);
+//		assertNotNull(map);
 	}
 
 	@Test
