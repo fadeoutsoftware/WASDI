@@ -544,10 +544,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         
         // TODO: Still needed? Really?
 		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("SENTINEL");
 			
-			sUser = oConfig.user;
-			sPassword = oConfig.password;
+			if (oConfig!=null) {
+				sUser = oConfig.user;
+				sPassword = oConfig.password;				
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
