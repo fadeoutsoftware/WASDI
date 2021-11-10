@@ -27,6 +27,7 @@ import wasdi
 
 
 class MarcoTestSearchEOImages(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         wasdi.init("./config.json")
@@ -41,3 +42,7 @@ class MarcoTestSearchEOImages(unittest.TestCase):
                                          oProvider, oBoundingBox)
         self.assertIsNotNone(eo_images)
         self.assertTrue(len(eo_images) > 0)
+
+    def test_SetVerbose(self):
+        wasdi.setVerbose(True)
+        self.assertTrue(wasdi.getVerbose())
