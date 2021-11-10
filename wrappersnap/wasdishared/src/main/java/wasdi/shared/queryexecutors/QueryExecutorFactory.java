@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
 import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
@@ -51,7 +53,7 @@ public class QueryExecutorFactory {
 		}
 	}
 
-	private QueryExecutor supply(String sProvider) {
+	private static QueryExecutor supply(String sProvider) {
 		
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {
@@ -65,7 +67,7 @@ public class QueryExecutorFactory {
 		return oExecutor;	
 	}
 
-	public QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials, String sParserConfigPath, String sAppConfigPath) {
+	private static QueryExecutor getExecutor(String sProvider, AuthenticationCredentials oCredentials, String sParserConfigPath, String sAppConfigPath) {
 		
 		QueryExecutor oExecutor = null;
 
@@ -88,5 +90,56 @@ public class QueryExecutorFactory {
 
 		return oExecutor;
 	}
+	
+	
+	/**
+	 * Get the Query Executor for a specific provider
+	 * @param sProvider Provider code
+	 * @return QueryExecutor of the specific provider
+	 */
+	public static  QueryExecutor getExecutor(String sProvider) {
+		Utils.debugLog("QueryExecutorFactory.getExecutor, provider: " + sProvider);
+		QueryExecutor oExecutor = null;
+		try {
+			if(null!=sProvider) {
+				AuthenticationCredentials oCredentials = getCredentials(sProvider);
+				
+				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+	
+				String sParserConfigPath = oDataProviderConfig.parserConfig;
+				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
+				
+				oExecutor = getExecutor(
+						sProvider,
+						oCredentials,
+						sParserConfigPath, sAppConfigPath);
+				
+				oExecutor.init();
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + " ): " + oE);
+		}
+		return oExecutor;
+
+	}
+
+	/**
+	 * Get Auth Credentials for a specific provider
+	 * @param sProvider Provider Code
+	 * @return AuthenticationCredentials entity
+	 */
+	private static  AuthenticationCredentials getCredentials(String sProvider) {
+		
+		AuthenticationCredentials oCredentials = null;
+		try {
+			DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+			
+			oCredentials = new AuthenticationCredentials(oDataProviderConfig.user, oDataProviderConfig.password);
+			
+		} catch (Exception oE) {
+			Utils.debugLog("QueryExecutorFactory.getCredentials( " + sProvider + " ): " + oE);
+		}
+		return oCredentials;
+	}	
 
 }

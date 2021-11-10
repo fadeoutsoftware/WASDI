@@ -37,7 +37,6 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public abstract class LauncherMainTest {
 
-	private static QueryExecutorFactory s_oQueryExecutorFactory;
 	private static String s_sClassName;
 	private static Map<String, AuthenticationCredentials> m_aoCredentials;
 
@@ -50,8 +49,7 @@ public abstract class LauncherMainTest {
     public static void setUpParent() throws Exception {
 		s_sClassName = "LauncherMainTest";
 		Utils.debugLog(s_sClassName + ".setUp");
-
-		s_oQueryExecutorFactory = new QueryExecutorFactory();
+		
 		m_aoCredentials = new HashMap<>();
 
 		SERIALIZATION_PATH = WasdiConfig.Current.paths.serializationPath;
@@ -398,7 +396,7 @@ public abstract class LauncherMainTest {
 				
 				try {
 					// Get the query executor
-					QueryExecutor oExecutor = getExecutor(sProvider);
+					QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProviders);
 					
 					if (oExecutor == null) {
 						Utils.debugLog(s_sClassName + ".search: executor null for Provider: " + sProvider);
@@ -438,32 +436,6 @@ public abstract class LauncherMainTest {
 		return null;
 	}
 
-	private QueryExecutor getExecutor(String sProvider) {
-		Utils.debugLog(s_sClassName + ".getExecutor, provider: " + sProvider);
-		QueryExecutor oExecutor = null;
-		try {
-			if(null!=sProvider) {
-				AuthenticationCredentials oCredentials = getCredentials(sProvider);
-				
-				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
-				
-	
-				String sParserConfigPath = oConfig.parserConfig;
-				
-				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
-				
-				oExecutor = s_oQueryExecutorFactory.getExecutor(
-						sProvider,
-						oCredentials,
-						sParserConfigPath, sAppConfigPath);
-				
-				oExecutor.init();
-			}
-		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
-		}
-		return oExecutor;
-	}
 
 	private AuthenticationCredentials getCredentials(String sProvider) {
 		//Utils.debugLog(s_sClassName + ".getCredentials( Provider: " + sProvider + " )");
