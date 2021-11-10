@@ -18,8 +18,8 @@ class WaspyIntegrationTests(unittest.TestCase):
     To test everything please create a non empty ws and set it in config.json for initialization
     '''
     # todo create unique workspace name each time
-    m_sWorkspaceName = ""
-    m_iWorkspaceNameLen = 64
+    # m_sWorkspaceName = ""
+    # m_iWorkspaceNameLen = 64
 
     # todo test writing username and password from stdin
     # def test_InitBroken(self):
@@ -28,17 +28,16 @@ class WaspyIntegrationTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        m_iWorkspaceNameLen = 512
-        m_sWorkspaceName = cls.randomString(m_iWorkspaceNameLen)
-        cls.clearWorkspaces()
+        cls.m_iWorkspaceNameLen = 512
+        cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
+        cls.clearWorkspaces(cls)
 
     @classmethod
     def randomString(cls, size=6, chars=string.ascii_uppercase + string.digits):
         sRandom = ''.join(random.choice(chars) for _ in range(size))
         return sRandom
 
-    @classmethod
-    def clearWorkspaces(cls):
+    def clearWorkspaces(self):
         aoWorkspaces = wasdi.getWorkspaces()
         for oWorkspace in aoWorkspaces:
             try:
@@ -67,13 +66,16 @@ class WaspyIntegrationTests(unittest.TestCase):
         wasdi.setBaseUrl(URL)
         wasdi.setWorkspaceBaseUrl("https://test.wasdi.net/wasdiwebserver/rest")
 
+    # 
+    # test begin here
+    #
+
     def test_createAndDeleteWorkspace(self):
         '''
         Creates and delete a workspace by using its Id !
         returns the id itself, if deleted
         '''
         print(self.m_sWorkspaceName)
-        print(m_sWorkspaceName)
         sWsIdAtCreation = wasdi.createWorkspace(self.m_sWorkspaceName)
         self.assertIsNotNone(sWsIdAtCreation)
         wsId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
@@ -81,7 +83,6 @@ class WaspyIntegrationTests(unittest.TestCase):
         asProducts = wasdi.getProductsByActiveWorkspace()
         self.assertEqual(0, len(asProducts))
         self.assertTrue(wasdi.deleteWorkspace(wsId))
-        pass
 
     def test_ListProduct(self):
         self.clearProducts()
