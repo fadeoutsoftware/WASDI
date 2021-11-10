@@ -69,19 +69,12 @@ class WaspyIntegrationTests(unittest.TestCase):
         for sProduct in asProducts:
             wasdi.deleteProduct(sProduct)
 
-    # def test_01_createWorkspace():
-    # {
-    #     LOGGER.info("createWorkspace");
-    #
-    # String
-    # createdWorkspaceId = wasdi.createWorkspace(sWorkspaceName, sNodeCode);
-    #
-    # String
-    # foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName);
-    #
-    # assertEquals(createdWorkspaceId, foundWorkspaceId);
-    # }
+    def test_01_createWorkspace(self):
+        sCreatedWorkspaceId = wasdi.createWorkspace(self.m_sWorkspaceName)
+        sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
+        self.assertEquals(sCreatedWorkspaceId, sFoundWorkspaceId)
 
+ 
 
 
 
