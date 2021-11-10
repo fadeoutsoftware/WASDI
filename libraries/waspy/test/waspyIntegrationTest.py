@@ -74,10 +74,20 @@ class WaspyIntegrationTests(unittest.TestCase):
         sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
         self.assertEquals(sCreatedWorkspaceId, sFoundWorkspaceId)
 
- 
+    def test_06_executeWorkflow(self):
+        return
 
+    def test_07_addFileToWASDI(self):
+        return
 
+    def test_08_mosaic(self):
+        return
 
+    def test_09_multiSubset(self):
+        return
+
+    def test_10_executeProcessor(self):
+        return
 
     #
     # test begin here
