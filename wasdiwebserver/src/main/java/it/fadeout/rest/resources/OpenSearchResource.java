@@ -34,27 +34,10 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
  */
 @Path("/search")
 public class OpenSearchResource {
-	
-	/**
-	 * Query executor factory
-	 */
-	private static QueryExecutorFactory s_oQueryExecutorFactory;
-	
 	/**
 	 * Static reference to this class name for logs
 	 */
 	private String m_sClassName;
-	
-	/**
-	 * Credentials of the different providers
-	 */
-	private Map<String,AuthenticationCredentials> m_aoCredentials;
-
-	static {
-		// Create instance of the factory
-		s_oQueryExecutorFactory = new QueryExecutorFactory();
-
-	}
 	
 	/**
 	 * Constructor
@@ -62,8 +45,6 @@ public class OpenSearchResource {
 	public OpenSearchResource() {
 		// Set this class name
 		m_sClassName = "OpenSearchResource";		
-		// Intialize the credentials dictionary
-		m_aoCredentials = new HashMap<>();
 	}
 	
 	/**
@@ -134,7 +115,7 @@ public class OpenSearchResource {
 			for (String sProvider : asProviders) {
 				Integer iProviderCountResults = 0;
 				try {
-					QueryExecutor oExecutor = getExecutor(sProvider);
+					QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProvider);
 					
 					if (oExecutor == null) {
 						Utils.debugLog(m_sClassName + ".getQueryCountResultsPerProvider: Query Executor = null ");
@@ -273,7 +254,7 @@ public class OpenSearchResource {
 				
 				try {
 					// Get the query executor
-					QueryExecutor oExecutor = getExecutor(sProvider);
+					QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProvider);
 					
 					if (oExecutor == null) {
 						Utils.debugLog(m_sClassName + ".search: executor null for Provider: " + sProvider);
@@ -515,7 +496,7 @@ public class OpenSearchResource {
 						// Check the value, never known...
 						if (iLimit<=0) iLimit = 100;
 						
-						QueryExecutor oExecutor = getExecutor(sProvider);
+						QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProvider);
 						
 						if (oExecutor == null) {
 							Utils.debugLog(m_sClassName + ".SearchList: Executor Null for Provider: " + sProvider);
@@ -603,61 +584,6 @@ public class OpenSearchResource {
 			Utils.debugLog(m_sClassName + ".SearchList: " + oE);
 		}
 		return null;
-	}
-
-	/**
-	 * Get the Query Executor for a specific provider
-	 * @param sProvider Provider code
-	 * @return QueryExecutor of the specific provider
-	 */
-	private QueryExecutor getExecutor(String sProvider) {
-		Utils.debugLog(m_sClassName + ".getExecutor, provider: " + sProvider);
-		QueryExecutor oExecutor = null;
-		try {
-			if(null!=sProvider) {
-				AuthenticationCredentials oCredentials = getCredentials(sProvider);
-				
-				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
-	
-				String sParserConfigPath = oDataProviderConfig.parserConfig;
-				String sAppConfigPath = WasdiConfig.Current.paths.missionsConfigFilePath;
-				
-				oExecutor = s_oQueryExecutorFactory.getExecutor(
-						sProvider,
-						oCredentials,
-						sParserConfigPath, sAppConfigPath);
-				
-				oExecutor.init();
-			}
-		} catch (Exception oE) {
-			Utils.debugLog(m_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
-		}
-		return oExecutor;
-
-	}
-
-	/**
-	 * Get Auth Credentials for a specific provider
-	 * @param sProvider Provider Code
-	 * @return AuthenticationCredentials entity
-	 */
-	private AuthenticationCredentials getCredentials(String sProvider) {
-		
-		AuthenticationCredentials oCredentials = null;
-		try {
-			oCredentials = m_aoCredentials.get(sProvider);
-			if(null == oCredentials) {
-				
-				DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
-				
-				oCredentials = new AuthenticationCredentials(oDataProviderConfig.user, oDataProviderConfig.password);
-				
-				m_aoCredentials.put(sProvider, oCredentials);
-			}
-		} catch (Exception oE) {
-			Utils.debugLog(m_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
-		}
-		return oCredentials;
 	}
 
 }

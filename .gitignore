@@ -1218,3 +1218,7 @@ wasdiOctaveDocker/.pydevproject
 client/app/assets/img/space-market-logo_old.png
 wasdiCondaDocker/.pydevproject
 wasdiwebserver/WebContent/webTEST.xml
+libraries/waspy/test/config.json
+libraries/waspy/test/256x256.tif
+wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestUtils.java
+wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestWorkspaceResource.java

@@ -140,6 +140,12 @@
                                     <waptextbox input-text="viewElement.m_sText"></waptextbox>
                                 </div>
 
+                                <!--input numeric-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"  ng-if="viewElement.type === 'numeric'">
+                                    <div class="input-text-label py-2">{{viewElement.label}}</div>
+                                    <wapnumericbox input-text="viewElement.m_sText"></wapnumericbox>
+                                </div>
+
                                 <!--dropdown -->
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4" ng-if="viewElement.type === 'dropdown'" >
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>

@@ -732,6 +732,9 @@ var ProcessorController = (function() {
          else if (sElementType === "textbox") {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"required": false\n\t},';
          }
+         else if (sElementType === "numeric") {
+            sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "numeric",\n\t\t"label": "description",\n\t\t"default": "0",\n\t\t"required": false\n\t},';
+        }
          else if (sElementType === "dropdown") {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": [],\n\t\t"required": false\n\t},';
          }

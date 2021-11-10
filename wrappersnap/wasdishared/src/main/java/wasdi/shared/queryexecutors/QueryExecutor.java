@@ -160,7 +160,7 @@ public abstract class QueryExecutor {
 				}
 			}
 			
-			return sClientQuery;					
+			return "";					
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("QueryExecutor.getUriFromProductName: exception " + oEx.toString());

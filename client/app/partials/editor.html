@@ -137,7 +137,8 @@
                             <a href=""><i class="fa fa-globe"></i>&nbsp;Navigation</a>
                         </li>
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
-                            ng-click="m_oController.setActiveTab(1)">
+                            ng-click="m_oController.setActiveTab(1)"
+                            ng-show="m_oController.m_b2DMapModeOn">
                             <a href=""><i class="fa fa-list"></i>&nbsp;Layers</a>
                         </li>
                     </ul>

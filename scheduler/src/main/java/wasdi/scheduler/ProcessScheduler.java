@@ -110,66 +110,81 @@ public class ProcessScheduler {
 			
 			SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sSchedulerKey);
 			
-			// Read Max Size of Concurrent Processes of this scheduler 
-			try {
-				int iMaxConcurrents = Integer.parseInt(oSchedulerQueueConfig.maxQueue);
-				if (iMaxConcurrents>0) {
-					m_iNumberOfConcurrentProcess = iMaxConcurrents;
-					WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			// Read Timeout of this scheduler 
-			try {
-				long lTimeout = Long.parseLong(oSchedulerQueueConfig.timeoutMs);
-				if (lTimeout>0) {
-					m_lTimeOutMs = lTimeout;
-					WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			// Read Operation Type supported 
-			try {
-				// Get the string from config
-				String sOperationTypes = oSchedulerQueueConfig.opTypes;
-				
-				// Split on comma
-				String [] asTypes = sOperationTypes.split(",");
-				
-				
-				// Add each element to the member list
-				if (asTypes != null) {
-					for (String sType : asTypes) {
-						m_asOperationTypes.add(sType);
-					}
+			if (oSchedulerQueueConfig!=null) {
+				// Read Max Size of Concurrent Processes of this scheduler 
+				try {
 					
-					// If there is only one type
-					if (asTypes.length == 1) {
-						// Read if there is a Subtype
-						String sOperationSubType = oSchedulerQueueConfig.opSubType;
-						
-						if (!Utils.isNullOrEmpty(sOperationSubType)) {
-							// Save the subtype
-							m_sOperationSubType = sOperationSubType;
+					if (!Utils.isNullOrEmpty(oSchedulerQueueConfig.maxQueue)) {
+						int iMaxConcurrents = Integer.parseInt(oSchedulerQueueConfig.maxQueue);
+						if (iMaxConcurrents>0) {
+							m_iNumberOfConcurrentProcess = iMaxConcurrents;
+							WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+						}					
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				// Read Timeout of this scheduler 
+				try {
+					if (!Utils.isNullOrEmpty(oSchedulerQueueConfig.timeoutMs)) {
+						long lTimeout = Long.parseLong(oSchedulerQueueConfig.timeoutMs);
+						if (lTimeout>0) {
+							m_lTimeOutMs = lTimeout;
+							WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				// Read Operation Type supported 
+				try {
+					// Get the string from config
+					String sOperationTypes = ""; 
+					
+					if (!Utils.isNullOrEmpty(oSchedulerQueueConfig.opTypes)) {
+						sOperationTypes = oSchedulerQueueConfig.opTypes;
+					}
+					
+					
+					// Split on comma
+					String [] asTypes = sOperationTypes.split(",");
+					
+					
+					// Add each element to the member list
+					if (asTypes != null) {
+						for (String sType : asTypes) {
+							m_asOperationTypes.add(sType);
+						}
+						
+						// If there is only one type
+						if (asTypes.length == 1) {
+							// Read if there is a Subtype
+							String sOperationSubType = oSchedulerQueueConfig.opSubType;
+							
+							if (!Utils.isNullOrEmpty(sOperationSubType)) {
+								// Save the subtype
+								m_sOperationSubType = sOperationSubType;
+							}
+						}
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			try {
-				long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
-				if (iStartWaitSleep>0) {
-					m_lWaitProcessStartMS = iStartWaitSleep;
-					WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					
+					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS)) {
+						long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
+						if (iStartWaitSleep>0) {
+							m_lWaitProcessStartMS = iStartWaitSleep;
+							WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
 			}
 			
 			// Read the Lancher Path
