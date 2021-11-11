@@ -143,16 +143,14 @@ public class JavaWasdiLibTest {
 	}
 
 	@Test
-	public void test_02_openWorkspace() {
-		LOGGER.info("openWorkspace");
-
-		String activeWorkspaceId = wasdi.openWorkspace(sWorkspaceName);
+	public void test_02_recreateWorkspace_shouldFail() {
+		LOGGER.info("recreateWorkspace");
 
 		String foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName);
+		assertNotNull(foundWorkspaceId);
 
-		assertEquals(activeWorkspaceId, wasdi.getActiveWorkspace());
-
-		assertEquals(activeWorkspaceId, foundWorkspaceId);
+		String createdWorkspaceId = wasdi.createWorkspace(sWorkspaceName, sNodeCode);
+		assertNull(createdWorkspaceId);
 	}
 
 	@Test
@@ -179,7 +177,7 @@ public class JavaWasdiLibTest {
 
 		List<Map<String, Object>> imagesToImport = images.stream()
 				.filter(t -> ((String) t.get("title")).equals(sTestFile1Name) || ((String) t.get("title")).equals(sTestFile2Name))
-				.filter(t -> !alreadyExistingImages.contains(t + ".zip"))
+				.filter(t -> !alreadyExistingImages.contains(((String) t.get("title")) + ".zip"))
 				.collect(Collectors.toList());
 
 		if (!imagesToImport.isEmpty()) {
