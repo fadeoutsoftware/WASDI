@@ -37,7 +37,6 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.geoserver.Publisher;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;

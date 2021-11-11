@@ -2,10 +2,6 @@ package wasdi.snapopearations;
 
 import java.io.File;
 import java.io.StringReader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +19,6 @@ import org.esa.snap.core.gpf.graph.Node;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 
-import sun.management.VMManagement;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
@@ -37,14 +32,14 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.parameters.settings.*;
+import wasdi.shared.parameters.GraphParameter;
+import wasdi.shared.parameters.settings.GraphSetting;
 import wasdi.shared.payloads.ExecuteGraphPayload;
-import wasdi.shared.parameters.*;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.products.*;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 
 /**
@@ -532,21 +527,6 @@ public class WasdiGraph {
 		else {
 			m_oLogger.debug("WasdiGraph.addProductToWorkspace: Product " + sProductName + " Already exists in WS " + m_oParams.getWorkspace());
 		}
-    }
-
-	/**
-	 * Get Process Id
-	 * @return
-	 * @throws Exception
-	 */
-	private int GetProcessId() throws Exception {
-        RuntimeMXBean oRuntimeMXBean = ManagementFactory.getRuntimeMXBean();
-        Field oJvmField = oRuntimeMXBean.getClass().getDeclaredField("jvm");
-        oJvmField.setAccessible(true);
-        VMManagement oVmManagement = (VMManagement) oJvmField.get(oRuntimeMXBean);
-        Method oGetProcessIdMethod = oVmManagement.getClass().getDeclaredMethod("getProcessId");
-        oGetProcessIdMethod.setAccessible(true);
-        return (int)oGetProcessIdMethod.invoke(oVmManagement);
     }
 	
 	/**

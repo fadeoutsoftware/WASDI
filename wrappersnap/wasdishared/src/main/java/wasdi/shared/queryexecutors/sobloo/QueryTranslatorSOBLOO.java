@@ -6,15 +6,13 @@
  */
 package wasdi.shared.queryexecutors.sobloo;
 
-import java.net.URLEncoder;
-
 import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
-import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryTranslationParser;
+import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;

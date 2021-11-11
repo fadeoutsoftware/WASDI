@@ -1,13 +1,11 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -184,24 +182,10 @@ public class UserRepository extends  MongoRepository{
      */
     public ArrayList<User> getAllUsers ()
     {
-    	FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find();
+    	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
         final ArrayList<User> aoReturnList = new ArrayList<User>();
-
-    	oDocuments.forEach(new Block<Document>() 
-    	{
-    		public void apply(Document document) 
-    		{
-    			String sJSON = document.toJson();
-    			User oUser = null;
-    			try {
-    				oUser = s_oMapper.readValue(sJSON,User.class);
-    				aoReturnList.add(oUser);
-    			} catch (IOException e) {
-    				e.printStackTrace();
-    			}
-
-    		}
-          });
+        
+        fillList(aoReturnList, oWSDocuments, User.class);
     	
     	return aoReturnList;
     }
