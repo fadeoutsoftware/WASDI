@@ -77,6 +77,7 @@ public class FileBufferResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId,
 									@QueryParam("fileUrl") String sFileUrl,
+									@QueryParam("name") String sFileName,
 									@QueryParam("provider") String sProvider,
 									@QueryParam("workspace") String sWorkspaceId,
 									@QueryParam("bbox") String sBoundingBox,
@@ -124,6 +125,7 @@ public class FileBufferResource {
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
 			oParameter.setUrl(sFileUrl);
+			oParameter.setName(sFileName);
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);

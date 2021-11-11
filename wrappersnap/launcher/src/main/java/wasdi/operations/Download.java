@@ -17,11 +17,15 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.payloads.DownloadPayload;
+import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -69,6 +73,13 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         try {
         	
         	DownloadFileParameter oParameter = (DownloadFileParameter) oParam;
+        	
+        	if (!Utils.isNullOrEmpty(oParameter.getName())) {
+        		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oParameter.getProvider());
+        		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oParameter.getProvider()); 
+        		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), oDataProviderConfig.defaultProtocol);
+        		m_oLocalLogger.debug("File Uri: " + sFileUri);
+        	}
         	
             m_oProcessWorkspaceLogger.log("Fetch Start - PROVIDER " + oParameter.getProvider());
 

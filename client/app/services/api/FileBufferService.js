@@ -9,7 +9,7 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
     this.m_oHttp = $http;
 
 
-    this.download = function(sUrl, sWorkspaceId,sBounds,sProvider) {
+    this.download = function(sUrl, sFileName, sWorkspaceId,sBounds,sProvider) {
 
         var iCut = 4;
         var sProtocol = 'http';
@@ -33,7 +33,7 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
         var sEncodedUri = encodeURIComponent(sTest);
         sEncodedUri = sProtocol + sEncodedUri;
 
-        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?fileUrl='+sEncodedUri+"&workspace="+sWorkspaceId+"&bbox="+sBounds+'&provider='+sProvider);
+        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?fileUrl='+sEncodedUri+"&name="+sFileName+"&workspace="+sWorkspaceId+"&bbox="+sBounds+'&provider='+sProvider);
     }
     
     this.publishBand = function(sUrl, sWorkspaceId, sBand) {
