@@ -122,18 +122,41 @@ class WaspyIntegrationTests(unittest.TestCase):
             self.dLRLat,
             self.dLRLon,
             wasdi.getParameter('product.type'),
-            None, # iOrbitNumber
-            None, # sSensorOperationalMode
+            None,  # iOrbitNumber
+            None,  # sSensorOperationalMode
             wasdi.getParameter('max.cloud')
         )
 
         asNames = [aoItem['title'] for aoItem in aoSearchResult]
 
-        self.assertTrue(wasdi.getParameter('file1.name') in asNames )
-        self.assertTrue(wasdi.getParameter('file1.name') in asNames )
+        self.assertTrue(wasdi.getParameter('file1.name') in asNames)
+        self.assertTrue(wasdi.getParameter('file1.name') in asNames)
 
-    def test_06_executeWorkflow(self):
-        aoImageList = wasdi.getProductsByActiveWorkspace()
+    def test_04_importProductListWithMaps(self):
+
+        logging.info("importProductListWithMaps")
+
+        images = wasdi.searchEOImages(self.sPlatform,
+                                      self.sDateFrom,
+                                      self.sDateTo,
+                                      self.dULLat,
+                                      self.dULLon,
+                                      self.dLRLat,
+                                      self.dLRLon,
+                                      self.sProductType,
+                                      self.iOrbitNumber,
+                                      self.sSensorOperationalMode,
+                                      self.sCloudCoverage)
+
+        alreadyExistingImages = wasdi.getProductsByActiveWorkspace()
+
+
+
+
+
+        def test_06_executeWorkflow(self):
+
+            aoImageList = wasdi.getProductsByActiveWorkspace()
 
         availableImageName = self.sTestFile2Name + ".zip"
         self.assertTrue(aoImageList.__contains__(availableImageName))
