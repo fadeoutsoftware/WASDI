@@ -8,12 +8,15 @@ The execution MUST be done with all tests in order to work correctly.
 The single execution of some test will fail because the state i which they need to be is a result
 of previous test.
 '''
+import shutil
 import string
 import random
 import unittest
 from datetime import date, timedelta
 
 import wasdi
+
+from shutil import copyfile
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
@@ -83,8 +86,6 @@ class WaspyIntegrationTests(unittest.TestCase):
         sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
         self.assertEquals(sCreatedWorkspaceId, sFoundWorkspaceId)
 
-
-
     def test_06_executeWorkflow(self):
         aoImageList = wasdi.getProductsByActiveWorkspace()
 
@@ -95,9 +96,9 @@ class WaspyIntegrationTests(unittest.TestCase):
         ndvi = ""
         for wf in aoWorkflows:
             if wf["name"] == "ndvi":
-                 ndvi = wf
+                ndvi = wf
 
-        actualResponse = wasdi.executeWorkflow(availableImageName,availableImageName+"_preproc.tif", ndvi["name"])
+        actualResponse = wasdi.executeWorkflow(availableImageName, availableImageName + "_preproc.tif", ndvi["name"])
 
         self.assertEquals(actualResponse, "DONE")
         aoImageList = wasdi.getProductsByActiveWorkspace()
@@ -108,12 +109,23 @@ class WaspyIntegrationTests(unittest.TestCase):
         wasdi.deleteProduct(availableImageName + "_preproc.tif")
 
         aoImageList = wasdi.getProductsByActiveWorkspace()
-        self.assertFalse(availableImageName.__contains__(availableImageName))
+        self.assertFalse(aoImageList.__contains__(availableImageName))
         self.assertFalse(aoImageList.__contains__(availableImageName + "_preproc.tif"))
 
-        return
-
     def test_07_addFileToWASDI(self):
+        # copy file from resources folder
+        shutil.copy("./resources/images/lux1.tif",
+                    "./lux1.out.tif")
+        status = wasdi.addFileToWASDI("lux1.tif")
+        self.assertEqual("DONE", status)
+
+        status = wasdi.addFileToWASDI("lux2.tif")
+        self.assertEqualc("DONE", status)
+
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertFalse(aoImageList.__contains__("lux1.tif"))
+        self.assertFalse(aoImageList.__contains__("lux2.tif"))
+
         return
 
     def test_08_mosaic(self):
