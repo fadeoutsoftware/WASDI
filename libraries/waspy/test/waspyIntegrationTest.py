@@ -34,6 +34,9 @@ class WaspyIntegrationTests(unittest.TestCase):
         cls.m_iWorkspaceNameLen = 512
         cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
 
+        cls.sTestFile1Name = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525"
+        cls.sTestFile2Name = "S2B_MSIL1C_20201013T101909_N0209_R065_T32TMR_20201018T165151"
+
         wasdi.init("./config.json")
         URL = "https://test.wasdi.net/wasdiwebserver/rest"
         print("swapping Base url to " + URL)
@@ -75,6 +78,31 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertEquals(sCreatedWorkspaceId, sFoundWorkspaceId)
 
     def test_06_executeWorkflow(self):
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+
+        availableImageName = self.sTestFile2Name + ".zip"
+        self.assertTrue(aoImageList.__contains__(availableImageName))
+
+        aoWorkflows = wasdi.getWorkflows()
+        ndvi = ""
+        for wf in aoWorkflows:
+            if wf["name"] == "ndvi":
+                 ndvi = wf
+
+        actualResponse = wasdi.executeWorkflow(availableImageName,availableImageName+"_preproc.tif", ndvi["name"])
+
+        self.assertEquals(actualResponse, "DONE")
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertTrue(aoImageList.__contains__(availableImageName))
+        self.assertTrue(aoImageList.__contains__(availableImageName + "_preproc.tif"))
+
+        wasdi.deleteProduct(availableImageName)
+        wasdi.deleteProduct(availableImageName + "_preproc.tif")
+
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertFalse(availableImageName.__contains__(availableImageName))
+        self.assertFalse(aoImageList.__contains__(availableImageName + "_preproc.tif"))
+
         return
 
     def test_07_addFileToWASDI(self):
