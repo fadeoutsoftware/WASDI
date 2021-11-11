@@ -1150,7 +1150,7 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorResource.countLogs: CounterRepository returned a null Counter");
 				return iResult;
 			}
-			iResult = oCounter.getValue();
+			iResult = oCounter.getValue() + 1;
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId + " ): " + oEx);
 		}

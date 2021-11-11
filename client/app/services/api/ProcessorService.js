@@ -155,7 +155,17 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         var sUrl = this.APIURL;
         if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
 
-        return this.m_oHttp.get(sUrl + '/processors/logs/list?processworkspace='+oProcessId + '&startrow=' + iStartRow + '&endrow=' + iEndRow);
+        sUrl += '/processors/logs/list?processworkspace='+oProcessId;
+
+        if (utilsIsObjectNullOrUndefined(iStartRow) === false) {
+            sUrl += '&startrow=' + iStartRow;
+        }
+
+        if (utilsIsObjectNullOrUndefined(iEndRow) === false) {
+            sUrl += '&endrow=' + iEndRow;
+        }
+
+        return this.m_oHttp.get(sUrl);
     };
 
     /**
