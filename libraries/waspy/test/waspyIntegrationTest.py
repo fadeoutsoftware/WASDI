@@ -31,7 +31,8 @@ class WaspyIntegrationTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.m_iWorkspaceNameLen = 512
+        cls.m_iWorkspaceNameLen = 128
+        print(cls.m_iWorkspaceNameLen)
         cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
 
         wasdi.init("./config.json")
@@ -118,6 +119,20 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertTrue(wasdi.getParameter('file1.name') in asNames )
         self.assertTrue(wasdi.getParameter('file1.name') in asNames )
 
+    def test_06_executeWorkflow(self):
+        return
+
+    def test_07_addFileToWASDI(self):
+        return
+
+    def test_08_mosaic(self):
+        return
+
+    def test_09_multiSubset(self):
+        return
+
+    def test_10_executeProcessor(self):
+        return
 
     #
     # test begin here
