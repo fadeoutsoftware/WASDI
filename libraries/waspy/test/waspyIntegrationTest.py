@@ -13,6 +13,7 @@ import string
 import random
 import unittest
 from datetime import date, timedelta
+import logging
 
 import wasdi
 
@@ -113,7 +114,7 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertFalse(aoImageList.__contains__(availableImageName + "_preproc.tif"))
 
     def test_07_addFileToWASDI(self):
-        wasdi.wasdiLog("Test - addFileToWasdi")
+        logging.info("Test - addFileToWasdi")
         # copy file from resources folder
         shutil.copy("./resources/images/lux1.tif",
                     "./lux1.out.tif")
@@ -130,7 +131,7 @@ class WaspyIntegrationTests(unittest.TestCase):
         return
 
     def test_08_mosaic(self):
-        wasdi.wasdiLog("Test - mosaic")
+        logging.info("Test - mosaic")
         asInput = ["lux1.tif", "lux2.tif"]
         sOutputFile = "mosaic.tif"
 
@@ -142,12 +143,41 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertFalse(aoImageList.__contains__("lux2.tif"))
         self.assertFalse(aoImageList.__contains__("mosaic.tif"))
 
-        return
-
     def test_09_multiSubset(self):
-        return
+        logging.info("Test - multisubset")
+
+        sInputFile = "mosaic.tif"
+        asOutputFiles = ["subset1.tif", "subset2.tif"]
+
+        adLatN = [48.9922701083264869, 48.9863412274512982]
+        adLonW = [5.9689794485811358, 6.0399463560265785]
+        adLatS = [48.9182489289150411, 48.9256151142448203]
+        adLonE = [6.0406650082538738, 6.1136082093243793]
+
+        status = wasdi.multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE)
+        self.assertEqual("DONE", status)
+
+        availableImages = wasdi.getProductsByActiveWorkspace()
+
+        self.assertTrue(availableImages.__contains__("lux1.tif"));
+        self.assertTrue(availableImages.__contains__("lux2.tif"));
+        self.assertTrue(availableImages.__contains__("mosaic.tif"));
+        self.assertTrue(availableImages.__contains__("subset1.tif"));
+        self.assertTrue(availableImages.__contains__("subset2.tif"));
 
     def test_10_executeProcessor(self):
+        logging.info("Test - executeProcessor")
+
+        sProcName = "hellowasdiworld";
+        asParams = {"NAME": "Tester"}
+        sProcessObjId = wasdi.asynchExecuteProcessor(sProcName, asParams);
+        sStatus = wasdi.waitProcess(sProcessObjId);
+        self.assertEqual("DONE", sStatus);
+
+        logging.info("payload");
+
+        wasdi.getProcessorPayload(sProcessObjId);
+
         return
 
     #
