@@ -41,13 +41,17 @@ class WaspyIntegrationTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.m_iWorkspaceNameLen = 512
+        cls.m_iWorkspaceNameLen = 128
+        print(cls.m_iWorkspaceNameLen)
         cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
 
         cls.sTestFile1Name = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525"
         cls.sTestFile2Name = "S2B_MSIL1C_20201013T101909_N0209_R065_T32TMR_20201018T165151"
 
         wasdi.init("./config.json")
+
+        cls.readBoundingBox(cls)
+
         URL = "https://test.wasdi.net/wasdiwebserver/rest"
         print("swapping Base url to " + URL)
         wasdi.setBaseUrl(URL)
@@ -82,10 +86,51 @@ class WaspyIntegrationTests(unittest.TestCase):
         for sProduct in asProducts:
             wasdi.deleteProduct(sProduct)
 
+    def readBoundingBox(self):
+        sBbox = wasdi.getParameter("test.bounding.box")
+        try:
+            asBbox = sBbox.split(",")
+            self.dULLat = asBbox[0]
+            self.dULLon = asBbox[1]
+            self.dLRLat = asBbox[2]
+            self.dLRLon = asBbox[3]
+        except Exception as oE:
+            print(f'readBoundingBox: {type(oE)}: {oE}')
+
     def test_01_createWorkspace(self):
+        print('test_01_createWorkspace')
         sCreatedWorkspaceId = wasdi.createWorkspace(self.m_sWorkspaceName)
         sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
-        self.assertEquals(sCreatedWorkspaceId, sFoundWorkspaceId)
+        self.assertEqual(sCreatedWorkspaceId, sFoundWorkspaceId)
+
+    def test_02_openWorkspace(self):
+        print('test_02_openWorkspace')
+        sActiveWorkspaceId = wasdi.openWorkspace(self.m_sWorkspaceName)
+        sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
+
+        self.assertEqual(sActiveWorkspaceId, wasdi.getActiveWorkspaceId())
+        self.assertEqual(sActiveWorkspaceId, sFoundWorkspaceId)
+
+    def test_03_searchEOImages(self):
+        print('test_03_searchEOImages')
+        aoSearchResult = wasdi.searchEOImages(
+            wasdi.getParameter('platform'),
+            wasdi.getParameter('date'),
+            wasdi.getParameter('date'),
+            self.dULLat,
+            self.dULLon,
+            self.dLRLat,
+            self.dLRLon,
+            wasdi.getParameter('product.type'),
+            None, # iOrbitNumber
+            None, # sSensorOperationalMode
+            wasdi.getParameter('max.cloud')
+        )
+
+        asNames = [aoItem['title'] for aoItem in aoSearchResult]
+
+        self.assertTrue(wasdi.getParameter('file1.name') in asNames )
+        self.assertTrue(wasdi.getParameter('file1.name') in asNames )
 
     def test_06_executeWorkflow(self):
         aoImageList = wasdi.getProductsByActiveWorkspace()

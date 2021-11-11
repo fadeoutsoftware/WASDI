@@ -577,6 +577,7 @@ def init(sConfigFilePath=None):
         asHeaders = {'Content-Type': 'application/json'}
         sUrl = m_sBaseUrl + '/auth/login'
         sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
+        oResponse = None
         try:
             oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
