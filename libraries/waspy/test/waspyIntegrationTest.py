@@ -1,6 +1,12 @@
 '''
 Unit Test class
 A config file is required in the current directory
+The test case are executed in the same order as they are implemented on this file.
+The scenario tested follows the tutorial of wasdi till test number 7, after that
+some more functionalities are tested.
+The execution MUST be done with all tests in order to work correctly.
+The single execution of some test will fail because the state i which they need to be is a result
+of previous test.
 '''
 import string
 import random
@@ -76,6 +82,8 @@ class WaspyIntegrationTests(unittest.TestCase):
         sCreatedWorkspaceId = wasdi.createWorkspace(self.m_sWorkspaceName)
         sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
         self.assertEquals(sCreatedWorkspaceId, sFoundWorkspaceId)
+
+
 
     def test_06_executeWorkflow(self):
         aoImageList = wasdi.getProductsByActiveWorkspace()
