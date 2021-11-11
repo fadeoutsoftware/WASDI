@@ -23,7 +23,7 @@ public class CommentRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("reviewId", sReviewId)).sort(new Document("date", 1));
-            fillList(aoReturnList, oWSDocuments, "CommentRepository", Comment.class);
+            fillList(aoReturnList, oWSDocuments, Comment.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -88,7 +88,7 @@ public class CommentRepository extends MongoRepository {
     		oCriteria.append("userId", sUserId);
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oCriteria);
-            fillList(aoReturnList, oWSDocuments, "CommentRepository", Comment.class);
+            fillList(aoReturnList, oWSDocuments, Comment.class);
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

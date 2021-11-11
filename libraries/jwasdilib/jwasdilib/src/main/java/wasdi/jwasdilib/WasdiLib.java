@@ -2180,7 +2180,7 @@ public class WasdiLib {
 		}
 
 		// If available cloud coverage
-		if (sCloudCoverage != null && sCloudCoverage.equals("S2")) {
+		if (sCloudCoverage != null && sPlatform.equals("S2")) {
 			sQuery += " AND cloudcoverpercentage:" + sCloudCoverage;
 		}
 

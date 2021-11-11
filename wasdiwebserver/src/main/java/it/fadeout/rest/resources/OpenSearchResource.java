@@ -20,7 +20,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.queryexecutors.QueryExecutorFactory;
-import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.DataProviderViewModel;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;

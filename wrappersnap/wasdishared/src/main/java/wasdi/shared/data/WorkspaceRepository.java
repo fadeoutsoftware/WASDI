@@ -9,7 +9,6 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -147,21 +146,9 @@ public class WorkspaceRepository extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Workspace oWorkspace = null;
-                    try {
-                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-                        aoReturnList.add(oWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -285,20 +272,8 @@ public class WorkspaceRepository extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Workspace oWorkspace = null;
-                    try {
-                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-                        aoReturnList.add(oWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -306,26 +281,4 @@ public class WorkspaceRepository extends  MongoRepository {
 
         return aoReturnList;
     }    
-    
-    /**
-     * Fill a list of Workpaces Entites
-     * @param aoReturnList
-     * @param oWSDocuments
-     */
-	private void fillList(final ArrayList<Workspace> aoReturnList, FindIterable<Document> oWSDocuments) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        Workspace oWorkspace = null;
-		        try {
-		            oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-		            aoReturnList.add(oWorkspace);
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
-
-		    }
-		});
-	}
-    
 }

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -54,20 +53,8 @@ public class WorkflowSharingRepository extends  MongoRepository{
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("ownerId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    WorkflowSharing oWorkflowSharing = null;
-                    try {
-                        oWorkflowSharing = s_oMapper.readValue(sJSON,WorkflowSharing.class);
-                        aoReturnList.add(oWorkflowSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, WorkflowSharing.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -87,21 +74,9 @@ public class WorkflowSharingRepository extends  MongoRepository{
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    WorkflowSharing oWorkflowSharing = null;
-                    try {
-                        oWorkflowSharing = s_oMapper.readValue(sJSON,WorkflowSharing.class);
-                        aoReturnList.add(oWorkflowSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, WorkflowSharing.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -120,20 +95,8 @@ public class WorkflowSharingRepository extends  MongoRepository{
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("workflowId", sWorkflowId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    WorkflowSharing oWorkflowSharing = null;
-                    try {
-                        oWorkflowSharing = s_oMapper.readValue(sJSON,WorkflowSharing.class);
-                        aoReturnList.add(oWorkflowSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, WorkflowSharing.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -153,21 +116,9 @@ public class WorkflowSharingRepository extends  MongoRepository{
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    WorkflowSharing oWorkflowSharing = null;
-                    try {
-                        oWorkflowSharing = s_oMapper.readValue(sJSON,WorkflowSharing.class);
-                        aoReturnList.add(oWorkflowSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, WorkflowSharing.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

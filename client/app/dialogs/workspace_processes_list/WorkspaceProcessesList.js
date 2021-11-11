@@ -33,8 +33,9 @@ var WorkspaceProcessesList = (function () {
 
         this.m_oTick;
 
-        if (_.isNil(this.m_oConstantsService.getActiveWorkspace()) == false) {
-            this.m_sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+        let oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        if (_.isNil(oActiveWorkspace) == false) {
+            this.m_sActiveWorkspaceId = oActiveWorkspace.workspaceId;
 
             $scope.close = function (result) {
                 // stops the update of the inverval
@@ -44,7 +45,6 @@ var WorkspaceProcessesList = (function () {
             };
 
             this.getAllProcessesLogs();
-            this.m_sHrefLogFile = "";
         } else {
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
@@ -132,7 +132,6 @@ var WorkspaceProcessesList = (function () {
                             oController.m_aoProcessesLogs[index] = element;
                         });
                         //oController.m_aoProcessesLogs = data.data;
-                        oController.m_sHrefLogFile = oController.generateLogFile();
                     }
                 }
             }, function (data, status) {
@@ -161,7 +160,6 @@ var WorkspaceProcessesList = (function () {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
                         oController.m_aoProcessesLogs = oController.m_aoProcessesLogs.concat(data.data);
-                        oController.m_sHrefLogFile = oController.generateLogFile();
                         oController.calculateNextListOfProcess();
                     } else {
                         oController.isLoadMoreButtonClickable = false;
@@ -252,6 +250,19 @@ var WorkspaceProcessesList = (function () {
         }
 
         return sNumber;
+    };
+
+    WorkspaceProcessesList.prototype.downloadLogFile = function () {
+        var oController = this;
+
+        setTimeout(function () {
+            let file = oController.generateLogFile();
+
+            var oLink=document.createElement('a');
+            oLink.href = file;
+            oLink.download = "processorLog";
+            oLink.click();
+        }, 500);
     };
 
     WorkspaceProcessesList.prototype.generateFile = function (sText) {

@@ -1,10 +1,9 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -12,12 +11,10 @@ import org.bson.conversions.Bson;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -108,8 +105,9 @@ public class MongoRepository {
     			
     			// Create the connection config
     			oMongoConnection = new MongoConnection();
-            	MongoCredential oCredential = MongoCredential.createCredential(sUser, sDbName, sPassword.toCharArray());
-            	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(sAddress, iServerPort), Arrays.asList(oCredential));
+            	
+            	String sConnectionString = "mongodb://" + sUser+":"+sPassword+"@"+sAddress+":"+iServerPort+"/?authSource=" + sDbName;
+            	oMongoConnection.m_oMongoClient = MongoClients.create(sConnectionString);
             	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(sDbName);
             	
             	// Add it to the dictionary
@@ -141,8 +139,8 @@ public class MongoRepository {
     			if (sDbCode.equals("wasdi")) {
     				// Create default connection
         			oMongoConnection = new MongoConnection();
-                	MongoCredential oCredential = MongoCredential.createCredential(DB_USER, DB_NAME, DB_PWD.toCharArray());
-                	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(SERVER_ADDRESS, SERVER_PORT), Arrays.asList(oCredential));
+                	String sConnectionString = "mongodb://" + DB_USER+":"+DB_PWD+"@"+SERVER_ADDRESS+":"+SERVER_PORT+"/?authSource=" + DB_NAME;
+                	oMongoConnection.m_oMongoClient = MongoClients.create(sConnectionString);
                 	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(DB_NAME);
                 	// Add it to the dictionary
                 	s_aoDbConnections.put("wasdi", oMongoConnection);
@@ -212,19 +210,56 @@ public class MongoRepository {
 		}    	
     }
     
-    public <T> void fillList(final ArrayList<T> aoReturnList, FindIterable<Document> oWSDocuments, String sRepositoryName,Class<T> oClass) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        T oAppCategory= null;
-		        try {
-		        	oAppCategory = s_oMapper.readValue(sJSON, oClass);
-		            aoReturnList.add(oAppCategory);
-		        } catch (IOException oEx) {
-		        	Utils.debugLog(sRepositoryName + ".fillList: " + oEx);
-		        }
-		    }
-		});
+    /**
+     * Fill a list of entities from the result of a Query.
+     * @param <T>
+     * @param aoReturnList
+     * @param oMongoDocuments
+     * @param sCollectionName
+     * @param oClass
+     */
+    public <T> void fillList(List<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
+    	
+        MongoCursor<Document> oCursor = oMongoDocuments.iterator();
+        
+        try {
+        	while (oCursor.hasNext()) {
+                String sJSON = oCursor.next().toJson();
+                
+                T oEntity = null;
+                try {
+                	oEntity = s_oMapper.readValue(sJSON,oClass);
+                    aoReturnList.add(oEntity);
+                } catch (Exception oEx) {
+                	Utils.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                }            		
+        	}
+        }
+        finally {
+			oCursor.close();
+		}
+	}
+    
+    public <T> void fillList(HashSet<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
+    	
+        MongoCursor<Document> oCursor = oMongoDocuments.iterator();
+        
+        try {
+        	while (oCursor.hasNext()) {
+                String sJSON = oCursor.next().toJson();
+                
+                T oEntity = null;
+                try {
+                	oEntity = s_oMapper.readValue(sJSON,oClass);
+                    aoReturnList.add(oEntity);
+                } catch (Exception oEx) {
+                	Utils.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                }            		
+        	}
+        }
+        finally {
+			oCursor.close();
+		}
 	}
     
 	public String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
