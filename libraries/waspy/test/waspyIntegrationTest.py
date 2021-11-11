@@ -190,7 +190,7 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertEqual("DONE", status)
 
         status = wasdi.addFileToWASDI("lux2.tif")
-        self.assertEqualc("DONE", status)
+        self.assertEqual("DONE", status)
 
         aoImageList = wasdi.getProductsByActiveWorkspace()
         self.assertFalse(aoImageList.__contains__("lux1.tif"))
