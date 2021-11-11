@@ -113,6 +113,7 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertFalse(aoImageList.__contains__(availableImageName + "_preproc.tif"))
 
     def test_07_addFileToWASDI(self):
+        wasdi.wasdiLog("Test - addFileToWasdi")
         # copy file from resources folder
         shutil.copy("./resources/images/lux1.tif",
                     "./lux1.out.tif")
@@ -129,6 +130,18 @@ class WaspyIntegrationTests(unittest.TestCase):
         return
 
     def test_08_mosaic(self):
+        wasdi.wasdiLog("Test - mosaic")
+        asInput = ["lux1.tif", "lux2.tif"]
+        sOutputFile = "mosaic.tif"
+
+        status = wasdi.mosaic(asInput, sOutputFile)
+        self.assertEqual("DONE", status)
+
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertFalse(aoImageList.__contains__("lux1.tif"))
+        self.assertFalse(aoImageList.__contains__("lux2.tif"))
+        self.assertFalse(aoImageList.__contains__("mosaic.tif"))
+
         return
 
     def test_09_multiSubset(self):
