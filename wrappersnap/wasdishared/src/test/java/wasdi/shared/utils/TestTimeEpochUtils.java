@@ -7,10 +7,9 @@
 package wasdi.shared.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import wasdi.shared.utils.TimeEpochUtils;
 
 /**
  * @author c.nattero

@@ -12,6 +12,8 @@ import java.util.Map;
 
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.SchedulerQueueConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
 
@@ -97,7 +99,7 @@ public class ProcessScheduler {
 			m_sLogPrefix = m_sSchedulerKey + ": ";
 			
 			//Read the Serialisation Path
-			File oFolder = new File(ConfigReader.getPropValue("SerializationPath", "/usr/lib/wasdi/params/"));
+			File oFolder = new File(WasdiConfig.Current.paths.serializationPath);
 			
 			if (!oFolder.isDirectory()) {
 				WasdiScheduler.error(m_sLogPrefix + ".init: cannot access parameters folder: " + oFolder.getAbsolutePath());
@@ -106,76 +108,93 @@ public class ProcessScheduler {
 			// Save the path 
 			m_oParametersFilesFolder = oFolder;
 			
-			// Read Max Size of Concurrent Processes of this scheduler 
-			try {
-				int iMaxConcurrents = Integer.parseInt(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_MAX_QUEUE"));
-				if (iMaxConcurrents>0) {
-					m_iNumberOfConcurrentProcess = iMaxConcurrents;
-					WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sSchedulerKey);
 			
-			// Read Timeout of this scheduler 
-			try {
-				long lTimeout = Long.parseLong(ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_TIMEOUT_MS"));
-				if (lTimeout>0) {
-					m_lTimeOutMs = lTimeout;
-					WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			// Read Operation Type supported 
-			try {
-				// Get the string from config
-				String sOperationTypes = ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_OP_TYPES", "");
-				
-				// Split on comma
-				String [] asTypes = sOperationTypes.split(",");
-				
-				
-				// Add each element to the member list
-				if (asTypes != null) {
-					for (String sType : asTypes) {
-						m_asOperationTypes.add(sType);
-					}
+			if (oSchedulerQueueConfig!=null) {
+				// Read Max Size of Concurrent Processes of this scheduler 
+				try {
 					
-					// If there is only one type
-					if (asTypes.length == 1) {
-						// Read if there is a Subtype
-						String sOperationSubType = ConfigReader.getPropValue(m_sSchedulerKey.toUpperCase()+"_OP_SUB_TYPE", "");
-						
-						if (!Utils.isNullOrEmpty(sOperationSubType)) {
-							// Save the subtype
-							m_sOperationSubType = sOperationSubType;
+					if (!Utils.isNullOrEmpty(oSchedulerQueueConfig.maxQueue)) {
+						int iMaxConcurrents = Integer.parseInt(oSchedulerQueueConfig.maxQueue);
+						if (iMaxConcurrents>0) {
+							m_iNumberOfConcurrentProcess = iMaxConcurrents;
+							WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+						}					
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				// Read Timeout of this scheduler 
+				try {
+					if (!Utils.isNullOrEmpty(oSchedulerQueueConfig.timeoutMs)) {
+						long lTimeout = Long.parseLong(oSchedulerQueueConfig.timeoutMs);
+						if (lTimeout>0) {
+							m_lTimeOutMs = lTimeout;
+							WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				// Read Operation Type supported 
+				try {
+					// Get the string from config
+					String sOperationTypes = ""; 
+					
+					if (!Utils.isNullOrEmpty(oSchedulerQueueConfig.opTypes)) {
+						sOperationTypes = oSchedulerQueueConfig.opTypes;
+					}
+					
+					
+					// Split on comma
+					String [] asTypes = sOperationTypes.split(",");
+					
+					
+					// Add each element to the member list
+					if (asTypes != null) {
+						for (String sType : asTypes) {
+							m_asOperationTypes.add(sType);
+						}
+						
+						// If there is only one type
+						if (asTypes.length == 1) {
+							// Read if there is a Subtype
+							String sOperationSubType = oSchedulerQueueConfig.opSubType;
+							
+							if (!Utils.isNullOrEmpty(sOperationSubType)) {
+								// Save the subtype
+								m_sOperationSubType = sOperationSubType;
+							}
+						}
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			try {
-				long iStartWaitSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadWaitStartMS", "2000"));
-				if (iStartWaitSleep>0) {
-					m_lWaitProcessStartMS = iStartWaitSleep;
-					WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					
+					if (!Utils.isNullOrEmpty(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS)) {
+						long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
+						if (iStartWaitSleep>0) {
+							m_lWaitProcessStartMS = iStartWaitSleep;
+							WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
 			}
 			
 			// Read the Lancher Path
-			m_sLauncherPath = ConfigReader.getPropValue("LauncherPath", "/usr/lib/wasdi/launcher/launcher.jar");
+			m_sLauncherPath = WasdiConfig.Current.scheduler.launcherPath;
 			// Read Java Exe Path
-			m_sJavaExePath = ConfigReader.getPropValue("JavaExe", "java");
+			m_sJavaExePath = WasdiConfig.Current.scheduler.javaExe;
 			// Read Wasdi Node Id
-			m_sWasdiNode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			m_sWasdiNode = WasdiConfig.Current.nodeCode;
 			// Read the Kill command
-			m_sKillCommand = ConfigReader.getPropValue("KILL_COMMAND", "kill -9 ");
+			m_sKillCommand = WasdiConfig.Current.scheduler.killCommand;
 			
 			// Create the Repo
 			m_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

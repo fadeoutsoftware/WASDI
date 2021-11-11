@@ -6,7 +6,7 @@ import java.io.IOException;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.utils.SerializationUtils;
-import wasdi.shared.viewmodels.MetadataViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
 
 /**
  * Save Metadata file Thread

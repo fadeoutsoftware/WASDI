@@ -20,7 +20,6 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
-
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -63,7 +62,7 @@ public class WasdiFileUtils {
 				while ((iLength = oFis.read(bytes)) >= 0) {
 					oZipOut.write(bytes, 0, iLength);
 				}
-				oFis.close();				
+//				oFis.close();				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,6 +122,7 @@ public class WasdiFileUtils {
 	return sPathString.replace("/",File.separator).replace("\\",File.separator);
 		
 	}
+
 
 	/**
 	 * Extract the zip-file into the declared directory.

@@ -289,6 +289,8 @@ class TestZipExtractor {
                 }
                 oZe = oZis.getNextEntry();
             }
+            
+            oZis.close();
             return asReturnArray.toArray(new String[0]);
 
         } catch (FileNotFoundException oE) {

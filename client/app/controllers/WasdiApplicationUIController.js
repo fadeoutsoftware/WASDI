@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function () {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessesLaunchedService, oModalService, $sce, $rootScope) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessWorkspaceService, oModalService, $sce, $rootScope) {
         /**
          * Angular Scope
          */
@@ -46,7 +46,7 @@ var WasdiApplicationUIController = (function () {
         /**
          * Processes Launched Service
          */
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         /**
          * Rabbit Service
          */
@@ -557,7 +557,7 @@ var WasdiApplicationUIController = (function () {
 
         this.m_bHistoryLoading = true;
 
-        this.m_oProcessesLaunchedService.getProcessesByProcessor(this.m_sSelectedApplication).then(function (data, status) {
+        this.m_oProcessWorkspaceService.getProcessesByProcessor(this.m_sSelectedApplication).then(function (data, status) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 // Ok execute
                 oController.m_aoProcHistory = data.data;
@@ -709,7 +709,7 @@ var WasdiApplicationUIController = (function () {
         'RabbitStompService',
         '$state',
         'ProductService',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'ModalService',
         '$sce',
         '$rootScope'

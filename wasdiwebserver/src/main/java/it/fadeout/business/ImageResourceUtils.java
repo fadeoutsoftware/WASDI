@@ -12,19 +12,27 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Static Methods to handle images related to applications: 
+ * can be logos or gallery images
+ * @author p.campanella
+ *
+ */
 public class ImageResourceUtils {
 	
-	private ImageResourceUtils() {
-		// private constructor to hide the public implicit one 
+	private ImageResourceUtils() { 
 	}
 	
+	/**
+	 * Base Path of the web application
+	 */
 	public static String s_sWebAppBasePath = "/var/lib/tomcat8/webapps/wasdiwebserver/";
 	
 	/**
 	 * Check if the extension of a image is valid for WASDI
-	 * @param sExt
-	 * @param sValidExtensions
-	 * @return
+	 * @param sExt extension to check
+	 * @param sValidExtensions List of accepted extensions
+	 * @return true if valid
 	 */
 	public static boolean isValidExtension(String sExt,String[] sValidExtensions){
 		//Check if the extension is valid
@@ -38,7 +46,7 @@ public class ImageResourceUtils {
 	
 	/**
 	 * Safe create directory in path
-	 * @param sPath
+	 * @param sPath new dir path
 	 */
 	public static void createDirectory(String sPath){
 		File oDirectory = new File(sPath);

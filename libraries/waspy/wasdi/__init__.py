@@ -719,7 +719,7 @@ def deleteWorkspace(sWorkspaceId):
     openWorkspaceById(sWorkspaceId)
     
     try:
-        sUrl = getWorkspaceBaseUrl() + '/ws/delete?sWorkspaceId='+sWorkspaceId+'&bDeleteLayer='+str(bDeleteLayer) + "&bDeleteFile=" + str(bDeleteFile)
+        sUrl = getWorkspaceBaseUrl() + '/ws/delete?workspace='+sWorkspaceId+'&deletelayer='+str(bDeleteLayer) + "&deletefile=" + str(bDeleteFile)
         
         try:
             oResult = requests.delete(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -841,7 +841,7 @@ def getWorkspaceUrlByWsId(sWsId):
 
     asHeaders = _getStandardHeaders()
 
-    sUrl = m_sBaseUrl + '/ws?sWorkspaceId=' + sWsId
+    sUrl = m_sBaseUrl + '/ws/getws?workspace=' + sWsId
 
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -922,7 +922,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
 
     m_sActiveWorkspace = sWorkspaceId
     asHeaders = _getStandardHeaders()
-    payload = {'sWorkspaceId': sWorkspaceId}
+    payload = {'workspace': sWorkspaceId}
 
     sUrl = m_sBaseUrl + '/product/namesbyws'
 
@@ -1067,7 +1067,7 @@ def getProcessStatus(sProcessId):
         return "ERROR"    
 
     asHeaders = _getStandardHeaders()
-    payload = {'processObjId': sProcessId}
+    payload = {'procws': sProcessId}
 
     sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
 
@@ -1141,7 +1141,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc=-1):
     global m_sSessionId
 
     asHeaders = _getStandardHeaders()
-    payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
+    payload = {'procws': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     sUrl = getWorkspaceBaseUrl() + '/process/updatebyid'
 
@@ -1318,7 +1318,7 @@ def updateProgressPerc(iPerc):
                 return ''
         
         sStatus = "RUNNING"
-        sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
+        sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?procws=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
         asHeaders = _getStandardHeaders()
         
         try:
@@ -1354,7 +1354,7 @@ def setProcessPayload(sProcessId, data):
 
     try:
         asHeaders = _getStandardHeaders()
-        payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
+        payload = {'procws': sProcessId, 'payload': json.dumps(data)}
 
         sUrl = getWorkspaceBaseUrl() + '/process/setpayload'
         
@@ -1410,7 +1410,7 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
             wasdiLog('[WARNING] waspy.getProcessorPayload: process obj id is None, aborting')
             return None
         sUrl = getWorkspaceBaseUrl() + '/process/payload'
-        asParams = {'processObjId': sProcessObjId}
+        asParams = {'procws': sProcessObjId}
         asHeaders = _getStandardHeaders()
         
         try:
@@ -1457,7 +1457,7 @@ def setSubPid(sProcessId, iSubPid):
 
     try:
         asHeaders = _getStandardHeaders()
-        payload = {'sProcessId': sProcessId, 'subpid': iSubPid}
+        payload = {'procws': sProcessId, 'subpid': iSubPid}
 
         sUrl = getWorkspaceBaseUrl() + '/process/setsubpid'
         
@@ -1663,11 +1663,11 @@ def deleteProduct(sProduct):
 
     asHeaders = _getStandardHeaders()
     sUrl = getWorkspaceBaseUrl()
-    sUrl += "/product/delete?sProductName="
+    sUrl += "/product/delete?name="
     sUrl += sProduct
-    sUrl += "&bDeleteFile=true&sWorkspaceId="
+    sUrl += "&deletefile=true&workspace="
     sUrl += m_sActiveWorkspace
-    sUrl += "&bDeleteLayer=true"
+    sUrl += "&deletelayer=true"
     
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -1909,7 +1909,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         else:
             sProvider = "LSA"
 
-    sQuery = "sQuery=" + sQuery + "&offset=0&limit=10&providers=" + sProvider
+    sQuery = "providers=" + sProvider
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
@@ -2042,7 +2042,7 @@ def getProductBBOX(sFileName):
     """
 
     sUrl = getBaseUrl()
-    sUrl += "/product/byname?sProductName="
+    sUrl += "/product/byname?name="
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
@@ -2098,14 +2098,14 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
         sProvider = "ONDA"
 
     sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?sFileUrl="
+    sUrl += "/filebuffer/download?fileUrl="
     sUrl += sFileUrl
-    sUrl += "&sProvider=" + sProvider
-    sUrl += "&sWorkspaceId="
+    sUrl += "&provider=" + sProvider
+    sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
 
     if sBoundingBox is not None:
-        sUrl += "&sBoundingBox="
+        sUrl += "&bbox="
         sUrl += sBoundingBox
 
     if m_bIsOnServer:
@@ -2161,14 +2161,14 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
         sProvider = "ONDA"
 
     sUrl = getBaseUrl()
-    sUrl += "/filebuffer/download?sFileUrl="
+    sUrl += "/filebuffer/download?fileUrl="
     sUrl += sFileUrl
-    sUrl += "&sProvider="
+    sUrl += "&provider="
     sUrl += sProvider
-    sUrl += "&sWorkspaceId="
+    sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
     if sBoundingBox is not None:
-        sUrl += "&sBoundingBox="
+        sUrl += "&bbox="
         sUrl += sBoundingBox
 
     if m_bIsOnServer:
@@ -2676,8 +2676,8 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
               '  ******************************************************************************')
         return ''
 
-    sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
-           sOutputFile + "&sWorkspaceId=" + m_sActiveWorkspace
+    sUrl = m_sBaseUrl + "/processing/subset?source=" + sInputFile + "&name=" + \
+           sOutputFile + "&workspace=" + m_sActiveWorkspace
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2751,8 +2751,8 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
               '  ******************************************************************************')
         return ''
 
-    sUrl = m_sBaseUrl + "/processing/geometric/multisubset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
-           sInputFile + "&sWorkspaceId=" + m_sActiveWorkspace
+    sUrl = m_sBaseUrl + "/processing/multisubset?source=" + sInputFile + "&name=" + \
+           sInputFile + "&workspace=" + m_sActiveWorkspace
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2813,7 +2813,7 @@ def getWorkflows():
 
     asHeaders = _getStandardHeaders()
 
-    sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
+    sUrl = m_sBaseUrl + '/workflows/getbyuser'
     
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
@@ -2825,6 +2825,79 @@ def getWorkflows():
         return oJsonResults
     else:
         return None
+
+
+def executeSen2Cor(sProductName):
+    """
+    Synchronous execution of the sen2Cor convertion on the product specified
+    :return:final status of the executed Sen2Cor
+    """
+
+    return _internalExecuteSen2Cor(sProductName,"", False)
+
+
+def asynchExecuteSen2Cor(sProductName):
+    """
+    Execute the sen2Cor convertion on the product specified
+    :return: The processId of the conversion
+    """
+
+    return _internalExecuteSen2Cor(sProductName,"", True)
+
+
+def _internalExecuteSen2Cor(sProductName, sWorkspaceId, bAsynch):
+    _log('[INFO] waspy._internalExecuteSen2Cor( ' + str(sProductName) + ', ' +
+         str(sWorkspaceId) + ', ' + str(bAsynch) + ')')
+
+    if sProductName is None:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: no product specified, aborting' +
+                 '  ******************************************************************************')
+        return ''
+
+    if sWorkspaceId is None:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: no workspace specified, aborting' +
+                 '  ******************************************************************************')
+        return ''
+
+    sProcessId = ''
+    sUrl = getBaseUrl() + "/processing/conversion/sen2cor?workspace=" + getActiveWorkspaceId()
+
+    sUrl += "&productName="
+    sUrl += sProductName
+    if m_bIsOnServer:
+        sUrl += "&parentId="
+        sUrl += getProcId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResponse = requests.post(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+
+    if oResponse is None:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: communication with the server failed, aborting' +
+                 '  ******************************************************************************')
+        return ''
+    elif oResponse.ok is True:
+        _log('[INFO] waspy._internalExecuteSen2Cor: server replied OK')
+        asJson = oResponse.json()
+        if "stringValue" in asJson:
+            sProcessId = asJson["stringValue"]
+            if bAsynch is True:
+                return sProcessId
+            else:
+                return waitProcess(sProcessId)
+        else:
+            wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: cannot find process ID in response, aborting' +
+                     '  ******************************************************************************')
+            return ''
+    else:
+        wasdiLog('[ERROR] waspy._internalExecuteSen2Cor: server returned status ' + str(oResponse.status_code) +
+                 '  ******************************************************************************')
+        wasdiLog(oResponse.content)
+        return ''
+
 
 def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     """
@@ -2854,7 +2927,7 @@ def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
     return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
 
 
-def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None):
+def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None):
     """
     Start a mosaic out of a set of images in asynch way
 
@@ -2866,13 +2939,18 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     :param iNoDataValue: Value to use as noData. Use -1 to ignore
 
     :param iIgnoreInputValue: Value to ignore from the input files of the mosaic. Use -1 to ignore
+    
+    :param fPixelSizeX: double value of the output pixel X resolution
+    
+    :param fPixelSizeY: double value of the output pixel Y resolution
+
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
 
     return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, True)
 
 
-def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, bAsynch=False):
+def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None, bAsynch=False):
     """
     Creates a mosaic out of a set of images
 
@@ -2884,26 +2962,21 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     :param iNoDataValue: Value to use as noData. Use -1 to ignore
 
     :param iIgnoreInputValue: Value to ignore from the input files of the mosaic. Use -1 to ignore
+    
+    :param fPixelSizeX: double value of the output pixel X resolution
+    
+    :param fPixelSizeY: double value of the output pixel Y resolution
 
     :param bAsynch: True to return after the triggering, False to wait the process to finish
+    
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
-    asBands = []
-    fPixelSizeX = -1.0
-    fPixelSizeY = -1.0
-    sCrs = None
-    fSouthBound = -1.0
-    fNorthBound = -1.0
-    fEastBound = -1.0
-    fWestBound = -1.0
-    sOverlappingMethod = "MOSAIC_TYPE_OVERLAY"
-    bShowSourceProducts = False
-    sElevationModelName = "ASTER 1sec GDEM"
-    sResamplingName = "Nearest"
-    bUpdateMode = False
-    bNativeResolution = True
-    sCombine = "OR"
-
+    if fPixelSizeX is None:
+        fPixelSizeX = -1.0
+    
+    if fPixelSizeY is None:
+        fPixelSizeY = -1.0
+    
     _log('[INFO]  waspy.mosaic( ' +
          str(asInputFiles) + ', ' +
          str(sOutputFile) + ', ' +
@@ -2930,7 +3003,7 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
         wasdiLog('[ERROR] waspy.mosaic: output file name is empty, aborting')
         return ''
 
-    sUrl = getBaseUrl() + "/processing/geometric/mosaic?sDestinationProductName=" + sOutputFile + "&sWorkspaceId=" + \
+    sUrl = getBaseUrl() + "/processing/mosaic?name=" + sOutputFile + "&workspace=" + \
            getActiveWorkspaceId()
 
     if m_bIsOnServer:
@@ -2942,32 +3015,16 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
         sOutputFormat = "BEAM-DIMAP"
     if (sOutputFile.endswith(".vrt")):
         sOutputFormat = "VRT"
-
-    if sCrs is None:
-        sCrs = _getDefaultCRS()
-
+        
     # todo check input type is appropriate
     try:
         aoMosaicSettings = {
-            'crs': sCrs,
-            'southBound': fSouthBound,
-            'eastBound': fEastBound,
-            'westBound': fWestBound,
-            'northBound': fNorthBound,
             'pixelSizeX': fPixelSizeX,
             'pixelSizeY': fPixelSizeY,
             'noDataValue': iNoDataValue,
             'inputIgnoreValue': iIgnoreInputValue,
-            'overlappingMethod': sOverlappingMethod,
-            'showSourceProducts': bShowSourceProducts,
-            'elevationModelName': sElevationModelName,
-            'resamplingName': sResamplingName,
-            'updateMode': bUpdateMode,
-            'nativeResolution': bNativeResolution,
-            'combine': sCombine,
             'outputFormat': sOutputFormat,
             'sources': asInputFiles,
-            'variableNames': asBands,
             'variableExpressions': []
         }
     except:
@@ -3137,7 +3194,7 @@ def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperatio
     
     sWorkspaceId = getActiveWorkspaceId() 
     asHeaders = _getStandardHeaders()
-    aoPayload = {'sWorkspaceId': sWorkspaceId, 'startindex': iStartIndex, 'endindex': iEndIndex}
+    aoPayload = {'workspace': sWorkspaceId, 'startindex': iStartIndex, 'endindex': iEndIndex}
     
     if sStatus is not None:
         aoPayload['status'] = sStatus
@@ -3516,7 +3573,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         return ''
 
     sProcessId = ''
-    sUrl = getBaseUrl() + "/processing/graph_id?workspace=" + getActiveWorkspaceId()
+    sUrl = getBaseUrl() + "/workflows/run?workspace=" + getActiveWorkspaceId()
 
     if m_bIsOnServer:
         sUrl += "&parent="

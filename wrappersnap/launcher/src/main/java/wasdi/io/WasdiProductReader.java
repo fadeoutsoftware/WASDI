@@ -6,8 +6,8 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
-import wasdi.shared.viewmodels.MetadataViewModel;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
  * Read Product utility class
@@ -95,7 +95,13 @@ public abstract class WasdiProductReader {
 	 * @return
 	 * @throws IOException
 	 */
-    public abstract MetadataViewModel getProductMetadataViewModel();	
+    public abstract MetadataViewModel getProductMetadataViewModel();
+    
+    /**
+     * 
+     * @return
+     */
+    public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider);
 	
 	
     /**

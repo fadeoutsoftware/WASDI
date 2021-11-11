@@ -11,6 +11,12 @@ import wasdi.LauncherMain;
 import wasdi.shared.parameters.ProcessorParameter;
 
 public class OctaveProcessorEngine extends DockerProcessorEngine {
+	
+	public OctaveProcessorEngine() {
+		super();
+		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
+		m_sDockerTemplatePath += "octave";		
+	}
 
 	public OctaveProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
 		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);

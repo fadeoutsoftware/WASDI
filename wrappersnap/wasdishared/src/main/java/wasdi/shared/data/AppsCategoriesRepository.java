@@ -1,18 +1,21 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.AppCategory;
-import wasdi.shared.utils.Utils;
 
+/**
+ * AppCategory Repository
+ * 
+ * @author p.campanella
+ *
+ */
 public class AppsCategoriesRepository extends MongoRepository {
 	
 	public AppsCategoriesRepository() {
@@ -30,7 +33,7 @@ public class AppsCategoriesRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-            fillList(aoReturnList, oWSDocuments);
+            fillList(aoReturnList, oWSDocuments, AppCategory.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -56,23 +59,6 @@ public class AppsCategoriesRepository extends MongoRepository {
         return null;
     }
     
-    
-	private void fillList(final ArrayList<AppCategory> aoReturnList, FindIterable<Document> oWSDocuments) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        AppCategory oAppCategory= null;
-		        try {
-		        	oAppCategory = s_oMapper.readValue(sJSON,AppCategory.class);
-		            aoReturnList.add(oAppCategory);
-		        } catch (IOException oEx) {
-		        	Utils.debugLog("AppCategoriesLogRepository.fillList: "+oEx);
-		        }
-
-		    }
-		});
-	}
-	
     public boolean insertCategory(AppCategory oCategory) {
 
         try {

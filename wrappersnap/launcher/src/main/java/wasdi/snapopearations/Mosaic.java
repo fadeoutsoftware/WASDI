@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
+
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.parameters.MosaicParameter;
-import wasdi.shared.parameters.MosaicSetting;
+import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
@@ -29,10 +31,6 @@ public class Mosaic {
 	 */
 	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
 	
-	/**
-	 * Local WASDI base path
-	 */
-	private String m_sBasePath = "";
 	
 	/**
 	 * Output file format
@@ -52,31 +50,14 @@ public class Mosaic {
     protected static final String PROPERTY_MAX_VALUE = "maxValue";
     protected static final String PROPERTY_MIN_VALUE = "minValue";	
 	
-	public Mosaic(MosaicParameter oParameter, String sBasePath) {
+	public Mosaic(MosaicParameter oParameter) {
 		m_oMosaicSetting = (MosaicSetting) oParameter.getSettings();
 		m_oMosaicParameter = oParameter;
-		m_sBasePath = sBasePath;
 		m_sOuptutFile = oParameter.getDestinationProductName();
 		
 		if (!Utils.isNullOrEmpty(m_oMosaicSetting.getOutputFormat())) {
 			m_sOutputFileFormat = m_oMosaicSetting.getOutputFormat();
 		}
-	}
-	
-	/**
-	 * Get Base Path
-	 * @return
-	 */
-	public String getBasePath() {
-		return m_sBasePath;
-	}
-
-	/** 
-	 * Set Base Path
-	 * @param sBasePath
-	 */
-	public void setBasePath(String sBasePath) {
-		this.m_sBasePath = sBasePath;
 	}
 
 	/**
@@ -121,7 +102,7 @@ public class Mosaic {
 		try {
 			String sGdalCommand = "gdal_merge.py";
 			
-			String sOutputFormat = LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat);
+			String sOutputFormat = snapFormat2GDALFormat(m_sOutputFileFormat);
 			Boolean bVrt = false;
 			
 			if (sOutputFormat.equals("VRT")) {
@@ -301,6 +282,25 @@ public class Mosaic {
 			m_oProcessWorkspaceLogger.log(sLog);
 		}
 	}
+	
+    public String snapFormat2GDALFormat(String sFormatName) {
+
+        if (Utils.isNullOrEmpty(sFormatName)) {
+            return "";
+        }
+
+        switch (sFormatName) {
+            case GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME:
+                return "GTiff";
+            case "BEAM-DIMAP":
+                return "DIMAP";
+            case "VRT":
+                return "VRT";
+            default:
+                return "GTiff";
+        }
+    }
+	
 	
 	
 	

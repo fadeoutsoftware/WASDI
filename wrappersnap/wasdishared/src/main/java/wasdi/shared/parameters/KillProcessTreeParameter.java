@@ -7,14 +7,21 @@
 package wasdi.shared.parameters;
 
 /**
+ * Parameter of the KILL Operation
+ * 
  * @author c.nattero
  *
  */
 public class KillProcessTreeParameter extends BaseParameter {
 	
+	/**
+	 * Process Workspace Id of the process to kill
+	 */
 	private String processToBeKilledObjId;
 	
-	//by default, kill the entire process tree
+	/**
+	 * by default, kill the entire process tree
+	 */
 	private boolean killTree = true;
 	
 	/**
