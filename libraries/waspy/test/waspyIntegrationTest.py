@@ -1,13 +1,22 @@
 '''
 Unit Test class
 A config file is required in the current directory
+The test case are executed in the same order as they are implemented on this file.
+The scenario tested follows the tutorial of wasdi till test number 7, after that
+some more functionalities are tested.
+The execution MUST be done with all tests in order to work correctly.
+The single execution of some test will fail because the state i which they need to be is a result
+of previous test.
 '''
+import shutil
 import string
 import random
 import unittest
 from datetime import date, timedelta
 
 import wasdi
+
+from shutil import copyfile
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
@@ -34,6 +43,9 @@ class WaspyIntegrationTests(unittest.TestCase):
         cls.m_iWorkspaceNameLen = 128
         print(cls.m_iWorkspaceNameLen)
         cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
+
+        cls.sTestFile1Name = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525"
+        cls.sTestFile2Name = "S2B_MSIL1C_20201013T101909_N0209_R065_T32TMR_20201018T165151"
 
         wasdi.init("./config.json")
 
@@ -120,9 +132,45 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertTrue(wasdi.getParameter('file1.name') in asNames )
 
     def test_06_executeWorkflow(self):
-        return
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+
+        availableImageName = self.sTestFile2Name + ".zip"
+        self.assertTrue(aoImageList.__contains__(availableImageName))
+
+        aoWorkflows = wasdi.getWorkflows()
+        ndvi = ""
+        for wf in aoWorkflows:
+            if wf["name"] == "ndvi":
+                ndvi = wf
+
+        actualResponse = wasdi.executeWorkflow(availableImageName, availableImageName + "_preproc.tif", ndvi["name"])
+
+        self.assertEquals(actualResponse, "DONE")
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertTrue(aoImageList.__contains__(availableImageName))
+        self.assertTrue(aoImageList.__contains__(availableImageName + "_preproc.tif"))
+
+        wasdi.deleteProduct(availableImageName)
+        wasdi.deleteProduct(availableImageName + "_preproc.tif")
+
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertFalse(aoImageList.__contains__(availableImageName))
+        self.assertFalse(aoImageList.__contains__(availableImageName + "_preproc.tif"))
 
     def test_07_addFileToWASDI(self):
+        # copy file from resources folder
+        shutil.copy("./resources/images/lux1.tif",
+                    "./lux1.out.tif")
+        status = wasdi.addFileToWASDI("lux1.tif")
+        self.assertEqual("DONE", status)
+
+        status = wasdi.addFileToWASDI("lux2.tif")
+        self.assertEqualc("DONE", status)
+
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertFalse(aoImageList.__contains__("lux1.tif"))
+        self.assertFalse(aoImageList.__contains__("lux2.tif"))
+
         return
 
     def test_08_mosaic(self):
