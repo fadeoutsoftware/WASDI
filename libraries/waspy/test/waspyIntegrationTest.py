@@ -44,6 +44,7 @@ class WaspyIntegrationTests(unittest.TestCase):
         cls.m_iWorkspaceNameLen = 128
         print(cls.m_iWorkspaceNameLen)
         cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
+        print(f'setUpClass: workspace name: {cls.m_sWorkspaceName}, of len {len(cls.m_iWorkspaceNameLen)}')
 
         cls.sTestFile1Name = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525"
         cls.sTestFile2Name = "S2B_MSIL1C_20201013T101909_N0209_R065_T32TMR_20201018T165151"
@@ -51,12 +52,6 @@ class WaspyIntegrationTests(unittest.TestCase):
         wasdi.init("./config.json")
 
         cls.readBoundingBox(cls)
-
-        URL = "https://test.wasdi.net/wasdiwebserver/rest"
-        print("swapping Base url to " + URL)
-        wasdi.setBaseUrl(URL)
-        wasdi.setWorkspaceBaseUrl("https://test.wasdi.net/wasdiwebserver/rest")
-        wasdi.getWorkspaceBaseUrl()
 
         # cls.clearWorkspaces(cls)
 
@@ -87,7 +82,7 @@ class WaspyIntegrationTests(unittest.TestCase):
             wasdi.deleteProduct(sProduct)
 
     def readBoundingBox(self):
-        sBbox = wasdi.getParameter("test.bounding.box")
+        sBbox = wasdi.getParameter("bounding.box")
         try:
             asBbox = sBbox.split(",")
             self.dULLat = asBbox[0]
@@ -122,15 +117,15 @@ class WaspyIntegrationTests(unittest.TestCase):
             self.dLRLat,
             self.dLRLon,
             wasdi.getParameter('product.type'),
-            None, # iOrbitNumber
-            None, # sSensorOperationalMode
+            None,  # iOrbitNumber
+            None,  # sSensorOperationalMode
             wasdi.getParameter('max.cloud')
         )
 
         asNames = [aoItem['title'] for aoItem in aoSearchResult]
 
-        self.assertTrue(wasdi.getParameter('file1.name') in asNames )
-        self.assertTrue(wasdi.getParameter('file1.name') in asNames )
+        self.assertTrue(wasdi.getParameter('file1.name') in asNames)
+        self.assertTrue(wasdi.getParameter('file1.name') in asNames)
 
     def test_06_executeWorkflow(self):
         aoImageList = wasdi.getProductsByActiveWorkspace()
