@@ -189,6 +189,14 @@ public class Utils {
 		sOffset = (iOffsetInMillis >= 0 ? "+" : "-") + sOffset;
 		return sOffset;
 	}
+
+	public static String getDateWithLocalDateOffsetFromUTCForJS(String sDate) {
+		if (sDate == null || sDate.isEmpty()) {
+			return "";
+		}
+
+		return sDate +  " " + getLocalDateOffsetFromUTCForJS();
+	}
 	
 
 	/**

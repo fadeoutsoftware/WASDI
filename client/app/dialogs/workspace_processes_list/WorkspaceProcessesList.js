@@ -280,7 +280,7 @@ var WorkspaceProcessesList = (function () {
 
     WorkspaceProcessesList.prototype.generateFile = function (sText) {
         var textFile = null;
-        var sType = 'text/plain';
+        var sType = 'text/csv';
         textFile = utilsMakeFile(sText, textFile, sType);
         return textFile;
     };
@@ -291,23 +291,23 @@ var WorkspaceProcessesList = (function () {
         // m_aoAllProcessesLogs
         var iNumberOfProcessesLogs = this.m_aoAllProcessesLogs.length;
         var sText = "";
+
+        sText += "Id,Product Name,Operation Type,User,Status,Progress,Operation date,Operation end date,File size" + "\r\n";
+
         for (var iIndexProcessLog = 0; iIndexProcessLog < iNumberOfProcessesLogs; iIndexProcessLog++) {
-            // sText += this.m_aoAllProcessesLogs[iIndexProcessLog] + "/n";
             var sOperationDate = this.m_aoAllProcessesLogs[iIndexProcessLog].operationStartDate;
             var sFileSize = this.m_aoAllProcessesLogs[iIndexProcessLog].fileSize;
             var sOperationEndDate = this.m_aoAllProcessesLogs[iIndexProcessLog].operationEndDate;
             var sOperationType = this.m_aoAllProcessesLogs[iIndexProcessLog].operationType;
             var sPid = this.m_aoAllProcessesLogs[iIndexProcessLog].pid;
-            // var sProcessObjId = this.m_aoAllProcessesLogs[iIndexProcessLog].processObjId;
             var sProductName = this.m_aoAllProcessesLogs[iIndexProcessLog].productName;
             var sProgressPerc = this.m_aoAllProcessesLogs[iIndexProcessLog].progressPerc;
             var sStatus = this.m_aoAllProcessesLogs[iIndexProcessLog].status;
             var sUserId = this.m_aoAllProcessesLogs[iIndexProcessLog].userId;
 
-
-            sText += iIndexProcessLog + ") " + "Id: " + sPid + ",Product Name: " + sProductName + ",Operation Type: " + sOperationType +
-                ",User: " + sUserId + ",Status: " + sStatus + ",Progress: " + sProgressPerc + "%" +
-                ",Operation date: " + sOperationDate + ",Operation end date: " + sOperationEndDate + ",File size: " + sFileSize + "\r\n";
+            sText += sPid + "," + sProductName + "," + sOperationType +
+                "," + sUserId + "," + sStatus + "," + sProgressPerc + "%" +
+                "," + sOperationDate + "," + sOperationEndDate + "," + sFileSize + "\r\n";
         }
 
         return sText;
