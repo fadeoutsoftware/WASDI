@@ -303,6 +303,13 @@ public class WorkspaceResource {
 			sName = "Untitled Workspace";
 		}
 
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+
+		while (oWorkspaceRepository.getByNameAndNode(sName, sNodeCode) != null) {
+			sName = sName + "_02";
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
+		}
+
 		// Default values
 		oWorkspace.setCreationDate((double) new Date().getTime());
 		oWorkspace.setLastEditDate((double) new Date().getTime());
@@ -320,7 +327,6 @@ public class WorkspaceResource {
 		}
 		oWorkspace.setNodeCode(sNodeCode);
 
-		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 		if (oWorkspaceRepository.insertWorkspace(oWorkspace)) {
 
 			PrimitiveResult oResult = new PrimitiveResult();

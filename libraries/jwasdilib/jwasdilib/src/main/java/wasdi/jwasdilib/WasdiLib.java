@@ -3495,17 +3495,10 @@ public class WasdiLib {
 		try {
 			if(null == sWorkspaceName) {
 				sWorkspaceName = "";
-			}
+			} 
 			if(sWorkspaceName.isEmpty()) {
 				log("createWorkspace: WARNING workspace name null or empty, it will be defaulted");
 			}
-
-			String sWorkspaceId = getWorkspaceIdByName(sWorkspaceName);
-			if (sWorkspaceId != null && !sWorkspaceId.isEmpty()) {
-				log("WasdiLib.createWorkspace: creation failed. A workspace with the same name already exists: " + sWorkspaceId);
-				return null;
-			}
-
 			StringBuilder oUrl = new StringBuilder();
 			oUrl.append(getBaseUrl()).append("/ws/create?");
 			if(!sWorkspaceName.isEmpty()) {
