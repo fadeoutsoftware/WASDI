@@ -309,8 +309,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
         if (oProcessWorkspace == null) return;
 
-        //if (!m_bNotifyDownloadUpdateActive) return;
-
         try {
             ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
@@ -329,6 +327,91 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         	m_oLocalLogger.debug("Download.executeOperationFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
+    
+
+	protected DownloadedFile fileAlreadyAvailable(String sFileNameWithoutPath) {
+
+        String sDownloadPath = WasdiConfig.Current.paths.downloadRootPath;
+        
+        DownloadedFile oAlreadyDownloaded = null;
+        
+        if (Utils.isNullOrEmpty(sFileNameWithoutPath)) return oAlreadyDownloaded;
+
+        try {
+            
+            DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+
+            // First check if it is already in this workspace:
+            oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
+
+            if (oAlreadyDownloaded == null) {
+            	
+            	// Check if it is already downloaded, in any workpsace
+            	
+                m_oLocalLogger.debug("Download.fileAlreadyAvailable: Product NOT found in the workspace, search in other workspaces");
+                
+                List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
+
+                // Check if any of this is in this node
+                for (DownloadedFile oDownloadedCandidate : aoExistingList) {
+
+                    if (new File(oDownloadedCandidate.getFilePath()).exists()) {
+                        oAlreadyDownloaded = oDownloadedCandidate;
+                        m_oLocalLogger.debug("Download.fileAlreadyAvailable: found already existing copy on this computing node");
+                        break;
+                    }
+                }
+            }
+
+            if (oAlreadyDownloaded != null)  
+            {
+            	m_oLocalLogger.debug("Download.fileAlreadyAvailable: File already downloaded: make a copy");
+            	
+            	String sFileNameWithFullPath = "";
+
+                // Yes!! Here we have the path
+                sFileNameWithFullPath = oAlreadyDownloaded.getFilePath();
+
+                m_oLocalLogger.debug("Download.fileAlreadyAvailable: Check if file exists");
+
+                // Check the path where we want the file
+                String sDestinationFileWithPath = sDownloadPath + sFileNameWithoutPath;
+
+                // Is it different?
+                if (sDestinationFileWithPath.equals(sFileNameWithFullPath) == false) {
+                    // if file doesn't exist
+                    if (!new File(sDestinationFileWithPath).exists()) {
+                        // Yes, make a copy
+                        FileUtils.copyFile(new File(sFileNameWithFullPath), new File(sDestinationFileWithPath));
+                        // Files.createLink(link, existing)
+                    }
+                }
+                
+                sFileNameWithFullPath = sDestinationFileWithPath;
+                
+                if (!new File(sFileNameWithFullPath).exists()) {
+                	oAlreadyDownloaded = null;
+                }
+                else {
+                	oAlreadyDownloaded.setFilePath(sFileNameWithFullPath);
+                }
+
+            } 
+            
+            return oAlreadyDownloaded;
+            
+        } catch (Exception oEx) {
+        	
+            m_oLocalLogger.error("Download.executeOperation: Exception "
+                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        }
+
+        m_oLocalLogger.debug("Download.executeOperation: return file name " + sFileName);
+
+        return oAlreadyDownloaded;
+		
+	}
+    
 	
 
 }
