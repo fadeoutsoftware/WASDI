@@ -8,6 +8,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     this.m_oConstantsService = oConstantsService;
     this.APIURL = oConstantsService.getAPIURL();
     this.AUTHURL = oConstantsService.getAUTHURL();
+    this.m_bIgnoreWorkspaceApiUrl = oConstantsService.getIgnoreWorkspaceApiUrl();
     this.m_oHttp = $http;
 
     var acSessionChangedEvent = 'ac-session-changed';
@@ -119,10 +120,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace != null) {
-            if (oWorkspace.apiUrl != null) {
-                sUrl = oWorkspace.apiUrl;
-            }
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
         }
 
         return this.m_oHttp.post(sUrl + '/auth/upload/createaccount', sEmailInput);//JSON.stringify({"sEmail":sEmailInput})
@@ -140,10 +139,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
 
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace != null) {
-            if (oWorkspace.apiUrl != null) {
-                sUrl = oWorkspace.apiUrl;
-            }
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
         }
 
         return this.m_oHttp.delete(sUrl + '/auth/upload/removeaccount',sIdInput);
@@ -161,10 +158,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
 
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace != null) {
-            if (oWorkspace.apiUrl != null) {
-                sUrl = oWorkspace.apiUrl;
-            }
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
         }
 
         return this.m_oHttp.post(sUrl + '/auth/upload/updatepassword',sEmailInput);
@@ -178,10 +173,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace != null) {
-            if (oWorkspace.apiUrl != null) {
-                sUrl = oWorkspace.apiUrl;
-            }
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
         }
 
         return this.m_oHttp.get(sUrl + '/auth/upload/existsaccount');
@@ -195,10 +188,8 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace != null) {
-            if (oWorkspace.apiUrl != null) {
-                sUrl = oWorkspace.apiUrl;
-            }
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
         }
 
         return this.m_oHttp.get(sUrl + '/auth/upload/list');

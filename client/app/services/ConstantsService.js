@@ -44,6 +44,12 @@ service('ConstantsService', [function () {
     this.AUTHURL = environment.authUrl;
 
     /**
+     * Flag to ignore the workspace's ApiUrl and use the main server's Url
+     * @type {boolean}
+     */
+     this.m_bIgnoreWorkspaceApiUrl = environment.ignoreWorkspaceApiUrl;
+
+    /**
      * Logged User
      * @type {null}
      */
@@ -133,6 +139,14 @@ service('ConstantsService', [function () {
     this.getAUTHURL = function(){
         return this.AUTHURL;
     };
+
+    /**
+     * Get flag ignore workspace's Api Url 
+     * @returns {boolean}
+     */
+     this.getIgnoreWorkspaceApiUrl = function() {
+        return this.m_bIgnoreWorkspaceApiUrl === true;
+    }
 
     /**
      * Get session id (empty means no logged user)

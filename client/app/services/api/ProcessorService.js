@@ -7,6 +7,7 @@ angular.module('wasdi.ProcessorService', ['wasdi.ProcessorService']).
 service('ProcessorService', ['ConstantsService','$rootScope','$http', function (oConstantsService,$rootScope,$http) {
     this.m_oConstantsService = oConstantsService;
     this.APIURL = oConstantsService.getAPIURL();
+    this.m_bIgnoreWorkspaceApiUrl = oConstantsService.getIgnoreWorkspaceApiUrl();
     this.m_oHttp = $http;
     this.m_sResource = "/processors";
 
@@ -123,7 +124,10 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.getProcessorLogs = function(oProcessId){
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
+        }
 
         return this.m_oHttp.get(sUrl + '/processors/logs/list?processworkspace='+oProcessId);
     };
@@ -137,7 +141,10 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
+        }
 
         return this.m_oHttp.get(sUrl + this.m_sResource + '/logs/count?processworkspace=' + oProcessId);
     };
@@ -153,7 +160,10 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         var sUrl = this.APIURL;
-        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
+        }
 
         sUrl += '/processors/logs/list?processworkspace='+oProcessId;
 

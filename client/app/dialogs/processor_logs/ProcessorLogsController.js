@@ -282,46 +282,30 @@
         return utilsConvertOperationToDescription(this.m_oProcess);
     }
 
-    ProcessorLogsController.prototype.getAllLogs = function(oProcessObjId)
-    {
-        var oController = this;
-
-        if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
-        {
-            return false;
-        }
+    ProcessorLogsController.prototype.downloadLogFile = function () {
 
         var oController = this;
 
-        this.m_oProcessorService.getPaginatedLogs(oProcessObjId,null,null).then(function (data, status) {
+        this.m_oProcessorService.getPaginatedLogs(this.m_oProcess.processObjId,null,null).then(function (data, status) {
             if (data.data != null)
             {
                 if (data.data != undefined)
                 {
                     oController.m_aoAllLogs = data.data;
+
+                    let file = oController.generateLogFile();
+
+                    var oLink=document.createElement('a');
+                    oLink.href = file;
+                    oLink.download = "processorLog";
+                    oLink.click();
                 }
             }
         },function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET LOGS');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN DOWNLOADING LOGS');
         });
 
-        return true;
-     };
-
-    ProcessorLogsController.prototype.downloadLogFile = function () {
-        this.getAllLogs(this.m_oProcess.processObjId);
-
-        var oController = this;
-
-        setTimeout(function () {
-            let file = oController.generateLogFile();
-
-            var oLink=document.createElement('a');
-            oLink.href = file;
-            oLink.download = "processorLog";
-            oLink.click();
-        }, 500);
     };
 
     /**

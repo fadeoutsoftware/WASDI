@@ -6,6 +6,7 @@
 angular.module('wasdi.WorkspaceService', ['wasdi.WorkspaceService']).
 service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
+    this.m_bIgnoreWorkspaceApiUrl = oConstantsService.getIgnoreWorkspaceApiUrl();
     this.m_oHttp = $http;
 
     this.getWorkspacesInfoListByUser = function() {
@@ -35,9 +36,15 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
 
         var sUrl = this.APIURL;
 
-        if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+        if (oWorkspace != null) {
+            if (oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
+            }
 
-        return this.m_oHttp.delete(sUrl + '/ws/delete?workspace=' + oWorkspace.workspaceId + '&deletefile=' + bDeleteFile + '&deletelayer=' + bDeleteLayer);
+            return this.m_oHttp.delete(sUrl + '/ws/delete?workspace=' + oWorkspace.workspaceId + '&deletefile=' + bDeleteFile + '&deletelayer=' + bDeleteLayer);
+        }
+
+        return null;
     };
 
     this.putShareWorkspace = function(sWorkspaceId,sUserId){

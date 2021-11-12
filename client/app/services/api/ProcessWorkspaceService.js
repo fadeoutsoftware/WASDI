@@ -18,6 +18,7 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
     this.m_oConstantsService = oConstantsService;
     this.m_oModalService = oModalService;
     this.APIURL =  this.m_oConstantsService.getAPIURL();
+    this.m_bIgnoreWorkspaceApiUrl = oConstantsService.getIgnoreWorkspaceApiUrl();
     this.m_oHttp = $http;
 
     /* ATTENTION!!! THE ORDER OF TYPE PROCESS IS IMPORTANT !! */
@@ -34,8 +35,8 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
 
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
             }
 
             this.m_oHttp.get(sUrl + '/process/lastbyws?workspace='+sWorkSpaceId).then(function (data, status)
@@ -63,11 +64,21 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
 
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
             }
 
-            return this.m_oHttp.get(sUrl + '/process/byws?workspace='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex);
+            sUrl += '/process/byws?workspace='+sWorkSpaceId;
+
+            if (utilsIsObjectNullOrUndefined(iStartIndex) === false) {
+                sUrl += '&startindex=' + iStartIndex;
+            }
+
+            if (utilsIsObjectNullOrUndefined(iEndIndex) === false) {
+                sUrl += '&endindex=' + iEndIndex;
+            }
+
+            return this.m_oHttp.get(sUrl);
         };
 
         /**
@@ -98,8 +109,8 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
 
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
             }
 
             sUrl = sUrl + '/process/byws?workspace='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex;
@@ -134,8 +145,8 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
 
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
             }
 
             var oService = this;
@@ -237,8 +248,8 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
 
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
             }
 
             return this.m_oHttp.get(sUrl + '/process/byid?procws=' + sProcessId);
@@ -253,8 +264,8 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
 
-            if (oWorkspace != null) {
-                if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
             }
 
 
