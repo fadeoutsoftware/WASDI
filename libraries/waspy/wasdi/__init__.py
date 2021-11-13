@@ -965,7 +965,7 @@ def getProductsByActiveWorkspace():
     return getProductsByWorkspaceId(m_sActiveWorkspace)
 
 
-def getPath(sFile):
+def getPath(sFile=''):
     """
     Get Local File Path. If the file exists and needed the file will be automatically downloaded.
     Returns the full local path where to read or write sFile
@@ -977,7 +977,7 @@ def getPath(sFile):
     if fileExistsOnWasdi(sFile) is True:
         return getFullProductPath(sFile)
     else:
-        return getSavePath() + sFile
+        return getSavePath() + str(sFile)
 
 
 def getFullProductPath(sProductName):
