@@ -8,15 +8,16 @@ The execution MUST be done with all tests in order to work correctly.
 The single execution of some test will fail because the state i which they need to be is a result
 of previous test.
 '''
+import os
 import shutil
 import string
 import random
 import unittest
 from datetime import date, timedelta
 import logging
-
+from pathlib import Path
 import wasdi
-
+from os.path import exists
 from shutil import copyfile
 
 unittest.TestLoader.sortTestMethodsUsing = None
@@ -31,7 +32,8 @@ class WaspyIntegrationTests(unittest.TestCase):
     '''
 
     # todo create unique workspace name each time
-    # m_sWorkspaceName = ""
+    m_sWorkspaceName = ""
+
     # m_iWorkspaceNameLen = 64
 
     # todo test writing username and password from stdin
@@ -42,9 +44,11 @@ class WaspyIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.m_iWorkspaceNameLen = 128
-        print(cls.m_iWorkspaceNameLen)
-        cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
-        print(f'setUpClass: workspace name: {cls.m_sWorkspaceName}, of len {len(cls.m_iWorkspaceNameLen)}')
+        logging.info(f'setUpClass: workspace len: {cls.m_iWorkspaceNameLen}')
+        # cls.m_sWorkspaceName = cls.randomString(cls.m_iWorkspaceNameLen)
+        cls.m_sWorkspaceName = "SOMERANDOMWORKSPACEJUSTFORTESTINGPYTHONLIB"
+        logging.info(f'setUpClass: workspace name: {cls.m_sWorkspaceName}, of len {len(cls.m_sWorkspaceName)}')
+        cls.clearWorkspaces(cls, cls.m_sWorkspaceName)
 
         cls.sTestFile1Name = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525"
         cls.sTestFile2Name = "S2B_MSIL1C_20201013T101909_N0209_R065_T32TMR_20201018T165151"
@@ -53,27 +57,28 @@ class WaspyIntegrationTests(unittest.TestCase):
 
         cls.readBoundingBox(cls)
 
-        # cls.clearWorkspaces(cls)
+    def clearWorkspaces(self, sWorkspaceName):
+        asWorkspaces = wasdi.getWorkspaces()
+        if sWorkspaceName in [aoWorkspace['workspaceName'] for aoWorkspace in asWorkspaces]:
+            logging.info(f'clearWorkspaces: workspace {sWorkspaceName} found')
+            sWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName)
+            bDeleted = wasdi.deleteWorkspace(sWorkspaceId)
+            logging.info(f'clearWorkspaces: deleted? {bDeleted}')
+
+    @classmethod
+    def tearDownClass(cls):
+        logging.info(f'tearDownClass: workspace name: {cls.m_sWorkspaceName}')
+        asWorkspaces = wasdi.getWorkspaces()
+        if cls.m_sWorkspaceName in asWorkspaces:
+            if wasdi.deleteWorkspace(cls.m_sWorkspaceName):
+                logging.info(f'tearDownClass: workspace {cls.m_sWorkspaceName} deleted correctly')
+            else:
+                logging.error(f'tearDownClass: could not delete workspace {cls.m_sWorkspaceName}')
 
     @classmethod
     def randomString(cls, size=6, chars=string.ascii_uppercase + string.digits):
         sRandom = ''.join(random.choice(chars) for _ in range(size))
         return sRandom
-
-    def clearWorkspaces(self):
-        aoWorkspaces = wasdi.getWorkspaces()
-        for oWorkspace in aoWorkspaces:
-            try:
-                print(f"clearWorkspaces: {oWorkspace['workspaceName']}")
-                if oWorkspace['workspaceName'] == self.m_sWorkspaceName:
-                    print(f"clearWorkspaces: FOUND!")
-                    sReadId = oWorkspace['workspaceId']
-                    bDeleted = wasdi.deleteWorkspace(sReadId)
-                    if not bDeleted:
-                        print(f'clearWorkspaces: could not delete workspace: {sReadId}')
-                    bDone = False
-            except Exception as oE:
-                print(f'clearWorkspaces: {type(oE)}: {oE}, skipping iteration')
 
     @classmethod
     def clearProducts(cls):
@@ -90,16 +95,26 @@ class WaspyIntegrationTests(unittest.TestCase):
             self.dLRLat = asBbox[2]
             self.dLRLon = asBbox[3]
         except Exception as oE:
-            print(f'readBoundingBox: {type(oE)}: {oE}')
+            logging.error(f'readBoundingBox: {type(oE)}: {oE}')
 
     def test_01_createWorkspace(self):
-        print('test_01_createWorkspace')
-        sCreatedWorkspaceId = wasdi.createWorkspace(self.m_sWorkspaceName)
-        sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
-        self.assertEqual(sCreatedWorkspaceId, sFoundWorkspaceId)
+        logging.info(f'test_01_createWorkspace: {self.m_sWorkspaceName}')
+        self.clearWorkspaces(self.m_sWorkspaceName)
+        aoWorkspaces = wasdi.getWorkspaces()
+        if self.m_sWorkspaceName not in [aoWs['workspaceName'] for aoWs in aoWorkspaces]:
+            sCreatedWorkspaceId = wasdi.createWorkspace(self.m_sWorkspaceName)
+            logging.info(f'test_01_createWorkspace: created with workspaceId {sCreatedWorkspaceId}')
+            sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
+            self.assertEqual(sCreatedWorkspaceId, sFoundWorkspaceId)
+            asWorkspaces = wasdi.getWorkspaces()
+            bFound = any(oWs['workspaceName'] == self.m_sWorkspaceName for oWs in asWorkspaces)
+            self.assertTrue(bFound)
+        else:
+            logging.error(f'test_01_createWorkspace: ERROR: workspace {self.m_sWorkspaceName} already found, failing')
+            self.assertTrue(False)
 
     def test_02_openWorkspace(self):
-        print('test_02_openWorkspace')
+        logging.info('test_02_openWorkspace')
         sActiveWorkspaceId = wasdi.openWorkspace(self.m_sWorkspaceName)
         sFoundWorkspaceId = wasdi.getWorkspaceIdByName(self.m_sWorkspaceName)
 
@@ -107,51 +122,65 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertEqual(sActiveWorkspaceId, sFoundWorkspaceId)
 
     def test_03_searchEOImages(self):
-        print('test_03_searchEOImages')
-        aoSearchResult = wasdi.searchEOImages(
-            wasdi.getParameter('platform'),
-            wasdi.getParameter('date'),
-            wasdi.getParameter('date'),
-            self.dULLat,
-            self.dULLon,
-            self.dLRLat,
-            self.dLRLon,
-            wasdi.getParameter('product.type'),
-            None,  # iOrbitNumber
-            None,  # sSensorOperationalMode
-            wasdi.getParameter('max.cloud')
-        )
+        logging.info('test_03_searchEOImages')
+        aoSearchResult = self.searchImages()
 
         asNames = [aoItem['title'] for aoItem in aoSearchResult]
-
+        sFile1 = wasdi.getParameter('file1.name')
+        logging.info(sFile1)
+        bContained1 = sFile1 in asNames
+        self.assertTrue(bContained1)
         self.assertTrue(wasdi.getParameter('file1.name') in asNames)
-        self.assertTrue(wasdi.getParameter('file1.name') in asNames)
 
-    def test_04_importProductListWithMaps(self):
+    def searchImages(self):
+        asQuery = {
+            'sPlatform': wasdi.getParameter('platform'),
+            'sDateFrom': wasdi.getParameter('startDate'),
+            'sDateTo': wasdi.getParameter('endDate'),
+            'fULLat': self.dULLat,
+            'fULLon': self.dULLon,
+            'fLRLat': self.dLRLat,
+            'fLRLon': self.dLRLon,
+            'sProductType': wasdi.getParameter('product.type'),
+            'sCloudCoverage': wasdi.getParameter('max.cloud'),
+            'sProvider': wasdi.getParameter('default.provider')
+        }
+        aoSearchResult = wasdi.searchEOImages(**asQuery)
+        return aoSearchResult
+
+    def test_04_importProductList(self):
 
         logging.info("importProductListWithMaps")
 
-        images = wasdi.searchEOImages(self.sPlatform,
-                                      self.sDateFrom,
-                                      self.sDateTo,
-                                      self.dULLat,
-                                      self.dULLon,
-                                      self.dLRLat,
-                                      self.dLRLon,
-                                      self.sProductType,
-                                      self.iOrbitNumber,
-                                      self.sSensorOperationalMode,
-                                      self.sCloudCoverage)
+        aoSearchResult = self.searchImages()
 
-        alreadyExistingImages = wasdi.getProductsByActiveWorkspace()
+        sFile1 = wasdi.getParameter('file1.name')
+        sFile2 = wasdi.getParameter('file2.name')
+        self.assertTrue(sFile1 in [aoItem['title'] for aoItem in aoSearchResult])
+        self.assertTrue(sFile2 in [aoItem['title'] for aoItem in aoSearchResult])
 
+        aoProductsToImport = [
+            aoItem for aoItem in aoSearchResult if aoItem['title'] == sFile1 or aoItem['title'] == sFile2
+        ]
 
+        asStatuses = wasdi.importProductList(aoProductsToImport)
+        self.assertListEqual(asStatuses, ['DONE', 'DONE'])
+        asImagesInWorkspace = wasdi.getProductsByActiveWorkspace()
+        self.assertTrue(sFile1 + '.zip' in asImagesInWorkspace)
+        self.assertTrue(sFile2 + '.zip' in asImagesInWorkspace)
 
+    def test_05_deleteImage(self):
+        logging.info('test_05_deleteImage')
+        sFileName = wasdi.getParameter('file1.name') + ".zip"
+        sResponse = wasdi.deleteProduct(sFileName)
+        bDeleted = bool(sResponse)
+        self.assertTrue(bDeleted)
+        asImages = wasdi.getProductsByActiveWorkspace()
+        self.assertFalse(sFileName in asImages)
 
+    def test_06_executeWorkflow(self):
 
-        def test_06_executeWorkflow(self):
-
-            aoImageList = wasdi.getProductsByActiveWorkspace()
+        aoImageList = wasdi.getProductsByActiveWorkspace()
 
         availableImageName = self.sTestFile2Name + ".zip"
         self.assertTrue(aoImageList.__contains__(availableImageName))
@@ -177,34 +206,61 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertFalse(aoImageList.__contains__(availableImageName + "_preproc.tif"))
 
     def test_07_addFileToWASDI(self):
-        logging.info("Test - addFileToWasdi")
-        # copy file from resources folder
-        shutil.copy("./resources/images/lux1.tif",
-                    "./lux1.out.tif")
-        status = wasdi.addFileToWASDI("lux1.tif")
-        self.assertEqual("DONE", status)
+        # logging.info("Test - addFileToWasdi")
 
-        status = wasdi.addFileToWASDI("lux2.tif")
-        self.assertEqual("DONE", status)
+        # copy file from resources folder
+        # lux1.tif
+        sResourcePath = "./resources/images/lux1.tif"
+        sResourcePath = os.path.abspath(sResourcePath)
+        self.assertTrue(exists(sResourcePath))
+        sWasdiPath = f'{wasdi.getPath()}'
+        Path(sWasdiPath).mkdir(parents=True, exist_ok=True)
+        self.assertTrue(exists(sWasdiPath))
+        oDest = shutil.copy(sResourcePath, sWasdiPath)
+        logging.info(f'test_07_addFileToWASDI: copy result: {oDest}')
+
+        # lux2.tif
+        sResourcePath = "./resources/images/lux2.tif"
+        sResourcePath = os.path.abspath(sResourcePath)
+        self.assertTrue(exists(sResourcePath))
+        sWasdiPath = f'{wasdi.getPath()}'
+        Path(sWasdiPath).mkdir(parents=True, exist_ok=True)
+        self.assertTrue(exists(sWasdiPath))
+        oDest = shutil.copy(sResourcePath, sWasdiPath)
+        logging.info(f'test_07_addFileToWASDI: copy result: {oDest}')
+
+        # add file 1
+        sStatus = wasdi.addFileToWASDI("lux1.tif")
+        logging.info(f"status: {sStatus}")
+        self.assertEqual("DONE", sStatus)
+
+        sStatus = wasdi.addFileToWASDI("lux2.tif")
+        logging.info(f"status: {sStatus}")
+        self.assertEqual("DONE", sStatus)
 
         aoImageList = wasdi.getProductsByActiveWorkspace()
-        self.assertFalse(aoImageList.__contains__("lux1.tif"))
-        self.assertFalse(aoImageList.__contains__("lux2.tif"))
 
-        return
+        self.assertTrue("lux1.tif" in aoImageList)
+        self.assertTrue("lux2.tif" in aoImageList)
 
     def test_08_mosaic(self):
         logging.info("Test - mosaic")
+
+        asProductsInWorkspace = wasdi.getProductsByActiveWorkspace()
         asInput = ["lux1.tif", "lux2.tif"]
+        # check preconditions
+        for sFile in asInput:
+            self.assertTrue( sFile in asProductsInWorkspace)
+
         sOutputFile = "mosaic.tif"
 
         status = wasdi.mosaic(asInput, sOutputFile)
         self.assertEqual("DONE", status)
 
         aoImageList = wasdi.getProductsByActiveWorkspace()
-        self.assertFalse(aoImageList.__contains__("lux1.tif"))
-        self.assertFalse(aoImageList.__contains__("lux2.tif"))
-        self.assertFalse(aoImageList.__contains__("mosaic.tif"))
+        self.assertTrue("lux1.tif" in aoImageList)
+        self.assertTrue("lux2.tif" in aoImageList)
+        self.assertTrue("mosaic.tif" in aoImageList)
 
     def test_09_multiSubset(self):
         logging.info("Test - multisubset")
@@ -222,11 +278,12 @@ class WaspyIntegrationTests(unittest.TestCase):
 
         availableImages = wasdi.getProductsByActiveWorkspace()
 
-        self.assertTrue(availableImages.__contains__("lux1.tif"));
-        self.assertTrue(availableImages.__contains__("lux2.tif"));
-        self.assertTrue(availableImages.__contains__("mosaic.tif"));
-        self.assertTrue(availableImages.__contains__("subset1.tif"));
-        self.assertTrue(availableImages.__contains__("subset2.tif"));
+        aoImageList = wasdi.getProductsByActiveWorkspace()
+        self.assertTrue("lux1.tif" in aoImageList)
+        self.assertTrue("lux2.tif" in aoImageList)
+        self.assertTrue("mosaic.tif" in aoImageList)
+        self.assertTrue("subset1.tif" in aoImageList)
+        self.assertTrue("subset2.tif" in aoImageList)
 
     def test_10_executeProcessor(self):
         logging.info("Test - executeProcessor")
