@@ -2618,21 +2618,21 @@ def _uploadFile(sFileName):
         if 'Content-Type' in asHeaders:
             del (asHeaders['Content-Type'])
 
-        oFiles = {'file': (sFileProperName, open(sFullPath, 'rb'))}
-
         _log('uploadFile: uploading file to wasdi...')
-
+        oResponse = None
         try:
-            oResponse = requests.post(sUrl, files=oFiles, headers=asHeaders, timeout=m_iRequestsTimeout)
+            with open(sFullPath, 'rb') as oFile:
+                oResponse = requests.post(sUrl, files={'file': (sFileName, oFile)}, headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
             wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
-
-        if oResponse.ok:
-            _log('uploadFile: upload complete :-)')
-            bResult = True
-        else:
-            wasdiLog('[ERROR] uploadFile: upload failed with code {oResponse.status_code}: {oResponse.text}')
-
+        try:
+            if oResponse.ok:
+                _log('uploadFile: upload complete :-)')
+                bResult = True
+            else:
+                wasdiLog('[ERROR] uploadFile: upload failed with code {oResponse.status_code}: {oResponse.text}')
+        except Exception as oE:
+            wasdiLog('[ERROR] uploadFile: upload failed due to ' +str(type(oE)) + str(oE))
     except Exception as oE:
         wasdiLog('[ERROR] uploadFile: ' + str(oE))
     # finally:
