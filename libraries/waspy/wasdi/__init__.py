@@ -1251,15 +1251,15 @@ def waitProcesses(asProcIdList):
     # Check the input
     if asProcIdList is None:
         wasdiLog("[WARNING] waitProcesses asProcIdList is none, return empty list")
-        return asReturnStatus;
+        return asReturnStatus
 
     if not isinstance(asProcIdList, list):
         wasdiLog("[WARNING] waitProcesses asProcIdList is not a list, return empty list")
-        return asReturnStatus;
+        return asReturnStatus
 
     if len(asProcIdList) == 0:
         wasdiLog("[WARNING] waitProcesses asProcIdList is empty, return empty list")
-        return asReturnStatus;
+        return asReturnStatus
 
     iTotalTime = 0
 
