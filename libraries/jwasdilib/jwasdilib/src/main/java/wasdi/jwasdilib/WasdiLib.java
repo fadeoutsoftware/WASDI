@@ -819,6 +819,36 @@ public class WasdiLib {
 	}
 
 	/**
+	 * Get name of a Workspace from the Id
+	 * Return the sWorkspaceName as a String, "" if there is any error
+	 * @param sWorkspaceId Workspace Id
+	 * @return Workspace name if found, "" if there is any error
+	 */
+	public String getWorkspaceNameById(String sWorkspaceId) {
+		try {
+			String sUrl = m_sBaseUrl + "/ws/byuser";
+
+			// Get all the Workspaces
+			String sResponse = httpGet(sUrl, getStandardHeaders());
+			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
+
+			// Search the one by Id
+			for (Map<String, Object> oWorkspace : aoJSONMap) {
+				if (((String) oWorkspace.get("workspaceId")).equals(sWorkspaceId)) {
+					// Found
+					return (String) oWorkspace.get("workspaceName");
+				}
+			}
+
+			return "";
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+
+	/**
 	 * Get User Id of the owner of a Workspace from the name
 	 * Return the userId as a String, "" if there is any error
 	 * @param sWorkspaceName Workspace Name

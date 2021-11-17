@@ -33,7 +33,7 @@ import wasdi.jwasdilib.utils.FileUtils;
 import wasdi.jwasdilib.utils.StringUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-//@Ignore
+@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class JavaWasdiLibTest {
 
@@ -142,6 +142,10 @@ public class JavaWasdiLibTest {
 		String foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName);
 
 		assertEquals(createdWorkspaceId, foundWorkspaceId);
+
+		String foundWorkspaceName = wasdi.getWorkspaceNameById(foundWorkspaceId);
+
+		assertEquals(sWorkspaceName, foundWorkspaceName);
 	}
 
 	@Test
@@ -302,7 +306,7 @@ public class JavaWasdiLibTest {
 
 	@Test
 	// Ignored, for the moment, because it hangs in the status "RUNNING"
-//	@Ignore
+	@Ignore
 	public void test_10_executeProcessor() throws IOException {
 		LOGGER.info("executeProcessor");
 
