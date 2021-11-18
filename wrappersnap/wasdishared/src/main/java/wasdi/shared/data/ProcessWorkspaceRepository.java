@@ -1,7 +1,6 @@
 package wasdi.shared.data;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
@@ -308,23 +307,22 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param aeDesiredStatuses a list of desired statuses
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, List<ProcessStatus> aeDesiredStatuses) {
-        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         if(Utils.isNullOrEmpty(sWorkspaceId)) {
         	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): sWorkspaceId null or empty, aborting");
-        	return aoReturnList;
+        	return new ArrayList<>();
         }
         if(null == aeDesiredStatuses) {
         	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", null ): aeDesiredStatuses is null, aborting");
-        	return aoReturnList;
+        	return new ArrayList<>();
         }
         if(aeDesiredStatuses.size() <= 0) {
         	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): aeDesiredStatuses is empty, returning empty list");
-        	return aoReturnList;
+        	return new ArrayList<>();
         }
 
         try {
         	//build filter on statuses
-        	List<String> asDesiredStatuses = new ArrayList<String>(aeDesiredStatuses.size());
+        	List<String> asDesiredStatuses = new ArrayList<>(aeDesiredStatuses.size());
         	for (ProcessStatus eStatus : aeDesiredStatuses) {
         		if(null!=eStatus && !Utils.isNullOrEmpty(eStatus.name())) {
         			asDesiredStatuses.add(eStatus.name());
@@ -334,12 +332,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	Bson oFilter = Filters.and(Filters.eq("workspaceId", sWorkspaceId), oInFilter);
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
             		.sort(new Document("operationDate", -1));
-            fillList(aoReturnList, oWSDocuments);
+
+			return fillList(oWSDocuments);
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
 
-        return aoReturnList;
+		return new ArrayList<>();
     }
 
 
@@ -1095,23 +1094,23 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     
     /**
      * Fill a list of ProcessWorkpsace Entities
-     * @param aoReturnList
-     * @param oWSDocuments
-     */
-	private void fillList(final List<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        ProcessWorkspace oProcessWorkspace = null;
-		        try {
-		            oProcessWorkspace = s_oMapper.readValue(sJSON,ProcessWorkspace.class);
-		            aoReturnList.add(oProcessWorkspace);
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
+	 * @param oWSDocuments
+	 * @return
+	 */
+	private List<ProcessWorkspace> fillList(FindIterable<Document> oWSDocuments) {
+		final List<ProcessWorkspace> aoReturnList = new ArrayList<>();
+		oWSDocuments.forEach(document -> {
 
-		    }
+				String sJSON = document.toJson();
+				ProcessWorkspace oProcessWorkspace = null;
+				try {
+					oProcessWorkspace = s_oMapper.readValue(sJSON,ProcessWorkspace.class);
+					aoReturnList.add(oProcessWorkspace);
+				} catch (IOException e) {
+					e.printStackTrace();
+			}
 		});
+		return aoReturnList;
 	}
 	
 	/**
