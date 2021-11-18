@@ -4,14 +4,15 @@
 'use strict';
 var WorkspaceProcessesList = (function () {
 
-    function WorkspaceProcessesList($scope, oClose, oProcessesLaunchedService, oConstantsService, oModalService, oProcessorService, $interval) {//,oExtras
+    function WorkspaceProcessesList($scope, oClose, oProcessWorkspaceService, oConstantsService, oModalService, oProcessorService, $interval) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oModalService = oModalService;
         this.m_oProcessorService = oProcessorService;
         this.hasError = false;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_aoProcessesLogs = [];
+        this.m_aoAllProcessesLogs = [];
         this.filterTable = "";
         this.m_bAreProcessesLoaded = false;
         this.m_oFilter = {};
@@ -33,8 +34,9 @@ var WorkspaceProcessesList = (function () {
 
         this.m_oTick;
 
-        if (_.isNil(this.m_oConstantsService.getActiveWorkspace()) == false) {
-            this.m_sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+        let oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        if (_.isNil(oActiveWorkspace) == false) {
+            this.m_sActiveWorkspaceId = oActiveWorkspace.workspaceId;
 
             $scope.close = function (result) {
                 // stops the update of the inverval
@@ -44,7 +46,6 @@ var WorkspaceProcessesList = (function () {
             };
 
             this.getAllProcessesLogs();
-            this.m_sHrefLogFile = "";
         } else {
             this.hasError = true;
             this.m_sActiveWorkspaceId = null;
@@ -123,7 +124,7 @@ var WorkspaceProcessesList = (function () {
         }
 
         // retrieves the last 40 processor Logs considering the current state of the filters
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessWorkspaceService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, 0, 40, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
@@ -132,7 +133,6 @@ var WorkspaceProcessesList = (function () {
                             oController.m_aoProcessesLogs[index] = element;
                         });
                         //oController.m_aoProcessesLogs = data.data;
-                        oController.m_sHrefLogFile = oController.generateLogFile();
                     }
                 }
             }, function (data, status) {
@@ -156,13 +156,11 @@ var WorkspaceProcessesList = (function () {
 
         this.m_bAreProcessesLoaded = false;
 
-        //this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
-        this.m_oProcessesLaunchedService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
+        this.m_oProcessWorkspaceService.getFilteredProcessesFromServer(this.m_sActiveWorkspaceId, this.m_iFirstProcess, this.m_iLastProcess, this.m_oFilter.m_sStatus, this.m_oFilter.m_sType, this.m_oFilter.m_sDate, this.m_oFilter.m_sName)
             .then(function (data, status) {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     if (data.data.length > 0) {
                         oController.m_aoProcessesLogs = oController.m_aoProcessesLogs.concat(data.data);
-                        oController.m_sHrefLogFile = oController.generateLogFile();
                         oController.calculateNextListOfProcess();
                     } else {
                         oController.isLoadMoreButtonClickable = false;
@@ -255,36 +253,61 @@ var WorkspaceProcessesList = (function () {
         return sNumber;
     };
 
+    WorkspaceProcessesList.prototype.downloadProcessesFile = function () {
+        var oController = this;
+
+        this.m_oProcessWorkspaceService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,null,null).then(function (data, status) {
+            if (data.data != null)
+            {
+                if (data.data != undefined)
+                {
+                    oController.m_aoAllProcessesLogs = data.data;
+
+                    let file = oController.generateLogFile();
+
+                    var oLink=document.createElement('a');
+                    oLink.href = file;
+                    oLink.download = "processes";
+                    oLink.click();
+                }
+            }
+        },function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN DOWNLOADING PROCESSES LIST');
+        });
+
+    };
+
     WorkspaceProcessesList.prototype.generateFile = function (sText) {
         var textFile = null;
-        var sType = 'text/plain';
+        var sType = 'text/csv';
         textFile = utilsMakeFile(sText, textFile, sType);
         return textFile;
     };
 
     WorkspaceProcessesList.prototype.makeStringLogFile = function () {
-        if (utilsIsObjectNullOrUndefined(this.m_aoProcessesLogs) === true)
+        if (utilsIsObjectNullOrUndefined(this.m_aoAllProcessesLogs) === true)
             return null;
-        // m_aoProcessesLogs
-        var iNumberOfProcessesLogs = this.m_aoProcessesLogs.length;
+        // m_aoAllProcessesLogs
+        var iNumberOfProcessesLogs = this.m_aoAllProcessesLogs.length;
         var sText = "";
+
+        sText += "Id,Product Name,Operation Type,User,Status,Progress,Operation date,Operation end date,File size" + "\r\n";
+
         for (var iIndexProcessLog = 0; iIndexProcessLog < iNumberOfProcessesLogs; iIndexProcessLog++) {
-            // sText += this.m_aoProcessesLogs[iIndexProcessLog] + "/n";
-            var sOperationDate = this.m_aoProcessesLogs[iIndexProcessLog].operationStartDate;
-            var sFileSize = this.m_aoProcessesLogs[iIndexProcessLog].fileSize;
-            var sOperationEndDate = this.m_aoProcessesLogs[iIndexProcessLog].operationEndDate;
-            var sOperationType = this.m_aoProcessesLogs[iIndexProcessLog].operationType;
-            var sPid = this.m_aoProcessesLogs[iIndexProcessLog].pid;
-            // var sProcessObjId = this.m_aoProcessesLogs[iIndexProcessLog].processObjId;
-            var sProductName = this.m_aoProcessesLogs[iIndexProcessLog].productName;
-            var sProgressPerc = this.m_aoProcessesLogs[iIndexProcessLog].progressPerc;
-            var sStatus = this.m_aoProcessesLogs[iIndexProcessLog].status;
-            var sUserId = this.m_aoProcessesLogs[iIndexProcessLog].userId;
+            var sOperationDate = this.m_aoAllProcessesLogs[iIndexProcessLog].operationStartDate;
+            var sFileSize = this.m_aoAllProcessesLogs[iIndexProcessLog].fileSize;
+            var sOperationEndDate = this.m_aoAllProcessesLogs[iIndexProcessLog].operationEndDate;
+            var sOperationType = this.m_aoAllProcessesLogs[iIndexProcessLog].operationType;
+            var sPid = this.m_aoAllProcessesLogs[iIndexProcessLog].pid;
+            var sProductName = this.m_aoAllProcessesLogs[iIndexProcessLog].productName;
+            var sProgressPerc = this.m_aoAllProcessesLogs[iIndexProcessLog].progressPerc;
+            var sStatus = this.m_aoAllProcessesLogs[iIndexProcessLog].status;
+            var sUserId = this.m_aoAllProcessesLogs[iIndexProcessLog].userId;
 
-
-            sText += iIndexProcessLog + ") " + "Id: " + sPid + ",Product Name: " + sProductName + ",Operation Type: " + sOperationType +
-                ",User: " + sUserId + ",Status: " + sStatus + ",Progress: " + sProgressPerc + "%" +
-                ",Operation date: " + sOperationDate + ",Operation end date: " + sOperationEndDate + ",File size: " + sFileSize + "\r\n";
+            sText += sPid + "," + sProductName + "," + sOperationType +
+                "," + sUserId + "," + sStatus + "," + sProgressPerc + "%" +
+                "," + sOperationDate + "," + sOperationEndDate + "," + sFileSize + "\r\n";
         }
 
         return sText;
@@ -352,7 +375,7 @@ var WorkspaceProcessesList = (function () {
 
 
     WorkspaceProcessesList.prototype.deleteProcess = function (oProcessInput) {
-        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
+        this.m_oProcessWorkspaceService.deleteProcess(oProcessInput);
         return true;
     };
 
@@ -364,7 +387,7 @@ var WorkspaceProcessesList = (function () {
     WorkspaceProcessesList.$inject = [
         '$scope',
         'close',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'ConstantsService',
         'ModalService',
         'ProcessorService',

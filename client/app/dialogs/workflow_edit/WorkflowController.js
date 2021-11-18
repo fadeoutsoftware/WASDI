@@ -1,7 +1,7 @@
 
 var WorkflowController = (function () {
 
-    function WorkflowController($scope, oExtras, oConstantsService, oSnapOperationService, oClose) {
+    function WorkflowController($scope, oExtras, oConstantsService, oWorkflowService, oClose) {
 
         /**
          * Angular Scope
@@ -23,7 +23,7 @@ var WorkflowController = (function () {
         /**
          * Snap Operations Service
          */
-        this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oWorkflowService = oWorkflowService;
         /**
          * First tab visualized
          * @type {string}
@@ -110,7 +110,7 @@ var WorkflowController = (function () {
 
     WorkflowController.prototype.getWorkflowXml = function (sWorkflowId) {
         var oController = this;
-        this.m_oSnapOperationService.getWorkflowXml(sWorkflowId).then(function (data) {
+        this.m_oWorkflowService.getWorkflowXml(sWorkflowId).then(function (data) {
             oController.m_asWorkflowXml = data.data;
         });
     }
@@ -120,7 +120,7 @@ var WorkflowController = (function () {
         if (!utilsIsStrNullOrEmpty(oController.m_asWorkflowXml)) {
             let oBody = new FormData();
             oBody.append('graphXml', oController.m_asWorkflowXml);
-            this.m_oSnapOperationService.postWorkflowXml(oController.m_oWorkflow.workflowId, oBody)
+            this.m_oWorkflowService.postWorkflowXml(oController.m_oWorkflow.workflowId, oBody)
                 .then(function (data) {
                     let dialog;
                     if (data.status == 200) dialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW XML UPDATED");
@@ -178,7 +178,7 @@ var WorkflowController = (function () {
      */
     WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId) {
         var oController = this;
-        this.m_oSnapOperationService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId)
+        this.m_oWorkflowService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId)
             .then(function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     // all done
@@ -200,7 +200,7 @@ var WorkflowController = (function () {
      * @param {*} oUserId the user ID invoking the API
      */
     WorkflowController.prototype.deleteWorkflow = function (oUserId) {
-        this.m_oSnapOperationService.deleteWorkflow(this.m_oWorkflow.workflowId, oUserId);
+        this.m_oWorkflowService.deleteWorkflow(this.m_oWorkflow.workflowId, oUserId);
     }
 
     /**
@@ -210,7 +210,7 @@ var WorkflowController = (function () {
      */
     WorkflowController.prototype.removeUserSharing = function (oUserId) {
         var oController = this;
-        this.m_oSnapOperationService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId).then(function (data) {
+        this.m_oWorkflowService.removeWorkflowSharing(this.m_oWorkflow.workflowId, oUserId).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 // all done
                 oController.getListOfEnabledUsers(oController.m_oWorkflow.workflowId);
@@ -234,7 +234,7 @@ var WorkflowController = (function () {
         var oBody = new FormData();
         oBody.append('file', this.m_oFile[0]);
         //this.m_oConstantService.getActiveWorkspace().sWorkspaceId
-        this.uploadGraph("idworkspace", // Current Workspace from constant service <-> unused on API
+        this.uploadByFile("idworkspace", // Current Workspace from constant service <-> unused on API
             this.m_oWorkflow.name, this.m_oWorkflow.description, this.m_oWorkflow.public, // name, description and boolean for isPublic
             oBody); // content of the file
 
@@ -268,7 +268,7 @@ var WorkflowController = (function () {
         }
         this.isUploadingWorkflow = true;
         var oController = this;
-        this.m_oSnapOperationService.uploadGraph("workspace", sName, sDescription, oBody, bIsPublic).then(function (data) {
+        this.m_oWorkflowService.uploadByFile("workspace", sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
                 var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>" + sName.toUpperCase());
@@ -303,7 +303,7 @@ var WorkflowController = (function () {
         this.isUploadingWorkflow = true;
         var oController = this;
         // update name, description, public
-        oController.m_oSnapOperationService.updateGraphParameters(this.m_oWorkflow.workflowId,
+        oController.m_oWorkflowService.updateGraphParameters(this.m_oWorkflow.workflowId,
             oController.m_oWorkflow.name,
             oController.m_oWorkflow.description,
             oController.m_oWorkflow.public).then(function () {
@@ -311,7 +311,7 @@ var WorkflowController = (function () {
                 if (oController.m_oFile != undefined) {
                     var oBody = new FormData();
                     oBody.append('file', oController.m_oFile[0]);
-                    oController.m_oSnapOperationService.updateGraphFile(oController.m_oWorkflow.workflowId, oBody).then(function (data) {
+                    oController.m_oWorkflowService.updateGraphFile(oController.m_oWorkflow.workflowId, oBody).then(function (data) {
                         if (utilsIsObjectNullOrUndefined(data.data) == false) {
                             var oDialog = utilsVexDialogAlertBottomRightCorner("UPDATED WORKFLOW<br>READY");
                             utilsVexCloseDialogAfter(4000, oDialog);
@@ -344,7 +344,7 @@ var WorkflowController = (function () {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.getUsersBySharedWorkflow(sWorkflowId)
+        this.m_oWorkflowService.getUsersBySharedWorkflow(sWorkflowId)
             .then(function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoEnabledUsers = data.data;
@@ -360,7 +360,7 @@ var WorkflowController = (function () {
     };
 
     WorkflowController.prototype.getWorkflowSharings = function (sWorkflowId) {
-        this.m_aoEnabledUsers = this.m_oSnapOperationService.getWorkflowSharing(sWorkflowId);
+        this.m_aoEnabledUsers = this.m_oWorkflowService.getWorkflowSharing(sWorkflowId);
     }
 
     WorkflowController.prototype.iAmTheOwner = function () {
@@ -370,7 +370,7 @@ var WorkflowController = (function () {
         '$scope',
         'extras',
         'ConstantsService',
-        'SnapOperationService',
+        'WorkflowService',
         'close'
     ]
 

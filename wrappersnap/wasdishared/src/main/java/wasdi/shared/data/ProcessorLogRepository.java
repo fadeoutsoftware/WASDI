@@ -1,18 +1,16 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.utils.Utils;
@@ -113,7 +111,7 @@ public class ProcessorLogRepository extends MongoRepository {
 	        try {
 	            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("processWorkspaceId", sProcessWorkspaceId));
 	            if(oWSDocuments!=null) {
-	            	fillList(aoReturnList, oWSDocuments);
+	            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
 	            }
 	        } catch (Exception oEx) {
 	        	Utils.debugLog("ProcessorLogRepository.GetLogsByProcessWorkspaceId( " + sProcessWorkspaceId + " )" +oEx);
@@ -146,7 +144,7 @@ public class ProcessorLogRepository extends MongoRepository {
         try {
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oQuery);
             if(oWSDocuments!=null) {
-            	fillList(aoReturnList, oWSDocuments);
+            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
             }
         } catch (Exception oEx) {
         	Utils.debugLog("ProcessorLogRepository.getLogsByArrayProcessWorkspaceId" +oEx);
@@ -220,7 +218,7 @@ public class ProcessorLogRepository extends MongoRepository {
 	        	
 	            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oRegexQuery);
 	            if(oWSDocuments!=null) {
-	            	fillList(aoReturnList, oWSDocuments);
+	            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
 	            }
 	        } catch (Exception oEx) {
 	        	Utils.debugLog("ProcessorLogRepository.GetLogRowsByText( " + sLogText + " )" +oEx);
@@ -254,7 +252,7 @@ public class ProcessorLogRepository extends MongoRepository {
 	        	
 	            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oAndQuery);
 	            if(oWSDocuments!=null) {
-	            	fillList(aoReturnList, oWSDocuments);
+	            	fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
 	            }
 	        } catch (Exception oEx) {
 	        	Utils.debugLog("ProcessorLogRepository.GetLogRowsByText( " + sLogText + " )" +oEx);
@@ -286,6 +284,7 @@ public class ProcessorLogRepository extends MongoRepository {
         
         try {
 			//MongoDB query is:
+        	/*
     		//db.getCollection('processorlog').find({ "rowNumber":{$gte: iLo, $lte: iUp}, processWorkspaceId: sProceessWorkspaceId })
         	DBObject oQuery = QueryBuilder.start().and(
         					QueryBuilder.start().put("processWorkspaceId").is(sProcessWorkspaceId).get(),
@@ -294,12 +293,12 @@ public class ProcessorLogRepository extends MongoRepository {
         						QueryBuilder.start().put("rowNumber").lessThanEquals(iUp).get()
         					).get()
         		    ).get();
-        	BasicDBObject oDocument = new BasicDBObject();
-        	oDocument.putAll(oQuery);
+        	*/
+        	Bson oFilter = Filters.and(Filters.eq("processWorkspaceId", sProcessWorkspaceId), Filters.and(Filters.gte("rowNumber", iLo), Filters.lte("rowNumber", iUp)));
         	MongoCollection<Document> aoProcessorLogCollection =  getCollection(m_sThisCollection);
-        	FindIterable<Document> oWSDocuments = aoProcessorLogCollection.find(oDocument);
+        	FindIterable<Document> oWSDocuments = aoProcessorLogCollection.find(oFilter);
         	if(oWSDocuments != null) {
-        		fillList(aoReturnList, oWSDocuments);
+        		fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
         	}
         } catch (Exception oEx) {
         	Utils.debugLog("ProcessorLogRepository.getLogsByWorkspaceIdInRange" + oEx);
@@ -308,28 +307,7 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
 
 	}
- 
-    /**
-     * Fill a list of ProcessorLog Entities
-     * @param aoReturnList
-     * @param oWSDocuments
-     */
-	private void fillList(final ArrayList<ProcessorLog> aoReturnList, FindIterable<Document> oWSDocuments) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        ProcessorLog oProcessorLog= null;
-		        try {
-		        	oProcessorLog = s_oMapper.readValue(sJSON,ProcessorLog.class);
-		            aoReturnList.add(oProcessorLog);
-		        } catch (IOException oEx) {
-		        	Utils.debugLog("ProcessorLogRepository.fillList: "+oEx);
-		        }
-
-		    }
-		});
-	}
-	
+    
     /**
      * Get the list of all processes
      * @return
@@ -339,7 +317,7 @@ public class ProcessorLogRepository extends MongoRepository {
         final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
         try {
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-            fillList(aoReturnList, oWSDocuments);
+            fillList(aoReturnList, oWSDocuments, ProcessorLog.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();

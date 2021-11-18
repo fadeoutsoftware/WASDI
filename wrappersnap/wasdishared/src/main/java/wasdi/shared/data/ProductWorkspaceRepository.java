@@ -9,10 +9,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -69,21 +67,9 @@ public class ProductWorkspaceRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("workspaceId", sWorkspaceId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProductWorkspace oProductWorkspace = null;
-                    try {
-                        oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
-                        aoReturnList.add(oProductWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -96,24 +82,24 @@ public class ProductWorkspaceRepository extends MongoRepository {
      * @param sProductId id of the product
      * @return List of string with the workspaceId where product is present
      */
-    public List<String> getWorkspaces(String sProductId) {    	
+    public List<String> getWorkspaces(String sProductId) {  
+    	ArrayList<ProductWorkspace> aoProductWorkspaces = new ArrayList<ProductWorkspace>();
     	List<String> asWorkspaces = new ArrayList<String>();
     	
-    	FindIterable<Document> aoDocuments = getCollection(m_sThisCollection).find(new Document("productName", sProductId));
-    	aoDocuments.forEach(new Block<Document>() {
-    		public void apply(Document oDocument) {
-                String sJson = oDocument.toJson();
-                try {
-                	ProductWorkspace pw = s_oMapper.readValue(sJson,ProductWorkspace.class);
-                    asWorkspaces.add(pw.getWorkspaceId());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-		});
-    	
-		return asWorkspaces ;
+    	try {
+        	FindIterable<Document> aoDocuments = getCollection(m_sThisCollection).find(new Document("productName", sProductId));
+        	
+        	fillList(aoProductWorkspaces, aoDocuments, ProductWorkspace.class);
+        	
+        	for (ProductWorkspace productWorkspace : aoProductWorkspaces) {
+    			asWorkspaces.add(productWorkspace.getWorkspaceId());
+    		}
+        	    	
+    		return asWorkspaces ;    		
+    	}
+    	catch (Exception oEx) {
+    		return asWorkspaces;
+		}
     }
     
     /**
@@ -129,20 +115,8 @@ public class ProductWorkspaceRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.eq("productName", sProductId), Filters.eq("workspaceId", sWorkspaceId)));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProductWorkspace oProductWorkspace = null;
-                    try {
-                        oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
-                        aoReturnList.add(oProductWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -168,20 +142,8 @@ public class ProductWorkspaceRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.eq("productName", sProductId), Filters.eq("workspaceId", sWorkspaceId)));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProductWorkspace oProductWorkspace = null;
-                    try {
-                        oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
-                        aoReturnList.add(oProductWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -278,21 +240,9 @@ public class ProductWorkspaceRepository extends MongoRepository {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         try {
 
-            FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find();
-
-            oDFDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProductWorkspace oProductWS = null;
-                    try {
-                        oProductWS = s_oMapper.readValue(sJSON,ProductWorkspace.class);
-                        aoReturnList.add(oProductWS);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+            
+            fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -336,16 +286,8 @@ public class ProductWorkspaceRepository extends MongoRepository {
             String sJSON = s_oMapper.writeValueAsString(oProductWorkspace);
             
             // Select by Product Name and Workspace Id
-        	DBObject oQuery = QueryBuilder.start().and(
-					QueryBuilder.start().put("productName").is(oProductWorkspace.getProductName()).get(),
-					QueryBuilder.start().and(
-						QueryBuilder.start().put("workspaceId").is(oProductWorkspace.getWorkspaceId()).get()
-					).get()
-		    ).get();
-            
-        	BasicDBObject oFilter = new BasicDBObject();
-        	oFilter.putAll(oQuery);
-        	
+        	Bson oFilter = Filters.and(Filters.eq("", oProductWorkspace.getProductName()), Filters.eq("workspaceId",oProductWorkspace.getWorkspaceId()));
+                    	
             Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
             
             UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
@@ -373,21 +315,24 @@ public class ProductWorkspaceRepository extends MongoRepository {
         	oLikeQuery.put("productName", oRegEx);
         	
             FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find(oLikeQuery);
-
-            oDFDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
+            
+            MongoCursor<Document> oCursor = oDFDocuments.iterator();
+            
+            try {
+            	while (oCursor.hasNext()) {
+                    String sJSON = oCursor.next().toJson();
                     ProductWorkspace oProductWorkspace = null;
                     try {
                         oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
                         aoReturnList.add(oProductWorkspace);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-
-                }
-            });
-
+                    }            		
+            	}
+            }
+            finally {
+				oCursor.close();
+			}
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

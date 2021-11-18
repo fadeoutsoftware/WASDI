@@ -16,6 +16,7 @@ import it.fadeout.services.ProcessService;
 import it.fadeout.services.ProcessServiceInterface;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.services.ConfigProvidersCatalog;
+import it.fadeout.services.KeycloakService;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.NodeRepository;

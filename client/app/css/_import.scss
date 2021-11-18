@@ -117,7 +117,10 @@
                 &.selected{
                     & > div{
                         //color: $color-link;
-                        color: $wasdi-green-logo;
+                        //color: $wasdi-green-logo;
+                        background: #43516a;
+                        color: white;
+                        font-weight: bold;
                     }
                 }
 

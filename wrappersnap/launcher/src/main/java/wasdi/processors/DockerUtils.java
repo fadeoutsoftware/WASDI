@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -167,7 +167,7 @@ public class DockerUtils {
 
                 // Extra host mapping, useful for some instances when the server host can't be resolved
                 // The symptoms of such problem is that the POST call from the Docker container timeouts
-                String sExtra_Host = ConfigReader.getPropValue("EXTRA_HOST");
+                String sExtra_Host = WasdiConfig.Current.dockers.extraHosts;
                 if (!Utils.isNullOrEmpty(sExtra_Host)) {
                     LauncherMain.s_oLogger.debug("DockerUtils.run Found extra host in configuration file");
                     LauncherMain.s_oLogger.debug("DockerUtils.run adding host mapping to the run arguments");
@@ -284,10 +284,13 @@ public class DockerUtils {
                 }
 
                 Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
+                
+                
             } else {
                 Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
             }
 
+            Thread.sleep(1000);
 
             Runtime.getRuntime().exec(sDeleteScriptFile);
 

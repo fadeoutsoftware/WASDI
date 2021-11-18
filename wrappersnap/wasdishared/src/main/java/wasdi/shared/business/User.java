@@ -71,9 +71,15 @@ public class User {
      * Singleton invalid User
      */
     private static User s_oInvalid;
-        
+    
+    /**
+     * Personal link
+     */
 	private String link;
-
+	
+	/**
+	 * Description
+	 */
 	private String description;
 	
     static {
