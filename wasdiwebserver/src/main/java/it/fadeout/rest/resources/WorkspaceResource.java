@@ -1,52 +1,13 @@
 package it.fadeout.rest.resources;
 
-import java.io.File;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.ServletConfig;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.io.FileUtils;
-
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.ProcessService;
-import it.fadeout.services.ProcessServiceInterface;
-import it.fadeout.services.ProvidersCatalog;
-import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.Node;
-import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProductWorkspace;
-import wasdi.shared.business.PublishedBand;
-import wasdi.shared.business.User;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.business.WorkspaceSharing;
+import org.apache.commons.io.FileUtils;
+import wasdi.shared.business.*;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.NodeRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProcessorLogRepository;
-import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.data.UserRepository;
-import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.data.WorkspaceSharingRepository;
+import wasdi.shared.data.*;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -54,6 +15,17 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.workspaces.WorkspaceEditorViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
+
+import javax.inject.Inject;
+import javax.servlet.ServletConfig;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.io.File;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Workspace Resource.
