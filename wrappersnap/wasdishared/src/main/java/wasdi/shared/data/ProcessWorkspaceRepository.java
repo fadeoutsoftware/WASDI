@@ -1100,7 +1100,6 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	private List<ProcessWorkspace> fillList(FindIterable<Document> oWSDocuments) {
 		final List<ProcessWorkspace> aoReturnList = new ArrayList<>();
 		oWSDocuments.forEach(document -> {
-
 				String sJSON = document.toJson();
 				ProcessWorkspace oProcessWorkspace = null;
 				try {
