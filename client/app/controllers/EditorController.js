@@ -794,6 +794,13 @@ var EditorController = (function () {
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             if (data.data != null) {
                 if (data.data != undefined) {
+                    // new condition: check that the viewmodel received is non empty 
+                    if (data.data.workspaceId == null){
+                        oController.m_oState.go("home");
+                        var oDialog = utilsVexDialogAlertTop('FORBIDDEN <br> TRYING TO ACCES A PRIVATE RESOURCE YOU HAVE NO RIGHTS ON');
+                        utilsVexCloseDialogAfter(10000 , oDialog);
+                    }
+                    else{
                     oController.m_oConstantsService.setActiveWorkspace(data.data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
@@ -803,6 +810,7 @@ var EditorController = (function () {
                     if (oController.m_oRabbitStompService.isSubscrbed() == false) {
                         //oController.m_oRabbitStompService.subscribe(oController.m_oActiveWorkspace.workspaceId);
                         oController._subscribeToRabbit();
+                    }
                     }
                 }
             }
