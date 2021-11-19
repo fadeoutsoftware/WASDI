@@ -2,8 +2,8 @@ package it.fadeout.rest.resources;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,8 +22,8 @@ import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.processors.ListProcessorParametersTemplatesViewModel;
-import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateViewModel;
+import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateListViewModel;
+import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateDetailViewModel;
 
 /**
  * ProcessorParametersTemplate Resource.
@@ -33,15 +33,15 @@ import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateViewModel;
  * @author PetruPetrescu
  *
  */
-@Path("processorParametersTemplates")
+@Path("processorParamTempl")
 public class ProcessorParametersTemplateResource {
 
 	/**
 	 * Deletes a processor parameters template.
 	 * 
-	 * @param sSessionId  the User Session Id
+	 * @param sSessionId the User Session Id
 	 * @param sTemplateId the template Id
-	 * @param sName       the name of the template
+	 * @param sName the name of the template
 	 * @return std http response
 	 */
 	@DELETE
@@ -52,12 +52,10 @@ public class ProcessorParametersTemplateResource {
 		try {
 			sTemplateId = java.net.URLDecoder.decode(sTemplateId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			Utils.debugLog(
-					"ProcessorParametersTemplateResource.deleteProcessorParametersTemplate excepion decoding the template Id");
+			Utils.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate excepion decoding the template Id");
 		}
 
-		Utils.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate(sProcessorId: "
-				+ sTemplateId + ")");
+		Utils.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate(sProcessorId: " + sTemplateId + ")");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -69,10 +67,9 @@ public class ProcessorParametersTemplateResource {
 		String sUserId = oUser.getUserId();
 
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-		ProcessorParametersTemplate oProcessorParametersTemplate = oProcessorParametersTemplateRepository
-				.getProcessorParametersTemplateByTemplateId(sTemplateId);
+		ProcessorParametersTemplate oTemplate = oProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId(sTemplateId);
 
-		if (oProcessorParametersTemplate == null) {
+		if (oTemplate == null) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
@@ -93,15 +90,14 @@ public class ProcessorParametersTemplateResource {
 	/**
 	 * Updates a template
 	 * 
-	 * @param sSessionId                            User Session Id
-	 * @param oProcessorParametersTemplateViewModel ProcessorParametersTemplate View
-	 *                                              Model
+	 * @param sSessionId the User Session Id
+	 * @param oDetailViewModel the detail view model
 	 * @return std http response
 	 */
 	@POST
 	@Path("/update")
 	public Response updateProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
-			ProcessorParametersTemplateViewModel oProcessorParametersTemplateViewModel) {
+			ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		Utils.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate");
 
 		// Check the user session
@@ -112,17 +108,15 @@ public class ProcessorParametersTemplateResource {
 
 		String sUserId = oUser.getUserId();
 
-		if (oProcessorParametersTemplateViewModel == null) {
+		if (oDetailViewModel == null) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
 
-		ProcessorParametersTemplate oProcessorParametersTemplate = getProcessorParametersTemplateFromViewModel(
-				oProcessorParametersTemplateViewModel, sUserId, oProcessorParametersTemplateViewModel.getTemplateId());
+		ProcessorParametersTemplate oTemplate = getTemplateFromDetailViewModel(oDetailViewModel, sUserId, oDetailViewModel.getTemplateId());
 
-		boolean isUpdated = oProcessorParametersTemplateRepository
-				.updateProcessorParametersTemplate(oProcessorParametersTemplate);
+		boolean isUpdated = oProcessorParametersTemplateRepository.updateProcessorParametersTemplate(oTemplate);
 		if (isUpdated) {
 			return Response.status(Status.OK).build();
 		} else {
@@ -133,15 +127,14 @@ public class ProcessorParametersTemplateResource {
 	/**
 	 * Add a template
 	 * 
-	 * @param sSessionId                            User Session Id
-	 * @param oProcessorParametersTemplateViewModel ProcessorParametersTemplate View
-	 *                                              Model
+	 * @param sSessionId the User Session Id
+	 * @param oDetailViewModel the detail view model
 	 * @return std http reponse
 	 */
 	@POST
 	@Path("/add")
 	public Response addProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
-			ProcessorParametersTemplateViewModel oProcessorParametersTemplateViewModel) {
+			ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		Utils.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate");
 
 		// Check the user session
@@ -151,14 +144,14 @@ public class ProcessorParametersTemplateResource {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		if (oProcessorParametersTemplateViewModel == null) {
+		if (oDetailViewModel == null) {
 			Utils.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		String sUserId = oUser.getUserId();
 
-		String sProcessorId = oProcessorParametersTemplateViewModel.getProcessorId();
+		String sProcessorId = oDetailViewModel.getProcessorId();
 
 		if (Utils.isNullOrEmpty(sProcessorId)) {
 			Utils.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid processorId");
@@ -169,17 +162,15 @@ public class ProcessorParametersTemplateResource {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: processor null "
-					+ sProcessorId);
+			Utils.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: processor null " + sProcessorId);
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
 
-		ProcessorParametersTemplate oProcessorParametersTemplate = getProcessorParametersTemplateFromViewModel(
-				oProcessorParametersTemplateViewModel, sUserId, Utils.getRandomName());
+		ProcessorParametersTemplate oTemplate = getTemplateFromDetailViewModel(oDetailViewModel, sUserId, Utils.getRandomName());
 
-		oProcessorParametersTemplateRepository.insertProcessorParametersTemplate(oProcessorParametersTemplate);
+		oProcessorParametersTemplateRepository.insertProcessorParametersTemplate(oTemplate);
 
 		return Response.status(Status.OK).build();
 	}
@@ -187,9 +178,9 @@ public class ProcessorParametersTemplateResource {
 	/**
 	 * Get the ProcessorParametersTemplate by Id.
 	 * 
-	 * @param sSessionId  User Session Id
-	 * @param sTemplateId template Id
-	 * @return List ProcessorParametersTemplate View Model
+	 * @param sSessionId the User Session Id
+	 * @param sTemplateId the template Id
+	 * @return the detail view model
 	 */
 	@GET
 	@Path("/get")
@@ -213,13 +204,11 @@ public class ProcessorParametersTemplateResource {
 
 		// Get all the ProcessorParametersTemplates
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-		ProcessorParametersTemplate oProcessorParametersTemplate = oProcessorParametersTemplateRepository
-				.getProcessorParametersTemplateByTemplateId(sTemplateId);
+		ProcessorParametersTemplate oTemplate = oProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId(sTemplateId);
 
-		ProcessorParametersTemplateViewModel oProcessorParametersTemplateViewModel = getProcessorParametersTemplateViewModel(
-				oProcessorParametersTemplate);
+		ProcessorParametersTemplateDetailViewModel oDetailViewModel = getDetailViewModel(oTemplate);
 
-		return Response.ok(oProcessorParametersTemplateViewModel).build();
+		return Response.ok(oDetailViewModel).build();
 	}
 
 	/**
@@ -227,7 +216,7 @@ public class ProcessorParametersTemplateResource {
 	 * 
 	 * @param sSessionId   User Session Id
 	 * @param sProcessorId Processor Id
-	 * @return List ProcessorParametersTemplate View Model
+	 * @return a list of list view model
 	 */
 	@GET
 	@Path("/getlist")
@@ -252,93 +241,88 @@ public class ProcessorParametersTemplateResource {
 
 		// Get all the ProcessorParametersTemplates
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-		List<ProcessorParametersTemplate> aoProcessorParametersTemplates = oProcessorParametersTemplateRepository
+		List<ProcessorParametersTemplate> aoTemplates = oProcessorParametersTemplateRepository
 				.getProcessorParametersTemplatesByUserAndProcessor(sUserId, sProcessorId);
 
-		if (aoProcessorParametersTemplates == null || aoProcessorParametersTemplates.size() == 0) {
-			return Response.ok(new ListProcessorParametersTemplatesViewModel()).build();
+		if (aoTemplates == null || aoTemplates.size() == 0) {
+			return Response.ok(new ProcessorParametersTemplateListViewModel()).build();
 		}
 
-		// Cast in a list, computing all the statistics
-		ListProcessorParametersTemplatesViewModel oListProcessorParametersTemplatesViewModel = getListProcessorParametersTemplatesViewModel(
-				aoProcessorParametersTemplates);
+		// Cast in a list
+		List<ProcessorParametersTemplateListViewModel> aoListViewModel = getListViewModels(aoTemplates);
 
-		return Response.ok(oListProcessorParametersTemplatesViewModel).build();
+		return Response.ok(aoListViewModel).build();
 	}
 
 	/**
-	 * Fill the ProcessorParametersTemplate Wrapper View Model result from a list of
-	 * templates.
+	 * Fill the list of ProcessorParametersTemplateListViewModel result from a list of templates.
 	 * 
-	 * @param aoProcessorParametersTemplateList the list of templates
-	 * @return the ListViewModel
+	 * @param aoTemplates the list of templates
+	 * @return the list of ListViewModel
 	 */
-	private ListProcessorParametersTemplatesViewModel getListProcessorParametersTemplatesViewModel(
-			List<ProcessorParametersTemplate> aoProcessorParametersTemplateList) {
-		ListProcessorParametersTemplatesViewModel oListProcessorParametersTemplates = new ListProcessorParametersTemplatesViewModel();
-		List<ProcessorParametersTemplateViewModel> aoProcessorParametersTemplates = new ArrayList<>();
-		if (aoProcessorParametersTemplateList == null) {
+	private static List<ProcessorParametersTemplateListViewModel> getListViewModels(List<ProcessorParametersTemplate> aoTemplates) {
+		if (aoTemplates == null) {
 			return null;
 		}
 
-		for (ProcessorParametersTemplate oProcessorParametersTemplate : aoProcessorParametersTemplateList) {
-			ProcessorParametersTemplateViewModel oProcessorParametersTemplateViewModel = new ProcessorParametersTemplateViewModel();
-			oProcessorParametersTemplateViewModel.setTemplateId(oProcessorParametersTemplate.getTemplateId());
-			oProcessorParametersTemplateViewModel.setUserId(oProcessorParametersTemplate.getUserId());
-			oProcessorParametersTemplateViewModel.setProcessorId(oProcessorParametersTemplate.getProcessorId());
-			oProcessorParametersTemplateViewModel.setName(oProcessorParametersTemplate.getName());
-			oProcessorParametersTemplateViewModel.setDescription(oProcessorParametersTemplate.getDescription());
-			oProcessorParametersTemplateViewModel.setJsonParameters(oProcessorParametersTemplate.getJsonParameters());
-
-			aoProcessorParametersTemplates.add(oProcessorParametersTemplateViewModel);
-		}
-
-		oListProcessorParametersTemplates.setProcessorParametersTemplates(aoProcessorParametersTemplates);
-
-		return oListProcessorParametersTemplates;
+		return aoTemplates.stream()
+				.map(ProcessorParametersTemplateResource::getListViewModel)
+				.collect(Collectors.toList());
 	}
 
 	/**
-	 * Fill the ProcessorParametersTemplate Wrapper View Model result from a
-	 * template object.
+	 * Fill the ProcessorParametersTemplateListViewModel result from a {@link ProcessorParametersTemplate} object.
 	 * 
-	 * @param oProcessorParametersTemplate the template object
-	 * @return the ViewModel
+	 * @param oTemplate the template object
+	 * @return a new list view model object
 	 */
-	private ProcessorParametersTemplateViewModel getProcessorParametersTemplateViewModel(
-			ProcessorParametersTemplate oProcessorParametersTemplate) {
-		ProcessorParametersTemplateViewModel oProcessorParametersTemplateViewModel = new ProcessorParametersTemplateViewModel();
-		oProcessorParametersTemplateViewModel.setTemplateId(oProcessorParametersTemplate.getTemplateId());
-		oProcessorParametersTemplateViewModel.setUserId(oProcessorParametersTemplate.getUserId());
-		oProcessorParametersTemplateViewModel.setProcessorId(oProcessorParametersTemplate.getProcessorId());
-		oProcessorParametersTemplateViewModel.setName(oProcessorParametersTemplate.getName());
-		oProcessorParametersTemplateViewModel.setDescription(oProcessorParametersTemplate.getDescription());
-		oProcessorParametersTemplateViewModel.setJsonParameters(oProcessorParametersTemplate.getJsonParameters());
+	private static ProcessorParametersTemplateListViewModel getListViewModel(ProcessorParametersTemplate oTemplate) {
+		ProcessorParametersTemplateListViewModel oListViewModel = new ProcessorParametersTemplateListViewModel();
+		oListViewModel.setTemplateId(oTemplate.getTemplateId());
+		oListViewModel.setUserId(oTemplate.getUserId());
+		oListViewModel.setProcessorId(oTemplate.getProcessorId());
+		oListViewModel.setName(oTemplate.getName());
 
-		return oProcessorParametersTemplateViewModel;
+		return oListViewModel;
 	}
 
 	/**
-	 * Converts a ProcessorParametersTemplate View Model in a
-	 * ProcessorParametersTemplate Entity
+	 * Fill the {@link ProcessorParametersTemplateDetailViewModel} result from a {@link ProcessorParametersTemplate} object.
 	 * 
-	 * @param oProcessorParametersTemplateViewModel the view model
-	 * @param sUserId                               the user Id
-	 * @param sId                                   the id of the template object
+	 * @param oTemplate the template object
+	 * @return a new detail view model object
+	 */
+	private static ProcessorParametersTemplateDetailViewModel getDetailViewModel(ProcessorParametersTemplate oTemplate) {
+		ProcessorParametersTemplateDetailViewModel oDetailViewModel = new ProcessorParametersTemplateDetailViewModel();
+		oDetailViewModel.setTemplateId(oTemplate.getTemplateId());
+		oDetailViewModel.setUserId(oTemplate.getUserId());
+		oDetailViewModel.setProcessorId(oTemplate.getProcessorId());
+		oDetailViewModel.setName(oTemplate.getName());
+		oDetailViewModel.setDescription(oTemplate.getDescription());
+		oDetailViewModel.setJsonParameters(oTemplate.getJsonParameters());
+
+		return oDetailViewModel;
+	}
+
+	/**
+	 * Converts a {@link ProcessorParametersTemplateDetailViewModel} in a {@link ProcessorParametersTemplate} object.
+	 * 
+	 * @param oDetailViewModel the view model object
+	 * @param sUserId the user Id
+	 * @param sId the id of the template object
 	 * @return a new template object
 	 */
-	private ProcessorParametersTemplate getProcessorParametersTemplateFromViewModel(
-			ProcessorParametersTemplateViewModel oProcessorParametersTemplateViewModel, String sUserId, String sId) {
-		if (oProcessorParametersTemplateViewModel != null) {
-			ProcessorParametersTemplate oProcessorParametersTemplate = new ProcessorParametersTemplate();
-			oProcessorParametersTemplate.setTemplateId(sId);
-			oProcessorParametersTemplate.setUserId(sUserId);
-			oProcessorParametersTemplate.setProcessorId(oProcessorParametersTemplateViewModel.getProcessorId());
-			oProcessorParametersTemplate.setName(oProcessorParametersTemplateViewModel.getName());
-			oProcessorParametersTemplate.setDescription(oProcessorParametersTemplateViewModel.getDescription());
-			oProcessorParametersTemplate.setJsonParameters(oProcessorParametersTemplateViewModel.getJsonParameters());
+	private static ProcessorParametersTemplate getTemplateFromDetailViewModel(ProcessorParametersTemplateDetailViewModel oDetailViewModel, String sUserId, String sId) {
+		if (oDetailViewModel != null) {
+			ProcessorParametersTemplate oTemplate = new ProcessorParametersTemplate();
+			oTemplate.setTemplateId(sId);
+			oTemplate.setUserId(sUserId);
+			oTemplate.setProcessorId(oDetailViewModel.getProcessorId());
+			oTemplate.setName(oDetailViewModel.getName());
+			oTemplate.setDescription(oDetailViewModel.getDescription());
+			oTemplate.setJsonParameters(oDetailViewModel.getJsonParameters());
 
-			return oProcessorParametersTemplate;
+			return oTemplate;
 		}
 
 		return null;

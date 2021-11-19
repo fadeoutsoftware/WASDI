@@ -1,5 +1,10 @@
 package wasdi.shared.business;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * Parameters template for processor by user Cross-table for users and
  * processors (applications). It enables a specific user to run a specific
@@ -9,85 +14,28 @@ package wasdi.shared.business;
  * @author PetruPetrescu
  *
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProcessorParametersTemplate {
 
-	/**
-	 * Identifier of the template
-	 */
+	/** Identifier of the template */
 	private String templateId;
 
-	/**
-	 * User owner of the processor
-	 */
+	/** User owner of the processor */
 	private String userId;
 
-	/**
-	 * Identifier of the processor
-	 */
+	/** Identifier of the processor */
 	private String processorId;
 
-	/**
-	 * Processor Name
-	 */
+	/** Processor Name */
 	private String name;
 
-	/**
-	 * Processor Description
-	 */
+	/** Processor Description */
 	private String description;
 
-	/**
-	 * Sample JSON Parameter
-	 */
+	/** Sample JSON Parameter */
 	private String jsonParameters;
-
-
-	public String getTemplateId() {
-		return templateId;
-	}
-
-	public void setTemplateId(String templateId) {
-		this.templateId = templateId;
-	}
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getProcessorId() {
-		return processorId;
-	}
-
-	public void setProcessorId(String processorId) {
-		this.processorId = processorId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getJsonParameters() {
-		return jsonParameters;
-	}
-
-	public void setJsonParameters(String jsonParameters) {
-		this.jsonParameters = jsonParameters;
-	}
 
 }
