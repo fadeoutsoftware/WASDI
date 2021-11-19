@@ -320,6 +320,22 @@ service('ConstantsService', [function () {
     }
 
     /**
+     * Set the review selected in the store
+     * @param oReview
+     */
+    this.setSelectedReview = function (oReview) {
+        this.m_oSelectedReview = oReview;
+    }
+
+    /**
+     * Get the review selected in the store
+     * @returns {*}
+     */
+    this.getSelectedReview = function () {
+        return this.m_oSelectedReview;
+    }
+
+    /**
      * Set the comment selected in the store
      * @param oComment
      */
