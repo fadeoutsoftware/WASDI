@@ -320,6 +320,22 @@ service('ConstantsService', [function () {
     }
 
     /**
+     * Set the comment selected in the store
+     * @param oComment
+     */
+    this.setSelectedComment = function (oComment) {
+        this.m_oSelectedComment = oComment;
+    }
+
+    /**
+     * Get the comment selected in the store
+     * @returns {*}
+     */
+    this.getSelectedComment = function () {
+        return this.m_oSelectedComment;
+    }
+
+    /**
      * Get the STOMP URL
      * @returns {string}
      */

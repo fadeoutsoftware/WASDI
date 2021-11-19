@@ -360,7 +360,11 @@
                                                     <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
                                                     <span class="reviews-name">{{comment.userId}}</span>
                                                 </div>
-                                                <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.deleteComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
+                                                <div class="d-flex justify-content-end">
+                                                    <!-- <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.updateComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>UPDATE</div>-->
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedComment(comment)">&nbsp;<span class="fa fa-comment mr-2"> </span>UPDATE</div>
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.deleteComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
+                                                </div>
                                             </div>
             
                                             <div class="reviews-comment mt-2">
@@ -448,8 +452,8 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content rounded-0">
                             <div class="modal-header d-flex justify-content-between">
-                                <h2 class="modal-title w-100">Write Comment</h2>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <h2 class="modal-title w-100">{{m_oController.m_oSelectedComment ? 'Update Comment' : 'Add Comment'}}</h2>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="m_oController.setSelectedComment(null)">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -464,8 +468,9 @@
                                 </form>
                             </div>
                             <div class="modal-footer rounded-0">
-                                <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal"> <span class="fa fa-trash mr-2"></span>Cancel</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0"  data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.addNewComment(review)"><span class="fa fa-save mr-2"></span>Save My Comment</button>
+                                <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal" ng-click="m_oController.setSelectedComment(null)"> <span class="fa fa-trash mr-2"></span>Cancel</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedComment"  data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.updateComment()"><span class="fa fa-save mr-2"></span>Update My Comment</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedComment" data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.addNewComment()"><span class="fa fa-save mr-2"></span>Add My Comment</button>
                             </div>
                         </div>
                     </div>

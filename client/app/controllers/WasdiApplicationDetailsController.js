@@ -84,6 +84,12 @@ var WasdiApplicationDetailsController = (function() {
         this.m_sSelectedReviewId = this.m_oConstantsService.getSelectedReviewId();
 
         /**
+         * The selected comment
+         * @type {*}
+         */
+        this.m_oSelectedComment = this.m_oConstantsService.getSelectedComment();
+
+        /**
          * array of images
          * @type {*[]}
          */
@@ -401,6 +407,22 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oReview.reviewId = reviewId;
     }
 
+    WasdiApplicationDetailsController.prototype.setSelectedComment = function (comment) {
+        this.m_oSelectedComment = comment;
+
+        if (comment) {
+            this.m_oReviewComment = {
+                reviewId: comment.reviewId,
+                text: comment.text
+            }
+        } else {
+            this.m_oReviewComment = {
+                reviewId: "",
+                text: ""
+            }
+        }
+    }
+
     /**
      * Add a new comment to a review
      */
@@ -423,6 +445,31 @@ var WasdiApplicationDetailsController = (function() {
             oController.m_oReviewComment.text="";
 
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SAVING THE COMMENT");
+        });
+    }
+
+    /**
+     * Updates a comment
+     */
+    WasdiApplicationDetailsController.prototype.updateComment = function () {
+        var oController = this;
+
+        this.m_oReviewComment.commentId = this.m_oSelectedComment.commentId;
+        this.m_oSelectedComment = null;
+
+        this.m_oProcessorMediaService.updateReviewComment(this.m_oReviewComment).then(function (data) {
+
+            oController.m_oReviewComment.text = "";
+            var oDialog = utilsVexDialogAlertBottomRightCorner("COMMENT UPDATED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iCommentsPage = 0;
+            oController.refreshComments(oController.m_oReviewComment.reviewId);
+
+        },function (error) {
+            oController.m_oReviewComment.text = "";
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE COMMENT");
         });
     }
 
