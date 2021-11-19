@@ -4,7 +4,7 @@
 
 var HomeController = (function () {
     function HomeController($rootScope, $scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState,
-                            oWindow, $anchorScroll) {
+        oWindow, $anchorScroll) {
         this.m_oScope = $scope;
         this.m_oRootScope = $rootScope;
         this.m_oLocation = $location;
@@ -50,7 +50,7 @@ var HomeController = (function () {
         else {
             this.waitForKeycloak(oController);
 
-            this.m_oScope.$on('KC_INIT_DONE', function(events, args) {
+            this.m_oScope.$on('KC_INIT_DONE', function (events, args) {
                 oController.checkKeycloakAuthStatus(oController);
             });
         }
@@ -66,10 +66,10 @@ var HomeController = (function () {
         }
     }
 
-    HomeController.prototype.checkKeycloakAuthStatus = function(oController) {
+    HomeController.prototype.checkKeycloakAuthStatus = function (oController) {
         console.log("HomeController KC_INIT_DONE")
 
-        if (oKeycloak.authenticated){
+        if (oKeycloak.authenticated) {
             console.log("HomeController: authenticated = true")
 
             if (oKeycloak.idToken) {
@@ -87,8 +87,8 @@ var HomeController = (function () {
         }
     }
 
-    HomeController.prototype.waitForKeycloak = function(oController) {
-        if(bKeyCloakInitialized == false) {
+    HomeController.prototype.waitForKeycloak = function (oController) {
+        if (bKeyCloakInitialized == false) {
             console.log("waitForKeycloak: bKeyCloakInitialized == false try again")
             window.setTimeout(this.waitForKeycloak, 100, oController); /* this checks the flag every 100 milliseconds*/
             return;
@@ -125,21 +125,21 @@ var HomeController = (function () {
         oLoginInfo.userPassword = oController.m_sUserPassword;
         this.m_oConstantsService.setUser(null);
         this.m_oAuthService.legacyLogin(oLoginInfo).then(
-            function (data,status) {
-                oController.callbackLogin(data.data, status,oController)
-            },function (data,status) {
-            //alert('error');
-            utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
+            function (data, status) {
+                oController.callbackLogin(data.data, status, oController)
+            }, function (data, status) {
+                //alert('error');
+                utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
 
-        });
+            });
     }
 
 
     HomeController.prototype.callbackLogin = function (data, status, oController) {
-/*two mode callback login:
-* 1- set SessionId directly with response data (Legacy)
-* 2- Decode the token to obtain the fields (KC) <- Implemented down here
-* **/
+        /*two mode callback login:
+        * 1- set SessionId directly with response data (Legacy)
+        * 2- Decode the token to obtain the fields (KC) <- Implemented down here
+        * **/
         /*console.log('AUTH: token obtained')
         console.log(data)*/
 
@@ -148,7 +148,7 @@ var HomeController = (function () {
             utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
             return;
         }
-        if (data.hasOwnProperty("sessionId")){
+        if (data.hasOwnProperty("sessionId")) {
             let oUser = {};
             oUser.userId = data.userId;
             oUser.authProvider = "wasdi";
@@ -208,11 +208,11 @@ var HomeController = (function () {
      *
      */
 
-    HomeController.prototype.keycloakLogin = function (){
+    HomeController.prototype.keycloakLogin = function () {
         /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.login();
     }
-    HomeController.prototype.keycloakRegister = function (){
+    HomeController.prototype.keycloakRegister = function () {
         /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.register();
     }
@@ -243,17 +243,13 @@ var HomeController = (function () {
         this.m_bError = false;
         this.m_oAuthService.signingUser(oUser).then(
 
-            function (data,status) {
-                if(utilsIsObjectNullOrUndefined(data) !== true)
-                {
-                    if(data.data.boolValue === true)
-                    {
+            function (data, status) {
+                if (utilsIsObjectNullOrUndefined(data) !== true) {
+                    if (data.data.boolValue === true) {
                         oController.m_bSuccess = true;
                     }
-                    else
-                    {
-                        if(utilsIsStrNullOrEmpty(data.data.stringValue) === false)
-                        {
+                    else {
+                        if (utilsIsStrNullOrEmpty(data.data.stringValue) === false) {
                             oController.m_sMessageError = data.data.stringValue;
                         }
                         oController.m_bError = true;
@@ -265,10 +261,10 @@ var HomeController = (function () {
                 }
 
                 oController.m_bRegistering = false;
-            },(function (data,status) {
+            }, (function (data, status) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 oController.m_bRegistering = false;
-        }));
+            }));
 
         return true;
     }
@@ -325,13 +321,19 @@ var HomeController = (function () {
         }
         var oController = this;
         this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).then(
-            function (data,status) {
+            function (data, status) {
                 // oController.callbackLogin(data, status,oController);
                 if (utilsIsObjectNullOrUndefined(data) !== true) {
-                    if (data.boolValue === true) {
+                    if (data.data.boolValue === true) {
                         oController.m_bSuccess = true;
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ACCOUNT RECOVER MESSAGE SENT TO "
+                            + sEmailToRecoverPassword
+                            + " <br> PLEASE, CHECK YOUR E-MAIL");
+                        // then hide the recovery password dialog
+                        oController.m_bIsVisibleRecoveryPassword = !oController.m_bIsVisibleRecoveryPassword;
+
                     } else {
-                        if (utilsIsStrNullOrEmpty(data.stringValue) === false) {
+                        if (utilsIsStrNullOrEmpty(data.data.stringValue) === false) {
                             oController.m_sMessageError = data.stringValue;
                         }
                         oController.m_bError = true;
@@ -339,11 +341,11 @@ var HomeController = (function () {
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 }
-            },(function (data,status) {
-            //alert('error');
-            utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+            }, (function (data, status) {
+                //alert('error');
+                utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
 
-        }));
+            }));
 
         return true;
     };

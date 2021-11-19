@@ -1,0 +1,47 @@
+@font-face {
+    font-family: Hero_Light;
+    src: url(./hero_light/Hero_Light.woff);
+}
+@font-face {
+    font-family: Hero;
+    src: url(./hero_regular/Hero.otf);
+}
+
+
+.rst-content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend{
+    margin-top: 0;
+    font-weight: 700;
+    font-family: Hero,ff-tisa-web-pro,Georgia,Arial,sans-serif;
+}
+
+div.body {
+    font-family: Hero;
+}
+h1,h2,h3,h4, span.caption-text {
+   color: #009036;
+}
+
+body {
+    font-family: Hero;
+}
+
+.wy-side-nav-search {
+    display: block;
+    width: 300px;
+    padding: .809em;
+    margin-bottom: .809em;
+    z-index: 200;
+    background-color: #43516A;
+    text-align: center;
+    color: #fcfcfc;
+}
+
+.wy-nav-top {
+    background: #43516A;
+}
+
+dt {
+    display: inline-block !important;
+}
+
+

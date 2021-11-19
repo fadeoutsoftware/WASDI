@@ -1,14 +1,10 @@
 package it.fadeout.rest.resources;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +21,6 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,7 +30,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -64,6 +59,7 @@ import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.MongoRepository;
@@ -78,30 +74,45 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipExtractor;
-import wasdi.shared.viewmodels.AppDetailViewModel;
-import wasdi.shared.viewmodels.AppFilterViewModel;
-import wasdi.shared.viewmodels.AppListViewModel;
-import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessorLogViewModel;
-import wasdi.shared.viewmodels.ProcessorSharingViewModel;
-import wasdi.shared.viewmodels.RunningProcessorViewModel;
+import wasdi.shared.viewmodels.processors.AppDetailViewModel;
+import wasdi.shared.viewmodels.processors.AppFilterViewModel;
+import wasdi.shared.viewmodels.processors.AppListViewModel;
+import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
+import wasdi.shared.viewmodels.processors.ProcessorLogViewModel;
+import wasdi.shared.viewmodels.processors.ProcessorSharingViewModel;
+import wasdi.shared.viewmodels.processworkspace.RunningProcessorViewModel;
 
+/**
+ * Processors Resource.
+ * Hosts the API for:
+ * 	.Upload a new processor
+ * 	.update existing processors files and data
+ * 	.force update lib and redeploy
+ * 	.run processor
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/processors")
-public class ProcessorsResource  {
-	
-	@Context
-	ServletConfig m_oServletConfig;
+public class ProcessorsResource  {	
 	
 	/**
 	 * Upload a new processor in Wasdi
-	 * @param oInputStreamForFile
-	 * @param sSessionId
-	 * @param sName
-	 * @param sVersion
-	 * @param sDescription
-	 * @return
+	 * 
+	 * @param oInputStreamForFile Processor Zip file stream 
+	 * @param sSessionId User Session Id
+	 * @param sWorkspaceId Actual Workspace Id
+	 * @param sName Processor Name
+	 * @param sVersion Processor Version -> Deprecated
+	 * @param sDescription Processor Description
+	 * @param sType Processor Type
+	 * @param sParamsSample Sample encoded json parameter
+	 * @param iPublic 1 if it is pubic, 0 othewise
+	 * @param iTimeout processors' specific timeout. 0 means no timeout (may be used scheduler one as configured in the node)
+	 * @return Primitive Result with http response code
 	 * @throws Exception
 	 */
 	@POST
@@ -175,7 +186,7 @@ public class ProcessorsResource  {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
 			
 			// Create folders
@@ -260,7 +271,7 @@ public class ProcessorsResource  {
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, "wasdi");
 
 			// Schedule the processworkspace to deploy the processor
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
 			ProcessorParameter oDeployProcessorParameter = new ProcessorParameter();
 			oDeployProcessorParameter.setName(sName);
@@ -272,7 +283,7 @@ public class ProcessorsResource  {
 			oDeployProcessorParameter.setProcessorType(sType);
 			oDeployProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DEPLOYPROCESSOR.name(), sName, sPath, oDeployProcessorParameter);
 			
@@ -295,6 +306,18 @@ public class ProcessorsResource  {
 		
 	}
 	
+	/**
+	 * Get a list of processors available
+	 * This is used to get all the processors and not only the one enabled in the marketplace.
+	 * The method will collect all:
+	 * 	.Users processors
+	 * 	.Public processors
+	 * 	.Processors shared with the user
+	 * 
+	 * @param sSessionId User Session Id
+	 * @return List of Deployed Processor View Models
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/getdeployed")
 	public List<DeployedProcessorViewModel> getDeployedProcessors(@HeaderParam("x-session-token") String sSessionId) throws Exception {
@@ -351,6 +374,13 @@ public class ProcessorsResource  {
 		return aoRet;
 	}
 	
+	/**
+	 * Get info of a processor.
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id 
+	 * @return Deployed Processor View Model
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/getprocessor")
 	public DeployedProcessorViewModel getSingleDeployedProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) throws Exception {
@@ -401,7 +431,16 @@ public class ProcessorsResource  {
 		return oDeployedProcessorViewModel;
 	}	
 	
-	
+	/**
+	 * Get the filtered list of the processors available for the marketplace.
+	 * The API will return all the public, owned or shared processors that are exposed in the marketplace
+	 * and that respects the given filters 
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param oFilters App Filter View Model
+	 * @return List of App List View Models
+	 * @throws Exception
+	 */
 	@POST
 	@Path("/getmarketlist")
 	public List<AppListViewModel> getMarketPlaceAppList(@HeaderParam("x-session-token") String sSessionId, AppFilterViewModel oFilters) throws Exception {
@@ -462,9 +501,13 @@ public class ProcessorsResource  {
 					}
 				}
 				
-				// Check and apply name filter
+				// Check and apply name filter taking in account both friendly and app name.
+				// Friendly name was added on the check to have a coherent behaviour for the users
 				if (!Utils.isNullOrEmpty(oFilters.getName())) {
-					if (!oProcessor.getName().contains(oFilters.getName())) continue;
+					String sLowerProcessorName = oProcessor.getName().toLowerCase();
+					String sLowerProcessorFriendlyName = oProcessor.getFriendlyName().toLowerCase();
+					String sLowerFiltername = oFilters.getName().toLowerCase();
+					if (!(sLowerProcessorName.contains(sLowerFiltername) || sLowerProcessorFriendlyName.contains(sLowerFiltername))) continue;
 				}
 				
 				// Check and apply category filter
@@ -576,6 +619,14 @@ public class ProcessorsResource  {
 		return aoRet;
 	}
 	
+	/**
+	 * Get the detailed marketplace info for an application.
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProcessorName Processor Name
+	 * @return App Detail View Model
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/getmarketdetail")
 	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
@@ -704,7 +755,19 @@ public class ProcessorsResource  {
 		}		
 	}	
 		
-	
+	/**
+	 * Run a processor.
+	 * This triggers the execution of the launcher.
+	 * This version is a POST to support long parameters
+	 * 
+	 * @param sSessionId User Session 
+	 * @param sName Processor Name
+	 * @param sWorkspaceId Workspace Id
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param sEncodedJson Processors' parameters as encoded JSON
+	 * @return Running Processor View Model
+	 * @throws Exception
+	 */
 	@POST
 	@Path("/run")
 	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
@@ -716,7 +779,20 @@ public class ProcessorsResource  {
 		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
 	}
 	
-	
+	/**
+	 * Run a processor.
+	 * This triggers the execution of the launcher.
+	 * This version is a get and supports only short parameters
+	 * 
+	 * @param sSessionId User Session 
+	 * @param sName Processor Name
+	 * @param sWorkspaceId Workspace Id
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param sEncodedJson Processors' parameters as encoded JSON
+	 * @return Running Processor View Model
+	 * @throws Exception
+	 */
+
 	@GET
 	@Path("/run")
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
@@ -730,13 +806,14 @@ public class ProcessorsResource  {
 	}
 	
 	/**
-	 * Internal method to create run operation
-	 * @param sSessionId 
-	 * @param sName
-	 * @param sEncodedJson
-	 * @param sWorkspaceId
-	 * @param sParentProcessWorkspaceId
-	 * @return
+	 * Internal method to create run operation for both GET and POST versions
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sName Processor Name
+	 * @param sEncodedJson Encoded JSON
+	 * @param sWorkspaceId Workspace Id
+	 * @param sParentProcessWorkspaceId Proc Id of the parent Process
+	 * @return Running Processor View Model
 	 * @throws Exception
 	 */
 	public RunningProcessorViewModel internalRun(String sSessionId, String sName, String sEncodedJson, String sWorkspaceId, String sParentProcessWorkspaceId) throws Exception {
@@ -773,9 +850,9 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(sName);
@@ -820,7 +897,16 @@ public class ProcessorsResource  {
 		return oRunningProcessorViewModel;
 	}
 	
-	
+	/**
+	 * Return the help of a processor. when the user uploads a processor it can upload also an help file
+	 * like help.md (supported different names ie readme.md...)
+	 * This API return the content of that file, if exists.
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sName Processor name
+	 * @return PrimitiveResult: if boolValue is = true, stringValue has the help
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/help")
 	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
@@ -843,41 +929,24 @@ public class ProcessorsResource  {
 			
 			Utils.debugLog("ProcessorsResource.help: read Processor " +sName);
 			
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
-			
-			// Call localhost:port
-			String sUrl = "http://localhost:"+oProcessorToRun.getPort()+"/run/--help";
-			
-			Utils.debugLog("ProcessorsResource.help: calling URL = " + sUrl);
-			
-			URL oProcessorUrl = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Content-Type", "application/json");
+			// Take path
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
 
-			OutputStream oOutputStream = oConnection.getOutputStream();
-			oOutputStream.write("{}".getBytes());
-			oOutputStream.flush();
-			
-			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
-				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				Utils.debugLog("ProcessorsResource.help: directory " + oDirPath.toString() + " not found");
+				return oPrimitiveResult;
 			}
 
-			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+			String sOutputCumulativeResult = Arrays.stream(oDirFile.listFiles())
+				.filter(File::isFile)
+				.filter(WasdiFileUtils::isHelpFile)
+				.map(File::getAbsolutePath)
+				.map(WasdiFileUtils::fileToText)
+				.findFirst()
+				.orElseGet(() -> "");
 
-			String sOutputResult;
-			String sOutputCumulativeResult = "";
-			Utils.debugLog("ProcessorsResource.help: Retrieving Output from Server .... \n");
-			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				//Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
-				
-				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
-			}
-
-			oConnection.disconnect();
-			
 			Utils.debugLog("ProcessorsResource.help: got help\n");
 			
 			oPrimitiveResult.setBoolValue(true);
@@ -891,6 +960,16 @@ public class ProcessorsResource  {
 		return oPrimitiveResult;
 	}
 	
+	/**
+	 * Return the status of a processor
+	 * NOTE: p.campanella 06/10/2021 : this API should be the same of the one in proc ws.
+	 * I think this may be used for the WPS bridge so I do not delete it now.
+	 * 
+	 * @param sSessionId User Session
+	 * @param sProcessingId Process Workspace Id
+	 * @return
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/status")
 	public RunningProcessorViewModel status(@HeaderParam("x-session-token") String sSessionId,
@@ -962,7 +1041,14 @@ public class ProcessorsResource  {
 		return oRunning;
 	}
 	
-	
+	/**
+	 * Add a log row to a running processor
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProcessWorkspaceId Process Workspace Id
+	 * @param sLog Log row
+	 * @return std http response
+	 */
 	@POST
 	@Path("/logs/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -988,7 +1074,7 @@ public class ProcessorsResource  {
 			
 			ProcessorLog oLog = new ProcessorLog();
 			
-			oLog.setLogDate(Wasdi.getFormatDate(new Date()));
+			oLog.setLogDate(Utils.getFormatDate(new Date()));
 			oLog.setProcessWorkspaceId(sProcessWorkspaceId);
 			oLog.setLogRow(sLog);
 			
@@ -1007,7 +1093,12 @@ public class ProcessorsResource  {
 		return Response.ok().build();
 	 }
 	
-	
+	/**
+	 * Get tht total count of log rows of a processor
+	 * @param sSessionId User Session Id
+	 * @param sProcessWorkspaceId Process Workspace Id
+	 * @return int with the number of logs of the processor
+	 */
 	@GET
 	@Path("/logs/count")
 	public int countLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId){
@@ -1040,13 +1131,22 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorResource.countLogs: CounterRepository returned a null Counter");
 				return iResult;
 			}
-			iResult = oCounter.getValue();
+			iResult = oCounter.getValue() + 1;
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId + " ): " + oEx);
 		}
 		return iResult;
 	}
 	
+	/**
+	 * Get a paginated list of logs of a processor
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProcessWorkspaceId Process Workspace Id
+	 * @param iStartRow Start log row
+	 * @param iEndRow End log row
+	 * @return
+	 */
 	@GET
 	@Path("/logs/list")
 	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId,
@@ -1123,7 +1223,7 @@ public class ProcessorsResource  {
 	@Path("/nodedelete")
 	public Response nodeDeleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspaceId") String sWorkspaceId,
+			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("processorName") String sProcessorName,
 			@QueryParam("processorType") String sProcessorType) {
 		Utils.debugLog("ProcessorResources.nodeDeleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
@@ -1155,8 +1255,8 @@ public class ProcessorsResource  {
 			String sUserId = oUser.getUserId();
 			
 			// Schedule the process to delete the processor
-			String sProcessObjId = Utils.GetRandomName();
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sProcessObjId = Utils.getRandomName();
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 						
 			// Trigger the processor delete operation on this specific node
 			Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is a computing node, just execute Delete here");
@@ -1206,7 +1306,7 @@ public class ProcessorsResource  {
 	@Path("/delete")
 	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspaceId") String sWorkspaceId) {
+			@QueryParam("workspace") String sWorkspaceId) {
 		Utils.debugLog("ProcessorResources.deleteProcessor( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
@@ -1226,7 +1326,7 @@ public class ProcessorsResource  {
 			
 			// This API is allowed ONLY on the main node
 			if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
-				Utils.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
+				Utils.debugLog("ProcessorsResource.deleteProcessor: this is not the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 
@@ -1265,8 +1365,8 @@ public class ProcessorsResource  {
 			}
 
 			// Schedule the process to delete the processor
-			String sProcessObjId = Utils.GetRandomName();
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sProcessObjId = Utils.getRandomName();
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			// Start a thread to update all the computing nodes
 			try {
@@ -1325,11 +1425,19 @@ public class ProcessorsResource  {
 		}
 	}
 			
+	/**
+	 * Force redeploy of an application
+	 * 
+	 * @param sSessionId User Session
+	 * @param sProcessorId Processor Id
+	 * @param sWorkspaceId Workspace Id
+	 * @return std http response
+	 */
 	@GET
 	@Path("/redeploy")
 	public Response redeployProcessor(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspaceId") String sWorkspaceId) {
+			@QueryParam("workspace") String sWorkspaceId) {
 		Utils.debugLog("ProcessorResources.redeployProcessor( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 	
 		try {
@@ -1399,9 +1507,9 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToReDeploy.getName());
@@ -1430,11 +1538,19 @@ public class ProcessorsResource  {
 		}
 	}
 	
+	/**
+	 * Force the update of the lib of a processor
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id
+	 * @param sWorkspaceId Workspace Id
+	 * @return std http response
+	 */
 	@GET
 	@Path("/libupdate")
 	public Response libraryUpdate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorId") String sProcessorId,
-			@QueryParam("workspaceId") String sWorkspaceId) {
+			@QueryParam("workspace") String sWorkspaceId) {
 		Utils.debugLog("ProcessorResources.libraryUpdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
@@ -1468,9 +1584,9 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			
-			String sProcessObjId = Utils.GetRandomName();
+			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
@@ -1499,6 +1615,14 @@ public class ProcessorsResource  {
 		}
 	}
 	
+	/**
+	 * Updates the parameters of a Processor
+	 * 
+	 * @param oUpdatedProcessorVM Updated Processor View Mode
+	 * @param sSessionId Session Id
+	 * @param sProcessorId Processor Id
+	 * @return std http response
+	 */
 	@POST
 	@Path("/update")
 	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
@@ -1575,7 +1699,16 @@ public class ProcessorsResource  {
 		}
 	}	
 	
-	
+	/**
+	 * Updates the files of a processor
+	 * 
+	 * @param oInputStreamForFile Stream of the files to update
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id
+	 * @param sWorkspaceId Workspace Id
+	 * @param sInputFileName Name of the input file
+	 * @return
+	 */
 	@POST
 	@Path("/updatefiles")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -1584,7 +1717,7 @@ public class ProcessorsResource  {
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("file") String sInputFileName) {
 
-		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " )");
+		Utils.debugLog("ProcessorsResource.updateProcessorFiles( WS: " + sWorkspaceId + ", Processor: " + sProcessorId + " filename: " + sInputFileName + " )");
 		try {
 			if(Utils.isNullOrEmpty(sProcessorId) || sProcessorId.contains("\\") || sProcessorId.contains("/")) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid processor name, aborting");
@@ -1628,7 +1761,7 @@ public class ProcessorsResource  {
 			}			
 			
 			// Set the processor path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName()).toAbsolutePath().normalize();
 			File oProcessorPath = oDirPath.toFile();
@@ -1661,7 +1794,7 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
+			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Saving Processor file Path: " + oProcessorFile.getPath());
 			
 			//save uploaded file
 			int iRead = 0;
@@ -1731,7 +1864,6 @@ public class ProcessorsResource  {
 					}
 				}
 				
-				
 				// Trigger the library update on this specific node
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Forcing Update Lib");
 				
@@ -1748,10 +1880,10 @@ public class ProcessorsResource  {
 					oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
 					oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 					oProcessorParameter.setName(oProcessorToUpdate.getName());
-					oProcessorParameter.setProcessObjId(Utils.GetRandomName());
+					oProcessorParameter.setProcessObjId(Utils.getRandomName());
 					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
 					
-					String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+					String sPath = WasdiConfig.Current.paths.serializationPath;
 					
 					// Trigger the library update in this node
 					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), sPath, oProcessorParameter);
@@ -1776,7 +1908,13 @@ public class ProcessorsResource  {
 		return Response.ok().build();
 	}
 	
-	
+	/**
+	 * Update the details of a processor 
+	 * @param oUpdatedProcessorVM Updated Processor View Model
+	 * @param sSessionId Session Id
+	 * @param sProcessorId Processor Id
+	 * @return std http response
+	 */
 	@POST
 	@Path("/updatedetails")
 	public Response updateProcessorDetails(AppDetailViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
@@ -1839,6 +1977,13 @@ public class ProcessorsResource  {
 		}
 	}		
 	
+	/**
+	 * Downloads a zip with the processors files
+	 * @param sSessionId User Session Id
+	 * @param sTokenSessionId User Session id as query param to be used by browsers
+	 * @param sProcessorId Processor Id
+	 * @return File Stream
+	 */
 	@GET
 	@Path("downloadprocessor")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -1851,6 +1996,7 @@ public class ProcessorsResource  {
 		
 		try {
 			
+			// Check authorization
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
 				sTokenSessionId = sSessionId;
 			}
@@ -1862,6 +2008,7 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			// Check the processor
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
@@ -1873,7 +2020,7 @@ public class ProcessorsResource  {
 			String sProcessorName = oProcessor.getName();
 			
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sDownloadRootPath = Wasdi.getDownloadPath();
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 			if(!oDirFile.isDirectory()) {
@@ -1886,11 +2033,7 @@ public class ProcessorsResource  {
 			
 			File oFile = oFilePath.toFile();
 			
-//			if(!oFile.exists()) {
-//				Utils.debugLog("ProcessorsResource.downloadProcessor: zip file not found");
-//				return Response.status(Status.NOT_FOUND).build();
-//			}
-			
+			// Create the zip and return the stream						
 			return zipProcessor(oFile, oProcessor);			
 		} 
 		catch (Exception oEx) {
@@ -1923,7 +2066,7 @@ public class ProcessorsResource  {
 
 			int iBaseLen = sBasePath.length();
 
-			String sProcTemplatePath = Wasdi.getDownloadPath(m_oServletConfig);
+			String sProcTemplatePath = Wasdi.getDownloadPath();
 			sProcTemplatePath += "dockertemplate/";
 			sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
 
@@ -2004,7 +2147,14 @@ public class ProcessorsResource  {
 		return Response.serverError().build();
 	}	
 
-    
+    /**
+     * Unzip a processor
+     * 
+     * @param oProcessorZipFile Processor Zip File
+     * @param sSessionId User Session Id
+     * @param sProcessorId Processor Id
+     * @return true if ok, false otherwise
+     */
 	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
 		try {
 			ZipExtractor oZipExtractor = new ZipExtractor(sSessionId + " : " + sProcessorId);
@@ -2061,7 +2211,14 @@ public class ProcessorsResource  {
 	
 	
 	
-	
+	/**
+	 * Add a sharing to a processor
+	 * 
+	 * @param sSessionId User Id
+	 * @param sProcessorId Processor Id
+	 * @param sUserId User to be added to the processor sharing list
+	 * @return Primitive Result with boolValue = true and stringValue = Done, or false and an error description
+	 */
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -2070,19 +2227,25 @@ public class ProcessorsResource  {
 		Utils.debugLog("ProcessorsResource.shareProcessor(  WS: " + sProcessorId + ", User: " + sUserId + " )");
 
 		// Validate Session
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
-		if (oOwnerUser == null) {
+		if (oRequesterUser == null) {
 			Utils.debugLog("ProcessorsResource.shareProcessor( Session: " + sSessionId + ", WS: " + sProcessorId + ", User: " + sUserId + " ): invalid session");
 			oResult.setStringValue("Invalid session.");
 			return oResult;
 		}
 
-		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) {
+		if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
 			oResult.setStringValue("Invalid user.");
 			return oResult;
+		}
+		
+		if (oRequesterUser.getUserId().equals(sUserId)) {
+			Utils.debugLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
+			oResult.setStringValue("Impossible to autoshare.");
+			return oResult;				
 		}
 		
 		try {
@@ -2095,24 +2258,18 @@ public class ProcessorsResource  {
 				oResult.setStringValue("Invalid processor");
 				return oResult;		
 			}
-			
-			if (!oValidateProcessor.getUserId().equals(oOwnerUser.getUserId())) {
-				oResult.setStringValue("Unauthorized");
-				return oResult;				
-			}
-			
+						
 			// Check the destination user
 			UserRepository oUserRepository = new UserRepository();
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 			
 			if (oDestinationUser == null) {
-				oResult.setStringValue("Unauthorized");
+				oResult.setStringValue("Invalid Destination User");
 				return oResult;				
 			}
 			
 			// Check if has been already shared
 			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			
 			ProcessorSharing oAlreadyExists = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
 			
 			if (oAlreadyExists != null) {
@@ -2120,19 +2277,39 @@ public class ProcessorsResource  {
 				return oResult;					
 			}
 			
+			// The requester is the owner?			
+			if (!oValidateProcessor.getUserId().equals(oRequesterUser.getUserId())) {
+				
+				// Is he trying to share with the owner?
+				if (oValidateProcessor.getUserId().equals(sUserId)) {
+					oResult.setStringValue("Cannot Share with owner");
+					return oResult;					
+				}
+				
+				// No: the requestr has a sharing on this processor?
+				ProcessorSharing oHasSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oRequesterUser.getUserId(), sProcessorId);
+				
+				if (oHasSharing==null) {
+					
+					//No. So it is neither the owner or a shared one
+					oResult.setStringValue("Unauthorized");
+					return oResult;				
+				}				
+			}			
+			
 			// Create and insert the sharing
 			ProcessorSharing oProcessorSharing = new ProcessorSharing();
 			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-			oProcessorSharing.setOwnerId(oOwnerUser.getUserId());
+			oProcessorSharing.setOwnerId(oRequesterUser.getUserId());
 			oProcessorSharing.setUserId(sUserId);
 			oProcessorSharing.setProcessorId(sProcessorId);
 			oProcessorSharing.setShareDate((double) oTimestamp.getTime());
 			oProcessorSharingRepository.insertProcessorSharing(oProcessorSharing);
 			
-			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oOwnerUser.getUserId() + " to " + sUserId);
+			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 			
 			try {
-				String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+				String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 				
 				if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 					Utils.debugLog("ProcessorsResource.shareProcessor: sMercuriusAPIAddress is null");
@@ -2145,14 +2322,14 @@ public class ProcessorsResource  {
 					
 					oMessage.setTilte(sTitle);
 					
-					String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+					String sSender =  WasdiConfig.Current.notifications.sftpManagementMailSender;
 					if (sSender==null) {
 						sSender = "wasdi@wasdi.net";
 					}
 					
 					oMessage.setSender(sSender);
 					
-					String sMessage = "The user " + oOwnerUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
+					String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
 									
 					oMessage.setMessage(sMessage);
 			
@@ -2184,7 +2361,12 @@ public class ProcessorsResource  {
 	}
 	
 	
-	
+	/**
+	 * Get the list of sharings of a processor
+	 * @param sSessionId User Session id
+	 * @param sProcessorId Processor Id
+	 * @return List of Processor Sharing View Models
+	 */
 	@GET
 	@Path("share/byprocessor")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -2235,7 +2417,16 @@ public class ProcessorsResource  {
 		return aoReturnList;
 
 	}
-
+	
+	/**
+	 * Deletes a sharing from a processor
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id
+	 * @param sUserId Id of the user to be removed from the sharings
+	 * 
+	 * @return  Primitive Result with boolValue = true and stringValue = Done, or false and an error description
+	 */
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -2297,7 +2488,15 @@ public class ProcessorsResource  {
 		return oResult;
 	}
 	
-
+	
+	/**
+	 * Get the json ui representation of a processor 
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sName Processor Name
+	 * @return Json representation of the UI
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/ui")
 	public Response getUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
@@ -2342,6 +2541,15 @@ public class ProcessorsResource  {
 		
 	}
 	
+	/**
+	 * Updates the UI of a processor
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sName Processor Name
+	 * @param sUIJson JSON representation of the UI in the body
+	 * @return
+	 * @throws Exception
+	 */
 	@POST
 	@Path("/saveui")
 	public Response saveUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, String sUIJson) throws Exception {
@@ -2355,8 +2563,6 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorsResource.saveUI: session invalid");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-			
-			//String sUserId = oUser.getUserId();
 			
 			Utils.debugLog("ProcessorsResource.saveUI: read Processor " +sName);
 			
@@ -2408,8 +2614,6 @@ public class ProcessorsResource  {
 			Utils.debugLog("ProcessorsResource.saveUI: " + oEx);
 			return Response.serverError().build();
 		}
-		
-	}	
-		
+	}
 	
 }

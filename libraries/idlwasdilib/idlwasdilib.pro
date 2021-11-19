@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.2
-; Last Update: 2021-03-10
+; IDL WASDI Lib Version 0.6.3
+; Last Update: 2021-05-06
 ;
 ; History
+; 0.6.3 - 2021-05-06
+;	support start by workspace id and copy to sftp relative path
+;
 ; 0.6.2 - 2021-03-10
 ;	moved to https
 ;
@@ -50,8 +53,8 @@
 ;	Removed debug prints
 ;
 ; 0.1.15
-;
 ;	Fixed path generation for shared workspaces
+;
 ;--------------------------------------------------------------------------------------------------------------------------
 
 PRO STARTWASDI, sConfigFilePath
@@ -75,6 +78,7 @@ PRO STARTWASDI, sConfigFilePath
 	activeworkspace = ''
 	workspaceowner = ''
 	workspaceurl = ''
+	wsid = ''
 	token = ''
 	myprocid = ''
 	baseurl='www.wasdi.net'
@@ -113,6 +117,11 @@ PRO STARTWASDI, sConfigFilePath
 			'WORKSPACE': BEGIN
 					IF n_elements(asKeyValue) gt 1 THEN BEGIN
 						activeworkspace = asKeyValue[1]
+					END
+				END
+			'WORKSPACEID': BEGIN
+					IF n_elements(asKeyValue) gt 1 THEN BEGIN
+						wsid = asKeyValue[1]
 					END
 				END
 			'BASEPATH': BEGIN
@@ -170,7 +179,11 @@ PRO STARTWASDI, sConfigFilePath
 	INITWASDI,user,password,basepath,token,myprocid
 
 	IF (activeworkspace EQ !NULL) OR (STRLEN(activeworkspace) LE 1) THEN BEGIN
-		print, 'Workspace not set'
+		IF (STRLEN(wsid) GT 1) THEN BEGIN
+			WASDIOPENWORKSPACEBYID, wsid
+		END ELSE BEGIN
+			print, 'Workspace not set'
+		END
 	END ELSE BEGIN
 		WASDIOPENWORKSPACE, activeworkspace
 		print, 'Workspace ', activeworkspace, ' opened'
@@ -683,19 +696,13 @@ PRO INITWASDI,sUser,sPassword,sBasePath,sSessionId,sMyProdId
 	END
 END
 
-
-; Hello WASDI
-PRO HELLOWASDI
-	wasdiResult = WASDIHTTPGET('/wasdiwebserver/rest/wasdi/hello',!NULL)
-END
-
 ; Get the status of a WASDI Process
 FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
+	UrlPath = '/wasdiwebserver/rest/process/byid?procws='+sProcessID
 
 	; Call get status
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -850,7 +857,7 @@ FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
 	ownerUserId = "";
 	
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/ws?sWorkspaceId=' + workspaceid
+	UrlPath = '/wasdiwebserver/rest/ws/getws?workspace=' + workspaceid
 
 	; Get the workpsace view model
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -927,7 +934,7 @@ FUNCTION WASDICHECKPRODUCTEXISTS, filename
 	workspaceId = "";
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/product/byname?name='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -961,7 +968,7 @@ FUNCTION WASDIGETPRODUCTBBOX, filename
 	workspaceId = "";
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/product/byname?name='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -989,7 +996,7 @@ FUNCTION WASDIDELETEPRODUCT, filename
 	workspaceId = activeworkspace;
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/product/delete?sProductName='+filename+'&bDeleteFile=true&sWorkspaceId='+workspaceId+'&bDeleteLayer=true'
+	UrlPath = '/wasdiwebserver/rest/product/delete?name='+filename+'&deletefile=true&workspace='+workspaceId+'&deletelayer=true'
 
 	; Get the list of users workpsaces
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -1048,7 +1055,7 @@ FUNCTION WASDIGETPRODUCTSBYWORKSPACE,workspacename
 	workspaceid = activeworkspace
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+workspaceid
+	UrlPath = '/wasdiwebserver/rest/product/byws?workspace='+workspaceid
 
 	; Get the list of products
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -1073,7 +1080,7 @@ FUNCTION WASDIGETACTIVEWORKSPACEPRODUCTS
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/product/namesbyws?sWorkspaceId='+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/product/namesbyws?workspace='+activeworkspace
 
 	; Get the list of products
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -1210,7 +1217,7 @@ FUNCTION WASDIGETWORKFLOWS
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/getgraphsbyusr'
+	UrlPath = '/wasdiwebserver/rest/workflows/getbyuser'
 
 	; Call API
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -1250,7 +1257,7 @@ FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWor
 	END
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/graph_id?workspace='+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/workflows/run?workspace='+activeworkspace
 
 	; Generate input file names JSON array
 	sInputFilesJSON = '['
@@ -1400,7 +1407,7 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreV
 
 
   ; API url
-  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+  UrlPath = '/wasdiwebserver/rest/processing/mosaic?name='+sOutputFile+"&workspace="+activeworkspace
  
   ; Generate input file names JSON array
   sInputFilesJSON = '['
@@ -1434,7 +1441,7 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreV
   END
  
   ; compose the full MosaicSetting JSON View Model
-  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '"'
+  sMosaicSettingsString='{  "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "sources":'+sInputFilesJSON +', "outputFormat":"' + sOutputFormat + '"'
   
   if (sNoDataValue NE !NULL) THEN BEGIN
 	sMosaicSettingsString = sMosaicSettingsString + ', "noDataValue":' + sNoDataValue
@@ -1483,7 +1490,7 @@ FUNCTION WASDISUBSET, sInputFile, sOutputFile, sLatN, sLonW, sLatS, sLonE
 
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/geometric/subset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/processing/subset?source='+sInputFile+'&name='+sOutputFile+"&workspace="+activeworkspace
 
 	; compose the full SubsetSetting JSON View Model
 	sSubsetSettingsString='{  "latN": '+ sLatN +',  "lonW": '+ sLonW +',"latS": '+ sLatS +', "lonE": '+ sLonE +'}'
@@ -1549,7 +1556,7 @@ FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asL
 
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processing/geometric/multisubset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sInputFile+"&sWorkspaceId="+activeworkspace
+	UrlPath = '/wasdiwebserver/rest/processing/multisubset?source='+sInputFile+'&name='+sInputFile+"&workspace="+activeworkspace
 	
 	sOutputFilesJSON = WASDIGENERATEJSONARRAY(asOutputFile)
 	
@@ -1676,7 +1683,7 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   oUrl = OBJ_NEW('IDLnetUrl')
   sEncodedQuery = oUrl->URLEncode(sQuery)
 
-  sQuery = "sQuery=" + sEncodedQuery + "&offset=0&limit=10&providers=ONDA";
+  sQuery = "providers=LSA";
   
   UrlPath = UrlPath + '?' + sQuery
     
@@ -1721,9 +1728,9 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
 
-	sProvider = "ONDA"
+	sProvider = "LSA"
 
-	sQuery = "sFileUrl=" + sEncodedLink + "&sProvider="+sProvider+"&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
 
 	UrlPath = UrlPath + '?' + sQuery
 
@@ -1762,7 +1769,7 @@ PRO WASDIUPDATEPROGRESS, iPerc
 		print, 'Progress Update ', sPerc.Trim()
 	END ELSE BEGIN
 		; API url
-		UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
+		UrlPath = '/wasdiwebserver/rest/process/updatebyid?procws='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
 		wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 		; Read updated status
@@ -1789,9 +1796,11 @@ END
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+	
+	sPerc = STRTRIM(STRING(iPerc),2)
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sProcessID+'&status='+sStatus+'&perc='+iPerc
+	UrlPath = '/wasdiwebserver/rest/process/updatebyid?procws='+sProcessID+'&status='+sStatus+'&perc='+sPerc
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
 
 	; get the output status
@@ -2098,7 +2107,7 @@ FUNCTION WASDIDELETEWORKSPACE, sWorkspaceId
 	sessioncookie = token
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/ws/delete?sWorkspaceId=' + sWorkspaceId +'&bDeleteLayer=true&bDeleteFile=true'
+	UrlPath = '/wasdiwebserver/rest/ws/delete?workspace=' + sWorkspaceId +'&deletelayer=true&deletefile=true'
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
@@ -2166,7 +2175,7 @@ FUNCTION WASDIGETPRODUCTSBYWORKSPACEID, sWorkspaceId
 	WASDIOPENWORKSPACEBYID, sWorkspaceId
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+sWorkspaceId
+	UrlPath = '/wasdiwebserver/rest/product/byws?workspace='+sWorkspaceId
 
 	; Get the list of products
 	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
@@ -2231,7 +2240,7 @@ FUNCTION WASDISETPROCESSPAYLOAD, sProcessId, data
 	sPayload = oUrl->URLEncode(data)
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/setpayload?sProcessId='+sProcessId+'&payload='+sPayload
+	UrlPath = '/wasdiwebserver/rest/process/setpayload?procws='+sProcessId+'&payload='+sPayload
 
 	; Get the list of products
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -2266,7 +2275,7 @@ FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
 	END
 	
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/payload?processObjId='+sProcessId
+	UrlPath = '/wasdiwebserver/rest/process/payload?procws='+sProcessId
 
 	; Call url
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -2276,7 +2285,7 @@ FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
 END
 
 
-FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
+FUNCTION WASDIGETPROCESSORPAYLOADASJSON, sProcessId
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
@@ -2285,7 +2294,7 @@ FUNCTION WASDIGETPROCESSORPAYLOAD, sProcessId
 	END
 	
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/payload?processObjId='+sProcessId
+	UrlPath = '/wasdiwebserver/rest/process/payload?procws='+sProcessId
 
 	; Call url
 	wasdiResult = WASDIHTTPGETNOJSON(UrlPath, workspaceurl)
@@ -2307,7 +2316,7 @@ FUNCTION WASDISETSUBPID, sProcessId, iSubPid
 	END
 	
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/setsubpid?sProcessId='+sProcessId+'&subpid='+iSubPid
+	UrlPath = '/wasdiwebserver/rest/process/setsubpid?procws='+sProcessId+'&subpid='+iSubPid
 
 	; Call url
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -2338,7 +2347,7 @@ FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
 
-	sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider=LSA&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
 
 	UrlPath = UrlPath + '?' + sQuery
 
@@ -2422,7 +2431,7 @@ FUNCTION WASDIASYNCHMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputI
 
 
   ; API url
-  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?name='+sOutputFile+"&workspace="+activeworkspace
  
   ; Generate input file names JSON array
   sInputFilesJSON = '['
@@ -2456,7 +2465,7 @@ FUNCTION WASDIASYNCHMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputI
   END
  
   ; compose the full MosaicSetting JSON View Model
-  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '"'
+  sMosaicSettingsString='{ "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "sources":'+sInputFilesJSON +', "outputFormat":"' + sOutputFormat + '"'
   
   if (sNoDataValue NE !NULL) THEN BEGIN
 	sMosaicSettingsString = sMosaicSettingsString + ', "noDataValue":' + sNoDataValue
@@ -2652,7 +2661,7 @@ END
 ;sFileName: FIle name (with extension, without path) to copy in the SFTP folder
 ;bAsynch: True to return after the triggering, False to wait the process to finish
 ;return: status. An empty string is returned in case of failure    
-FUNCTION WASDICOPYFILETOSFTP, sFileName
+FUNCTION WASDICOPYFILETOSFTP, sFileName, sRelativePath
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
 	
@@ -2662,6 +2671,17 @@ FUNCTION WASDICOPYFILETOSFTP, sFileName
 	
 	IF (isonserver EQ '1') THEN BEGIN
 		UrlPath = UrlPath + "&parent="+myprocid
+	END
+	
+	; add the relative path if exists	
+	IF sRelativePath NE !NULL THEN BEGIN
+		IF STRLEN(sRelativePath) > 0 THEN BEGIN
+			;Create a new url object
+			oUrl = OBJ_NEW('IDLnetUrl')
+			sEncodedRelativePath = oUrl->URLEncode(sRelativePath)
+			
+			UrlPath = UrlPath + "&path=" + sEncodedRelativePath
+		END 
 	END
 
 	wasdiResult = WASDIHTTPGET(UrlPath, workspaceurl)
@@ -2701,7 +2721,7 @@ FUNCTION WASDIGETPROCESSESBYWORKSPACE, iStartIndex, iEndIndex, sStatus, sOperati
 	
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/process/byws?sWorkspaceId='+activeworkspace + '&startindex='+STRTRIM(STRING(iStartIndex),2) + '&endindex='+STRTRIM(STRING(iEndIndex),2)
+	UrlPath = '/wasdiwebserver/rest/process/byws?workspace='+activeworkspace + '&startindex='+STRTRIM(STRING(iStartIndex),2) + '&endindex='+STRTRIM(STRING(iEndIndex),2)
 	
 	IF (sStatus NE !NULL) THEN BEGIN
 		UrlPath = UrlPath + '&status='+sStatus

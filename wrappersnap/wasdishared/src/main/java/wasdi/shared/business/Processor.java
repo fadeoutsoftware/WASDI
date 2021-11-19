@@ -5,6 +5,7 @@ import java.util.ArrayList;
 /**
  * Processor Entity
  * Represents a User Processor uploaded to WASDI 
+ * 
  * @author p.campanella
  *
  */

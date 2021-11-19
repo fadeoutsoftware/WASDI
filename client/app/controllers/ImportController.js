@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
+                              oProcessWorkspaceService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
         // Service references
         this.m_oScope = $scope;
         this.m_oConstantsService = oConstantsService;
@@ -22,7 +22,7 @@ var ImportController = (function() {
         this.m_oFileBufferService = oFileBufferService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oProductService = oProductService;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oWorkspaceService=oWorkspaceService;
         this.m_oResultsOfSearchService = oResultsOfSearchService;
         this.m_oModalService = oModalService;
@@ -162,7 +162,7 @@ var ImportController = (function() {
         else
         {
             /*Load elements by Service if there was a previous search i load*/
-            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessWorkspaceService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             var oWorkspaceByResultService = this.m_oResultsOfSearchService.getActiveWorkspace();
             //if the workspace id saved in ResultService but the id it's differet to actual workspace id clean ResultService
@@ -196,6 +196,8 @@ var ImportController = (function() {
 
             oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
             oController.m_oScope.$apply();
+            // selects the first mission (S1)
+            oController.updateMissionSelection(0);
         });
 
 
@@ -346,8 +348,18 @@ var ImportController = (function() {
 
     ImportController.prototype.toggleMissionSelection= function(mission, index, event)
     {
+
+        // Beforehand deselect all the missions -> the migrate this behaviour to tab selection (on active tabs)
+        let curMission = null;
+        for (var i = 0;i< this.m_aoMissions.length;i++){ 
+            curMission = this.m_aoMissions[i];
+            curMission.selected= false;
+        }
         mission.selected = !mission.selected;
         this.updateMissionSelection(index);
+        // also do the selection of the tab 
+        this.m_activeMissionTab = index;
+        
 
         // prevent tab selection when user click on the checkbox
         event.stopPropagation();
@@ -539,10 +551,9 @@ var ImportController = (function() {
         return true;
     };
 
-    ImportController.prototype.searchAndCount = function(oProvider, oThat)
+    ImportController.prototype.searchAndCount = function(oProvider)
     {
         var oController = this;
-        if(utilsIsObjectNullOrUndefined(oThat) === false) oController = oThat;
 
         if(oController.thereIsAtLeastOneProvider() === false) return false;
         if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
@@ -1572,7 +1583,7 @@ var ImportController = (function() {
                     /*Start Rabbit WebStomp*/
                     // oController.m_oRabbitStompService.initWebStomp("ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
-                    if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
             }
         },function (data,status) {
@@ -1642,7 +1653,7 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
         // if(oLayer.isDisabledToDoDownload)
-        if(this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()) === true)
+        if(this.m_oProcessWorkspaceService.checkIfFileIsDownloading(oLayer,this.m_oProcessWorkspaceService.getTypeOfProcessProductDownload()) === true)
         {
             bReturnValue = true;
             oLayer.isDisabledToDoDownload = false;
@@ -2487,7 +2498,7 @@ var ImportController = (function() {
         'FileBufferService',
         'RabbitStompService',
         'ProductService',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'WorkspaceService',
         'ResultsOfSearchService',
         'ModalService',

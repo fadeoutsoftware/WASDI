@@ -17,10 +17,10 @@
         <div class="col-v4">
             <!--Editor json-->
             <div class="jsonView" ng-show="m_oController.m_bIsJsonEditModeActive">
-                <json child="m_oController.myJson" default-collapsed="false" type="object"></json>
+                <json child="m_oController.m_sJson" default-collapsed="false" type="object"></json>
             </div>
             <div class="jsonContainer" ng-show="m_oController.m_bIsJsonEditModeActive">
-                {{m_oController.myJson}}
+                {{m_oController.m_sJson}}
             </div>
 
             <textarea class="form-control h-100" rows="5" id="" style="font-family:'Courier New',sans-serif;font-size: 16px;" ng-model="m_oController.m_sMyJsonString" ng-hide="m_oController.m_bIsJsonEditModeActive"></textarea>

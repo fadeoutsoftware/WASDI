@@ -5,11 +5,12 @@ angular.module('wasdi.DropdownMenuDirective', [])
             restrict : 'EAC',
             templateUrl:"directives/DropDownMenu/DropDownMenuView.html",
             scope :{
-                onClickFunction:"&",
+
                 selectedValue:"=",
                 listOfValues:"=",
                 enableSearchFilter:"=",
-                dropdownName:"="
+                dropdownName:"=",
+                onClickFunction:"&"
 
 
                 // * Text binding ('@' or '@?') *

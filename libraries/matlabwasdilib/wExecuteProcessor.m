@@ -1,24 +1,25 @@
-function sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
-% Execute a WASDI processor
-% Syntax
-% sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%	 sProcessorName: Processor Name
-%	 asParams: Processor parameters, as a key/value dictionary
+function sProcessId=wExecuteProcessor(Wasdi, sProcessorName, asParams)
+%Execute a WASDI processor asynchronously
+%Syntax
+%sStatus=wExecuteProcessor(Wasdi, sProcessorName, asParams)
 %
-% OUTPUT
-%   sStatus: Status of the process
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sProcessorName: Processor Name
+%:param asParams: Processor parameters, as a key/value dictionary
 %
+%:Returns:
+%  :sProcessId: process workspace id. It can be used as input to the wWaitProcess method or wGetProcessStatus methods to check the execution.
+
 
   if exist("Wasdi") < 1 
     disp('Wasdi variable does not existst')
     return
    end
    
-   %sStatus = Wasdi.subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE);
+   sJsonParams = wUrlEncode(savejson('',asParams,'Compact',1))
    
-   disp(['TODO: ' ]);
+   sProcessId = char(Wasdi.executeProcessor(sProcessorName, sJsonParams));
+   
+   disp(['sProcessId: ', sProcessId ]);
    
 end

@@ -4,7 +4,7 @@
 
 var WorkspaceController = (function () {
     function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
-                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oSatelliteService,
+                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oOpportunitySearchService,
                                  $interval) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
@@ -26,7 +26,7 @@ var WorkspaceController = (function () {
         this.m_oRootScope = $rootScope;
         this.m_oSelectedProduct = null;
         this.m_oWorkspaceSelected = null;
-        this.m_oSatelliteService = oSatelliteService;
+        this.m_oOpportunitySearchService = oOpportunitySearchService;
         this.m_aoSatellitePositions = [];
         this.m_aoSateliteInputTraks = [];
         this.m_oFakePosition = null;
@@ -42,7 +42,7 @@ var WorkspaceController = (function () {
         this.sort = {
             column: '',
             descending: false
-        };
+        };        
 
         if(utilsIsObjectNullOrUndefined(oConstantsService.getUser())){
             this.m_oState.go("home");
@@ -199,7 +199,6 @@ var WorkspaceController = (function () {
         if (this.m_bOpeningWorkspace) return;
 
         this.m_bLoadingWSFiles = true;
-        //this.m_oWorkspaceSelected = null;
 
         if (utilsIsObjectNullOrUndefined(oWorkspace)) return false;
         if (utilsIsStrNullOrEmpty(oWorkspace.workspaceId)) return false;
@@ -217,12 +216,9 @@ var WorkspaceController = (function () {
 
 
         var oController = this;
-
         this.m_bIsVisibleFiles = true;
         this.m_bIsOpenInfo = false;
-
         var oWorkspaceId = oWorkspace.workspaceId;
-
         this.m_bIsVisibleFiles = true;
 
 
@@ -478,9 +474,9 @@ var WorkspaceController = (function () {
             var oActualSat = this.m_aoSateliteInputTraks[iSat];
 
 
-            this.m_oSatelliteService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
+            this.m_oOpportunitySearchService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
 
-                if (utilsIsObjectNullOrUndefined(response) === false && response.data.code != null) {
+                if (utilsIsObjectNullOrUndefined(response) === false) {
                     var oData = response.data;
 
                     if (utilsIsObjectNullOrUndefined(oData) === false) {
@@ -552,8 +548,8 @@ var WorkspaceController = (function () {
 
         var oController = this;
 
-        this.m_oSatelliteService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
-            if (utilsIsObjectNullOrUndefined(response) === false && reponse.data.length > 0) {
+        this.m_oOpportunitySearchService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
+            if (utilsIsObjectNullOrUndefined(response) === false) {
                 var oData = response.data;
                 if (utilsIsObjectNullOrUndefined(oData) === false) {
                     for (var iSatellites = 0; iSatellites < oData.length; iSatellites++) {
@@ -571,7 +567,7 @@ var WorkspaceController = (function () {
                 }
             }
         }, function errorCallback(response) {
-        }).catch(angular.noop);
+        });
 
         return true;
     };
@@ -601,7 +597,7 @@ var WorkspaceController = (function () {
         }
 
     };
-
+    
     WorkspaceController.prototype.changeSorting = function(column) {
 
         var sort = this.sort;
@@ -612,22 +608,22 @@ var WorkspaceController = (function () {
             sort.column = column;
         }
     };
-
+        
     WorkspaceController.prototype.selectedCls = function(column) {
         return column == this.sort.column && 'sort-' + this.sort.descending;
-    };
+    };    
 
 
     WorkspaceController.prototype.showArrow = function(sColumn, bDescending) {
-
+        
         if (sColumn == this.sort.column) {
             if (bDescending == this.sort.descending) {
                 return true;
             }
         }
-
+        
         return false;
-    };
+    };    
 
 
     WorkspaceController.$inject = [
@@ -641,9 +637,8 @@ var WorkspaceController = (function () {
         'RabbitStompService',
         'GlobeService',
         '$rootScope',
-        'SatelliteService',
+        'OpportunitySearchService',
         '$interval'
     ];
     return WorkspaceController;
 })();
-window.WorkspaceController =WorkspaceController;

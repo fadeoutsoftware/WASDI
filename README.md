@@ -3,7 +3,7 @@
 Web Advanced Space Developer Interface
 
 ----
-
+[![Documentation Status](https://readthedocs.org/projects/wasdi/badge/?version=latest)](https://wasdi.readthedocs.io/en/latest/?badge=latest)
 ## Develop
 
 ### Prerequisites

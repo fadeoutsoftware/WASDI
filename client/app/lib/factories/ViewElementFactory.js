@@ -26,6 +26,17 @@ function ViewElementFactory() {
                 oViewElement.m_sText = oControl.default;
             }
         }
+        else if (oControl.type === "numeric") {
+
+            // Text box
+            oViewElement = new NumericBox();
+
+            // See if we have a default
+            if (oControl.default) {
+                oViewElement.m_sValue = oControl.default;
+                oViewElement.m_sText = oControl.default;
+            }
+        }
         else if (oControl.type === "dropdown") {
             // Drop Down
             oViewElement = new DropDown();
@@ -292,6 +303,31 @@ let TextBox = function () {
         return this.m_sText;
     }
 };
+/**
+ * Text Box Control Class
+ * @constructor
+ */
+ let NumericBox = function () {
+    this.m_sValue = 0;
+    this.m_sText = this.m_sValue.toString();
+
+    /**
+     * Get the value of the numericbox
+     * @returns {string} Value in the numericbox
+     */
+    this.getValue = function () {
+        return this.m_sValue;
+    }
+
+    /**
+     * Get the string from the numericbox
+     * @returns {string} String in the numericbox
+     */
+    this.getStringValue = function () {
+        return this.m_sValue.toString();
+    }
+};
+
 
 /**
  * Hidden Control Class

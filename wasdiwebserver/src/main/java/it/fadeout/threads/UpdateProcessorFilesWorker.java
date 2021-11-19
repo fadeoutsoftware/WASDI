@@ -9,14 +9,42 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Thread that calls all the computing nodes to ask to update the files of a processor
+ * @author p.campanella
+ *
+ */
 public class UpdateProcessorFilesWorker extends Thread {
 	
+	/**
+	 * List of nodes to update
+	 */
 	List<Node> m_aoNodes;
+	/**
+	 * Path of the file with the users' update
+	 */
 	String m_sFilePath;
+	/**
+	 * User session
+	 */
 	String m_sSessionId;
+	/**
+	 * Workspace id
+	 */
 	String m_sWorkspaceId;
+	/**
+	 * Processor Id
+	 */
 	String m_sProcessorId;
 	
+	/**
+	 * Initialized the thread member variables
+	 * @param aoNodes List of nodes
+	 * @param sFilePath Path of the file with the users' update
+	 * @param sSessionId Session Id
+	 * @param sWorkspaceId Workspace Id
+	 * @param sProcessorId Processor Id
+	 */
 	public void init(List<Node> aoNodes, String sFilePath, String sSessionId, String sWorkspaceId, String sProcessorId) {
 		m_aoNodes = aoNodes;
 		m_sFilePath = sFilePath;

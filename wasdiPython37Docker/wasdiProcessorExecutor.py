@@ -10,7 +10,6 @@ import sys
 import urllib.parse
 import json
 import traceback
-import myProcessor
 
 
 def executeProcessor(parameters, processId): 
@@ -19,64 +18,64 @@ def executeProcessor(parameters, processId):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     os.chdir(dir_path)
     
-    print("wasdi.executeProcessor: processor folder set")
+    print("[" + processId+ "] wasdi.executeProcessor: processor folder set")
     
     
     #Try to get the user
     try:
         sUser = parameters['user']
         wasdi.setUser(sUser)
-        print("wasdi.executeProcessor User available in params. Got " + sUser)
+        print("[" + processId+ "] wasdi.executeProcessor User available in params. Got " + sUser)
     except:
-        print('wasdi.executeProcessor user not available in parameters.')
+        print("[" + processId+ "] wasdi.executeProcessor user not available in parameters.")
         
     #Try to get the password
     try:
         sPassword = parameters['password']
         wasdi.setPassword(sPassword)
-        print("wasdi.executeProcessor Pw available in params")
+        print("[" + processId+ "] wasdi.executeProcessor Pw available in params")
     except:
-        print('wasdi.executeProcessor password not available in parameters.')
+        print("[" + processId+ "] wasdi.executeProcessor password not available in parameters.")
         
     #Try to get the session id
     try:
         sSessionId = parameters['sessionid']
         wasdi.setSessionId(sSessionId)
-        print("wasdi.executeProcessor Session available in params " + sSessionId)
+        print("[" + processId+ "] wasdi.executeProcessor Session available in params " + sSessionId)
     except:
-        print('wasdi.executeProcessor Session not available in parameters.')        
+        print("[" + processId+ "] wasdi.executeProcessor Session not available in parameters.")        
     
     #Try to set the proc id
     try:
         wasdi.setProcId(processId)
         print("wasdi.executeProcessor set Proc Id " + processId)
     except:
-        print('wasdi.executeProcessor Proc Id not available')
+        print("[" + processId+ "] wasdi.executeProcessor Proc Id not available")
         
     #Try to get the workspace id
     try:
         sWorkspaceId = parameters['workspaceid']
         wasdi.openWorkspaceById(sWorkspaceId)
-        print("wasdi.executeProcessor Workspace Id available in params " + sWorkspaceId)
+        print("[" + processId+ "] wasdi.executeProcessor Workspace Id available in params " + sWorkspaceId)
     except:
-        print('wasdi.executeProcessor Workspace Id not available in parameters.')
+        print("[" + processId+ "] wasdi.executeProcessor Workspace Id not available in parameters.")
     
     
     #Try to get the base url
     try:
         sBaseUrl = parameters['baseurl']
         wasdi.setBaseUrl(sBaseUrl)
-        print("wasdi.executeProcessor Base Url in params " + sBaseUrl)
+        print("[" + processId+ "] wasdi.executeProcessor Base Url in params " + sBaseUrl)
     except:
-        print('wasdi.executeProcessor Using default base url')                        
+        print("[" + processId+ "] wasdi.executeProcessor Using default base url")                        
     
     #Init Wasdi
-    print("wasdi.executeProcessor: init waspy lib")
+    print("[" + processId+ "] wasdi.executeProcessor: init waspy lib")
     wasdi.setIsOnServer(True)
     wasdi.setDownloadActive(False)
     
     if wasdi.init() == False:
-        print("wasdi.executeProcessor: init FAILED")
+        print("[" + processId+ "] wasdi.executeProcessor: init FAILED")
         
     sForceStatus = 'ERROR'
     
@@ -85,6 +84,7 @@ def executeProcessor(parameters, processId):
     
     #Run the processor
     try:
+        import myProcessor        
         wasdi.wasdiLog("wasdi.executeProcessor RUN " + processId)
         myProcessor.run()
         wasdi.wasdiLog("wasdi.executeProcessor Done")

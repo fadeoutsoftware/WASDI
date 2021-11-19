@@ -10,10 +10,9 @@ import javax.inject.Singleton;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
-import it.fadeout.rest.resources.AuthResource;
-import it.fadeout.services.KeycloakService;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.services.ConfigProvidersCatalog;
+import it.fadeout.services.KeycloakService;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.data.NodeRepository;
 

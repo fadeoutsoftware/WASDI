@@ -1,11 +1,16 @@
 package wasdi.processors;
 
-import java.util.ArrayList;
-
 public class UbuntuPython37ProcessorEngine extends DockerProcessorEngine {
+	
+	public UbuntuPython37ProcessorEngine() {
+		super();
+		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
+		m_sDockerTemplatePath += "python37";
+		
+	}
 
-	public UbuntuPython37ProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath)  {
-		super(sWorkingRootPath,sDockerTemplatePath);
+	public UbuntuPython37ProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
+		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 
 		m_sDockerTemplatePath = sDockerTemplatePath;		
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
@@ -13,18 +18,4 @@ public class UbuntuPython37ProcessorEngine extends DockerProcessorEngine {
 		
 	}
 
-	@Override
-	protected void handleRunCommand(String sCommand, ArrayList<String> asArgs) {
-		
-	}
-
-	@Override
-	protected void handleBuildCommand(String sCommand, ArrayList<String> asArgs) {
-		
-	}
-
-	@Override
-	protected void handleUnzippedProcessor(String sProcessorFolder) {
-		
-	}
 }

@@ -17,6 +17,15 @@ var PayloadDialogController = (function () {
         }
         else{
             this.m_sPayloadString = oExtras.process.payload;
+
+            try {
+                var oParsed = JSON.parse(this.m_sPayloadString);
+                sPrettyPrint = JSON.stringify(oParsed, null, 2);
+                this.m_sPayloadString = sPrettyPrint;
+            }
+            catch (oError) {
+
+            }            
         }
     } // constructor
 

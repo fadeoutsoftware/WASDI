@@ -3,8 +3,8 @@ Waspy - WASDI Python Library
 
 Created on 11 Jun 2018
 
-@author: p.campanella - FadeOut Software
-@author: c.nattero - FadeOut Software
+@author: p.campanella - FadeOut Software - WASDI Sarl
+@author: c.nattero - FadeOut Software - WASDI Sarl
 """
 import setuptools
 import io
@@ -15,7 +15,7 @@ with io.open("README.md", "r", encoding="utf8") as oFh:
 
 setuptools.setup(
     name="wasdi",
-    version="0.6.2",
+    version="0.6.5",
     author="FadeOut Software",
     author_email="info@fadeout.biz",
     description="The Wasdi Python library",

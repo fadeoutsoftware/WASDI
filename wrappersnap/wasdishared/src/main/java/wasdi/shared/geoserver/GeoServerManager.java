@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 
+import org.apache.log4j.Logger;
+
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
+import it.geosolutions.geoserver.rest.HTTPUtils;
 import it.geosolutions.geoserver.rest.decoder.RESTBoundingBox;
 import it.geosolutions.geoserver.rest.decoder.RESTLayer;
 import it.geosolutions.geoserver.rest.decoder.RESTLayer.Type;
@@ -15,6 +18,7 @@ import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -41,6 +45,10 @@ public class GeoServerManager {
     	if (!m_oGsReader.existsWorkspace(m_sWorkspace)) {
     		m_oGsPublisher.createWorkspace(m_sWorkspace);
     	}
+    }
+    
+    public GeoServerManager() throws MalformedURLException {
+    	this(WasdiConfig.Current.geoserver.address, WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
     }
     
     public String getLayerBBox(String sLayerId) {
@@ -125,29 +133,31 @@ public class GeoServerManager {
     }
 
 
-    public boolean publishStandardGeoTiff(String sStoreName, File oGeotiffFile, String sEpsg, String sStyle)
+    public boolean publishStandardGeoTiff(String sStoreName, File oGeotiffFile, String sEpsg, String sStyle, Logger oLogger)
             throws FileNotFoundException {
-
+    	
     	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
     	if (oLayer != null) removeLayer(sStoreName);
 
     	if (sStyle == null || sStyle.isEmpty()) sStyle = "raster";
     	    	
     	if (sStoreName == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: Store Name is null");
+    		oLogger.error("GeoServerManager.publishStandardGeoTiff: Store Name is null");
     	}
     	
     	if (oGeotiffFile == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
+    		oLogger.error("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
     	}
         
     	if (sEpsg == null) {
-    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
+    		oLogger.error("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
     	}
-    	    	
-        boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,sStyle);
-        
-        if (bRes && m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName) && m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName)) {
+    	
+        boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED, sStyle);
+        boolean bExistsCoverageStore = m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName);
+        boolean bExistsCoverage= m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName);
+                
+        if (bRes && bExistsCoverageStore && bExistsCoverage) {
         	GSCoverageEncoder oCe = new GSCoverageEncoder();
             oCe.setEnabled(true); //abilito il coverage
             oCe.setSRS(sEpsg);
@@ -157,9 +167,29 @@ public class GeoServerManager {
 		return bRes;
     }
     
+    public boolean publishStyle(String sStyleFile) {
+    	File oFile = new File(sStyleFile);
+    	
+    	if (oFile.exists()) {
+    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+    		return m_oGsPublisher.publishStyle(oFile, sStyleName);
+    	}
+    	else {
+    		return false;
+    	}
+    }
     
-    
-    
+    public boolean styleExists(String sStyle) {
+    	String sStyles = HTTPUtils.get(m_sRestUrl+"/rest/styles", m_sRestUser, m_sRestPassword);
+    	
+    	if (Utils.isNullOrEmpty(sStyles) == false) {
+    		String sResearchKey = "\"name\":\"" + sStyle + "\"";
+    		
+    		if (sStyles.contains(sResearchKey)) return true;
+    	}
+    	
+    	return false;
+    }
     
 	/**
 	 * aggiunge un layer da uno shapefile

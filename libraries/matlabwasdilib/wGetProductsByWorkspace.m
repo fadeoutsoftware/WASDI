@@ -1,15 +1,14 @@
 function asProducts=wGetProductsByWorkspace(Wasdi, sWorkspaceName)
-% Get the List of Products in a Workspace 
-% Syntax
-% asProducts=wGetProductsByWorkspace(Wasdi, sWorkspaceName);
-% 
-% INPUT
-%    Wasdi: Wasdi object created after the wasdilib call
-%    sWorkspaceName: name of the workspace
-%  
+%Get the List of Products in a Workspace
+%Syntax
+%asProducts=wGetProductsByWorkspace(Wasdi, sWorkspaceName);
 %
-% OUTPUT
-%   asProducts: array of strings that are the names of the products
+%:param Wasdi: Wasdi object created after the wasdilib call
+%:param sWorkspaceName: name of the workspace
+%
+%
+%:Returns:
+%  :asProducts: array of strings that are the names of the products
 
 
   if exist("Wasdi") < 1 
@@ -24,7 +23,7 @@ function asProducts=wGetProductsByWorkspace(Wasdi, sWorkspaceName)
    
    disp(['products count ' sprintf("%d",iTot )]);
 
-  % Per tutte le centraline trovate
+  %Per tutte le centraline trovate
   for iWs = 0:iTot-1
     asProducts{iWs+1} = aoProducts.get(iWs);
   end

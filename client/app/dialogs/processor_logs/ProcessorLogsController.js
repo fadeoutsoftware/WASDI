@@ -1,7 +1,7 @@
  var ProcessorLogsController = (function() {
 
     function ProcessorLogsController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,
-                                              oProcessorService,$interval, oProcessesLaunchedService) {
+                                              oProcessorService,$interval, oProcessWorkspaceService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
@@ -9,9 +9,10 @@
         this.m_oConstantsService = oConstantsService;
         this.m_oProcess = oExtras.process;
         this.m_oProcessorService = oProcessorService;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oInterval = $interval;
         this.m_aoLogs = [];
+        this.m_aoAllLogs = [];
         this.m_sSearch="";
         this.m_bSortReverse = true;
         this.m_sSortByColum = "Date";
@@ -30,9 +31,6 @@
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
-        // Get the log count
-        this.getLogsCount(this.m_oProcess.processObjId,this.getCountLogsANDLogsCallback);
-
         // Start the refresh timer
         this.m_oTick = this.startTick(this.m_oProcess.status);
 
@@ -46,6 +44,7 @@
 
             if(utilsIsObjectNullOrUndefined(newValue) === false && newValue >= 0)
             {
+                // Get the log count
                 oController.getLogsCount(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
             }
         });
@@ -207,7 +206,7 @@
                  oController.m_iNumberOfLogs = data;
 
                  var iFirstRow = oController.m_iNumberOfLogs - (oController.m_iCurrentPage * oController.m_iNumberOfLogsPerPage);
-                 var iLastRow = iFirstRow + oController.m_iNumberOfLogsPerPage;
+                 var iLastRow = iFirstRow + oController.m_iNumberOfLogsPerPage - 1;
                  if(iFirstRow < 0)
                  {
                      iFirstRow = 0;
@@ -237,7 +236,7 @@
              utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PROCESSOR LOGS');
          });
 
-         this.m_oProcessesLaunchedService.getProcessWorkspaceById(oProcessObjId).then(function (data, status) {
+         this.m_oProcessWorkspaceService.getProcessWorkspaceById(oProcessObjId).then(function (data, status) {
             oController.m_oProcess = data.data;
         },function (data,status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR REFRESHING PROCESSOR STATUS');
@@ -279,9 +278,68 @@
          return true;
      };
 
-     ProcessorLogsController.prototype.getOperationDescription = function() {
+    ProcessorLogsController.prototype.getOperationDescription = function() {
         return utilsConvertOperationToDescription(this.m_oProcess);
     }
+
+    ProcessorLogsController.prototype.downloadLogFile = function () {
+
+        var oController = this;
+
+        this.m_oProcessorService.getPaginatedLogs(this.m_oProcess.processObjId,null,null).then(function (data, status) {
+            if (data.data != null)
+            {
+                if (data.data != undefined)
+                {
+                    oController.m_aoAllLogs = data.data;
+
+                    let file = oController.generateLogFile();
+
+                    var oLink=document.createElement('a');
+                    oLink.href = file;
+                    oLink.download = "processorLog";
+                    oLink.click();
+                }
+            }
+        },function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN DOWNLOADING LOGS');
+        });
+
+    };
+
+    /**
+     *
+     */
+     ProcessorLogsController.prototype.generateLogFile = function () {
+        var sText = this.makeStringLogFile();
+        var oFile = this.generateFile(sText);
+
+        return oFile;
+    };
+
+    ProcessorLogsController.prototype.generateFile = function (sText) {
+        var textFile = null;
+        var sType = 'text/plain';
+        textFile = utilsMakeFile(sText, textFile, sType);
+        return textFile;
+    };
+ 
+    ProcessorLogsController.prototype.makeStringLogFile = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_aoAllLogs) === true)
+            return null;
+
+       var iNumberOfProcessesLogs = this.m_aoAllLogs.length;
+       var sText = "";
+       for (var i = 0; i < iNumberOfProcessesLogs; i++) {
+           var sLogDate = this.m_aoAllLogs[i].logDate;
+           var sLogRow = this.m_aoAllLogs[i].logRow;
+
+           sText += sLogDate + "; " + sLogRow + "\r\n";
+       }
+
+       return sText;
+    };
 
     ProcessorLogsController.$inject = [
         '$scope',
@@ -292,8 +350,7 @@
         'CatalogService',
         'ProcessorService',
         '$interval',
-        'ProcessesLaunchedService'
+        'ProcessWorkspaceService'
     ];
     return ProcessorLogsController;
 })();
-window.ProcessorLogsController = ProcessorLogsController;

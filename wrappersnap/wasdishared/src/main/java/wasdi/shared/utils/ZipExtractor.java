@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
@@ -17,6 +18,7 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
@@ -92,7 +94,7 @@ public class ZipExtractor {
 		
 		Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
 		if (oPath.toFile().mkdir()) {
-			s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created");
+			s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempPath);
 		} else {
 			throw new IOException("Can't create temporary dir " + sTempPath);
 		}
@@ -101,68 +103,74 @@ public class ZipExtractor {
 			
 			while ((oEntry = oZis.getNextEntry()) != null) {
 				
-				s_oLogger.info(m_sLoggerPrefix + "Extracting: " + oEntry);
-				int iCount;
-				
-				byte[] ayData = new byte[BUFFER];
-				// Write the files to the disk, but ensure that the filename is valid,
-				// and that the file is not insanely big
-				String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
-				
-				// Random used to mitigate attacks
-				if (oEntry.isDirectory()) {
-					s_oLogger.info(m_sLoggerPrefix + "unzip: Creating directory " + sName);
-					if (new File(sName).mkdir()) {
-						s_oLogger.info(m_sLoggerPrefix + "unzip: Directory "+sName+" created");
+				try {
+					s_oLogger.info(m_sLoggerPrefix + "Extracting: " + oEntry);
+					int iCount;
+					
+					byte[] ayData = new byte[BUFFER];
+					// Write the files to the disk, but ensure that the filename is valid,
+					// and that the file is not insanely big
+					String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
+					
+					// Random used to mitigate attacks
+					if (!oEntry.isDirectory()) {
+						File oFile = new File(sName);
+						if (!oFile.getParentFile().exists()) {
+							s_oLogger.info(m_sLoggerPrefix + "unzip: Creating parent directory " + oFile.getParent());
+							oFile.getParentFile().mkdirs();
+						}
 					}
-					iEntries++; // count also a directory creation as an entry
-					continue;
+					else {
+						new File(sName).mkdirs();
+						continue;
+					}
+					
+					FileOutputStream oFos = new FileOutputStream(sName);
+					
+					try (BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
+						
+						while ( (lTotal + BUFFER <= m_lToobigtotal || m_lToobigtotal==0) && (lSingle + BUFFER <= m_lToobigsingle || m_lToobigsingle == 0) && (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
+							oDest.write(ayData, 0, iCount);
+							lTotal += iCount;
+							lSingle += iCount;
+						}
+						
+						oDest.flush();
+						oZis.closeEntry();
+						iEntries++;
+						
+						if ( (lSingle + BUFFER > m_lToobigsingle) && (m_lToobigsingle>0)) {
+							cleanTempDir(sTempPath, sTemp);
+							s_oLogger.error(m_sLoggerPrefix + "unzip: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
+							throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
+						}
+						if ( (lTotal + BUFFER > m_lToobigtotal) && (m_lToobigtotal>0)) {
+							cleanTempDir(sTempPath, sTemp);
+							s_oLogger.error(m_sLoggerPrefix + "unzip: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
+							throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
+						}
+						if ( (iEntries > m_lToomany) && (m_lToomany>0)) {
+							cleanTempDir(sTempPath, sTemp);
+							s_oLogger.error(m_sLoggerPrefix + "unzip: Too many files inside the archive. The limit is "+m_lToomany);
+							throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
+						}
+						
+						// resets single file byte-counter
+						lSingle = 0; 
+					}					
 				}
-				else {
-					File oFile = new File(sName);
-					if (!oFile.getParentFile().exists()) {
-						s_oLogger.info(m_sLoggerPrefix + "unzip: Creating directory " + oFile.getParent());
-						oFile.getParentFile().mkdirs();
-					}
+				catch (Exception e) {
+					s_oLogger.error(m_sLoggerPrefix + "unzip: error extracting entry: "+ e.toString());
+					throw e;
 				}
 				
-				FileOutputStream oFos = new FileOutputStream(sName);
-				
-				try (BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
-					
-					//while (lTotal + BUFFER <= m_lToobigtotal && lSingle + BUFFER <= m_lToobigsingle && (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
-					while ( (lTotal + BUFFER <= m_lToobigtotal || m_lToobigtotal==0) && (lSingle + BUFFER <= m_lToobigsingle || m_lToobigsingle == 0) && (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
-						oDest.write(ayData, 0, iCount);
-						lTotal += iCount;
-						lSingle += iCount;
-					}
-					
-					oDest.flush();
-					oZis.closeEntry();
-					iEntries++;
-					
-					if ( (lSingle + BUFFER > m_lToobigsingle) && (m_lToobigsingle>0)) {
-						cleanTempDir(sTempPath, sTemp);
-						s_oLogger.error(m_sLoggerPrefix + "unzip: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
-						throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
-					}
-					if ( (lTotal + BUFFER > m_lToobigtotal) && (m_lToobigtotal>0)) {
-						cleanTempDir(sTempPath, sTemp);
-						s_oLogger.error(m_sLoggerPrefix + "unzip: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
-						throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
-					}
-					if ( (iEntries > m_lToomany) && (m_lToomany>0)) {
-						cleanTempDir(sTempPath, sTemp);
-						s_oLogger.error(m_sLoggerPrefix + "unzip: Too many files inside the archive. The limit is "+m_lToomany);
-						throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
-					}
-					
-					// resets single file byte-counter
-					lSingle = 0; 
-				}
 			}
-			/// IF everything went well cp temp content to original folder (overwrite it's fine) and delete temp dir
-			cleanTempDir(sTempPath, sTemp);
+			
+			// IF everything went well cp temp content to original folder (overwrite it's fine) and delete temp dir
+			s_oLogger.info(m_sLoggerPrefix + "Copy and clean tmp dir.");
+			if (!cleanTempDir(sTempPath, sTemp)) {
+				s_oLogger.error(m_sLoggerPrefix + "clean temp dir returned false...");
+			}
 		}
 		return sTempPath;
 	}
@@ -176,7 +184,7 @@ public class ZipExtractor {
 	/**
 	 * Instantiates a ZipExtractor with default parameters and initialize the logger
 	 * prefix
-	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
+	 * @param sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
 	public ZipExtractor(String sLoggerPrefix) {
 		if(!Utils.isNullOrEmpty(sLoggerPrefix)) {
@@ -190,7 +198,7 @@ public class ZipExtractor {
 	 * @param lToobigtotal  the total maximum size allowed for extraction
 	 * @param lToobigsingle the maximum single size for each file
 	 * @param lToomany      the maximum number of files allowed to be extracted
-	 * @param String sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
+	 * @param sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
 	public ZipExtractor(long lToobigtotal, long lToobigsingle, int lToomany, String sLoggerPrefix) {
 		this.m_lToobigtotal = lToobigtotal;
@@ -251,18 +259,35 @@ public class ZipExtractor {
 	 * @return True if the operation is done without errors nor exceptions. False instead
 	 */
 	private boolean cleanTempDir(String sTempPath, String sTemp) {
-		File oDir = new File(sTempPath); // point one dir
+		
+		// point the temp dir
+		File oDir = new File(sTempPath); 
 
 		try (Stream<Path> aoPathStream = Files.walk(oDir.toPath())){
-			aoPathStream
-			.sorted(Comparator.naturalOrder()). // this make the dir before other files
-			map(Path::toFile).
-			forEach(oFile -> {
+			
+			// this make the dir before other files
+			aoPathStream.sorted(Comparator.naturalOrder()).map(Path::toFile).forEach(oFile -> {
 				try {
-					File oDest = new File(oFile.getCanonicalPath().replace(sTemp, "")); // removes the tmp-part from the destination files
-					if (oDest.isDirectory()) return; // checks the existence of the dir
+					// removes the tmp-part from the destination files
+					File oDest = new File(oFile.getCanonicalPath().replace(sTemp, ""));
+					// checks the existence of the dir
+					if (oFile.isDirectory()) {
+						oDest.mkdir();
+						return;
+					}
+					
+					if  (!oDest.getParentFile().exists()) {
+						oDest.mkdirs();
+					}
+					
 					Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException oE) {
+					try {
+						Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
+					}
+					catch (Exception e) {
+					}
+																													  
+				} catch (Exception oE) {
 					oE.printStackTrace();
 				}
 			});
@@ -277,6 +302,7 @@ public class ZipExtractor {
 			oE.printStackTrace();
 			return false;
 		}
+		
 		return true;
 
 	}
@@ -321,5 +347,32 @@ public class ZipExtractor {
 	public void setTOOMANY(int iTooMany) {
 		m_lToomany = iTooMany;
 	}
+
+
+	/**
+	 * Util method to zip a complete Path, traversing all the subdirectories, using java stream support
+	 * @param sourceDirPath The path to the directory that should be added
+	 * @param zipFilePath the destination Zip File path
+	 * @throws IOException
+	 */
+	public void zip(String sourceDirPath, String zipFilePath) throws IOException {
+		Path p = Files.createFile(Paths.get(zipFilePath));
+		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+			Path pp = Paths.get(sourceDirPath);
+			Files.walk(pp)
+					.filter(path -> !Files.isDirectory(path))
+					.forEach(path -> {
+						ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+						try {
+							zs.putNextEntry(zipEntry);
+							Files.copy(path, zs);
+							zs.closeEntry();
+						} catch (IOException e) {
+							s_oLogger.error(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
+						}
+					});
+		}
+	}
+
 
 }

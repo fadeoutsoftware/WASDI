@@ -1,0 +1,1 @@
+function wSetSessionId(Wasdi, sSessionId)%Set the session ID%Syntax%wSetSessionId(Wasdi, sSessionId)%%:param Wasdi: Wasdi object created after the wasdilib call%:param sSessionId: the session ID  if exist("Wasdi") < 1     disp('Wasdi variable does not existst')    return   end      Wasdi.setSessionId(sSessionId)   end

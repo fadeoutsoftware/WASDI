@@ -1,17 +1,14 @@
 package wasdi.shared.business;
 
 /**
- * Represent a row of the log of a custom processor
+ * Represent a row of the log of a custom processor.
+ * Each log has a rowNumber obtained with a Counter 
+ * that uses the ProcessWorspaceId as sequence.
+ * 
  * @author p.campanella
  *
  */
 public class ProcessorLog {
-	
-	/**
-	 * Mongo object id. Logs did not have an id. We can use 
-	 * this but it has to be tested before
-	 */
-	//ObjectId _id;
 	
 	/**
 	 * Log Date

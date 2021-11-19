@@ -14,7 +14,7 @@
     "LOGIN_LINK_REGISTER":"Register",
 
     "RECOVERY_EMAIL_BUTTON":"Send request",
-    "RECOVERY_EMAIL_TITLE":"Insert your email if you want to recover your password",
+    "RECOVERY_EMAIL_TITLE":"Please, insert your email and confirm.\n A message will be sent with further instructions to recover your account",
 
     "SIGN_IN_PLACEHOLDER_EMAIL":"Email Address",
     "SIGN_IN_PLACEHOLDER_PASSWORD":"Password",
@@ -299,7 +299,7 @@
     "DIALOG_WORKFLOW_MANAGER_TITLE":"Snap Workflows",
     "DIALOG_WORKFLOW_MANAGER_TABLE_NAME":"Name",
     "DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION":"Description",
-    "DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW":"Upload",
+    "DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW":"New Workflow",
     "DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW":"Execute",
     "DIALOG_WORKFLOW_MANAGER_TAB_BATCH_WORKFLOW":"Batch Processing",
     "DIALOG_WORKFLOW_MANAGER_MULTI_INPUT_WORKFLOW_HEADER_TABLE_NODE_NAME":"Node",
@@ -338,6 +338,7 @@
     "DIALOG_LIST_OF_WORKSPACES_HIDE_WORKFLOWS_BUTTON":"Hide workflows",
 
     "DIALOG_TITLE_WAPPS":"WASDI Apps",
+    "DIALOG_TITLE_WORKFLOWEDIT":"WORKFLOW Edit",
     "DIALOG_TITLE_PAYLOAD":"View Payload",
 
     "DIALOG_EDIT_USER":"Update user info",
@@ -412,5 +413,11 @@
     "DIALOG_PROCESSOR_TAB_SHARE": "Share",
     "DIALOG_PROCESSOR_TAB_UI": "UI",
 
-    "DIALOG_PAYLOAD_COPY": "Copy payload"
+    "DIALOG_WORKFLOW_TAB_BASE": "Workflow",
+    "DIALOG_WORKFLOW_TAB_SHARE": "Share",
+
+    "DIALOG_PAYLOAD_COPY": "Copy payload",
+
+    "DIALOG_WORKSPACE_DETAILS_APPLY" : "Apply",
+    "DIALOG_WORKSPACE_DETAILS_CLOSE": "Close"
 }

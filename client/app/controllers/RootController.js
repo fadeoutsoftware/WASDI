@@ -5,7 +5,7 @@ var RootController = (function() {
 
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
                             $timeout,oModalService,oRabbitStompService, $window) {
 
         this.m_oScope = $scope;
@@ -13,7 +13,7 @@ var RootController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oState=$state;
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
@@ -44,23 +44,8 @@ var RootController = (function() {
             else
             {
                 oController.m_isRabbitConnected = false;
-                if( connectionState == 2)
-                {
-                    if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
-                    {
-                        this.signalRabbitConnectionLost();
-                    }
-                }
             }
         };
-
-
-        this.signalRabbitConnectionLost = function()
-        {
-            var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
-            utilsVexCloseDialogAfter(5000, dialog);
-        };
-
 
         // Subscribe to 'rabbit service connection changes'
         var _this = this;
@@ -100,14 +85,14 @@ var RootController = (function() {
             }
         }
 
-        this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
+        this.m_aoProcessesRunning = this.m_oProcessWorkspaceService.getProcesses();
 
         /*when ProcessLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
         $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
             // you could inspect the data to see
             if(data == true)
             {
-                var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+                var aoProcessesRunning = $scope.m_oController.m_oProcessWorkspaceService.getProcesses();
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
                 // Set the number of running processes
@@ -303,7 +288,7 @@ var RootController = (function() {
     RootController.prototype.getSummary = function()
     {
         var oController = this;
-        this.m_oProcessesLaunchedService.getSummary()
+        this.m_oProcessWorkspaceService.getSummary()
             .then(function (data, status) {
                 if(utilsIsObjectNullOrUndefined(data.data) === true || data.data.BoolValue === false)
                 {
@@ -312,8 +297,8 @@ var RootController = (function() {
                 else
                 {
                     oController.m_oSummary = data.data;
-                    oController.m_iNumberOfProcesses = data.data.userProcessRunning + data.data.userDownloadRunning + data.data.userIDLRunning;
-                    oController.m_iWaitingProcesses = data.data.userProcessWaiting + data.data.userDownloadWaiting + data.data.userIDLWaiting;
+                    oController.m_iNumberOfProcesses = data.data.userProcessRunning;
+                    oController.m_iWaitingProcesses = data.data.userProcessWaiting;
                 }
 
             },(function (data,status) {
@@ -356,10 +341,7 @@ var RootController = (function() {
 
     RootController.prototype.isRabbitConnected = function()
     {
-        //console.debug("Rabbit is connected?", this.m_isRabbitConnected);
         return this.m_isRabbitConnected;
-        // return false;
-        // return true;
     }
 
     RootController.prototype.onClickProcess = function()
@@ -383,35 +365,6 @@ var RootController = (function() {
         {
         console.log("RootController - Exception " + e);
         }
-        //this.openLogoutModal();
-        /*this.m_oAuthService.logout()
-            .success(function (data, status) {
-                if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
-                {
-                    utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
-                    console.log("SERVER ERROR ON LOGOUT");
-                }
-
-                try
-                {
-                    _this.m_oConstantsService.setActiveWorkspace(null);
-                    _this.m_oConstantsService.logOut();
-                }catch(e)
-                {
-
-                }
-
-                //_this.closeLogoutModal();
-                _this.m_oState.go("home");
-            })
-            .error(function (data,status) {
-                utilsVexDialogAlertTop("ERROR IN LOGOUT");
-                _this.m_oConstantsService.logOut();
-                //_this.closeLogoutModal();
-                _this.m_oState.go("home");
-            });*/
-
-
     };
 
     RootController.prototype.getWorkspaceName = function()
@@ -503,19 +456,12 @@ var RootController = (function() {
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
     RootController.prototype.openEditorPage = function () {
-
-        //if(this.isWorkspacesPageOpen() === true) return false;
-
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         if(utilsIsObjectNullOrUndefined(oWorkspace.workspaceId)) return false;
         var oController = this;
         var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-    };
-
-    RootController.prototype.openCatalogPage = function()
-    {
-        this.m_oState.go("root.catalog", { });
+        //use workSpace when reload editor page
+        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });
     };
 
     RootController.prototype.openSearchorbit = function()
@@ -530,7 +476,6 @@ var RootController = (function() {
 
     RootController.prototype.openImportPage = function () {
         var oController = this;
-        // workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
         oController.m_oState.go("root.import", { });
     };
 
@@ -565,7 +510,6 @@ var RootController = (function() {
         var oController = this;
         // console.log("miao");
         this.m_oModalService.showModal({
-            // templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
             templateUrl: "dialogs/snake_dialog/SnakeDialogV2.html",
             controller: "SnakeController"
         }).then(function(modal) {
@@ -581,7 +525,7 @@ var RootController = (function() {
 
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
-        this.m_oProcessesLaunchedService.deleteProcess(oProcessInput);
+        this.m_oProcessWorkspaceService.deleteProcess(oProcessInput);
         return true;
     };
 
@@ -592,12 +536,16 @@ var RootController = (function() {
     RootController.prototype.openProcessLogsDialog = function()
     {
         var oController = this;
-        // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
         this.m_oModalService.showModal({
-            templateUrl: "dialogs/workspace_processes_list/WorkpsaceProcessesList.html",
+            templateUrl: "dialogs/workspace_processes_list/WorkspaceProcessesList.html",
             controller: "WorkspaceProcessesList"
         }).then(function(modal) {
-            modal.element.modal();
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+              });
+
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
             });
@@ -651,8 +599,6 @@ var RootController = (function() {
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
                 oController.m_oUser = oController.m_oConstantsService.getUser();
-                // if(result === 'delete')
-                //     oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
             });
         });
 
@@ -753,7 +699,7 @@ var RootController = (function() {
             oController.openProcessorLogsDialog(process);
             return true;
         }else{
-            console.error("Cannot find process ID " + processId + " in the processes list")
+        //    console.error("Cannot find process ID " + processId + " in the processes list") 
             return false;
         }
     };
@@ -763,7 +709,7 @@ var RootController = (function() {
         var oAudio = new Audio('assets/audio/R2D2a.wav');
         oAudio.play();
 
-        this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
+        this.m_oWindow.open('https://wasdi.readthedocs.io/en/latest/index.html', '_blank');
     }
 
     RootController.prototype.getOperationDescription = function(oOperation) {
@@ -776,7 +722,7 @@ var RootController = (function() {
         'ConstantsService',
         'AuthService',
         '$state',
-        'ProcessesLaunchedService',
+        'ProcessWorkspaceService',
         'WorkspaceService',
         '$timeout',
         'ModalService',

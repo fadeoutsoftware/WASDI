@@ -6,12 +6,13 @@
 
 var WorkFlowManagerController = (function () {
 
-    function WorkFlowManagerController($scope, oClose, oExtras, oSnapOperationService, oConstantsService, oHttp) {
+    function WorkFlowManagerController($scope, oClose, oExtras, oWorkflowService, oConstantsService, oHttp, oModalService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oWorkflowService = oWorkflowService;
+        this.m_oModalService = oModalService;
         this.m_oFile = null;
         this.m_aoProducts = this.m_oExtras.products;
 
@@ -59,14 +60,15 @@ var WorkFlowManagerController = (function () {
 
 
         $scope.close = function (result) {
-
-            oClose(result, 500); // close, but give 500ms for bootstrap to animate
+            // close, but give 500ms for bootstrap to animate
+            oClose(result, 500);
         };
 
         //Load workflows
         this.getWorkflowsByUser();
 
     }
+
 
     WorkFlowManagerController.prototype.selectedMultiInputWorkflow = function (oWorkflow) {
         this.m_oSelectedMultiInputWorkflow = oWorkflow;
@@ -77,17 +79,13 @@ var WorkFlowManagerController = (function () {
     WorkFlowManagerController.prototype.getWorkflowsByUser = function () {
         var oController = this;
         this.m_bIsLoadingWorkflows = true;
-        this.m_oSnapOperationService.getWorkflowsByUser().then(function (data) {
+        this.m_oWorkflowService.getWorkflowsByUser().then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.m_aoWorkflows = data.data;
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, DATA NOT AVAILABLE");
             }
 
-            //it changes the default tab, we can't visualize the 'WorkFlowTab1' because there aren't workflows
-            if ((utilsIsObjectNullOrUndefined(oController.m_aoWorkflows) === true) || (oController.m_aoWorkflows.length === 0)) {
-                oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
-            }
             oController.m_bIsLoadingWorkflows = false;
         },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW LIST");
@@ -110,11 +108,18 @@ var WorkFlowManagerController = (function () {
             if (utilsIsObjectNullOrUndefined(oProduct)) {
                 return false;
             }
-            //TODO REMOVE IT
-            // var sDestinationProductName = oProduct.name + "_workflow";
+
+            // Graph execution on back end request a list of files so, on the client side, for each file a list
+            // with a single element in it must be initialized
+
             this.m_oSelectedWorkflow.inputFileNames.push(oProduct.fileName);
+            let ao_ListSingleInputFile = [];
+            ao_ListSingleInputFile.push(this.m_oSelectedWorkflow.inputFileNames[iIndexSelectedProduct]);
+
             var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId, this.m_oSelectedWorkflow.name, this.m_oSelectedWorkflow.description,
-                this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames, this.m_oSelectedWorkflow.outputNodeNames,
+                this.m_oSelectedWorkflow.inputNodeNames,
+                ao_ListSingleInputFile, // pass the local list with a single element in the list
+                 this.m_oSelectedWorkflow.outputNodeNames,
                 this.m_oSelectedWorkflow.outputFileNames);
             if (utilsIsObjectNullOrUndefined(oSnapWorkflowViewModel) === false) {
                 this.executeGraphFromWorkflowId(this.m_sWorkspaceId, oSnapWorkflowViewModel);
@@ -168,9 +173,11 @@ var WorkFlowManagerController = (function () {
             utilsIsObjectNullOrUndefined(asInputFileNames)) {
             bReturnValue = false;
         }
+        /*this checks always fails on multiple files passed to the workflow on batch mode
+        Batch mode work only with single input nodes workflows
         if (asInputNodeNames.length !== asInputFileNames.length) {
             bReturnValue = false;
-        }
+        }*/
 
         return bReturnValue;
     };
@@ -202,7 +209,7 @@ var WorkFlowManagerController = (function () {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId, oObjectWorkFlow).then(function (data) {
+        this.m_oWorkflowService.executeGraphFromWorkflowId(sWorkspaceId, oObjectWorkFlow).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 oController.cleanAllExecuteWorkflowFields();
             } else {
@@ -232,7 +239,7 @@ var WorkFlowManagerController = (function () {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.deleteWorkflow(oWorkflow.workflowId).then(function (data) {
+        this.m_oWorkflowService.deleteWorkflow(oWorkflow.workflowId).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.getWorkflowsByUser();
             } else {
@@ -286,7 +293,7 @@ var WorkFlowManagerController = (function () {
         }
         this.isUploadingWorkflow = true;
         var oController = this;
-        this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId, sName, sDescription, oBody, bIsPublic).then(function (data) {
+        this.m_oWorkflowService.uploadByFile(this.m_sWorkspaceId, sName, sDescription, oBody, bIsPublic).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //Reload list o workFlows
                 oController.getWorkflowsByUser();
@@ -400,6 +407,26 @@ var WorkFlowManagerController = (function () {
         return true;
     };
 
+    WorkFlowManagerController.prototype.openEditWorkflowDialog = function (oWorkflow) {
+        var oController = this;
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/workflow_edit/WorkflowView.html",
+            controller: "WorkflowController",
+            inputs: {
+                extras: {
+                    workflow:oWorkflow
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult, iDelay) {
+                oController.m_sSelectedWorkflowTab="WorkFlowTab3";
+                oController.getWorkflowsByUser();
+            });
+        });
+    }
+
+
     WorkFlowManagerController.prototype.openDeleteWorkflowDialog = function (oWorkflow) {
         if (utilsIsObjectNullOrUndefined(oWorkflow) === true) {
             return false;
@@ -420,8 +447,7 @@ var WorkFlowManagerController = (function () {
             return false;
         }
 
-
-        this.m_oSnapOperationService.downloadWorkflow(oWorkflow.workflowId);
+        this.m_oWorkflowService.downloadWorkflow(oWorkflow.workflowId);
         return true;
     };
 
@@ -448,9 +474,11 @@ var WorkFlowManagerController = (function () {
         '$scope',
         'close',
         'extras',
-        'SnapOperationService',
+        'WorkflowService',
         'ConstantsService',
-        '$http'
+        '$http',
+        'ModalService',
+
     ];
     return WorkFlowManagerController;
 })();

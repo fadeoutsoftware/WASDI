@@ -4,13 +4,13 @@
 
 var MosaicController = (function() {
 
-    function MosaicController($scope, oClose,oExtras,oSnapOperationService,oConstantsService) {
+    function MosaicController($scope, oClose,oExtras,oProcessingService,oConstantsService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
-        this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oProcessingService = oProcessingService;
         this.m_oConstantsService = oConstantsService;
         this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProducts);
         this.m_asSelectedProducts = [];
@@ -96,7 +96,7 @@ var MosaicController = (function() {
 
         this.m_oMosaicViewModel.sources = asSourceFiles;
 
-        this.m_oSnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel)
+        this.m_oProcessingService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel)
             .then(function (data) {
             var oDialog = utilsVexDialogAlertBottomRightCorner("MOSAIC SCHEDULED<br>READY");
             utilsVexCloseDialogAfter(4000, oDialog);
@@ -108,7 +108,7 @@ var MosaicController = (function() {
         '$scope',
         'close',
         'extras',
-        'SnapOperationService',
+        'ProcessingService',
         'ConstantsService',
     ];
     return MosaicController;

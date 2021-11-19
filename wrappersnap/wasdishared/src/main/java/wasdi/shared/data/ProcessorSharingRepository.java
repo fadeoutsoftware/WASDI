@@ -1,12 +1,10 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -56,20 +54,9 @@ public class ProcessorSharingRepository  extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("ownerId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProcessorSharing oProcessorSharing = null;
-                    try {
-                        oProcessorSharing = s_oMapper.readValue(sJSON,ProcessorSharing.class);
-                        aoReturnList.add(oProcessorSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, ProcessorSharing.class);
+            
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -89,21 +76,9 @@ public class ProcessorSharingRepository  extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProcessorSharing oProcessorSharing = null;
-                    try {
-                        oProcessorSharing = s_oMapper.readValue(sJSON,ProcessorSharing.class);
-                        aoReturnList.add(oProcessorSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, ProcessorSharing.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -122,21 +97,9 @@ public class ProcessorSharingRepository  extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("processorId", sProcessorId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProcessorSharing oProcessorSharing = null;
-                    try {
-                        oProcessorSharing = s_oMapper.readValue(sJSON,ProcessorSharing.class);
-                        aoReturnList.add(oProcessorSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, ProcessorSharing.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -156,20 +119,8 @@ public class ProcessorSharingRepository  extends  MongoRepository {
         try {
         	
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.eq("userId", sUserId), Filters.eq("processorId", sProcessorId)));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProcessorSharing oProcessorSharing = null;
-                    try {
-                        oProcessorSharing = s_oMapper.readValue(sJSON,ProcessorSharing.class);
-                        aoReturnList.add(oProcessorSharing);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, ProcessorSharing.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();

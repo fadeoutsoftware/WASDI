@@ -1,4 +1,4 @@
-<div class="container-fluid">
+    <div class="container-fluid">
     <div class="login-view row section_full_height">
         <div class="login-top">
             <nav class="navbar navbar-inverse bg_bluewasdi">
@@ -6,10 +6,10 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
                             <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
-                        <li class="link-login pull-right  nav-item"> <a href="#enduser" class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">STORIES</a> </li>
-                        <li class="link-login pull-right  nav-item"> <a href="#developer"  class="text-white" ng-click="m_oController.m_oAnchorService('developer')">ADVANCED</a> </li>
-                        <li class="link-login pull-right  nav-item"> <a href="#eoexpert"  class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">BASIC</a> </li>
-                        <li class="link-login pull-right  nav-item"> <a href="#introwasdi"  class="text-white" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">STORIES</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a class="text-white" ng-click="m_oController.m_oAnchorService('developer')">ADVANCED</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">BASIC</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a class="text-white" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT</a> </li>
                     </ul>
                 </div>
             </nav>
@@ -51,32 +51,36 @@
 
                 </form>
 
-                <br>
+                <!--br -->
 
                 <!--GOOGLE BUTTON-->
 <!--                <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>-->
 
 <!--                <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>-->
 
-                <br>
+                <!--br-->
                 <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
                     </a>
                 </div>
                 <br>
-                <div  ng-hide="m_oController.m_bRegisterIsVisible">
+                <div  ng-hide="m_oController.m_bRegisterIsVisible || m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.keycloakRegister()">
                         New User? Register here!
                     </a>
                 </div>
                 <!-- NEW WASDI LOGIN  -->
+                
+                <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
+
                 <br><hr><br>
 
                 <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()"
                         ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     {{"LOGIN_BUTTON_SIGN_IN_2"|translate}}
                 </button>
+                </div>
 
 
 
@@ -191,14 +195,14 @@
                 </div>
 
                 <div class="col-md-3">
-                    <img  class="loghi_fadeout_acrotec img-responsive center-block" alt="FADEOUT - ACROTEC">
+                    <!--img  class="loghi_fadeout_acrotec img-responsive center-block" alt="FADEOUT - ACROTEC"-->
                 </div>
                 <div class="col-md-6">
                     <h4>Web Advanced Space Developer Interface</h4>
                     <a class="btn btn-large" href="#introwasdi" ng-click="m_oController.m_oAnchorService('introwasdi')"> <i class="fa fa-angle-double-down fa-4x animated bounce login-more-icon" aria-hidden="true"></i></a>
                 </div>
                 <div class="col-md-3">
-                    <img  class="loghi_esa_asi img-responsive center-block" alt="ESA - ASI">
+                    <!--img  class="loghi_esa_asi img-responsive center-block" alt="ESA - ASI"-->
                 </div>
 
             </div>
@@ -343,7 +347,7 @@
                     </div>
                     <br>
                     <br>
-                    <a href="http://www.wasdi.net/index.php?title=Tutorial" target="_blank" class="btn btn-lg bg_bluewasdi text-white marginiverticali" role="button">WASDI Tutorial</a>
+                    <a href="https://wasdi.readthedocs.io/en/latest/WasdiTutorial.html" target="_blank" class="btn btn-lg bg_bluewasdi text-white marginiverticali" role="button">WASDI Tutorial</a>
                 </div>
 
             </div>
@@ -382,7 +386,7 @@
                     <br>
                     <img class="rocket animated slideInUp slow">
                     <h3>Develop at home, Deploy to the Cloud<br>Move your processor to the DIAS</h3>
-                    <a href="http://www.wasdi.net/index.php?title=DeveloperManual" target="_blank" class="btn btn-lg bg-white marginiverticali" role="button">Developer Manual</a>
+                    <a href="https://wasdi.readthedocs.io/en/latest/PythonTutorial.html" target="_blank" class="btn btn-lg bg-white marginiverticali" role="button">Developer Manual</a>
                 </div>
                 <div class="col-md-12">
 

@@ -1,6 +1,5 @@
 package it.fadeout;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -45,33 +43,52 @@ import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.launcherOperations.LauncherOperationsUtils;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
+/**
+ * Main Class of the WASDI Web Server.
+ * Intilizes the system
+ * Contains different Utility functions to make from this server http calls to the other servers
+ * 
+ * @author p.campanella
+ *
+ */
 public class Wasdi extends ResourceConfig {
 	
+	/**
+	 * Static name of the system property that hosts to the nfs (satellite path finder) download folder 
+	 */
 	private static final String s_SNFS_DATA_DOWNLOAD = "nfs.data.download";
-
+	
+	/**
+	 * Name of the main WASDI node
+	 */
 	private static final String s_sWASDINAME = "wasdi";
-
+	
+	/**
+	 * Servlet Config to access web.xml file
+	 */
 	@Context
 	ServletConfig m_oServletConfig;
 
@@ -119,39 +136,45 @@ public class Wasdi extends ResourceConfig {
 	static {
 		m_oCredentialPolicy = new CredentialPolicy();
 	}
-
+	
+	/**
+	 * Contructor: bind the clasess and the resources classes
+	 */
 	public Wasdi() {
 		register(new WasdiBinder());
 		packages(true, "it.fadeout.rest.resources");
 	}
-
+	
+	/**
+	 * Web Server intialization: it loads the main web-server configuration
+	 */
 	@PostConstruct
 	public void initWasdi() {
 
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
-
-		try {
-			Utils.s_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", "" + Utils.s_iSessionValidityMinutes));
-			Utils.debugLog("-------Session Validity [minutes]: " + Utils.s_iSessionValidityMinutes);
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
+		
+		String sConfigFilePath = "/data/wasdi/config.json"; 
+		
+		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
+			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
 		}
-
-		// set nfs properties download
+		
+		if (!WasdiConfig.readConfig(sConfigFilePath)) {
+			Utils.debugLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
+		}
+		
+		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
 		String sNfsFolder = System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD);
 		if (sNfsFolder == null)
 			System.setProperty(Wasdi.s_SNFS_DATA_DOWNLOAD, sUserHome + "/nfs/download");
 
 		Utils.debugLog("-------nfs dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
-
+		
+		// Read MongoDb Configuration
 		try {
 
-			MongoRepository.SERVER_ADDRESS = getInitParameter("MONGO_ADDRESS", "127.0.0.1");
-			MongoRepository.SERVER_PORT = Integer.parseInt(getInitParameter("MONGO_PORT", "27017"));
-			MongoRepository.DB_NAME = getInitParameter("MONGO_DBNAME", Wasdi.s_sWASDINAME);
-			MongoRepository.DB_USER = getInitParameter("MONGO_DBUSER", "mongo");
-			MongoRepository.DB_PWD = getInitParameter("MONGO_DBPWD", "mongo");
+            MongoRepository.readConfig();
 
 			Utils.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
 
@@ -159,52 +182,63 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
+		// Read the code of this Node
 		try {
 
-			s_sMyNodeCode = getInitParameter("NODECODE", Wasdi.s_sWASDINAME);
+			s_sMyNodeCode = WasdiConfig.Current.nodeCode;
 			Utils.debugLog("-------Node Code " + s_sMyNodeCode);
 
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		
-		s_sKeyCloakIntrospectionUrl = getInitParameter("keycloak_introspect", null);
-		s_sClientId = getInitParameter("keycloak_confidentialClient", null);
-		s_sClientSecret = getInitParameter("keycloak_clientSecret", null);
-		s_KeyCloakUser = getInitParameter("keycloak_admin", null);
-		s_KeyCloakPw = getInitParameter("keycloak_pw", null); // keycloak_brrrSecret
-		s_KeyBearerSecret = getInitParameter("keycloak_brrrSecret", null); //
-
+		// Read the configuration of KeyCloak		
+		s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
+		s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
+		s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
+		
+		// Computational nodes need to configure also the local dababase
 		try {
 			// If this is not the main node
 			if (!s_sMyNodeCode.equals(Wasdi.s_sWASDINAME)) {
+				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
-				
 				Utils.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
 			}			
 		}
 		catch (Throwable e) {
 			e.printStackTrace();
 		}
-
+		
+		// Local path the the web application
 		try {
-
-			RabbitFactory.s_sRABBIT_QUEUE_USER = getInitParameter("RABBIT_QUEUE_USER", "guest");
-			RabbitFactory.s_sRABBIT_QUEUE_PWD = getInitParameter("RABBIT_QUEUE_PWD", "guest");
-			RabbitFactory.s_sRABBIT_HOST = getInitParameter("RABBIT_HOST", "127.0.0.1");
-			RabbitFactory.s_sRABBIT_QUEUE_PORT = getInitParameter("RABBIT_QUEUE_PORT", "5672");
-
-			Utils.debugLog("-------Rabbit User " + RabbitFactory.s_sRABBIT_QUEUE_USER);
-
-		} catch (Throwable e) {
+			String sLocalTomcatWebAppFolder = WasdiConfig.Current.paths.tomcatWebAppPath;
+			if (!Utils.isNullOrEmpty(sLocalTomcatWebAppFolder)) {
+				
+				ImageResourceUtils.s_sWebAppBasePath = sLocalTomcatWebAppFolder;
+				if (!ImageResourceUtils.s_sWebAppBasePath.endsWith("/")) ImageResourceUtils.s_sWebAppBasePath += "/";
+			}
+		}
+		catch (Throwable e) {
 			e.printStackTrace();
 		}
 
+		
+		// Configure Rabbit
+		try {
+			RabbitFactory.readConfig();
+			
+			Utils.debugLog("-------Rabbit Initialized ");
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
+		// Initialize Snap
 		Utils.debugLog("-------initializing snap...");
 
 		try {
-			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
+			String snapAuxPropPath = WasdiConfig.Current.snap.auxPropertiesFile;
 			Utils.debugLog("snap aux properties file: " + snapAuxPropPath);
 			Path propFile = Paths.get(snapAuxPropPath);
 			Config.instance("snap.auxdata").load(propFile);
@@ -213,10 +247,8 @@ public class Wasdi extends ResourceConfig {
 			SystemUtils.init3rdPartyLibs(null);
 			SystemUtils.LOG.setLevel(Level.ALL);
 
-			String sSnapLogActive = getInitParameter("SNAP_LOG_ACTIVE", "1");
-
-			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
-				String sSnapLogFolder = getInitParameter("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snapweb.log");
+			if (WasdiConfig.Current.snap.webLogActive) {
+				String sSnapLogFolder = WasdiConfig.Current.snap.webLogFile;
 
 				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
 				oFileHandler.setLevel(Level.ALL);
@@ -233,6 +265,7 @@ public class Wasdi extends ResourceConfig {
 		}
 		
 		
+		// Each node must have a special workspace for depoy operations: here it check if exists: if not it will be created
 		Utils.debugLog("-------initializing node local workspace...");
 		
 		try {
@@ -241,19 +274,18 @@ public class Wasdi extends ResourceConfig {
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, s_sMyNodeCode);
 			
 			if (oWorkspace == null) {
+				
+				// Create the working Workspace in this node
 				Utils.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
 				
 				oWorkspace = new Workspace();
-				
-				// Create the working Workspace in this node
-
 				// Default values
 				oWorkspace.setCreationDate((double) new Date().getTime());
 				oWorkspace.setLastEditDate((double) new Date().getTime());
 				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
 				// Leave this at "no user"
-				oWorkspace.setWorkspaceId(Utils.GetRandomName());
-				oWorkspace.setNodeCode(Wasdi.s_sWASDINAME);
+				oWorkspace.setWorkspaceId(Utils.getRandomName());
+				oWorkspace.setNodeCode(Wasdi.s_sMyNodeCode);
 				
 				// Insert in the db
 				oWorkspaceRepository.insertWorkspace(oWorkspace);
@@ -273,8 +305,8 @@ public class Wasdi extends ResourceConfig {
 		
 		try {
 			
+			// Can be useful for debug
 			Utils.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
-			
 			for (String string : enviorntmentVars.keySet()) { Utils.debugLog(string + ": " + enviorntmentVars.get(string)); }
 			 			
 		}
@@ -291,6 +323,7 @@ public class Wasdi extends ResourceConfig {
 		try {
 			Utils.debugLog("-------Shutting Down Wasdi");
 			
+			// Stop mongo
 			try {
 				MongoRepository.shutDownConnection();
 			} catch (Exception oE) {
@@ -301,41 +334,10 @@ public class Wasdi extends ResourceConfig {
 			oE.printStackTrace();
 		}
 	}
-
-	/**
-	 * Safe Read Init Parameter
-	 * 
-	 * @param sParmaneter
-	 * @param sDefault
-	 * @return
-	 */
-	private String getInitParameter(String sParmaneter, String sDefault) {
-		String sParameterValue = m_oServletConfig.getInitParameter(sParmaneter);
-		return sParameterValue == null ? sDefault : sParameterValue;
-	}
-
-	/**
-	 * Get Safe Random file name
-	 * 
-	 * @return
-	 */
-	public static String GetSerializationFileName() {
-		return UUID.randomUUID().toString();
-	}
-
-	/**
-	 * Get Common Date Time Format
-	 * 
-	 * @param oDate
-	 * @return
-	 */
-	public static String getFormatDate(Date oDate) {
-		return Utils.getFormatDate(oDate);
-	}
-
+	
 	/**
 	 * Get the User object from the session Id
-	 * 
+	 * It checks first in Key Cloak and later on the local session mechanism.
 	 * @param sSessionId
 	 * @return
 	 */
@@ -414,9 +416,15 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 
-	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
+	/**
+	 * Obtain the local workspace path from configuration (base path), user and worksapce id
+	 * @param sUserId User Id
+	 * @param sWorkspace Workspace
+	 * @return full workspace local path with the ending / included
+	 */
+	public static String getWorkspacePath(String sUserId, String sWorkspace) {
 		// Take path
-		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
 
 		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
 			sDownloadRootPath = "/data/wasdi/";
@@ -429,11 +437,15 @@ public class Wasdi extends ResourceConfig {
 
 		return sPath;
 	}
-
-
-	public static String getDownloadPath(ServletConfig oServletConfig) {
+	
+	/**
+	 * Get the root path of download folder of WASDI 
+	 * 
+	 * @return base download local path with the ending / included
+	 */
+	public static String getDownloadPath() {
 		// Take path
-		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
 
 		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
 			sDownloadRootPath = "/data/wasdi/";
@@ -462,23 +474,40 @@ public class Wasdi extends ResourceConfig {
 		return sWorkspaceOwner;
 	}
 	
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
-		return runProcess(sUserId, sSessionId, sOperationId, sProductName, sSerializationPath, oParameter, null);
+	/**
+	 * Run Process: trigger the execution of a WASDI Process. 
+	 * If the workspace of the operation is the actual node this function
+	 * creates the process workspace entry in the db that will be handled by the scheduler to run a process on a node.
+	 * If the workspace it is in another node, it routes the request to the destination node calling 
+	 * processing/run
+	 * API
+	 * This version assumes Sub Operation Id and Parent Id NULL
+	 *  
+	 * @param sUserId requesting the operation
+	 * @param sSessionId User session
+	 * @param sOperationType Id of the Launcher Operation
+	 * @param sProductName Product name associated to the Process Workspace
+	 * @param sSerializationPath Node Serialisation Path
+	 * @param oParameter Parameter associated to the operation
+	 * @return
+	 * @throws IOException
+	 */
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationType, sProductName, sSerializationPath, oParameter, null);
 	}
 	
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
-		return runProcess(sUserId, sSessionId, sOperationId, null, sProductName, sSerializationPath, oParameter, sParentId);
-	}
-
 	/**
-	 * Run Process: if the workspace of the operation is the actual node this function
-	 * creates the process workspace entry that will be handled by the scheduler to run a process on a node.
-	 * If it is in another node, it routes the request to the destination node.
-	 *
+	 * Run Process: trigger the execution of a WASDI Process. 
+	 * If the workspace of the operation is the actual node this function
+	 * creates the process workspace entry in the db that will be handled by the scheduler to run a process on a node.
+	 * If the workspace it is in another node, it routes the request to the destination node calling 
+	 * processing/run
+	 * API	 
+	 * This version assume Operation Sub Id = Null
+	 *  
 	 * @param sUserId User requesting the operation
 	 * @param sSessionId User session
-	 * @param sOperationId Id of the Launcher Operation
-	 * @param sOperationSubId Sub Id of the Launcher Operation
+	 * @param sOperationType Id of the Launcher Operation
 	 * @param sProductName Product name associated to the Process Workspace
 	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
@@ -486,9 +515,33 @@ public class Wasdi extends ResourceConfig {
 	 * @return Primitive Result with the output status of the operation
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationType, null, sProductName, sSerializationPath, oParameter, sParentId);
+	}
 
-		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationId)) {
+	/**
+	 * Run Process: trigger the execution of a WASDI Process. 
+	 * If the workspace of the operation is the actual node this function
+	 * creates the process workspace entry in the db that will be handled by the scheduler to run a process on a node.
+	 * If the workspace it is in another node, it routes the request to the destination node calling 
+	 * processing/run
+	 * API
+	 *
+	 * @param sUserId User requesting the operation
+	 * @param sSessionId User session
+	 * @param sOperationType Id of the Launcher Operation
+	 * @param sOperationSubId Sub Id of the Launcher Operation
+	 * @param sProductName Product name associated to the Process Workspace
+	 * @param sSerializationPath Node Serialisation Path
+	 * @param oParameter Parameter associated to the operation
+	 * @param sParentId Id the the parent process
+	 * @return Primitive Result with the output status of the operation: boolValue = true, intValue = 200, stringValue = processId if the operation is fine. 
+	 * 			otherwise boolValue = false, intValue = httpErrorCode.
+	 * @throws IOException
+	 */
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+
+		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationType)) {
 			// Bad request
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setIntValue(400);
@@ -501,7 +554,7 @@ public class Wasdi extends ResourceConfig {
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
 		if(null == oUser) {
-			Utils.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationId + ", " + sProductName + ", ... ): session not valid, aborting");
+			Utils.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
 			return oResult;
@@ -553,7 +606,7 @@ public class Wasdi extends ResourceConfig {
 				String sUrl = oDestinationNode.getNodeBaseAddress();
 				Utils.debugLog("Wasdi.runProcess: base url is: " + sUrl );
 				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
+				sUrl += "processing/run?operation=" + sOperationType + "&name=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
@@ -634,8 +687,9 @@ public class Wasdi extends ResourceConfig {
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 
 				try {
-					oProcess.setOperationDate(Wasdi.getFormatDate(new Date()));
-					oProcess.setOperationType(sOperationId);
+					
+					oProcess.setOperationDate(Utils.getFormatDate(new Date()));
+					oProcess.setOperationType(sOperationType);
 					oProcess.setOperationSubType(sOperationSubId);
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
@@ -741,52 +795,13 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 	
-	
 	/**
-	 * Standard http post utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post 
-	 * @param asHeaders headers dictionary
-	 * @return server response
+	 * Standard http post file utility function
+	 * @param sUrl destination url
+	 * @param sFileName full path of the file to post
+	 * @param asHeaders headers to use
+	 * @throws IOException
 	 */
-	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
-		
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setConnectTimeout(2000);
-			oConnection.setReadTimeout(2000);
-
-			oConnection.setDoOutput(true);
-			// Set POST
-			oConnection.setRequestMethod("GET");
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-				}
-			}
-						
-			oConnection.connect();
-
-			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String sInputLine;
-			StringBuilder sResponse = new StringBuilder();
-	
-			while ((sInputLine = oInputBuffer.readLine()) != null) {
-				sResponse.append(sInputLine);
-			}
-			oInputBuffer.close();
-			
-			return sResponse.toString();
-		}
-		catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-		
-	
 	public static void httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) throws IOException 
 	{
 		//local file -> automatically checks for null
@@ -797,7 +812,8 @@ public class Wasdi extends ResourceConfig {
 		
 		String sZippedFile = null;
 		
-		if (!oFile.getName().toUpperCase().equals("ZIP")) {
+		// Check if we need to zip this file
+		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
 			
 			Utils.debugLog("Wasdi.httpPostFile: File not zipped, zip it");
 			
@@ -916,8 +932,105 @@ public class Wasdi extends ResourceConfig {
 			}			
 		}
 	}
+	
+	
+	/**
+	 * Standard http put utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders) {
+		return httpPut(sUrl, sPayload, asHeaders, null);
+	}
+	
+	/**
+	 * Standard http put utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post
+	 * @param asHeaders headers dictionary
+	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
+	 * @return server response
+	 */
+	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			if(!Utils.isNullOrEmpty(sAuth)) {
+				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
+				String sAuthHeaderValue = "Basic " + sEncodedAuth;
+				oConnection.setRequestProperty("Authorization", sAuthHeaderValue);
+
+			}
+
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("PUT");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+			
+			OutputStream oPostOutputStream = oConnection.getOutputStream();
+			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
+			if (sPayload!= null) oStreamWriter.write(sPayload);
+			oStreamWriter.flush();
+			oStreamWriter.close();
+			oPostOutputStream.close(); 
+			
+			oConnection.connect();
+
+			String sMessage = readHttpResponse(oConnection);
+			oConnection.disconnect();
+			
+			return sMessage;
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+	
+	/**
+	 * Standard http get utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post 
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
+		
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setConnectTimeout(2000);
+			oConnection.setReadTimeout(2000);
+
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("GET");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+						
+			oConnection.connect();
+			
+			return readHttpResponse(oConnection);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
 
 	/**
+	 * Read http response stream
 	 * @param oConnection
 	 * @throws IOException
 	 * @throws CopyStreamException
@@ -958,11 +1071,11 @@ public class Wasdi extends ResourceConfig {
 
 	
 	/**
-	 * Download a file on the local PC
+	 * Download a workflow on the local PC
 	 * @param sWorkflowId File Name
 	 * @return Full Path
 	 */
-	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId, ServletConfig oServletConfig) {
+	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId) {
 		try {
 			
 			if (Utils.isNullOrEmpty(sWorkflowId)) {
@@ -974,12 +1087,9 @@ public class Wasdi extends ResourceConfig {
 			
 			if (Utils.isNullOrEmpty(sNodeUrl)) { sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest"; }
 
-		    String sUrl = sBaseUrl + "/processing/downloadgraph?workflowId="+sWorkflowId;
+		    String sUrl = sBaseUrl + "/workflows/download?workflowId="+sWorkflowId;
 		    
 		    String sOutputFilePath = "";
-		    
-		    
-		    
 		    
 			
 			try {
@@ -1018,7 +1128,7 @@ public class Wasdi extends ResourceConfig {
 					}
 					
 
-					String sSavePath = getDownloadPath(oServletConfig) + "workflows/";
+					String sSavePath = getDownloadPath() + "workflows/";
 					sOutputFilePath = sSavePath + sWorkflowId+".xml";
 					
 					File oTargetFile = new File(sOutputFilePath);
