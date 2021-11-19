@@ -812,7 +812,7 @@ public class ProcessWorkspaceResource {
 	}
 
 
-
+	//TODO move to a service
 	private PrimitiveResult killProcessTree(String sSessionId, String sToKillProcessObjId, boolean bKillTheEntireTree, User oUser, ProcessWorkspace oProcessToDelete) throws IOException {
 		//create the operation parameter
 		String sDeleteObjId = Utils.getRandomName();
