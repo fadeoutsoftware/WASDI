@@ -204,6 +204,11 @@ public class WorkspaceResource {
 				return oVM;
 			}
 
+			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: user cannot access workspace info, aborting");
+				return oVM;
+			}
+
 			Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: read workspaces " + sWorkspaceId);
 
 			// Create repo
@@ -249,11 +254,12 @@ public class WorkspaceResource {
 					.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
 			// Add Sharings to View Model
 			if (aoSharings != null) {
-				for (int iSharings = 0; iSharings < aoSharings.size(); iSharings++) {
-					if (oVM.getSharedUsers() == null) {
-						oVM.setSharedUsers(new ArrayList<String>());
-					}
-					oVM.getSharedUsers().add(aoSharings.get(iSharings).getUserId());
+				if (oVM.getSharedUsers() == null) {
+					oVM.setSharedUsers(new ArrayList<String>());
+				}
+
+				for (WorkspaceSharing oSharing : aoSharings) {
+					oVM.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
 		} catch (Exception oEx) {
@@ -433,6 +439,11 @@ public class WorkspaceResource {
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
 			return null;
+
+		if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace: user cannot delete workspace, aborting");
+			return null;
+		}
 
 		try {
 			// repositories
