@@ -283,9 +283,12 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oProcessorMediaService.getReviewComments(sSelectedReviewId).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
+                console.log("refreshComments data.data: ", data.data);
+                console.log("refreshComments oController.m_sSelectedReviewId: ", oController.m_sSelectedReviewId);
                 oController.m_oCommentsWrapper[oController.m_sSelectedReviewId] = data.data;
 
-                if (data.data.comments.length == 0) oController.m_bShowLoadComments = false;
+                if (data.data.length == 0) oController.m_bShowLoadComments = false;
+                console.log("refreshComments oController.m_bShowLoadComments: ", oController.m_bShowLoadComments);
             }
             else
             {

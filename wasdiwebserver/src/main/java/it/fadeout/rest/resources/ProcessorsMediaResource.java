@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -48,8 +49,8 @@ import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppCategoryViewModel;
-import wasdi.shared.viewmodels.processors.CommentViewModel;
-import wasdi.shared.viewmodels.processors.ListCommentsViewModel;
+import wasdi.shared.viewmodels.processors.CommentDetailViewModel;
+import wasdi.shared.viewmodels.processors.CommentListViewModel;
 import wasdi.shared.viewmodels.processors.ListReviewsViewModel;
 import wasdi.shared.viewmodels.processors.PublisherFilterViewModel;
 import wasdi.shared.viewmodels.processors.ReviewViewModel;
@@ -801,7 +802,7 @@ public class ProcessorsMediaResource {
 	 */
 	@POST
 	@Path("/comments/update")
-	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentViewModel oCommentViewModel) {
+	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
 		Utils.debugLog("ProcessorsMediaResource.updateComment");
 	
@@ -899,7 +900,7 @@ public class ProcessorsMediaResource {
 	 */
 	@POST
 	@Path("/comments/add")
-	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentViewModel oCommentViewModel) {
+	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
 		Utils.debugLog("ProcessorsMediaResource.addComment");
 	
@@ -1035,41 +1036,66 @@ public class ProcessorsMediaResource {
 		List<Comment> aoReviewComments = oCommentRepository.getComments(oReview.getId());
 		
 		if (aoReviewComments == null || aoReviewComments.size() == 0) {
-			return Response.ok(new ListCommentsViewModel()).build();
+			return Response.ok(new CommentListViewModel()).build();
 		}
 
-		// Cast in a list, computing all the statistics
-		ListCommentsViewModel oListCommentsViewModel = getListCommentsViewModel(aoReviewComments);
+		// Cast in a list
+		List<CommentListViewModel> aoCommentsListViewModel = getListCommentsViewModel(aoReviewComments);
 
-	    return Response.ok(oListCommentsViewModel).build();
+	    return Response.ok(aoCommentsListViewModel).build();
 	}
-	
+
 	/**
-	 * Fill the Comment Wrapper View Model result from a list of comments
+	 * Transform the list of Comment objects into a list of Comment ListViewModel.
 	 * @param aoCommentList
-	 * @return
+	 * @return a list of list view models
 	 */
-	private ListCommentsViewModel getListCommentsViewModel(List<Comment> aoCommentList) {
-		ListCommentsViewModel oListComments = new ListCommentsViewModel();
-		List<CommentViewModel> aoComments = new ArrayList<CommentViewModel>();
+	private static List<CommentListViewModel> getListCommentsViewModel(List<Comment> aoCommentList) {
 		if (aoCommentList == null) {
 			return null; 
 		}
 
-		for (Comment oComment : aoCommentList) {
-			CommentViewModel oCommentViewModel = new CommentViewModel();
-			oCommentViewModel.setCommentId(oComment.getCommentId());
-			oCommentViewModel.setReviewId(oComment.getReviewId());
-			oCommentViewModel.setUserId(oComment.getUserId());
-			oCommentViewModel.setDate(Utils.getDate(oComment.getDate().longValue()));
-			oCommentViewModel.setText(oComment.getText());
-			
-			aoComments.add(oCommentViewModel);
-		}
-		
-		oListComments.setComments(aoComments);
+		return aoCommentList.stream().map(ProcessorsMediaResource::getListViewModel).collect(Collectors.toList());
+	}
 
-		return oListComments;
+	/**
+	 * Transform the Comment object into a Comment ListViewModel.
+	 * @param oComment the comment object
+	 * @return a list view model
+	 */
+	private static CommentListViewModel getListViewModel(Comment oComment) {
+		if (oComment == null) {
+			return null; 
+		}
+
+		CommentListViewModel oListViewModel = new CommentListViewModel();
+		oListViewModel.setCommentId(oComment.getCommentId());
+		oListViewModel.setReviewId(oComment.getReviewId());
+		oListViewModel.setUserId(oComment.getUserId());
+		oListViewModel.setDate(Utils.getDate(oComment.getDate().longValue()));
+		oListViewModel.setText(oComment.getText());
+
+		return oListViewModel;
+	}
+	
+	/**
+	 * Transform the Comment object into a Comment DetailViewModel.
+	 * @param oComment the comment object
+	 * @return a detail view model
+	 */
+	private static CommentDetailViewModel getDetailViewModel(Comment oComment) {
+		if (oComment == null) {
+			return null; 
+		}
+
+		CommentDetailViewModel oDetailViewModel = new CommentDetailViewModel();
+		oDetailViewModel.setCommentId(oComment.getCommentId());
+		oDetailViewModel.setReviewId(oComment.getReviewId());
+		oDetailViewModel.setUserId(oComment.getUserId());
+		oDetailViewModel.setDate(Utils.getDate(oComment.getDate().longValue()));
+		oDetailViewModel.setText(oComment.getText());
+
+		return oDetailViewModel;
 	}
 	
 	/**
@@ -1181,7 +1207,7 @@ public class ProcessorsMediaResource {
 	 * @param sId
 	 * @return
 	 */
-	private Comment getCommentFromViewModel(CommentViewModel oCommentViewModel, String sUserId, String sId) {
+	private Comment getCommentFromViewModel(CommentDetailViewModel oCommentViewModel, String sUserId, String sId) {
 		if (oCommentViewModel != null) {
 			Comment oComment = new Comment();
 			oComment.setCommentId(sId);

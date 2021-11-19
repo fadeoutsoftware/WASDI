@@ -352,8 +352,8 @@
                                 <div class="col-1 col-md-2"></div>
 
                                 <div class="col-5 col-md-10">
-                                    <div ng-show="m_oController.m_oCommentsWrapper[review.id].comments.length">
-                                        <div ng-repeat="comment in m_oController.m_oCommentsWrapper[review.id].comments" class="reviews-list border shadow-sm p-3 mb-4">
+                                    <div ng-show="m_oController.m_oCommentsWrapper[review.id].length">
+                                        <div ng-repeat="comment in m_oController.m_oCommentsWrapper[review.id]" class="reviews-list border shadow-sm p-3 mb-4">
 
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="d-flex align-items-center">
@@ -372,7 +372,7 @@
                                         </div>
                                     </div>
 
-                                    <div ng-show="!m_oController.m_oCommentsWrapper[review.id].comments.length && !oController.m_bShowLoadComments">
+                                    <div ng-show="!m_oController.m_oCommentsWrapper[review.id].length && !oController.m_bShowLoadComments">
                                         <div class="reviews-list border shadow-sm p-3 mb-4" >
                                             <div class="d-flex align-items-center justify-content-between">
                                                 THERE ARE NO COMMENTS
