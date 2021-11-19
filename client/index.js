@@ -22,28 +22,28 @@ import './app/assets/slider-appdetails/css/lightslider.css';
 
 require('./app/services/ConstantsService.js');
 require('./app/services/SessionInjector.js');
-require('./app/services/AuthService.js');
-require('./app/services/AuthServiceFacebook.js');
+require('./app/services/api/AuthService.js');
+//require('./app/services/api/AuthServiceFacebook.js');
 require('./app/services/MapService.js');
 require('./app/services/GlobeService.js');
-require('./app/services/WorkspaceService.js');
-require('./app/services/FileBufferService.js');
-require('./app/services/ProductService.js');
+require('./app/services/api/WorkspaceService.js');
+require('./app/services/api/FileBufferService.js');
+require('./app/services/api/ProductService.js');
 require('./app/services/ConfigurationService.js');
-require('./app/services/OpenSearchService.js');
-require('./app/services/ProcessesLaunchedService.js');
-require('./app/services/SearchOrbitService.js');
+require('./app/services/api/OpenSearchService.js');
+//require('./app/services/ProcessesLaunchedService.js');
+//require('./app/services/SearchOrbitService.js');
 require('./app/services/RabbitStompService.js');
 require('./app/services/ResultsOfSearchService.js');
-require('./app/services/SnapOperationService.js');
-require('./app/services/SatelliteService.js');
-require('./app/services/CatalogService.js');
+//require('./app/services/SnapOperationService.js');
+//require('./app/services/SatelliteService.js');
+require('./app/services/api/CatalogService.js');
 require('./app/services/PagesService.js');
-require('./app/services/FilterService.js');
-require('./app/services/ProcessorService.js');
+//require('./app/services/api/FilterService.js');
+require('./app/services/api/ProcessorService.js');
 require('./app/services/TreeService.js');
-require('./app/services/ProcessorMediaService.js');
-require('./app/services/NodeService.js');
+require('./app/services/api/ProcessorMediaService.js');
+require('./app/services/api/NodeService.js');
 
 
 /*require('./app/app.js');*/

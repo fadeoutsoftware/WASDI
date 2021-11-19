@@ -7,9 +7,9 @@ require('./app/directives/space_invaders_fixed_small_version/SpaceInvaderFixedSm
 require('./app/directives/multiselect_dropdown_menu/MultiselectDropdownMenuDirective.js');
 require('./app/directives/DrawSquares/SquaresDirective.js');
 require('./app/directives/multiradiobutton_dropdown_menu/MultiRadioButtonDropdownMenuDirective.js');
-require('./app/directives/image_preview/ImagePreviewDirective.js');
+//require('./app/directives/image_preview/ImagePreviewDirective.js');
 require('./app/directives/Toggle/ToggleSwitchDirective.js');
-require('./app/directives/image_editor/ImageEditorController.js');
+//require('./app/directives/image_editor/ImageEditorController.js');
 require('./app/directives/DropDownMenu/DropDownMenuDirective.js');
 require('./app/directives/wasdiApps/wapTextBox/wapTextBox.js');
 require('./app/directives/wasdiApps/wapSelectArea/wapSelectArea.js');
