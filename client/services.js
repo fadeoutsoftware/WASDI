@@ -22,5 +22,6 @@ require('./services/ProcessorService.js');
 require('./services/TreeService.js');
 require('./services/ProcessorMediaService.js');
 require('./services/api/NodeService.js');
+require('./services/api/ProcessWorkspaceService.js');
 
 require('./services/search/light-search-service'); // this is the sole service inside search

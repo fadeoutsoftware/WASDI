@@ -17,6 +17,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MapService',
     'wasdi.GlobeService',
     'wasdi.WorkspaceService',
+    'wasdi.ProcessWorkspaceService',
     'wasdi.FileBufferService',
     'wasdi.ProductService',
     'wasdi.ConfigurationService',
