@@ -21,13 +21,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y python-dev
 
-# Install GDAL
-RUN apt-get install -y build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev
-RUN apt -y install libpq-dev
-RUN apt-get install -y gdal-bin
-RUN apt-get install -y libgdal-dev
-RUN apt-get update && apt install -y python3-gdal
-
 RUN mkdir /home/wasdi && chmod o+wrx /home/wasdi
 
 # Go at Home and copy files
@@ -54,12 +47,13 @@ RUN rm Miniconda3-py39_4.9.2-Linux-x86_64.sh
 ENV PATH /home/$USR_NAME/miniconda/bin:$PATH
 RUN /home/$USR_NAME/miniconda/bin/conda update -y --all
 
-# Install fast ai
-RUN /home/$USR_NAME/miniconda/bin/conda install -y -c fastchan fastai
 # Install OpenCV
 RUN /home/$USR_NAME/miniconda/bin/conda install -y -c conda-forge opencv
 
 RUN /home/$USR_NAME/miniconda/bin/conda install -y -c anaconda pip
+
+RUN /home/$USR_NAME/miniconda/bin/conda install -y gdal -c conda-forge 
+
 RUN pip3 install wasdi
 RUN pip3 install gunicorn
 RUN pip3 install flask
