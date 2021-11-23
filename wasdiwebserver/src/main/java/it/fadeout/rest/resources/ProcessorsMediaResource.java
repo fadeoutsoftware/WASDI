@@ -690,7 +690,13 @@ public class ProcessorsMediaResource {
 		if( iDeletedCount == 0 ){
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		
+
+
+		// Delete all the comments associated with the recently deleted review
+		CommentRepository oCommentRepository = new CommentRepository();
+		oCommentRepository.deleteComments(sReviewId);
+
+
 		return Response.status(Status.OK).build();
 	}
 	
