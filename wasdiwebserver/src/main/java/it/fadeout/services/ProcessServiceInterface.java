@@ -17,6 +17,5 @@ public interface ProcessServiceInterface {
 
 		public List<ProcessWorkspace> killProcessesInWorkspace(String sWorkspaceId);
 		public List<ProcessWorkspace> killFathers(List<ProcessWorkspace> aoProcesses, String sWorkspaceId);
-		public PrimitiveResult killProcessTree(String sSessionId, String sToKillProcessObjId, Boolean bKillTheEntireTree,
-				User oUser, ProcessWorkspace oProcessToDelete);
+		public PrimitiveResult killProcessTree(Boolean bKillTheEntireTree, User oUser, ProcessWorkspace oProcessToKill);
 }

@@ -2,6 +2,7 @@ package it.fadeout.rest.resources;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import it.fadeout.Wasdi;
+import it.fadeout.services.ProcessServiceInterface;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.*;
 import wasdi.shared.config.WasdiConfig;
@@ -16,6 +17,7 @@ import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -46,6 +48,9 @@ import java.util.*;
  */
 @Path("/process")
 public class ProcessWorkspaceResource {
+	
+	@Inject
+	ProcessServiceInterface m_oProcessService;
 
 	/**
 	 * Get a filtered paginated list of processworkspaces.
@@ -798,7 +803,8 @@ public class ProcessWorkspaceResource {
 			oKillProcessParameter.setExchange(sWorkspaceId);
 			oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			PrimitiveResult oResult = killProcessTree(sSessionId, sToKillProcessObjId, bKillTheEntireTree, oUser, oProcessToDelete);
+			PrimitiveResult oResult = m_oProcessService.killProcessTree(bKillTheEntireTree, oUser, oProcessToDelete);
+			//PrimitiveResult oResult = killProcessTree(sSessionId, sToKillProcessObjId, bKillTheEntireTree, oUser, oProcessToDelete);
 			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
 
 			return Response.status(oResult.getIntValue()).build();

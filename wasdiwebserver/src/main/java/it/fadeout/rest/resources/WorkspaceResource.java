@@ -19,6 +19,7 @@ import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.io.File;
@@ -44,8 +45,6 @@ public class WorkspaceResource {
 	@Inject
 	ProcessService m_oProcessWorkspaceService;
 
-	private CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-	private WorkspacePolicy m_oWorkspacePolicy = new WorkspacePolicy();
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -58,8 +57,8 @@ public class WorkspaceResource {
 		Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( Product: " + sProductName + " )");
 
 		// input validation
-		if (!m_oWorkspacePolicy.validProductName(sProductName)) {
-			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sProductName");
+		if (Utils.isNullOrEmpty(sProductName)) {
+			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: sProductName null or empty");
 			return null;
 		}
 		
@@ -463,7 +462,7 @@ public class WorkspaceResource {
 
 		Utils.debugLog("WorkspaceResource.DeleteWorkspace( WS: " + sWorkspaceId + ", DeleteLayer: " + bDeleteLayer + ", DeleteFile: " + bDeleteFile + " )");
 		User oUser = null;
-
+		
 		//preliminary checks
 		try {
 			// before any operation check that this is not an injection attempt from the user
@@ -490,13 +489,10 @@ public class WorkspaceResource {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " cannot be accessed by " + oUser.getUserId() + ", aborting");
 				return Response.status(403).build();
 			}
+			
 		} catch (Exception oE) {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace( " + sSessionId + ", " + sWorkspaceId + " ): cannot complete checks due to " + oE);
-		}
-
-		if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-			Utils.debugLog("WorkspaceResource.DeleteWorkspace: user cannot delete workspace, aborting");
-			return null;
+			return Response.status(500).build();
 		}
 
 		try {
@@ -521,7 +517,6 @@ public class WorkspaceResource {
 			}
 
 			//kill active processes
-			//TODO test
 			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId);
 
 			//TODO test
