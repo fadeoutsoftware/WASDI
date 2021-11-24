@@ -75,6 +75,8 @@ public class NodeResource {
 				}
 				
 				oNodeViewModel.setNodeCode(node.getNodeCode());
+
+				oNodeViewModel.setApiUrl(node.getNodeBaseAddress());
 				
 				// Add to the return list
 				aoNodeViewModelList.add(oNodeViewModel);
