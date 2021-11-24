@@ -1,15 +1,17 @@
 <!--LOAD ICON-->
-<div class="row mt-0 pl-4">
+<div class="modal-body d-flex flex-column" >
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
          ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
+         <!--ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)"-->
         <div class="loadIcon">
-            <invader></invader>
+            <invader style ="margin-top: calc(100% / 5);margin-bottom: calc(100% / 5);"></invader>
         </div>
     </div>
 </div>
 
 <!--LIST OF WORKFLOWS  -->
-<div class="modal-body d-flex flex-column">
+<div class="modal-body d-flex flex-column" ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
+<!-- ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)"> -->
     <div class="row-v4">
         <div class="col-v4" style="height: 60vh;">
             <!------------------------------------- SEARCH BAR ------------------------------------->

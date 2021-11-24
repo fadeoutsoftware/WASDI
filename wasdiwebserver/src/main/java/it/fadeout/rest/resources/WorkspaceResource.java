@@ -386,7 +386,13 @@ public class WorkspaceResource {
 			
 			// if present, the node code must be updated
 			if(oWorkspaceEditorViewModel.getNodeCode() != null) {
-				oWorkspace.setNodeCode(oWorkspaceEditorViewModel.getNodeCode());
+				NodeRepository oNodeRepository = new NodeRepository();
+				String sNodeCode = oWorkspaceEditorViewModel.getNodeCode();
+				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
+				oWorkspace.setNodeCode(sNodeCode);
+				// Set the base url on the returning view model
+				oWorkspaceEditorViewModel.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+				// update on Db
 				oWorkspaceRepository.updateWorkspaceNodeCode(oWorkspace);
 			}
 			
