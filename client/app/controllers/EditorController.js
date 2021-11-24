@@ -1343,7 +1343,6 @@ var EditorController = (function () {
                                     });
                                 modal.element.modal();
                                 modal.close.then(function (oResult) {
-
                                 });
                             });
                         }, function (data, status) {

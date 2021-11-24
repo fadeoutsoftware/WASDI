@@ -1048,7 +1048,7 @@ public class Wasdi extends ResourceConfig {
 			if( 200 <= iResponseCode && 299 >= iResponseCode ) {
 				oResponseInputStream = oConnection.getInputStream();
 			} else {
-				Utils.debugLog("Wasdi.readHttpResponse: failed with error " + iResponseCode);
+				//Utils.debugLog("Wasdi.readHttpResponse: failed with error " + iResponseCode);
 				oResponseInputStream = oConnection.getErrorStream();
 			}
 			if(null!=oResponseInputStream) {
@@ -1057,11 +1057,11 @@ public class Wasdi extends ResourceConfig {
 				if( 200 <= iResponseCode && 299 >= iResponseCode ) {
 					return sMessage;
 				} else {
-					Utils.debugLog("Wasdi.readHttpResponse: error message: " + sMessage);
+					//Utils.debugLog("Wasdi.readHttpResponse: error message: " + sMessage);
 					return "";
 				}
 			} else {
-				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+				throw new NullPointerException("Wasdi.readHttpResponse: stream is null");
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("Wasdi.readHttpResponse: " + oE );

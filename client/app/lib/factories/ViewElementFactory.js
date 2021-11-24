@@ -28,7 +28,7 @@ function ViewElementFactory() {
         }
         else if (oControl.type === "numeric") {
 
-            // Text box
+            // Numeric box
             oViewElement = new NumericBox();
 
             // See if we have a default

@@ -5,6 +5,7 @@
 
 ### Added
 - getWorkspaceNameById: return the name of a workspace from the id
+- sen2Core: executes sen2Core on a S2L1 image
 ### Fixed
 - updated all methods to new APIs
 - checked null or empty list in waitProcesses

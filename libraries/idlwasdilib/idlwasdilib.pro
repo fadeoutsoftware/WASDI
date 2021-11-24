@@ -1400,7 +1400,7 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 	sessioncookie = token
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processors/run?workspace='+activeworkspace+'&name='+sProcessorName+'&encodedJson='
+	UrlPath = '/wasdiwebserver/rest/processors/run?workspace='+activeworkspace+'&name='+sProcessorName
 
 	; Generate input file names JSON array
 	sParamsJSON = '{'
@@ -1429,11 +1429,8 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 	
 	;Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
-	sEncodedParametersJSON = oUrl->URLEncode(sParamsJSON)
-
-	UrlPath = UrlPath + sEncodedParametersJSON
-
-	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+	
+	wasdiResult = WASDIHTTPPOST(UrlPath, sParamsJSON, !NULL)
 
 	sProcessID = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
 	
