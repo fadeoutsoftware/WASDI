@@ -39,11 +39,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 /**
+ * [0.7.0] - 2021-11-24
+ * 	
+ * ### Added
+ * - getWorkspaceNameById: return the name of a workspace from the id
+ * ### Fixed
+ * - updated all methods to new APIs
+ * - checked null or empty list in waitProcesses
+ * 
  * @author c.nattero
  *
  */
 public class WasdiLib {
-
+	
+	/**
+	 * Object mapper to convert json to java and java to json
+	 */
 	protected static ObjectMapper s_oMapper = new ObjectMapper();
 
 	/**
