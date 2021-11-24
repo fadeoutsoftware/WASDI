@@ -2,10 +2,14 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.3
-; Last Update: 2021-05-06
+; IDL WASDI Lib Version 0.7.0
+; Last Update: 2021-11-24
 ;
 ; History
+; 0.7.0 - 2021-11-24
+;	added getWorkspaceNameById
+;	adapted to new API
+;
 ; 0.6.3 - 2021-05-06
 ;	support start by workspace id and copy to sftp relative path
 ;
@@ -846,6 +850,44 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
 
 	; return the found id or ""
 	RETURN, workspaceId
+  
+END
+
+; converts a ws id in a ws name
+FUNCTION WASDIGETWORKSPACENAMEBYID, workspaceId
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+
+	workspaceName = "";
+
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/ws/byuser'
+
+	; Get the list of users workpsaces
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	; Search the Workspace with the desired id
+	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
+
+		oWorkspace = wasdiResult[i]
+
+		; Check the id property
+		sId = GETVALUEBYKEY(oWorkspace, 'workspaceID')
+
+		IF sId EQ workspaceId THEN BEGIN
+			; found it
+			sName = GETVALUEBYKEY(oWorkspace, 'workspaceName')
+			workspaceName = sName
+			BREAK
+		ENDIF
+	ENDFOR
+
+	IF (workspaceName EQ '') THEN BEGIN
+		print, 'WASDIGETWORKSPACENAMEBYID Workspace ', workspaceId, ' NOT FOUND'
+	END
+
+	; return the found id or ""
+	RETURN, workspaceName
   
 END
 
