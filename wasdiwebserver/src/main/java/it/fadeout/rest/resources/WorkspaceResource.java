@@ -523,7 +523,7 @@ public class WorkspaceResource {
 			}
 
 			//kill active processes
-			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId);
+			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, oUser);
 
 			//big list...
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

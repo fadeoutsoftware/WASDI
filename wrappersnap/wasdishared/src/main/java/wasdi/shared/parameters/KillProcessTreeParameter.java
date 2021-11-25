@@ -6,6 +6,8 @@
  */
 package wasdi.shared.parameters;
 
+import java.util.List;
+
 /**
  * Parameter of the KILL Operation
  * 
@@ -17,7 +19,7 @@ public class KillProcessTreeParameter extends BaseParameter {
 	/**
 	 * Process Workspace Id of the process to kill
 	 */
-	private String processToBeKilledObjId;
+	private List<String> processesToBeKilledObjId;
 	
 	/**
 	 * by default, kill the entire process tree
@@ -27,14 +29,14 @@ public class KillProcessTreeParameter extends BaseParameter {
 	/**
 	 * @return the sProcessObjId
 	 */
-	public String getProcessToBeKilledObjId() {
-		return processToBeKilledObjId;
+	public List<String> getProcessesToBeKilledObjId() {
+		return processesToBeKilledObjId;
 	}
 	/**
 	 * @param sProcessObjId the sProcessObjId to set
 	 */
-	public void setProcessToBeKilledObjId(String sProcessObjId) {
-		this.processToBeKilledObjId = sProcessObjId;
+	public void setProcessesToBeKilledObjId(List<String> sProcessObjId) {
+		this.processesToBeKilledObjId = sProcessObjId;
 	}
 	/**
 	 * @return the bKillTree

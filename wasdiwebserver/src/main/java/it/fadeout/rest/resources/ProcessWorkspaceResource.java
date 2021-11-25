@@ -769,42 +769,21 @@ public class ProcessWorkspaceResource {
 			}
 
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sToKillProcessObjId);
+			ProcessWorkspace oProcessToKill = oRepository.getProcessByProcessObjId(sToKillProcessObjId);
 
 			//check that the process exists
-			if(null==oProcessToDelete) {
+			if(null==oProcessToKill) {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
 				return Response.status(400).build();
 			}
 
-			// check that the user can access the processworkspace
+			// check that the user can access the processWorkspace
 			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sToKillProcessObjId)) {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
 				return Response.status(403).build();
 			}
-
-
-			//create the operation parameter
-			String sDeleteObjId = Utils.getRandomName();
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
-			oKillProcessParameter.setProcessObjId(sDeleteObjId);
-			oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
-			if(null!=bKillTheEntireTree) {
-				oKillProcessParameter.setKillTree(bKillTheEntireTree);
-			}
-
-
-			String sWorkspaceId = oProcessToDelete.getWorkspaceId();
-
-			//base parameter atttributes
-			oKillProcessParameter.setWorkspace(sWorkspaceId);
-			oKillProcessParameter.setUserId(oUser.getUserId());
-			oKillProcessParameter.setExchange(sWorkspaceId);
-			oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			PrimitiveResult oResult = m_oProcessService.killProcessTree(bKillTheEntireTree, oUser, oProcessToDelete);
-			//PrimitiveResult oResult = killProcessTree(sSessionId, sToKillProcessObjId, bKillTheEntireTree, oUser, oProcessToDelete);
+	
+			PrimitiveResult oResult = m_oProcessService.killProcessTree(bKillTheEntireTree, oUser, oProcessToKill);
 			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
 
 			return Response.status(oResult.getIntValue()).build();
@@ -817,31 +796,6 @@ public class ProcessWorkspaceResource {
 		return Response.status(500).build();
 	}
 
-
-	//TODO move to a service
-	private PrimitiveResult killProcessTree(String sSessionId, String sToKillProcessObjId, boolean bKillTheEntireTree, User oUser, ProcessWorkspace oProcessToDelete) throws IOException {
-		//create the operation parameter
-		String sDeleteObjId = Utils.getRandomName();
-		String sPath =  WasdiConfig.Current.paths.serializationPath;
-		KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
-		oKillProcessParameter.setProcessObjId(sDeleteObjId);
-		oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
-		oKillProcessParameter.setKillTree(bKillTheEntireTree);
-
-
-		String sWorkspaceId = oProcessToDelete.getWorkspaceId();
-
-		//base parameter atttributes
-		oKillProcessParameter.setWorkspace(sWorkspaceId);
-		oKillProcessParameter.setUserId(oUser.getUserId());
-		oKillProcessParameter.setExchange(sWorkspaceId);
-		oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-		//schedule the deletion
-		PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), oProcessToDelete.getProductName(), sPath, oKillProcessParameter, null);
-		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
-		return oResult;
-	}
 
 	
 	/**
