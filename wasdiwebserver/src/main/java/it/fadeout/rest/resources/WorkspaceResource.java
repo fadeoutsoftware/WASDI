@@ -465,17 +465,17 @@ public class WorkspaceResource {
 		
 		//preliminary checks
 		try {
-			// before any operation check that this is not an injection attempt from the user
-			if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\") || sWorkspaceId.contains(File.separator)) {
-				Utils.debugLog("WorkspaceResource.deleteWorkspace: Injection attempt from users");
-				return Response.status(400).build();
-			}
-
 			// Validate Session
 			oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
 				return Response.status(401).build();
+			}
+			
+			// before any operation check that this is not an injection attempt from the user
+			if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\") || sWorkspaceId.contains(File.separator)) {
+				Utils.debugLog("WorkspaceResource.deleteWorkspace: Injection attempt by user: " + oUser.getUserId() + " on path: " + sWorkspaceId);
+				return Response.status(400).build();
 			}
 
 			//check user is valid
@@ -519,8 +519,6 @@ public class WorkspaceResource {
 			//kill active processes
 			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId);
 
-			//TODO test
-			//TODO move to service
 			//big list...
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			List<String> asWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId(sWorkspaceId);
