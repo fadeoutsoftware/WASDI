@@ -1,0 +1,58 @@
+<div class="modal fade processor-dialog processor-parameters-template-detail-dialog">
+    <div class="modal-dialog modal-dialog-extra-large modal-wasdi">
+        <div class="modal-content ">
+
+            <div class="modal-header">
+                <i class="fa fa-rocket" aria-hidden="true"></i>&nbsp;WASDI APP
+            </div>
+
+            <div class="modal-body">
+                <div class="container-fluid">
+
+                    <div>
+                        <label>Processor Parameters Template for: {{m_oController.m_oInputProcessor.processorName}}</label>
+                    </div>
+
+                    <div>
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <div>
+                                <label for="template_name">Name</label>
+                                <input id="template_name" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_oProcessorParametersTemplate.name">
+                            </div>
+                            <div>
+                                <label for="template_description">Description</label>
+                                <textarea class="form-control h-50" rows="4" id="template_description" placeholder="Description" ng-model="m_oController.m_oProcessorParametersTemplate.description"></textarea>
+                            </div>
+                            <div ng-show="m_oController.m_oProcessorParametersTemplate.templateId">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <label for="template_creation_date">Creation Date</label>
+                                    <input id="template_creation_date" ng-readonly="true" type="text" class="form-control" placeholder="Creation Date" ng-model="m_oController.m_oProcessorParametersTemplate.creationDate">
+                                </div>
+                                
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <label for="template_update_date">Update Date</label>
+                                    <input id="template_update_date" ng-readonly="true" type="text" class="form-control" placeholder="Update Date" ng-model="m_oController.m_oProcessorParametersTemplate.updateDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <label for="template_parameters">Parameters</label>
+                            <textarea class="form-control h-100" style="font-family:'Courier New',sans-serif;font-size: 16px;" rows="14" id="template_parameters" placeholder="Parameters" ng-model="m_oController.m_oProcessorParametersTemplate.jsonParameters"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <button type="button" ng-click="m_oController.save()" class="my-button" data-dismiss="modal"> <!--data-dismiss="modal"-->
+                    {{"DIALOG_SAVE_BUTTON"|translate}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

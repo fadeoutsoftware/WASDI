@@ -23,5 +23,6 @@ public class ProcessorParametersTemplateListViewModel {
 	private String userId;
 	private String processorId;
 	private String name;
+	private String updateDate;
 
 }
