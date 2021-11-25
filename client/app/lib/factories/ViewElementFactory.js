@@ -33,8 +33,8 @@ function ViewElementFactory() {
 
             // See if we have a default
             if (oControl.default) {
-                oViewElement.m_sValue = oControl.default;
-                oViewElement.m_sText = oControl.default;
+                oViewElement.m_sValue = parseFloat(oControl.default);
+                oViewElement.m_sText = parseFloat(oControl.default);
             }
         }
         else if (oControl.type === "dropdown") {
