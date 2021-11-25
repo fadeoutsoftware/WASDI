@@ -308,7 +308,7 @@
                                     <span class="reviews-name">{{review.userId}}</span>
                                 </div>
                                 <div class="d-flex justify-content-end">
-                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" data-toggle="modal" ng-show="true" data-target="#writeReviewsModal" ng-click="m_oController.setSelectedReview(review)">&nbsp;<span class="fa fa-comment mr-2"> </span>UPDATE</div>
+                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" data-toggle="modal" ng-show="true" data-target="#writeReviewsModal" ng-click="m_oController.setSelectedReview(review)">&nbsp;<span class="fa fa-edit mr-2"> </span>UPDATE</div>
                                     <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
                                 </div>
                             </div>
@@ -364,7 +364,7 @@
                                                     <span class="reviews-name">{{comment.userId}}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-end">
-                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedComment(comment)">&nbsp;<span class="fa fa-comment mr-2"> </span>UPDATE</div>
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedComment(comment)">&nbsp;<span class="fa fa-edit mr-2"> </span>UPDATE</div>
                                                     <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.deleteComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
                                                 </div>
                                             </div>

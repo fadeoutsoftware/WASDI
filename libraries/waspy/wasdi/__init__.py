@@ -32,8 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.5
-Last Update: 02/09/2021
+Version 0.7.0
+
+Last Update: 24/11/2021
 
 Tested with: Python 2.7, Python 3.7
 
@@ -767,6 +768,37 @@ def getWorkspaceIdByName(sName):
             try:
                 if oWorkspace['workspaceName'] == sName:
                     return oWorkspace['workspaceId']
+            except:
+                return ''
+
+    return ''
+
+def getWorkspaceNameById(sWorkspaceId):
+    """
+    Get Name of a Workspace from the id
+
+    :param sWorkspaceId: Workspace Id
+    :return: the Workspace Name as a String, '' if there is any error
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+
+    asHeaders = _getStandardHeaders()
+
+    sUrl = m_sBaseUrl + '/ws/byuser'
+
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResult = oResult.json()
+
+        for oWorkspace in oJsonResult:
+            try:
+                if oWorkspace['workspaceId'] == sWorkspaceId:
+                    return oWorkspace['workspaceName']
             except:
                 return ''
 

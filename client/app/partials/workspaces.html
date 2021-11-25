@@ -38,7 +38,7 @@
                 <table class="table table-hover" id="TableWorkspacesList" aria-label="WS List table"
                        ng-show="m_oController.getWorkspaceInfoList().length > 0 && (m_oController.m_bIsLoading === false)">
                     <thead>
-                    <th ">&nbsp;</th>
+                    <th >&nbsp;</th>
                     <th ng-click="m_oController.changeSorting('workspaceName')">{{"WORKSPACES_THEAD_WORKSPACES" | translate}}&nbsp;<i class="fa fa-sort-asc" aria-hidden="true" ng-show="m_oController.showArrow('workspaceName', false)"></i><i class="fa fa-sort-desc" aria-hidden="true" ng-show="m_oController.showArrow('workspaceName', true)"></i></th>
                     <th ng-click="m_oController.changeSorting('ownerUserId')">{{"WORKSPACES_THEAD_OWNER" | translate}}&nbsp;<i class="fa fa-sort-asc" aria-hidden="true" ng-show="m_oController.showArrow('ownerUserId', false)"></i><i class="fa fa-sort-desc" aria-hidden="true" ng-show="m_oController.showArrow('ownerUserId', true)"></th>
                     <th></th>
@@ -49,7 +49,7 @@
                         ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}">
                         <td ng-click="m_oController.loadProductList(oWSListItem)">
                             &nbsp;
-                        </td-->
+                        </td>
                         <td ng-click="m_oController.loadProductList(oWSListItem)">
                             <span class="ellipsis">
                                 {{oWSListItem.workspaceName}}

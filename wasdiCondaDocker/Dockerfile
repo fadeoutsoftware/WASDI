@@ -1,83 +1,135 @@
 FROM ubuntu:20.04
 
-MAINTAINER Fadeout Software <info@fadeout.it>
+MAINTAINER WASDI <info@wasdi.cloud>
 
+
+# Define argument used to create a user and a group in the container
+# Values are provided with the docker build command
 ARG USR_NAME
 ARG USR_ID
 ARG GRP_NAME
 ARG GRP_ID
+ARG USR_HOME="/home/wasdi"
+ARG MINICONDA_SRC_URL="https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh"
+ARG MINICONDA_TEMPORARY_SCRIPT="Miniconda3.sh"
 
-# Install Java and common tools
-RUN apt-get update && apt-get install -y \
-	openjdk-8-jre \
-	software-properties-common \
-	locate \
-	nano \
-	wget
 
-# Install Python 3.x
-RUN apt-get update && apt-get install -y \
-        python3
+# Create environment variables:
+#   - DEBIAN_FRONTEND: to avoid packages to ask a confirmation
+#   - VIRTUAL_ENV: to define the path to the venv we will use
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV VIRTUAL_ENV=$USR_HOME/venv
 
-RUN apt-get update && apt-get install -y python-dev
 
-# Install GDAL
-RUN apt-get install -y build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev
-RUN apt -y install libpq-dev
-RUN apt-get install -y gdal-bin
-RUN apt-get install -y libgdal-dev
-RUN apt-get update && apt install -y python3-gdal
+# Create a user, create a group and change rights on /home
+RUN groupadd --gid $GRP_ID --non-unique $USR_NAME && \
+    useradd --create-home --home-dir $USR_HOME --uid $USR_ID --gid $GRP_ID --non-unique --shell /bin/bash $USR_NAME && \
+    chmod 755 /home
 
-RUN mkdir /home/wasdi && chmod o+wrx /home/wasdi
 
-# Go at Home and copy files
-WORKDIR "/home/wasdi"
+# Set the workdir to $USR_HOME
+WORKDIR "$USR_HOME"
 
-# Add the tomcat user
-RUN groupadd -g $GRP_ID $GRP_NAME
-RUN chmod 777 /home
-RUN useradd -u $USR_ID -g $GRP_ID $USR_NAME -d /home/$USR_NAME
 
+# Update the system and install packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+        build-essential \
+        gdal-bin \
+        libffi-dev \
+        libgdal-dev \
+        libpq-dev \
+        libssl-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        locate \
+        nano \
+        openjdk-8-jre \
+        python3 \
+        python3-dev \
+        python3-gdal \
+        python3-pip \
+        python3-venv \
+        software-properties-common \
+        wget \
+        zlib1g-dev
+
+
+# Copy our files
+COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
+
+
+# Change rights
+RUN chmod 644 $USR_HOME/*
+
+
+# From now, all commands executed are executed with the user $USR_NAME who must not be root
 USER $USR_NAME
-#
-# MiniConda installing
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh
-RUN bash Miniconda3-py39_4.9.2-Linux-x86_64.sh -b -p /home/$USR_NAME/miniconda
-RUN rm Miniconda3-py39_4.9.2-Linux-x86_64.sh
-
-#RUN wget https://repo.anaconda.com/archive/Anaconda3-2021.04-Linux-x86_64.sh
-#RUN bash Anaconda3-2021.04-Linux-x86_64.sh -b -p /home/$USR_NAME/miniconda
-#RUN rm Anaconda3-2021.04-Linux-x86_64.sh
 
 
-## Updating Anaconda packages
-ENV PATH /home/$USR_NAME/miniconda/bin:$PATH
-RUN /home/$USR_NAME/miniconda/bin/conda update -y --all
+# Create a virtual environment
+RUN python3 -m venv $VIRTUAL_ENV
 
-# Install fast ai
-RUN /home/$USR_NAME/miniconda/bin/conda install -y -c fastchan fastai
-# Install OpenCV
-RUN /home/$USR_NAME/miniconda/bin/conda install -y -c conda-forge opencv
 
-RUN /home/$USR_NAME/miniconda/bin/conda install -y -c anaconda pip
-RUN pip3 install wasdi
-RUN pip3 install gunicorn
-RUN pip3 install flask
-RUN pip3 install requests
+# Install miniconda
+RUN wget -O $USR_HOME/$MINICONDA_TEMPORARY_SCRIPT $MINICONDA_SRC_URL && \
+    bash $USR_HOME/$MINICONDA_TEMPORARY_SCRIPT -b -p $USR_HOME/miniconda && \
+    rm -f $USR_HOME/$MINICONDA_TEMPORARY_SCRIPT
 
-# Copy WASDI Server Files
-COPY ./ /home/wasdi/
 
-# Install specific app requirements
-#RUN /home/$USR_NAME/miniconda/bin/conda install `cat /home/wasdi/requirements.txt | tr "\n" " "`; exit 0
-RUN pip3 install `cat /home/wasdi/requirements.txt | tr "\n" " "`; exit 0
-#RUN /home/$USR_NAME/miniconda/bin/conda env update --file /home/wasdi/env.yml
+# Override the environment PATH variable to be able to use binaries provided by our virtual environment
+# and by miniconda
+# From here, all pip3 commands are executed in our virtual environment because of this setting
+ENV PATH="$VIRTUAL_ENV/bin:$USR_HOME/miniconda/bin:$PATH"
 
-# Set working dir
-WORKDIR /home/wasdi
 
-# Start the server
+# Update conda
+RUN conda update -y --all
+
+
+# Install package using conda
+RUN conda install -y -c fastchan fastai && \
+    conda install -y -c conda-forge opencv && \
+    conda install -y -c anaconda pip
+
+
+# [IN OUR VENV] Install needed Python libraries
+RUN pip3 install flask \
+    gunicorn \
+    requests \
+    numpy \
+    pandas \
+    rasterio \
+    wasdi \
+    wheel
+
+
+# [IN OUR VENV] Install needed Python GDAL library
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+    export C_INCLUDE_PATH=/usr/include/gdal
+RUN pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
+
+
+# From now, all commands executed are executed as root
 USER root
-RUN chmod 777 ./runServer.sh
+
+
+# Install user's packages:
+#   - only if $USR_HOME/packages.txt exists
+#   - we have to become root using USER instruction
+RUN test -f $USR_HOME/packages.txt && apt-get install -y `cat $USR_HOME/packages.txt | tr "\n" " "`; exit 0
+
+
+# From now, all commands executed are executed with the user $USR_NAME who must not be root
 USER $USR_NAME
+
+
+# Install user's Python libraries:
+#   - only if $USR_HOME/pip.txt exists
+RUN test -f $USR_HOME/pip.txt && pip3 install `cat $USR_HOME/pip.txt | tr "\n" " "`; exit 0
+
+
+# Start our webserver
+RUN chmod 777 ./runServer.sh
 CMD ./runServer.sh
