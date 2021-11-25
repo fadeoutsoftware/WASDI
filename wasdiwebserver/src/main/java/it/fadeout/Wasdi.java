@@ -1038,33 +1038,37 @@ public class Wasdi extends ResourceConfig {
 	public static String readHttpResponse(HttpURLConnection oConnection) {
 		try {
 			// response
-			int iResponseCode = oConnection.getResponseCode();
-			//Utils.debugLog("Wasdi.readHttpResponse: server returned " + iResponseCode);
 
 			InputStream oResponseInputStream = null;
+			try {
+				oResponseInputStream = oConnection.getInputStream();
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.readHttpResponse: could not getInputStream due to: " + oE );
+			}
+			
+			try {
+				if(null==oResponseInputStream) {
+					oResponseInputStream = oConnection.getErrorStream();
+				}
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.readHttpResponse: could not getErrorStream due to: " + oE );
+			}
+			
 
 			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+			
 
-			if( 200 <= iResponseCode && 299 >= iResponseCode ) {
-				oResponseInputStream = oConnection.getInputStream();
+			Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+			String sMessage = oByteArrayOutputStream.toString();
+			if( 200 <= oConnection.getResponseCode() && 299 >= oConnection.getResponseCode() ) {
+				return sMessage;
 			} else {
-				//Utils.debugLog("Wasdi.readHttpResponse: failed with error " + iResponseCode);
-				oResponseInputStream = oConnection.getErrorStream();
+				Utils.debugLog("Wasdi.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
+				return "";
 			}
-			if(null!=oResponseInputStream) {
-				Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-				String sMessage = oByteArrayOutputStream.toString();
-				if( 200 <= iResponseCode && 299 >= iResponseCode ) {
-					return sMessage;
-				} else {
-					//Utils.debugLog("Wasdi.readHttpResponse: error message: " + sMessage);
-					return "";
-				}
-			} else {
-				throw new NullPointerException("Wasdi.readHttpResponse: stream is null");
-			}
+			
 		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.readHttpResponse: " + oE );
+			Utils.debugLog("Wasdi.readHttpResponse: exception: " + oE );
 		}
 		return "";
 	}
