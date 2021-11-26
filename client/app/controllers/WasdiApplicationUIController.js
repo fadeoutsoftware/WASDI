@@ -388,7 +388,7 @@ var WasdiApplicationUIController = (function () {
                 //console.log(oElement.paramName + " ["+oElement.type+"]: " + oElement.getValue());
 
                 // Save the value to the output json
-                if (this.m_bRenderAsStrings) {
+                if (this.m_bRenderAsStrings && oElement.type != 'numeric') {
                     oProcessorInput[oElement.paramName] = oElement.getStringValue();
                 } else {
                     oProcessorInput[oElement.paramName] = oElement.getValue();
