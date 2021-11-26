@@ -239,6 +239,15 @@ var ProcessorParametersTemplateController = (function() {
     ProcessorParametersTemplateController.prototype.save = function() {
         var oController = this;
 
+        try {
+            var sJSONPayload = oController.m_oProcessorParametersTemplate.jsonParameters;
+            JSON.parse(sJSONPayload);
+        }
+        catch (oError) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PARSING THE JSON PAYLOAD");
+            return;
+        }
+
         oController.m_oProcessorParametersTemplate.jsonParameters = encodeURI(oController.m_oProcessorParametersTemplate.jsonParameters);
 
         if(utilsIsStrNullOrEmpty(oController.m_oProcessorParametersTemplate.templateId) === false){
