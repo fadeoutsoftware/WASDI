@@ -30,7 +30,6 @@ import java.util.logging.SimpleFormatter;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
@@ -44,7 +43,6 @@ import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
-import it.fadeout.services.AuthProviderService;
 import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -72,22 +70,22 @@ import wasdi.shared.viewmodels.PrimitiveResult;
  * Main Class of the WASDI Web Server.
  * Intilizes the system
  * Contains different Utility functions to make from this server http calls to the other servers
- *
+ * 
  * @author p.campanella
  *
  */
 public class Wasdi extends ResourceConfig {
 	
 	/**
-	 * Static name of the system property that hosts to the nfs (satellite path finder) download folder
+	 * Static name of the system property that hosts to the nfs (satellite path finder) download folder 
 	 */
 	private static final String s_SNFS_DATA_DOWNLOAD = "nfs.data.download";
-
+	
 	/**
 	 * Name of the main WASDI node
 	 */
 	private static final String s_sWASDINAME = "wasdi";
-
+	
 	/**
 	 * Servlet Config to access web.xml file
 	 */
@@ -96,10 +94,6 @@ public class Wasdi extends ResourceConfig {
 
 	@Context
 	ServletContext m_oContext;
-
-	@Inject
-	static
-	AuthProviderService s_oAuthServiceProvider;
 
 
 	/**
@@ -142,7 +136,7 @@ public class Wasdi extends ResourceConfig {
 	static {
 		m_oCredentialPolicy = new CredentialPolicy();
 	}
-
+	
 	/**
 	 * Contructor: bind the clasess and the resources classes
 	 */
@@ -150,7 +144,7 @@ public class Wasdi extends ResourceConfig {
 		register(new WasdiBinder());
 		packages(true, "it.fadeout.rest.resources");
 	}
-
+	
 	/**
 	 * Web Server intialization: it loads the main web-server configuration
 	 */
@@ -158,17 +152,17 @@ public class Wasdi extends ResourceConfig {
 	public void initWasdi() {
 
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
-
-		String sConfigFilePath = "/data/wasdi/config.json";
-
+		
+		String sConfigFilePath = "/data/wasdi/config.json"; 
+		
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
 		}
-
+		
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			Utils.debugLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
-
+		
 		// set nfs properties download folder
 		String sUserHome = System.getProperty("user.home");
 		String sNfsFolder = System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD);
@@ -176,7 +170,7 @@ public class Wasdi extends ResourceConfig {
 			System.setProperty(Wasdi.s_SNFS_DATA_DOWNLOAD, sUserHome + "/nfs/download");
 
 		Utils.debugLog("-------nfs dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
-
+		
 		// Read MongoDb Configuration
 		try {
 
@@ -198,16 +192,16 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
-		// Read the configuration of KeyCloak
+		// Read the configuration of KeyCloak		
 		s_sKeyCloakIntrospectionUrl = WasdiConfig.Current.keycloack.introspectAddress;
 		s_sClientId = WasdiConfig.Current.keycloack.confidentialClient;
 		s_sClientSecret = WasdiConfig.Current.keycloack.clientSecret;
-
+		
 		// Computational nodes need to configure also the local dababase
 		try {
 			// If this is not the main node
 			if (!s_sMyNodeCode.equals(Wasdi.s_sWASDINAME)) {
-
+				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
 				Utils.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
@@ -216,12 +210,12 @@ public class Wasdi extends ResourceConfig {
 		catch (Throwable e) {
 			e.printStackTrace();
 		}
-
+		
 		// Local path the the web application
 		try {
 			String sLocalTomcatWebAppFolder = WasdiConfig.Current.paths.tomcatWebAppPath;
 			if (!Utils.isNullOrEmpty(sLocalTomcatWebAppFolder)) {
-
+				
 				ImageResourceUtils.s_sWebAppBasePath = sLocalTomcatWebAppFolder;
 				if (!ImageResourceUtils.s_sWebAppBasePath.endsWith("/")) ImageResourceUtils.s_sWebAppBasePath += "/";
 			}
@@ -230,16 +224,16 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 
-
+		
 		// Configure Rabbit
 		try {
 			RabbitFactory.readConfig();
-
+			
 			Utils.debugLog("-------Rabbit Initialized ");
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-
+		
 		// Initialize Snap
 		Utils.debugLog("-------initializing snap...");
 
@@ -280,7 +274,7 @@ public class Wasdi extends ResourceConfig {
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, s_sMyNodeCode);
 			
 			if (oWorkspace == null) {
-
+				
 				// Create the working Workspace in this node
 				Utils.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
 				
@@ -340,7 +334,7 @@ public class Wasdi extends ResourceConfig {
 			oE.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Get the User object from the session Id
 	 * It checks first in Key Cloak and later on the local session mechanism.
@@ -443,10 +437,10 @@ public class Wasdi extends ResourceConfig {
 
 		return sPath;
 	}
-
+	
 	/**
-	 * Get the root path of download folder of WASDI
-	 *
+	 * Get the root path of download folder of WASDI 
+	 * 
 	 * @return base download local path with the ending / included
 	 */
 	public static String getDownloadPath() {
@@ -481,14 +475,14 @@ public class Wasdi extends ResourceConfig {
 	}
 	
 	/**
-	 * Run Process: trigger the execution of a WASDI Process.
+	 * Run Process: trigger the execution of a WASDI Process. 
 	 * If the workspace of the operation is the actual node this function
 	 * creates the process workspace entry in the db that will be handled by the scheduler to run a process on a node.
-	 * If the workspace it is in another node, it routes the request to the destination node calling
+	 * If the workspace it is in another node, it routes the request to the destination node calling 
 	 * processing/run
 	 * API
 	 * This version assumes Sub Operation Id and Parent Id NULL
-	 *
+	 *  
 	 * @param sUserId requesting the operation
 	 * @param sSessionId User session
 	 * @param sOperationType Id of the Launcher Operation
@@ -501,16 +495,16 @@ public class Wasdi extends ResourceConfig {
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
 		return runProcess(sUserId, sSessionId, sOperationType, sProductName, sSerializationPath, oParameter, null);
 	}
-
+	
 	/**
-	 * Run Process: trigger the execution of a WASDI Process.
+	 * Run Process: trigger the execution of a WASDI Process. 
 	 * If the workspace of the operation is the actual node this function
 	 * creates the process workspace entry in the db that will be handled by the scheduler to run a process on a node.
-	 * If the workspace it is in another node, it routes the request to the destination node calling
+	 * If the workspace it is in another node, it routes the request to the destination node calling 
 	 * processing/run
-	 * API
+	 * API	 
 	 * This version assume Operation Sub Id = Null
-	 *
+	 *  
 	 * @param sUserId User requesting the operation
 	 * @param sSessionId User session
 	 * @param sOperationType Id of the Launcher Operation
@@ -526,10 +520,10 @@ public class Wasdi extends ResourceConfig {
 	}
 
 	/**
-	 * Run Process: trigger the execution of a WASDI Process.
+	 * Run Process: trigger the execution of a WASDI Process. 
 	 * If the workspace of the operation is the actual node this function
 	 * creates the process workspace entry in the db that will be handled by the scheduler to run a process on a node.
-	 * If the workspace it is in another node, it routes the request to the destination node calling
+	 * If the workspace it is in another node, it routes the request to the destination node calling 
 	 * processing/run
 	 * API
 	 *
@@ -541,7 +535,7 @@ public class Wasdi extends ResourceConfig {
 	 * @param sSerializationPath Node Serialisation Path
 	 * @param oParameter Parameter associated to the operation
 	 * @param sParentId Id the the parent process
-	 * @return Primitive Result with the output status of the operation: boolValue = true, intValue = 200, stringValue = processId if the operation is fine.
+	 * @return Primitive Result with the output status of the operation: boolValue = true, intValue = 200, stringValue = processId if the operation is fine. 
 	 * 			otherwise boolValue = false, intValue = httpErrorCode.
 	 * @throws IOException
 	 */
@@ -664,10 +658,9 @@ public class Wasdi extends ResourceConfig {
 				oSession.setUserId(sUserId);
 
 				Boolean bNew = false;
-				//MAYBE store the keycloak access token instead, so we can retrieve the user and perform a further check
-				//if it is a root process, then create a new (old-style) session
+				//store the keycloak access token instead, so we can retrieve the user and perform a further check
 				if (Utils.isNullOrEmpty(sParentId)) {
-					sSessionId = s_oAuthServiceProvider.getOldStyleRandomSession();
+					sSessionId = UUID.randomUUID().toString();
 					bNew = true;
 				}
 				oSession.setSessionId(sSessionId);
@@ -681,7 +674,6 @@ public class Wasdi extends ResourceConfig {
 				} else {
 					bRet = oSessionRepo.touchSession(oSession);
 				}
-
 				if (bRet) {
 					oParameter.setSessionID(oSession.getSessionId());
 				} else {
@@ -695,7 +687,7 @@ public class Wasdi extends ResourceConfig {
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 
 				try {
-
+					
 					oProcess.setOperationDate(Utils.getFormatDate(new Date()));
 					oProcess.setOperationType(sOperationType);
 					oProcess.setOperationSubType(sOperationSubId);
@@ -802,7 +794,7 @@ public class Wasdi extends ResourceConfig {
 			return "";
 		}
 	}
-
+	
 	/**
 	 * Standard http post file utility function
 	 * @param sUrl destination url
@@ -1102,7 +1094,7 @@ public class Wasdi extends ResourceConfig {
 		    String sUrl = sBaseUrl + "/workflows/download?workflowId="+sWorkflowId;
 		    
 		    String sOutputFilePath = "";
-
+		    
 			
 			try {
 				URL oURL = new URL(sUrl);
