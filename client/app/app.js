@@ -28,6 +28,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.ProcessorService',
+    'wasdi.ProcessorParametersTemplateService',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
@@ -210,6 +211,8 @@ wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersControl
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
+wasdiApp.controller("ProcessorParametersTemplateListController", ProcessorParametersTemplateListController);
+wasdiApp.controller("ProcessorParametersTemplateDetailController", ProcessorParametersTemplateDetailController);
 wasdiApp.controller("WorkflowController", WorkflowController);
 wasdiApp.controller("WorkspaceDetailsController", WorkspaceDetailsController);
 wasdiApp.controller("WappsController", WappsController);

@@ -38,4 +38,10 @@ public class ProcessorParametersTemplate {
 	/** Sample JSON Parameter */
 	private String jsonParameters;
 
+	/** Creation timestamp */
+	private Double creationDate;
+
+	/** Last update timestamp */
+	private Double updateDate;
+
 }

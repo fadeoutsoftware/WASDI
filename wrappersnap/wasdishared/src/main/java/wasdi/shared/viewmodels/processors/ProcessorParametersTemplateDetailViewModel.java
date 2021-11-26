@@ -25,5 +25,7 @@ public class ProcessorParametersTemplateDetailViewModel {
 	private String name;
 	private String description;
 	private String jsonParameters;
+    private String creationDate;
+	private String updateDate;
 
 }

@@ -155,6 +155,27 @@ public class Utils {
 			return null;
 		}
 	}
+
+	/**
+	 * Parse the date into a Double fit for MongoDb.
+	 * @param sWasdiDate the date as a string in the yyyy-MM-dd HH:mm:ss format
+	 * @return the time in millis in the form of a Double
+	 */
+	public static Double getWasdiDateAsDouble(String sWasdiDate) {
+		if (sWasdiDate == null) {
+			return null;
+		}
+
+		Date oDate = getWasdiDate(sWasdiDate);
+
+		if (oDate == null) {
+			return null;
+		}
+
+		long lTimeInMillis = oDate.getTime();
+
+		return new Double(lTimeInMillis);
+	}
 	
 	public static long getProcessWorkspaceSecondsDuration(ProcessWorkspace oProcessWorkspace) {
 		try {

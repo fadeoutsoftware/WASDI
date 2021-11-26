@@ -225,6 +225,44 @@ var WappsController = (function() {
 
     }
 
+    WappsController.prototype.paramsClick = function(oProcessor) {
+        var oController = this;
+
+        this.m_sJson = "m_sJson";
+
+        this.m_sMyJsonString = "m_sMyJsonString";
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/processor_parameters_template_list/ProcessorParametersTemplateListView.html",
+            controller: "ProcessorParametersTemplateListController",
+            inputs: {
+                extras: {
+                    processor:oProcessor
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                if (utilsIsObjectNullOrUndefined(oResult) === false) {
+
+                    let sJson = decodeURIComponent(oResult);
+
+                    try {
+                        var oParsed = JSON.parse(sJson);
+                        sPrettyPrint = JSON.stringify(oParsed, null, 2);
+
+                        oController.m_sMyJsonString = sPrettyPrint;
+                    }
+                    catch (oError) {
+
+                    }
+
+                }
+            });
+        });
+
+    }
+
     WappsController.prototype.getProcessorNameAsTitle = function(){
         if( this._selectedProcessor ){
             return this._selectedProcessor.processorName;
