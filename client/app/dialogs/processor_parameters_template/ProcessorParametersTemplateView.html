@@ -112,9 +112,16 @@
                                     <input id="template_update_date" ng-readonly="true" type="text" class="form-control" placeholder="Update Date" ng-model="m_oController.m_oProcessorParametersTemplate.updateDate">
                                 </div>
                             </div>
+
                             <div>
-                                <label for="template_parameters">Parameters</label>
-                                <textarea class="form-control h-40" ng-readonly="!m_oController.m_bEditMode" style="font-family:'Courier New',sans-serif;font-size: 16px;" rows="8" id="template_parameters" placeholder="Parameters" ng-model="m_oController.m_oProcessorParametersTemplate.jsonParameters"></textarea>
+                                <div class="loadIcon" ng-hide="m_oController.m_bIsLoading === false">
+                                    <invader></invader>
+                                </div>
+
+                                <div ng-hide="m_oController.m_bIsLoading === true">
+                                    <label for="template_parameters">Parameters</label>
+                                    <textarea class="form-control h-40" ng-readonly="!m_oController.m_bEditMode" style="font-family:'Courier New',sans-serif;font-size: 16px;" rows="8" id="template_parameters" placeholder="Parameters" ng-model="m_oController.m_oProcessorParametersTemplate.jsonParameters"></textarea>
+                                </div>
                             </div>
 
                             <br>

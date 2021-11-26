@@ -64,6 +64,8 @@ var ProcessorParametersTemplateController = (function() {
 
         this.m_oModalService = oModalService;
 
+        this.m_bIsLoading = false;
+
         // Are we creating a new processor or editing an existing one?
         if (this.m_oInputProcessor !== null) {
 
@@ -185,18 +187,26 @@ var ProcessorParametersTemplateController = (function() {
                         var oParsed = JSON.parse(sJSONPayload);
                         var sPrettyPrint = JSON.stringify(oParsed, null, 2);
                         oController.m_oProcessorParametersTemplate.jsonParameters = sPrettyPrint;
+
+                        oController.m_bIsLoading = false;
                     }
                     catch (oError) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PARSING THE JSON PAYLOAD");
+
+                        oController.m_bIsLoading = false;
                     }
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING PROCESSOR PARAMETERS TEMPLATE DETAIL");
+
+                    oController.m_bIsLoading = false;
                 }
 
             },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING PROCESSOR PARAMETERS TEMPLATE DETAIL");
+
+            oController.m_bIsLoading = false;
         });
     }
 
@@ -248,6 +258,8 @@ var ProcessorParametersTemplateController = (function() {
             return;
         }
 
+        oController.m_bIsLoading = true;
+
         oController.m_oProcessorParametersTemplate.jsonParameters = encodeURI(oController.m_oProcessorParametersTemplate.jsonParameters);
 
         if(utilsIsStrNullOrEmpty(oController.m_oProcessorParametersTemplate.templateId) === false){
@@ -260,6 +272,7 @@ var ProcessorParametersTemplateController = (function() {
                 oController.viewProcessorParametersTemplate(oController.m_oProcessorParametersTemplate);
             },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPDATING PROCESSOR PARAMETERS TEMPLATE");
+                oController.m_bIsLoading = false;
             });
         } else {
             oController.m_oProcessorParametersTemplateService.addProcessorParameterTemplate(oController.m_oProcessorParametersTemplate).then(function () {
@@ -269,8 +282,11 @@ var ProcessorParametersTemplateController = (function() {
                 oController.getProcessorParametersTemplatesList(oController.m_sProcessorId);
                 oController.m_bEditMode = false;
                 oController.m_oProcessorParametersTemplate = null;
+
+                oController.m_bIsLoading = false;
             },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR ADDING PROCESSOR PARAMETERS TEMPLATE");
+                oController.m_bIsLoading = false;
             });
         }
 
