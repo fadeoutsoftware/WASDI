@@ -22,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
+import wasdi.shared.business.CloudProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
@@ -31,6 +32,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.CloudProviderRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -244,9 +246,17 @@ public class WorkspaceResource {
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
 					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
-					
+										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
 						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+						
+						CloudProviderRepository oCloudProviderRepository = new CloudProviderRepository();
+						CloudProvider oCloudProvider = oCloudProviderRepository.getCloudProviderByCode(oWorkspaceNode.getCloudProvider());
+						
+						if (oCloudProvider != null) {
+							oVM.setSlaLink(oCloudProvider.getSlaLink());
+						}
+						
 					}
 					else {
 						oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
