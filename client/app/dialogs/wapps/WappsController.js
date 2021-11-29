@@ -233,8 +233,8 @@ var WappsController = (function() {
         this.m_sMyJsonString = "m_sMyJsonString";
 
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/processor_parameters_template_list/ProcessorParametersTemplateListView.html",
-            controller: "ProcessorParametersTemplateListController",
+            templateUrl: "dialogs/processor_parameters_template/ProcessorParametersTemplateView.html",
+            controller: "ProcessorParametersTemplateController",
             inputs: {
                 extras: {
                     processor:oProcessor

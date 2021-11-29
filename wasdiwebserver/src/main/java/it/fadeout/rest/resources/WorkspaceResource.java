@@ -176,6 +176,15 @@ public class WorkspaceResource {
 		return aoWSList;
 	}
 
+	/**
+	 * Returns the View Model of the workspace.
+	 * The view model contains the baseic parameters of the ws, plus the base URL
+	 * for the api calls following api calls, accordingly to the node url from DB.
+	 * To change the workspace node Id checks the "update" call on this resource
+	 * @param sSessionId the current sesssion, that should be validated
+	 * @param sWorkspaceId Unique identifier of the workspace
+	 * @return Workspace View Model with the updated values
+	 */
 	@GET
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
