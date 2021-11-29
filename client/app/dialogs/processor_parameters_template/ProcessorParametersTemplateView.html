@@ -6,7 +6,7 @@
             <div class=" modal-header">
                 <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
                     <h4 class="modal-title ">
-                        <i class="fa fa-rocket" aria-hidden="true"></i>&nbsp;WASDI APP PARAMETERS TEMPLATES
+                        <i class="fa fa-rocket" aria-hidden="true"></i>&nbsp;App Params Library
                     </h4>
                 </div>
                 <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
@@ -41,7 +41,7 @@
 
                         <div class="row-v4 apps-list">
                             <!------------------------------------- TEMPLATES TABLE ------------------------------------->
-                            <div class="col-v4-6 mb-4"
+                            <div class="col-v4-6 mb-4" ng-hide="m_oController.m_aoProcessorParametersTemplates.length == 0"
                                 ng-repeat="oProcessorParametersTemplate in m_oController.m_aoProcessorParametersTemplates | filter: {name:SearchTextTemplate}">
                                 <div class="pt-1 pb-3 px-3 h-50 app-item" style="margin-bottom: 15px;"
                                     ng-click="m_oController.viewProcessorParametersTemplate(oProcessorParametersTemplate)"
@@ -70,6 +70,9 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="col-v4-6 mb-4" ng-hide="m_oController.m_aoProcessorParametersTemplates.length > 0">
+                                <div>No parameters available for this app, do you want to <a style="cursor: pointer;" ng-click="m_oController.addProcessorParametersTemplate()">add one</a>?</div>
                             </div>
                         </div>
                     </div>
@@ -135,13 +138,13 @@
                             <div class="over-icon text-right">
                                 <div ng-hide="m_oController.m_bEditMode">
                                     <button class="my-button my-align-right" ng-click="m_oController.editProcessorParametersTemplate(m_oController.m_oProcessorParametersTemplate)">
-                                        EDIT
+                                        Edit
                                     </button>
                                 </div>
 
                                 <div ng-hide="m_oController.m_bEditMode">
                                     <button class="my-button my-align-right" ng-click="m_oController.applyProcessorParametersTemplate(m_oController.m_oProcessorParametersTemplate.templateId)" data-dismiss="modal">
-                                        APPLY
+                                        Apply
                                     </button>
                                 </div>
                             </div>

@@ -243,7 +243,7 @@ var ProcessorParametersTemplateController = (function() {
             }
         }
  
-        utilsVexDialogConfirm("Are you SURE you want to delete the Processor Parameters Template: " + oTemplate.name + " ?", oReturnFunctionValue);
+        utilsVexDialogConfirm("Are you SURE you want to delete<br> " + oTemplate.name + " ?", oReturnFunctionValue);
     };
 
     ProcessorParametersTemplateController.prototype.save = function() {

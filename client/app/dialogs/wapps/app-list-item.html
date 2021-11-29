@@ -8,8 +8,8 @@
                 <div class="col-v4-12">
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher || processor.sharedWithMe" class="wapps-button" title="Download" ng-click="m_oController.downloadClick(processor)"><em class="fa fa-download"></em></button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher || processor.sharedWithMe" class="wapps-button" title="Edit" ng-click="m_oController.editClick(processor)"><em class="fa fa-pencil"></em></button>
-                    <button                                                                                                         class="wapps-button" title="View Parameters Templates" ng-click="m_oController.paramsClick(processor)"><em class="fa fa-cogs"></em></button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher || processor.sharedWithMe" class="wapps-button" title="Delete" ng-click="m_oController.deleteClick(processor)"><em class="fa fa-times"></em></button>
+                    <button                                                                                                         class="wapps-button" title="View Parameters Templates" ng-click="m_oController.paramsClick(processor)"><em class="fa fa-cogs"></em></button>                    
                     <em ng-show="m_oController.m_oConstantsService.getUserId()!==processor.publisher" class="fa fa-times" style="color:transparent"></em>
                 </div>
             </div>
