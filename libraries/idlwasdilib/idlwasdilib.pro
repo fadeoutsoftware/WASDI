@@ -9,6 +9,7 @@
 ; 0.7.0 - 2021-11-24
 ;	added getWorkspaceNameById
 ;	adapted to new API
+;	added searchEOImages support to L8,ENVI, S3, S5P, VIIRS
 ;
 ; 0.6.3 - 2021-05-06
 ;	support start by workspace id and copy to sftp relative path
@@ -1636,9 +1637,9 @@ FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asL
 END
 
 
-; Search Sentinel EO Images
+; Search EO Images
 ;
-; @param sPlatform Satellite Platform. Accepts "S1","S2"
+; @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVISAT","L8","VIIRS"
 ; @param sDateFrom Starting date in format "YYYY-MM-DD"
 ; @param sDateTo End date in format "YYYY-MM-DD"
 ; @param dULLat Upper Left Lat Coordinate. Can be null.
@@ -1672,13 +1673,27 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   sQuery = "( platformname:";
   
   IF (sPlatform eq 'S2') THEN BEGIN
-	 sQuery = sQuery + "Sentinel-2 "
+	 sQuery = sQuery + "Sentinel-2"
+  END ELSE IF (sPlatform eq 'S3') THEN BEGIN
+     sQuery = sQuery + "Sentinel-3"
+  END ELSE IF (sPlatform eq 'S5P') THEN BEGIN
+     sQuery = sQuery + "Sentinel-5P"
+  END ELSE IF (sPlatform eq 'VIIRS') THEN BEGIN
+     sQuery = sQuery + "VIIRS"
+  END ELSE IF (sPlatform eq 'ENVI') THEN BEGIN
+     sQuery = sQuery + "Envisat"
+  END ELSE IF (sPlatform eq 'L8') THEN BEGIN
+     sQuery = sQuery + "Landsat-*"
   END ELSE BEGIN
 	 sQuery = sQuery + "Sentinel-1"
   END
 
   IF (sProductType NE !NULL) THEN BEGIN
 	 sQuery = sQuery + " AND producttype:" + sProductType
+  END ELSE BEGIN
+	 IF (sPlatform eq 'VIIRS') THEN BEGIN
+		sQuery = sQuery + " AND producttype:VIIRS_1d_composite"
+	 END
   END
   
   IF (sSensorOperationalMode NE !NULL) THEN BEGIN

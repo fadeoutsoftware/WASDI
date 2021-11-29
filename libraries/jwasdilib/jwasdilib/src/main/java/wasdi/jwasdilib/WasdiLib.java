@@ -39,10 +39,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 /**
- * [0.7.0] - 2021-11-24
+ * [0.7.0] - 2021-11-29
  * 	
  * ### Added
  * - getWorkspaceNameById: return the name of a workspace from the id
+ * - searchEOImages support to S3, S5P, ENVISAT, VIIRS, L8
  * ### Fixed
  * - updated all methods to new APIs
  * - checked null or empty list in waitProcesses
@@ -2122,7 +2123,7 @@ public class WasdiLib {
 
 	/**
 	 * Search EO-Images 
-	 * @param sPlatform Satellite Platform. Accepts "S1","S2"
+	 * @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS"
 	 * @param sDateFrom Starting date in format "YYYY-MM-DD"
 	 * @param sDateTo End date in format "YYYY-MM-DD"
 	 * @param dULLat Upper Left Lat Coordinate. Can be null.
@@ -2162,8 +2163,8 @@ public class WasdiLib {
 			return aoReturnList;
 		}
 
-		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2"))) {
-			log("searchEOImages: platform must be S1 or S2. Received [" + sPlatform + "]");
+		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2") || sPlatform.equals("S3") || sPlatform.equals("S5P") || sPlatform.equals("ENVI") || sPlatform.equals("VIIRS") || sPlatform.equals("L8"))) {
+			log("searchEOImages: platform must be one of S1, S2, S3, S5P, ENVI, VIIRS, L8. Received [" + sPlatform + "]");
 			return aoReturnList;
 		}
 
@@ -2182,7 +2183,15 @@ public class WasdiLib {
 				}
 			}
 		}
-
+		
+		if (sPlatform.equals("S3")) {
+			if (sProductType != null) {
+				if (!(sProductType.equals("SR_1_SRA___") || sProductType.equals("SR_1_SRA_A_")  || sProductType.equals("SR_1_SRA_BS")  || sProductType.equals("SR_2_LAN___") )) {
+					log("searchEOImages: Available Product Types for S3; SR_1_SRA___, SR_1_SRA_A_, SR_1_SRA_BS, SR_2_LAN___. Received [" + sProductType + "]");
+				}
+			}
+		}
+		
 		if (sDateFrom == null) {
 			log("searchEOImages: sDateFrom cannot be null");
 			return aoReturnList;			
@@ -2208,11 +2217,21 @@ public class WasdiLib {
 		// Platform name for sure
 		String sQuery = "( platformname:";
 		if (sPlatform.equals("S2")) sQuery += "Sentinel-2 ";
+		else if (sPlatform.equals("S3")) sQuery += "Sentinel-3";
+		else if (sPlatform.equals("S5P")) sQuery += "Sentinel-5P";
+		else if (sPlatform.equals("ENVI")) sQuery += "Envisat";
+		else if (sPlatform.equals("L8")) sQuery += "Landsat-*";
+		else if (sPlatform.equals("VIIRS")) sQuery += "VIIRS";
 		else sQuery += "Sentinel-1";
 
 		// If available add product type
 		if (sProductType != null) {
 			sQuery += " AND producttype:" + sProductType;
+		}
+		else {
+			if (sPlatform.equals("VIIRS")) {
+				sQuery += " AND producttype:VIIRS_1d_composite";
+			}
 		}
 
 		// If available Sensor Operational Mode
@@ -2255,7 +2274,7 @@ public class WasdiLib {
 			String sResponse = httpPost(sUrl, sQueryBody, getStandardHeaders());
 			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
 
-			log("" + aoJSONMap);
+			//log("" + aoJSONMap);
 
 			return aoJSONMap;		
 		}
