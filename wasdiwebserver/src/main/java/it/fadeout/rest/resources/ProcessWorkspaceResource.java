@@ -7,7 +7,6 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.*;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.*;
-import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;

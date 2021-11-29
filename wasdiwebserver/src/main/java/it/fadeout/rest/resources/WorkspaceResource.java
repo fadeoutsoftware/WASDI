@@ -4,6 +4,8 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.ProcessService;
+import it.fadeout.services.ProcessServiceInterface;
+
 import org.apache.commons.io.FileUtils;
 import wasdi.shared.business.*;
 import wasdi.shared.config.WasdiConfig;
@@ -43,7 +45,7 @@ import java.util.List;
 public class WorkspaceResource {
 
 	@Inject
-	ProcessService m_oProcessWorkspaceService;
+	ProcessServiceInterface m_oProcessWorkspaceService;
 
 
 	@Context
@@ -516,22 +518,24 @@ public class WorkspaceResource {
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
-				Utils.debugLog("User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
 
 			//kill active processes
-			m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, oUser);
+			PrimitiveResult oKillResult = m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, oUser);
+			if(!oKillResult.getBoolValue()) {
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: WARNING: could not kill processes in workspace");
+			}
 
-			//big list...
+			//big list of all processes in workspace
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			List<String> asWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId(sWorkspaceId);
+			//delete logs
 			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 			oProcessorLogRepository.deleteLogsByProcessWorkspaceIds(asWorkspaceProcessesList);
-
-
 			// Delete all the process-workspaces
 			oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
 

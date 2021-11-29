@@ -37,6 +37,6 @@ public class WasdiBinder extends AbstractBinder {
 		bind(NodeRepository.class).to(NodeRepository.class);
 		//process workspace
 		//bind(ProcessService.class).to(ProcessServiceInterface.class).in(Singleton.class);
-		bind(ProcessService.class).to(ProcessService.class).in(Singleton.class);
+		bind(ProcessService.class).to(ProcessServiceInterface.class).in(Singleton.class);
 	}
 }
