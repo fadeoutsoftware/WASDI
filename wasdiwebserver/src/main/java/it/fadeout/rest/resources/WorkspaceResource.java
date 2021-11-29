@@ -525,21 +525,11 @@ public class WorkspaceResource {
 			}
 
 			//kill active processes
-			PrimitiveResult oKillResult = m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, oUser);
+			PrimitiveResult oKillResult = m_oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, oUser, true);
 			if(!oKillResult.getBoolValue()) {
-				Utils.debugLog("WorkspaceResource.DeleteWorkspace: WARNING: could not kill processes in workspace");
+				Utils.debugLog("WorkspaceResource.DeleteWorkspace: WARNING: could not schedule kill processes in workspace");
 			}
-
-			//big list of all processes in workspace
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			List<String> asWorkspaceProcessesList = oProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId(sWorkspaceId);
-			//delete logs
-			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-			oProcessorLogRepository.deleteLogsByProcessWorkspaceIds(asWorkspaceProcessesList);
-			// Delete all the process-workspaces
-			oProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId(sWorkspaceId);
-
-
+			
 			// get workspace path
 			String sWorkspacePath = Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 

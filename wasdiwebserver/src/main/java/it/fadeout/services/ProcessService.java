@@ -27,6 +27,7 @@ import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
 
 /**
  * @author c.nattero
@@ -35,16 +36,15 @@ import wasdi.shared.business.Workspace;
 public class ProcessService implements ProcessServiceInterface {
 
 	@Context
-	ServletConfig m_oServletConfig;	
-
+	ServletConfig m_oServletConfig;
 
 	@Override
-	public PrimitiveResult killProcesses(List<ProcessWorkspace> aoProcesses, Boolean bKillProcessTree, User oUser) {
-		if(null == aoProcesses) {
+	public PrimitiveResult killProcesses(List<ProcessWorkspace> aoProcesses, Boolean bKillProcessTree, Boolean bCleanDB, User oUser) {
+		if (null == aoProcesses) {
 			Utils.debugLog("ProcessWorkspaceService.killFathers: list of processes is null, aborting");
 			return PrimitiveResult.getInvalid();
 		}
-		if(aoProcesses.size() <= 0) {
+		if (aoProcesses.size() <= 0) {
 			Utils.debugLog("ProcessWorkspaceService.killFathers: list of processes is empty, aborting");
 			return PrimitiveResult.getInvalid();
 		}
@@ -52,55 +52,63 @@ public class ProcessService implements ProcessServiceInterface {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setIntValue(500);
 		oResult.setBoolValue(false);
-		
+
 		try {
 
-			//create new session
+			// create new session
 			String sSessionId = UUID.randomUUID().toString();
 			UserSession oSession = new UserSession();
+			oSession.setUserId(oUser.getUserId());
 			oSession.setSessionId(sSessionId);
 			oSession.setLoginDate((double) new Date().getTime());
 			oSession.setLastTouch((double) new Date().getTime());
 			SessionRepository oSessionRepository = new SessionRepository();
-			if(!oSessionRepository.insertSession(oSession)) {
-				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: could not insert the session in the DB, kill not scheduled");
+			if (!oSessionRepository.insertSession(oSession)) {
+				Utils.debugLog(
+						"ProcessWorkspaceResource.DeleteProcess: could not insert the session in the DB, kill not scheduled");
 				oResult.setStringValue("Could not kill the requested process");
 				return oResult;
 			}
-			
+
 			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
-			if(null!=bKillProcessTree && bKillProcessTree) {
+			if (null != bKillProcessTree && bKillProcessTree) {
 				oKillProcessParameter.setKillTree(true);
 			} else {
 				oKillProcessParameter.setKillTree(false);
 			}
 			oKillProcessParameter.setSessionID(sSessionId);
-			
+
 			String sWorkspaceId = null;
 			List<String> asProcesses = null;
 			asProcesses = new LinkedList<String>();
 			for (ProcessWorkspace oProcessWorkspace : aoProcesses) {
-				if(null==oProcessWorkspace) {
+				if (null == oProcessWorkspace) {
 					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: found a null process, skipping");
 					continue;
 				}
 				asProcesses.add(oProcessWorkspace.getProcessObjId());
-				if(Utils.isNullOrEmpty(sWorkspaceId)) {
+				if (Utils.isNullOrEmpty(sWorkspaceId)) {
 					sWorkspaceId = oProcessWorkspace.getWorkspaceId();
 				}
-			}	
+			}
 			oKillProcessParameter.setWorkspace(sWorkspaceId);
 			oKillProcessParameter.setExchange(sWorkspaceId);
 			oKillProcessParameter.setProcessesToBeKilledObjId(asProcesses);
 			oKillProcessParameter.setSessionID(sSessionId);
+			oKillProcessParameter.setProcessObjId(UUID.randomUUID().toString());
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			String sOwner = oWorkspace.getUserId();
 			oKillProcessParameter.setWorkspaceOwnerId(sOwner);
-			
-			oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), asProcesses.get(0), m_oServletConfig.getInitParameter("SerializationPath"), oKillProcessParameter, null);
-			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
-			
+			if(null!=bCleanDB) {
+				oKillProcessParameter.setCleanDb(true);
+			}
+
+			oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(),
+					asProcesses.get(0), WasdiConfig.Current.paths.serializationPath, oKillProcessParameter, null);
+			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: "
+					+ oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
+
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: " + oE);
 		}
@@ -108,34 +116,36 @@ public class ProcessService implements ProcessServiceInterface {
 	}
 
 	@Override
-	public PrimitiveResult killProcessesInWorkspace(String sWorkspaceId, User oUser) {
+	public PrimitiveResult killProcessesInWorkspace(String sWorkspaceId, User oUser, boolean bCleanDB) {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setIntValue(500);
 		oResult.setBoolValue(false);
-		if(Utils.isNullOrEmpty(sWorkspaceId)) {
+		if (Utils.isNullOrEmpty(sWorkspaceId)) {
 			Utils.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: workspace is null or empty, aborting");
 			return oResult;
 		}
-		
+
 		List<ProcessWorkspace> aoProcesses = null;
 		try {
 			// Get all the process-workspaces of this workspace
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			//get list of processes that are not DONE / STOPPED / ERROR
-			ProcessStatus[] aeNotTerminalStatusesArray = {ProcessStatus.CREATED, ProcessStatus.READY, ProcessStatus.RUNNING, ProcessStatus.WAITING};
-			aoProcesses = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId, new ArrayList<>(Arrays.asList(aeNotTerminalStatusesArray)));
+			// get list of processes that are not DONE / STOPPED / ERROR
+			ProcessStatus[] aeNotTerminalStatusesArray = { ProcessStatus.CREATED, ProcessStatus.READY,
+					ProcessStatus.RUNNING, ProcessStatus.WAITING };
+			aoProcesses = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId,
+					new ArrayList<>(Arrays.asList(aeNotTerminalStatusesArray)));
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: " + oE);
 		}
-		return killProcesses(aoProcesses, true, oUser);
+		return killProcesses(aoProcesses, true, true, oUser);
 	}
 
-
-	//TODO don't use session, create one on the fly (assume not everybody can call this) 
+	// TODO don't use session, create one on the fly (assume not everybody can call
+	// this)
 	@Override
 	public PrimitiveResult killProcessTree(Boolean bKillTheEntireTree, User oUser, ProcessWorkspace oProcessToKill) {
 
-		//create the operation parameter
+		// create the operation parameter
 		String sDeleteObjId = Utils.getRandomName();
 		KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
 		oKillProcessParameter.setProcessObjId(sDeleteObjId);
@@ -143,30 +153,30 @@ public class ProcessService implements ProcessServiceInterface {
 		asProcessedToBeKilled.add(oProcessToKill.getProcessObjId());
 
 		oKillProcessParameter.setProcessesToBeKilledObjId(asProcessedToBeKilled);
-		if(null!=bKillTheEntireTree) {
+		if (null != bKillTheEntireTree) {
 			oKillProcessParameter.setKillTree(bKillTheEntireTree);
 		}
 
 		String sWorkspaceId = oProcessToKill.getWorkspaceId();
 
-		//base parameter atttributes
+		// base parameter atttributes
 		oKillProcessParameter.setWorkspace(sWorkspaceId);
 		oKillProcessParameter.setUserId(oUser.getUserId());
 		oKillProcessParameter.setExchange(sWorkspaceId);
 		oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-		//schedule the deletion
+		// schedule the deletion
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setIntValue(500);
 		oResult.setBoolValue(false);
 		try {
 			List<ProcessWorkspace> aoProcessesToBeKilled = new ArrayList<ProcessWorkspace>(1);
 			aoProcessesToBeKilled.add(oProcessToKill);
-			return killProcesses(aoProcessesToBeKilled, bKillTheEntireTree, oUser);
+			return killProcesses(aoProcessesToBeKilled, bKillTheEntireTree, false, oUser);
 
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: " + oE);
 		}
 		return oResult;
-	}	
+	}
 }

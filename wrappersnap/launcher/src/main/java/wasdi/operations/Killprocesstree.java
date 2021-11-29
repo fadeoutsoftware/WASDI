@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.KillProcessTreeParameter;
@@ -39,9 +41,9 @@ public class Killprocesstree extends Operation {
 
 			//now get the processWorkspaces from DB using their processObjId 
 			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			for (String sProcessObjId: oKillProcessTreeParameter.getProcessesToBeKilledObjId()) {
-				ProcessWorkspace oProcessToKill = oRepository.getProcessByProcessObjId(sProcessObjId);
+				ProcessWorkspace oProcessToKill = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
 				if (null != oProcessToKill) {
 					m_oLocalLogger.info("Killprocesstree.executeOperation: collecting and killing processes for " + oProcessToKill.getProcessObjId());
 					aoProcessesToBeKilled.add(oProcessToKill);
@@ -50,6 +52,7 @@ public class Killprocesstree extends Operation {
 				}
 			}
 
+			List<String> asKilledProcessObjIds = new ArrayList<String>(aoProcessesToBeKilled.size());
 			while (aoProcessesToBeKilled.size() > 0) {
 				//breadth first
 				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
@@ -58,9 +61,13 @@ public class Killprocesstree extends Operation {
 					m_oLocalLogger.error("Killprocesstree.executeOperation: a null process was added, skipping");
 					continue;
 				}
+				
 				m_oLocalLogger.info("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
 
 				terminate(oProcess);
+				
+				//save processObjId for later DB cleanub
+				asKilledProcessObjIds.add(oProcess.getProcessObjId());
 				
 				//from here on collect children
 				if (!oKillProcessTreeParameter.getKillTree()) {
@@ -79,19 +86,22 @@ public class Killprocesstree extends Operation {
 					m_oLocalLogger.error("Killprocesstree.executeOperation: process has null or empty ObjId, skipping");
 					continue;
 				}
-				List<ProcessWorkspace> aoChildren = oRepository.getProcessByParentId(oProcess.getProcessObjId());
+				List<ProcessWorkspace> aoChildren = oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
 				if (null != aoChildren && aoChildren.size() > 0) {
 					//append at the end
 					aoProcessesToBeKilled.addAll(aoChildren);
 				}
 			}
 
-			m_oLocalLogger.error("Killprocesstree.executeOperation: Kill loop done");
+			m_oLocalLogger.info("Killprocesstree.executeOperation: Kill loop done");
+			
+			if(oKillProcessTreeParameter.getCleanDb()) {
+				cleanDB(oProcessWorkspaceRepository, asKilledProcessObjIds);
+			}
 
-			ProcessWorkspace oMyProcess = oRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());
-
+			//mark complete and return
+			ProcessWorkspace oMyProcess = oProcessWorkspaceRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());			
 			updateProcessStatus(oMyProcess, ProcessStatus.DONE, 100);
-
 			return true;
 
 		} catch (Exception oE) {
@@ -101,6 +111,21 @@ public class Killprocesstree extends Operation {
 		m_oLocalLogger.info("Killprocesstree.executeOperation: done");
 
 		return false;
+	}
+
+	/**
+	 * @param oProcessWorkspaceRepository
+	 * @param asKilledProcessObjIds
+	 */
+	private void cleanDB(ProcessWorkspaceRepository oProcessWorkspaceRepository, List<String> asKilledProcessObjIds) {
+		m_oLocalLogger.info("Killprocesstree.executeOperation: cleaning DB");
+		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+		for (String sProcessObjId: asKilledProcessObjIds) {
+			//delete processes
+			oProcessWorkspaceRepository.deleteProcessWorkspaceByProcessObjId(sProcessObjId);
+			//delete logs
+			oProcessorLogRepository.deleteLogsByProcessWorkspaceId(sProcessObjId);
+		}
 	}
 
 	/**

@@ -99,7 +99,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param sId Process Workspace Mongo Id
      * @return
      */
-    public boolean deleteProcessWorkspace(String sId) {
+    public boolean deleteProcessWorkspace(String sId) { 
     	
     	if (Utils.isNullOrEmpty(sId)) return false;
 

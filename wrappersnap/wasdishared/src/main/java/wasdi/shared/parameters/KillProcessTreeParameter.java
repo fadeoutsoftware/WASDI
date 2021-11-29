@@ -26,6 +26,11 @@ public class KillProcessTreeParameter extends BaseParameter {
 	 */
 	private boolean killTree = true;
 	
+	/*
+	 * If true, then DB entries will be removed too
+	 */
+	private boolean cleanDb = false;
+	
 	/**
 	 * @return the sProcessObjId
 	 */
@@ -50,4 +55,17 @@ public class KillProcessTreeParameter extends BaseParameter {
 	public void setKillTree(boolean killTree) {
 		this.killTree = killTree;
 	}
+	/**
+	 * @return the cleanDb
+	 */
+	public boolean getCleanDb() {
+		return cleanDb;
+	}
+	/**
+	 * @param cleanDb the cleanDb to set
+	 */
+	public void setCleanDb(boolean cleanDb) {
+		this.cleanDb = cleanDb;
+	}
+	
 }
