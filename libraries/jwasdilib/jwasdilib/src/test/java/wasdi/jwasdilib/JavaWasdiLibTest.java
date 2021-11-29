@@ -332,10 +332,10 @@ public class JavaWasdiLibTest {
 		LOGGER.info("recreateWorkspace");
 
 		assertNotNull(wasdi.getWorkspaceIdByName(sWorkspaceName));
-		assertEquals("", wasdi.getWorkspaceIdByName(sWorkspaceName + "_02"));
+		assertEquals("", wasdi.getWorkspaceIdByName(sWorkspaceName + "(1)"));
 
 		String createdWorkspaceId = wasdi.createWorkspace(sWorkspaceName, sNodeCode);
-		String foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName + "_02");
+		String foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName + "(1)");
 
 		assertEquals(createdWorkspaceId, foundWorkspaceId);
 
