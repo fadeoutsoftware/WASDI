@@ -308,7 +308,7 @@ function ViewElementFactory() {
         }
     };
 /**
- * Text Box Control Class
+ * Numeric Control Class
  * @constructor
  */
  let NumericBox = function () {
@@ -320,7 +320,7 @@ function ViewElementFactory() {
      * @returns {string} Value in the numericbox
      */
     this.getValue = function () {
-        return this.m_sValue;
+        return parseFloat(this.m_sText);
     }
 
     /**
