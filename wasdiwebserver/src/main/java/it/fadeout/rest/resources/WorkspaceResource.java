@@ -330,8 +330,8 @@ public class WorkspaceResource {
 
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
-		while (oWorkspaceRepository.getByNameAndNode(sName, sNodeCode) != null) {
-			sName = sName + "_02";
+		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+			sName = Utils.cloneWorkspaceName(sName);
 			Utils.debugLog("WorkspaceResource.CreateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
 		}
 
@@ -395,10 +395,16 @@ public class WorkspaceResource {
 			// Initialize repository
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
+			String sName = oWorkspaceEditorViewModel.getName();
+			while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+				sName = Utils.cloneWorkspaceName(sName);
+				Utils.debugLog("WorkspaceResource.updateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
+			}
+
 			// Default values
 			oWorkspace.setCreationDate((double) oWorkspaceEditorViewModel.getCreationDate().getTime());
 			oWorkspace.setLastEditDate((double) oWorkspaceEditorViewModel.getLastEditDate().getTime());
-			oWorkspace.setName(oWorkspaceEditorViewModel.getName());
+			oWorkspace.setName(sName);
 			oWorkspace.setUserId(oWorkspaceEditorViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
 
@@ -419,6 +425,8 @@ public class WorkspaceResource {
 
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setStringValue(oWorkspace.getWorkspaceId());
+
+				oWorkspaceEditorViewModel.setName(sName);
 
 				return oWorkspaceEditorViewModel;
 			} else {
