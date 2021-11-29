@@ -330,8 +330,8 @@ public class WorkspaceResource {
 
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
-		while (oWorkspaceRepository.getByNameAndNode(sName, sNodeCode) != null) {
-			sName = sName + "_02";
+		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+			sName = Utils.cloneWorkspaceName(sName);
 			Utils.debugLog("WorkspaceResource.CreateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
 		}
 
