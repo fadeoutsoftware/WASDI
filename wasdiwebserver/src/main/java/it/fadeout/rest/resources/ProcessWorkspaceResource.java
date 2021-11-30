@@ -1,12 +1,36 @@
 package it.fadeout.rest.resources;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import it.fadeout.Wasdi;
-import it.fadeout.services.ProcessServiceInterface;
+import it.fadeout.services.ProcessWorkspaceService;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.*;
+import wasdi.shared.business.Node;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.*;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -15,13 +39,6 @@ import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
-
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.time.Instant;
-import java.util.*;
 
 /**
  * Process Workspace Resource.
@@ -48,8 +65,6 @@ import java.util.*;
 @Path("/process")
 public class ProcessWorkspaceResource {
 	
-	@Inject
-	ProcessServiceInterface m_oProcessService;
 
 	/**
 	 * Get a filtered paginated list of processworkspaces.
@@ -782,11 +797,13 @@ public class ProcessWorkspaceResource {
 				return Response.status(403).build();
 			}
 	
-			PrimitiveResult oResult = m_oProcessService.killProcessTree(bKillTheEntireTree, oUser, oProcessToKill);
-			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
-
-			return Response.status(oResult.getIntValue()).build();
-
+			ProcessWorkspaceService oProcessService = new ProcessWorkspaceService();
+			List<ProcessWorkspace> aoProcessesToBeKilled = new ArrayList<ProcessWorkspace>(1);
+			aoProcessesToBeKilled.add(oProcessToKill);
+			boolean bResult = oProcessService.killProcesses(aoProcessesToBeKilled, bKillTheEntireTree, false, sSessionId);
+			if(bResult) {
+				return Response.status(Response.Status.OK).build();
+			}
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.DeleteProcess: " + oEx);

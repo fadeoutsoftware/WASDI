@@ -96,7 +96,7 @@ public class Killprocesstree extends Operation {
 			m_oLocalLogger.info("Killprocesstree.executeOperation: Kill loop done");
 			
 			if(oKillProcessTreeParameter.getCleanDb()) {
-				cleanDB(oProcessWorkspaceRepository, asKilledProcessObjIds);
+				cleanDB(asKilledProcessObjIds);
 			}
 
 			//mark complete and return
@@ -117,9 +117,10 @@ public class Killprocesstree extends Operation {
 	 * @param oProcessWorkspaceRepository
 	 * @param asKilledProcessObjIds
 	 */
-	private void cleanDB(ProcessWorkspaceRepository oProcessWorkspaceRepository, List<String> asKilledProcessObjIds) {
+	private void cleanDB(List<String> asKilledProcessObjIds) {
 		m_oLocalLogger.info("Killprocesstree.executeOperation: cleaning DB");
 		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository(); 
 		for (String sProcessObjId: asKilledProcessObjIds) {
 			//delete processes
 			oProcessWorkspaceRepository.deleteProcessWorkspaceByProcessObjId(sProcessObjId);
