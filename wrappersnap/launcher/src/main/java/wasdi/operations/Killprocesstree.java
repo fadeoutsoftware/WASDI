@@ -89,7 +89,11 @@ public class Killprocesstree extends Operation {
 				List<ProcessWorkspace> aoChildren = oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
 				if (null != aoChildren && aoChildren.size() > 0) {
 					//append at the end
-					aoProcessesToBeKilled.addAll(aoChildren);
+					for (ProcessWorkspace oChildren : aoChildren) {
+						if(!aoProcessesToBeKilled.contains(oChildren)) {
+							aoProcessesToBeKilled.add(oChildren);
+						}
+					}
 				}
 			}
 
@@ -144,6 +148,7 @@ public class Killprocesstree extends Operation {
 			}
 
 			killProcess(oProcessToKill);
+			setStatusAsStopped(oProcessToKill);
 		} catch (Exception oE) {
 			m_oLocalLogger.error("Killprocesstree.killProcessAndDocker: " + oE);
 		}
@@ -172,28 +177,37 @@ public class Killprocesstree extends Operation {
 			} else {
 				m_oLocalLogger.error("Killprocesstree.killProcess: Process pid not in data");
 			}
-
-			// set process state to STOPPED only if CREATED or RUNNING
-			String sPrevSatus = oProcessToKill.getStatus();
-
-			if (sPrevSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) ||
-					sPrevSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name()) ||
-					sPrevSatus.equalsIgnoreCase(ProcessStatus.WAITING.name()) ||
-					sPrevSatus.equalsIgnoreCase(ProcessStatus.READY.name())) {
-
-				oProcessToKill.setStatus(ProcessStatus.STOPPED.name());
-				oProcessToKill.setOperationEndDate(Utils.getFormatDate(new Date()));
-
-				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-				if (!oRepository.updateProcess(oProcessToKill)) {
-					m_oLocalLogger.error("Killprocesstree.killProcess: Unable to update process status of process " + oProcessToKill.getProcessObjId());
-				}
-
-			} else {
-				m_oLocalLogger.info("Killprocesstree.killProcess: Process " + oProcessToKill.getProcessObjId() + " was already over with status: " + sPrevSatus);
-			}
 		} catch (Exception oE) {
 			m_oLocalLogger.error("Killprocesstree.killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+		}
+	}
+
+	/**
+	 * set process state to STOPPED only if CREATED or RUNNING
+	 * @param oKilledProcessWorkspace the ProcessWorkspace that has been killed and for which the status must be updated
+	 */
+	private void setStatusAsStopped(ProcessWorkspace oKilledProcessWorkspace) {
+		
+		//refresh the status
+		ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+		oKilledProcessWorkspace = oRepository.getProcessByProcessObjId(oKilledProcessWorkspace.getProcessObjId());
+		String sPrevSatus = oKilledProcessWorkspace.getStatus();
+
+		if (
+				!sPrevSatus.equalsIgnoreCase(ProcessStatus.DONE.name()) &&
+				!sPrevSatus.equalsIgnoreCase(ProcessStatus.ERROR.name()) &&
+				!sPrevSatus.equalsIgnoreCase(ProcessStatus.STOPPED.name())
+		){
+			oKilledProcessWorkspace.setStatus(ProcessStatus.STOPPED.name());
+			oKilledProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+
+			if (!oRepository.updateProcess(oKilledProcessWorkspace)) {
+				m_oLocalLogger.error("Killprocesstree.setStatusAsStopped: Unable to update process status of process " +
+				oKilledProcessWorkspace.getProcessObjId() + " from: " + sPrevSatus + " to: STOPPED");
+			}
+		} else {
+			m_oLocalLogger.info("Killprocesstree.setStatusAsStopped: Process " + oKilledProcessWorkspace.getProcessObjId() +
+					" was already over with status: " + sPrevSatus);
 		}
 	}
 
