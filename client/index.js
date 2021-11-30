@@ -20,31 +20,49 @@ import './node_modules/leaflet-draw/dist/leaflet.draw.css';
 import './node_modules/angular-moment-picker/src/angular-moment-picker.css';
 import './app/assets/slider-appdetails/css/lightslider.css';
 
+require('./app/services/api/AuthService.js');
+require('./app/services/api/CatalogService.js');
+require('./app/services/api/FileBufferService.js');
+require('./app/services/api/NodeService.js');
+require('./app/services/api/OpenSearchService.js');
+//require('./app/services/api/OpportunitySearchService.js');
+require('./app/services/api/WorkspaceService.js');
+require('./app/services/api/ProcessingService');
+require('./app/services/api/ProcessorMediaService.js');
+require('./app/services/api/ProcessorService.js');
 require('./app/services/api/ProcessWorkspaceService.js');
+require('./app/services/api/ProductService.js');
+require('./app/services/api/WorkflowService.js');
+require('./app/services/api/WorkspaceService.js');
+
+
+
+
+
+
+
+
+require('./app/services/ConfigurationService.js');
+
 require('./app/services/ConstantsService.js');
 require('./app/services/SessionInjector.js');
-require('./app/services/api/AuthService.js');
+
 //require('./app/services/api/AuthServiceFacebook.js');
 require('./app/services/MapService.js');
 require('./app/services/GlobeService.js');
-require('./app/services/api/WorkspaceService.js');
-require('./app/services/api/FileBufferService.js');
-require('./app/services/api/ProductService.js');
-require('./app/services/ConfigurationService.js');
-require('./app/services/api/OpenSearchService.js');
+
 //require('./app/services/ProcessesLaunchedService.js');
 //require('./app/services/SearchOrbitService.js');
 require('./app/services/RabbitStompService.js');
 require('./app/services/ResultsOfSearchService.js');
 //require('./app/services/SnapOperationService.js');
 //require('./app/services/SatelliteService.js');
-require('./app/services/api/CatalogService.js');
+
 require('./app/services/PagesService.js');
 //require('./app/services/api/FilterService.js');
-require('./app/services/api/ProcessorService.js');
+
 require('./app/services/TreeService.js');
-require('./app/services/api/ProcessorMediaService.js');
-require('./app/services/api/NodeService.js');
+
 
 
 

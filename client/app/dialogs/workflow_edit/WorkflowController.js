@@ -376,3 +376,4 @@ var WorkflowController = (function () {
 
     return WorkflowController;
 })();
+window.WorkflowController = WorkflowController;
