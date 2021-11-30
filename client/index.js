@@ -20,6 +20,7 @@ import './node_modules/leaflet-draw/dist/leaflet.draw.css';
 import './node_modules/angular-moment-picker/src/angular-moment-picker.css';
 import './app/assets/slider-appdetails/css/lightslider.css';
 
+require('./app/services/api/ProcessWorkspaceService.js');
 require('./app/services/ConstantsService.js');
 require('./app/services/SessionInjector.js');
 require('./app/services/api/AuthService.js');
@@ -44,6 +45,7 @@ require('./app/services/api/ProcessorService.js');
 require('./app/services/TreeService.js');
 require('./app/services/api/ProcessorMediaService.js');
 require('./app/services/api/NodeService.js');
+
 
 
 /*require('./app/app.js');*/
