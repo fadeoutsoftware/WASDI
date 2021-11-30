@@ -12,6 +12,7 @@ var WorkspaceProcessesList = (function () {
         this.hasError = false;
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_aoProcessesLogs = [];
+        this.m_aoAllProcessesLogs = [];
         this.filterTable = "";
         this.m_bAreProcessesLoaded = false;
         this.m_oFilter = {};
@@ -252,49 +253,61 @@ var WorkspaceProcessesList = (function () {
         return sNumber;
     };
 
-    WorkspaceProcessesList.prototype.downloadLogFile = function () {
+    WorkspaceProcessesList.prototype.downloadProcessesFile = function () {
         var oController = this;
 
-        setTimeout(function () {
-            let file = oController.generateLogFile();
+        this.m_oProcessWorkspaceService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,null,null).then(function (data, status) {
+            if (data.data != null)
+            {
+                if (data.data != undefined)
+                {
+                    oController.m_aoAllProcessesLogs = data.data;
 
-            var oLink=document.createElement('a');
-            oLink.href = file;
-            oLink.download = "processorLog";
-            oLink.click();
-        }, 500);
+                    let file = oController.generateLogFile();
+
+                    var oLink=document.createElement('a');
+                    oLink.href = file;
+                    oLink.download = "processes";
+                    oLink.click();
+                }
+            }
+        },function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN DOWNLOADING PROCESSES LIST');
+        });
+
     };
 
     WorkspaceProcessesList.prototype.generateFile = function (sText) {
         var textFile = null;
-        var sType = 'text/plain';
+        var sType = 'text/csv';
         textFile = utilsMakeFile(sText, textFile, sType);
         return textFile;
     };
 
     WorkspaceProcessesList.prototype.makeStringLogFile = function () {
-        if (utilsIsObjectNullOrUndefined(this.m_aoProcessesLogs) === true)
+        if (utilsIsObjectNullOrUndefined(this.m_aoAllProcessesLogs) === true)
             return null;
-        // m_aoProcessesLogs
-        var iNumberOfProcessesLogs = this.m_aoProcessesLogs.length;
+        // m_aoAllProcessesLogs
+        var iNumberOfProcessesLogs = this.m_aoAllProcessesLogs.length;
         var sText = "";
+
+        sText += "Id,Product Name,Operation Type,User,Status,Progress,Operation date,Operation end date,File size" + "\r\n";
+
         for (var iIndexProcessLog = 0; iIndexProcessLog < iNumberOfProcessesLogs; iIndexProcessLog++) {
-            // sText += this.m_aoProcessesLogs[iIndexProcessLog] + "/n";
-            var sOperationDate = this.m_aoProcessesLogs[iIndexProcessLog].operationStartDate;
-            var sFileSize = this.m_aoProcessesLogs[iIndexProcessLog].fileSize;
-            var sOperationEndDate = this.m_aoProcessesLogs[iIndexProcessLog].operationEndDate;
-            var sOperationType = this.m_aoProcessesLogs[iIndexProcessLog].operationType;
-            var sPid = this.m_aoProcessesLogs[iIndexProcessLog].pid;
-            // var sProcessObjId = this.m_aoProcessesLogs[iIndexProcessLog].processObjId;
-            var sProductName = this.m_aoProcessesLogs[iIndexProcessLog].productName;
-            var sProgressPerc = this.m_aoProcessesLogs[iIndexProcessLog].progressPerc;
-            var sStatus = this.m_aoProcessesLogs[iIndexProcessLog].status;
-            var sUserId = this.m_aoProcessesLogs[iIndexProcessLog].userId;
+            var sOperationDate = this.m_aoAllProcessesLogs[iIndexProcessLog].operationStartDate;
+            var sFileSize = this.m_aoAllProcessesLogs[iIndexProcessLog].fileSize;
+            var sOperationEndDate = this.m_aoAllProcessesLogs[iIndexProcessLog].operationEndDate;
+            var sOperationType = this.m_aoAllProcessesLogs[iIndexProcessLog].operationType;
+            var sPid = this.m_aoAllProcessesLogs[iIndexProcessLog].pid;
+            var sProductName = this.m_aoAllProcessesLogs[iIndexProcessLog].productName;
+            var sProgressPerc = this.m_aoAllProcessesLogs[iIndexProcessLog].progressPerc;
+            var sStatus = this.m_aoAllProcessesLogs[iIndexProcessLog].status;
+            var sUserId = this.m_aoAllProcessesLogs[iIndexProcessLog].userId;
 
-
-            sText += iIndexProcessLog + ") " + "Id: " + sPid + ",Product Name: " + sProductName + ",Operation Type: " + sOperationType +
-                ",User: " + sUserId + ",Status: " + sStatus + ",Progress: " + sProgressPerc + "%" +
-                ",Operation date: " + sOperationDate + ",Operation end date: " + sOperationEndDate + ",File size: " + sFileSize + "\r\n";
+            sText += sPid + "," + sProductName + "," + sOperationType +
+                "," + sUserId + "," + sStatus + "," + sProgressPerc + "%" +
+                "," + sOperationDate + "," + sOperationEndDate + "," + sFileSize + "\r\n";
         }
 
         return sText;

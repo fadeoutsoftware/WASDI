@@ -199,6 +199,7 @@
 
     "DIALOG_RUN_BUTTON":"Run",
     "DIALOG_CLOSE_BUTTON":"Close",
+    "DIALOG_SAVE_BUTTON":"Save",
 
 
     "DIALOG_APPLY_ORBIT_TITLE":"Apply Orbit",

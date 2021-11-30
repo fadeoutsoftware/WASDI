@@ -546,18 +546,18 @@ public class ProcessWorkspaceResource {
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
 			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
+				oViewModel.setOperationStartDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationStartDate()));
 			}
 			else {
-				oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+				oViewModel.setOperationStartDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationDate()));
 			}
 			
 			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
-				oViewModel.setLastChangeDate(oProcess.getLastStateChangeDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+				oViewModel.setLastChangeDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getLastStateChangeDate()));
 			}
 			
-			oViewModel.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
-			oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+			oViewModel.setOperationDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationDate()));
+			oViewModel.setOperationEndDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationEndDate()));
 			oViewModel.setOperationType(oProcess.getOperationType());
 			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
 				oViewModel.setOperationSubType(oProcess.getOperationSubType());
@@ -568,7 +568,7 @@ public class ProcessWorkspaceResource {
 			
 			oViewModel.setProductName(oProcess.getProductName());
 			oViewModel.setUserId(oProcess.getUserId());
-			oViewModel.setFileSize(oProcess.getFileSize());
+			oViewModel.setFileSize(oProcess.getFileSize() == null ? "" : oProcess.getFileSize());
 			oViewModel.setPid(oProcess.getPid());
 			oViewModel.setStatus(oProcess.getStatus());
 			oViewModel.setProgressPerc(oProcess.getProgressPerc());

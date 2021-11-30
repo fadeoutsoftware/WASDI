@@ -84,7 +84,7 @@ var ProcessorController = (function() {
          * Types of available processors
          * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
          */
-        this.m_aoProcessorTypes = [{'name':'Python 2.7 Pip','id':'ubuntu_python_snap'},{'name':'Python 3.7 Pip','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'},{'name':'OCTAVE 6.x','id':'octave'},{'name':'Python 3.x Conda','id':'conda'}];
+        this.m_aoProcessorTypes = [{'name':'Python 3.7 Pip','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'},{'name':'OCTAVE 6.x','id':'octave'},{'name':'Python 3.x Conda','id':'conda'}];
         /**
          * Selected Processor Type
          * @type {string}
@@ -751,7 +751,7 @@ var ProcessorController = (function() {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "boolean",\n\t\t"label": "description",\n\t\t"default": false,\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "productscombo") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product",\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product",\n\t\t"required": false,\n\t\t"showExtension": false\n\t},';
          }
          else if (sElementType === "searcheoimage") {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "searcheoimage",\n\t\t"label": "Description",\n\t\t"required": false\n\t},';

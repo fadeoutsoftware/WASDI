@@ -599,9 +599,9 @@ public class Publishband extends Operation {
                     }
                 }
 
-                int responseCode = oConnection.getResponseCode();
+                int iResponseCode = oConnection.getResponseCode();
 
-                if (responseCode == 200) {
+                if (iResponseCode == 200) {
 
                     Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
                     List<String> asContents = null;
@@ -618,8 +618,6 @@ public class Publishband extends Operation {
                         if (sAttachmentName.endsWith("\"")) {
                             sAttachmentName = sAttachmentName.substring(0, sAttachmentName.length() - 1);
                         }
-                        System.out.println(sAttachmentName);
-
                     }
 
                     File oTargetFile = new File(sDestinationFileFullPath);
@@ -644,7 +642,7 @@ public class Publishband extends Operation {
                     return sDestinationFileFullPath;
                 } else {
                     String sMessage = oConnection.getResponseMessage();
-                    System.out.println(sMessage);
+                    m_oLocalLogger.error("Error downloading style: ResponseCode: " +iResponseCode + " Message: " + sMessage);
                     return "";
                 }
 

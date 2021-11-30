@@ -22,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
+import wasdi.shared.business.CloudProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
@@ -31,6 +32,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.CloudProviderRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -176,6 +178,15 @@ public class WorkspaceResource {
 		return aoWSList;
 	}
 
+	/**
+	 * Returns the View Model of the workspace.
+	 * The view model contains the baseic parameters of the ws, plus the base URL
+	 * for the api calls following api calls, accordingly to the node url from DB.
+	 * To change the workspace node Id checks the "update" call on this resource
+	 * @param sSessionId the current sesssion, that should be validated
+	 * @param sWorkspaceId Unique identifier of the workspace
+	 * @return Workspace View Model with the updated values
+	 */
 	@GET
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -201,6 +212,11 @@ public class WorkspaceResource {
 				return oVM;
 			}
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+				return oVM;
+			}
+
+			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: user cannot access workspace info, aborting");
 				return oVM;
 			}
 
@@ -230,9 +246,17 @@ public class WorkspaceResource {
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
 					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
-					
+										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
 						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+						
+						CloudProviderRepository oCloudProviderRepository = new CloudProviderRepository();
+						CloudProvider oCloudProvider = oCloudProviderRepository.getCloudProviderByCode(oWorkspaceNode.getCloudProvider());
+						
+						if (oCloudProvider != null) {
+							oVM.setSlaLink(oCloudProvider.getSlaLink());
+						}
+						
 					}
 					else {
 						oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
@@ -249,11 +273,12 @@ public class WorkspaceResource {
 					.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
 			// Add Sharings to View Model
 			if (aoSharings != null) {
-				for (int iSharings = 0; iSharings < aoSharings.size(); iSharings++) {
-					if (oVM.getSharedUsers() == null) {
-						oVM.setSharedUsers(new ArrayList<String>());
-					}
-					oVM.getSharedUsers().add(aoSharings.get(iSharings).getUserId());
+				if (oVM.getSharedUsers() == null) {
+					oVM.setSharedUsers(new ArrayList<String>());
+				}
+
+				for (WorkspaceSharing oSharing : aoSharings) {
+					oVM.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
 		} catch (Exception oEx) {
@@ -303,6 +328,13 @@ public class WorkspaceResource {
 			sName = "Untitled Workspace";
 		}
 
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+
+		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+			sName = Utils.cloneWorkspaceName(sName);
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
+		}
+
 		// Default values
 		oWorkspace.setCreationDate((double) new Date().getTime());
 		oWorkspace.setLastEditDate((double) new Date().getTime());
@@ -320,7 +352,6 @@ public class WorkspaceResource {
 		}
 		oWorkspace.setNodeCode(sNodeCode);
 
-		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 		if (oWorkspaceRepository.insertWorkspace(oWorkspace)) {
 
 			PrimitiveResult oResult = new PrimitiveResult();
@@ -374,7 +405,13 @@ public class WorkspaceResource {
 			
 			// if present, the node code must be updated
 			if(oWorkspaceEditorViewModel.getNodeCode() != null) {
-				oWorkspace.setNodeCode(oWorkspaceEditorViewModel.getNodeCode());
+				NodeRepository oNodeRepository = new NodeRepository();
+				String sNodeCode = oWorkspaceEditorViewModel.getNodeCode();
+				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
+				oWorkspace.setNodeCode(sNodeCode);
+				// Set the base url on the returning view model
+				oWorkspaceEditorViewModel.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+				// update on Db
 				oWorkspaceRepository.updateWorkspaceNodeCode(oWorkspace);
 			}
 			
@@ -427,6 +464,11 @@ public class WorkspaceResource {
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId()))
 			return null;
+
+		if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			Utils.debugLog("WorkspaceResource.DeleteWorkspace: user cannot delete workspace, aborting");
+			return null;
+		}
 
 		try {
 			// repositories

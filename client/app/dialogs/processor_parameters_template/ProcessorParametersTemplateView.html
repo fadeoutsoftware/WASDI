@@ -1,0 +1,166 @@
+<div id="processor-parameters-template-list-dialog" class="modal fade wapps-dialog">
+    <div class="modal-dialog modal-dialog-extra-large">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class=" modal-header">
+                <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
+                    <h4 class="modal-title ">
+                        <i class="fa fa-book" aria-hidden="true"></i>&nbsp;App Params Library
+                    </h4>
+                </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                    <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body d-flex flex-column" style="height:70vh">
+                <div class="row-v4">
+    
+                    <div class="col-v4" style="height:90vh">
+
+                        <!------------------------------------- SEARCH BAR ------------------------------------->
+                        <div class="row-v4">
+                            <div class="col-v4-8">
+                                <input class="wasdi-input"
+                                    ng-model="SearchTextTemplate"
+                                    placeholder="Filter Template Name..." style="margin-bottom: 15px;">
+                            </div>
+
+                            <div class="col-v4-2">
+                            </div>
+
+                            <div class="col-v4-2 over-icon text-right">
+                                <button class="my-button my-align-right" ng-click="m_oController.addProcessorParametersTemplate()"
+                                        ng-hide="m_oController._selectedProcessor === null">
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row-v4 apps-list">
+                            <!------------------------------------- TEMPLATES TABLE ------------------------------------->
+                            <div class="col-v4-6 mb-4" ng-hide="m_oController.m_aoProcessorParametersTemplates.length == 0"
+                                ng-repeat="oProcessorParametersTemplate in m_oController.m_aoProcessorParametersTemplates | filter: {name:SearchTextTemplate}">
+                                <div class="pt-1 pb-3 px-3 h-50 app-item" style="margin-bottom: 15px;"
+                                    ng-click="m_oController.viewProcessorParametersTemplate(oProcessorParametersTemplate)"
+                                    ng-class="{'selected' : m_oController._selectedProcessor === oProcessorParametersTemplate}">
+                                    <div class="row-v4">
+                                        <div class="col-v4-12">
+                                            <!-- <button class="wapps-button" title="Edit" ng-click="m_oController.editProcessorParametersTemplate(oProcessorParametersTemplate)"><em class="fa fa-pencil"></em></button> -->
+                                            <button class="wapps-button" title="Apply" ng-click="m_oController.applyProcessorParametersTemplate(oProcessorParametersTemplate.templateId)" data-dismiss="modal"><em class="fa fa-upload"></em></button>
+                                            <button class="wapps-button" title="Delete" ng-click="m_oController.deleteProcessorParametersTemplate(oProcessorParametersTemplate)"><em class="fa fa-times"></em></button>
+                                        </div>
+                                    </div>
+                                    <div class="row-v4">
+                                        <div class="col-v4-12">
+                                            <div class="content-image text-center">
+                                                <em class="fa fa-book"></em>
+                                            </div>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="" >
+                                        <label>
+                                            {{oProcessorParametersTemplate.name.replaceAll("_", " ")}}
+                                        </label>
+                                        <div>
+                                            {{oProcessorParametersTemplate.updateDate}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-v4-6 mb-4" ng-hide="m_oController.m_aoProcessorParametersTemplates.length > 0">
+                                <div>No parameters available for this app, do you want to <a style="cursor: pointer;" ng-click="m_oController.addProcessorParametersTemplate()">add one</a>?</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--------------------   LAUNCH TEMPLATE DIALOG -------------------->
+                    <div class="col-v4" style="height:90vh" ng-show="!m_oController.m_oProcessorParametersTemplate">
+                    </div>
+
+                    <div class="col-v4" style="height:90vh" ng-show="m_oController.m_oProcessorParametersTemplate">
+                        <div class="well h-90 m-0 d-flex flex-column">
+                            <div class="row-v4">
+                                <div class="col-v4-6">
+                                    <h3> {{m_oController.m_oInputProcessor.processorName}} </h3>
+                                </div>
+                                <div class="col-v4-6">
+                                    <div class="row-v12">
+                                        <label>
+                                            <strong ng-hide="m_oController.m_oInputProcessor === null">Publisher:</strong>
+                                        </label>
+                                        <span> {{m_oController.m_oInputProcessor.publisher}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="template_name">Name</label>
+                                <input id="template_name" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_oProcessorParametersTemplate.name">
+                            </div>
+                            <div>
+                                <label for="template_description">Description</label>
+                                <textarea class="form-control h-9" ng-readonly="!m_oController.m_bEditMode" rows="3" id="template_description" placeholder="Description" ng-model="m_oController.m_oProcessorParametersTemplate.description"></textarea>
+                            </div>
+                            <div class="row-v4" ng-show="m_oController.m_oProcessorParametersTemplate.templateId">
+                                <div class="col-v4-6">
+                                    <label for="template_creation_date">Creation Date</label>
+                                    <input id="template_creation_date" ng-readonly="true" type="text" class="form-control" placeholder="Creation Date" ng-model="m_oController.m_oProcessorParametersTemplate.creationDate">
+                                </div>
+                                
+                                <div class="col-v4-6">
+                                    <label for="template_update_date">Update Date</label>
+                                    <input id="template_update_date" ng-readonly="true" type="text" class="form-control" placeholder="Update Date" ng-model="m_oController.m_oProcessorParametersTemplate.updateDate">
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="loadIcon" ng-hide="m_oController.m_bIsLoading === false">
+                                    <invader></invader>
+                                </div>
+
+                                <div ng-hide="m_oController.m_bIsLoading === true">
+                                    <label for="template_parameters">Parameters</label>
+                                    <textarea class="form-control h-40" ng-readonly="!m_oController.m_bEditMode" style="font-family:'Courier New',sans-serif;font-size: 16px;" rows="8" id="template_parameters" placeholder="Parameters" ng-model="m_oController.m_oProcessorParametersTemplate.jsonParameters"></textarea>
+                                </div>
+                            </div>
+
+                            <br>
+
+                            <div ng-show="m_oController.m_bEditMode">
+                                <button class="my-button my-align-right" ng-click="m_oController.save()">
+                                    {{"DIALOG_SAVE_BUTTON" | translate}}
+                                </button>
+                            </div>
+
+                            <div class="over-icon text-right">
+                                <div ng-hide="m_oController.m_bEditMode">
+                                    <button class="my-button my-align-right" ng-click="m_oController.editProcessorParametersTemplate(m_oController.m_oProcessorParametersTemplate)">
+                                        Edit
+                                    </button>
+                                </div>
+
+                                <div ng-hide="m_oController.m_bEditMode">
+                                    <button class="my-button my-align-right" ng-click="m_oController.applyProcessorParametersTemplate(m_oController.m_oProcessorParametersTemplate.templateId)" data-dismiss="modal">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

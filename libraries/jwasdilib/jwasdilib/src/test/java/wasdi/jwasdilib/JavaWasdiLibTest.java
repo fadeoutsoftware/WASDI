@@ -135,11 +135,17 @@ public class JavaWasdiLibTest {
 	public void test_01_createWorkspace() {
 		LOGGER.info("createWorkspace");
 
+		assertEquals("", wasdi.getWorkspaceIdByName(sWorkspaceName));
+
 		String createdWorkspaceId = wasdi.createWorkspace(sWorkspaceName, sNodeCode);
 
 		String foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName);
 
 		assertEquals(createdWorkspaceId, foundWorkspaceId);
+
+		String foundWorkspaceName = wasdi.getWorkspaceNameById(foundWorkspaceId);
+
+		assertEquals(sWorkspaceName, foundWorkspaceName);
 	}
 
 	@Test
@@ -179,7 +185,7 @@ public class JavaWasdiLibTest {
 
 		List<Map<String, Object>> imagesToImport = images.stream()
 				.filter(t -> ((String) t.get("title")).equals(sTestFile1Name) || ((String) t.get("title")).equals(sTestFile2Name))
-				.filter(t -> !alreadyExistingImages.contains(t + ".zip"))
+				.filter(t -> !alreadyExistingImages.contains(((String) t.get("title")) + ".zip"))
 				.collect(Collectors.toList());
 
 		if (!imagesToImport.isEmpty()) {
@@ -210,6 +216,8 @@ public class JavaWasdiLibTest {
 	}
 
 	@Test
+	// Ignored, for the moment, because it hangs in the status "RUNNING"
+	@Ignore
 	public void test_06_executeWorkflow() {
 		LOGGER.info("executeWorkflow");
 
@@ -297,6 +305,7 @@ public class JavaWasdiLibTest {
 	}
 
 	@Test
+	// Ignored, for the moment, because it hangs in the status "RUNNING"
 	@Ignore
 	public void test_10_executeProcessor() throws IOException {
 		LOGGER.info("executeProcessor");
@@ -314,6 +323,23 @@ public class JavaWasdiLibTest {
 		wasdi.getProcessorPayload(sProcessObjId);
 //		Map<String, Object> map = wasdi.getProcessorPayload(sProcessObjId);
 //		assertNotNull(map);
+	}
+
+	@Test
+	// Ignored, for the moment, because it fails in without the latest changes on the server side
+	@Ignore
+	public void test_11_recreateWorkspace_shouldChangeName() {
+		LOGGER.info("recreateWorkspace");
+
+		assertNotNull(wasdi.getWorkspaceIdByName(sWorkspaceName));
+		assertEquals("", wasdi.getWorkspaceIdByName(sWorkspaceName + "(1)"));
+
+		String createdWorkspaceId = wasdi.createWorkspace(sWorkspaceName, sNodeCode);
+		String foundWorkspaceId = wasdi.getWorkspaceIdByName(sWorkspaceName + "(1)");
+
+		assertEquals(createdWorkspaceId, foundWorkspaceId);
+
+		wasdi.deleteWorkspace(createdWorkspaceId);
 	}
 
 	@Test

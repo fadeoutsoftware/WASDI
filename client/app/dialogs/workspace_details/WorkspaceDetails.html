@@ -19,6 +19,9 @@
                         <div><span class="workspace-details-heading"
                                    ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Node:</span>{{m_oController.m_oWorkspaceViewModel.nodeCode}}
                         </div>
+                        <div ng-hide="m_oController.getSLALink() == ''">
+                            <span class="workspace-details-heading"> SLA Link:</span> <a href="{{m_oController.getSLALink()}}" target="_blank">{{m_oController.m_oWorkspaceViewModel.cloudProvider}} SLA</a>
+                        </div>
                         <div><span class="workspace-details-heading"> Last Update :</span>
                             {{m_oController.getLastTouchDate()}}
                         </div>
@@ -68,7 +71,7 @@
                     {{ "DIALOG_WORKSPACE_DETAILS_CLOSE" | translate }}
                 </button>
 
-                <button type="button" ng-click="m_oController.saveNodeCode()" class="my-button"> <!--data-dismiss="modal"-->
+                <button type="button" ng-click="m_oController.saveNodeCode()" class="my-button" data-dismiss="modal"> <!--data-dismiss="modal"-->
                     {{ "DIALOG_WORKSPACE_DETAILS_APPLY" | translate }}
                 </button>
 

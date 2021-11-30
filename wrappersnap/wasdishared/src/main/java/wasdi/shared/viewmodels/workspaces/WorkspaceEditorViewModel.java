@@ -21,9 +21,9 @@ public class WorkspaceEditorViewModel {
     private String nodeCode;
     private long processesCount;
     private String cloudProvider;
+    private String slaLink;
+   
     
-
-
 	public String getCloudProvider() {
 		return cloudProvider;
 	}
@@ -103,6 +103,15 @@ public class WorkspaceEditorViewModel {
 	public void setNodeCode(String nodeCode) {
 		this.nodeCode = nodeCode;
 	}
+	
+	public String getSlaLink() {
+		return slaLink;
+	}
+
+	public void setSlaLink(String slaLink) {
+		this.slaLink = slaLink;
+	}
+
 
 	@Override
 	public String toString() {

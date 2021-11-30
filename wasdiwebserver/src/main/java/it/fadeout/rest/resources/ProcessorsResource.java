@@ -1,14 +1,10 @@
 package it.fadeout.rest.resources;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +74,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipExtractor;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
@@ -931,41 +929,24 @@ public class ProcessorsResource  {
 			
 			Utils.debugLog("ProcessorsResource.help: read Processor " +sName);
 			
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
-			
-			// Call localhost:port
-			String sUrl = "http://localhost:"+oProcessorToRun.getPort()+"/run/--help";
-			
-			Utils.debugLog("ProcessorsResource.help: calling URL = " + sUrl);
-			
-			URL oProcessorUrl = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Content-Type", "application/json");
+			// Take path
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
 
-			OutputStream oOutputStream = oConnection.getOutputStream();
-			oOutputStream.write("{}".getBytes());
-			oOutputStream.flush();
-			
-			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
-				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				Utils.debugLog("ProcessorsResource.help: directory " + oDirPath.toString() + " not found");
+				return oPrimitiveResult;
 			}
 
-			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+			String sOutputCumulativeResult = Arrays.stream(oDirFile.listFiles())
+				.filter(File::isFile)
+				.filter(WasdiFileUtils::isHelpFile)
+				.map(File::getAbsolutePath)
+				.map(WasdiFileUtils::fileToText)
+				.findFirst()
+				.orElseGet(() -> "");
 
-			String sOutputResult;
-			String sOutputCumulativeResult = "";
-			Utils.debugLog("ProcessorsResource.help: Retrieving Output from Server .... \n");
-			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				//Utils.debugLog("ProcessorsResource.help: " + sOutputResult);
-				
-				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
-			}
-
-			oConnection.disconnect();
-			
 			Utils.debugLog("ProcessorsResource.help: got help\n");
 			
 			oPrimitiveResult.setBoolValue(true);

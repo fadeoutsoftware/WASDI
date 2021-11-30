@@ -7,6 +7,7 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
     service('ProductService', ['$http', 'ConstantsService', function ($http, oConstantsService) {
         this.APIURL = oConstantsService.getAPIURL();
         this.m_oConstantsService = oConstantsService;
+        this.m_bIgnoreWorkspaceApiUrl = oConstantsService.getIgnoreWorkspaceApiUrl();
         this.m_oHttp = $http;
 
         this.getProductListByWorkspace = function (sWorkspaceId) {
@@ -21,7 +22,10 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
 
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
+            }
 
             return this.m_oHttp.get(sUrl + '/product/delete?name=' + sProductName + '&workspace=' + sWorkspaceId + '&deletefile=' + bDeleteFile + '&deletelayer=' + bDeleteLayer);
         };
@@ -32,7 +36,11 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
             }
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
+
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
+            }
+
             // the list is passed in the body request
             return this.m_oHttp.post(sUrl + '/product/deletelist?workspace=' + sWorkspaceId + '&deletefile=' + bDeleteFile + '&bdeletelayer=' + bDeleteLayer, sProductNameList);
         };
@@ -45,8 +53,10 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
 
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
 
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
+            }
             return sUrl + "/product/metadatabyname?name=" + sProductName + "&workspace=" + sWorkspace;
         };
 
@@ -56,8 +66,10 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
 
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
-            if (oWorkspace.apiUrl != null) sUrl = oWorkspace.apiUrl;
 
+            if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+                sUrl = oWorkspace.apiUrl;
+            }
             var oOptions = {
                 transformRequest: angular.identity,
                 // headers: {'Content-Type': 'multipart/form-data'}

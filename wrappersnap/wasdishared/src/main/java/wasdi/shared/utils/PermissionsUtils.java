@@ -7,6 +7,7 @@
 package wasdi.shared.utils;
 
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 
@@ -69,4 +70,25 @@ public class PermissionsUtils {
 		}
 		return false;
 	}
+
+	/**
+	 * @param sUserId a valid userId
+	 * @param sTemplateId a valid templateId
+	 * @return true if the user owns the ProcessorParametersTemplate, false otherwise
+	 */
+	public static boolean canUserAccessProcessorParametersTemplate(String sUserId, String sTemplateId) {
+		try {
+			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sTemplateId)) {
+				return false;
+			}
+
+			ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
+
+			return oProcessorParametersTemplateRepository.isTheOwnerOfTheTemplate(sTemplateId, sUserId);
+		} catch (Exception oE) {
+			Utils.debugLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
+		}
+		return false;
+	}
+
 }

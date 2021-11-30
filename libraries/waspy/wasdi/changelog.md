@@ -1,6 +1,15 @@
 # \_\_/== Changelog ==\\\_\_
 
 
+## [0.7.0] - 2021-11-24
+
+### Added
+- getWorkspaceNameById: return the name of a workspace from the id
+- sen2Core: executes sen2Core on a S2L1 image
+### Fixed
+- updated all methods to new APIs
+- checked null or empty list in waitProcesses
+
 ## [0.6.5] - 2021-09-02
 
 ### Added

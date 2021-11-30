@@ -67,7 +67,16 @@ public class CommentRepository extends MongoRepository {
 
         return delete(oCriteria, m_sThisCollection);
     }
-    
+
+    public int deleteComments(String sReviewId) {
+    	if (Utils.isNullOrEmpty(sReviewId)) return 0;
+
+		BasicDBObject oCriteria = new BasicDBObject();
+		oCriteria.append("reviewId", sReviewId);
+
+        return deleteMany(oCriteria, m_sThisCollection);
+    }
+
     public boolean updateComment(Comment oComment) {
 		BasicDBObject oCriteria = new BasicDBObject();
 		oCriteria.append("commentId", oComment.getCommentId());

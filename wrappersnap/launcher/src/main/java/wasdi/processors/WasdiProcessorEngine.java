@@ -38,13 +38,10 @@ public abstract class WasdiProcessorEngine {
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
-			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
+			sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
 		}
 		
-		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON27_SNAP)) {
-			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
-		}
-		else if (sType.equals(ProcessorTypes.IDL)) {
+		if (sType.equals(ProcessorTypes.IDL)) {
 			return new IDL2ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
@@ -57,7 +54,7 @@ public abstract class WasdiProcessorEngine {
 			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
 		else {
-			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new UbuntuPython37ProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
 	}
 
