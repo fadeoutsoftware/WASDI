@@ -203,7 +203,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function ($stateProvide
 
 wasdiApp.controller("HomeController", window.HomeController);
 wasdiApp.controller("MarketPlaceController", window.MarketPlaceController);
-wasdiApp.controller("CatalogController", window.CatalogController);
+//wasdiApp.controller("CatalogController", window.CatalogController);
 wasdiApp.controller("WorkspaceController", window.WorkspaceController);
 wasdiApp.controller("EditorController", window.EditorController);
 wasdiApp.controller("RootController", window.RootController);
@@ -217,36 +217,36 @@ wasdiApp.controller("WasdiApplicationDetailsController", window.WasdiApplication
 wasdiApp.controller("OrbitInfoController", window.OrbitInfoController);
 wasdiApp.controller("ProductInfoController", window.ProductInfoController);
 wasdiApp.controller("GetCapabilitiesController", window.GetCapabilitiesController);
-wasdiApp.controller("MergeProductsController", window.MergeProductsController);
+//wasdiApp.controller("MergeProductsController", window.MergeProductsController);
 wasdiApp.controller("ProductEditorInfoController", window.ProductEditorInfoController);
 wasdiApp.controller("AttributesMetadataController", window.AttributesMetadataController);
 wasdiApp.controller("SftpUploadController", window.SftpUploadController);
 wasdiApp.controller("DeleteProcessController", window.DeleteProcessController);
 wasdiApp.controller("WorkspaceProcessesList", window.WorkspaceProcessesList);
 wasdiApp.controller("SnakeController", window.SnakeController);
-wasdiApp.controller("GetInfoProductCatalogController", window.GetInfoProductCatalogController);
+//wasdiApp.controller("GetInfoProductCatalogController", window.GetInfoProductCatalogController);
 wasdiApp.controller("DownloadProductInWorkspaceController", window.DownloadProductInWorkspaceController);
-wasdiApp.controller("FilterBandController", window.FilterBandController);
-wasdiApp.controller("MaskManagerController", window.MaskManagerController);
+//wasdiApp.controller("FilterBandController", window.FilterBandController);
+//wasdiApp.controller("MaskManagerController", window.MaskManagerController);
 wasdiApp.controller("ImportAdvanceFiltersController", window.ImportAdvanceFiltersController);
 wasdiApp.controller("WorkFlowManagerController", window.WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController", window.GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", window.ProcessorController);
 wasdiApp.controller("WorkspaceDetailsController", window.WorkspaceDetailsController);
-wasdiApp.controller("WpsController", window.WpsController);
+//wasdiApp.controller("WpsController", window.WpsController);
 wasdiApp.controller("WappsController", window.WappsController);
 wasdiApp.controller("EditUserController", window.EditUserController);
 wasdiApp.controller("FTPController", window.FTPController);
 wasdiApp.controller("UploadController", window.UploadController);
 wasdiApp.controller("MosaicController", window.MosaicController);
-wasdiApp.controller("EditPanelController", window.EditPanelController);
+//wasdiApp.controller("EditPanelController", window.EditPanelController);
 wasdiApp.controller("ProcessorLogsController", window.ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", window.ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
 wasdiApp.controller("UploadFileController", window.UploadFileController);
-wasdiApp.controller("ImageEditorController", window.ImageEditorController);
+//wasdiApp.controller("ImageEditorController", window.ImageEditorController);
 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function ($rootScope, $state, AuthService) {

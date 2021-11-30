@@ -1,7 +1,13 @@
-require('./app/controllers/HomeController.js');
-require('./app/controllers/WorkspaceController.js');
-require('./app/controllers/EditorController.js');
 require('./app/controllers/RootController.js');
+require('./app/controllers/HomeController.js');
+
+// // Test with import instead of require 
+// import WorkspaceController from './app/controllers/WorkspaceController.js';
+// global.WorkspaceController = WorkspaceController;
+require('./app/controllers/WorkspaceController.js');
+
+
+require('./app/controllers/EditorController.js');
 require('./app/controllers/ImportController.js');
 require('./app/controllers/SearchOrbitController.js');
 require('./app/controllers/ValidateUserController.js');
