@@ -47,19 +47,19 @@ import wasdi.shared.utils.Utils;
 
 /**
  * WASDI Launcher Main Class
- * 
+ *
  * This class is the executor of all the WASDI Operations.
  * Some operations are done by the Launcher itself, others are User Processors that are triggered by the launcher.
- * 
+ *
  * The Launcher takes as input:
- * 
- * -operation -> Uppercase Name of the WASDI Operation. ie "DOWNLOAD" 
+ *
+ * -operation -> Uppercase Name of the WASDI Operation. ie "DOWNLOAD"
  * -parameter -> Path of the parameter file. ie /usr/lib/wasdi/params/fab5028a-341b-4bd3-ba7e-a321d6eb54ca
  * -config -> Path of te WASDI JSON Config file. ie /data/wasdi/config.json
- * 
+ *
  * The parameter file should be named as guid that is the same guid of the corresponding ProcessWorkspace.
- * 
- * 
+ *
+ *
  */
 public class LauncherMain  {
 
@@ -69,8 +69,8 @@ public class LauncherMain  {
     public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(LauncherMain.class));
 
     /**
-     * Static reference to Send To Rabbit utility class. 
-     * It is here created to be used "safe" in all the code. 
+     * Static reference to Send To Rabbit utility class.
+     * It is here created to be used "safe" in all the code.
      * The launcher will try to recreate with the real configuration in the main function.
      */
     public static Send s_oSendToRabbit = new Send(null);
@@ -79,7 +79,7 @@ public class LauncherMain  {
      * Actual node where the Launcher is running, main by default
      */
     public static String s_sNodeCode = "wasdi";
-    
+
     /**
      * Process Workspace Logger: this object allow to write the logs
      * linked to the process workspace that can be seen by the users in the web client
@@ -93,12 +93,12 @@ public class LauncherMain  {
      * it is needed
      */
     public static ObjectMapper s_oMapper = new ObjectMapper();
-    
+
     /**
      * Actual Process Workspace
      */
     protected static ProcessWorkspace s_oProcessWorkspace;
-    
+
     /**
      * WASDI Launcher Main Entry Point
      *
@@ -106,13 +106,13 @@ public class LauncherMain  {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-    	
+
         try {
         	// Set crypto Policy for sftp connections
             Security.setProperty("crypto.policy", "unlimited");
-            
+
             // Serach the local log4j file
-            
+
             // get jar directory
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             // configure log
@@ -125,7 +125,7 @@ public class LauncherMain  {
         }
 
         s_oLogger.debug("WASDI Launcher Main Start");
-        
+
         // We need to read the command line parameters.
 
         // create the parser
@@ -133,14 +133,14 @@ public class LauncherMain  {
 
         // create Options object
         Options oOptions = new Options();
-        
+
         // Operation to be executed
         oOptions.addOption("o", "operation", true, "WASDI Launcher Operation");
         // Parameter file path
         oOptions.addOption("p", "parameter", true, "WASDI Operation Parameter");
         // Config file path
         oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
-        
+
         // Default initialization
         String sOperation = "ND";
         String sParameter = "ND";
@@ -153,57 +153,57 @@ public class LauncherMain  {
         if (oLine.hasOption("operation")) {
             sOperation = oLine.getOptionValue("operation");
         }
-        
+
         // Check if it is available
         if (sOperation.equals("ND")) {
             System.err.println("Launcher Main - operation not available. Exit");
             System.exit(-1);
-        }                
+        }
 
         // Get the Parameter File
         if (oLine.hasOption("parameter")) {
             sParameter = oLine.getOptionValue("parameter");
         }
-        
+
         // Check if it is available
         if (sParameter.equals("ND")) {
             System.err.println("Launcher Main - parameter file not available. Exit");
             System.exit(-1);
-        }        
-        
+        }
+
         // Get the Config File
         if (oLine.hasOption("config")) {
         	sConfigFilePath = oLine.getOptionValue("config");
         }
-        
+
         // Check if it is available
         if (!WasdiConfig.readConfig(sConfigFilePath)) {
             System.err.println("Launcher Main - config file not found. Exit");
-            System.exit(-1);        	
+            System.exit(-1);
         }
-        
+
         try {
 
             // Set Rabbit Factory Params
         	RabbitFactory.readConfig();
-            
+
             // Set the Mongo Config
             MongoRepository.readConfig();
 
             // Create the Rabbit Sender Object. The object is safe: in case of any problem
             // It does not send to rabbit but only logs on console.
             LauncherMain.s_oSendToRabbit = new Send(WasdiConfig.Current.rabbit.exchange);
-            
+
             // Create Launcher Instance
             LauncherMain oLauncher = new LauncherMain();
 
-            // Deserialize the parameter 
+            // Deserialize the parameter
             BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-            
+
             // Read the Process Workspace from the db
             ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
             s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oBaseParameter.getProcessObjId());
-            
+
             // This is the operation we have to do, it must exists
             if (s_oProcessWorkspace == null) {
                 s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Are you sure the configured Node is correct? Exit");
@@ -229,13 +229,13 @@ public class LauncherMain  {
 
             // Run the operation
             oLauncher.executeOperation(sOperation, sParameter);
-            
+
             // Operation Done
             s_oLogger.debug(getBye());
-            
-        } 
+
+        }
         catch (Throwable oException) {
-        	
+
         	// ERROR: we need to put the ProcessWorkspace in a end-state, error in this case
             s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
 
@@ -243,13 +243,13 @@ public class LauncherMain  {
                 System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
 
                 if (s_oProcessWorkspace != null) {
-                	
+
                     s_oProcessWorkspace.setProgressPerc(100);
                     s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
                     s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-                    
+
                     ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                    
+
                     if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
                         s_oLogger.debug("LauncherMain FINAL: Error during process update (terminated) " + sParameter);
                     }
@@ -257,29 +257,29 @@ public class LauncherMain  {
             } catch (Exception oInnerEx) {
                 s_oLogger.error("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
             }
-            
+
             // Exit with error
             System.exit(-1);
-            
+
         } finally {
 
             // Final Check of the Process Workspace Status: it is in safe state?
             if (s_oProcessWorkspace != null) {
-            	
+
             	// Read again the process workspace
             	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                
+
                 s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(s_oProcessWorkspace.getProcessObjId());
 
                 s_oLogger.error("Launcher Main FINAL: process status [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
-                
+
                 // If it is not in a runnig state
                 if (s_oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())
                         || s_oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) {
 
-                	
+
                 	// Force the closing
                     s_oLogger.error("Launcher Main FINAL: process status not closed [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
                     s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + s_oProcessWorkspace.getProcessObjId() + "]");
@@ -291,10 +291,10 @@ public class LauncherMain  {
                     }
                 }
             }
-            
+
             // Free Rabbit resources
             LauncherMain.s_oSendToRabbit.Free();
-			
+
 			try {
 				// Stop SNAP Engine
 				Engine.getInstance().stop();
@@ -318,7 +318,7 @@ public class LauncherMain  {
      */
     public LauncherMain() {
         try {
-            
+
             // Read this node code
             LauncherMain.s_sNodeCode = WasdiConfig.Current.nodeCode;
             s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
@@ -329,10 +329,10 @@ public class LauncherMain  {
                 s_oLogger.debug("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT + 1, MongoRepository.DB_NAME);
             }
-            
+
             // Set the java/system user home folder
             System.setProperty("user.home", WasdiConfig.Current.paths.userHomePath);
-            
+
             // Configure SNAP
             configureSNAP();
 
@@ -340,7 +340,7 @@ public class LauncherMain  {
             s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
-    
+
     /**
      * Configure SNAP: it set needed system variables and configure
      * the specific Logger
@@ -352,11 +352,11 @@ public class LauncherMain  {
             Path oPropFile = Paths.get(sSnapAuxProperties);
             Config.instance("snap.auxdata").load(oPropFile);
             Config.instance().load();
-            
+
             // Init Snap
             SystemUtils.init3rdPartyLibs(null);
             Engine.start(false);
-            
+
             if (WasdiConfig.Current.snap.launcherLogActive) {
 
                 String sSnapLogLevel = WasdiConfig.Current.snap.launcherLogLevel;
@@ -392,7 +392,7 @@ public class LauncherMain  {
                 }
             } else {
                 s_oLogger.debug("SNAP Log file not active");
-            }        		
+            }
     	}
     	catch (Throwable oEx) {
             s_oLogger.error("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -412,56 +412,56 @@ public class LauncherMain  {
         String sExchange = "";
 
         try {
-        	
+
         	//Get the name of the class from the Operation
         	String sClassName = toTitleCase(sOperation.toLowerCase());
-        	
+
         	// Re contrusct the full package class name
         	sClassName = "wasdi.operations." + sClassName;
-        	
+
             // Deserialize the Parameter
             BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-            
+
             // Read Workspace and Exchange for Rabbit
             sWorkspace = oBaseParameter.getWorkspace();
             sExchange = oBaseParameter.getExchange();
 
             // Create the process workspace logger
             m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(oBaseParameter.getProcessObjId());
-            
+
             // Create the operation class
         	Operation oOperation = (Operation) Class.forName(sClassName).newInstance();
-        	
+
         	// Set the local logger
         	oOperation.setLocalLogger(s_oLogger);
         	// Set the process workspace logger
         	oOperation.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
         	// Set the send to rabbit object
         	oOperation.setSendToRabbit(s_oSendToRabbit);
-        	
+
         	// Call the execute operation method
         	boolean bOperationResult = oOperation.executeOperation(oBaseParameter, s_oProcessWorkspace);
-        	
+
         	// Check the result of the operation and set the status
         	if (bOperationResult) s_oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
         	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-        	
+
         	s_oLogger.debug("LauncherMain.executeOperation: Operation Result " + bOperationResult);
 
-        } 
+        }
         catch (Exception oEx) {
-        	            
+
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-            
+
             s_oLogger.error("LauncherMain.executeOperation Exception ", oEx);
-            
+
             s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace, sError, sExchange);
-            
+
         }
         finally {
             // update process status and send rabbit updateProcess message
             closeProcessWorkspace();
-            s_oLogger.debug("LauncherMain.executeOperation: CloseProcessWorkspace done");        	
+            s_oLogger.debug("LauncherMain.executeOperation: CloseProcessWorkspace done");
         }
 
         s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
@@ -535,19 +535,19 @@ public class LauncherMain  {
 
         return sWorkspacePath;
     }
-    
+
     /**
      * Static helper function to update status and progress of a Process Workspace.
      * Used mainly by Operation class, that has a wrapper, can be used also by other classes not
      * directly derived from Operation, like the DataProviders or the Processor Hierarcy.
-     * 
+     *
      * @param oProcessWorkspaceRepository Repo to access db
      * @param oProcessWorkspace Process Workspace Object
      * @param oProcessStatus Updated Status
      * @param iProgressPerc Updated Progress percentage
      */
     public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
-                                           ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc) 
+                                           ProcessWorkspace oProcessWorkspace, ProcessStatus oProcessStatus, int iProgressPerc)
     {
 
         if (oProcessWorkspace == null) {
@@ -558,19 +558,19 @@ public class LauncherMain  {
             s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
             return;
         }
-        
+
         try {
             oProcessWorkspace.setStatus(oProcessStatus.name());
             oProcessWorkspace.setProgressPerc(iProgressPerc);
-            
+
             // update the process
             if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
                 s_oLogger.debug("Error during process update");
             }
-            
+
             if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
                 s_oLogger.debug("Error sending rabbitmq message to update process list");
-            }        	
+            }
         }
         catch (Exception oEx) {
         	s_oLogger.debug("LauncherMain.updateProcessStatus Exception "+oEx.toString());
@@ -583,19 +583,19 @@ public class LauncherMain  {
     private void closeProcessWorkspace() {
         try {
             s_oLogger.debug("LauncherMain.CloseProcessWorkspace");
-            
+
             if (s_oProcessWorkspace != null) {
-            	
+
                 // Set Progress Perc and Operation End Date
             	s_oProcessWorkspace.setProgressPerc(100);
             	s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-                
+
                 ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                
+
                 if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
                     s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Error during process workspace update");
                 }
-                
+
                 s_oSendToRabbit.SendUpdateProcessMessage(s_oProcessWorkspace);
             }
         } catch (Exception oEx) {
@@ -603,7 +603,7 @@ public class LauncherMain  {
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
-    
+
     /**
      * Get the id of the process
      *
@@ -657,7 +657,7 @@ public class LauncherMain  {
 
         return "ERROR";
     }
-    
+
     public static String adjustGdalFolder(String sGdalCommand) {
         try {
             String sGdalPath = WasdiConfig.Current.paths.gdalPath;

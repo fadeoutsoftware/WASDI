@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import it.fadeout.Wasdi;
+import it.fadeout.services.ProcessWorkspaceService;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -30,7 +31,6 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -42,13 +42,13 @@ import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
 /**
  * Process Workspace Resource.
- * 
+ *
  * Hosts API for:
  *	.get and set processworksapce status
  *	.get and set processworkspace payload
  *
  * Status of process workspace are listed in the ProcessStatus enum and are:
- * 
+ *
  * CREATED	: process created, waiting to be started
  * RUNNING	: process started and running
  * WAITING	: process waiting for an another operation to finish
@@ -56,18 +56,19 @@ import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
  * DONE		: process finished with success
  * ERROR	: process finished in error
  * STOPPED	: process stopped by the user or a timeout
- * 
+ *
  * Processes can be of any type supported in the LauncherOperation enum.
- * 
+ *
  * @author p.campanella
  *
  */
 @Path("/process")
 public class ProcessWorkspaceResource {
+	
 
 	/**
 	 * Get a filtered paginated list of processworkspaces.
-	 * 
+	 *
 	 * @param sSessionId User session id
 	 * @param sWorkspaceId Workspace Id
 	 * @param sStatus Status filter
@@ -184,9 +185,9 @@ public class ProcessWorkspaceResource {
 	
 	/**
 	 * Get a list of proc workspace for a user
-	 * 
+	 *
 	 * @param sSessionId User Session Id
-	 * @return List of 
+	 * @return List of
 	 */
 	@GET
 	@Path("/byusr")
@@ -235,7 +236,7 @@ public class ProcessWorkspaceResource {
 	 * This API is exposed by the main server that calls the same API on all computing node.
 	 * Since processworkspace is in the distributed database, each node may have its own records.
 	 * This API collects all these data to get back the full history.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessorName Processor Name
 	 * @return Process History View Model
@@ -381,12 +382,12 @@ public class ProcessWorkspaceResource {
 	
 	/**
 	 * Get Application statistic
-	 * 
+	 *
 	 * This API is exposed by the main server that calls the same API on all computing node.
 	 * Since processworkspace is in the distributed database, each node may have its own records.
 	 * This API collects all these data to get back the stats.
-	 * 
-	 * @param sSessionId User Session 
+	 *
+	 * @param sSessionId User Session
 	 * @param sProcessorName Application name
 	 * @return AppStatsViewModel with the app statistics
 	 */
@@ -583,7 +584,7 @@ public class ProcessWorkspaceResource {
 	/**
 	 * Get the last 5 process workspaces of a workspace. The limit 5 is hard coded in the repository query.
 	 * This is used mainly for the process bar in the client.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sWorkspaceId Workspace Id
 	 * @return List (max 5) of Process Workspace View Model
@@ -638,7 +639,7 @@ public class ProcessWorkspaceResource {
 	/**
 	 * Get the last 5 process workspaces of a user.
 	 * The limit 5 is hard coded in the repository query.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @return List of Process Workspace View Models
 	 */
@@ -685,10 +686,10 @@ public class ProcessWorkspaceResource {
 	}
 	
 	/**
-	 * Get summary info about process workspaces of a user. 
+	 * Get summary info about process workspaces of a user.
 	 * The summary has the number of CREATED, RUNNING and WAITING processes for the user.
 	 * This API works only on this node.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @return Process Workspace Summary View Model
 	 */
@@ -703,7 +704,7 @@ public class ProcessWorkspaceResource {
 		try {
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-			
+
 			// Domain Check
 			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
@@ -755,7 +756,7 @@ public class ProcessWorkspaceResource {
 	
 	/**
 	 * Kills a running process workspace, and all the relative process tree.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sToKillProcessObjId Proc id to kill
 	 * @param bKillTheEntireTree Flag to delete all the tree or only the process
@@ -765,7 +766,7 @@ public class ProcessWorkspaceResource {
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sToKillProcessObjId, @QueryParam("treeKill") Boolean bKillTheEntireTree) {
-		
+
 		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
 
 		try {
@@ -775,53 +776,34 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " ): invalid session");
 				return Response.status(401).build();
 			}
-			
+
 			if(Utils.isNullOrEmpty(sToKillProcessObjId)) {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: processObjId is null or empty, aborting");
 				return Response.status(401).build();
 			}
-			
+
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessToDelete = oRepository.getProcessByProcessObjId(sToKillProcessObjId);
-			
+			ProcessWorkspace oProcessToKill = oRepository.getProcessByProcessObjId(sToKillProcessObjId);
+
 			//check that the process exists
-			if(null==oProcessToDelete) {
+			if(null==oProcessToKill) {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
-				return Response.status(401).build();
+				return Response.status(400).build();
 			}
-			
-			// check that the user can access the processworkspace
+
+			// check that the user can access the processWorkspace
 			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sToKillProcessObjId)) {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
 				return Response.status(403).build();
 			}
-			
-			
-			//create the operation parameter
-			String sDeleteObjId = Utils.getRandomName();
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
-			oKillProcessParameter.setProcessObjId(sDeleteObjId);
-			oKillProcessParameter.setProcessToBeKilledObjId(sToKillProcessObjId);
-			if(null!=bKillTheEntireTree) {
-				oKillProcessParameter.setKillTree(bKillTheEntireTree);
+	
+			ProcessWorkspaceService oProcessService = new ProcessWorkspaceService();
+			List<ProcessWorkspace> aoProcessesToBeKilled = new ArrayList<ProcessWorkspace>(1);
+			aoProcessesToBeKilled.add(oProcessToKill);
+			boolean bResult = oProcessService.killProcesses(aoProcessesToBeKilled, bKillTheEntireTree, false, sSessionId);
+			if(bResult) {
+				return Response.status(Response.Status.OK).build();
 			}
-			
-			
-			String sWorkspaceId = oProcessToDelete.getWorkspaceId();
-			
-			//base parameter atttributes
-			oKillProcessParameter.setWorkspace(sWorkspaceId);
-			oKillProcessParameter.setUserId(oUser.getUserId());
-			oKillProcessParameter.setExchange(sWorkspaceId);
-			oKillProcessParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-			
-			//schedule the deletion
-			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(), oProcessToDelete.getProductName(), sPath, oKillProcessParameter, null);
-			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: " + oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
-			
-			return Response.status(oResult.getIntValue()).build();
-						
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.DeleteProcess: " + oEx);
@@ -830,10 +812,11 @@ public class ProcessWorkspaceResource {
 		return Response.status(500).build();
 	}
 
+
 	
 	/**
 	 * Get a Process Workspace View Model by id
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessWorkspaceId Process Workspace ID
 	 * @return Process Workspace View Model
@@ -880,7 +863,7 @@ public class ProcessWorkspaceResource {
 	
 	/**
 	 * Get the status of multiple processes in a single call
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param asProcessesWorkspaceId List of string, each representing a ProcessWorkspace Id, receved in the body.
 	 * @return List of strings: each is the status of the procws, corresponding to the same index used in input
@@ -951,12 +934,12 @@ public class ProcessWorkspaceResource {
 	
 	/**
 	 * Update Status and Progress Percentage of a process workspace.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessObjId Process Workspace Id
-	 * @param sNewStatus New status 
+	 * @param sNewStatus New status
 	 * @param iPerc New progress perc. If it is out of range [0-100], it is ignored
-	 * @param sSendToRabbit flag to decide if this update has to be notified in rabbit or not. Can be "1" or "true" to activate the transmission 
+	 * @param sSendToRabbit flag to decide if this update has to be notified in rabbit or not. Can be "1" or "true" to activate the transmission
 	 * @return updated Process Workspace View Model
 	 */
 	@GET
@@ -1036,10 +1019,10 @@ public class ProcessWorkspaceResource {
 	
 	/**
 	 * Set the payload of a Process Workspace
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessObjId Process Workspace Id
-	 * @param sPayload Payload to save 
+	 * @param sPayload Payload to save
 	 * @return Updated Process Workspace View Model
 	 */
 	@GET
@@ -1071,7 +1054,7 @@ public class ProcessWorkspaceResource {
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
-			// Get Process 
+			// Get Process
 			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessObjId);
 			
 			// Update payload
@@ -1094,7 +1077,7 @@ public class ProcessWorkspaceResource {
 	 * Set the sub-pid for a running process workspace.
 	 * Usually, pid is set by the launcher and is the pid of launcher process itself
 	 * Sub-pid can be set via api and is the pid of the real running process in the application docker.
-	 * 
+	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessObjId Process Workspace Id
 	 * @param iSubPid Sub pid (in docker pid)
@@ -1156,9 +1139,9 @@ public class ProcessWorkspaceResource {
 	@Path("/payload")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public String getPayload(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId) {
-		
+
 		Utils.debugLog("ProcessWorkspaceResource.getPayload(" + sProcessObjId + " )" );
-		
+
 		try {
 			if(Utils.isNullOrEmpty(sSessionId)) {
 				Utils.debugLog("ProcessWorkspaceResource.getPayload: session is null or empty, aborting");
