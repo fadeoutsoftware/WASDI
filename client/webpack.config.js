@@ -23,12 +23,17 @@ module.exports = {
         vendor: {
             import: './vendor.js'
         },
-        // this entry report all controllers
+        services:{
+            import :'./services.js'
+        },
+
+
+        // this entry include all controllers
         // each controller must be declared inside the window object in order to be
         // initialized as module by app.js
         controllers: {
             import:'./controllers.js',
-            dependOn: ['vendor'],
+            dependOn: ['vendor','services'],
 
         },
         app: {
@@ -118,7 +123,7 @@ module.exports = {
     ],
     optimization: {
         runtimeChunk: 'single',
-        // minimization reduce the ./dist folder footprint of just a mere 3 MB over 45MB
+        // minimization reduce the ./dist folder footprint to just 30 MB over 45MB
         // but generates some error for modules created using factory() from angular
         // so for production mode is now disabled
         minimize: false

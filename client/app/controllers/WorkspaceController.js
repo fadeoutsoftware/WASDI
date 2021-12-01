@@ -4,7 +4,7 @@
 
 var WorkspaceController = (function () {
     function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
-                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oOpportunitySearchService,
+                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, /*oOpportunitySearchService,*/
                                  $interval) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
@@ -26,7 +26,7 @@ var WorkspaceController = (function () {
         this.m_oRootScope = $rootScope;
         this.m_oSelectedProduct = null;
         this.m_oWorkspaceSelected = null;
-        this.m_oOpportunitySearchService = oOpportunitySearchService;
+        /*this.m_oOpportunitySearchService = oOpportunitySearchService;*/
         this.m_aoSatellitePositions = [];
         this.m_aoSateliteInputTraks = [];
         this.m_oFakePosition = null;
@@ -53,7 +53,7 @@ var WorkspaceController = (function () {
         this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
         this.m_oGlobeService.goHome();
 
-        this.getTrackSatellite();
+        //this.getTrackSatellite();
 
 
         this.m_oUpdatePositionSatellite = $interval(function () {
@@ -460,7 +460,7 @@ var WorkspaceController = (function () {
         });
     };
 
-    WorkspaceController.prototype.getTrackSatellite = function () {
+  /*  WorkspaceController.prototype.getTrackSatellite = function () {
         var oController = this;
         var iSat;
 
@@ -527,7 +527,7 @@ var WorkspaceController = (function () {
             });
         }
 
-    };
+    };*/
 
     WorkspaceController.prototype.updatePositionsSatellites = function () {
         if (utilsIsObjectNullOrUndefined(this.m_aoSatellitePositions)) return false;
@@ -540,7 +540,7 @@ var WorkspaceController = (function () {
         return true;
     }
 
-    WorkspaceController.prototype.updatePosition = function () {
+   /* WorkspaceController.prototype.updatePosition = function () {
         var sSatellites = "";
         for (var iSat = 0; iSat < this.m_aoSateliteInputTraks.length; iSat++) {
             sSatellites += this.m_aoSateliteInputTraks[iSat].name + "-";
@@ -570,7 +570,7 @@ var WorkspaceController = (function () {
         });
 
         return true;
-    };
+    };*/
 
     WorkspaceController.prototype.getIndexActualSatellitePositions = function (sCode) {
         for (var iOriginalSat = 0; iOriginalSat < this.m_aoSateliteInputTraks.length; iOriginalSat++) {
@@ -637,7 +637,7 @@ var WorkspaceController = (function () {
         'RabbitStompService',
         'GlobeService',
         '$rootScope',
-        'OpportunitySearchService',
+        /*'OpportunitySearchService',*/
         '$interval'
     ];
     return WorkspaceController;
