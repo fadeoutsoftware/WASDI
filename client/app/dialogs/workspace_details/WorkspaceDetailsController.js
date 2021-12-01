@@ -24,23 +24,17 @@ var WorkspaceDetailsController = (function () {
          */
         this.m_oNodeService = oNodeService;
         /**
-         *
+         * Link to the costants service
          */
         this.m_oConstantService = oConstantService;
-
-
-
         /**
          * Reference to this controller
          */
         this.m_oScope.m_oController = this;
-
-
         /**
          * workspace id
          */
         this.m_workspaceId = this.m_oExtras.WorkSpaceId;
-
         /**
          * workspace view model <-> WorkspaceEditorViewModel on the server
          */
@@ -53,7 +47,9 @@ var WorkspaceDetailsController = (function () {
          * Computational Node list
          */
         this.m_aoNodesList = this.m_oExtras.NodeList;
-
+        /**
+         * Current node code
+         */
         this.m_sCurrentNode = this.m_oExtras.WorkSpaceViewModel.nodeCode;
 
 
@@ -111,6 +107,23 @@ var WorkspaceDetailsController = (function () {
 
     }
 
+    /**
+     * Get the Cloud provider SLA Link if available
+     * @returns 
+     */
+    WorkspaceDetailsController.prototype.getSLALink = function () {
+
+        if (this.m_oWorkspaceViewModel === null) {
+            return "";
+        } else {
+            if (utilsIsObjectNullOrUndefined(this.m_oWorkspaceViewModel.slaLink)) {
+                return "";
+            }
+            else {
+                return this.m_oWorkspaceViewModel.slaLink;
+            }
+        }
+    }
 
     /**
      * Methods that sets the node and post the updated ViewModel

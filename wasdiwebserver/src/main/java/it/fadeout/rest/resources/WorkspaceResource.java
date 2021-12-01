@@ -25,6 +25,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.ProcessWorkspaceService;
+import wasdi.shared.business.CloudProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProductWorkspace;
@@ -33,6 +34,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.CloudProviderRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -231,6 +233,15 @@ public class WorkspaceResource {
 		return aoWSList;
 	}
 
+	/**
+	 * Returns the View Model of the workspace.
+	 * The view model contains the baseic parameters of the ws, plus the base URL
+	 * for the api calls following api calls, accordingly to the node url from DB.
+	 * To change the workspace node Id checks the "update" call on this resource
+	 * @param sSessionId the current sesssion, that should be validated
+	 * @param sWorkspaceId Unique identifier of the workspace
+	 * @return Workspace View Model with the updated values
+	 */
 	@GET
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -290,9 +301,17 @@ public class WorkspaceResource {
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
 					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
-					
+										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
 						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+						
+						CloudProviderRepository oCloudProviderRepository = new CloudProviderRepository();
+						CloudProvider oCloudProvider = oCloudProviderRepository.getCloudProviderByCode(oWorkspaceNode.getCloudProvider());
+						
+						if (oCloudProvider != null) {
+							oVM.setSlaLink(oCloudProvider.getSlaLink());
+						}
+						
 					}
 					else {
 						oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
@@ -366,8 +385,8 @@ public class WorkspaceResource {
 
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
-		while (oWorkspaceRepository.getByNameAndNode(sName, sNodeCode) != null) {
-			sName = sName + "_02";
+		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+			sName = Utils.cloneWorkspaceName(sName);
 			Utils.debugLog("WorkspaceResource.CreateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
 		}
 

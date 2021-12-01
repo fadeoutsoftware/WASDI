@@ -1777,8 +1777,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # todo support other platforms
     if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (
-            sPlatform != "ENVI"):
-        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI. Received [' + sPlatform + ']' +
+            sPlatform != "ENVI") and (sPlatform != "S5P"):
+        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI|S5P. Received [' + sPlatform + ']' +
                  '  ******************************************************************************')
         return aoReturnList
 
@@ -1897,12 +1897,16 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sQuery += "Sentinel-2 "
     elif sPlatform == "S1":
         sQuery += "Sentinel-1"
+    elif sPlatform == "S3":
+        sQuery += "Sentinel-3"        
     elif sPlatform == "VIIRS":
         sQuery += "VIIRS"
     elif sPlatform == "L8":
         sQuery += "Landsat-*"
     elif sPlatform == "ENVI":
         sQuery += "Envisat"
+    elif sPlatform == "S5P":
+        sQuery += "Sentinel-5P"        
 
     # If available add product type
     if sProductType is not None:

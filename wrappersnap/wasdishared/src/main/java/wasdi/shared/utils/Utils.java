@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -461,5 +462,40 @@ public class Utils {
 	 */
 	public static int getRandomNumber(int iMin, int iMax) {
 		return iMin + new SecureRandom().nextInt(iMax - iMin);
-	}	
+	}
+
+	/**
+	 * Get a clone of the workspace name.
+	 * If the name ends with an ordinal (i.e. 1) it is increased (i.e. 2).
+	 * Otherwise, it appends the (1) termination
+	 * @param originalName the original name of the workspace
+	 * @return the new name of the workspace
+	 */
+	public static String cloneWorkspaceName(String originalName) {
+
+		if (originalName == null || originalName.isEmpty()) {
+			return "Untitled Workspace";
+		}
+
+		List<String> tokens = Arrays.asList(originalName.split("[\\(\\)]"));
+
+		String newName;
+
+		if (tokens.size() == 1) {
+			newName = originalName + "(1)";
+		} else {
+			String lastToken = tokens.get(tokens.size() - 1);
+
+			try {
+				int ordinal = Integer.parseInt(lastToken);
+				int incrementedOrdinal = ordinal + 1;
+				int index = originalName.lastIndexOf(lastToken);
+				newName = originalName.substring(0, index) + incrementedOrdinal + ")";
+			} catch (NumberFormatException e) {
+				newName = originalName + "(1)";
+			}
+		}
+
+		return newName;
+	}
 }

@@ -19,6 +19,9 @@
                         <div><span class="workspace-details-heading"
                                    ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Node:</span>{{m_oController.m_oWorkspaceViewModel.nodeCode}}
                         </div>
+                        <div ng-hide="m_oController.getSLALink() == ''">
+                            <span class="workspace-details-heading"> SLA Link:</span> <a href="{{m_oController.getSLALink()}}" target="_blank">{{m_oController.m_oWorkspaceViewModel.cloudProvider}} SLA</a>
+                        </div>
                         <div><span class="workspace-details-heading"> Last Update :</span>
                             {{m_oController.getLastTouchDate()}}
                         </div>

@@ -29,6 +29,14 @@ public class App
         oLib.printStatus();
         
         System.out.println(oLib.getProcessorPath());
+        
+        oLib.setDefaultProvider("CREODIAS");
+        List<Map<String, Object>>  aoResults =  oLib.searchEOImages("S3", "2021-11-26", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
+        aoResults =  oLib.searchEOImages("ENVI", "2010-11-20", "2010-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
+        aoResults =  oLib.searchEOImages("S5P", "2021-11-26", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
+        aoResults =  oLib.searchEOImages("L8", "2021-11-20", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
+        oLib.setDefaultProvider("VIIRS");
+        aoResults =  oLib.searchEOImages("VIIRS", "2021-11-20", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
       
         testExecuteWorkflow(oLib);
         

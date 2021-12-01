@@ -155,7 +155,48 @@ public class WorkspaceRepository extends  MongoRepository {
 
         return aoReturnList;
     }
-    
+
+    /**
+     * Find a workspace by userId and workspace name.
+     * @param sUserId the userId
+     * @param sName the name of the workspace
+     * @return the first workspace found or null
+     */
+    public Workspace getByUserIdAndWorkspaceName(String sUserId, String sName) {
+    	try {
+    		Document oWSDocument = getCollection(m_sThisCollection).find(
+    				Filters.and(
+    						Filters.eq("userId", sUserId),
+    						Filters.eq("name", sName)
+    						)
+    		).first();
+    		
+    		if(null!=oWSDocument) {
+    			String sJSON = oWSDocument.toJson();
+    			
+                Workspace oWorkspace = null;
+                try {
+                    oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                
+                return oWorkspace;
+    		}
+    		
+    	} catch (Exception oE) {
+			Utils.debugLog("WorkspaceRepository.getByName( " + sName + "): error: " + oE);
+		}
+    	
+    	return null;
+    }
+
+    /**
+     * Find a workspace by name and node.
+     * @param sName the name of the workspace
+     * @param sNode the node
+     * @return the first workspace found or null
+     */
     public Workspace getByNameAndNode(String sName, String sNode) {
     	try {
     		Document oWSDocument = getCollection(m_sThisCollection).find(
