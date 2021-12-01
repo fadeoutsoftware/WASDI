@@ -406,7 +406,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
-        m_oLocalLogger.debug("Download.executeOperation: return file name " + sFileName);
+        //m_oLocalLogger.debug("Download.executeOperation: return file name " + sFileName);
 
         return oAlreadyDownloaded;
 		
