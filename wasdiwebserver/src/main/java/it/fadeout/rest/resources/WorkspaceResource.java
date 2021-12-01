@@ -458,8 +458,9 @@ public class WorkspaceResource {
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
 
 			
-			// if present, the node code must be updated
-			if(oWorkspaceEditorViewModel.getNodeCode() != null) {
+			// if present and different from "wasdi", the node code must be updated
+			if(oWorkspaceEditorViewModel.getNodeCode() != null &&
+					!(oWorkspaceEditorViewModel.getNodeCode().equals("wasdi"))) {
 				NodeRepository oNodeRepository = new NodeRepository();
 				String sNodeCode = oWorkspaceEditorViewModel.getNodeCode();
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
