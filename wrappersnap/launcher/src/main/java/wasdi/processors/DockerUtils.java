@@ -86,8 +86,14 @@ public class DockerUtils {
                     oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
-                            " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")" +
-                            " $1 >> " + m_sDockerLogFile + " 2>&1");
+                            " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");
+                    
+                    if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
+                    	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=" + WasdiConfig.Current.dockers.pipInstallWasdiAddress); 
+                    }
+                      
+                    oBuildScriptWriter.write(" $1 >> " + m_sDockerLogFile + " 2>&1");
+                    
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
                     oBuildScriptWriter.flush();

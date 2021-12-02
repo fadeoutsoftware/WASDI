@@ -12,4 +12,9 @@ public class DockersConfig {
 	 * May be needed in some cloud for network reasons.
 	 */
 	public String extraHosts;
+	
+	/**
+	 * Address to use to access pyPi to install waspy
+	 */
+	public String pipInstallWasdiAddress;
 }
