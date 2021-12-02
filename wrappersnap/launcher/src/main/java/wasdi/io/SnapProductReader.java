@@ -22,6 +22,7 @@ public class SnapProductReader extends WasdiProductReader {
 	public SnapProductReader(File oProductFile) {
 		super(oProductFile);
 	}
+	
 	public ProductViewModel getProductViewModel() {
 		
 		LauncherMain.s_oLogger.debug("SnapProductReader.getProductViewModel: start");
@@ -77,8 +78,8 @@ public class SnapProductReader extends WasdiProductReader {
             oViewModel.setHeight(oBand.getRasterHeight());
             oProductViewModel.getBandsGroups().getBands().add(oViewModel);
         }
-
     }
+    
 	@Override
 	public String getProductBoundingBox() {
 		
