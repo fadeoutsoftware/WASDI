@@ -1,5 +1,19 @@
 # \_\_/== Changelog ==\\\_\_
 
+WASDI python programming library CHANGELOG.md, according to the 
+[standard proposed by keepchangelog](https://keepachangelog.com/)
+
+## [0.7.1] - 2021-12-02
+
+### Added
+- Integration tests
+
+### Changed
+- Name of this file from changelog.md to CHANGELOG.md to [adhere to the 
+  standard](https://keepachangelog.com/)
+
+### Fixed
+- Wrong paths in some calls (paths changed after server refactoring)
 
 ## [0.7.0] - 2021-11-24
 
