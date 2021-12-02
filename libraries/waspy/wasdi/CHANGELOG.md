@@ -3,26 +3,16 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
-## [0.7.1] - 2021-12-02
-
-### Added
-- Integration tests
-
-### Changed
-- Name of this file from changelog.md to CHANGELOG.md to [adhere to the 
-  standard](https://keepachangelog.com/)
-
-### Fixed
-- Wrong paths in some calls (paths changed after server refactoring)
-
 ## [0.7.0] - 2021-11-24
 
 ### Added
 - getWorkspaceNameById: return the name of a workspace from the id
 - sen2Core: executes sen2Core on a S2L1 image
+
 ### Fixed
 - updated all methods to new APIs
 - checked null or empty list in waitProcesses
+- Wrong paths in some calls (paths changed after server refactoring)
 
 ## [0.6.5] - 2021-09-02
 
