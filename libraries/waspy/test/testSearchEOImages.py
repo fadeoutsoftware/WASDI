@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
-# courtesy of Linda Cademartori and Carola Lo Monaco
+# courtesy of Linda Cademartori and Carola Lo Monaco, 2021
 
 """
 The goal is to test searchEOImages function of wasdi library using mock and unittest.
