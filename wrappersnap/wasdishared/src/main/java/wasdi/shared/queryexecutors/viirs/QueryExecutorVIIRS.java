@@ -4,10 +4,8 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -69,27 +67,11 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		
 		ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 
-		int iDays = countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+		int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
 
 	    iCount = asSections.size() * iDays;
 		
 		return iCount;
-	}
-
-	/**
-	 * Count the days of an interval, considering both the start and the end dates.
-	 * @param sFromDate the start of the interval
-	 * @param sToDate the end of the interval
-	 * @return the number of days of the interval
-	 */
-	private static int countDaysIncluding(String sFromDate, String sToDate) {
-		long lStart = TimeEpochUtils.fromDateStringToEpoch(sFromDate);
-		long lEnd = TimeEpochUtils.fromDateStringToEpoch(sToDate);
-
-		long lDiffInMillies = Math.abs(lEnd - lStart);
-		long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS) + 1;
-
-		return (int) lDays;
 	}
 		
 	@Override
@@ -132,9 +114,9 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	    
 	    DateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");
 
-		int iDays = countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+		int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
 		for (int i = 0; i < iDays; i++) {
-			Date oActualDay = getLaterDate(lStart, i);
+			Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
 	    	
 	    	for (String sSection : asSections) {
 	    		
@@ -180,14 +162,6 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	    }
 		
 		return aoResults;
-	}
-
-	public static Date getLaterDate(long lTimeInMillis, int iDaysLater) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(lTimeInMillis);
-		cal.add(Calendar.DATE, iDaysLater);
-
-		return cal.getTime();
 	}
 	
 	@Override
