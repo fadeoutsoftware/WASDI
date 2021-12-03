@@ -67,16 +67,28 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		}
 		
 		ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
-				
-		long lStart = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.startFromDate);
-		long lEnd  = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.endToDate);
-		
-		long lDiffInMillies = Math.abs(lEnd - lStart);
-	    long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS) + 1;
-	    
-	    iCount = asSections.size() * ((int) lDays);
+
+		int iDays = countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+
+	    iCount = asSections.size() * ((int) iDays);
 		
 		return iCount;
+	}
+
+	/**
+	 * Count the days of an interval, considering both the start and the end dates.
+	 * @param sFromDate the start of the interval
+	 * @param sToDate the end of the interval
+	 * @return the number of days of the interval
+	 */
+	private static int countDaysIncluding(String sFromDate, String sToDate) {
+		long lStart = TimeEpochUtils.fromDateStringToEpoch(sFromDate);
+		long lEnd = TimeEpochUtils.fromDateStringToEpoch(sToDate);
+
+		long lDiffInMillies = Math.abs(lEnd - lStart);
+		long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS) + 1;
+
+		return (int) lDays;
 	}
 		
 	@Override
