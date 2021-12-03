@@ -72,7 +72,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		long lEnd  = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.endToDate);
 		
 		long lDiffInMillies = Math.abs(lEnd - lStart);
-	    long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS);
+	    long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS) + 1;
 	    
 	    iCount = asSections.size() * ((int) lDays);
 		
