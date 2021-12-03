@@ -30,7 +30,7 @@ public class Trigger {
 	/**
 	 * Default Base Url
 	 */
-	String m_sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest/";
+	String m_sBaseUrl = WasdiConfig.Current.baseUrl;
 	/**
 	 * Static Logger that references the "Trigger" logger
 	 */
