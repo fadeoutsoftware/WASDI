@@ -1765,8 +1765,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # todo support other platforms
     if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (
-            sPlatform != "ENVI") and (sPlatform != "S5P"):
-        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI|S5P. Received [' + sPlatform + ']' +
+            sPlatform != "ENVI") and (sPlatform != "S5P") and (sPlatform != "S3"): 
+        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|S3|VIIRS|L8|ENVI|S5P. Received [' + sPlatform + ']' +
                  '  ******************************************************************************')
         return aoReturnList
 
