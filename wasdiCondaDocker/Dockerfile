@@ -10,6 +10,7 @@ ARG USR_ID
 ARG GRP_NAME
 ARG GRP_ID
 ARG USR_HOME="/home/wasdi"
+ARG PIP_INSTALL_WASDI_ARGUMENTS
 ARG MINICONDA_SRC_URL="https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh"
 ARG MINICONDA_TEMPORARY_SCRIPT="Miniconda3.sh"
 
@@ -101,14 +102,17 @@ RUN pip3 install flask \
     numpy \
     pandas \
     rasterio \
-    wasdi \
     wheel
+
+
+# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
+RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
 
 
 # [IN OUR VENV] Install needed Python GDAL library
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-    export C_INCLUDE_PATH=/usr/include/gdal
-RUN pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
+    export C_INCLUDE_PATH=/usr/include/gdal && \
+    pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
 
 
 # From now, all commands executed are executed as root
