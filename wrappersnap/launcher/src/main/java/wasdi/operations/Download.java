@@ -182,16 +182,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
 
                 // Get The product view Model
-				WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(new File(sFileName));
-				sFileName = oReadProduct.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
+				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
+				sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
 				File oProductFile = new File(sFileName);
 				
-				//P.Campanella 24/10/2021: this can lead to an error for S3 images. All are named xfdumanifest.xml
-				// Need to be checked and fixed some how
 				sFileNameWithoutPath = oProductFile.getName(); 
 				
-				Product oProduct = oReadProduct.getSnapProduct();
-				oVM = oReadProduct.getProductViewModel();
+				Product oProduct = oProductReader.getSnapProduct();
+				oVM = oProductReader.getProductViewModel();
 				
                 // Save it in the register
                 oAlreadyDownloaded = new DownloadedFile();

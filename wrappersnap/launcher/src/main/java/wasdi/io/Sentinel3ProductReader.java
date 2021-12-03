@@ -5,14 +5,18 @@ package wasdi.io;
 
 import java.io.File;
 
-import wasdi.shared.viewmodels.products.MetadataViewModel;
-import wasdi.shared.viewmodels.products.ProductViewModel;
+import org.esa.snap.core.datamodel.Product;
+
+import wasdi.LauncherMain;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.ZipExtractor;
+
 
 /**
  * @author c.nattero
  *
  */
-public class Sentinel3ProductReader extends WasdiProductReader {
+public class Sentinel3ProductReader extends SnapProductReader {
 
 	/**
 	 * @param oProductFile the Sentinel-3 (zip) file to be read
@@ -22,27 +26,68 @@ public class Sentinel3ProductReader extends WasdiProductReader {
 	}
 
 	@Override
-	public ProductViewModel getProductViewModel() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getProductBoundingBox() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MetadataViewModel getProductMetadataViewModel() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			if(Utils.isNullOrEmpty(sDownloadedFileFullPath)) {
+				LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: sDownloadedFileFullPath null or empty, aborting");
+				return null;
+			}
+			if(Utils.isNullOrEmpty(sFileNameFromProvider)){
+				LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: sFileNameFromProvider null or empty, aborting");
+				return null;
+			}
+			if(!sFileNameFromProvider.toLowerCase().startsWith("s3") || !sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
+				LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a Sentinel-3 file name");
+				return null;
+			}
+		} catch (Exception oE) {
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: arguments checking failed due to: " + oE + ", aborting");
+			return null;
+		}
+
+		try {
+			String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
+			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
+			ZipExtractor oZipExtractor = new ZipExtractor("");
+			oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
+			String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", ".SEN3");
+			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
+
+			return sFolderName;
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: error ", oEx);
+		}
+
+		return sDownloadedFileFullPath;
 	}
 
+	
+	/**
+	 * Get the SNAP product or null if this is not a product readable by Snap
+	 * 
+	 * @return
+	 */
+	@Override
+	public Product getSnapProduct() {
+		try {
+			//save File pointing to directory
+			File oTempFile = new File(m_oProductFile.getAbsolutePath());
+			//create File pointing to manifest
+			m_oProductFile = new File(oTempFile.getAbsolutePath() + File.separator + "xfdumanifest.xml");
+			//business as usual
+			if (m_bSnapReadAlreadyDone == false) {
+				m_oProduct = readSnapProduct();
+			}
+			//reset the File pointer
+			m_oProductFile = new File(oTempFile.getAbsolutePath());
+			
+			return m_oProduct;
+		}
+		catch (Exception oE) {
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: " + oE);
+		}
+		return null;
+	}
 }

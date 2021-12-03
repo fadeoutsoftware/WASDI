@@ -55,12 +55,12 @@ public class SnapProductReader extends WasdiProductReader {
     protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null return");
+            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null, return");
             return;
         }
 
         if (oProduct == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null");
+            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null, return");
             return;
         }
 
@@ -78,8 +78,8 @@ public class SnapProductReader extends WasdiProductReader {
             oViewModel.setHeight(oBand.getRasterHeight());
             oProductViewModel.getBandsGroups().getBands().add(oViewModel);
         }
+
     }
-    
 	@Override
 	public String getProductBoundingBox() {
 		

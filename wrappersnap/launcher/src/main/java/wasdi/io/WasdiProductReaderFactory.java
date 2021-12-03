@@ -25,7 +25,7 @@ public class WasdiProductReaderFactory {
 			return new Sentinel5ProductReader(oFile);
 		}
 		
-		if (oFile.getName().toLowerCase().startsWith("s3p")) { 
+		if (oFile.getName().toLowerCase().startsWith("s3")) { 
 			return new Sentinel3ProductReader(oFile);
 		}
 		
