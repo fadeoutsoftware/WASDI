@@ -28,6 +28,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
 
@@ -273,6 +274,20 @@ public class CatalogResources {
 		return oResponseBuilder.build();
 	}
 	
+	private Response zipSentinel3(File oInitialFile) {
+		if(null==oInitialFile) {
+			Utils.debugLog("CatalogResource.zipSentinel3: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		if(!oInitialFile.isDirectory()) {
+			Utils.debugLog("CatalogResource.zipSentinel3: file " + oInitialFile.getAbsolutePath() + " is not a directory, aborting");
+			return Response.serverError().build();
+		}
+		
+		
+		throw new UnsupportedOperationException("Implement this method!");
+	}
+	
 	/**
 	 * Zip a file and return the stream 
 	 * @param oInitialFile File to zip
@@ -288,13 +303,14 @@ public class CatalogResources {
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: init");
 			String sBasePath = oInitialFile.getAbsolutePath();
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sBasePath = " + sBasePath);
-			
+			sBasePath = sBasePath.toLowerCase();
 			if (sBasePath.endsWith(".dim")) {
 				return zipBeanDimapFile(oInitialFile);
-			}
-			else if (sBasePath.toLowerCase().endsWith(".shp")) {
+			} else if (sBasePath.endsWith(".shp")) {
 				return zipShapeFile(oInitialFile);
-			}
+			} else if(WasdiFileUtils.isSentinel3Directory(oInitialFile)) {
+				return zipSentinel3(oInitialFile);
+			} 
 		} 
 		catch (Exception e) {
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
@@ -302,6 +318,7 @@ public class CatalogResources {
 		return null;
 	}
 	
+
 	/**
 	 * Checks if the file must be zipped or not
 	 * @param oFile File to check
@@ -316,16 +333,16 @@ public class CatalogResources {
 		}
 		boolean bRet = false;
 
-		String sName = oFile.getName();
+		String sName = oFile.getName().toLowerCase();
 		
 		if(!Utils.isNullOrEmpty(sName)) {
-			
-			if(sName.endsWith(".dim")) {
-				bRet = true;
-			}
-			else if (sName.endsWith(".shp")) {
-				bRet = true;
-			}
+			return (
+					//dim files are the output of SNAP operations
+					sName.endsWith(".dim") ||
+					//sName.endsWith(".shp") ||
+					WasdiFileUtils.isShapeFile(oFile) ||
+					WasdiFileUtils.isSentinel3Directory(oFile)
+					);
 		}
 		return bRet;
 	}
