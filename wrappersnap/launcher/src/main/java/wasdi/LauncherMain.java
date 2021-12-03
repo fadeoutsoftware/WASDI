@@ -20,6 +20,7 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.esa.snap.runtime.EngineConfig;
@@ -393,6 +394,21 @@ public class LauncherMain  {
             } else {
                 s_oLogger.debug("SNAP Log file not active");
             }
+            
+            try {
+            	// Print the openjpeg path
+            	Path oPath = OpenJpegExecRetriever.getOpenJPEGAuxDataPath();
+            	
+            	if (oPath != null) {
+            		s_oLogger.debug("getOpenJPEGAuxDataPath = " + oPath.toString());
+            	}
+            	else {
+            		s_oLogger.debug("getOpenJPEGAuxDataPath = null");
+            	}
+            }
+            catch (Throwable oEx) {
+            	s_oLogger.error("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			}
     	}
     	catch (Throwable oEx) {
             s_oLogger.error("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
