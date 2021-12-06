@@ -13,7 +13,7 @@ echo "Process Obj Id is: "$sProcessObjId
 iDuration=-1
 while (( i < 5 ))
 do
-	sStatus=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?processObjId=${sProcessObjId}" --header "x-session-token: ${sSessionId}")
+	sStatus=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?procws=${sProcessObjId}" --header "x-session-token: ${sSessionId}")
 	if [[ "$sStatus" == "DONE" ]] || [[ "$sStatus" == "ERROR" ]] || [[ "$sStatus" == "STOPPED" ]]
 	then
 		break
@@ -27,8 +27,8 @@ do
 	((i++))
 	#echo "Getting proces status"
 	# get status
-	sStatus=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?processObjId=${sProcessObjId}" --header "x-session-token: ${sSessionId}")
-	if [[ "RUNNING" == $sStatus ]]
+	sStatus=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?procws=${sProcessObjId}" --header "x-session-token: ${sSessionId}")
+	if [[ "RUNNING" == "$sStatus" ]]
 	then
 		echo "[${sProcessObjId}] Retrying after 1 m sleep"
 		sleep 1m
@@ -44,7 +44,7 @@ if [ "$sStatus" != "DONE" ] && [ "$sStatus" != "ERROR" ] && [ "$sStatus" != "STO
 then
 	echo "[${sProcessObjId}] Something did not work, forcing status to ERROR, sorry"
 	# todo force status = ERROR
-	sResult=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/updatebyid?sProcessId=${sProcessObjId}&status=ERROR&perc=-1" --header "x-session-token: ${sSessionId}")
+	sResult=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/updatebyid?procws=${sProcessObjId}&status=ERROR&perc=-1" --header "x-session-token: ${sSessionId}")
 	#echo $sResult
 else
 	echo "[${sProcessObjId}] IDL Processor done!"
