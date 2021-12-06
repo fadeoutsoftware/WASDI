@@ -1661,7 +1661,7 @@ END
 ; 		properties = < Another JSON Object containing other product-specific info >
 ; }
 ;
-FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage 
+FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage, sProvider
 
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
   
@@ -1703,6 +1703,10 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   IF (sCloudCoverage NE !NULL) THEN BEGIN
 	 sQuery = sQuery + " AND cloudcoverpercentage:" + sCloudCoverage
   END  
+  
+  IF (sProvider EQ !NULL) THEN BEGIN
+	 sProvider = 'LSA'
+  END
 		
   ; TODO: CloudCoverage for S2
   
@@ -1720,10 +1724,9 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   
   ;Close the second block
   sQuery = sQuery + ") "
-  
     
   IF ((dULLat NE !NULL) AND  (dULLon NE !NULL) AND (dLRLat NE !NULL) AND (dLRLon NE !NULL) ) THEN BEGIN
-	sFootPrint = '( footprint:"intersects(POLYGON(( ' + dULLon + " " +dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " +dLRLat + ')))") AND ';
+	sFootPrint = '( footprint:"intersects(POLYGON(( ' + STRTRIM(STRING(dULLon),2) + " " +STRTRIM(STRING(dLRLat),2) + "," + STRTRIM(STRING(dULLon),2) + " " + STRTRIM(STRING(dULLat),2) + "," + STRTRIM(STRING(dLRLon),2) + " " + STRTRIM(STRING(dULLat),2) + "," + STRTRIM(STRING(dLRLon),2) + " " + STRTRIM(STRING(dLRLat),2) + "," + STRTRIM(STRING(dULLon),2) + " " +STRTRIM(STRING(dLRLat),2) + ')))") AND ';
 	
 	sQuery = sFootPrint + sQuery;
   END
@@ -1737,9 +1740,9 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   oUrl = OBJ_NEW('IDLnetUrl')
   sEncodedQuery = oUrl->URLEncode(sQuery)
 
-  sQuery = "providers=LSA";
+  sQuery = "providers=" + sProvider;
   
-  UrlPath = UrlPath + '?' + sQuery
+  UrlPath = UrlPath + sQuery
     
   IF (verbose eq '1') THEN BEGIN
 	print, 'SEARCH BODY  ' , sQueryBody
