@@ -717,3 +717,4 @@ var WasdiApplicationUIController = (function () {
 
     return WasdiApplicationUIController;
 })();
+window.WasdiApplicationUIController = WasdiApplicationUIController;
