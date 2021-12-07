@@ -1405,23 +1405,27 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 
 	; Generate input file names JSON array
 	sParamsJSON = '{'
+	
+	IF aoParameters NE !NULL THEN BEGIN
 
-	; For each input name
-	FOREACH sKey , aoParameters.Keys() DO BEGIN
+		; For each input name
+		FOREACH sKey , aoParameters.Keys() DO BEGIN
 
-		sParamsJSON = sParamsJSON + '"' + sKey + '":'
-		
-		sValue = aoParameters[sKey]
-		
-		IF (sValue NE !NULL) THEN BEGIN
-			sParamsJSON = sParamsJSON + '"' + sValue + '" , '
-		END ELSE BEGIN
-			sParamsJSON = sParamsJSON + '"" , '
+			sParamsJSON = sParamsJSON + '"' + sKey + '":'
+			
+			sValue = aoParameters[sKey]
+			
+			IF (sValue NE !NULL) THEN BEGIN
+				sParamsJSON = sParamsJSON + '"' + sValue + '" , '
+			END ELSE BEGIN
+				sParamsJSON = sParamsJSON + '"" , '
+			END
+			
 		END
-		
-	END
 
-	sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+		sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+	END
+	
 	sParamsJSON = sParamsJSON + '}'
 	
 	IF (verbose EQ 1) THEN BEGIN
@@ -1639,7 +1643,7 @@ END
 
 ; Search EO Images
 ;
-; @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVISAT","L8","VIIRS"
+; @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS"
 ; @param sDateFrom Starting date in format "YYYY-MM-DD"
 ; @param sDateTo End date in format "YYYY-MM-DD"
 ; @param dULLat Upper Left Lat Coordinate. Can be null.
