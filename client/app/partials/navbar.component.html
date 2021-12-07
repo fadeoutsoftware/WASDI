@@ -55,7 +55,7 @@
                                 <li role="presentation"  ng-click="m_oController.editUserInfo()" ><!--dropdown-header-->
                                     <a role="menuitem" tabindex="-1">
 
-                                        <i class="fa fa-user-o fa-lg" aria-hidden="true"></i>
+                                        <i class="far fa-user fa-lg" aria-hidden="true"></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</span>
                                         <span ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.userId}}</span>
                                     </a>
@@ -72,7 +72,7 @@
                                 </li>
                                 <li role="presentation">
                                     <a role="menuitem" tabindex="-1" ng-click="m_oController.onClickLogOut()">
-                                        <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i>
+                                        <i class="fas fa-sign-out-alt fa-lg" aria-hidden="true"></i>
                                         <span>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</span>
                                     </a>
                                 </li>
