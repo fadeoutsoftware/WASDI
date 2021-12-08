@@ -134,25 +134,6 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
 
 
-# From now, all commands executed are executed as root
-USER root
-
-
-# Install user's packages:
-#   - only if $USR_HOME/packages.txt exists
-#   - we have to become root using USER instruction
-RUN test -f $USR_HOME/packages.txt && apt-get install -y `cat $USR_HOME/packages.txt | tr "\n" " "`; exit 0
-
-
-# From now, all commands executed are executed with the user $USR_NAME who must not be root
-USER $USR_NAME
-
-
-# Install user's Python libraries:
-#   - only if $USR_HOME/pip.txt exists
-RUN test -f $USR_HOME/pip.txt && pip3 install `cat $USR_HOME/pip.txt | tr "\n" " "`; exit 0
-
-
 # Start our webserver
 RUN chmod 777 ./runServer.sh
 CMD ./runServer.sh
