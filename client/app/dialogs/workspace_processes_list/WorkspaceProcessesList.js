@@ -396,3 +396,4 @@ var WorkspaceProcessesList = (function () {
     ];
     return WorkspaceProcessesList;
 })();
+window.WorkspaceProcessesList = WorkspaceProcessesList;
