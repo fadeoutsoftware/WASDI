@@ -37,11 +37,11 @@
                                         <th scope="col"><label>{{"DIALOG_LIST_OF_WORKSPACES_TH_TABLE_OWNER"|translate}}</label></th>
                                         <th class="over-icon" ng-hide = "m_oController.m_bSelectedAllWorkspaces"
                                             ng-click = "m_oController.selectAllWorkspaces()">
-                                            <i class="fa fa-square-o" aria-hidden="true" ></i>
+                                            <i class="fa fa-square fa-lg    " aria-hidden="true" ></i>
                                         </th>
                                         <th scope="col" class="over-icon" ng-show = "m_oController.m_bSelectedAllWorkspaces"
                                             ng-click = "m_oController.deselectAllWorkspaces()">
-                                            <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                            <i class="fa fa-check-square fa-lg" aria-hidden="true"></i>
                                         </th>
                                     </tr>
                                     </thead>
@@ -52,10 +52,10 @@
                                         <td>{{workspace.ownerUserId}}</td>
                                         <td class="over-icon" ng-click="m_oController.selectWorkspace(workspace)" ng-hide="m_oController.isSelectedWorkspace(workspace)">
 
-                                            <i class="fa fa-square-o" aria-hidden="true"></i>
+                                            <i class="fa fa-square fa-lg" aria-hidden="true"></i>
                                         </td>
                                         <td class="over-icon" ng-click="m_oController.deselectWorkspace(workspace)" ng-show="m_oController.isSelectedWorkspace(workspace)">
-                                            <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                            <i class="fa fa-check-square fa-lg" aria-hidden="true"></i>
                                         </td>
                                     </tr>
                                     <tr>

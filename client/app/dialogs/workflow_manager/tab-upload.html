@@ -13,10 +13,10 @@
                 <textarea class="form-control wasdi-input not-resizable" rows="5" id="comment"maxlength="150" ng-model="m_oController.m_oWorkflowFileData.workflowDescription"></textarea>
             </div>
             <div class="form-v4-group">
-                <i class="fa fa-square-o " aria-hidden="true"
+                <i class="fa fa-square " aria-hidden="true"
                    ng-hide = "m_oController.m_oWorkflowFileData.isPublic === true"
                    ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
-                <i class="fa fa-check-square-o " aria-hidden="true"
+                <i class="fa fa-check-square " aria-hidden="true"
                    ng-hide="m_oController.m_oWorkflowFileData.isPublic === false"
                    ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
                 <span>Set workflow public</span>

@@ -14,12 +14,12 @@
                 <!-- CHECK PRODUCT-->
                 <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
                         data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
-                    <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                    <i class="fa fa-check-square" aria-hidden="true"></i>
                 </button>
                 <!-- UNCHECK PRODUCT-->
                 <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
                         data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
-                    <i class="fa fa-square-o" aria-hidden="true"></i>
+                    <i class="fa fa-square" aria-hidden="true"></i>
                 </button>
                 <button type="button" class="btn btn btn-primary" ng-click="$ctrl.openModalDownloadProductInSelectedWorkspaces(layer)"
                         ng-disabled="$ctrl.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
