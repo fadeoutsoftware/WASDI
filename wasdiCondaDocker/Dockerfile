@@ -10,7 +10,8 @@ ARG USR_ID
 ARG GRP_NAME
 ARG GRP_ID
 ARG USR_HOME="/home/wasdi"
-ARG MINICONDA_SRC_URL="https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh"
+ARG PIP_INSTALL_WASDI_ARGUMENTS
+ARG MINICONDA_SRC_URL="https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh"
 ARG MINICONDA_TEMPORARY_SCRIPT="Miniconda3.sh"
 
 
@@ -35,25 +36,16 @@ WORKDIR "$USR_HOME"
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
-        build-essential \
-        gdal-bin \
-        libffi-dev \
-        libgdal-dev \
-        libpq-dev \
-        libssl-dev \
-        libxml2-dev \
-        libxslt1-dev \
+        curl \
         locate \
         nano \
         openjdk-8-jre \
         python3 \
         python3-dev \
-        python3-gdal \
         python3-pip \
         python3-venv \
         software-properties-common \
-        wget \
-        zlib1g-dev
+        wget
 
 
 # Copy our files
@@ -61,7 +53,7 @@ COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
 
 
 # Change rights
-RUN chmod 644 $USR_HOME/*
+RUN chmod -R 755 $USR_HOME/
 
 
 # From now, all commands executed are executed with the user $USR_NAME who must not be root
@@ -85,13 +77,13 @@ ENV PATH="$VIRTUAL_ENV/bin:$USR_HOME/miniconda/bin:$PATH"
 
 
 # Update conda
-RUN conda update -y --all
+RUN conda update --yes --all
 
 
 # Install package using conda
-RUN conda install -y -c fastchan fastai && \
-    conda install -y -c conda-forge opencv && \
-    conda install -y -c anaconda pip
+RUN conda install --yes --channel conda-forge \
+    gdal \
+    opencv
 
 
 # [IN OUR VENV] Install needed Python libraries
@@ -101,14 +93,11 @@ RUN pip3 install flask \
     numpy \
     pandas \
     rasterio \
-    wasdi \
     wheel
 
 
-# [IN OUR VENV] Install needed Python GDAL library
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-    export C_INCLUDE_PATH=/usr/include/gdal
-RUN pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
+# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
+RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
 
 
 # From now, all commands executed are executed as root
@@ -125,9 +114,9 @@ RUN test -f $USR_HOME/packages.txt && apt-get install -y `cat $USR_HOME/packages
 USER $USR_NAME
 
 
-# Install user's Python libraries:
-#   - only if $USR_HOME/pip.txt exists
-RUN test -f $USR_HOME/pip.txt && pip3 install `cat $USR_HOME/pip.txt | tr "\n" " "`; exit 0
+# Install user's Conda libraries:
+#   - only if $USR_HOME/env.yml exists
+RUN test -f $USR_HOME/env.yml && $USR_HOME/miniconda/bin/conda env update --file $USR_HOME/env.yml; exit 0
 
 
 # Start our webserver

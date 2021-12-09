@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -59,7 +58,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	public int executeCount(String sQuery) {
 		int iCount = 0;
 		
-		// arse the query
+		// Parse the query
 		QueryViewModel oVIIRSQuery = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 		
 		if (m_asSupportedPlatforms.contains(oVIIRSQuery.platformName) == false) {
@@ -67,14 +66,10 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		}
 		
 		ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
-				
-		long lStart = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.startFromDate);
-		long lEnd  = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.endToDate);
-		
-		long lDiffInMillies = Math.abs(lEnd - lStart);
-	    long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS);
-	    
-	    iCount = asSections.size() * ((int) lDays);
+
+		int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+
+	    iCount = asSections.size() * iDays;
 		
 		return iCount;
 	}
@@ -96,7 +91,6 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 		
 		long lStart = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.startFromDate);
-		long lEnd  = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.endToDate);
 	    
 	    String sOffset = oQuery.getOffset();
 	    String sLimit = oQuery.getLimit();
@@ -118,13 +112,11 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 	    	Utils.debugLog("QueryExecutorVIIRS.executeAndRetrieve: " + oE.toString());
 		}
 	    
-	    long lActualDay = lStart;
-	    
-	    DateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");  
-	    
-	    for (lActualDay = lStart; lActualDay<=lEnd; lActualDay += 1000*60*60*24) {
-	    	
-	    	Date oActualDay = new Date(lActualDay);
+	    DateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");
+
+		int iDays = TimeEpochUtils.countDaysIncluding(oVIIRSQuery.startFromDate, oVIIRSQuery.endToDate);
+		for (int i = 0; i < iDays; i++) {
+			Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
 	    	
 	    	for (String sSection : asSections) {
 	    		

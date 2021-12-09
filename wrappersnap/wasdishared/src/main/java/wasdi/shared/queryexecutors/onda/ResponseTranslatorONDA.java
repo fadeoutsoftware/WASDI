@@ -153,7 +153,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 		oResult.setFootprint( sFootprint );
 		String sProductId = oJsonOndaResult.optString("id","");
 		String sLink = "";
-		String sProtocol = "https";
+		String sProtocol = "https:";
 		if(!Utils.isNullOrEmpty(sProductId)) {
 			oResult.setId(sProductId);
 			//TODO use m_sLinkPrefix and m_sLinkSuffix instead

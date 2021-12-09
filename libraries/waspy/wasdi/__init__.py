@@ -34,9 +34,9 @@ the return statues
 
 Version 0.7.0
 
-Last Update: 24/11/2021
+Last Update: 03/12/2021
 
-Tested with: Python 2.7, Python 3.7
+Tested with: Python 3.7, Python 3.8, Python 3.9
 
 Created on 11 Jun 2018
 
@@ -45,14 +45,7 @@ Created on 11 Jun 2018
 from time import sleep
 from telnetlib import AO
 from urllib.parse import urlencode
-
-try:
-    from __builtin__ import str
-except Exception as oE0:
-    try:
-        from builtins import str
-    except Exception as oE1:
-        print('Cannot import str. This is bad')
+from builtins import str
 
 name = "wasdi"
 
@@ -88,6 +81,7 @@ m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_iRequestsTimeout = 2 * 60
 
@@ -520,21 +514,15 @@ def init(sConfigFilePath=None):
             _loadParams()
 
     if m_sUser is None and m_sPassword is None:
-
-        if (sys.version_info > (3, 0)):
-            m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
-        else:
-            m_sUser = raw_input('[INFO] waspy.init: Please Insert WASDI User:')
+        
+        m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
 
         m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
 
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
-
-        if (sys.version_info > (3, 0)):
-            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
-        else:
-            sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+        
+        sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
@@ -1777,8 +1765,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # todo support other platforms
     if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (
-            sPlatform != "ENVI") and (sPlatform != "S5P"):
-        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI|S5P. Received [' + sPlatform + ']' +
+            sPlatform != "ENVI") and (sPlatform != "S5P") and (sPlatform != "S3"): 
+        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|S3|VIIRS|L8|ENVI|S5P. Received [' + sPlatform + ']' +
                  '  ******************************************************************************')
         return aoReturnList
 

@@ -151,7 +151,9 @@ public class KeycloakService implements AuthProviderService {
 				.append(WasdiConfig.Current.keycloack.address)
 				.append("admin/realms/wasdi/users/")
 				.append(sUserDbId)
-				.append("/execute-actions-email?redirect_uri=https://www.wasdi.net/&client_id=wasdi_api");
+				.append("/execute-actions-email?redirect_uri=")
+				.append(WasdiConfig.Current.baseUrl)
+				.append("&client_id=wasdi_api\"");
 		String sUrl = oUrlBuilder.toString();
 		String sPayload = "[\"UPDATE_PASSWORD\"]";
 		try {

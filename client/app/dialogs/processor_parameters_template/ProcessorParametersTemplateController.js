@@ -118,14 +118,14 @@ var ProcessorParametersTemplateController = (function() {
         }
 
         var oController = this;
-
+        
         this.m_oProcessorParametersTemplateService.getProcessorParametersTemplate(sTemplateId)
             .then(function (data) {
                 if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
                     // FETCHING THE TEMPLATE
                     let oTemplate = data.data;
-                    oController.m_oClose(oTemplate.jsonParameters, 100); // close, but give 100ms for bootstrap to animate
+                    oController.m_oClose(oTemplate.jsonParameters, 200); // close, but give 200ms for bootstrap to animate
                 }
                 else
                 {

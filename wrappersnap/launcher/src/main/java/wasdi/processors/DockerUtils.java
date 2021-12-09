@@ -89,7 +89,7 @@ public class DockerUtils {
                             " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");
                     
                     if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
-                    	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=" + WasdiConfig.Current.dockers.pipInstallWasdiAddress); 
+                    	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=\"" + WasdiConfig.Current.dockers.pipInstallWasdiAddress+"\""); 
                     }
                       
                     oBuildScriptWriter.write(" $1 >> " + m_sDockerLogFile + " 2>&1");

@@ -96,6 +96,7 @@ var WorkspaceDetailsController = (function () {
                 // update on the current active workspaces
                 oController.m_oConstantService.getActiveWorkspace().nodeCode = this.m_sCurrentNode;
                // oController.m_oConstantService.getActiveWorkspace().apiUrl = oWorkspaceViewModel.apiUrl;
+               oController.m_oConstantService.setActiveWorkspace(oWorkspaceViewModel);
                 var oDialog = utilsVexDialogAlertBottomRightCorner('WORKSPACE NODE UPDATED<br>READY');
                 utilsVexCloseDialogAfter(4000, oDialog);
             }

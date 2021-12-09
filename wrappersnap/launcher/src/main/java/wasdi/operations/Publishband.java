@@ -580,7 +580,7 @@ public class Publishband extends Operation {
                 return "";
             }
 
-            String sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
+            String sBaseUrl = WasdiConfig.Current.baseUrl;
 
             String sUrl = sBaseUrl + "/filebuffer/downloadstyle?style=" + sStyle;
 
