@@ -13,7 +13,7 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.Sen2CorParameter;
 import wasdi.shared.utils.ZipExtractor;
 
-public class Sen2core extends Operation {
+public class Sen2cor extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
