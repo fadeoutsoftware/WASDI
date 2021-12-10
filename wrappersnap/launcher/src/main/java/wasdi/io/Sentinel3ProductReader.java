@@ -50,6 +50,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
 			ZipExtractor oZipExtractor = new ZipExtractor("");
 			oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
+			deleteZipFile(sFileNameFromProvider, sDownloadPath);
 			String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", ".SEN3");
 			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
@@ -62,6 +63,23 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		}
 
 		return sDownloadedFileFullPath;
+	}
+
+	/**
+	 * @param sFileNameFromProvider
+	 * @param sDownloadPath
+	 */
+	private void deleteZipFile(String sFileNameFromProvider, String sDownloadPath) {
+		try {
+			File oZipFile = new File(sDownloadPath + File.separator + sFileNameFromProvider);
+			if(!oZipFile.delete()) {
+				LauncherMain.s_oLogger.error("SnapProductReader.deleteZipFile: cannot delete zip file");
+			} else {
+				LauncherMain.s_oLogger.debug("SnapProductReader.deleteZipFile: file zip successfully deleted");
+			}
+		} catch (Exception oE) {
+			LauncherMain.s_oLogger.error("SnapProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
+		}
 	}
 
 	
