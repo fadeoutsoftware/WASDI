@@ -300,22 +300,13 @@ public class CatalogResources {
 			return Response.serverError().build();
 		}
 		Map<String, File> aoFileEntries = new HashMap<>();
-		try {
-			//the initial file must be a directory
-			if(!oInitialFile.isDirectory()) {
-				throw new IllegalArgumentException("Initial file, for Sentinel-3, must be a directory, but " + oInitialFile.getAbsolutePath()  + " is not");
-			}
-		} catch (Exception oE) {
-			Utils.debugLog("CatalogResource.zipSentinel3: " + oE);
-			return Response.serverError().build();
-		}
 		
 		//collect all files in the directory
 		try( Stream<java.nio.file.Path> paths = Files.walk(oInitialFile.toPath())){
 			paths
 			.filter(oPath -> !Files.isDirectory(oPath))
 			.forEach(oPath -> {
-				String sPath = oPath.toFile().getPath();
+				String sPath = oInitialFile.getName() + File.separator + oPath.toFile().getName();
 				Utils.debugLog("CatalogResource.zipSentinel3: adding file: " + sPath);
 				aoFileEntries.put(sPath, oPath.toFile());
 			});
@@ -323,8 +314,8 @@ public class CatalogResources {
 			Utils.debugLog("CatalogResource.zipSentinel3: " + oE + " while adding files");
 		}
 
-
-		return zipOnTheFly(aoFileEntries, oInitialFile.getName());
+		
+		return zipOnTheFly(aoFileEntries, oInitialFile.getName().toUpperCase().replace(".SEN3", ".zip"));
 	}
 	
 	/**

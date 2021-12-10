@@ -50,10 +50,11 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
 			ZipExtractor oZipExtractor = new ZipExtractor("");
 			oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
-			String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", ".SEN3");
+			String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", ".SEN3");
 			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
 
+			m_oProductFile = new File(sFolderName);
 			return sFolderName;
 		}
 		catch (Exception oEx) {
@@ -73,15 +74,13 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	public Product getSnapProduct() {
 		try {
 			//save File pointing to directory
-			File oTempFile = new File(m_oProductFile.getAbsolutePath());
-			//create File pointing to manifest
-			m_oProductFile = new File(oTempFile.getAbsolutePath() + File.separator + "xfdumanifest.xml");
+			m_oProductFile = new File(m_oProductFile.getAbsolutePath() + File.separator + "xfdumanifest.xml");
 			//business as usual
 			if (m_bSnapReadAlreadyDone == false) {
 				m_oProduct = readSnapProduct();
 			}
 			//reset the File pointer
-			m_oProductFile = new File(oTempFile.getAbsolutePath());
+			m_oProductFile = m_oProductFile.getParentFile();
 			
 			return m_oProduct;
 		}
