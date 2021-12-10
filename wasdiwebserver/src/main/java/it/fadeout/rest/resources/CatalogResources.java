@@ -285,7 +285,7 @@ public class CatalogResources {
 				lLength += oTempFile.length();
 			}
 		}
-		oResponseBuilder.header("Content-Length", lLength);
+		//oResponseBuilder.header("Content-Length", lLength);
 		Utils.debugLog("CatalogResources.zipShapeFile: return ");
 		return oResponseBuilder.build();
 	}
