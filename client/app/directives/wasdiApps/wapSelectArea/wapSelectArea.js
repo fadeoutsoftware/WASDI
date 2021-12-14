@@ -82,6 +82,25 @@ angular.module('wasdi.wapSelectArea', [])
                         }
                         //save new shape in map
                         oController.m_oDrawnItems.addLayer(layer);
+                        // TEST for rule of tumb to obtain area 
+                        let M_number_lat = 110.574; // chilometers
+                        let M_number_lng = 111.320; // chilometers
+                        let latN = oController.boundingBox.northEast.lat; // in degrees ? 
+                        let lngE = oController.boundingBox.northEast.lng;
+
+                        let latS = oController.boundingBox.southWest.lat;
+                        let lngW = oController.boundingBox.southWest.lng;
+
+                        let width = (latN - latS) * M_number_lat;
+                        let height = (lngE - lngW ) * M_number_lng * Math.cos(latN);
+                        let area = width * height ;
+                        /*console.log("Area with a width of " + width +
+                        "meters, height " + height + "meters "  + 
+                        " Area : "+ area + "Square meters");*/
+
+                        console.log("Check with result from leaflet" + area *100 + "ha");
+
+                        
                     });
 
                     oMap.on(L.Draw.Event.DELETESTOP, function (event) {
@@ -126,6 +145,7 @@ angular.module('wasdi.wapSelectArea', [])
                                             }
 
                                             var aoBounds = [[fNorth, fWest], [fSouth, fEast]];
+                                            // checks size here. 
                                             var oLayer = L.rectangle(aoBounds, {color: "#3388ff", weight: 1});
 
 
