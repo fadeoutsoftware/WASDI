@@ -23,7 +23,7 @@ public class CommentRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("reviewId", sReviewId)).sort(new Document("date", 1));
-            fillList(aoReturnList, oWSDocuments, "CommentRepository", Comment.class);
+            fillList(aoReturnList, oWSDocuments, Comment.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -67,7 +67,16 @@ public class CommentRepository extends MongoRepository {
 
         return delete(oCriteria, m_sThisCollection);
     }
-    
+
+    public int deleteComments(String sReviewId) {
+    	if (Utils.isNullOrEmpty(sReviewId)) return 0;
+
+		BasicDBObject oCriteria = new BasicDBObject();
+		oCriteria.append("reviewId", sReviewId);
+
+        return deleteMany(oCriteria, m_sThisCollection);
+    }
+
     public boolean updateComment(Comment oComment) {
 		BasicDBObject oCriteria = new BasicDBObject();
 		oCriteria.append("commentId", oComment.getCommentId());
@@ -88,7 +97,7 @@ public class CommentRepository extends MongoRepository {
     		oCriteria.append("userId", sUserId);
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oCriteria);
-            fillList(aoReturnList, oWSDocuments, "CommentRepository", Comment.class);
+            fillList(aoReturnList, oWSDocuments, Comment.class);
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

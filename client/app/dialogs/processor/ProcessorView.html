@@ -24,7 +24,7 @@
                     </li>
                     <li ng-class="{'active':m_oController.m_sSelectedTab === 'Media'}" ng-click="m_oController.m_sSelectedTab = 'Media'">
                         <a href="" role="tab" data-toggle="tab">
-                            <i class="fa fa-picture-o" ></i>
+                            <i class="fa fa-images" ></i>
                             {{"DIALOG_PROCESSOR_TAB_MEDIA" | translate}}
                         </a>
                     </li>
@@ -74,7 +74,7 @@
                     </div>
 
                     <!------- UI ------->
-                    <div class="tab-pane fade in" id="Share"
+                    <div class="tab-pane fade in" id="UI"
                          ng-class="{'active':m_oController.m_sSelectedTab === 'UI' || m_oController.m_bEditMode==false}"
                          ng-hide="m_oController.m_sSelectedTab != 'UI'">
                         <ng-include src="'dialogs/processor/TabUIProcessor.html'"></ng-include>

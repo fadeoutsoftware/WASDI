@@ -1,10 +1,21 @@
 package wasdi.shared.business;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * Process Workspace Entity
- * Represent any "job" ongoing on the WASDI server
+ * Represent any "job" ongoing on the WASDI server.
+ * 
+ * This entity links an operation to a workspace.
+ * 
+ * Operations can be or the launcher embedded operations or any user processor.
+ * 
+ * The status is updated in real time.
+ * The payload is also stored here.
+ * 
  * Created by s.adamo on 31/01/2017.
  */
+@EqualsAndHashCode
 public class ProcessWorkspace {
 
 	/**
@@ -225,6 +236,5 @@ public class ProcessWorkspace {
 	public void setOperationSubType(String operationSubType) {
 		this.operationSubType = operationSubType;
 	}
-
 
 }

@@ -44,6 +44,12 @@ service('ConstantsService', [function () {
     this.AUTHURL = environment.authUrl;
 
     /**
+     * Flag to ignore the workspace's ApiUrl and use the main server's Url
+     * @type {boolean}
+     */
+     this.m_bIgnoreWorkspaceApiUrl = environment.ignoreWorkspaceApiUrl;
+
+    /**
      * Logged User
      * @type {null}
      */
@@ -133,6 +139,14 @@ service('ConstantsService', [function () {
     this.getAUTHURL = function(){
         return this.AUTHURL;
     };
+
+    /**
+     * Get flag ignore workspace's Api Url 
+     * @returns {boolean}
+     */
+     this.getIgnoreWorkspaceApiUrl = function() {
+        return this.m_bIgnoreWorkspaceApiUrl === true;
+    }
 
     /**
      * Get session id (empty means no logged user)
@@ -303,6 +317,38 @@ service('ConstantsService', [function () {
      */
     this.getSelectedReviewId = function () {
         return this.m_sSelectedReviewId;
+    }
+
+    /**
+     * Set the review selected in the store
+     * @param oReview
+     */
+    this.setSelectedReview = function (oReview) {
+        this.m_oSelectedReview = oReview;
+    }
+
+    /**
+     * Get the review selected in the store
+     * @returns {*}
+     */
+    this.getSelectedReview = function () {
+        return this.m_oSelectedReview;
+    }
+
+    /**
+     * Set the comment selected in the store
+     * @param oComment
+     */
+    this.setSelectedComment = function (oComment) {
+        this.m_oSelectedComment = oComment;
+    }
+
+    /**
+     * Get the comment selected in the store
+     * @returns {*}
+     */
+    this.getSelectedComment = function () {
+        return this.m_oSelectedComment;
     }
 
     /**

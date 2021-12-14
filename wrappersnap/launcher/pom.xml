@@ -13,7 +13,30 @@
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<snap.version>8.0.8</snap.version>
+		<s1tbx.version>8.0.4</s1tbx.version>
+		<s2tbx.version>8.0.4</s2tbx.version>
+		<s3tbx.version>8.0.4</s3tbx.version>
+		<probav.version>2.2.0</probav.version>
 	</properties>
+	
+	<repositories>
+		<repository>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+	</repositories>
+	
+	
 	<artifactId>launcher</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<build>
@@ -72,6 +95,7 @@
 
 		</plugins>
 	</build>
+	
 	<dependencies>
 		<dependency>
 			<groupId>fadeout.software.wasdi</groupId>
@@ -128,32 +152,32 @@
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-core</artifactId>
-			<version>8.0.3</version>
+			<version>${snap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-engine-utilities</artifactId>
-			<version>8.0.3</version>
+			<version>${snap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-bigtiff</artifactId>
-			<version>8.0.3</version>
+			<version>${snap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-rcp</artifactId>
-			<version>8.0.3</version>
+			<version>${snap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-raster</artifactId>
-			<version>8.0.3</version>
+			<version>${snap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-ndvi</artifactId>
-			<version>8.0.3</version>
+			<version>${snap.version}</version>
 		</dependency>
 
 		<!-- S1 -->
@@ -161,237 +185,247 @@
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sar-processing</artifactId>
-			<version>8.0.3</version>
+			<version>${s1tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-calibration</artifactId>
-			<version>8.0.3</version>
+			<version>${s1tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sentinel1-ui</artifactId>
-			<version>8.0.3</version>
+			<version>${s1tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-utilities</artifactId>
-			<version>8.0.3</version>
+			<version>${s1tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sar-processing-ui</artifactId>
-			<version>8.0.3</version>
+			<version>${s1tbx.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-insar</artifactId>
+			<version>${s1tbx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-insar-ui</artifactId>
+			<version>${s1tbx.version}</version>
+		</dependency>		
 
 		<!-- S2 -->
 
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-spot-reader</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-spot6-reader</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-s2msi-reader</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-rapideye-reader</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
-		<!--dependency>
+		<!-- dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-jp2-reader</artifactId>
-			<version>8.0.3</version>
-		</dependency-->
+			<version>${s2tbx.version}</version>
+		</dependency> -->
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-gdal-reader</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-gdal-writer</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-radiometric-indices</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-mosaic</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-cache</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-biophysical</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>lib-gdal</artifactId>
-			<version>8.0.3</version>
+			<version>${s2tbx.version}</version>
 		</dependency>
 
 		<!-- S3 -->
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-aatsr-sst</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-alos-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-arc</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-atsr-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-avhrr-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-c2rcc</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<!-- dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-chris-reader</artifactId>
-			<version>8.0.3</version>     
-		</dependency-->
+			<version>${s3tbx.version}</version>     
+		</dependency> -->
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-flhmci</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-fub-wew</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-fu-operator</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-kit</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-landsat-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-cloud</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-brr</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-sdr</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-l2auxdata</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-radiometry</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-smac</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-ops</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-merisl3-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-modis-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-mphchl</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-rad2refl</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-olci-radiometry</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-owt-classification</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-sentinel3-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-slstr-pdu-stitching</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-slstr-regrid</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-spot-vgt-reader</artifactId>
-			<version>8.0.3</version>     
+			<version>${s3tbx.version}</version>     
 		</dependency>
 
 		<!-- PROBAV -->
@@ -399,12 +433,12 @@
 		<dependency>
 			<groupId>org.vito.probavbox</groupId>
 			<artifactId>probavbox-kit</artifactId>
-			<version>2.2.0</version>        
+			<version>${probav.version}</version>        
 		</dependency>
 		<dependency>
 			<groupId>org.vito.probavbox</groupId>
 			<artifactId>probavbox-reader</artifactId>
-			<version>2.2.0</version>        
+			<version>${probav.version}</version>        
 		</dependency>
 
 		<!-- FTP server + tests -->
@@ -434,24 +468,15 @@
 		    <artifactId>netcdfAll</artifactId>
 		    <version>5.3.1</version>
 		</dependency>
+				
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.1</version>
+			<scope>test</scope>
+		</dependency>
 		
 		
 	</dependencies>	
-
-	<repositories>
-		<repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-	</repositories>
-
+	
 </project>

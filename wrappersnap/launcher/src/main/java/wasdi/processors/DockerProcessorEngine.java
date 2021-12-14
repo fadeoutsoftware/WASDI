@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
@@ -26,8 +25,8 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.payload.DeleteProcessorPayload;
-import wasdi.shared.payload.DeployProcessorPayload;
+import wasdi.shared.payloads.DeleteProcessorPayload;
+import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -35,6 +34,10 @@ import wasdi.shared.utils.ZipExtractor;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
+	public DockerProcessorEngine() {
+		super();
+	}
+	
     public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
         super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
     }
@@ -213,7 +216,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
                 }
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", e);
             }
             return false;
@@ -591,7 +594,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 }
             } else {
                 // Old processor engine: force safe status
-                LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: impossible to read processor outptu in a json. Force closed");
+                LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: impossible to read processor output in a json. Force closed");
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
             }
 
@@ -610,6 +613,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             return false;
+        }
+        finally {
+        	if (oProcessWorkspace != null) {
+        		m_oProcessWorkspace.setStatus(oProcessWorkspace.getStatus());
+        	}
         }
 
         return true;
@@ -638,6 +646,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
         try {
 
+        	
             oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
             oProcessWorkspace = m_oProcessWorkspace;
 

@@ -6,8 +6,18 @@ package wasdi.shared.business;
  * Created by p.campanella on 18/11/2016.
  */
 public class ProductWorkspace {
+	
+	/**
+	 * Name of the product
+	 */
     private String productName;
+    /**
+     * Workspace Id
+     */
     private String workspaceId;
+    /**
+     * Bounding box
+     */
     private String bbox;
 
     public String getBbox() {

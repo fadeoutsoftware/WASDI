@@ -1,6 +1,5 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,7 +8,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -118,21 +116,9 @@ public class ProcessorRepository extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Processor oProcesor = null;
-                    try {
-                        oProcesor = s_oMapper.readValue(sJSON,Processor.class);
-                        aoReturnList.add(oProcesor);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, Processor.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -232,24 +218,11 @@ public class ProcessorRepository extends  MongoRepository {
 
         final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
         try {
-
-            //FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("port", new Document("$gt", 4999)));
+        	
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find().sort(new Document(sOrderBy, iDirection));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Processor oWorkflow = null;
-                    try {
-                        oWorkflow = s_oMapper.readValue(sJSON,Processor.class);
-                        aoReturnList.add(oWorkflow);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+        	
+        	fillList(aoReturnList, oWSDocuments, Processor.class);
+        	
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -264,7 +237,7 @@ public class ProcessorRepository extends  MongoRepository {
 	}
 
 	public long countProcessors() {
-		return getCollection(m_sThisCollection).count();
+		return getCollection(m_sThisCollection).countDocuments();
 	}
 	
 	public long countProcessors(boolean bPublicOnly) {
@@ -287,15 +260,15 @@ public class ProcessorRepository extends  MongoRepository {
 			}
 			
 			if(null==oPublicOnlyQuery && null==oInStoreOnlyQuery) {
-				return getCollection(m_sThisCollection).count();
+				return getCollection(m_sThisCollection).countDocuments();
 			}
 			
 			if(null!=oPublicOnlyQuery && null==oInStoreOnlyQuery) {
-				return getCollection(m_sThisCollection).count(oPublicOnlyQuery);
+				return getCollection(m_sThisCollection).countDocuments(oPublicOnlyQuery);
 			}
 			
 			if(null==oPublicOnlyQuery && null!=oInStoreOnlyQuery) {
-				return getCollection(m_sThisCollection).count(oInStoreOnlyQuery);
+				return getCollection(m_sThisCollection).countDocuments(oInStoreOnlyQuery);
 			}
 			
 			if(null!=oPublicOnlyQuery && null!=oInStoreOnlyQuery) {
@@ -303,7 +276,7 @@ public class ProcessorRepository extends  MongoRepository {
 				aoAndList.add(oPublicOnlyQuery);
 				aoAndList.add(oInStoreOnlyQuery);
 				oQuery.put("$and", aoAndList);
-				return getCollection(m_sThisCollection).count(oQuery);
+				return getCollection(m_sThisCollection).countDocuments(oQuery);
 			}
 	
 		} catch (Exception oE) {

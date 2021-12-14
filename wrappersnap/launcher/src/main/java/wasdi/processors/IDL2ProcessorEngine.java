@@ -10,7 +10,14 @@ import wasdi.LauncherMain;
 import wasdi.shared.parameters.ProcessorParameter;
 
 public class IDL2ProcessorEngine extends DockerProcessorEngine {
+	
+	public IDL2ProcessorEngine() {
+		super();
+		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
+		m_sDockerTemplatePath += "idl";		
+	}
 
+	
 	public IDL2ProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		

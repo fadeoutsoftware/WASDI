@@ -1,6 +1,15 @@
 package wasdi.shared.viewmodels;
 
 /**
+ * Generic Result with primitive value. 
+ * It can have different values:	
+ *		.Integer
+ *		.Bool
+ *		.String
+ *		.Double
+ * 
+ * Each API can valorize one of more of these values
+ *
  * Created by p.campanella on 14/10/2016.
  */
 public class PrimitiveResult {

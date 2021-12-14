@@ -2,33 +2,32 @@ package it.fadeout.services;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
+import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
+/**
+ * Implements the AuthService Provider for Keycloak
+ * @author p.campanella
+ *
+ */
 public class KeycloakService implements AuthProviderService {
 
-	@Context
-	ServletConfig m_oServletConfig;
-
 	private static final String s_sACCESS_TOKEN = "access_token";
-
-	//just to hide the implicit one
-	//private KeycloakService() {}
+	
 
 	public String getToken() {
 		try {
-			String sAuthUrl = m_oServletConfig.getInitParameter("keycloak_server");
-			String sCliSecret = m_oServletConfig.getInitParameter("keycloak_CLI_Secret");
+			String sAuthUrl = WasdiConfig.Current.keycloack.address;
+			String sCliSecret =  WasdiConfig.Current.keycloack.cliSecret;
 			//URL
 			if(!sAuthUrl.endsWith("/")) {
 				sAuthUrl += "/";
@@ -70,7 +69,7 @@ public class KeycloakService implements AuthProviderService {
 
 	public String getUserData(String sToken, String sUserId) {
 		// build keycloak API URL
-		String sUrl = m_oServletConfig.getInitParameter("keycloak_server");
+		String sUrl = WasdiConfig.Current.keycloack.address;
 		if(!sUrl.endsWith("/")) {
 			sUrl += "/";
 		}
@@ -88,11 +87,11 @@ public class KeycloakService implements AuthProviderService {
 	@Override
 	public String login(String sUser, String sPassword) {
 		//authenticate against keycloak
-		String sUrl = m_oServletConfig.getInitParameter("keycloak_auth");
+		String sUrl = WasdiConfig.Current.keycloack.authTokenAddress;
 
 		String sPayload = "client_id=";
-		sPayload += m_oServletConfig.getInitParameter("keycloak_confidentialClient");
-		sPayload += "&client_secret=" + m_oServletConfig.getInitParameter("keycloak_clientSecret");
+		sPayload += WasdiConfig.Current.keycloack.confidentialClient;
+		sPayload += "&client_secret=" + WasdiConfig.Current.keycloack.clientSecret;
 		sPayload += "&grant_type=password&username=" + sUser;
 		sPayload += "&password=" + sPassword;
 		Map<String, String> asHeaders = new HashMap<>();
@@ -149,10 +148,12 @@ public class KeycloakService implements AuthProviderService {
 			return oResult;
 		}
 		StringBuilder oUrlBuilder = new StringBuilder()
-				.append(m_oServletConfig.getInitParameter("keycloak_server"))
+				.append(WasdiConfig.Current.keycloack.address)
 				.append("admin/realms/wasdi/users/")
 				.append(sUserDbId)
-				.append("/execute-actions-email?redirect_uri=https://www.wasdi.net/&client_id=wasdi_api");
+				.append("/execute-actions-email?redirect_uri=")
+				.append(WasdiConfig.Current.baseUrl)
+				.append("&client_id=wasdi_api\"");
 		String sUrl = oUrlBuilder.toString();
 		String sPayload = "[\"UPDATE_PASSWORD\"]";
 		try {
@@ -207,6 +208,15 @@ public class KeycloakService implements AuthProviderService {
 		}
 		oNewUser.setUserId(sUserId);
 		return oNewUser;
+	}
+	
+	public String getOldStyleRandomSession() {
+		return UUID.randomUUID().toString();
+	}
+	
+	public String insertOldStyleSession(String sUserId){
+		
+		return "";
 	}
 }
 

@@ -1,12 +1,39 @@
 package wasdi.shared.business;
 
+/**
+ * Review of an application made by a user
+ * 
+ * @author p.campanella
+ *
+ */
 public class Review {
+	/**
+	 * Processor Id
+	 */
 	private String processorId;
+	/**
+	 * Date of the review (timestamp)
+	 */
 	private Double date;
+	/**
+	 * Vote (1-5)
+	 */
 	private Float vote;
+	/**
+	 * Review Title
+	 */
 	private String title;
+	/**
+	 * Review comment
+	 */
 	private String comment;
+	/**
+	 * User that made the review
+	 */
 	private String userId;
+	/**
+	 * Unique review id (guid)
+	 */
 	private String id;
 	
 	public String getProcessorId() {

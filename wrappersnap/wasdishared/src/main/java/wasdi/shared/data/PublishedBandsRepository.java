@@ -1,13 +1,11 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -84,20 +82,8 @@ public class PublishedBandsRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.eq("productName", sProductName));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    PublishedBand oPublishedBand = null;
-                    try {
-                        oPublishedBand = s_oMapper.readValue(sJSON,PublishedBand.class);
-                        aoReturnList.add(oPublishedBand);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, PublishedBand.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -117,20 +103,8 @@ public class PublishedBandsRepository extends MongoRepository {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
 
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    PublishedBand oPublishedBand = null;
-                    try {
-                        oPublishedBand = s_oMapper.readValue(sJSON,PublishedBand.class);
-                        aoReturnList.add(oPublishedBand);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            fillList(aoReturnList, oWSDocuments, PublishedBand.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

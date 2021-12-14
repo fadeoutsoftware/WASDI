@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -14,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.nfs.orbits.CoverageTool.Polygon;
@@ -23,6 +21,7 @@ import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
+import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
 
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
@@ -36,22 +35,37 @@ import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.StyleState;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
-import it.fadeout.viewmodels.CoverageSwathResultViewModel;
-import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
-import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
-import it.fadeout.viewmodels.SatelliteResourceViewModel;
 import satLib.astro.time.Time;
 import wasdi.shared.business.User;
-import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.plan.CoverageSwathResultViewModel;
+import wasdi.shared.viewmodels.plan.OpportunitiesSearchViewModel;
+import wasdi.shared.viewmodels.plan.SatelliteOrbitResultViewModel;
+import wasdi.shared.viewmodels.plan.SatelliteResourceViewModel;
+import wasdi.shared.viewmodels.plan.SensorModeViewModel;
+import wasdi.shared.viewmodels.plan.SensorViewModel;
 
+/**
+ * Opportunity Search Resource.
+ * Hosts API for:
+ * 	.search new acquisition possibilities
+ * 	.Download the relative kml file
+ *  .Get the actual position of satellites
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/searchorbit")
 public class OpportunitySearchResource {
-	@Context
-	ServletConfig m_oServletConfig;
-
-	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-
+	
+	
+	/**
+	 * Search new acquisition possibilities
+	 * @param sSessionId User session 
+	 * @param OpportunitiesSearch Input filters view model
+	 * @return List of Coverage Swath Result View Models, each representing a possible acquisition
+	 */
 	@POST
 	@Path("/search")
 	@Produces({ "application/xml", "application/json", "text/html" })
@@ -99,8 +113,7 @@ public class OpportunitySearchResource {
 					aoCoverageSwathResultViewModels.add(oCoverageSwathResultViewModel);
 				}
 
-				CoverageSwathResultViewModel oSwathResultViewModel = getCoverageSwathResultViewModelFromCoverageSwathResult(
-						oSwatResul);
+				CoverageSwathResultViewModel oSwathResultViewModel = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwatResul);
 				oSwathResultViewModel.FrameFootPrint = "";
 				oSwathResultViewModel.IdCoverageSwathResultViewModel = iIdCoverageCounter;
 				iIdCoverageCounter++;
@@ -189,9 +202,9 @@ public class OpportunitySearchResource {
 			ArrayList<SwathArea> aoChilds = oSwath.getChilds();
 			ArrayList<CoverageSwathResultViewModel> aoChildsViewModel = new ArrayList<CoverageSwathResultViewModel>();
 
-			for (SwathArea swathArea : aoChilds) {
+			for (SwathArea oSwathArea : aoChilds) {
 				CoverageSwathResultViewModel oChild;
-				oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(swathArea);
+				oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwathArea);
 				aoChildsViewModel.add(oChild);
 
 			}
@@ -201,7 +214,12 @@ public class OpportunitySearchResource {
 		}
 		return oVM;
 	}
-
+	
+	/**
+	 * Convert the child swath area in a view model
+	 * @param oSwath Swath Area to convert to CoverageSwathResultViewModel View Model
+	 * @return CoverageSwathResultViewModel View Model
+	 */
 	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
@@ -232,12 +250,10 @@ public class OpportunitySearchResource {
 
 				if (oSwath.getTimeStart() != null) {
 					GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
-					// oVM.AcquisitionStartTime = oCalendar.getTime();
 					oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
 				}
 				if (oSwath.getTimeEnd() != null) {
 					GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
-					// oVM.AcquisitionEndTime = oCalendar.getTime();
 					oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
 				}
 
@@ -270,7 +286,12 @@ public class OpportunitySearchResource {
 		}
 		return oVM;
 	}
-
+	
+	/**
+	 * Converts the Coverage Swat Result of Orbit (NFS Plan Engine) to a WASDI Swat View Mode
+	 * @param oSwath NFS result
+	 * @return WASDI View Model
+	 */
 	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
 		Utils.debugLog("OpportunitySearchResource.getSwatViewModelFromResult");
 		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
@@ -334,13 +355,18 @@ public class OpportunitySearchResource {
 		}
 		return aoResults;
 	}
-
+	
+	/**
+	 * Get the track (points in time) of a sat
+	 * @param sSessionId User Id
+	 * @param sSatname Satellite Code
+	 * @return Sat Orbit Result View Model
+	 */
 	@GET
 	@Path("/track/{satellitename}")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
-	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
-			@PathParam("satellitename") String sSatname) {
+	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitename") String sSatname) {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null == oUser) {
@@ -393,11 +419,17 @@ public class OpportunitySearchResource {
 		}
 		return oReturnViewModel;
 	}
-
+	
+	/**
+	 * Returns a KML with the acquisition opportunity
+	 * @param sSessionId User Session
+	 * @param sText
+	 * @param sFootPrint
+	 * @return
+	 */
 	@GET
 	@Path("/getkmlsearchresults")
-	@Produces({ "application/xml" }) // , "application/json", "text/html"
-	// @Consumes(MediaType.APP)
+	@Produces({ "application/xml" })
 	@Consumes(MediaType.APPLICATION_XML)
 	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
 			@QueryParam("footPrint") String sFootPrint) {
@@ -455,7 +487,13 @@ public class OpportunitySearchResource {
 
 		return kml;
 	}
-
+	
+	/**
+	 * Updates the sat track for all the satellites in a single call
+	 * @param sSessionId User Session
+	 * @param sSatName Satellite names separated by -
+	 * @return List of Sat Orbit Result View Models, one for each valid satellite
+	 */
 	@GET
 	@Path("/updatetrack/{satellitesname}")
 	@Produces({ "application/xml", "application/json", "text/html" })
@@ -531,7 +569,12 @@ public class OpportunitySearchResource {
 
 		return aoRet;
 	}
-
+	
+	/**
+	 * Get a list of supported satellites for planning
+	 * @param sSessionId User Session
+	 * @return List of supported Satellites
+	 */
 	@GET
 	@Path("/getsatellitesresource")
 	@Produces({ "application/xml", "application/json", "text/html" })
@@ -551,8 +594,7 @@ public class OpportunitySearchResource {
 
 			String[] asSatellites = null;
 
-			// String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
-			String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
+			String sSatellites = WasdiConfig.Current.plan.listOfSatellites;
 			if (sSatellites != null && sSatellites.length() > 0) {
 				asSatellites = sSatellites.split(",|;");
 			}
@@ -566,10 +608,32 @@ public class OpportunitySearchResource {
 					String satres = InstanceFinder.getOrbitSatsMap().get(asSatellites[iIndexSarellite]);
 					Satellite oSatellite = SatFactory.buildSat(satres);
 					ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
-
+					
+					// Convert the Sat Sensor List in the view model
 					SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
 					oSatelliteResource.setSatelliteName(oSatellite.getName());
-					oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
+					
+					ArrayList<SensorViewModel> aoSensorViewModels = new ArrayList<SensorViewModel>();
+					
+					for (SatSensor oSatSensor : aoSatelliteSensors) {
+						SensorViewModel oSensorViewModel = new SensorViewModel();
+						oSensorViewModel.setDescription(oSatSensor.getDescription());
+						oSensorViewModel.setEnable(oSatSensor.isEnabled());
+						
+						for (SensorMode oMode : oSatSensor.getSensorModes()) {
+							SensorModeViewModel oSensorModeViewModel = new SensorModeViewModel();
+							
+							oSensorModeViewModel.setEnable(oMode.isEnabled());
+							oSensorModeViewModel.setName(oMode.getName());
+							
+							oSensorViewModel.getSensorModes().add(oSensorModeViewModel);
+							
+						}
+						
+						aoSensorViewModels.add(oSensorViewModel);
+					}
+					
+					oSatelliteResource.setSatelliteSensors(aoSensorViewModels);
 					aaoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
 					Utils.debugLog("getSatellitesResources Exception: " + oE);

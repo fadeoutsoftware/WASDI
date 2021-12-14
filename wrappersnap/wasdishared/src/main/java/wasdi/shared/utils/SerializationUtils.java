@@ -42,7 +42,7 @@ public class SerializationUtils {
     /**
      * This method serializes any java bean object into a String
      */
-    public static String serializeObjectToStringXML(Object oObjectToSerialize) throws Exception {
+    public static String serializeObjectToStringXML(Object oObjectToSerialize) {
         ByteArrayOutputStream aoOutputStream = new ByteArrayOutputStream();
         XMLEncoder oEncoder = new XMLEncoder(aoOutputStream);
         oEncoder.writeObject(oObjectToSerialize);
@@ -54,7 +54,7 @@ public class SerializationUtils {
     /**
      * Reads Java Bean Object From XML File
      */
-    public static Object deserializeStringXMLToObject(String sXMLObject) throws Exception {
+    public static Object deserializeStringXMLToObject(String sXMLObject) {
     	
     	InputStream oTargetStream = new ByteArrayInputStream(sXMLObject.getBytes());
         XMLDecoder oDecoder = new XMLDecoder(oTargetStream);

@@ -1,6 +1,5 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.UUID;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -125,19 +123,7 @@ public class SessionRepository extends MongoRepository {
             long lNow = new Date().getTime();
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.gte("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
 
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    UserSession oUserSession = null;
-                    try {
-                        oUserSession = s_oMapper.readValue(sJSON, UserSession.class);
-                        aoReturnList.add(oUserSession);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            fillList(aoReturnList, oWSDocuments, UserSession.class);
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -155,20 +141,9 @@ public class SessionRepository extends MongoRepository {
         try {
             long lNow = new Date().getTime();
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.lt("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    UserSession oUserSession = null;
-                    try {
-                        oUserSession = s_oMapper.readValue(sJSON, UserSession.class);
-                        aoReturnList.add(oUserSession);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, UserSession.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -215,4 +190,6 @@ public class SessionRepository extends MongoRepository {
 
         return false;
     }
+    
+    //public String createSession()
 }

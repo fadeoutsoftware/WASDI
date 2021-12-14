@@ -12,11 +12,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.BandViewModel;
-import wasdi.shared.viewmodels.GeorefProductViewModel;
-import wasdi.shared.viewmodels.MetadataViewModel;
-import wasdi.shared.viewmodels.NodeGroupViewModel;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.*;
 
 public class ShapeProductReader extends WasdiProductReader{
 
@@ -143,6 +139,11 @@ public class ShapeProductReader extends WasdiProductReader{
 	@Override
 	public MetadataViewModel getProductMetadataViewModel() {
 		return new MetadataViewModel("Metadata");
+	}
+
+	@Override
+	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+		return sDownloadedFileFullPath;
 	}
 	
 

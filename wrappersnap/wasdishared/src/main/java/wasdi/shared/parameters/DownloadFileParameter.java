@@ -1,11 +1,9 @@
 package wasdi.shared.parameters;
 
 /**
+ * Parameter of the DOWNLOAD Operation
  * Created by s.adamo on 10/10/2016.
  */
-
-
-
 public class DownloadFileParameter extends BaseParameter{
 
     /**

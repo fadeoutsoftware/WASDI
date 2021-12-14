@@ -9,7 +9,6 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -147,28 +146,57 @@ public class WorkspaceRepository extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Workspace oWorkspace = null;
-                    try {
-                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-                        aoReturnList.add(oWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
 
         return aoReturnList;
     }
-    
+
+    /**
+     * Find a workspace by userId and workspace name.
+     * @param sUserId the userId
+     * @param sName the name of the workspace
+     * @return the first workspace found or null
+     */
+    public Workspace getByUserIdAndWorkspaceName(String sUserId, String sName) {
+    	try {
+    		Document oWSDocument = getCollection(m_sThisCollection).find(
+    				Filters.and(
+    						Filters.eq("userId", sUserId),
+    						Filters.eq("name", sName)
+    						)
+    		).first();
+    		
+    		if(null!=oWSDocument) {
+    			String sJSON = oWSDocument.toJson();
+    			
+                Workspace oWorkspace = null;
+                try {
+                    oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                
+                return oWorkspace;
+    		}
+    		
+    	} catch (Exception oE) {
+			Utils.debugLog("WorkspaceRepository.getByName( " + sName + "): error: " + oE);
+		}
+    	
+    	return null;
+    }
+
+    /**
+     * Find a workspace by name and node.
+     * @param sName the name of the workspace
+     * @param sNode the node
+     * @return the first workspace found or null
+     */
     public Workspace getByNameAndNode(String sName, String sNode) {
     	try {
     		Document oWSDocument = getCollection(m_sThisCollection).find(
@@ -285,20 +313,8 @@ public class WorkspaceRepository extends  MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    Workspace oWorkspace = null;
-                    try {
-                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-                        aoReturnList.add(oWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, Workspace.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -306,26 +322,4 @@ public class WorkspaceRepository extends  MongoRepository {
 
         return aoReturnList;
     }    
-    
-    /**
-     * Fill a list of Workpaces Entites
-     * @param aoReturnList
-     * @param oWSDocuments
-     */
-	private void fillList(final ArrayList<Workspace> aoReturnList, FindIterable<Document> oWSDocuments) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        Workspace oWorkspace = null;
-		        try {
-		            oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
-		            aoReturnList.add(oWorkspace);
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
-
-		    }
-		});
-	}
-    
 }

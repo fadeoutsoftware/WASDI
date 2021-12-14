@@ -3,8 +3,8 @@
  */
 
 angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service('RabbitStompService',
-    ['$http', 'ConstantsService', '$interval', 'ProcessesLaunchedService', '$q', '$rootScope',
-        function ($http, oConstantsService, $interval, oProcessesLaunchedService, $q, $rootScope, $scope) {
+    ['$http', 'ConstantsService', '$interval', 'ProcessWorkspaceService', '$q', '$rootScope',
+        function ($http, oConstantsService, $interval, oProcessWorkspaceService, $q, $rootScope, $scope) {
 
             // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
             this.m_oInterval = $interval;
@@ -28,7 +28,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
             this.m_oRabbitReconnect = null;
 
             // Reference to the ProcessLaunched Service
-            this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+            this.m_oProcessWorkspaceService = oProcessWorkspaceService;
 
             this.m_oSubscription = null;
             this.m_oUser = null;
@@ -129,7 +129,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                             }
 
                             // Update the process List
-                            oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
+                            oThisService.m_oProcessWorkspaceService.loadProcessesFromServer(sActiveWorkspaceId);
                         }
                     });
                 }
@@ -207,6 +207,15 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 var on_error = function (sMessage) {
 
                     console.log('RabbitStompService: WEB STOMP ERROR, message:' + sMessage + ' [' + utilsGetTimeStamp() + ']');
+
+                    if (!(typeof sMessage === 'string' || sMessage instanceof String)) {
+                        if (!utilsIsObjectNullOrUndefined(sMessage.body)) {
+                            sMessage = sMessage.body;
+                        }
+                        else {
+                            return;
+                        }
+                    }
 
                     if (sMessage == "LOST_CONNECTION" || sMessage.includes("Whoops! Lost connection to"))
                     {

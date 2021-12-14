@@ -1,10 +1,9 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -12,16 +11,15 @@ import org.bson.conversions.Bson;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -74,7 +72,19 @@ public class MongoRepository {
      */
     protected String m_sRepoDb = "wasdi";
     
+    /**
+     * Flag to notify with a log if the repository has no local connection and 
+     * reverts to the default wasdi connection
+     */
     private static boolean s_bDbSwitchLogged = false;
+    
+    public static void readConfig() {
+        MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongo.address;
+        MongoRepository.SERVER_PORT = WasdiConfig.Current.mongo.port;
+        MongoRepository.DB_NAME = WasdiConfig.Current.mongo.dbName;
+        MongoRepository.DB_USER = WasdiConfig.Current.mongo.user;
+        MongoRepository.DB_PWD = WasdiConfig.Current.mongo.password;    	
+    }
     
 	/**
      * Add a new Mongo Connection
@@ -95,8 +105,9 @@ public class MongoRepository {
     			
     			// Create the connection config
     			oMongoConnection = new MongoConnection();
-            	MongoCredential oCredential = MongoCredential.createCredential(sUser, sDbName, sPassword.toCharArray());
-            	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(sAddress, iServerPort), Arrays.asList(oCredential));
+            	
+            	String sConnectionString = "mongodb://" + sUser+":"+sPassword+"@"+sAddress+":"+iServerPort+"/?authSource=" + sDbName;
+            	oMongoConnection.m_oMongoClient = MongoClients.create(sConnectionString);
             	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(sDbName);
             	
             	// Add it to the dictionary
@@ -128,8 +139,8 @@ public class MongoRepository {
     			if (sDbCode.equals("wasdi")) {
     				// Create default connection
         			oMongoConnection = new MongoConnection();
-                	MongoCredential oCredential = MongoCredential.createCredential(DB_USER, DB_NAME, DB_PWD.toCharArray());
-                	oMongoConnection.m_oMongoClient = new MongoClient(new ServerAddress(SERVER_ADDRESS, SERVER_PORT), Arrays.asList(oCredential));
+                	String sConnectionString = "mongodb://" + DB_USER+":"+DB_PWD+"@"+SERVER_ADDRESS+":"+SERVER_PORT+"/?authSource=" + DB_NAME;
+                	oMongoConnection.m_oMongoClient = MongoClients.create(sConnectionString);
                 	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(DB_NAME);
                 	// Add it to the dictionary
                 	s_aoDbConnections.put("wasdi", oMongoConnection);
@@ -199,20 +210,58 @@ public class MongoRepository {
 		}    	
     }
     
-    public <T> void fillList(final ArrayList<T> aoReturnList, FindIterable<Document> oWSDocuments, String sRepositoryName,Class<T> oClass) {
-		oWSDocuments.forEach(new Block<Document>() {
-		    public void apply(Document document) {
-		        String sJSON = document.toJson();
-		        T oAppCategory= null;
-		        try {
-		        	oAppCategory = s_oMapper.readValue(sJSON, oClass);
-		            aoReturnList.add(oAppCategory);
-		        } catch (IOException oEx) {
-		        	Utils.debugLog(sRepositoryName + ".fillList: " + oEx);
-		        }
-		    }
-		});
+    /**
+     * Fill a list of entities from the result of a Query.
+     * @param <T>
+     * @param aoReturnList
+     * @param oMongoDocuments
+     * @param sCollectionName
+     * @param oClass
+     */
+    public <T> void fillList(List<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
+    	
+        MongoCursor<Document> oCursor = oMongoDocuments.iterator();
+        
+        try {
+        	while (oCursor.hasNext()) {
+                String sJSON = oCursor.next().toJson();
+                
+                T oEntity = null;
+                try {
+                	oEntity = s_oMapper.readValue(sJSON,oClass);
+                    aoReturnList.add(oEntity);
+                } catch (Exception oEx) {
+                	Utils.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                }            		
+        	}
+        }
+        finally {
+			oCursor.close();
+		}
 	}
+    
+    public <T> void fillList(HashSet<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
+    	
+        MongoCursor<Document> oCursor = oMongoDocuments.iterator();
+        
+        try {
+        	while (oCursor.hasNext()) {
+                String sJSON = oCursor.next().toJson();
+                
+                T oEntity = null;
+                try {
+                	oEntity = s_oMapper.readValue(sJSON,oClass);
+                    aoReturnList.add(oEntity);
+                } catch (Exception oEx) {
+                	Utils.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                }            		
+        	}
+        }
+        finally {
+			oCursor.close();
+		}
+	}
+    
 	public String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
 		String sResult = "";
 		if(oNewDocument != null) {
@@ -232,6 +281,20 @@ public class MongoRepository {
 	public int delete(BasicDBObject oCriteria, String sCollectionName ){
         try {
             DeleteResult oDeleteResult = getCollection(sCollectionName).deleteOne(oCriteria);
+            if (oDeleteResult != null)
+            {
+                return (int) oDeleteResult.getDeletedCount();
+            }
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+	}
+
+	public int deleteMany(BasicDBObject oCriteria, String sCollectionName){
+        try {
+            DeleteResult oDeleteResult = getCollection(sCollectionName).deleteMany(oCriteria);
             if (oDeleteResult != null)
             {
                 return (int) oDeleteResult.getDeletedCount();
@@ -263,32 +326,5 @@ public class MongoRepository {
 
         return  false;
     }
-//	public void uploadImage (File oImageFile){
-//		
-//		GridFS gfsPhoto = new GridFS( s_oMongoClient.getDB(dbName), "userphotos");
-//
-//		String newFileName = "userimage";
-//		try {
-//			GridFSInputFile gfsFile = gfsPhoto.createFile(oImageFile);
-//			gfsFile.setFilename(newFileName);
-//			gfsFile.save();
-//
-//		} catch (IOException e) {
-//			Utils.debugLog("MongoRepository.uploadImage:" + e);
-//			e.printStackTrace();
-//		}
-//	}
-//	public void getImage (){
-//		GridFS gfsPhoto = new GridFS((DB) s_oMongoDatabase, "photo");
-//		String newFileName = "userimage";
-//		GridFSDBFile imageForOutput = gfsPhoto.findOne(newFileName);
-//		// save it into a new image file
-//		try {
-//			imageForOutput.writeTo("C:\\temp\\wasdi\\data\\alessio");
-//		} catch (IOException e) {
-//			Utils.debugLog("MongoRepository.getImage:" + e);
-//			e.printStackTrace();
-//		}
-//	}
 	
 }

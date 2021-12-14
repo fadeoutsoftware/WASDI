@@ -2,6 +2,16 @@ package wasdi.shared.business;
 
 /**
  * Represent the schedule of a User Processor
+ * 
+ * Schedules are read by the trigger. 
+ * To schedule a processor, a new row in the server crontab must be added.
+ * This cron tab task must run the trigger with the schedule ID.
+ * 
+ * The trigger starts, create a new valid session and triggers the execution of the 
+ * requested application.
+ * 
+ * In this entity there are all the info needed by the trigger to start the processor
+ * 
  * @author p.campanella
  *
  */
@@ -32,27 +42,27 @@ public class Schedule {
 	private String params;
 	
 	/**
-	 * Cron min param
+	 * Cron min param [Not used yet]
 	 */
 	private String minutes;
 	
 	/**
-	 * Cron hour param
+	 * Cron hour param [Not used yet]
 	 */
 	private String hours;
 	
 	/**
-	 * Cron dom param
+	 * Cron dom param [Not used yet]
 	 */
 	private String dayOfMonth;
 	
 	/**
-	 * Cron mon param
+	 * Cron mon param [Not used yet]
 	 */
 	private String month;
 	
 	/**
-	 * Cron dow param
+	 * Cron dow param [Not used yet]
 	 */
 	private String dayOfWeek;
 

@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -86,8 +86,14 @@ public class DockerUtils {
                     oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
-                            " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")" +
-                            " $1 >> " + m_sDockerLogFile + " 2>&1");
+                            " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");
+                    
+                    if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
+                    	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=\"" + WasdiConfig.Current.dockers.pipInstallWasdiAddress+"\""); 
+                    }
+                      
+                    oBuildScriptWriter.write(" $1 >> " + m_sDockerLogFile + " 2>&1");
+                    
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
                     oBuildScriptWriter.flush();
@@ -167,7 +173,7 @@ public class DockerUtils {
 
                 // Extra host mapping, useful for some instances when the server host can't be resolved
                 // The symptoms of such problem is that the POST call from the Docker container timeouts
-                String sExtra_Host = ConfigReader.getPropValue("EXTRA_HOST");
+                String sExtra_Host = WasdiConfig.Current.dockers.extraHosts;
                 if (!Utils.isNullOrEmpty(sExtra_Host)) {
                     LauncherMain.s_oLogger.debug("DockerUtils.run Found extra host in configuration file");
                     LauncherMain.s_oLogger.debug("DockerUtils.run adding host mapping to the run arguments");

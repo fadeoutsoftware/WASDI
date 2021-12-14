@@ -1,18 +1,21 @@
 package wasdi.scheduler;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.SchedulerQueueConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
@@ -63,6 +66,36 @@ public class WasdiScheduler
 	public static void main(String[] args) {		
 		System.out.println("---------------------------- WASDI SCHEDULER START ----------------------------\n");
 		
+		// create the parser
+		CommandLineParser oParser = new DefaultParser();
+
+		// create Options object
+		Options oOptions = new Options();
+		
+		oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
+
+		String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
+		
+		try {
+	        // parse the command line arguments
+	        CommandLine oLine = oParser.parse(oOptions, args);
+
+	        if (oLine.hasOption("config")) {
+	            // Get the Parameter File
+	        	sConfigFilePath = oLine.getOptionValue("config");
+	        }			
+		}
+		catch (Exception oEx) {
+            System.err.println("WasdiScheduler.main - Exception paring args " + oEx.toString());			
+		}
+		
+    	
+        if (!WasdiConfig.readConfig(sConfigFilePath)) {
+            System.err.println("WasdiScheduler.main - config file not available. Exit");
+            System.exit(-1);            	
+        }		
+
+		
 		//logger config
 		try {
 			System.out.println("WasdiScheduler.main: configuring logger...");
@@ -85,11 +118,7 @@ public class WasdiScheduler
 		try {
 			s_oLogger.info("main: Configuring mongo...");
 			// Init Mongo Configuration
-			MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
-			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
-			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
-			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
-			MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
+			MongoRepository.readConfig();	
 		} 
 		catch (Throwable oEx) {
 			s_oLogger.fatal("main: Mongo configuration failed. Reason: " + oEx);
@@ -98,30 +127,37 @@ public class WasdiScheduler
 		}
 		s_oLogger.info("main: Mongo configured :-)\n");
 		
+		// Computational nodes need to configure also the local dababase
+		try {
+			// If this is not the main node
+			if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				
+				// Configure also the local connection: by default is the "wasdi" port + 1
+				MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
+				Utils.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
+			}			
+		}
+		catch (Throwable oEx) {
+			s_oLogger.fatal("main: Mongo configuration failed. Reason: " + oEx);
+			oEx.printStackTrace();
+		}		
 		
 		// Read the list of configured schedulers
-		String sSchedulers = "";
 		ArrayList<String> asSchedulers = new ArrayList<String>();
 		try {
 			s_oLogger.info("main: reading schedulers configurations...");
-			// Get the list of schedulers from config
-			sSchedulers = ConfigReader.getPropValue("SCHEDULERS", "");
-			// Split on comma
-			String [] asSplitted = sSchedulers.split(",");
 			
-			// Add to the list of schedulers
-			if (asSplitted != null) {
-				for (String sScheduler : asSplitted) {
-					asSchedulers.add(sScheduler);
-				}
+			for (SchedulerQueueConfig oQueueConfig: WasdiConfig.Current.scheduler.schedulers) {
+				asSchedulers.add(oQueueConfig.name);
+				
 			}
 			
 			// Read Node Code
-			s_sWasdiNode = ConfigReader.getPropValue("WASDI_NODE", "wasdi");
+			s_sWasdiNode = WasdiConfig.Current.nodeCode;
 			
 			// Read the sleep time beween steps
 			try {
-				long iThreadSleep = Long.parseLong(ConfigReader.getPropValue("ProcessingThreadSleepingTimeMS", "2000"));
+				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 				if (iThreadSleep>0) {
 					s_lSleepingTimeMS = iThreadSleep;
 					WasdiScheduler.log("main: CatNap Ms: " + s_lSleepingTimeMS);
@@ -130,7 +166,7 @@ public class WasdiScheduler
 				e.printStackTrace();
 			}			
 		} 
-		catch (IOException oEx) {
+		catch (Exception oEx) {
 			s_oLogger.fatal("Could not read schedulers configurations. Reason: " + oEx);
 			oEx.printStackTrace();
 			System.exit(-1);
@@ -191,7 +227,9 @@ public class WasdiScheduler
 					}
 				}
 				
-				String sSchedulerEnabled = ConfigReader.getPropValue(sScheduler.toUpperCase()+"_ENABLED", "1");
+				SchedulerQueueConfig oSchedulerQueueConfig = WasdiConfig.Current.scheduler.getSchedulerQueueConfig(sScheduler.toUpperCase());
+				
+				String sSchedulerEnabled = oSchedulerQueueConfig.enabled;
 				
 				if (sSchedulerEnabled.equals("1")) {
 					// Start the scheduler

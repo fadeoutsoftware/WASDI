@@ -13,10 +13,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import wasdi.ConfigReader;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -37,6 +40,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
@@ -57,8 +61,8 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.BandViewModel;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class dbUtils {
 
@@ -387,9 +391,9 @@ public class dbUtils {
                     return;
                 }
 
-                String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-                String sDockerTemplatePath = ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH");
-                String sTomcatUser = ConfigReader.getPropValue("TOMCAT_USER", "tomcat8");
+                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
+                String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
+                String sTomcatUser = WasdiConfig.Current.tomcatUser;
 
                 WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath, sTomcatUser);
 
@@ -450,7 +454,7 @@ public class dbUtils {
                 for (Processor oProcessor : aoProcessors) {
 
                     String sProcessorName = oProcessor.getName();
-                    String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+                    String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
                     String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
                     File oUiFile = new File(sProcessorPath + "/ui.json");
 
@@ -479,7 +483,7 @@ public class dbUtils {
                 for (Processor oProcessor : aoProcessors) {
 
                     String sProcessorName = oProcessor.getName();
-                    String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+                    String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
                     String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
                     File oProcessorFolder = new File(sProcessorPath);
 
@@ -720,7 +724,7 @@ public class dbUtils {
                 SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
                 List<SnapWorkflow> aoWorkflows = oSnapWorkflowRepository.getList();
 
-                String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
                 if (!sBasePath.endsWith("/")) {
                     sBasePath += "/";
                 }
@@ -832,7 +836,7 @@ public class dbUtils {
                 // Clean the user folder
                 System.out.println("Deleting User Folder ");
 
-                String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
                 if (!sBasePath.endsWith("/")) {
                     sBasePath += "/";
                 }
@@ -856,7 +860,7 @@ public class dbUtils {
     }
 
     private static String getWorkspacePath(String sWorkspaceOwner, String sWorkspaceId) throws IOException {
-        String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
         if (!sBasePath.endsWith("/")) {
             sBasePath += "/";
         }
@@ -898,7 +902,7 @@ public class dbUtils {
                 Utils.debugLog("Deleting workspace layers");
 
                 // GeoServer Manager Object
-                GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GS_URL"), ConfigReader.getPropValue("GS_USER"), ConfigReader.getPropValue("GS_PASSWORD"));
+                GeoServerManager oGeoServerManager = new GeoServerManager();
 
                 // For each product in the workspace
                 for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
@@ -1028,7 +1032,7 @@ public class dbUtils {
     private static void cleanPublishedBands() throws MalformedURLException, IOException {
 
         try {
-            GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
+            GeoServerManager oGeoServerManager = new GeoServerManager();
 
             PublishedBandsRepository oPublishedBandRepo = new PublishedBandsRepository();
 
@@ -1175,7 +1179,7 @@ public class dbUtils {
                 String sWorkspaceOwner = oWS.getUserId();
 
                 // get workspace path
-                String sWorkspacePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH") + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
 
                 System.out.println("Deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -1189,7 +1193,7 @@ public class dbUtils {
                         System.out.println("Deleting workspace layers");
 
                         // GeoServer Manager Object
-                        GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"));
+                        GeoServerManager oGeoServerManager = new GeoServerManager();
 
                         // For each product in the workspace, if is unique, delete published bands and metadata file ref
                         for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
@@ -1322,7 +1326,7 @@ public class dbUtils {
                 String sWorkspaceOwner = oWS.getUserId();
 
                 // get workspace path
-                String sWorkspacePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH") + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
 
                 // Check and create the folder
                 File oWorkspaceFolder = new File(sWorkspacePath);
@@ -1407,7 +1411,7 @@ public class dbUtils {
 
                     System.out.println("Starting again " + oProcToRun.getProcessObjId());
 
-                    String sSerializationPath = ConfigReader.getPropValue("SERIALIZATION_PATH", "/usr/lib/wasdi/params/");
+                    String sSerializationPath = WasdiConfig.Current.paths.serializationPath;
 
                     if (!sSerializationPath.endsWith("" + File.separatorChar)) sSerializationPath += File.separatorChar;
 
@@ -1757,7 +1761,7 @@ public class dbUtils {
                 String sCategory = s_oScanner.nextLine();
                 AppCategory oAppCategory = new AppCategory();
                 oAppCategory.setCategory(sCategory);
-                oAppCategory.setId(Utils.GetRandomName());
+                oAppCategory.setId(Utils.getRandomName());
 
                 AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
                 oAppsCategoriesRepository.insertCategory(oAppCategory);
@@ -1812,22 +1816,41 @@ public class dbUtils {
         try {
         	System.out.println("Wasdi DB Utils");
         	
-            //this is how you read parameters:
-            MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
-            MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
-            MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
-            MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
-            MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+            // create the parser
+            CommandLineParser oParser = new DefaultParser();
 
-            String sNode = ConfigReader.getPropValue("WASDI_NODE");
+            // create Options object
+            Options oOptions = new Options();
+
+            oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
+
+            String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
+
+            // parse the command line arguments
+            CommandLine oLine = oParser.parse(oOptions, args);
+
+            if (oLine.hasOption("config")) {
+                // Get the Parameter File
+            	sConfigFilePath = oLine.getOptionValue("config");
+            }
+        	
+            if (!WasdiConfig.readConfig(sConfigFilePath)) {
+                System.err.println("Db Utils - config file not available. Exit");
+                System.exit(-1);            	
+            }
+        	
+            //this is how you read parameters:
+            MongoRepository.readConfig();
+
+            String sNode = WasdiConfig.Current.nodeCode;
+            
             if (!Utils.isNullOrEmpty(sNode)) {
                 s_sMyNodeCode = sNode;
             }
 
             try {
                 // get jar directory
-                File oCurrentFile = new File(
-                        dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                File oCurrentFile = new File(dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
                 // configure log
                 String sThisFilePath = oCurrentFile.getParentFile().getPath();
                 DOMConfigurator.configure(sThisFilePath + "/log4j.xml");

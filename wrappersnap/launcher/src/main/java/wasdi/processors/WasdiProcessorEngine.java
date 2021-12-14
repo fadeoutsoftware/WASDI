@@ -17,6 +17,7 @@ import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 
@@ -29,16 +30,18 @@ public abstract class WasdiProcessorEngine {
 	ProcessorParameter m_oParameter;
 	protected ProcessWorkspace m_oProcessWorkspace= null;
 	
+	public static WasdiProcessorEngine getProcessorEngine(String sType) { 
+		return getProcessorEngine(sType, WasdiConfig.Current.paths.downloadRootPath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
+	}
+	
+	
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
-			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
+			sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
 		}
 		
-		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON27_SNAP)) {
-			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
-		}
-		else if (sType.equals(ProcessorTypes.IDL)) {
+		if (sType.equals(ProcessorTypes.IDL)) {
 			return new IDL2ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
@@ -51,8 +54,17 @@ public abstract class WasdiProcessorEngine {
 			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
 		else {
-			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new UbuntuPython37ProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
+	}
+
+	/**
+	 * Create a Processor Engine using paths and tomcat user from config
+	 */
+	public WasdiProcessorEngine() {
+		m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
+		m_sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
+		m_sTomcatUser = WasdiConfig.Current.tomcatUser;
 	}
 	
 	/**
@@ -202,7 +214,7 @@ public abstract class WasdiProcessorEngine {
 			
 			String sBaseUrl = oProcessor.getNodeUrl();
 			
-			if (Utils.isNullOrEmpty(sBaseUrl)) sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
+			if (Utils.isNullOrEmpty(sBaseUrl)) sBaseUrl = WasdiConfig.Current.baseUrl;
 
 		    String sUrl = sBaseUrl + "/processors/downloadprocessor?processorId="+sProcessorId;
 		    

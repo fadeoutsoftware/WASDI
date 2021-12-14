@@ -21,22 +21,50 @@ public class LoggerWrapper {
 	}
 	
 	public void debug(String sText) {
-		m_oLogger.debug(m_sPrefix + " " + sText);
+		
+		if (m_oLogger!=null) {
+			m_oLogger.debug(m_sPrefix + " " + sText);
+		} 
+		else {
+			System.out.println(m_sPrefix + " " + sText);
+		}
 	}
 	
 	public void warn(String sText) {
-		m_oLogger.warn(m_sPrefix + " " + sText);
+		
+		if (m_oLogger!=null) {
+			m_oLogger.warn(m_sPrefix + " " + sText);
+		} 
+		else {
+			System.out.println(m_sPrefix + " " + sText);
+		}		
 	}
 	
 	public void info(String sText) {
-		m_oLogger.info(m_sPrefix + " " + sText);
+		if (m_oLogger!=null) {
+			m_oLogger.info(m_sPrefix + " " + sText);
+		} 
+		else {
+			System.out.println(m_sPrefix + " " + sText);
+		}		
+		
 	}
 	
 	public void error(String sText) {
-		m_oLogger.error(m_sPrefix + " " + sText);
+		if (m_oLogger!=null) {
+			m_oLogger.error(m_sPrefix + " " + sText);
+		} 
+		else {
+			System.out.println(m_sPrefix + " " + sText);
+		}		
 	}
 	
 	public void error(String sText, Exception oEx) {
-		m_oLogger.error(m_sPrefix + " " + sText, oEx);
+		if (m_oLogger!=null) {
+			m_oLogger.error(m_sPrefix + " " + sText, oEx);
+		} 
+		else {
+			System.out.println(m_sPrefix + " " + sText);
+		}		
 	}
 }
