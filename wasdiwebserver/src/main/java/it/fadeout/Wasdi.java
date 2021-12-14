@@ -153,7 +153,7 @@ public class Wasdi extends ResourceConfig {
 
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 		
-		String sConfigFilePath = "/data/wasdi/config.json"; 
+		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
 		
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");

@@ -1824,7 +1824,7 @@ public class dbUtils {
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
-            String sConfigFilePath = "/data/wasdi/config.json";
+            String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
 
             // parse the command line arguments
             CommandLine oLine = oParser.parse(oOptions, args);

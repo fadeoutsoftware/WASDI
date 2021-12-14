@@ -145,7 +145,7 @@ public class LauncherMain  {
         // Default initialization
         String sOperation = "ND";
         String sParameter = "ND";
-        String sConfigFilePath = "/data/wasdi/config.json";
+        String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
 
         // parse the command line arguments
         CommandLine oLine = oParser.parse(oOptions, args);
