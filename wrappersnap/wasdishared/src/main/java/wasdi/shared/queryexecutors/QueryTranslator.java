@@ -8,6 +8,8 @@ package wasdi.shared.queryexecutors;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
@@ -461,6 +463,8 @@ public abstract class QueryTranslator {
 
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
+			String sStack = ExceptionUtils.getStackTrace(oEx);
+			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: stack " + sStack);
 		}
 
 		return oResult;
