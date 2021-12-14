@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -31,6 +34,32 @@ import com.google.common.base.Preconditions;
  *
  */
 public class WasdiFileUtils {
+	
+	static List<String> asShapeFileExtensions;
+	static{
+		
+		//populate shapefiles extensions as found here:
+		// https://desktop.arcgis.com/en/arcmap/latest/manage-data/shapefiles/shapefile-file-extensions.htm
+		asShapeFileExtensions = new ArrayList<>(
+				Arrays.asList(
+						"shp",
+						"shx",
+						"dbf",
+						"sbn",
+						"sbx",
+						"fbn",
+						"fbx",
+						"ain",
+						"aih",
+						"atx",
+						"ixs",
+						"mxs",
+						"prj",
+//						"xml", //commented out since it is a too common extension
+						"cpg"
+				)
+		);
+	}
 
 	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
 	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
@@ -421,5 +450,117 @@ public class WasdiFileUtils {
 		return (name.equalsIgnoreCase("readme") || name.equalsIgnoreCase("help"))
 				&& (extension.equalsIgnoreCase("md") || extension.equalsIgnoreCase("txt"));
 	}
+	
+	public static List<String> getShapefileExtensions(){
+		return null;
+	}
+	
+	public static boolean isShapeFile(String sFileName) {
+		try {
+			if(Utils.isNullOrEmpty(sFileName)) {
+				return false;
+			}
+			String sLo = sFileName.toLowerCase(); 
+			for (String sExtension : asShapeFileExtensions) {
+				if(sLo.endsWith("."+sExtension)) {
+					return true;
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isShapeFile( String ): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isShapeFile(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			return isShapeFile(oFile.getName());
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isShapeFile( File ): " + oE);
+		}
+		return false;
+	}
+
+	private static boolean isSentinel3ZippedFile(String sName) {
+		try {
+			if(Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+			if(sName.toLowerCase().startsWith("s3") && sName.toLowerCase().endsWith(".zip")){
+				return true;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isSentinel3ZippedFile(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			return isSentinel3ZippedFile(oFile.getName());
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
+		}
+		return false;
+	}
+
+	private static boolean isSentinel3Name(String sName) {
+		try {
+			if(Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+			if(sName.toLowerCase().startsWith("s3")){
+				return true;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isSentinel3Name(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			return isSentinel3Name(oFile.getName());
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
+		}
+		return false;
+	}
+	
+	private static boolean isSentinel3Directory(String sName) {
+		try {
+			if(Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+			if(sName.toLowerCase().startsWith("s3") && sName.toLowerCase().endsWith(".sen3")){
+				return true;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isSentinel3Directory(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			return isSentinel3Directory(oFile.getName());
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
+		}
+		return false;
+	}
+
 
 }

@@ -207,6 +207,16 @@
 			<artifactId>s1tbx-op-sar-processing-ui</artifactId>
 			<version>${s1tbx.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-insar</artifactId>
+			<version>${s1tbx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-insar-ui</artifactId>
+			<version>${s1tbx.version}</version>
+		</dependency>		
 
 		<!-- S2 -->
 

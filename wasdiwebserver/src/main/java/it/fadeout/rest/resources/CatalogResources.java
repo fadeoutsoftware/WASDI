@@ -2,9 +2,15 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -28,6 +34,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
 
@@ -100,7 +107,7 @@ public class CatalogResources {
 				if(bMustZip) {
 					// Yes, zip and stream on the fly
 					Utils.debugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + " must be zipped");
-					return zipOnTheFlyAndStream(oFile);
+					return prepareAndReturnZip(oFile);
 				} else {
 					// No, just return the stream
 					Utils.debugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
@@ -136,7 +143,7 @@ public class CatalogResources {
 		int iLast = sBasePath.lastIndexOf(".dim");
 		String sDir = sBasePath.substring(0, iLast) + ".data";
 		
-		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sDir = " + sDir);
+		Utils.debugLog("CatalogResources.zipBeanDimapFile: sDir = " + sDir);
 		
 		File oFile = new File(sDir);
 		aoFileStack.push(oFile);
@@ -148,17 +155,17 @@ public class CatalogResources {
 			sBasePath = sBasePath + "/";
 		}
 		
-		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: updated sBasePath = " + sBasePath);
+		Utils.debugLog("CatalogResources.zipBeanDimapFile: updated sBasePath = " + sBasePath);
 		
 		int iBaseLen = sBasePath.length();
 		Map<String, File> aoFileEntries = new HashMap<>();
 		
 		while(aoFileStack.size()>=1) {
-			//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: pushing files into stack");
+			//Wasdi.DebugLog("CatalogResources.zipBeanDimapFile: pushing files into stack");
 			oFile = aoFileStack.pop();
 			String sAbsolutePath = oFile.getAbsolutePath();
 			
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path " + sAbsolutePath);
+			Utils.debugLog("CatalogResources.zipBeanDimapFile: sAbsolute Path " + sAbsolutePath);
 
 			if(oFile.isDirectory()) {
 				if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
@@ -170,18 +177,17 @@ public class CatalogResources {
 				}
 			}
 			
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path 2 " + sAbsolutePath);
+			Utils.debugLog("CatalogResources.zipBeanDimapFile: sAbsolute Path 2 " + sAbsolutePath);
 			
 			String sRelativePath = sAbsolutePath.substring(iBaseLen);
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
+			Utils.debugLog("CatalogResources.zipBeanDimapFile: adding file " + sRelativePath +" for compression");
 			aoFileEntries.put(sRelativePath,oFile);
 		}
-		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
+		Utils.debugLog("CatalogResources.zipBeanDimapFile: done preparing map, added " + aoFileEntries.size() + " files");
 					
-		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+		
 
 		// Set response headers and return 
-		ResponseBuilder oResponseBuilder = Response.ok(oStream);
 		String sFileName = oInitialFile.getName();
 		
 		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName1 " + sFileName);
@@ -190,17 +196,28 @@ public class CatalogResources {
 		
 		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName2 Path " + sFileName);
 		
+		return zipOnTheFly(aoFileEntries, sFileName);
+	}
+
+	/**
+	 * @param aoFileEntries
+	 * @param sFileName
+	 * @return
+	 */
+	private Response zipOnTheFly(Map<String, File> aoFileEntries, String sFileName) {
+		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+		ResponseBuilder oResponseBuilder = Response.ok(oStream);
 		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
-		Long lLength = 0L;
-		for (String sFile : aoFileEntries.keySet()) {
-			File oTempFile = aoFileEntries.get(sFile);
-			if(!oTempFile.isDirectory()) {
-				//NOTE: this way we are cheating, it is an upper bound, not the real size!
-				lLength += oTempFile.length();
-			}
-		}
+//		Long lLength = 0L;
+//		for (String sFile : aoFileEntries.keySet()) {
+//			File oTempFile = aoFileEntries.get(sFile);
+//			if(!oTempFile.isDirectory()) {
+//				//NOTE: this way we are cheating, it is an upper bound, not the real size!
+//				lLength += oTempFile.length();
+//			}
+//		}
 		//oResponseBuilder.header("Content-Length", lLength);
-		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: return ");
+		Utils.debugLog("CatalogResources.zipOnTheFly: return ");
 		return oResponseBuilder.build();
 	}
 	
@@ -240,7 +257,7 @@ public class CatalogResources {
 		
 		for (int i=0; i<aoMatchingFiles.length; i++) {
 			Utils.debugLog("CatalogResources.zipShapeFile: adding " + aoMatchingFiles[i].getName() + " to zip");
-			aoFileEntries.put(aoMatchingFiles[i].getName() ,aoMatchingFiles[i]);
+			aoFileEntries.put(aoMatchingFiles[i].getName(), aoMatchingFiles[i]);
 		}
 		
 
@@ -268,9 +285,37 @@ public class CatalogResources {
 				lLength += oTempFile.length();
 			}
 		}
-		oResponseBuilder.header("Content-Length", lLength);
+		//oResponseBuilder.header("Content-Length", lLength);
 		Utils.debugLog("CatalogResources.zipShapeFile: return ");
 		return oResponseBuilder.build();
+	}
+	
+	private Response zipSentinel3(File oInitialFile) {
+		if(null==oInitialFile) {
+			Utils.debugLog("CatalogResource.zipSentinel3: passed a null file, aborting");
+			return Response.serverError().build();
+		}
+		if(!oInitialFile.isDirectory()) {
+			Utils.debugLog("CatalogResource.zipSentinel3: file " + oInitialFile.getAbsolutePath() + " is not a directory, aborting");
+			return Response.serverError().build();
+		}
+		Map<String, File> aoFileEntries = new HashMap<>();
+		
+		//collect all files in the directory
+		try( Stream<java.nio.file.Path> paths = Files.walk(oInitialFile.toPath())){
+			paths
+			.filter(oPath -> !Files.isDirectory(oPath))
+			.forEach(oPath -> {
+				String sPath = oInitialFile.getName() + File.separator + oPath.toFile().getName();
+				Utils.debugLog("CatalogResource.zipSentinel3: adding file: " + sPath);
+				aoFileEntries.put(sPath, oPath.toFile());
+			});
+		} catch (Exception oE) {
+			Utils.debugLog("CatalogResource.zipSentinel3: " + oE + " while adding files");
+		}
+
+		
+		return zipOnTheFly(aoFileEntries, oInitialFile.getName().toUpperCase().replace(".SEN3", ".zip"));
 	}
 	
 	/**
@@ -278,23 +323,24 @@ public class CatalogResources {
 	 * @param oInitialFile File to zip
 	 * @return stream
 	 */
-	private Response zipOnTheFlyAndStream(File oInitialFile) {
-		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream");
+	private Response prepareAndReturnZip(File oInitialFile) {
+		Utils.debugLog("CatalogResources.prepareAndReturnZip");
 		if(null==oInitialFile) {
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: oFile is null");
+			Utils.debugLog("CatalogResources.prepareAndReturnZip: oFile is null");
 			return null;
 		}		
 		try {
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: init");
+			Utils.debugLog("CatalogResources.prepareAndReturnZip: init");
 			String sBasePath = oInitialFile.getAbsolutePath();
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sBasePath = " + sBasePath);
-			
+			Utils.debugLog("CatalogResources.prepareAndReturnZip: sBasePath = " + sBasePath);
+			sBasePath = sBasePath.toLowerCase();
 			if (sBasePath.endsWith(".dim")) {
 				return zipBeanDimapFile(oInitialFile);
-			}
-			else if (sBasePath.toLowerCase().endsWith(".shp")) {
+			} else if (sBasePath.endsWith(".shp")) {
 				return zipShapeFile(oInitialFile);
-			}
+			} else if(WasdiFileUtils.isSentinel3Directory(oInitialFile)) {
+				return zipSentinel3(oInitialFile);
+			} 
 		} 
 		catch (Exception e) {
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
@@ -302,6 +348,7 @@ public class CatalogResources {
 		return null;
 	}
 	
+
 	/**
 	 * Checks if the file must be zipped or not
 	 * @param oFile File to check
@@ -316,16 +363,16 @@ public class CatalogResources {
 		}
 		boolean bRet = false;
 
-		String sName = oFile.getName();
+		String sName = oFile.getName().toLowerCase();
 		
 		if(!Utils.isNullOrEmpty(sName)) {
-			
-			if(sName.endsWith(".dim")) {
-				bRet = true;
-			}
-			else if (sName.endsWith(".shp")) {
-				bRet = true;
-			}
+			return (
+					//dim files are the output of SNAP operations
+					sName.endsWith(".dim") ||
+					//sName.endsWith(".shp") ||
+					WasdiFileUtils.isShapeFile(oFile) ||
+					WasdiFileUtils.isSentinel3Directory(oFile)
+					);
 		}
 		return bRet;
 	}
@@ -731,7 +778,7 @@ public class CatalogResources {
 	}
 	
 	/**
-	 * Get the file object corrisponding to the input requests.
+	 * Get the file object corresponding to the input requests.
 	 * It returns null if the file is not registered in WASDI and or if the file is not physically present
 	 * @param sFileName
 	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable

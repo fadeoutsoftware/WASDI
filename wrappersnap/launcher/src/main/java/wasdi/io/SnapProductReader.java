@@ -22,6 +22,7 @@ public class SnapProductReader extends WasdiProductReader {
 	public SnapProductReader(File oProductFile) {
 		super(oProductFile);
 	}
+	
 	public ProductViewModel getProductViewModel() {
 		
 		LauncherMain.s_oLogger.debug("SnapProductReader.getProductViewModel: start");
@@ -54,12 +55,12 @@ public class SnapProductReader extends WasdiProductReader {
     protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null return");
+            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null, return");
             return;
         }
 
         if (oProduct == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null");
+            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null, return");
             return;
         }
 
