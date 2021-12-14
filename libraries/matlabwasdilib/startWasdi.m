@@ -49,7 +49,7 @@ end
 %add internal path
 %addpath(genpath(sPath))
 %add WASDI Library Jar
-wasdilib = 'jwasdilib.jar';
+wasdilib = 'jwasdilib-0.7.0.jar';
 if isdeployed
     javaaddpath(['./', wasdilib])
 else
