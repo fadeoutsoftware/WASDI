@@ -1031,8 +1031,7 @@ public class ProcessWorkspaceResource {
 	public ProcessWorkspaceViewModel setProcessPayload(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("procws") String sProcessObjId, @QueryParam("payload") String sPayload) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload( ProcWsId: " + sProcessObjId +
-				", Payload: " + sPayload + " )" );
+		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload" );
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -1042,9 +1041,6 @@ public class ProcessWorkspaceResource {
 			// Domain Check
 			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload: invalid session" );
-				return oProcess;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return oProcess;
 			}
 
