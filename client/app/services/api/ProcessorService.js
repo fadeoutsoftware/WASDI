@@ -268,7 +268,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         var sWorkspaceId = "-";
 
         if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
-            sWorkspaceId = sWorkspaceId.workspaceId;
+            sWorkspaceId = oWorkspace.workspaceId;
         }
 
         return this.m_oHttp.get(this.APIURL + '/processors/redeploy?processorId=' + sProcessorId + "&workspace=" + sWorkspaceId);
