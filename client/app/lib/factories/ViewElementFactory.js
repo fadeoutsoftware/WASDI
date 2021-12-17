@@ -247,6 +247,7 @@ function ViewElementFactory() {
             northEast: "",
             southWest: ""
         };
+        this.max=10;
         this.iWidth = "";
         this.iHeight = "";
 

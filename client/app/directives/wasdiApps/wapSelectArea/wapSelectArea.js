@@ -12,7 +12,8 @@ angular.module('wasdi.wapSelectArea', [])
             bindToController: {
                 heightMap: '=',
                 widthMap: '=',
-                boundingBox: '='
+                boundingBox: '=',
+                max: '='
             },
             template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
 
@@ -20,6 +21,8 @@ angular.module('wasdi.wapSelectArea', [])
 
                 // generated a new id map number and converted as string
                 this.mapId = "" + Date.now() + Math.random();
+
+                console.log("10 " + this.max);
 
                 this.oMap = null;
                 this.m_oDrawnItems = {};
@@ -82,7 +85,8 @@ angular.module('wasdi.wapSelectArea', [])
                         }
                         //save new shape in map
                         oController.m_oDrawnItems.addLayer(layer);
-                        // TEST for rule of tumb to obtain area 
+                        
+                        // aproximate method to calculate area
                         let M_number_lat = 110.574; // chilometers
                         let M_number_lng = 111.320; // chilometers
                         let latN = oController.boundingBox.northEast.lat; // in degrees -> convert to radians in calc
@@ -91,26 +95,14 @@ angular.module('wasdi.wapSelectArea', [])
                         let latS = oController.boundingBox.southWest.lat;
                         let lngW = oController.boundingBox.southWest.lng;
 
-                        let area2 = ((latN-latS) * M_number_lat) *
+                        let area = ((latN-latS) * M_number_lat) *
                                     ((lngE-lngW) * 
                                     (Math.cos(latN * (Math.PI/180)) * M_number_lng)*100);
 
-
-                        let width = (latN - latS) * M_number_lat;
-                        let height = (lngE - lngW ) * M_number_lng * Math.cos(latN);
-                        let area = width * height ;
-
-                        console.log(area2);
-                        // console.log(String(latN).replace(".","," )+"\n"+
-                        // String(lngE).replace(".","," )+"\n"+
-                        // String(latS).replace(".","," )+"\n"+
-                        // String(lngW).replace(".","," )
-                        // );
-                        /*console.log("Area with a width of " + width +
-                        "meters, height " + height + "meters "  + 
-                        " Area : "+ area + "Square meters");*/
-
-                        console.log("Check with result from leaflet" + area *100 + "ha");
+                        
+                    
+                        console.log(area);
+                        
 
                         
                     });
