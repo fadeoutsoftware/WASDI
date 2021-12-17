@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<groupId>fadeout.software.wasdi</groupId>
-		<artifactId>wasdi-parent</artifactId>	
+		<artifactId>wasdi-parent</artifactId>
 		<relativePath>../../pom.xml</relativePath>
 		<version>1.0</version>
 	</parent>
@@ -42,15 +42,12 @@
 	</build>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
-		<!-- dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongo-java-driver</artifactId>
-			<version>3.12.8</version>
-		</dependency-->
+		<!-- dependency> <groupId>org.mongodb</groupId> <artifactId>mongo-java-driver</artifactId> 
+			<version>3.12.8</version> </dependency -->
 		<dependency>
-		    <groupId>org.mongodb</groupId>
-		    <artifactId>mongodb-driver-sync</artifactId>
-		    <version>4.3.4</version>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-sync</artifactId>
+			<version>4.3.4</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
@@ -58,7 +55,7 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.13.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.abdera</groupId>
 			<artifactId>abdera-core</artifactId>
@@ -67,14 +64,14 @@
 		<dependency>
 			<groupId>org.apache.abdera</groupId>
 			<artifactId>abdera-client</artifactId>
-			<version>1.1.3</version> 
+			<version>1.1.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.abdera</groupId>
 			<artifactId>abdera-extensions-json</artifactId>
 			<version>1.1.3</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -106,16 +103,16 @@
 			<artifactId>json</artifactId>
 			<version>20160810</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
-		    <groupId>com.google.code.gson</groupId>
-		    <artifactId>gson</artifactId>
-		    <version>2.8.6</version>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.6</version>
 		</dependency>
-		
 
- 		<!-- ESA SNAP -->
+
+		<!-- ESA SNAP -->
 
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
@@ -132,7 +129,7 @@
 			<artifactId>s2tbx-radiometric-indices</artifactId>
 			<version>8.0.3</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-rcp</artifactId>
@@ -149,15 +146,22 @@
 			<artifactId>probavbox-reader</artifactId>
 			<version>2.2.0</version>
 		</dependency>
-		
+
 		<!-- END OF ESA SNAP -->
-		
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.21</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.1</version>
 		</dependency>
-		
+
 		<!-- FTP mock server + tests -->
 		<dependency>
 			<groupId>commons-net</groupId>
@@ -181,7 +185,7 @@
 			<artifactId>junit-jupiter-params</artifactId>
 			<version>5.7.0</version>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.mockftpserver</groupId>
 			<artifactId>MockFtpServer</artifactId>
@@ -196,17 +200,17 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>javax.xml.bind</groupId>
-		    <artifactId>jaxb-api</artifactId>
-		    <version>2.3.1</version>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
 		</dependency>
-		
+
 		<dependency>
-    		<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-lang3</artifactId>
-    		<version>3.11</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.11</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
@@ -219,10 +223,10 @@
 			<version>1.18.22</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 	</dependencies>
-	
-	
+
+
 
 	<repositories>
 		<repository>
@@ -230,18 +234,18 @@
 			<url>http://maven.geo-solutions.it/</url>
 		</repository>
 		<repository>
-            <id>snap-repo-public</id>
-            <name>Public Maven Repository for SNAP</name>
-            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
+			<id>snap-repo-public</id>
+			<name>Public Maven Repository for SNAP</name>
+			<url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
+		</repository>
 	</repositories>
 
 </project>
