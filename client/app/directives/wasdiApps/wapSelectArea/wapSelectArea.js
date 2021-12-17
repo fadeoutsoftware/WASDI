@@ -22,8 +22,6 @@ angular.module('wasdi.wapSelectArea', [])
                 // generated a new id map number and converted as string
                 this.mapId = "" + Date.now() + Math.random();
 
-                console.log("10 " + this.max);
-
                 this.oMap = null;
                 this.m_oDrawnItems = {};
 

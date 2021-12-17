@@ -59,7 +59,11 @@ function ViewElementFactory() {
             }
         }
         else if (oControl.type === "bbox") {
+            // max from parameters
+            let max = oControl.max;
+            
             // Bounding Box from Map
+
             oViewElement = new SelectArea();
         }
         else if (oControl.type === "date") {
@@ -247,7 +251,6 @@ function ViewElementFactory() {
             northEast: "",
             southWest: ""
         };
-        this.max=10;
         this.iWidth = "";
         this.iHeight = "";
 
