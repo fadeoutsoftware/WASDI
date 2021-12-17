@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -93,7 +93,7 @@ public class RedeployProcessorWorker extends Thread  {
 				Utils.debugLog("RedeployProcessorWorker.run: calling url: " + sUrl);
 				
 				// It is a get call				
-				Wasdi.httpGet(sUrl, asHeaders);
+				HttpUtils.httpGet(sUrl, asHeaders);
 				
 				Utils.debugLog("RedeployProcessorWorker.run: redeployed on node " + oNode.getNodeCode());
 				

@@ -395,6 +395,48 @@
                 "indexvalue":"VIIRS_1d_composite"
 
             }]
+        },
+        {
+            "name": "ERA5",
+            "indexname": "platformname",
+            "indexvalue": "ERA5",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "reanalysis-era5-pressure-levels|reanalysis-era5-single-levels",
+                    "regex": ".*",
+                    "indexvalue":"reanalysis-era5-pressure-levels"
+                },
+                {
+                    "indexname": "productType",
+                    "indexlabel": "Product type",
+                    "indexvalues": "reanalysis|ensemble_mean|ensemble_members|ensemble_spread",
+                    "regex": ".*",
+                    "indexvalue":"reanalysis"
+                },
+                {
+                    "indexname": "pressureLevels",
+                    "indexlabel": "Pressure levels in hPa",
+                    "indexvalues": "1|2|1+2|1000",
+                    "regex": ".*",
+                    "indexvalue":"1000"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "RH|U|V|RH+U+V|SST+SP+TP|10U+10V+2DT+2T+SP",
+                    "regex": ".*",
+                    "indexvalue":"RH+U+V"
+                },
+                {
+                    "indexname": "format",
+                    "indexlabel": "Format",
+                    "indexvalues":"grib|netcdf",
+                    "regex": ".*",
+                    "indexvalue":"netcdf"
+                }
+            ]
         }
     ],
     "orbitsearch":{

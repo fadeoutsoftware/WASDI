@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.products;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a node group of a product. 
@@ -21,13 +21,13 @@ public class NodeGroupViewModel {
         this.setNodeName(sNodeName);
     }
 
-    private ArrayList<BandViewModel> bands;
+    private List<BandViewModel> bands;
 
-    public ArrayList<BandViewModel> getBands() {
+    public List<BandViewModel> getBands() {
         return bands;
     }
 
-    public void setBands(ArrayList<BandViewModel> bands) {
+    public void setBands(List<BandViewModel> bands) {
         this.bands = bands;
     }
 

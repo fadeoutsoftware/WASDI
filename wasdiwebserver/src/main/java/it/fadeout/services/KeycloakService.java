@@ -7,9 +7,9 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -42,7 +42,7 @@ public class KeycloakService implements AuthProviderService {
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
 			Utils.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl + ", " + sPayload);
-			String sAuthResult = Wasdi.httpPost(sAuthUrl, sPayload, asHeaders);
+			String sAuthResult = HttpUtils.httpPost(sAuthUrl, sPayload, asHeaders);
 			if(Utils.isNullOrEmpty(sAuthResult)) {
 				throw new RuntimeException("could not login into keycloak");
 			}
@@ -79,7 +79,7 @@ public class KeycloakService implements AuthProviderService {
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.clear();
 		asHeaders.put("Authorization", "Bearer " + sToken);
-		String sResponse = Wasdi.httpGet(sUrl, asHeaders);
+		String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
 		Utils.debugLog("KeycloakService.getUserData: user data: " + sResponse);
 		return sResponse;
 	}
@@ -96,7 +96,7 @@ public class KeycloakService implements AuthProviderService {
 		sPayload += "&password=" + sPassword;
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-		String sAuthResult = Wasdi.httpPost(sUrl, sPayload, asHeaders);
+		String sAuthResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
 		Utils.debugLog("KeycloakService.login: auth result: " + sAuthResult);
 		return sAuthResult;
 	}
@@ -161,7 +161,7 @@ public class KeycloakService implements AuthProviderService {
 			Map<String, String> asHeaders = new HashMap<>();
 			asHeaders.put("Authorization", "Bearer " + sToken);
 			asHeaders.put("Content-Type", "application/json");
-			String sResponse = Wasdi.httpPut(sUrl, sPayload, asHeaders);
+			String sResponse = HttpUtils.httpPut(sUrl, sPayload, asHeaders);
 			Utils.debugLog("KeycloakService.getUserDbId: response (should be empty): \"" + sResponse + "\"");
 			oResult.setIntValue(200);
 			return oResult;

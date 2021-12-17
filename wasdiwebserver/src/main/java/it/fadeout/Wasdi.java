@@ -1,42 +1,23 @@
 package it.fadeout;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
-import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.net.io.CopyStreamException;
-import org.apache.commons.net.io.Util;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
@@ -60,10 +41,10 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -357,7 +338,7 @@ public class Wasdi extends ResourceConfig {
 				String sPayload = "token=" + sSessionId;
 				Map<String,String> asHeaders = new HashMap<>();
 				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-				String sResponse = httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
+				String sResponse = HttpUtils.httpPost(Wasdi.s_sKeyCloakIntrospectionUrl, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret);
 				JSONObject oJSON = null;
 				if(!Utils.isNullOrEmpty(sResponse)) {
 					oJSON = new JSONObject(sResponse);
@@ -624,7 +605,7 @@ public class Wasdi extends ResourceConfig {
 				//Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
 				// call the API on the destination node 
-				String sResult = httpPost(sUrl, sPayload, getStandardHeaders(sSessionId));
+				String sResult = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId));
 				
 				
 		        try {
@@ -643,7 +624,7 @@ public class Wasdi extends ResourceConfig {
 			}
 			else {
 				// The Workspace is here. Just add the ProcessWorkspace to the database 
-				
+
 				// Serialization Path
 				String sPath = sSerializationPath;
 
@@ -721,359 +702,7 @@ public class Wasdi extends ResourceConfig {
 
 		return oResult;
 	}
-	
-	/**
-	 * Get the standard headers for a WASDI call
-	 * @return
-	 */
-	public static HashMap<String, String> getStandardHeaders(String sSessionId) {
-		HashMap<String, String> asHeaders = new HashMap<String, String>();
-		asHeaders.put("x-session-token", sSessionId);
-		asHeaders.put("Content-Type", "application/json");
-		
-		return asHeaders;
-	}
-	
-	/**
-	 * Standard http post utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post 
-	 * @param asHeaders headers dictionary
-	 * @return server response
-	 */
-	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders) {
-		return httpPost(sUrl, sPayload, asHeaders, null);
-	}
 
-	/**
-	 * Standard http post utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post
-	 * @param asHeaders headers dictionary
-	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
-	 * @return server response
-	 */
-	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-			if(!Utils.isNullOrEmpty(sAuth)) {
-				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
-				String sAuthHeaderValue = "Basic " + sEncodedAuth;
-				oConnection.setRequestProperty("Authorization", sAuthHeaderValue);
-
-			}
-
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("POST");
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-				}
-			}
-			
-			OutputStream oPostOutputStream = oConnection.getOutputStream();
-			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
-			if (sPayload!= null) oStreamWriter.write(sPayload);
-			oStreamWriter.flush();
-			oStreamWriter.close();
-			oPostOutputStream.close(); 
-			
-			oConnection.connect();
-
-			String sMessage = readHttpResponse(oConnection);
-			oConnection.disconnect();
-			
-			return sMessage;
-		}
-		catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-	
-	/**
-	 * Standard http post file utility function
-	 * @param sUrl destination url
-	 * @param sFileName full path of the file to post
-	 * @param asHeaders headers to use
-	 * @throws IOException
-	 */
-	public static void httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) throws IOException 
-	{
-		//local file -> automatically checks for null
-		File oFile = new File(sFileName);
-		if(!oFile.exists()) {
-			throw new IOException("Wasdi.httpPostFile: file not found");
-		}
-		
-		String sZippedFile = null;
-		
-		// Check if we need to zip this file
-		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
-			
-			Utils.debugLog("Wasdi.httpPostFile: File not zipped, zip it");
-			
-			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
-			
-			String sTemp = "tmp-" + iRandom + File.separator;
-			String sTempPath = WasdiFileUtils.fixPathSeparator(oFile.getParentFile().getPath());
-			
-			if(!sTempPath.endsWith(File.separator)) {
-				sTempPath += File.separator;
-			}
-			sTempPath += sTemp;
-			
-			Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
-			if (oPath.toFile().mkdir()) {
-				Utils.debugLog("Wasdi.httpPostFile: Temporary directory created");
-			} else {
-				throw new IOException("Wasdi.httpPostFile: Can't create temporary dir " + sTempPath);
-			}
-			
-			sZippedFile = sTempPath+iRandom + ".zip";
-			
-			File oZippedFile = new File(sTempPath+iRandom + ".zip");
-			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			WasdiFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
-			
-			oOutZipStream.close();
-			
-			String sOldFileName = oFile.getName();
-			
-			oFile = new File(sZippedFile);
-			
-			sUrl = sUrl.replace(sOldFileName, oFile.getName());
-			
-			sFileName = oFile.getName();
-		}
-
-		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
-		try(FileInputStream oInputStream = new FileInputStream(oFile)){
-		    //request
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setDoOutput(true);
-			oConnection.setDoInput(true);
-			oConnection.setUseCaches(false);
-			int iBufferSize = 8192;//8*1024*1024
-			oConnection.setChunkedStreamingMode(iBufferSize);
-			Long lLen = oFile.length();
-			Utils.debugLog("Wasdi.httpPostFile: file length is: "+Long.toString(lLen));
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-				}
-			}
-			oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
-			oConnection.setRequestProperty("Connection", "Keep-Alive");
-			oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
-			oConnection.connect();
-			
-			try(DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream())){
-
-				oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
-				oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
-				oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
-				oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
-				oOutputStream.writeBytes("\r\n");
-
-				Util.copyStream(oInputStream, oOutputStream);
-
-				oOutputStream.flush();
-				oInputStream.close();
-				oOutputStream.writeBytes("\r\n");
-				oOutputStream.flush();
-				oOutputStream.writeBytes("\r\n");
-				oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
-
-				// response
-				int iResponse = oConnection.getResponseCode();
-				Utils.debugLog("Wasdi.httpPostFile: server returned " + iResponse);
-				
-				InputStream oResponseInputStream = null;
-				
-				ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
-				
-				if( 200 <= iResponse && 299 >= iResponse ) {
-					oResponseInputStream = oConnection.getInputStream();
-				} else {
-					oResponseInputStream = oConnection.getErrorStream();
-				}
-				if(null!=oResponseInputStream) {
-					Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-					String sMessage = "WasdiLib.uploadFile: " + oByteArrayOutputStream.toString();
-					Utils.debugLog(sMessage);
-				} else {
-					throw new NullPointerException("WasdiLib.uploadFile: stream is null");
-				}
-
-				oConnection.disconnect();
-
-			} catch(Exception oE) {
-				Utils.debugLog("WasdiLib.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
-				throw oE;
-			}
-		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
-			throw oE;
-		}
-		
-		if (!Utils.isNullOrEmpty(sZippedFile)) {
-			try {
-				FileUtils.deleteDirectory(new File(sZippedFile).getParentFile());
-			}
-			catch (Exception oE) {
-				Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
-			}			
-		}
-	}
-	
-	
-	/**
-	 * Standard http put utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post
-	 * @param asHeaders headers dictionary
-	 * @return server response
-	 */
-	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders) {
-		return httpPut(sUrl, sPayload, asHeaders, null);
-	}
-	
-	/**
-	 * Standard http put utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post
-	 * @param asHeaders headers dictionary
-	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
-	 * @return server response
-	 */
-	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-			if(!Utils.isNullOrEmpty(sAuth)) {
-				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
-				String sAuthHeaderValue = "Basic " + sEncodedAuth;
-				oConnection.setRequestProperty("Authorization", sAuthHeaderValue);
-
-			}
-
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("PUT");
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-				}
-			}
-			
-			OutputStream oPostOutputStream = oConnection.getOutputStream();
-			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
-			if (sPayload!= null) oStreamWriter.write(sPayload);
-			oStreamWriter.flush();
-			oStreamWriter.close();
-			oPostOutputStream.close(); 
-			
-			oConnection.connect();
-
-			String sMessage = readHttpResponse(oConnection);
-			oConnection.disconnect();
-			
-			return sMessage;
-		}
-		catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-	
-	/**
-	 * Standard http get utility function
-	 * @param sUrl url to call
-	 * @param sPayload payload of the post 
-	 * @param asHeaders headers dictionary
-	 * @return server response
-	 */
-	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
-		
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setConnectTimeout(2000);
-			oConnection.setReadTimeout(2000);
-
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("GET");
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
-				}
-			}
-						
-			oConnection.connect();
-			
-			return readHttpResponse(oConnection);
-		}
-		catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-
-	/**
-	 * Read http response stream
-	 * @param oConnection
-	 * @throws IOException
-	 * @throws CopyStreamException
-	 */
-	public static String readHttpResponse(HttpURLConnection oConnection) {
-		try {
-			// response
-
-			InputStream oResponseInputStream = null;
-			try {
-				oResponseInputStream = oConnection.getInputStream();
-			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.readHttpResponse: could not getInputStream due to: " + oE );
-			}
-			
-			try {
-				if(null==oResponseInputStream) {
-					oResponseInputStream = oConnection.getErrorStream();
-				}
-			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.readHttpResponse: could not getErrorStream due to: " + oE );
-			}
-			
-
-			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
-			
-
-			Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-			String sMessage = oByteArrayOutputStream.toString();
-			if( 200 <= oConnection.getResponseCode() && 299 >= oConnection.getResponseCode() ) {
-				return sMessage;
-			} else {
-				Utils.debugLog("Wasdi.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
-				return "";
-			}
-			
-		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.readHttpResponse: exception: " + oE );
-		}
-		return "";
-	}
-
-	
 	/**
 	 * Download a workflow on the local PC
 	 * @param sWorkflowId File Name
@@ -1081,92 +710,30 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static String downloadWorkflow(String sNodeUrl, String sWorkflowId, String sSessionId) {
 		try {
-			
+
 			if (Utils.isNullOrEmpty(sWorkflowId)) {
 				Utils.debugLog("sWorkflowId is null or empty");
 				return "";
 			}
-			
+
 			String sBaseUrl = sNodeUrl;
-			
+
 			if (Utils.isNullOrEmpty(sNodeUrl)) { sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest"; }
 
-		    String sUrl = sBaseUrl + "/workflows/download?workflowId="+sWorkflowId;
-		    
-		    String sOutputFilePath = "";
-		    
-			
-			try {
-				URL oURL = new URL(sUrl);
-				HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			String sUrl = sBaseUrl + "/workflows/download?workflowId=" + sWorkflowId;
 
-				// optional default is GET
-				oConnection.setRequestMethod("GET");
-				HashMap<String, String> asHeaders = getStandardHeaders(sSessionId);
-				for (Entry<String,String> asEntry : asHeaders.entrySet()) {
-						oConnection.setRequestProperty(asEntry.getKey(),asEntry.getValue());
-				}
-				
-				
-				int responseCode =  oConnection.getResponseCode();
+			String sSavePath = getDownloadPath() + "workflows/";
+			String sOutputFilePath = sSavePath + sWorkflowId + ".xml";
 
- 				if(responseCode == 200) {
-							
-					Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
-					List<String> asContents = null;
-					if(null!=aoHeaders) {
-						asContents = aoHeaders.get("Content-Disposition");
-					}
-					String sAttachmentName = null;
-					if(null!=asContents) {
-						String sHeader = asContents.get(0);
-						sAttachmentName = sHeader.split("filename=")[1];
-						if(sAttachmentName.startsWith("\"")) {
-							sAttachmentName = sAttachmentName.substring(1);
-						}
-						if(sAttachmentName.endsWith("\"")) {
-							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
-						}
-						Utils.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
-						
-					}
-					
-
-					String sSavePath = getDownloadPath() + "workflows/";
-					sOutputFilePath = sSavePath + sWorkflowId+".xml";
-					
-					File oTargetFile = new File(sOutputFilePath);
-					File oTargetDir = oTargetFile.getParentFile();
-					oTargetDir.mkdirs();
-				
-					
-					try(FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
-						InputStream oInputStream = oConnection.getInputStream()){
-							// 	opens an output stream to save into file
-							Util.copyStream(oInputStream, oOutputStream);
-					}catch (Exception oEx) {
-						oEx.printStackTrace();
-					}
-					return sOutputFilePath;
-				} else {
-					String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
-					Utils.debugLog(sMessage);
-					return "";
-				}
- 				
-			} catch (Exception oEx) {
-				oEx.printStackTrace();
-				return "";
-			}
-			
-			
+			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(sSessionId);
+			return HttpUtils.downloadFile(sUrl, asHeaders, sOutputFilePath);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
 			return "";
-		}		
-	}	
-	
+		}
+	}
+
 	/**
 	 * Get the Node Object representing the node where the server is running.
 	 * @return Actual Node Object
@@ -1177,13 +744,13 @@ public class Wasdi extends ResourceConfig {
 				NodeRepository oNodeRepository = new NodeRepository();
 				s_oMyNode = oNodeRepository.getNodeByCode(s_sMyNodeCode);
 			}
-			
+
 			return s_oMyNode;
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("Wasdi.getActualNode: " + oEx.toString());
 		}
-		
+
 		return null;
 	}
 

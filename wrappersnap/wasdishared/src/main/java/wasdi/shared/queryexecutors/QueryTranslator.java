@@ -83,7 +83,11 @@ public abstract class QueryTranslator {
 	/**
 	 * Token of VIIRS platform
 	 */
-	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";	
+	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";
+	/**
+	 * Token of ERA5 platform
+	 */
+	private static final String s_sPLATFORMNAME_ERA5 = "platformname:ERA5";
 	/**
 	 * Token of product type
 	 */
@@ -443,6 +447,9 @@ public abstract class QueryTranslator {
 			// Try get Info about VIIRS
 			parseVIIRS(sQuery, oResult);
 			
+			// Try get Info about ERA5
+			parseERA5(sQuery, oResult);
+			
 			// Try to get info about Landsat
 			parseLandsat(sQuery, oResult);
 			
@@ -722,7 +729,140 @@ public abstract class QueryTranslator {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
-	
+	/**
+	 * Fills the Query View Model with ERA5 info
+	 * 
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseERA5(String sQuery, QueryViewModel oResult) {
+		System.out.println("parseERA5 sQuery: " + sQuery);
+		try {
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_ERA5);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_ERA5.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.ERA5;
+					
+//					provider		provider		CDS
+//					platformName	platformName	ERA5
+//					productName		dataset			reanalysis-era5-pressure-levels
+//					productType		Product type	Reanalysis
+//					productLevel	Pressure level	1 hPa
+//					sensorMode		Variable		U-component of wind
+//					timeliness		Format			GRIB
+
+					oResult.productName = extractValue(sQuery, "dataset");
+					oResult.productType = extractValue(sQuery, "productType");
+					oResult.productLevel = extractValue(sQuery, "pressureLevels");
+					oResult.sensorMode = extractValue(sQuery, "variables");
+					oResult.timeliness = extractValue(sQuery, "format");
+
+//					// check for product level
+//					try {
+//						if (sQuery.contains(QueryTranslator.s_sPRODUCTLEVEL)) {
+//							iStart = sQuery.indexOf(s_sPRODUCTLEVEL);
+//							if (iStart < 0) {
+//								throw new IllegalArgumentException("Could not find product level");
+//							}
+//							iStart += s_sPRODUCTLEVEL.length();
+//							iEnd = sQuery.indexOf(" AND ", iStart);
+//							if (iEnd < 0) {
+//								iEnd = sQuery.indexOf(')', iStart);
+//							}
+//							if (iEnd < 0) {
+//								iEnd = sQuery.indexOf(' ', iStart);
+//							}
+//							if (iEnd < 0) {
+//								// the types are all of ten letters
+//								iEnd = iStart + 10;
+//							}
+//							String sLevel = sQuery.substring(iStart, iEnd);
+//							sLevel = sLevel.trim();
+//
+//							oResult.productLevel = sLevel;
+//						}
+//					} catch (Exception oE) {
+//						Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
+//					}
+
+//					// check for product type
+//					try {
+//						if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
+//							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+//							if (iStart < 0) {
+//								throw new IllegalArgumentException("Could not find product type");
+//							}
+//							iStart += s_sPRODUCTTYPE.length();
+//							iEnd = sQuery.indexOf(" AND ", iStart);
+//							if (iEnd < 0) {
+//								iEnd = sQuery.indexOf(')', iStart);
+//							}
+//							// since the product type might contain composite values (U V), the index of ' ' cannot be used
+////							if (iEnd < 0) {
+////								iEnd = sQuery.indexOf(' ', iStart);
+////							}
+//							if (iEnd < 0) {
+//								iEnd = sQuery.length();
+//							}
+//							String sType = sQuery.substring(iStart, iEnd);
+//							sType = sType.trim();
+//
+//							oResult.productType = sType;
+//						}
+//					} catch (Exception oE) {
+//						Utils.debugLog("QueryTranslator.parseERA5( " + sQuery + " ): error while parsing product type: " + oE);
+//					}
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+		}
+	}
+
+	/**
+	 * Extract the value corresponding to the key from the simplifiedquery.
+	 * <br><br>
+	 * For example, using the query <i>AND dataset:reanalysis-era5-pressure-levels AND productType:Reanalysis AND pressureLevels:1 hPa AND variables:U V AND format:netcdf</i>
+	 * and the key <i>dataset</i>, it should return <i>reanalysis-era5-pressure-levels</i>.
+	 * 
+	 * @param sQuery the simplified query
+	 * @param sKey the key
+	 * @return the corresponding value
+	 */
+	private static String extractValue(String sQuery, String sKey) {
+		int iStart = -1;
+		int iEnd = -1;
+
+		if (sQuery.contains(sKey)) {
+			iStart = sQuery.indexOf(sKey);
+
+			iStart += (sKey.length() + 1);
+			iEnd = sQuery.indexOf(" AND ", iStart);
+
+			if (iEnd < 0) {
+				iEnd = sQuery.length();
+			}
+
+			String sType = sQuery.substring(iStart, iEnd);
+			sType = sType.trim();
+
+			return sType;
+		}
+
+		return null;
+	}
 	
 	/**
 	 * Parse Landsat filters

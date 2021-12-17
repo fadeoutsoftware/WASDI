@@ -43,7 +43,7 @@ import wasdi.jwasdilib.utils.MosaicSetting;
  * 	
  * ### Added
  * - getWorkspaceNameById: return the name of a workspace from the id
- * - searchEOImages support to S3, S5P, ENVISAT, VIIRS, L8
+ * - searchEOImages support to S3, S5P, ENVISAT, VIIRS, L8, ERA5
  * ### Fixed
  * - updated all methods to new APIs
  * - checked null or empty list in waitProcesses
@@ -2123,7 +2123,7 @@ public class WasdiLib {
 
 	/**
 	 * Search EO-Images 
-	 * @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS"
+	 * @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS","ERA5"
 	 * @param sDateFrom Starting date in format "YYYY-MM-DD"
 	 * @param sDateTo End date in format "YYYY-MM-DD"
 	 * @param dULLat Upper Left Lat Coordinate. Can be null.
@@ -2163,8 +2163,8 @@ public class WasdiLib {
 			return aoReturnList;
 		}
 
-		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2") || sPlatform.equals("S3") || sPlatform.equals("S5P") || sPlatform.equals("ENVI") || sPlatform.equals("VIIRS") || sPlatform.equals("L8"))) {
-			log("searchEOImages: platform must be one of S1, S2, S3, S5P, ENVI, VIIRS, L8. Received [" + sPlatform + "]");
+		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2") || sPlatform.equals("S3") || sPlatform.equals("S5P") || sPlatform.equals("ENVI") || sPlatform.equals("VIIRS") || sPlatform.equals("ERA5") || sPlatform.equals("L8"))) {
+			log("searchEOImages: platform must be one of S1, S2, S3, S5P, ENVI, VIIRS, ERA5, L8. Received [" + sPlatform + "]");
 			return aoReturnList;
 		}
 
@@ -2222,6 +2222,7 @@ public class WasdiLib {
 		else if (sPlatform.equals("ENVI")) sQuery += "Envisat";
 		else if (sPlatform.equals("L8")) sQuery += "Landsat-*";
 		else if (sPlatform.equals("VIIRS")) sQuery += "VIIRS";
+		else if (sPlatform.equals("ERA5")) sQuery += "ERA5";
 		else sQuery += "Sentinel-1";
 
 		// If available add product type

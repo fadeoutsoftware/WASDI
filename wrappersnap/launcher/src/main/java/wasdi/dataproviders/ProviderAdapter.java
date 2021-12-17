@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
@@ -431,6 +432,146 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 		return sReturnFilePath;
 	}
+	
+//	/**
+//	 * Download a file via Http POST using Basic HTTP authentication is sDownloadUser is not null
+//	 */
+//	protected String downloadViaHttpPost(String sFileURL, String sPayload, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
+//		
+//		// Return file path
+//		String sReturnFilePath = null;
+//		
+//		try {
+//			// Basic HTTP Authentication
+//			//m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+//			
+//			if (sDownloadUser != null) {
+//				Authenticator.setDefault(new Authenticator() {
+//					@Override
+//					protected PasswordAuthentication getPasswordAuthentication() {
+//						try {
+//							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
+//						} catch (Exception oEx) {
+//							m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+//						}
+//						return null;
+//					}
+//				});
+//			}
+//
+//			m_oLogger.debug("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+//
+//			URL oUrl = new URL(sFileURL);
+//			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+//			oHttpConn.setDoOutput(true);
+//			oHttpConn.setRequestMethod("POST");
+//			oHttpConn.setRequestProperty("Accept", "*/*");
+//			oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+//
+//			OutputStream oPostOutputStream = oHttpConn.getOutputStream();
+//			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
+//			if (sPayload!= null) oStreamWriter.write(sPayload);
+//			oStreamWriter.flush();
+//			oStreamWriter.close();
+//			oPostOutputStream.close();
+//			
+//			int iResponseCode = oHttpConn.getResponseCode();
+//
+//			// always check HTTP response code first
+//			if (iResponseCode == HttpURLConnection.HTTP_OK || iResponseCode == HttpURLConnection.HTTP_ACCEPTED) {
+//
+//				m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
+//
+//				String sFileName = "";
+//				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+//				String sContentType = oHttpConn.getContentType();
+//				long lContentLength = oHttpConn.getContentLengthLong();
+//
+//				boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
+//				if (bFromDisposition) {
+//					m_oLogger.debug("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
+//					// extracts file name from header field
+//					String sFileNameKey = "filename=";
+//					int iStart = sDisposition.indexOf(sFileNameKey);
+//					if (iStart > 0) {
+//						m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
+//						int iEnd = sDisposition.indexOf(' ', iStart);
+//						if(iEnd < 0) {
+//							iEnd = sDisposition.length();
+//						}
+//						sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
+//						while(sFileName.startsWith("\"") && sFileName.length()>1) {
+//							sFileName=sFileName.substring(1);
+//						}
+//						assert(!sFileName.startsWith("\""));
+//						while(sFileName.endsWith("\"") && sFileName.length()>1) {
+//							sFileName=sFileName.substring(0, sFileName.length()-1);
+//						}
+//						assert(!sFileName.endsWith("\""));
+//						
+//						
+//					} else {
+//						bFromDisposition = false;
+//					}
+//				}
+//				if(!bFromDisposition) {
+//					// extracts file name from URL
+//					m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
+//					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
+//				}
+//				m_oLogger.debug("fileName = " + sFileName);
+//				
+//				m_oLogger.debug("Content-Type = " + sContentType);
+//				m_oLogger.debug("Content-Length = " + lContentLength);
+//				
+//
+//				// opens input stream from the HTTP connection
+//				InputStream oInputStream = oHttpConn.getInputStream();
+//				
+//				if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
+//				
+//				String sSaveFilePath = sSaveDirOnServer + sFileName;
+//
+//				m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
+//
+//				File oTargetFile = new File(sSaveFilePath);
+//				File oTargetDir = oTargetFile.getParentFile();
+//				oTargetDir.mkdirs();
+//
+//				// opens an output stream to save into file
+//				FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
+//
+//				//Retry should be handled by the specific provider ExecuteDownloadingFile Method
+//				if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
+//					sReturnFilePath = sSaveFilePath;
+//					m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+//				}
+//				else {
+//					m_oLogger.debug("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
+//				}
+//
+//			} else {
+//				m_oLogger.debug("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
+//				//todo retrieve error
+//				InputStream oErrorStream = oHttpConn.getErrorStream();
+//				if(null != oErrorStream) {
+//					InputStreamReader oReader = new InputStreamReader(oErrorStream);
+//					m_oLogger.debug("ProviderAdapter.downloadViaHttp: error message: " + oReader.toString() );
+//				} else {
+//					m_oLogger.debug("ProviderAdapter.downloadViaHttp: provider did not send an error message");
+//				}
+//				m_iLastError = iResponseCode;
+//			}
+//			oHttpConn.disconnect();			
+//		}
+//		catch (Exception oEx) {
+//			m_oLogger.error("ProviderAdapter.downloadViaHttp: Exception " + oEx);
+//			return null;
+//		}
+//
+//
+//		return sReturnFilePath;
+//	}
 
 	/**
 	 * Copy a source stream to a output stream notifying the progress
