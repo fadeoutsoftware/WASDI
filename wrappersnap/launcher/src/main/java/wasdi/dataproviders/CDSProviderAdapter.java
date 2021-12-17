@@ -33,9 +33,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
 		Utils.debugLog("CDSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
-		System.out.println("sFileURL: " + sFileURL);
 
-		System.out.println("productName: " + oProcessWorkspace.getProductName());
 		String sDesiredFileName = oProcessWorkspace.getProductName();
 
 		Map<String, String> aoWasdiPayload = extractWasdiPayloadFromUrl(sFileURL);
@@ -45,28 +43,17 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		Map<String, Object> aoCdsPayload = prepareCdsPayload(aoWasdiPayload);
 		String sPayload = JsonUtils.stringify(aoCdsPayload);
-		System.out.println("sPayload: " + sPayload);
 
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
-		System.out.println("sDataset: " + sDataset);
-		
-
-		String sCdsSearchRequestId = null;
-//		String sCdsSearchRequestId = "a9792c73-6a0a-44bf-b3e3-de10af9d311a";
-//		String sCdsSearchRequestId = "c401feaf-40d0-4ea1-948f-fe9ee96be6ba";
-//		String sCdsSearchRequestId = "99ce0d8e-825b-4f71-9973-5091cb0301d2";
 
 		String sCdsSearchRequestState = "queued";
-		if (sCdsSearchRequestId == null) {
-			String sUrl = CDS_URL_SEARCH + "/" + sDataset;
-			
-			String sCdsSearchRequestResult = performCdsSearchRequest(sUrl, sDownloadUser, sDownloadPassword, sPayload, iMaxRetry);
-			System.out.println("sCdsSearchRequestResult: " + sCdsSearchRequestResult);
-	
-			Map<String, Object> oCdsSearchRequestResult = JsonUtils.jsonToMapOfObjects(sCdsSearchRequestResult);
-			sCdsSearchRequestState = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "state");
-			sCdsSearchRequestId = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "request_id");
-		}
+		String sUrl = CDS_URL_SEARCH + "/" + sDataset;
+		
+		String sCdsSearchRequestResult = performCdsSearchRequest(sUrl, sDownloadUser, sDownloadPassword, sPayload, iMaxRetry);
+
+		Map<String, Object> oCdsSearchRequestResult = JsonUtils.jsonToMapOfObjects(sCdsSearchRequestResult);
+		sCdsSearchRequestState = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "state");
+		String sCdsSearchRequestId = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "request_id");
 
 
 		if ("queued".equalsIgnoreCase(sCdsSearchRequestState)) {
@@ -81,7 +68,6 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			for (int i = 0; i < 120; i++) {
 				Utils.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: attemp #" + i);
 				sCdsGetStatusRequestResult = performCdsGetStatusRequest(sUrlRequestStatus, sDownloadUser, sDownloadPassword, sCdsSearchRequestId, iMaxRetry);
-				System.out.println("sCdsGetStatusRequestResult: " + sCdsGetStatusRequestResult);
 
 				oCdsGetStatusRequestResult = JsonUtils.jsonToMapOfObjects(sCdsGetStatusRequestResult);
 				sCdsGetStatusRequestState = (String) JsonUtils.getProperty(oCdsGetStatusRequestResult, "status.state");
@@ -112,10 +98,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			}
 
 			if (!Utils.isNullOrEmpty(sUrlDownload)) {
-				System.out.println("sLocation: " + sUrlDownload);
-
 				String sCdsDownloadRequestResult = performCdsDownloadRequest(sUrlDownload, sDownloadUser, sDownloadPassword, sSaveDirOnServer, iMaxRetry);
-				System.out.println("sCdsDownloadRequestResult: " + sCdsDownloadRequestResult);
 
 				return WasdiFileUtils.renameFile(sCdsDownloadRequestResult, sDesiredFileName);
 			}
@@ -214,16 +197,11 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	}
 
 	private Map<String, String> extractWasdiPayloadFromUrl(String sUrl) {
-		System.out.println("uncoded URL: " + sUrl);
-
 		String sDecodedUrl = deodeUrl(sUrl);
-		System.out.println("decoded URL: " + sDecodedUrl);
 
 		String sPayload = null;
 		if (sDecodedUrl != null && sDecodedUrl.startsWith(CDS_URL_SEARCH) && sDecodedUrl.contains("?payload=")) {
 			sPayload = sDecodedUrl.substring(sDecodedUrl.indexOf("?payload=") + 9);
-
-			System.out.println("sPayload: " + sPayload);
 
 			return JsonUtils.jsonToMapOfStrings(sPayload);
 		}
@@ -334,8 +312,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		String sExtension = "." + sFormat;
 
-		// filename: dataset_variabile_giorno
-		// reanalysis-era5-pressure-levels_UV_20211201
+		// filename: reanalysis-era5-pressure-levels_UV_20211201
 		String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
 
 		return sFileName;

@@ -10,6 +10,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
@@ -35,10 +37,12 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorCDS extends QueryExecutor {
 
 	private static ObjectMapper s_oMapper = new ObjectMapper();
+	private static DataProviderConfig s_oDataProviderConfig;
 
 	public QueryExecutorCDS() {
 		
 		m_sProvider="CDS";
+		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
 		
 		this.m_oQueryTranslator = new QueryTranslatorCDS();
 		this.m_oResponseTranslator = new ResponseTranslatorCDS();
@@ -104,56 +108,40 @@ public class QueryExecutorCDS extends QueryExecutor {
 			if (iActualElement >= iOffset && iActualElement < iOffset + iLimit) {
 				QueryResultViewModel oResult = new QueryResultViewModel();
 
-				System.out.println();
-				System.out.println("oCDSQuery.platformName = platformName: " + oCDSQuery.platformName);
-				System.out.println("oCDSQuery.productName = dataset: " + oCDSQuery.productName);
-				System.out.println("oCDSQuery.productType = productType: " + oCDSQuery.productType);
-				System.out.println("oCDSQuery.productLevels = presureLevels: " + oCDSQuery.productLevel);
-				System.out.println("oCDSQuery.sensorMode = variables : " + oCDSQuery.sensorMode);
-				System.out.println("oCDSQuery.timeliness = format : " + oCDSQuery.timeliness);
-
-//				String sPlatformName = oCDSQuery.platformName;
 				String sDataset = oCDSQuery.productName;
 				String sProductType = oCDSQuery.productType;
 				String sPresureLevels = oCDSQuery.productLevel;
 				String sVariables = oCDSQuery.sensorMode;
 				String sFormat = oCDSQuery.timeliness;
 
-				System.out.println("oCDSQuery.boundingBox: " + oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east);
-				
 				String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
-				System.out.println("boundingBox: " + sBoundingBox);
-				System.out.println();
-
-				// filename: dataset_variabile_giorno
-				// url: dataset; variabile; giorno; bb; URL JSON encoded
-				// platform_name -> dataset (reanalysis-era5-pressure-levels)
-				// product_type -> variabile (U, V)
 
 				String sDate = Utils.formatToYyyyMMdd(oActualDay);
 				String sExtension = "." + sFormat;
 
-//				String sFileName = oCDSQuery.productLevel + "_" + oCDSQuery.productType.replace(" ", "") + "_" + sDate;
-				String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]|_", "_") + sExtension;
-
-//				String sFormat = ".netcdf";
-				System.out.println("sFileName: " + sFileName);
+				String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
 
 				oResult.setId(sFileName);
 				oResult.setTitle(sFileName);
 
-//				String sPayload = prepareLinkJsonPayload(sPlatformName, oCDSQuery.productType, oCDSQuery.productLevel, sDate, sBoundingBox, sFormat);
 				String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, sBoundingBox, sFormat);
-				System.out.println("payload: " + sPayload);
 
-				String sUrl = "https://cds.climate.copernicus.eu/api/v2/resources" + "?payload=" + sPayload;
+				String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 				String sUrlEncoded = encodeUrl(sUrl);
 
 				oResult.setLink(sUrlEncoded);
-				oResult.setSummary("Date: "  + TimeEpochUtils.fromEpochToDateString(oActualDay.getTime()) +  ", Mode: Reanalysis, Satellite: CDS");
-				oResult.setProvider("CDS");
+				String sDateTime = TimeEpochUtils.fromEpochToDateString(oActualDay.getTime());
+				oResult.setSummary("Date: "  + sDateTime +  ", Satellite: CDS");
+				oResult.setProvider(s_oDataProviderConfig.name);
 				oResult.setFootprint(extractFootprint(oQuery.getQuery()));
-				oResult.getProperties().put("platformname", "ERA5");
+				oResult.getProperties().put("platformname", Platforms.ERA5);
+				oResult.getProperties().put("dataset", oCDSQuery.productName);
+				oResult.getProperties().put("productType", oCDSQuery.productType);
+				oResult.getProperties().put("presureLevels", oCDSQuery.productLevel);
+				oResult.getProperties().put("variables", oCDSQuery.sensorMode);
+				oResult.getProperties().put("format", oCDSQuery.timeliness);
+				oResult.getProperties().put("startDate", sDateTime);
+				oResult.getProperties().put("beginposition", sDateTime);
 
 				aoResults.add(oResult);
 			}
@@ -166,7 +154,6 @@ public class QueryExecutorCDS extends QueryExecutor {
 		return aoResults;
 	}
 
-//	private static String prepareLinkJsonPayload(String sPlatformName, String sProductType, String sProductLevel, String sDate, String sBoundingBox, String sFormat) {
 	private static String prepareLinkJsonPayload(String sDataset, String sProductType, String sVariables, String sPresureLevels, String sDate, String sBoundingBox, String sFormat) {
 		Map<String, String> aoPayload = new HashMap<>();
 		aoPayload.put("dataset", sDataset); // reanalysis-era5-pressure-levels
@@ -212,20 +199,9 @@ public class QueryExecutorCDS extends QueryExecutor {
 			}
 
 			sFootprint = sQuery.substring(iStart, iEnd).trim();
-			System.out.println("sFootprint: " + sFootprint);
 		}
 
 		return sFootprint;
 	}
-
-//	private String queryViewModelToString(QueryViewModel oCDSQuery) {
-//		return "QueryViewModel [offset=" + oCDSQuery.offset + ", limit=" + oCDSQuery.limit + ", north=" + oCDSQuery.north + ", south=" + oCDSQuery.south
-//				+ ", east=" + oCDSQuery.east + ", west=" + oCDSQuery.west + ", startFromDate=" + oCDSQuery.startFromDate + ", startToDate="
-//				+ oCDSQuery.startToDate + ", endFromDate=" + oCDSQuery.endFromDate + ", endToDate=" + oCDSQuery.endToDate + ", platformName="
-//				+ oCDSQuery.platformName + ", productType=" + oCDSQuery.productType + ", productLevel=" + oCDSQuery.productLevel + ", relativeOrbit="
-//				+ oCDSQuery.relativeOrbit + ", absoluteOrbit=" + oCDSQuery.absoluteOrbit + ", cloudCoverageFrom=" + oCDSQuery.cloudCoverageFrom
-//				+ ", cloudCoverageTo=" + oCDSQuery.cloudCoverageTo + ", sensorMode=" + oCDSQuery.sensorMode + ", productName=" + oCDSQuery.productName
-//				+ ", timeliness=" + oCDSQuery.timeliness + "]";
-//	}
 
 }

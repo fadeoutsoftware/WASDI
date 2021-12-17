@@ -159,12 +159,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 // Download the File
                 sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
-//                sFileName = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\adaptor.mars.internal-1639073851.1098163-928-13-c39cbe87-7a7a-4880-9547-2cba6783c520.nc";
-//                sFileName = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\reanalysis_era5_pressure_levels_U_19820404.grib";
-//                sFileName = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\reanalysis_era5_pressure_levels_RH_U_V_20210202.netcdf";
-//                sFileName = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\reanalysis_era5_pressure_levels_RH_U_V_20210302.grib";
-//                sFileName = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\reanalysis_era5_single_levels_SST_SP_TP_20210404.grib";
-//                sFileName = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\reanalysis_era5_single_levels_10U_10V_2DT_2T_SP_20201201";
                 if (Utils.isNullOrEmpty(sFileName)) {
 
                     int iLastError = oProviderAdapter.getLastServerError();

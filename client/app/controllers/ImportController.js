@@ -1069,7 +1069,9 @@ var ImportController = (function() {
             aaoAllBounds.push(oController.m_aoProductsList[iIndexData].bounds);
         }
 
-        oController.m_oMapService.zoomOnBounds(aaoAllBounds);
+        if (aaoAllBounds.length > 0 && aaoAllBounds[0] && aaoAllBounds[0].length) {
+            oController.m_oMapService.zoomOnBounds(aaoAllBounds);
+        }
     };
 
     /*
@@ -1273,6 +1275,10 @@ var ImportController = (function() {
             console.log("Error: rectangle is undefined ");
             return false;
         }
+        if(utilsIsObjectNullOrUndefined(oRectangle._rawPxBounds))
+        {
+            return false;
+        }
         oRectangle.setStyle({weight:3,fillOpacity:0.7});
         console.log("changeStyleRectangleMouseOver");
     };
@@ -1285,6 +1291,10 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oRectangle))
         {
             console.log("Error: rectangle is undefined ");
+            return false;
+        }
+        if(utilsIsObjectNullOrUndefined(oRectangle._rawPxBounds))
+        {
             return false;
         }
         oRectangle.setStyle({weight:1,fillOpacity:0.2});
