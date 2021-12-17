@@ -60,7 +60,10 @@ function ViewElementFactory() {
         }
         else if (oControl.type === "bbox") {
             // max from parameters
-            let max = oControl.max;
+             oControl.max-area;
+             oControl.max-side;
+             oControl.max-ratio-side;
+
             
             // Bounding Box from Map
 
