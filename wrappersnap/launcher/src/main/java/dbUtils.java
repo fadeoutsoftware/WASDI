@@ -505,9 +505,19 @@ public class dbUtils {
 
                         System.out.println("Processor " + sProcessorName + " present in the node");
 
-                        if (oProcessor.getType() == ProcessorTypes.IDL) {
+                        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
 
-                        }
+                        ProcessorParameter oParameter = new ProcessorParameter();
+
+                        oParameter.setName(oProcessor.getName());
+                        oParameter.setProcessorID(oProcessor.getProcessorId());
+
+                        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
+
+                        oEngine.setParameter(oParameter);
+
+                        oEngine.libraryUpdate(oParameter);    	
+
 
                     } else {
                         System.out.println("Processor " + sProcessorName + " NOT present in the node, JUMP");
@@ -515,6 +525,10 @@ public class dbUtils {
                 }
 
             }else if (sInputString.equals("7")) {
+            	
+                System.out.println("Please input Processors Type:");
+                String sProcessorType = s_oScanner.nextLine();
+            	
                 System.out.println("Redeploy All processor start");
                 
 
@@ -525,9 +539,10 @@ public class dbUtils {
                 for (Processor oProcessor : aoProcessors) {
                 	
                 	try {
-                		
-                		System.out.println("Redeploy " + oProcessor.getName());
-                		redeployProcessor(oProcessor);
+                		if (oProcessor.getType().equals(sProcessorType)) {
+                    		System.out.println("Redeploy " + oProcessor.getName());
+                    		redeployProcessor(oProcessor);                			
+                		}
                 	}
                 	catch (Exception oEx) {
                 		System.out.println("Exception redeploying " + oProcessor.getName() + " " + oEx.toString());
@@ -536,7 +551,7 @@ public class dbUtils {
 
             } 
         } catch (Exception oEx) {
-            System.out.println("processors Exception: " + oEx);
+            System.out.println("processors redeploying Exception: " + oEx);
             oEx.printStackTrace();
         }
     }
