@@ -13,7 +13,10 @@ angular.module('wasdi.wapSelectArea', [])
                 heightMap: '=',
                 widthMap: '=',
                 boundingBox: '=',
-                max: '='
+                maxArea: '=',
+                maxSide: '=',
+                maxRatioSide: '='
+
             },
             template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
 

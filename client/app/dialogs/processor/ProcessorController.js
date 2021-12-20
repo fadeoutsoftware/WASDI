@@ -746,7 +746,12 @@ var ProcessorController = (function() {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": [],\n\t\t"required": false\n\t},';
          }
          else if (sElementType === "bbox") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box",\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box",'+
+             '\n\t\t"required": false,'+
+             '\n\t\t"maxArea": 0,'+
+             '\n\t\t"maxSide": 0,'+
+             '\n\t\t"maxRatioSide": 0'+
+             '\n\t},';
          }
          else if (sElementType === "slider") {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "slider",\n\t\t"label": "description",\n\t\t"default": 0,\n\t\t"min": 0,\n\t\t"max": 100,\n\t\t"required": false\n\t},';
