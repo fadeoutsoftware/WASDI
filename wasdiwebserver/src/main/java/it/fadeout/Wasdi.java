@@ -64,6 +64,7 @@ import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -839,7 +840,7 @@ public class Wasdi extends ResourceConfig {
 			
 			File oZippedFile = new File(sTempPath+iRandom + ".zip");
 			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			WasdiFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
 			
 			oOutZipStream.close();
 			

@@ -5,6 +5,8 @@
 
 package wasdi.shared.utils;
 
+import static wasdi.shared.utils.WasdiFileUtils.*;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -380,5 +382,84 @@ public class ZipFileUtils {
 		}
 	}
 
+	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
+	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
+		try {
+			//			if (oFileToZip.isHidden()) {
+			//				return;
+			//			}
+			if(oFileToZip.getName().equals(".") || oFileToZip.getName().equals("..")) {
+				return;
+			}
+			if (oFileToZip.isDirectory()) {
+				if (sFileName.endsWith("/")) {
+					oZipOut.putNextEntry(new ZipEntry(sFileName));
+					oZipOut.closeEntry();
+				} else {
+					oZipOut.putNextEntry(new ZipEntry(sFileName + "/"));
+					oZipOut.closeEntry();
+				}
+				File[] oChildren = oFileToZip.listFiles();
+				for (File oChildFile : oChildren) {
+					zipFile(oChildFile, sFileName + "/" + oChildFile.getName(), oZipOut);
+				}
+				return;
+			}
+			try (FileInputStream oFis = new FileInputStream(oFileToZip)) {
+				ZipEntry oZipEntry = new ZipEntry(sFileName);
+				oZipOut.putNextEntry(oZipEntry);
+				byte[] bytes = new byte[1024];
+				int iLength;
+				while ((iLength = oFis.read(bytes)) >= 0) {
+					oZipOut.write(bytes, 0, iLength);
+				}
+//				oFis.close();				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Extract the content of a zip file, removing the initial file.
+	 * @param zipFile the zip file to be extracted
+	 * @param destDir the destination directory where the content should be moved
+	 * @throws IOException in case of any issue
+	 */
+	public static void cleanUnzipFile(File zipFile, File destDir) throws IOException {
+		if (zipFile == null) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
+			return;
+		} else if (!zipFile.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
+		}
+
+		if (destDir == null) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
+			return;
+		} else if (!destDir.exists()) {
+			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
+		}
+
+		ZipFileUtils oZipExtractor = new ZipFileUtils();
+
+		String sFilename = zipFile.getAbsolutePath();
+		String sPath = destDir.getAbsolutePath();
+		oZipExtractor.unzip(sFilename, sPath);
+
+		String dirPath = completeDirPath(destDir.getAbsolutePath());
+		String fileZipPath = dirPath + zipFile.getName();
+
+		String unzippedDirectoryPath = dirPath + removeZipExtension(zipFile.getName());
+
+		if (fileExists(unzippedDirectoryPath)) {
+			boolean filesMovedFlag = moveFile(unzippedDirectoryPath, dirPath);
+
+			if (filesMovedFlag) {
+				deleteFile(unzippedDirectoryPath);
+				deleteFile(fileZipPath);
+			}
+		}
+	}
 
 }

@@ -35,7 +35,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 
 /**
  * @author c.nattero
@@ -332,7 +332,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         File fileToZip = new File(sourceFile);
 
-        WasdiFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+        ZipFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
         zipOut.close();
         fos.close();
 	}
