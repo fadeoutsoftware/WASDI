@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,10 +19,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.utils.IOUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -165,65 +160,6 @@ public class WasdiFileUtils {
 	}
 
 	/**
-	 * Extract the zip-file into the declared directory.
-	 * 
-	 * <pre>
-	 * The processing in streaming mode of zip-files that are not compressed/deflated 
-	 * (see CREODIAS downloads) might end up in an error:
-	 * java.util.zip.ZipException: only DEFLATED entries can have EXT descriptor
-	 * 
-	 * Due to this fact, an alternative solution based on Apache's commons-compress was used.
-	 * For more details see the following page:
-	 * https://stackoverflow.com/questions/47208272/android-zipinputstream-only-deflated-entries-can-have-ext-descriptor
-	 * </pre>
-	 * @param zipFile the zip-file to be extracted
-	 * @param destDir the destination directory
-	 * @throws IOException if an error occurs
-	 */
-	public static void unzipFile(File zipFile, File destDir) throws IOException {
-		if (zipFile == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
-			return;
-		} else if (!zipFile.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
-		}
-
-		if (destDir == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
-			return;
-		} else if (!destDir.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
-		}
-
-		String destDirectory = destDir.getAbsolutePath();
-
-		try (ArchiveInputStream i = new ZipArchiveInputStream(new FileInputStream(zipFile), "UTF-8", false, true)) {
-			ArchiveEntry entry = null;
-			while ((entry = i.getNextEntry()) != null) {
-				if (!i.canReadEntryData(entry)) {
-					Utils.debugLog("Utils.GetFileNameExtension: Can't read entry: " + entry);
-					continue;
-				}
-				String name = destDirectory + File.separator + entry.getName();
-				File f = new File(name);
-				if (entry.isDirectory()) {
-					if (!f.isDirectory() && !f.mkdirs()) {
-						throw new IOException("failed to create directory " + f);
-					}
-				} else {
-					File parent = f.getParentFile();
-					if (!parent.isDirectory() && !parent.mkdirs()) {
-						throw new IOException("failed to create directory " + parent);
-					}
-					try (OutputStream o = Files.newOutputStream(f.toPath())) {
-						IOUtils.copy(i, o);
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Extract the content of a zip file, removing the initial file.
 	 * @param zipFile the zip file to be extracted
 	 * @param destDir the destination directory where the content should be moved
@@ -244,7 +180,11 @@ public class WasdiFileUtils {
 			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
 		}
 
-		unzipFile(zipFile, destDir);
+		ZipExtractor oZipExtractor = new ZipExtractor();
+
+		String sFilename = zipFile.getAbsolutePath();
+		String sPath = destDir.getAbsolutePath();
+		oZipExtractor.unzip(sFilename, sPath);
 
 		String dirPath = completeDirPath(destDir.getAbsolutePath());
 		String fileZipPath = dirPath + zipFile.getName();
