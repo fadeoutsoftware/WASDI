@@ -458,6 +458,10 @@ public class LauncherMain  {
         	// Call the execute operation method
         	boolean bOperationResult = oOperation.executeOperation(oBaseParameter, s_oProcessWorkspace);
         	
+        	// Re-Read the process workspace; may have been changed from the Operation
+            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+            s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(s_oProcessWorkspace.getProcessObjId());
+        	
         	// If the process workspace is not in a safe state
         	if (!s_oProcessWorkspace.getStatus().equals("DONE") && !s_oProcessWorkspace.getStatus().equals("ERROR") && !s_oProcessWorkspace.getStatus().equals("STOPPED")) {
             	// Check the result of the operation and set the status
