@@ -9,7 +9,7 @@ import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 
 
 /**
@@ -48,7 +48,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		try {
 			String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
-			ZipExtractor oZipExtractor = new ZipExtractor("");
+			ZipFileUtils oZipExtractor = new ZipFileUtils();
 
 			//remove .SEN3 from the file name -> required for CREODIAS
 			String sNewFileName = sFileNameFromProvider.replaceAll(".SEN3", "");

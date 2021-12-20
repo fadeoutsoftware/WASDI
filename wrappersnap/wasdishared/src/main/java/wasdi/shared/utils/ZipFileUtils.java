@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  * @see <a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1263">CVE-2018-1263</a>
  * @see <a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-16131">CVE-2018-16131</a>
  */
-public class ZipExtractor {
+public class ZipFileUtils {
 
 	/**
 	 * These parameters must be instantiated using configurations values
@@ -58,7 +58,7 @@ public class ZipExtractor {
 	/**
 	 * Static logger reference
 	 */
-	static Logger s_oLogger = Logger.getLogger(ZipExtractor.class);
+	static Logger s_oLogger = Logger.getLogger(ZipFileUtils.class);
 
 
 	/**
@@ -184,7 +184,7 @@ public class ZipExtractor {
 	/**
 	 * Instantiates a ZipExtractor with default parameters
 	 */
-	public ZipExtractor() {
+	public ZipFileUtils() {
 	}
 
 	/**
@@ -192,7 +192,7 @@ public class ZipExtractor {
 	 * prefix
 	 * @param sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
-	public ZipExtractor(String sLoggerPrefix) {
+	public ZipFileUtils(String sLoggerPrefix) {
 		if(!Utils.isNullOrEmpty(sLoggerPrefix)) {
 			this.m_sLoggerPrefix = sLoggerPrefix + " - [" + this.m_sLoggerPrefix + "]";
 		}
@@ -206,7 +206,7 @@ public class ZipExtractor {
 	 * @param lToomany      the maximum number of files allowed to be extracted
 	 * @param sLoggerPrefix a string that must be passed in order to identify the process from a logging perspective
 	 */
-	public ZipExtractor(long lToobigtotal, long lToobigsingle, int lToomany, String sLoggerPrefix) {
+	public ZipFileUtils(long lToobigtotal, long lToobigsingle, int lToomany, String sLoggerPrefix) {
 		this.m_lToobigtotal = lToobigtotal;
 		this.m_lToobigsingle = lToobigsingle;
 		this.m_lToomany = lToomany;

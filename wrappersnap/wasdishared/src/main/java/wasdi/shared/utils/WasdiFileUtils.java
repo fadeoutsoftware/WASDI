@@ -180,7 +180,7 @@ public class WasdiFileUtils {
 			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
 		}
 
-		ZipExtractor oZipExtractor = new ZipExtractor();
+		ZipFileUtils oZipExtractor = new ZipFileUtils();
 
 		String sFilename = zipFile.getAbsolutePath();
 		String sPath = destDir.getAbsolutePath();

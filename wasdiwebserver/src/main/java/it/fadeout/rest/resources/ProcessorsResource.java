@@ -75,7 +75,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
 import wasdi.shared.viewmodels.processors.AppFilterViewModel;
@@ -2156,7 +2156,7 @@ public class ProcessorsResource  {
      */
 	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
 		try {
-			ZipExtractor oZipExtractor = new ZipExtractor(sSessionId + " : " + sProcessorId);
+			ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
 
 			//get containing dir 
 			String sProcessorFolder = oProcessorZipFile.getParent();
