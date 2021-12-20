@@ -131,7 +131,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 				oResult.setLink(sUrlEncoded);
 				String sDateTime = TimeEpochUtils.fromEpochToDateString(oActualDay.getTime());
-				oResult.setSummary("Date: "  + sDateTime +  ", Satellite: CDS");
+				oResult.setSummary("Date: "  + sDateTime +  ", Mode: " + oCDSQuery.sensorMode +  ", Instrument: " + oCDSQuery.timeliness);
 				oResult.setProvider(s_oDataProviderConfig.name);
 				oResult.setFootprint(extractFootprint(oQuery.getQuery()));
 				oResult.getProperties().put("platformname", Platforms.ERA5);
