@@ -113,10 +113,20 @@ angular.module('wasdi.wapSelectArea', [])
                                 (Math.cos(latN * (Math.PI/180)) * M_number_lng)*100);
 
 
-                        var latlngs = [[19.04469, 72.9258], [19.04469, 72.9268], [19.04369, 72.9268],[19.04369, 72.9258]];
-                        var polygon = L.polygon(latlngs, {color: 'red'}).addTo(oMap);
+                        //var latlngs = [[19.04469, 72.9258], [19.04469, 72.9268], [19.04369, 72.9268],[19.04369, 72.9258]];
+                        var latlngs = layer.getLatLngs();
+                        //var polygon = L.polygon(latlngs, {color: 'red'}).addTo(oMap);
 
-                        let areaFromLeaflet = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]); // first element of the array should be passed
+                        var markerFrom = L.circleMarker(latlngs[0][0],{ color: "#4AFF00", radius: 10 });
+                        var markerTo =  L.circleMarker(latlngs[0][1],{ color: "#4aff00", radius: 10 });
+
+                        var from = markerFrom.getLatLng();
+                        var to = markerTo.getLatLng();
+
+                        var distance = (from.distanceTo(to)).toFixed(0)/1000; // distance in km
+
+
+                        let areaFromLeaflet = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]); // first element is the array itself to be passed
                         let squarekm = areaFromLeaflet / 1000000;
 
                         console.log(squarekm);
