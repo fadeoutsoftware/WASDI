@@ -67,7 +67,18 @@ function ViewElementFactory() {
             // oViewElement.maxarea= oControl.maxArea;
             // oViewElement.maxside  = oControl.maxSide;
             // oViewElement.maxratioSide  = oControl.maxRatioSide;
-            oViewElement.maxArea = 5555;
+            if (!utilsIsObjectNullOrUndefined(oControl.maxArea)){
+                oViewElement.maxArea = oControl.maxArea;
+            }
+            if (!utilsIsObjectNullOrUndefined(oControl.maxSide)){
+                oViewElement.maxSide = oControl.maxSide;
+            }
+
+            if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)){
+                oViewElement.maxRatioSide = oControl.maxRatioSide;
+            }
+            
+            
 
         }
         else if (oControl.type === "date") {
@@ -251,9 +262,11 @@ let DateTimePicker = function () {
  * @constructor
  */
 let SelectArea = function () {
-    this.maxArea = 111;
-    this.maxSide = 222;
-    this.maxRatioSide = 333;
+    
+    // using zero as default to relax the constraints 
+    this.maxArea = 0;
+    this.maxSide = 0;
+    this.maxRatioSide = 0;
     this.oBoundingBox = {
         northEast: "",
         southWest: ""
