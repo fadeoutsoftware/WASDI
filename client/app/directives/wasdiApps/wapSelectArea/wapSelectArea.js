@@ -13,14 +13,27 @@ angular.module('wasdi.wapSelectArea', [])
                 heightMap: '=',
                 widthMap: '=',
                 boundingBox: '=',
-                maxArea: '=',
-                maxSide: '=',
-                maxRatioSide: '='
+                maxarea:'=',
+                maxside:'=',
+                maxratioside:'=',
+                max:'='
+
 
             },
             template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
 
             controller: function() {
+
+                this.$onInit = function () {
+
+                    // passing values as globals cause bindToController is deprecated and
+                    // for some reasons, doesn't bind new values
+                    // this.maxArea = window.maxArea;
+                    // this.maxSide = window.maxSide;
+                    // this.maxRatioSide = window.maxRatioSide;
+
+                    console.log(this); // logs your item object
+                };
 
                 // generated a new id map number and converted as string
                 this.mapId = "" + Date.now() + Math.random();
@@ -39,7 +52,7 @@ angular.module('wasdi.wapSelectArea', [])
                 }
 
                 this.oMapStyle = { height: this.heightMap + 'px',
-                                   width: this.widthMap + 'px'  };
+                    width: this.widthMap + 'px'  };
 
                 this.addBoundingBoxDrawerOnMap = function (oMap) {
 
@@ -86,7 +99,7 @@ angular.module('wasdi.wapSelectArea', [])
                         }
                         //save new shape in map
                         oController.m_oDrawnItems.addLayer(layer);
-                        
+
                         // aproximate method to calculate area
                         let M_number_lat = 110.574; // chilometers
                         let M_number_lng = 111.320; // chilometers
@@ -97,15 +110,15 @@ angular.module('wasdi.wapSelectArea', [])
                         let lngW = oController.boundingBox.southWest.lng;
 
                         let area = ((latN-latS) * M_number_lat) *
-                                    ((lngE-lngW) * 
-                                    (Math.cos(latN * (Math.PI/180)) * M_number_lng)*100);
+                            ((lngE-lngW) *
+                                (Math.cos(latN * (Math.PI/180)) * M_number_lng)*100);
 
-                        
-                    
+
+
                         console.log(area);
-                        
 
-                        
+
+
                     });
 
                     oMap.on(L.Draw.Event.DELETESTOP, function (event) {
@@ -150,7 +163,7 @@ angular.module('wasdi.wapSelectArea', [])
                                             }
 
                                             var aoBounds = [[fNorth, fWest], [fSouth, fEast]];
-                                            // checks size here. 
+                                            // checks size here.
                                             var oLayer = L.rectangle(aoBounds, {color: "#3388ff", weight: 1});
 
 

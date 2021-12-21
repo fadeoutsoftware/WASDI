@@ -25,7 +25,8 @@ function ViewElementFactory() {
             if (oControl.default) {
                 oViewElement.m_sText = oControl.default;
             }
-        } else if (oControl.type === "numeric") {
+        }
+        else if (oControl.type === "numeric") {
 
             // Numeric box
             oViewElement = new NumericBox();
@@ -35,7 +36,8 @@ function ViewElementFactory() {
                 oViewElement.m_sValue = parseFloat(oControl.default);
                 oViewElement.m_sText = parseFloat(oControl.default);
             }
-        } else if (oControl.type === "dropdown") {
+        }
+        else if (oControl.type === "dropdown") {
             // Drop Down
             oViewElement = new DropDown();
 
@@ -55,33 +57,43 @@ function ViewElementFactory() {
                     oViewElement.sSelectedValues = oItem;
                 }
             }
-        } else if (oControl.type === "bbox") {
+        }
+        else if (oControl.type === "bbox") {
             // Bounding Box from Map
+
             oViewElement = new SelectArea();
-            // max from parameters
-            // add check if they're set for retrocompatibility
-            if (!utilsIsObjectNullOrUndefined(oControl.maxArea)) oViewElement.maxArea = oControl.maxArea;
-            if (!utilsIsObjectNullOrUndefined(oControl.maxSide)) oViewElement.maxSide = oControl.maxSide;
-            if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)) oViewElement.maxRatioSide = oControl.maxRatioSide;
-        } else if (oControl.type === "date") {
+            //oViewElement.maxarea = oControl.maxarea;
+
+            // oViewElement.maxarea= oControl.maxArea;
+            // oViewElement.maxside  = oControl.maxSide;
+            // oViewElement.maxratioSide  = oControl.maxRatioSide;
+            oViewElement.maxArea = 5555;
+
+        }
+        else if (oControl.type === "date") {
             oViewElement = new DateTimePicker();
-        } else if (oControl.type === "productlist") {
+        }
+        else if (oControl.type === "productlist") {
             oViewElement = new ProductList();
-        } else if (oControl.type === "searcheoimage") {
+        }
+        else if (oControl.type === "searcheoimage") {
             oViewElement = new SearchEOImage();
-        } else if (oControl.type === "productscombo") {
+        }
+        else if (oControl.type === "productscombo") {
             if (oControl.showExtension != undefined) {
                 oViewElement = new ProductsCombo(oControl.showExtension);
             } else {
                 oViewElement = new ProductsCombo(false); // back to default behaviour, in case showExtension is not specified
             }
-        } else if (oControl.type === "boolean") {
+        }
+        else if (oControl.type === "boolean") {
             oViewElement = new CheckBox();
 
             if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
                 oViewElement.m_bValue = oControl.default;
             }
-        } else if (oControl.type === "slider") {
+        }
+        else if (oControl.type === "slider") {
             oViewElement = new Slider();
 
             if (utilsIsObjectNullOrUndefined(oControl.min) == false) {
@@ -94,10 +106,12 @@ function ViewElementFactory() {
                 oViewElement.m_iValue = oControl.default;
             }
 
-        } else if (oControl.type === "hidden") {
+        }
+        else if (oControl.type === "hidden") {
             oViewElement = new Hidden();
             oViewElement.m_oValue = oControl.default;
-        } else {
+        }
+        else {
             oViewElement = new TextBox();
         }
 
@@ -211,7 +225,8 @@ let DateTimePicker = function () {
     this.getValue = function () {
         if (this.m_sDate) {
             return this.m_sDate;
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -223,7 +238,8 @@ let DateTimePicker = function () {
     this.getStringValue = function () {
         if (this.m_sDate) {
             return this.m_sDate;
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -235,6 +251,9 @@ let DateTimePicker = function () {
  * @constructor
  */
 let SelectArea = function () {
+    this.maxArea = 111;
+    this.maxSide = 222;
+    this.maxRatioSide = 333;
     this.oBoundingBox = {
         northEast: "",
         southWest: ""
@@ -249,7 +268,8 @@ let SelectArea = function () {
     this.getValue = function () {
         try {
             return this.oBoundingBox;
-        } catch (e) {
+        }
+        catch (e) {
             return "";
         }
     }
@@ -261,15 +281,18 @@ let SelectArea = function () {
     this.getStringValue = function () {
         try {
             if (this.oBoundingBox) {
-                return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2) + "," + this.oBoundingBox.southWest.lat.toFixed(2) + "," + +this.oBoundingBox.northEast.lng.toFixed(2);
-            } else {
+                return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2) + "," + this.oBoundingBox.southWest.lat.toFixed(2) + "," + + this.oBoundingBox.northEast.lng.toFixed(2);
+            }
+            else {
                 return "";
             }
-        } catch (e) {
+        }
+        catch (e) {
             return "";
         }
     }
 };
+
 
 
 /**
@@ -368,7 +391,8 @@ let CheckBox = function () {
     this.getStringValue = function () {
         if (this.m_bValue) {
             return "1";
-        } else {
+        }
+        else {
             return "0";
         }
     }

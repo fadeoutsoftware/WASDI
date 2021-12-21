@@ -161,10 +161,10 @@
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4" ng-if="viewElement.type === 'productscombo'" >
                                     <div class="input-text-label pt-2 mb-2">{{viewElement.label}}</div>
                                     <wapproductscombo list-of-values="viewElement.asListValues"
-                                                 selected-value="viewElement.sSelectedValues"
-                                                 enable-search-filter="viewElement.bEnableSearchFilter"
-                                                 dropdown-name="viewElement.sDropdownName"
-                                                 on-click-function="viewElement.oOnClickFunction"
+                                                      selected-value="viewElement.sSelectedValues"
+                                                      enable-search-filter="viewElement.bEnableSearchFilter"
+                                                      dropdown-name="viewElement.sDropdownName"
+                                                      on-click-function="viewElement.oOnClickFunction"
                                     ></wapproductscombo>
                                 </div>
 
@@ -172,7 +172,12 @@
                                 <!--select-area-map-->
                                 <div class="col-xs-12 col-md-12 col-lg-12 py-2" ng-if="viewElement.type === 'bbox'" >
                                     <div class="input-text-label pt-2 mb-3">{{viewElement.label}}</div>
-                                    <wapselectarea  max="viewElement.max" bounding-box="viewElement.oBoundingBox"></wapselectarea>
+                                    <wapselectarea
+                                        max="viewElement.max"
+                                        maxarea="viewElement.maxArea"
+                                        maxside="viewElement.maxSide"
+                                        maxratioside="viewElement.maxRatioSide"
+                                        bounding-box="viewElement.oBoundingBox"></wapselectarea>
                                 </div>
 
                                 <!--timepicker-->
@@ -236,7 +241,7 @@
                                 </div>
                             </div>
                             <div class="loadIcon" ng-show="m_oController.m_bHistoryLoading">
-                                    <invader></invader>
+                                <invader></invader>
                             </div>
                             <div class="row table-row py-2" ng-repeat="oRun in m_oController.m_aoProcHistory">
                                 <div class="col col-lg-3">
