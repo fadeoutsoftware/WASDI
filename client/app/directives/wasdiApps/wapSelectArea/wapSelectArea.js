@@ -114,7 +114,13 @@ angular.module('wasdi.wapSelectArea', [])
                                 (Math.cos(latN * (Math.PI/180)) * M_number_lng)*100);
 
 
+                        var latlngs = [[19.04469, 72.9258], [19.04469, 72.9268], [19.04369, 72.9268],[19.04369, 72.9258]];
+                        var polygon = L.polygon(latlngs, {color: 'red'}).addTo(oMap);
 
+                        let areaFromLeaflet = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]); // first element of the array should be passed
+                        let squarekm = areaFromLeaflet / 1000000;
+
+                        console.log(sqaurekm);
                         console.log(area);
 
 
