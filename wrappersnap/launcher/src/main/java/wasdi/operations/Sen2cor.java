@@ -11,7 +11,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.Sen2CorParameter;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 
 public class Sen2cor extends Operation {
 
@@ -46,7 +46,7 @@ public class Sen2cor extends Operation {
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
                     m_oLocalLogger.debug("Sen2core.executeOperation: Extraction of " + sL1ProductName + " product");
-                    ZipExtractor oZipExtractor = new ZipExtractor(oSen2CorParameter.getProcessObjId());
+                    ZipFileUtils oZipExtractor = new ZipFileUtils(oSen2CorParameter.getProcessObjId());
                     oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
 
                     // 4 - Convert -> obtain L2A.SAFE

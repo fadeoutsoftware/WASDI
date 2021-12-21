@@ -9,7 +9,7 @@ import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 
 
 /**
@@ -47,13 +47,24 @@ public class Sentinel3ProductReader extends SnapProductReader {
 
 		try {
 			String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
-			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
-			ZipExtractor oZipExtractor = new ZipExtractor("");
-			oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
-			deleteZipFile(sFileNameFromProvider, sDownloadPath);
-			String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", ".SEN3");
-			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
-			LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
+			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
+			ZipFileUtils oZipExtractor = new ZipFileUtils();
+
+			//remove .SEN3 from the file name -> required for CREODIAS
+			String sNewFileName = sFileNameFromProvider.replaceAll(".SEN3", "");
+			
+			oZipExtractor.unzip(sDownloadPath + File.separator + sNewFileName, sDownloadPath);
+			deleteDownloadedZipFile(sDownloadedFileFullPath);
+			
+			//remove .zip and add .SEN3 if required
+			sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
+			if(!sNewFileName.endsWith(".SEN3")) {
+				sNewFileName = sNewFileName + ".SEN3";
+			}
+			
+			String sFolderName = sDownloadPath + File.separator + sNewFileName;
+			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
 
 			m_oProductFile = new File(sFolderName);
 			return sFolderName;
@@ -69,16 +80,16 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	 * @param sFileNameFromProvider
 	 * @param sDownloadPath
 	 */
-	private void deleteZipFile(String sFileNameFromProvider, String sDownloadPath) {
+	private void deleteDownloadedZipFile(String sDownloadedFileFullPath) {
 		try {
-			File oZipFile = new File(sDownloadPath + File.separator + sFileNameFromProvider);
+			File oZipFile = new File(sDownloadedFileFullPath);
 			if(!oZipFile.delete()) {
-				LauncherMain.s_oLogger.error("SnapProductReader.deleteZipFile: cannot delete zip file");
+				LauncherMain.s_oLogger.error("Sentinel3ProductReader.deleteZipFile: cannot delete zip file");
 			} else {
-				LauncherMain.s_oLogger.debug("SnapProductReader.deleteZipFile: file zip successfully deleted");
+				LauncherMain.s_oLogger.debug("Sentinel3ProductReader.deleteZipFile: file zip successfully deleted");
 			}
 		} catch (Exception oE) {
-			LauncherMain.s_oLogger.error("SnapProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
 		}
 	}
 
