@@ -259,7 +259,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		String sFileName = sDownloadedFileFullPath;
 		
 		try {
-			if (sDownloadedFileFullPath.startsWith("S5P") && sDownloadedFileFullPath.toLowerCase().endsWith(".zip")) {
+			if (sFileNameFromProvider.startsWith("S5P") && sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File is a Sentinel 5P image, start unzip");
 				String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 				
@@ -269,7 +269,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				File oTargetDirectory = new File(sTargetDirectoryPath);
 				ZipFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
 
-				String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", "");
+				String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 				
 				sFileName = sFolderName + ".nc";
