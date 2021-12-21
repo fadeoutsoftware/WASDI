@@ -17,7 +17,7 @@ import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.ShapeFileUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class Ingest extends Operation {
@@ -97,7 +97,7 @@ public class Ingest extends Operation {
                         m_oLocalLogger.info("Ingest.executeOperation: File to ingest looks can be a zipped shape file, try to unzip");
 
                         // Unzip
-                        ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+                        ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
                         oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oFileToIngestPath.getParent());
 
                         // Get the name of shp from the zip file (case safe)
@@ -145,7 +145,7 @@ public class Ingest extends Operation {
                 if (bUnzipAfterCopy) {
 
                     m_oLocalLogger.debug("File must be unzipped");
-                    ZipExtractor oZipExtractor = new ZipExtractor(oParameter.getProcessObjId());
+                    ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
                     oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oDstDir.getCanonicalPath());
                     m_oLocalLogger.debug("Unzip done");
 

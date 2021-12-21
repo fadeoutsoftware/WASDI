@@ -30,7 +30,7 @@ import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -276,7 +276,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 return false;
             }
             try {
-                ZipExtractor oZipExtractor = new ZipExtractor(sProcessObjId);
+                ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
                 oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
             } catch (Exception oE) {
                 LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");

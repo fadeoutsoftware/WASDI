@@ -15,7 +15,7 @@ import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -267,7 +267,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 
 				File oSourceFile = new File(sDownloadedFileFullPath);
 				File oTargetDirectory = new File(sTargetDirectoryPath);
-				WasdiFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
+				ZipFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
 
 				String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);

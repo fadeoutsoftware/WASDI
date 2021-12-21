@@ -17,7 +17,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -119,7 +119,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 			deleteFile(explodedDirectoryPath);
 		}
 
-		WasdiFileUtils.unzipFile(sourceFile, targetDirectory);
+		new ZipFileUtils().unzip(sourceFile.getAbsolutePath(), targetDirectory.getAbsolutePath());
 	}
 
 	/**

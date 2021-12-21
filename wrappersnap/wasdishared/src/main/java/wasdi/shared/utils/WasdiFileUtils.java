@@ -7,23 +7,15 @@
 package wasdi.shared.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.utils.IOUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -59,44 +51,6 @@ public class WasdiFileUtils {
 						"cpg"
 				)
 		);
-	}
-
-	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
-	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
-		try {
-			//			if (oFileToZip.isHidden()) {
-			//				return;
-			//			}
-			if(oFileToZip.getName().equals(".") || oFileToZip.getName().equals("..")) {
-				return;
-			}
-			if (oFileToZip.isDirectory()) {
-				if (sFileName.endsWith("/")) {
-					oZipOut.putNextEntry(new ZipEntry(sFileName));
-					oZipOut.closeEntry();
-				} else {
-					oZipOut.putNextEntry(new ZipEntry(sFileName + "/"));
-					oZipOut.closeEntry();
-				}
-				File[] oChildren = oFileToZip.listFiles();
-				for (File oChildFile : oChildren) {
-					zipFile(oChildFile, sFileName + "/" + oChildFile.getName(), oZipOut);
-				}
-				return;
-			}
-			try (FileInputStream oFis = new FileInputStream(oFileToZip)) {
-				ZipEntry oZipEntry = new ZipEntry(sFileName);
-				oZipOut.putNextEntry(oZipEntry);
-				byte[] bytes = new byte[1024];
-				int iLength;
-				while ((iLength = oFis.read(bytes)) >= 0) {
-					oZipOut.write(bytes, 0, iLength);
-				}
-//				oFis.close();				
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -165,103 +119,6 @@ public class WasdiFileUtils {
 	}
 
 	/**
-	 * Extract the zip-file into the declared directory.
-	 * 
-	 * <pre>
-	 * The processing in streaming mode of zip-files that are not compressed/deflated 
-	 * (see CREODIAS downloads) might end up in an error:
-	 * java.util.zip.ZipException: only DEFLATED entries can have EXT descriptor
-	 * 
-	 * Due to this fact, an alternative solution based on Apache's commons-compress was used.
-	 * For more details see the following page:
-	 * https://stackoverflow.com/questions/47208272/android-zipinputstream-only-deflated-entries-can-have-ext-descriptor
-	 * </pre>
-	 * @param zipFile the zip-file to be extracted
-	 * @param destDir the destination directory
-	 * @throws IOException if an error occurs
-	 */
-	public static void unzipFile(File zipFile, File destDir) throws IOException {
-		if (zipFile == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
-			return;
-		} else if (!zipFile.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
-		}
-
-		if (destDir == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
-			return;
-		} else if (!destDir.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
-		}
-
-		String destDirectory = destDir.getAbsolutePath();
-
-		try (ArchiveInputStream i = new ZipArchiveInputStream(new FileInputStream(zipFile), "UTF-8", false, true)) {
-			ArchiveEntry entry = null;
-			while ((entry = i.getNextEntry()) != null) {
-				if (!i.canReadEntryData(entry)) {
-					Utils.debugLog("Utils.GetFileNameExtension: Can't read entry: " + entry);
-					continue;
-				}
-				String name = destDirectory + File.separator + entry.getName();
-				File f = new File(name);
-				if (entry.isDirectory()) {
-					if (!f.isDirectory() && !f.mkdirs()) {
-						throw new IOException("failed to create directory " + f);
-					}
-				} else {
-					File parent = f.getParentFile();
-					if (!parent.isDirectory() && !parent.mkdirs()) {
-						throw new IOException("failed to create directory " + parent);
-					}
-					try (OutputStream o = Files.newOutputStream(f.toPath())) {
-						IOUtils.copy(i, o);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Extract the content of a zip file, removing the initial file.
-	 * @param zipFile the zip file to be extracted
-	 * @param destDir the destination directory where the content should be moved
-	 * @throws IOException in case of any issue
-	 */
-	public static void cleanUnzipFile(File zipFile, File destDir) throws IOException {
-		if (zipFile == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
-			return;
-		} else if (!zipFile.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
-		}
-
-		if (destDir == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
-			return;
-		} else if (!destDir.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
-		}
-
-		unzipFile(zipFile, destDir);
-
-		String dirPath = completeDirPath(destDir.getAbsolutePath());
-		String fileZipPath = dirPath + zipFile.getName();
-
-		String unzippedDirectoryPath = dirPath + removeZipExtension(zipFile.getName());
-
-		if (fileExists(unzippedDirectoryPath)) {
-			boolean filesMovedFlag = moveFile(unzippedDirectoryPath, dirPath);
-
-			if (filesMovedFlag) {
-				deleteFile(unzippedDirectoryPath);
-				deleteFile(fileZipPath);
-			}
-		}
-	}
-
-	/**
 	 * Get the name of the zip file without the .zip extension.
 	 * @param sProductName the name of the zip file
 	 * @return the name without the zip extension
@@ -311,7 +168,7 @@ public class WasdiFileUtils {
 	 * @param destinationDirectoryPath the path of the destination directory
 	 * @return true if the operation was successful, false otherwise
 	 */
-	private static boolean moveFile(String sourcePath, String destinationDirectoryPath) {
+	public static boolean moveFile(String sourcePath, String destinationDirectoryPath) {
 		if (sourcePath == null) {
 			Utils.log("ERROR", "WasdiFileUtils.moveFile: sourcePath is null");
 			return false;
@@ -375,7 +232,7 @@ public class WasdiFileUtils {
 	 * @param filePath the absolute path of the file
 	 * @return true if the file was deleted, false otherwise
 	 */
-	private static boolean deleteFile(String filePath) {
+	public static boolean deleteFile(String filePath) {
 		if (filePath == null) {
 			Utils.log("ERROR", "WasdiFileUtils.deleteFile: filePath is null");
 			return false;
