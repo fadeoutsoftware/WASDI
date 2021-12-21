@@ -43,7 +43,6 @@ public final class HttpUtils {
 	/**
 	 * Standard http get utility function
 	 * @param sUrl url to call
-	 * @param sPayload payload of the post 
 	 * @param asHeaders headers dictionary
 	 * @return server response
 	 */
@@ -379,7 +378,7 @@ public final class HttpUtils {
 
 			File oZippedFile = new File(sTempPath+iRandom + ".zip");
 			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			WasdiFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
 
 			oOutZipStream.close();
 
