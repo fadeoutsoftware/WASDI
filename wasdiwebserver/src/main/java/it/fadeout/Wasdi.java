@@ -640,6 +640,7 @@ public class Wasdi extends ResourceConfig {
 
 				Boolean bNew = false;
 				//store the keycloak access token instead, so we can retrieve the user and perform a further check
+				// NO!!! LIBS does not have the ability to refresh the token!!
 				if (Utils.isNullOrEmpty(sParentId)) {
 					sSessionId = UUID.randomUUID().toString();
 					bNew = true;
