@@ -274,6 +274,8 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				
 				sFileName = sFolderName + ".nc";
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+
+				m_oProductFile = new File(sFileName);
 			}			
 		}
 		catch (Exception oEx) {
