@@ -54,7 +54,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			String sNewFileName = sFileNameFromProvider.replaceAll(".SEN3", "");
 			
 			oZipExtractor.unzip(sDownloadPath + File.separator + sNewFileName, sDownloadPath);
-			deleteZipFile(sFileNameFromProvider, sDownloadPath);
+			deleteDownloadedZipFile(sDownloadedFileFullPath);
 			
 			//remove .zip and add .SEN3 if required
 			sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
@@ -80,9 +80,9 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	 * @param sFileNameFromProvider
 	 * @param sDownloadPath
 	 */
-	private void deleteZipFile(String sFileNameFromProvider, String sDownloadPath) {
+	private void deleteDownloadedZipFile(String sDownloadedFileFullPath) {
 		try {
-			File oZipFile = new File(sDownloadPath + File.separator + sFileNameFromProvider);
+			File oZipFile = new File(sDownloadedFileFullPath);
 			if(!oZipFile.delete()) {
 				LauncherMain.s_oLogger.error("Sentinel3ProductReader.deleteZipFile: cannot delete zip file");
 			} else {
