@@ -6,6 +6,7 @@ import os
 import wasdi
 import json
 import urllib.parse
+import traceback
 import subprocess
 from distutils.dir_util import copy_tree
 from os.path import sys
@@ -78,6 +79,46 @@ def run(processId):
 		# Return the available help			
 		return jsonify({'help': sHelp})
 	
+	# Check if this is a lib update request
+	if processId == '--wasdiupdate':
+		#Try to update the lib
+		try:
+			print("[" + processId+ "] Calling pip upgrade")
+			oProcess = subprocess.Popen(["pip", "install", "--upgrade", "wasdi"])
+			print("[" + processId+ "] pip upgrade done")
+		except Exception as oEx:
+			print(f'[{processId}] wasdi.executeProcessor EXCEPTION: {type(oEx)}: {oEx}')
+			print(repr(oEx))
+			print(traceback.format_exc())
+		except:
+			# todo catch BaseException or something
+			print("[" + processId+ "] wasdi.executeProcessor generic EXCEPTION while updating\n" + traceback.format_exc())
+		
+		# Return the result of the update
+		return jsonify({'update': '1'})	
+		
+		
+	# Check if this is a lib update request
+	if processId.startswith('--kill'):
+		#Try to update the lib
+		try:
+			asKillParts = processId.split("_")
+			
+			#TODO safety check or something
+			print("[" + processId+ "] Killing subprocess")
+			oProcess = subprocess.Popen(["kill", "-9", asKillParts[1]])
+			print("[" + processId+ "] Subprocess killed")
+		except Exception as oEx:
+			print(f'[{processId}] wasdi.executeProcessor EXCEPTION ({type(oEx)}: {oEx})')
+			print("[" + processId+ "] " + repr(oEx))
+			print("[" + processId+ "] " + traceback.format_exc())
+		except:
+			# todo catch BaseException or something
+			print("[" + processId + "] wasdi.executeProcessor generic EXCEPTION while killing\n" + traceback.format_exc())
+		
+		# Return the result of the update
+		return jsonify({'kill': '1'})		
+
 	print("[" + processId+ "] wasdiProcessorServer run request")
 	
 	# This is not a help request but a run request.
@@ -175,6 +216,8 @@ def run(processId):
 		oProcess = subprocess.Popen(["python", "wasdiProcessorExecutor.py", sEncodeParameters, processId])
 		
 		wasdi.wasdiLog("wasdiProcessorServer Process Started with local pid "  + str(oProcess.pid))
+		#Update the server with the subprocess pid
+		wasdi.setSubPid(processId, int(oProcess.pid))
 		
 	except Exception as oEx:
 		wasdi.wasdiLog("wasdiProcessorServer EXCEPTION")

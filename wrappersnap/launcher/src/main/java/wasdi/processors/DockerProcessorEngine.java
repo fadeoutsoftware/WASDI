@@ -188,15 +188,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (bFirstDeploy)
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
-            try {
-                // The workspace id is the special one... in the exchange there is the real id of the workspace where the user started the op
-                if (LauncherMain.s_oSendToRabbit != null) {
-                    String sInfo = "Processor Deployed " + oProcessor.getName();
-                    LauncherMain.s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), oParameter.getExchange(), sInfo, oProcessWorkspace.getWorkspaceId());
-                }
-            } catch (Exception oInnerEx) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception sending rabbit info message ", oInnerEx);
-            }
+            // Moved in the Operation Class
+//            try {
+//                // The workspace id is the special one... in the exchange there is the real id of the workspace where the user started the op
+//                if (LauncherMain.s_oSendToRabbit != null) {
+//                    String sInfo = "Processor Deployed " + oProcessor.getName();
+//                    LauncherMain.s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), oParameter.getExchange(), sInfo, oProcessWorkspace.getWorkspaceId());
+//                }
+//            } catch (Exception oInnerEx) {
+//                LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception sending rabbit info message ", oInnerEx);
+//            }
 
             processWorkspaceLog(new EndMessageProvider().getGood());
 

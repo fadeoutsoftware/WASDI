@@ -1,9 +1,11 @@
 package wasdi.operations;
 
 import wasdi.processors.WasdiProcessorEngine;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.Utils;
 
 /**
  * Deploy Processor Operation
@@ -41,7 +43,29 @@ public class Deployprocessor extends Operation {
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
-	        return oEngine.deploy(oParameter);			
+	        
+	        boolean bRet = oEngine.deploy(oParameter);
+	        
+	        try {
+	        	
+	        	String sName = oParameter.getName();
+	        	
+	        	if (Utils.isNullOrEmpty(sName)) sName = "Your Processor";
+	        	
+	            String sInfo = "Deploy Done<br>" + sName + " is now available";
+	            
+	            if (!bRet) {
+	            	sInfo = "GURU MEDITATION<br>There was an error deploying " + sName + " :(";
+	            }
+	            
+	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        	
+	        }
+	        catch (Exception oRabbitException) {
+				m_oLocalLogger.error("Deployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
+			}
+            
+            return bRet;
+	        
 		}
 		catch (Exception oEx) {
 			m_oLocalLogger.error("Deployprocessor.executeOperation: exception", oEx);

@@ -36,6 +36,7 @@ RUN apt-get update && \
     apt-get install -y \
         build-essential \
         curl \
+        git \
         gdal-bin \
         libffi-dev \
         libgdal-dev \
@@ -54,11 +55,6 @@ RUN apt-get update && \
         software-properties-common \
         wget \
         zlib1g-dev
-
-
-# Copy our files
-COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
-
 
 # Change rights
 RUN chmod -R 755 $USR_HOME/
@@ -97,8 +93,16 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
 
 
+# Copy our files
+COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
+
+
 # From now, all commands executed are executed as root
 USER root
+
+
+# Change rights
+RUN chmod -R 755 $USR_HOME/
 
 
 # Install user's packages:

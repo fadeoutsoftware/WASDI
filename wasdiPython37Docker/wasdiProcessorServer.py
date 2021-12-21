@@ -81,7 +81,7 @@ def run(processId):
 			sHelp = "No help available. Just try."
 		except Exception as oE:
 			print(f'[{processId}] wasdiProcessorServer Help not available ({type(oE)}: {oE})')
-            sHelp = "No help available. Just try."
+			sHelp = "No help available. Just try."
 		except:
 			# todo catch BaseException or something
 			print("[" + processId + "] error while looking for documentation\n" + traceback.format_exc())
