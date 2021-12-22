@@ -515,7 +515,7 @@ public class WasdiFileUtils {
 			if(Utils.isNullOrEmpty(sName)) {
 				return false;
 			}
-			if(sName.toLowerCase().startsWith("s3")){
+			if(sName.toLowerCase().startsWith("s3") && ! (sName.toLowerCase().endsWith(".tif") || sName.toLowerCase().endsWith(".tiff") || sName.toLowerCase().endsWith(".shp"))  ){
 				return true;
 			}
 		} catch (Exception oE) {
