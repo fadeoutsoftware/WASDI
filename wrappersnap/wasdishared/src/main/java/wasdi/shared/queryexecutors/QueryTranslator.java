@@ -754,76 +754,12 @@ public abstract class QueryTranslator {
 					sQuery = sQuery.trim();
 
 					oResult.platformName = Platforms.ERA5;
-					
-//					provider		provider		CDS
-//					platformName	platformName	ERA5
-//					productName		dataset			reanalysis-era5-pressure-levels
-//					productType		Product type	Reanalysis
-//					productLevel	Pressure level	1 hPa
-//					sensorMode		Variable		U-component of wind
-//					timeliness		Format			GRIB
 
 					oResult.productName = extractValue(sQuery, "dataset");
 					oResult.productType = extractValue(sQuery, "productType");
 					oResult.productLevel = extractValue(sQuery, "pressureLevels");
 					oResult.sensorMode = extractValue(sQuery, "variables");
 					oResult.timeliness = extractValue(sQuery, "format");
-
-//					// check for product level
-//					try {
-//						if (sQuery.contains(QueryTranslator.s_sPRODUCTLEVEL)) {
-//							iStart = sQuery.indexOf(s_sPRODUCTLEVEL);
-//							if (iStart < 0) {
-//								throw new IllegalArgumentException("Could not find product level");
-//							}
-//							iStart += s_sPRODUCTLEVEL.length();
-//							iEnd = sQuery.indexOf(" AND ", iStart);
-//							if (iEnd < 0) {
-//								iEnd = sQuery.indexOf(')', iStart);
-//							}
-//							if (iEnd < 0) {
-//								iEnd = sQuery.indexOf(' ', iStart);
-//							}
-//							if (iEnd < 0) {
-//								// the types are all of ten letters
-//								iEnd = iStart + 10;
-//							}
-//							String sLevel = sQuery.substring(iStart, iEnd);
-//							sLevel = sLevel.trim();
-//
-//							oResult.productLevel = sLevel;
-//						}
-//					} catch (Exception oE) {
-//						Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
-//					}
-
-//					// check for product type
-//					try {
-//						if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
-//							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
-//							if (iStart < 0) {
-//								throw new IllegalArgumentException("Could not find product type");
-//							}
-//							iStart += s_sPRODUCTTYPE.length();
-//							iEnd = sQuery.indexOf(" AND ", iStart);
-//							if (iEnd < 0) {
-//								iEnd = sQuery.indexOf(')', iStart);
-//							}
-//							// since the product type might contain composite values (U V), the index of ' ' cannot be used
-////							if (iEnd < 0) {
-////								iEnd = sQuery.indexOf(' ', iStart);
-////							}
-//							if (iEnd < 0) {
-//								iEnd = sQuery.length();
-//							}
-//							String sType = sQuery.substring(iStart, iEnd);
-//							sType = sType.trim();
-//
-//							oResult.productType = sType;
-//						}
-//					} catch (Exception oE) {
-//						Utils.debugLog("QueryTranslator.parseERA5( " + sQuery + " ): error while parsing product type: " + oE);
-//					}
 				}
 			}
 		} catch (Exception oE) {
