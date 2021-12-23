@@ -15,13 +15,32 @@ angular.module('wasdi.wapSelectArea', [])
                 boundingBox: '=',
                 maxarea:'=',
                 maxside:'=',
-                maxratioside:'='
+                maxratioside:'=',
+                tooltip:'='
 
 
             },
-            template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle"></div>`,
+            // Tooltips alternatives : 
+            // uib-tooltip="I'm a tooltip!" alternative using bootstrap-UI
+            // title="My Tooltip!" data-toggle="tooltip" data-placement="top" tooltip
+            // the first on relies on a library, UI-boostrap, the second one relies on a directive 
+            template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right"></div>`,
 
             controller: function() {
+                
+                
+
+                this.getDistance = function(pointFrom, pointTo ){
+                    let markerFrom = L.circleMarker(pointFrom,{ color: "#4AFF00", radius: 10 });
+                    let markerTo =  L.circleMarker(pointTo,{ color: "#4aff00", radius: 10 });
+
+                    let from = markerFrom.getLatLng();
+                    let to = markerTo.getLatLng();
+
+                    let distance = (from.distanceTo(to)).toFixed(0)/1000; // distance in km
+
+                    return distance;
+            }
 
                 this.$onInit = function () {
 
@@ -34,6 +53,7 @@ angular.module('wasdi.wapSelectArea', [])
                     console.log(this); // logs your item object
                 };
 
+         
                 // generated a new id map number and converted as string
                 this.mapId = "" + Date.now() + Math.random();
 
@@ -52,6 +72,8 @@ angular.module('wasdi.wapSelectArea', [])
 
                 this.oMapStyle = { height: this.heightMap + 'px',
                     width: this.widthMap + 'px'  };
+
+                    
 
                 this.addBoundingBoxDrawerOnMap = function (oMap) {
 
@@ -125,6 +147,10 @@ angular.module('wasdi.wapSelectArea', [])
 
                         var distance = (from.distanceTo(to)).toFixed(0)/1000; // distance in km
 
+                        var distanceFunction = this.getDistance(latlngs[0][0],latlngs[0][1]);
+
+                        if (distance== distanceFunction) console.log("distances are equals!");
+
 
                         let areaFromLeaflet = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]); // first element is the array itself to be passed
                         let squarekm = areaFromLeaflet / 1000000;
@@ -135,6 +161,8 @@ angular.module('wasdi.wapSelectArea', [])
 
 
                     });
+
+                    
 
                     oMap.on(L.Draw.Event.DELETESTOP, function (event) {
                         // var layer = event.layers;
@@ -208,6 +236,8 @@ angular.module('wasdi.wapSelectArea', [])
 
                     return oMap;
                 }
+
+
 
                 let oThat = this;
                 //init the map after the directive is loaded

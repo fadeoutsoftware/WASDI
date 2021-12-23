@@ -77,6 +77,10 @@ function ViewElementFactory() {
             if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)){
                 oViewElement.maxRatioSide = oControl.maxRatioSide;
             }
+
+            if (!utilsIsObjectNullOrUndefined(oControl.tooltip)){
+                oViewElement.tooltip = oControl.tooltip;
+            }
             
             
 
@@ -267,6 +271,7 @@ let SelectArea = function () {
     this.maxArea = 0;
     this.maxSide = 0;
     this.maxRatioSide = 0;
+    this.tooltip = "";
     this.oBoundingBox = {
         northEast: "",
         southWest: ""
