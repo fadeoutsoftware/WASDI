@@ -14,8 +14,8 @@ function ViewElementFactory() {
         if (utilsIsObjectNullOrUndefined(oControl)) return oViewElement;
         // If mandatory is not set, assume false
         if (utilsIsObjectNullOrUndefined(oControl.required)) oControl.required = false;
-        // // adding an optional tooltip to all the possible components 
-        // 
+        // // adding an optional tooltip to all the possible components
+        //
 
         // Find the right type and create the element
         if (oControl.type === "textbox") {
@@ -80,9 +80,9 @@ function ViewElementFactory() {
                 oViewElement.maxRatioSide = oControl.maxRatioSide;
             }
 
-            
-            
-            
+
+
+
 
         }
         else if (oControl.type === "date") {
@@ -269,7 +269,7 @@ let DateTimePicker = function () {
  */
 class UIComponent{
     constructor(){
-        this.tooltip = "";
+        this.tooltip = "Ciao";
     }
 }
 
@@ -280,7 +280,7 @@ class UIComponent{
 class SelectArea extends UIComponent{
     constructor(){
     super();
-    // using zero as default to relax the constraints 
+    // using zero as default to relax the constraints
     this.maxArea = 0;
     this.maxSide = 0;
     this.maxRatioSide = 0;
@@ -330,25 +330,29 @@ class SelectArea extends UIComponent{
  * Text Box Control Class
  * @constructor
  */
-let TextBox = function () {
-    this.m_sText = "";
+class TextBox extends UIComponent {
+    constructor() {
+        super();
 
-    /**
-     * Get the value of the textbox
-     * @returns {string} String in the textbox
-     */
-    this.getValue = function () {
-        return this.m_sText;
-    }
+        this.m_sText = "";
 
-    /**
-     * Get the value of the textbox
-     * @returns {string} String in the textbox
-     */
-    this.getStringValue = function () {
-        return this.m_sText;
-    }
-};
+        /**
+         * Get the value of the textbox
+         * @returns {string} String in the textbox
+         */
+        this.getValue = function () {
+            return this.m_sText;
+        }
+
+        /**
+         * Get the value of the textbox
+         * @returns {string} String in the textbox
+         */
+        this.getStringValue = function () {
+            return this.m_sText;
+        }
+    };
+}
 /**
  * Numeric Control Class
  * @constructor
@@ -373,6 +377,7 @@ let NumericBox = function () {
         return this.m_sValue.toString();
     }
 };
+
 
 
 /**

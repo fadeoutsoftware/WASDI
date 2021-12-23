@@ -137,7 +137,9 @@
                                 <!--input text-->
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"  ng-if="viewElement.type === 'textbox'">
                                     <div class="input-text-label py-2">{{viewElement.label}}</div>
-                                    <waptextbox input-text="viewElement.m_sText"></waptextbox>
+                                    <waptextbox input-text="viewElement.m_sText"
+                                    tooltip = "viewElement.tooltip"
+                                    ></waptextbox>
                                 </div>
 
                                 <!--input numeric-->
