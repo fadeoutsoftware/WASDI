@@ -14,6 +14,8 @@ function ViewElementFactory() {
         if (utilsIsObjectNullOrUndefined(oControl)) return oViewElement;
         // If mandatory is not set, assume false
         if (utilsIsObjectNullOrUndefined(oControl.required)) oControl.required = false;
+        // // adding an optional tooltip to all the possible components 
+        // 
 
         // Find the right type and create the element
         if (oControl.type === "textbox") {
@@ -78,9 +80,7 @@ function ViewElementFactory() {
                 oViewElement.maxRatioSide = oControl.maxRatioSide;
             }
 
-            if (!utilsIsObjectNullOrUndefined(oControl.tooltip)){
-                oViewElement.tooltip = oControl.tooltip;
-            }
+            
             
             
 
@@ -129,6 +129,9 @@ function ViewElementFactory() {
         else {
             oViewElement = new TextBox();
         }
+        if (!utilsIsObjectNullOrUndefined(oControl.tooltip)){
+                 oViewElement.tooltip = oControl.tooltip;
+             }
 
         oViewElement.type = oControl.type;
         oViewElement.label = oControl.label;
@@ -262,16 +265,25 @@ let DateTimePicker = function () {
 };
 
 /**
+ * Basic class for UI components
+ */
+class UIComponent{
+    constructor(){
+        this.tooltip = "";
+    }
+}
+
+/**
  * Select Area (bbox) Control Class
  * @constructor
  */
-let SelectArea = function () {
-    
+class SelectArea extends UIComponent{
+    constructor(){
+    super();
     // using zero as default to relax the constraints 
     this.maxArea = 0;
     this.maxSide = 0;
     this.maxRatioSide = 0;
-    this.tooltip = "";
     this.oBoundingBox = {
         northEast: "",
         southWest: ""
@@ -310,6 +322,7 @@ let SelectArea = function () {
         }
     }
 };
+}
 
 
 
