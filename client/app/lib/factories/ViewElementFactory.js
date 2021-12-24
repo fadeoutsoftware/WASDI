@@ -158,6 +158,16 @@ function ViewElementFactory() {
 }
 
 /**
+ * Basic class for UI components
+ */
+ class UIComponent {
+    constructor() {
+        //TODO remove text and defaults to empty string
+        this.tooltip = "tool tip";
+    }
+}
+
+/**
  * Search EO Image Control Class
  * @constructor
  */
@@ -233,46 +243,41 @@ let ProductList = function () {
  * Date Time Picker Control Class
  * @constructor
  */
-let DateTimePicker = function () {
-    this.m_sDate = null;
-
-    /**
-     * Returns the selected Date
-     * @returns {string|null} Date as a string in format YYYY-MM-DD
-     */
-    this.getValue = function () {
-        if (this.m_sDate) {
-            return this.m_sDate;
-        }
-        else {
-            return "";
-        }
-    }
-
-    /**
-     * Returns the selected Date
-     * @returns {string|null} Date as a string in format YYYY-MM-DD
-     */
-    this.getStringValue = function () {
-        if (this.m_sDate) {
-            return this.m_sDate;
-        }
-        else {
-            return "";
-        }
-    }
-
-};
-
-/**
- * Basic class for UI components
- */
-class UIComponent {
+class DateTimePicker extends UIComponent {
     constructor() {
-        //TODO remove text and defaults to empty string 
-        this.tooltip = "tool tip";
-    }
+        super();
+
+
+        this.m_sDate = null;
+
+        /**
+         * Returns the selected Date
+         * @returns {string|null} Date as a string in format YYYY-MM-DD
+         */
+        this.getValue = function () {
+            if (this.m_sDate) {
+                return this.m_sDate;
+            } else {
+                return "";
+            }
+        }
+
+        /**
+         * Returns the selected Date
+         * @returns {string|null} Date as a string in format YYYY-MM-DD
+         */
+        this.getStringValue = function () {
+            if (this.m_sDate) {
+                return this.m_sDate;
+            } else {
+                return "";
+            }
+        }
+
+    };
 }
+
+
 
 /**
  * Select Area (bbox) Control Class
