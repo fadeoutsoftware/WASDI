@@ -196,13 +196,15 @@
                                 <!--product list-->
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'productlist'" >
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>
-                                    <wapproductlist  products-list="viewElement.aoProducts"></wapproductlist>
+                                    <wapproductlist  products-list="viewElement.aoProducts"
+                                    tooltip="viewElement.tooltip"></wapproductlist>
                                 </div>
 
                                 <!--searcheoimages-->
                                 <div class="col-xs-12 col-md-12 border-bottom py-2" ng-if="viewElement.type === 'searcheoimage'" >
                                     <div class="input-text-label pt-2 mb-2">{{viewElement.label}}</div>
-                                    <wapsearcheoimage light-search-object="viewElement"></wapsearcheoimage>
+                                    <wapsearcheoimage light-search-object="viewElement"
+                                    tooltip="viewElement.tooltip"></wapsearcheoimage>
                                 </div>
 
                                 <!--checkbox-->

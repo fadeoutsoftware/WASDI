@@ -160,7 +160,7 @@ function ViewElementFactory() {
 /**
  * Basic class for UI components
  */
- class UIComponent {
+class UIComponent {
     constructor() {
         //TODO remove text and defaults to empty string
         this.tooltip = "tool tip";
@@ -171,73 +171,80 @@ function ViewElementFactory() {
  * Search EO Image Control Class
  * @constructor
  */
-let SearchEOImage = function () {
-    this.oTableOfProducts = new ProductList();
-    this.oStartDate = new DateTimePicker();
-    this.oEndDate = new DateTimePicker();
-    this.oSelectArea = new SelectArea();
-    this.aoProviders = [];
-    this.aoProviders.push("ONDA");
-    this.aoMissionsFilters = [];
+class SearchEOImage extends UIComponent {
+    constructor() {
+        super();
+        this.oTableOfProducts = new ProductList();
+        this.oStartDate = new DateTimePicker();
+        this.oEndDate = new DateTimePicker();
+        this.oSelectArea = new SelectArea();
+        this.aoProviders = [];
+        this.aoProviders.push("ONDA");
+        this.aoMissionsFilters = [];
 
 
-    /*
-    let tst7 = oFactory.CreateViewElement("searcheoimage");
-    tst7.sLabel = "Sono una light search";
-    tst7.oStartDate.m_sDate =  moment().subtract(1, 'days').startOf('day');
-    tst7.oEndDate.m_sDate = moment();
-    tst7.oSelectArea.iHeight = 200;
-    tst7.oSelectArea.iWidth = 500;
-    tst7.aoProviders.push(providers.ONDA);
-    tst7.aoMissionsFilters.push({name:"sentinel-1" },{name:"sentinel-2" });
-    tst7.oTableOfProducts.isAvailableSelection = true;
-    tst7.oTableOfProducts.isSingleSelection = true;
-    */
+        /*
+        let tst7 = oFactory.CreateViewElement("searcheoimage");
+        tst7.sLabel = "Sono una light search";
+        tst7.oStartDate.m_sDate =  moment().subtract(1, 'days').startOf('day');
+        tst7.oEndDate.m_sDate = moment();
+        tst7.oSelectArea.iHeight = 200;
+        tst7.oSelectArea.iWidth = 500;
+        tst7.aoProviders.push(providers.ONDA);
+        tst7.aoMissionsFilters.push({name:"sentinel-1" },{name:"sentinel-2" });
+        tst7.oTableOfProducts.isAvailableSelection = true;
+        tst7.oTableOfProducts.isSingleSelection = true;
+        */
 
-    /**
-     * This control does not really return a value
-     * @returns {string}
-     */
-    this.getValue = function () {
-        return "";
-    }
+        /**
+         * This control does not really return a value
+         * @returns {string}
+         */
+        this.getValue = function () {
+            return "";
+        }
 
-    /**
-     * This control does not really return a value
-     * @returns {string}
-     */
-    this.getStringValue = function () {
-        return "";
-    }
-};
+        /**
+         * This control does not really return a value
+         * @returns {string}
+         */
+        this.getStringValue = function () {
+            return "";
+        }
+    };
+}
 
 /**
  * Product List Control Class
  * @constructor
  */
-let ProductList = function () {
-    this.aoProducts = [];
-    this.isAvailableSelection = false;
-    this.isSingleSelection = true;
-    this.oSingleSelectionLayer = {};
+class ProductList extends UIComponent {
+    constructor() {
+        super();
 
-    /**
-     * Return the selected product
-     * @returns {{}}
-     */
-    this.getValue = function () {
-        return this.oSingleSelectionLayer;
-    }
+        this.aoProducts = [];
+        this.isAvailableSelection = false;
+        this.isSingleSelection = true;
+        this.oSingleSelectionLayer = {};
 
-    /**
-     * Return the name of the selected product
-     * @returns {{}}
-     */
-    this.getStringValue = function () {
-        return this.oSingleSelectionLayer;
-    }
+        /**
+         * Return the selected product
+         * @returns {{}}
+         */
+        this.getValue = function () {
+            return this.oSingleSelectionLayer;
+        }
 
-};
+        /**
+         * Return the name of the selected product
+         * @returns {{}}
+         */
+        this.getStringValue = function () {
+            return this.oSingleSelectionLayer;
+        }
+
+    };
+}
 
 /**
  * Date Time Picker Control Class
