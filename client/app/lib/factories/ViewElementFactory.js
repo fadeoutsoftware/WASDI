@@ -269,7 +269,8 @@ let DateTimePicker = function () {
  */
 class UIComponent{
     constructor(){
-        this.tooltip = "Ciao";
+        //TODO remove text and defaults to empty string 
+        this.tooltip = "tool tip";  
     }
 }
 
@@ -357,26 +358,30 @@ class TextBox extends UIComponent {
  * Numeric Control Class
  * @constructor
  */
-let NumericBox = function () {
-    this.m_sValue = 0;
-    this.m_sText = this.m_sValue.toString();
+class NumericBox extends UIComponent {
+    constructor() {
+        super();
 
-    /**
-     * Get the value of the numericbox
-     * @returns {string} Value in the numericbox
-     */
-    this.getValue = function () {
-        return parseFloat(this.m_sText);
-    }
+        this.m_sValue = 0;
+        this.m_sText = this.m_sValue.toString();
 
-    /**
-     * Get the string from the numericbox
-     * @returns {string} String in the numericbox
-     */
-    this.getStringValue = function () {
-        return this.m_sValue.toString();
-    }
-};
+        /**
+         * Get the value of the numericbox
+         * @returns {string} Value in the numericbox
+         */
+        this.getValue = function () {
+            return parseFloat(this.m_sText);
+        }
+
+        /**
+         * Get the string from the numericbox
+         * @returns {string} String in the numericbox
+         */
+        this.getStringValue = function () {
+            return this.m_sValue.toString();
+        }
+    };
+}
 
 
 
