@@ -69,14 +69,14 @@ function ViewElementFactory() {
             // oViewElement.maxarea= oControl.maxArea;
             // oViewElement.maxside  = oControl.maxSide;
             // oViewElement.maxratioSide  = oControl.maxRatioSide;
-            if (!utilsIsObjectNullOrUndefined(oControl.maxArea)){
+            if (!utilsIsObjectNullOrUndefined(oControl.maxArea)) {
                 oViewElement.maxArea = oControl.maxArea;
             }
-            if (!utilsIsObjectNullOrUndefined(oControl.maxSide)){
+            if (!utilsIsObjectNullOrUndefined(oControl.maxSide)) {
                 oViewElement.maxSide = oControl.maxSide;
             }
 
-            if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)){
+            if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)) {
                 oViewElement.maxRatioSide = oControl.maxRatioSide;
             }
 
@@ -129,9 +129,9 @@ function ViewElementFactory() {
         else {
             oViewElement = new TextBox();
         }
-        if (!utilsIsObjectNullOrUndefined(oControl.tooltip)){
-                 oViewElement.tooltip = oControl.tooltip;
-             }
+        if (!utilsIsObjectNullOrUndefined(oControl.tooltip)) {
+            oViewElement.tooltip = oControl.tooltip;
+        }
 
         oViewElement.type = oControl.type;
         oViewElement.label = oControl.label;
@@ -267,10 +267,10 @@ let DateTimePicker = function () {
 /**
  * Basic class for UI components
  */
-class UIComponent{
-    constructor(){
+class UIComponent {
+    constructor() {
         //TODO remove text and defaults to empty string 
-        this.tooltip = "tool tip";  
+        this.tooltip = "tool tip";
     }
 }
 
@@ -278,51 +278,51 @@ class UIComponent{
  * Select Area (bbox) Control Class
  * @constructor
  */
-class SelectArea extends UIComponent{
-    constructor(){
-    super();
-    // using zero as default to relax the constraints
-    this.maxArea = 0;
-    this.maxSide = 0;
-    this.maxRatioSide = 0;
-    this.oBoundingBox = {
-        northEast: "",
-        southWest: ""
-    };
-    this.iWidth = "";
-    this.iHeight = "";
+class SelectArea extends UIComponent {
+    constructor() {
+        super();
+        // using zero as default to relax the constraints
+        this.maxArea = 0;
+        this.maxSide = 0;
+        this.maxRatioSide = 0;
+        this.oBoundingBox = {
+            northEast: "",
+            southWest: ""
+        };
+        this.iWidth = "";
+        this.iHeight = "";
 
-    /**
-     * Return the bbox as a JSON Obkect
-     * @returns {{southWest: {lat: "", lon:""}, northEast: {lat: "", lon:""}}|string}
-     */
-    this.getValue = function () {
-        try {
-            return this.oBoundingBox;
-        }
-        catch (e) {
-            return "";
-        }
-    }
-
-    /**
-     * Return the bounding box as a string.
-     * @returns {string} BBox as string: LATN,LONW,LATS,LONE
-     */
-    this.getStringValue = function () {
-        try {
-            if (this.oBoundingBox) {
-                return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2) + "," + this.oBoundingBox.southWest.lat.toFixed(2) + "," + + this.oBoundingBox.northEast.lng.toFixed(2);
+        /**
+         * Return the bbox as a JSON Obkect
+         * @returns {{southWest: {lat: "", lon:""}, northEast: {lat: "", lon:""}}|string}
+         */
+        this.getValue = function () {
+            try {
+                return this.oBoundingBox;
             }
-            else {
+            catch (e) {
                 return "";
             }
         }
-        catch (e) {
-            return "";
+
+        /**
+         * Return the bounding box as a string.
+         * @returns {string} BBox as string: LATN,LONW,LATS,LONE
+         */
+        this.getStringValue = function () {
+            try {
+                if (this.oBoundingBox) {
+                    return "" + this.oBoundingBox.northEast.lat.toFixed(2) + "," + this.oBoundingBox.southWest.lng.toFixed(2) + "," + this.oBoundingBox.southWest.lat.toFixed(2) + "," + + this.oBoundingBox.northEast.lng.toFixed(2);
+                }
+                else {
+                    return "";
+                }
+            }
+            catch (e) {
+                return "";
+            }
         }
-    }
-};
+    };
 }
 
 
@@ -383,6 +383,38 @@ class NumericBox extends UIComponent {
     };
 }
 
+/**
+ * Drop Down Control Class
+ * @constructor
+ */
+class DropDown extends UIComponent {
+    constructor() {
+        super();
+
+        this.asListValues = [];
+        this.sSelectedValues = "";
+        this.oOnClickFunction = null;
+        this.bEnableSearchFilter = true;
+        this.sDropdownName = "";
+
+        /**
+         * Get the selected value
+         * @returns {string}
+         */
+        this.getValue = function () {
+            return this.sSelectedValues.name;
+        }
+
+        /**
+         * Get the selected value
+         * @returns {string}
+         */
+        this.getStringValue = function () {
+            return this.sSelectedValues.name;
+        }
+    }
+};
+
 
 
 /**
@@ -440,33 +472,7 @@ let CheckBox = function () {
 
 };
 
-/**
- * Drop Down Control Class
- * @constructor
- */
-let DropDown = function () {
-    this.asListValues = [];
-    this.sSelectedValues = "";
-    this.oOnClickFunction = null;
-    this.bEnableSearchFilter = true;
-    this.sDropdownName = "";
 
-    /**
-     * Get the selected value
-     * @returns {string}
-     */
-    this.getValue = function () {
-        return this.sSelectedValues.name;
-    }
-
-    /**
-     * Get the selected value
-     * @returns {string}
-     */
-    this.getStringValue = function () {
-        return this.sSelectedValues.name;
-    }
-};
 
 
 /**

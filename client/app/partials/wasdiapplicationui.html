@@ -145,7 +145,8 @@
                                 <!--input numeric-->
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"  ng-if="viewElement.type === 'numeric'">
                                     <div class="input-text-label py-2">{{viewElement.label}}</div>
-                                    <wapnumericbox input-text="viewElement.m_sText"
+                                    <wapnumericbox 
+                                    input-text="viewElement.m_sText"
                                     tooltip = "viewElement.tooltip" ></wapnumericbox>
                                 </div>
 
@@ -157,6 +158,7 @@
                                                  enable-search-filter="viewElement.bEnableSearchFilter"
                                                  dropdown-name="viewElement.sDropdownName"
                                                  on-click-function="viewElement.oOnClickFunction"
+                                                 tooltip = "viewElement.tooltip"
                                     ></wapdropdown>
                                 </div>
 
