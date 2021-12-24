@@ -457,32 +457,35 @@ let Hidden = function () {
  * Check box Control Class
  * @constructor
  */
-let CheckBox = function () {
-    this.m_bValue = true;
+class CheckBox extends UIComponent {
+    constructor() {
+        super();
+        this.m_bValue = true;
 
-    /**
-     * Return the value of the checkbox
-     * @returns {boolean} True if selected, False if not
-     */
-    this.getValue = function () {
-        return this.m_bValue;
-    }
-
-    /**
-     * Return the value of the checkbox as a string:
-     * 1 = true 0 = false
-     * @returns {string}
-     */
-    this.getStringValue = function () {
-        if (this.m_bValue) {
-            return "1";
+        /**
+         * Return the value of the checkbox
+         * @returns {boolean} True if selected, False if not
+         */
+        this.getValue = function () {
+            return this.m_bValue;
         }
-        else {
-            return "0";
-        }
-    }
 
-};
+        /**
+         * Return the value of the checkbox as a string:
+         * 1 = true 0 = false
+         * @returns {string}
+         */
+        this.getStringValue = function () {
+            if (this.m_bValue) {
+                return "1";
+            }
+            else {
+                return "0";
+            }
+        }
+
+    };
+}
 
 
 
@@ -491,26 +494,30 @@ let CheckBox = function () {
  * Products Combo Control Class
  * @constructor
  */
-let ProductsCombo = function (bShowExt) {
-    this.asListValues = [];
-    this.sSelectedValues = "";
-    this.oOnClickFunction = null;
-    this.bEnableSearchFilter = true;
-    this.sDropdownName = "";
-    this.bShowExtension = bShowExt;
+class ProductsCombo extends UIComponent {
+    constructor(bShowExt) {
+        super();
 
-    /**
-     * Get the selected value
-     * @returns {string}
-     */
-    this.getValue = function () {
-        return this.sSelectedValues.name;
-    }
+        this.asListValues = [];
+        this.sSelectedValues = "";
+        this.oOnClickFunction = null;
+        this.bEnableSearchFilter = true;
+        this.sDropdownName = "";
+        this.bShowExtension = bShowExt;
 
-    this.getStringValue = function () {
-        return this.sSelectedValues.name;
-    }
-};
+        /**
+         * Get the selected value
+         * @returns {string}
+         */
+        this.getValue = function () {
+            return this.sSelectedValues.name;
+        }
+
+        this.getStringValue = function () {
+            return this.sSelectedValues.name;
+        }
+    };
+}
 
 /**
  * Slider for a numeric input
