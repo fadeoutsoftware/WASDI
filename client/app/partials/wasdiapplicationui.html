@@ -4,23 +4,28 @@
         <div class="container mt-4">
             <div class="row sticky-bar">
                 <div class="border-bottom py-3 mb-3 d-print-flex justify-content-between">
-                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the Future</span>
+                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the
+                        Future</span>
                 </div>
                 <!--APP TITLE-->
                 <div class="app-title d-flex justify-content-between align-items-center border-bottom pb-3">
                     <!--LEFT SIDE-->
                     <div class="d-flex align-items-center">
-                        <div class="app-logo mr-3" style="background-image: url({{m_oController.m_oApplication.imgLink}})"></div>
+                        <div class="app-logo mr-3"
+                            style="background-image: url({{m_oController.m_oApplication.imgLink}})"></div>
                         <div>
                             <span class="title">{{m_oController.m_oApplication.friendlyName}}</span><br>
-                            <span>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span>
-                            <div class="edit-btn ml-3" ng-if="m_oController.m_oApplication.isMine" ng-click="m_oController.editClick()">
+                            <span>Publisher: <span
+                                    class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span>
+                            <div class="edit-btn ml-3" ng-if="m_oController.m_oApplication.isMine"
+                                ng-click="m_oController.editClick()">
                                 <span class="fa fa-edit mr-1"></span>
                                 Edit
                             </div>
                             <br>
 
-                            <div class="back-link mt-1 collapsed" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                            <div class="back-link mt-1 collapsed" type="button" data-toggle="collapse"
+                                data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                                 <span class="more">MORE</span><span class="less">LESS</span> DETAILS
                             </div>
 
@@ -28,18 +33,22 @@
 
                     </div>
                     <!--RIGHT SIDE-->
-                    <div  class="d-flex select-workspace">
+                    <div class="d-flex select-workspace">
                         <div class="radio-container mr-4">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="newWorkspace" value="new" checked ng-click="m_oController.newWorkspaceClicked()">
+                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose"
+                                    name="exampleRadios" id="newWorkspace" value="new" checked
+                                    ng-click="m_oController.newWorkspaceClicked()">
                                 <label class="form-check-label" for="newWorkspace">
                                     New Workspace
                                 </label>
                             </div>
                             <div class="form-check d-flex align-items-center mt-2">
-                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose" name="exampleRadios" id="openWorkspace" value="open" ng-click="m_oController.openWorkspaceClicked()">
+                                <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose"
+                                    name="exampleRadios" id="openWorkspace" value="open"
+                                    ng-click="m_oController.openWorkspaceClicked()">
                                 <!--MOSTRA SOLO SE NON SELEZIONATO-->
-                                <label class="form-check-label" for="openWorkspace"ng-show="workspaceChose == 'new'">
+                                <label class="form-check-label" for="openWorkspace" ng-show="workspaceChose == 'new'">
                                     <span>Open Workspace</span>
                                 </label>
 
@@ -55,11 +64,11 @@
                                         <div class="open-workspace-label">{{m_oController.m_oSelectedWorkspace === null ? "Select Workspace" : m_oController.m_oSelectedWorkspace.workspaceName}} </div>
                                     </button> -->
 
-                                    <dropdownmenudirective  list-of-values="m_oController.m_aoWorkspaceListForDirective"
-                                                            selected-value="m_oController.m_oSelectedWorkspaceForDirective"
-                                                            on-click-function="m_oController.selectedWorkspaceCombo(oValue)"
-                                                            enable-search-filter="true"
-                                                            dropdown-name="'Select workspace'"></dropdownmenudirective>
+                                    <dropdownmenudirective list-of-values="m_oController.m_aoWorkspaceListForDirective"
+                                        selected-value="m_oController.m_oSelectedWorkspaceForDirective"
+                                        on-click-function="m_oController.selectedWorkspaceCombo(oValue)"
+                                        enable-search-filter="true" dropdown-name="'Select workspace'">
+                                    </dropdownmenudirective>
 
                                     <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                      <div class="dropdown-workspace-item" ng-repeat="oWorkspace in m_oController.m_aoWorkspaceList" ng-click="m_oController.selectedWorkspace(oWorkspace)">
@@ -69,7 +78,8 @@
 
                             </div>
                         </div>
-                        <div class="blue-big-btn run-btn d-flex align-items-center justify-content-center flex-row" ng-click="m_oController.generateParamsAndRun()">
+                        <div class="blue-big-btn run-btn d-flex align-items-center justify-content-center flex-row"
+                            ng-click="m_oController.generateParamsAndRun()">
                             <span>RUN</span>
                             <div class="slide-out">
                                 <div class="rocket-animation ml-2">
@@ -85,12 +95,19 @@
                 <div class="collapse border-bottom mb-3" id="collapseExample">
                     <div class="row pb-3">
                         <div class="col-12 col-md-8">
-                            <span>Description: </span><span class="text-green-wasdi">{{m_oController.m_oApplication.processorDescription}}</span>
+                            <span>Description: </span><span
+                                class="text-green-wasdi">{{m_oController.m_oApplication.processorDescription}}</span>
                         </div>
                         <div class="col-12 col-md-4 border-left">
-                            <div>Contact: <span class="text-green-wasdi"><a ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span></div>
-                            <div>WebSite: <span class="text-green-wasdi"><a ng-href="{{m_oController.m_oApplication.link}}" target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
-                            <div>Last Update: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span></div>
+                            <div>Contact: <span class="text-green-wasdi"><a
+                                        ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span>
+                            </div>
+                            <div>WebSite: <span class="text-green-wasdi"><a
+                                        ng-href="{{m_oController.m_oApplication.link}}"
+                                        target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
+                            <div>Last Update: <span
+                                    class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,23 +118,29 @@
                 <div class="sidebar-nav col-12 col-md-3 bg-wasdi-blue py-3 px-0">
                     <!-- TAB NAVIGATION -->
                     <div>
-                        <div class="side-tab px-4 py-2" ng-repeat="sTab in m_oController.getTabs()" ng-class="{'active':m_oController.m_sSelectedTab === sTab}" ng-click="m_oController.activeTabChanged(sTab)" >
+                        <div class="side-tab px-4 py-2" ng-repeat="sTab in m_oController.getTabs()"
+                            ng-class="{'active':m_oController.m_sSelectedTab === sTab}"
+                            ng-click="m_oController.activeTabChanged(sTab)">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 {{sTab}}
                             </a>
                         </div>
 
-                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}" ng-click="m_oController.activeTabChanged('help')" >
+                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}"
+                            ng-click="m_oController.activeTabChanged('help')">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 Help
                             </a>
                         </div>
-                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}" ng-click="m_oController.activeTabChanged('history')" >
+                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}"
+                            ng-click="m_oController.activeTabChanged('history')">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 History
                             </a>
                         </div>
-                        <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}" ng-click="m_oController.activeTabChanged('json_prms')" >
+                        <div class="side-tab px-4 py-2"
+                            ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}"
+                            ng-click="m_oController.activeTabChanged('json_prms')">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
                                 JSON
                             </a>
@@ -130,98 +153,100 @@
                     <div class="tab-content">
                         <!-------   TABLE WORKFLOWS + LIST OF PRODUCTS ------->
                         <div class="tab-pane fade in" ng-repeat="sTab in m_oController.getTabs()"
-                             ng-class="{'active':m_oController.m_sSelectedTab === sTab}">
+                            ng-class="{'active':m_oController.m_sSelectedTab === sTab}">
 
                             <div class="row" ng-repeat="viewElement in m_oController.getTabControls(sTab)">
 
                                 <!--input text-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"  ng-if="viewElement.type === 'textbox'">
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"
+                                    ng-if="viewElement.type === 'textbox'">
                                     <div class="input-text-label py-2">{{viewElement.label}}</div>
-                                    <waptextbox input-text="viewElement.m_sText"
-                                    tooltip = "viewElement.tooltip"
-                                    ></waptextbox>
+                                    <waptextbox input-text="viewElement.m_sText" tooltip="viewElement.tooltip">
+                                    </waptextbox>
                                 </div>
 
                                 <!--input numeric-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"  ng-if="viewElement.type === 'numeric'">
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom pt-2 pb-4"
+                                    ng-if="viewElement.type === 'numeric'">
                                     <div class="input-text-label py-2">{{viewElement.label}}</div>
-                                    <wapnumericbox 
-                                    input-text="viewElement.m_sText"
-                                    tooltip = "viewElement.tooltip" ></wapnumericbox>
+                                    <wapnumericbox input-text="viewElement.m_sText" tooltip="viewElement.tooltip">
+                                    </wapnumericbox>
                                 </div>
 
                                 <!--dropdown -->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4" ng-if="viewElement.type === 'dropdown'" >
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4"
+                                    ng-if="viewElement.type === 'dropdown'">
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>
                                     <wapdropdown list-of-values="viewElement.asListValues"
-                                                 selected-value="viewElement.sSelectedValues"
-                                                 enable-search-filter="viewElement.bEnableSearchFilter"
-                                                 dropdown-name="viewElement.sDropdownName"
-                                                 on-click-function="viewElement.oOnClickFunction"
-                                                 tooltip = "viewElement.tooltip"
-                                    ></wapdropdown>
+                                        selected-value="viewElement.sSelectedValues"
+                                        enable-search-filter="viewElement.bEnableSearchFilter"
+                                        dropdown-name="viewElement.sDropdownName"
+                                        on-click-function="viewElement.oOnClickFunction" tooltip="viewElement.tooltip">
+                                    </wapdropdown>
                                 </div>
 
                                 <!--products combo -->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4" ng-if="viewElement.type === 'productscombo'" >
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2 pb-4"
+                                    ng-if="viewElement.type === 'productscombo'">
                                     <div class="input-text-label pt-2 mb-2">{{viewElement.label}}</div>
                                     <wapproductscombo list-of-values="viewElement.asListValues"
-                                                      selected-value="viewElement.sSelectedValues"
-                                                      enable-search-filter="viewElement.bEnableSearchFilter"
-                                                      dropdown-name="viewElement.sDropdownName"
-                                                      on-click-function="viewElement.oOnClickFunction"
-                                                      tooltip="viewElement.tooltip"
-                                    ></wapproductscombo>
+                                        selected-value="viewElement.sSelectedValues"
+                                        enable-search-filter="viewElement.bEnableSearchFilter"
+                                        dropdown-name="viewElement.sDropdownName"
+                                        on-click-function="viewElement.oOnClickFunction" tooltip="viewElement.tooltip">
+                                    </wapproductscombo>
                                 </div>
 
 
                                 <!--select-area-map-->
-                                <div class="col-xs-12 col-md-12 col-lg-12 py-2" ng-if="viewElement.type === 'bbox'" >
+                                <div class="col-xs-12 col-md-12 col-lg-12 py-2" ng-if="viewElement.type === 'bbox'">
                                     <div class="input-text-label pt-2 mb-3">{{viewElement.label}}</div>
-                                    <wapselectarea
-                                        max="viewElement.max"
-                                        maxarea="viewElement.maxArea"
-                                        maxside="viewElement.maxSide"
-                                        maxratioside="viewElement.maxRatioSide"
-                                        bounding-box="viewElement.oBoundingBox"
-                                        tooltip="viewElement.tooltip"></wapselectarea>
+                                    <wapselectarea max="viewElement.max" maxarea="viewElement.maxArea"
+                                        maxside="viewElement.maxSide" maxratioside="viewElement.maxRatioSide"
+                                        bounding-box="viewElement.oBoundingBox" tooltip="viewElement.tooltip">
+                                    </wapselectarea>
                                 </div>
 
                                 <!--timepicker-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'date'" >
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2"
+                                    ng-if="viewElement.type === 'date'">
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>
-                                    <wapdatetimepicker  date-time="viewElement.m_sDate"
-                                    tooltip="viewElement.tooltip"></wapdatetimepicker>
+                                    <wapdatetimepicker date-time="viewElement.m_sDate" tooltip="viewElement.tooltip">
+                                    </wapdatetimepicker>
                                 </div>
 
                                 <!--product list-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2" ng-if="viewElement.type === 'productlist'" >
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2"
+                                    ng-if="viewElement.type === 'productlist'">
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>
-                                    <wapproductlist  products-list="viewElement.aoProducts"
-                                    tooltip="viewElement.tooltip"></wapproductlist>
+                                    <wapproductlist products-list="viewElement.aoProducts"
+                                        tooltip="viewElement.tooltip"></wapproductlist>
                                 </div>
 
                                 <!--searcheoimages-->
-                                <div class="col-xs-12 col-md-12 border-bottom py-2" ng-if="viewElement.type === 'searcheoimage'" >
+                                <div class="col-xs-12 col-md-12 border-bottom py-2"
+                                    ng-if="viewElement.type === 'searcheoimage'">
                                     <div class="input-text-label pt-2 mb-2">{{viewElement.label}}</div>
-                                    <wapsearcheoimage light-search-object="viewElement"
-                                    tooltip="viewElement.tooltip"></wapsearcheoimage>
+                                    <wapsearcheoimage light-search-object="viewElement" tooltip="viewElement.tooltip">
+                                    </wapsearcheoimage>
                                 </div>
 
                                 <!--checkbox-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-4 d-flex align-items-center"  ng-if="viewElement.type === 'boolean'" 
-                                uib-tooltip="{{viewElement.tooltip}}" tooltip-placement="right">
-                                    <wapcheckbox 
-                                    bool-value="viewElement.m_bValue" 
-                                    label-text="viewElement.label"
-                                    tooltip="viewElement.tooltip"></wapcheckbox>
-                                    <div class="input-text-label ml-3" >{{viewElement.label}}</div>
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-4 d-flex align-items-center"
+                                    ng-if="viewElement.type === 'boolean'" uib-tooltip="{{viewElement.tooltip}}"
+                                    tooltip-placement="right">
+                                    <wapcheckbox bool-value="viewElement.m_bValue" label-text="viewElement.label"
+                                        tooltip="viewElement.tooltip"></wapcheckbox>
+                                    <div class="input-text-label ml-3">{{viewElement.label}}</div>
                                 </div>
 
                                 <!--slider-->
-                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-4"  ng-if="viewElement.type === 'slider'">
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-4"
+                                    ng-if="viewElement.type === 'slider'">
                                     <div class="input-text-label">{{viewElement.label}}</div>
-                                    <wapslider value="viewElement.m_iValue" min="viewElement.m_iMin" max="viewElement.m_iMax" label-text="viewElement.label"></wapslider>
+                                    <wapslider value="viewElement.m_iValue" min="viewElement.m_iMin"
+                                        max="viewElement.m_iMax" label-text="viewElement.label"
+                                        tooltip="viewElement.tooltip"></wapslider>
 
                                 </div>
 
@@ -236,13 +261,16 @@
                         </div>
 
                         <!--JSON-->
-                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}">
-                            <textarea  readonly style="font-family:'Courier New',serif;font-size: 16px;width: 100%;" rows="40" ng-model="m_oController.m_sJSONParam"></textarea>
+                        <div class="tab-pane fade in"
+                            ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}">
+                            <textarea readonly style="font-family:'Courier New',serif;font-size: 16px;width: 100%;"
+                                rows="40" ng-model="m_oController.m_sJSONParam"></textarea>
                         </div>
 
 
                         <!--HISTORY-->
-                        <div class="tab-pane fade in history px-3" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}">
+                        <div class="tab-pane fade in history px-3"
+                            ng-class="{'active':m_oController.m_sSelectedTab === 'history'}">
                             <div class="row table-header py-2">
                                 <div class="col col-lg-3">
                                     Date
@@ -262,15 +290,15 @@
                                     {{oRun.operationDate}}
                                 </div>
                                 <div class="col col-lg-2">
-                                    <span class="status-badge"
-                                          ng-class="oRun.status=='DONE'?'done':
+                                    <span class="status-badge" ng-class="oRun.status=='DONE'?'done':
                                           oRun.status=='WAITING'?'waiting':
                                           oRun.status=='STOPPED'?'stopped':
                                           oRun.status=='ERROR'?'error':''
                                           ">{{oRun.status}}</span>
                                 </div>
                                 <div class="col col-lg-7">
-                                    <span class="workspace-name" title="Open Workspace" ng-click="m_oController.historyClicked(oRun.workspaceId)">{{oRun.workspaceName}}</span>
+                                    <span class="workspace-name" title="Open Workspace"
+                                        ng-click="m_oController.historyClicked(oRun.workspaceId)">{{oRun.workspaceName}}</span>
                                 </div>
                             </div>
                         </div>
@@ -281,4 +309,3 @@
         </div>
     </div>
 </div>
-

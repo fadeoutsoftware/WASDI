@@ -523,25 +523,29 @@ class ProductsCombo extends UIComponent {
  * Slider for a numeric input
  * @constructor
  */
-let Slider = function () {
-    this.m_iMin = 0;
-    this.m_iMax = 10;
-    this.m_iValue = 5;
+class Slider extends UIComponent {
+    constructor() {
+        super();
 
-    /**
-     * Get the selected value
-     * @returns {number}
-     */
-    this.getValue = function () {
-        return this.m_iValue;
+        this.m_iMin = 0;
+        this.m_iMax = 10;
+        this.m_iValue = 5;
+
+        /**
+         * Get the selected value
+         * @returns {number}
+         */
+        this.getValue = function () {
+            return this.m_iValue;
+        }
+
+        /**
+         * Get the selected value as a string
+         * @returns {number}
+         */
+        this.getStringValue = function () {
+            return String(this.m_iValue);
+        }
+
     }
-
-    /**
-     * Get the selected value as a string
-     * @returns {number}
-     */
-    this.getStringValue = function () {
-        return String(this.m_iValue);
-    }
-
 }
