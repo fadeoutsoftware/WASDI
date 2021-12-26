@@ -77,35 +77,35 @@ function ViewElementFactory() {
             } else {
                 oViewElement = new ProductsCombo(false); // back to default behaviour, in case showExtension is not specified
             }
-            }
+        }
         else if (oControl.type === "boolean") {
-                oViewElement = new CheckBox();
+            oViewElement = new CheckBox();
 
-                if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
-                    oViewElement.m_bValue = oControl.default;
-                }
+            if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
+                oViewElement.m_bValue = oControl.default;
             }
-            else if (oControl.type === "slider") {
-                oViewElement = new Slider();
+        }
+        else if (oControl.type === "slider") {
+            oViewElement = new Slider();
 
-                if (utilsIsObjectNullOrUndefined(oControl.min) == false) {
-                    oViewElement.m_iMin = oControl.min;
-                }
-                if (utilsIsObjectNullOrUndefined(oControl.max) == false) {
-                    oViewElement.m_iMax = oControl.max;
-                }
-                if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
-                    oViewElement.m_iValue = oControl.default;
-                }
+            if (utilsIsObjectNullOrUndefined(oControl.min) == false) {
+                oViewElement.m_iMin = oControl.min;
+            }
+            if (utilsIsObjectNullOrUndefined(oControl.max) == false) {
+                oViewElement.m_iMax = oControl.max;
+            }
+            if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
+                oViewElement.m_iValue = oControl.default;
+            }
 
-            }
-            else if (oControl.type === "hidden") {
-                oViewElement = new Hidden();
-                oViewElement.m_oValue = oControl.default;
-            }
-            else {
-                oViewElement = new TextBox();
-            }
+        }
+        else if (oControl.type === "hidden") {
+            oViewElement = new Hidden();
+            oViewElement.m_oValue = oControl.default;
+        }
+        else {
+            oViewElement = new TextBox();
+        }
 
             oViewElement.type = oControl.type;
             oViewElement.label = oControl.label;
@@ -113,9 +113,9 @@ function ViewElementFactory() {
             oViewElement.required = oControl.required
 
             return oViewElement;
-        }
+    }
 
-        this.getTabElements = function (oTab) {
+    this.getTabElements = function (oTab) {
 
             let aoTabElements = [];
 

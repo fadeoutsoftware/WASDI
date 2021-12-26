@@ -48,5 +48,7 @@ public interface AuthProviderService {
 	 * @throws IllegalStateException if the users found come in quantity different from 1
 	 */
 	User getUser(String sUserId);
+	String insertOldStyleSession(String sUserId);
+	String getOldStyleRandomSession();
 
 }

@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -309,6 +310,32 @@ public class dbUtils {
             oEx.printStackTrace();
         }
     }
+    
+    public static void redeployProcessor(Processor oProcessor) {
+        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
+        String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
+        String sTomcatUser = WasdiConfig.Current.tomcatUser;
+        
+        String sProcessorFolder = sBasePath + "/processors/" + oProcessor.getName() + "/";
+        
+        if (new File(sProcessorFolder).exists() == false) {
+        	System.out.println("Processor " + oProcessor.getName() + " Does not exists in path " + sProcessorFolder);
+        	return;
+        }
+
+        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath, sTomcatUser);
+
+        ProcessorParameter oParameter = new ProcessorParameter();
+
+        oParameter.setName(oProcessor.getName());
+        oParameter.setProcessorID(oProcessor.getProcessorId());
+
+        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
+
+        oEngine.setParameter(oParameter);
+
+        oEngine.redeploy(oParameter);    	
+    }
 
 
     public static void processors() {
@@ -323,6 +350,7 @@ public class dbUtils {
             System.out.println("\t4 - Fix Processor Creation/Update date");
             System.out.println("\t5 - Update db UI from local ui.json files");
             System.out.println("\t6 - Force Lib Update for all");
+            System.out.println("\t7 - Redeploy all processors");
             System.out.println("\tx - Back");
             System.out.println("");
 
@@ -390,23 +418,8 @@ public class dbUtils {
                     System.out.println(sProcessorName + " does NOT exists");
                     return;
                 }
-
-                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
-                String sTomcatUser = WasdiConfig.Current.tomcatUser;
-
-                WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath, sTomcatUser);
-
-                ProcessorParameter oParameter = new ProcessorParameter();
-
-                oParameter.setName(oProcessor.getName());
-                oParameter.setProcessorID(oProcessor.getProcessorId());
-
-                System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
-
-                oEngine.setParameter(oParameter);
-
-                oEngine.redeploy(oParameter);
+                
+                redeployProcessor(oProcessor);
 
             } else if (sInputString.equals("4")) {
                 ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -442,9 +455,10 @@ public class dbUtils {
                         oProcessorRepository.updateProcessor(oProcessor);
                     }
                 }
-
+                
                 System.out.println("Processors Update Done");
-            } else if (sInputString.equals("5")) {
+            }
+            else if (sInputString.equals("5")) {
                 ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();
                 ProcessorRepository oProcessorRepository = new ProcessorRepository();
                 List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
@@ -491,18 +505,53 @@ public class dbUtils {
 
                         System.out.println("Processor " + sProcessorName + " present in the node");
 
-                        if (oProcessor.getType() == ProcessorTypes.IDL) {
+                        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
 
-                        }
+                        ProcessorParameter oParameter = new ProcessorParameter();
+
+                        oParameter.setName(oProcessor.getName());
+                        oParameter.setProcessorID(oProcessor.getProcessorId());
+
+                        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
+
+                        oEngine.setParameter(oParameter);
+
+                        oEngine.libraryUpdate(oParameter);    	
+
 
                     } else {
                         System.out.println("Processor " + sProcessorName + " NOT present in the node, JUMP");
                     }
                 }
 
-            }
+            }else if (sInputString.equals("7")) {
+            	
+                System.out.println("Please input Processors Type:");
+                String sProcessorType = s_oScanner.nextLine();
+            	
+                System.out.println("Redeploy All processor start");
+                
+
+                ProcessorRepository oProcessorRepository = new ProcessorRepository();
+                
+                List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
+                
+                for (Processor oProcessor : aoProcessors) {
+                	
+                	try {
+                		if (oProcessor.getType().equals(sProcessorType)) {
+                    		System.out.println("Redeploy " + oProcessor.getName());
+                    		redeployProcessor(oProcessor);                			
+                		}
+                	}
+                	catch (Exception oEx) {
+                		System.out.println("Exception redeploying " + oProcessor.getName() + " " + oEx.toString());
+					}
+                }                    
+
+            } 
         } catch (Exception oEx) {
-            System.out.println("processors Exception: " + oEx);
+            System.out.println("processors redeploying Exception: " + oEx);
             oEx.printStackTrace();
         }
     }
@@ -1824,7 +1873,7 @@ public class dbUtils {
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
-            String sConfigFilePath = "/data/wasdi/config.json";
+            String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
 
             // parse the command line arguments
             CommandLine oLine = oParser.parse(oOptions, args);

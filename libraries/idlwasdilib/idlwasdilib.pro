@@ -1405,23 +1405,27 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 
 	; Generate input file names JSON array
 	sParamsJSON = '{'
+	
+	IF aoParameters NE !NULL THEN BEGIN
 
-	; For each input name
-	FOREACH sKey , aoParameters.Keys() DO BEGIN
+		; For each input name
+		FOREACH sKey , aoParameters.Keys() DO BEGIN
 
-		sParamsJSON = sParamsJSON + '"' + sKey + '":'
-		
-		sValue = aoParameters[sKey]
-		
-		IF (sValue NE !NULL) THEN BEGIN
-			sParamsJSON = sParamsJSON + '"' + sValue + '" , '
-		END ELSE BEGIN
-			sParamsJSON = sParamsJSON + '"" , '
+			sParamsJSON = sParamsJSON + '"' + sKey + '":'
+			
+			sValue = aoParameters[sKey]
+			
+			IF (sValue NE !NULL) THEN BEGIN
+				sParamsJSON = sParamsJSON + '"' + sValue + '" , '
+			END ELSE BEGIN
+				sParamsJSON = sParamsJSON + '"" , '
+			END
+			
 		END
-		
-	END
 
-	sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+		sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+	END
+	
 	sParamsJSON = sParamsJSON + '}'
 	
 	IF (verbose EQ 1) THEN BEGIN
@@ -1639,7 +1643,7 @@ END
 
 ; Search EO Images
 ;
-; @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVISAT","L8","VIIRS"
+; @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS"
 ; @param sDateFrom Starting date in format "YYYY-MM-DD"
 ; @param sDateTo End date in format "YYYY-MM-DD"
 ; @param dULLat Upper Left Lat Coordinate. Can be null.
@@ -1661,7 +1665,7 @@ END
 ; 		properties = < Another JSON Object containing other product-specific info >
 ; }
 ;
-FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage 
+FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage, sProvider
 
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
   
@@ -1703,6 +1707,10 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   IF (sCloudCoverage NE !NULL) THEN BEGIN
 	 sQuery = sQuery + " AND cloudcoverpercentage:" + sCloudCoverage
   END  
+  
+  IF (sProvider EQ !NULL) THEN BEGIN
+	 sProvider = 'LSA'
+  END
 		
   ; TODO: CloudCoverage for S2
   
@@ -1720,10 +1728,9 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   
   ;Close the second block
   sQuery = sQuery + ") "
-  
     
   IF ((dULLat NE !NULL) AND  (dULLon NE !NULL) AND (dLRLat NE !NULL) AND (dLRLon NE !NULL) ) THEN BEGIN
-	sFootPrint = '( footprint:"intersects(POLYGON(( ' + dULLon + " " +dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " +dLRLat + ')))") AND ';
+	sFootPrint = '( footprint:"intersects(POLYGON(( ' + STRTRIM(STRING(dULLon),2) + " " +STRTRIM(STRING(dLRLat),2) + "," + STRTRIM(STRING(dULLon),2) + " " + STRTRIM(STRING(dULLat),2) + "," + STRTRIM(STRING(dLRLon),2) + " " + STRTRIM(STRING(dULLat),2) + "," + STRTRIM(STRING(dLRLon),2) + " " + STRTRIM(STRING(dLRLat),2) + "," + STRTRIM(STRING(dULLon),2) + " " +STRTRIM(STRING(dLRLat),2) + ')))") AND ';
 	
 	sQuery = sFootPrint + sQuery;
   END
@@ -1737,9 +1744,9 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   oUrl = OBJ_NEW('IDLnetUrl')
   sEncodedQuery = oUrl->URLEncode(sQuery)
 
-  sQuery = "providers=LSA";
+  sQuery = "providers=" + sProvider;
   
-  UrlPath = UrlPath + '?' + sQuery
+  UrlPath = UrlPath + sQuery
     
   IF (verbose eq '1') THEN BEGIN
 	print, 'SEARCH BODY  ' , sQueryBody

@@ -75,7 +75,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
 import wasdi.shared.viewmodels.processors.AppFilterViewModel;
@@ -1448,7 +1448,6 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorResources.redeployProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 			String sUserId = oUser.getUserId();
 			
@@ -1477,7 +1476,7 @@ public class ProcessorsResource  {
 			}
 			
 			
-			if (Wasdi.s_sMyNodeCode == "wasdi") {
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
 				// Start a thread to update all the computing nodes
 				try {
 					Utils.debugLog("ProcessorsResource.redeployProcessor: this is the main node, starting Worker to redeploy Processor also on computing nodes");
@@ -2157,7 +2156,7 @@ public class ProcessorsResource  {
      */
 	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
 		try {
-			ZipExtractor oZipExtractor = new ZipExtractor(sSessionId + " : " + sProcessorId);
+			ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
 
 			//get containing dir 
 			String sProcessorFolder = oProcessorZipFile.getParent();

@@ -2,6 +2,7 @@ package it.fadeout.services;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -150,7 +151,9 @@ public class KeycloakService implements AuthProviderService {
 				.append(WasdiConfig.Current.keycloack.address)
 				.append("admin/realms/wasdi/users/")
 				.append(sUserDbId)
-				.append("/execute-actions-email?redirect_uri=https://www.wasdi.net/&client_id=wasdi_api");
+				.append("/execute-actions-email?redirect_uri=")
+				.append(WasdiConfig.Current.baseUrl)
+				.append("&client_id=wasdi_api\"");
 		String sUrl = oUrlBuilder.toString();
 		String sPayload = "[\"UPDATE_PASSWORD\"]";
 		try {
@@ -205,6 +208,15 @@ public class KeycloakService implements AuthProviderService {
 		}
 		oNewUser.setUserId(sUserId);
 		return oNewUser;
+	}
+	
+	public String getOldStyleRandomSession() {
+		return UUID.randomUUID().toString();
+	}
+	
+	public String insertOldStyleSession(String sUserId){
+		
+		return "";
 	}
 }
 

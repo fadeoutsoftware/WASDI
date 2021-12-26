@@ -176,7 +176,7 @@ var EditorController = (function () {
             // --- Import ---
             {
                 name: "",
-                icon: "fa fa-cloud-upload",
+                icon: "fa fa-cloud-upload-alt",
                 caption_i18n: "EDITOR_OPERATION_TITLE_IMPORT",
                 subMenu: [],
                 onClick: this.openImportsDialog

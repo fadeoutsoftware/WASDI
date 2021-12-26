@@ -34,6 +34,7 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
         build-essential \
+        curl \
         gdal-bin \
         libffi-dev \
         libgdal-dev \
@@ -59,7 +60,7 @@ COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
 
 
 # Change rights
-RUN chmod 644 $USR_HOME/*
+RUN chmod -R 755 $USR_HOME/
 
 
 # From now, all commands executed are executed with the user $USR_NAME who must not be root

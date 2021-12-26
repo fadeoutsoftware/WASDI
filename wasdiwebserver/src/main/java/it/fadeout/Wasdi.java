@@ -64,6 +64,7 @@ import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -153,7 +154,7 @@ public class Wasdi extends ResourceConfig {
 
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 		
-		String sConfigFilePath = "/data/wasdi/config.json"; 
+		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
 		
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
@@ -659,6 +660,7 @@ public class Wasdi extends ResourceConfig {
 
 				Boolean bNew = false;
 				//store the keycloak access token instead, so we can retrieve the user and perform a further check
+				// NO!!! LIBS does not have the ability to refresh the token!!
 				if (Utils.isNullOrEmpty(sParentId)) {
 					sSessionId = UUID.randomUUID().toString();
 					bNew = true;
@@ -838,7 +840,7 @@ public class Wasdi extends ResourceConfig {
 			
 			File oZippedFile = new File(sTempPath+iRandom + ".zip");
 			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			WasdiFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
 			
 			oOutZipStream.close();
 			

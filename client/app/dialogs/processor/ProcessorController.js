@@ -243,7 +243,14 @@ var ProcessorController = (function() {
                 oController.updateProcessor(oController, oFile);
             }
             else {
-                oController.postProcessor(oController, oController.m_oFile[0]);
+                if (oController.m_oFile != null){
+                    oController.postProcessor(oController, oController.m_oFile[0]);
+                }
+                else{
+                    var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>NO FILE SELECTED, PLEASE UPLOAD THE ARCHIVE CONTAINING PROCESSOR\'S FILES' );
+                    utilsVexCloseDialogAfter(10000, oDialog);
+                }
+                
             }
             // close only if successfull?
             //oClose(oController.m_oProcessorDetails, 300); // close, but give 500ms for bootstrap to animate

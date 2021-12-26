@@ -2,6 +2,8 @@ package wasdi.io;
 
 import java.io.File;
 
+import wasdi.shared.utils.WasdiFileUtils;
+
 public class WasdiProductReaderFactory {
 	
 	private WasdiProductReaderFactory() {
@@ -13,7 +15,8 @@ public class WasdiProductReaderFactory {
 			return null;
 		}
 		
-		if (oFile.getName().toLowerCase().endsWith("shp")) { 
+		if(WasdiFileUtils.isShapeFile(oFile)) {
+		//if (oFile.getName().toLowerCase().endsWith("shp")) { 
 			return new ShapeProductReader(oFile);
 		}
 		
@@ -23,6 +26,11 @@ public class WasdiProductReaderFactory {
 		
 		if (oFile.getName().toLowerCase().startsWith("s5p")) { 
 			return new Sentinel5ProductReader(oFile);
+		}
+		
+		if(WasdiFileUtils.isSentinel3Name(oFile)) {
+		//if (oFile.getName().toLowerCase().startsWith("s3")) { 
+			return new Sentinel3ProductReader(oFile);
 		}
 		
 		return new SnapProductReader(oFile);

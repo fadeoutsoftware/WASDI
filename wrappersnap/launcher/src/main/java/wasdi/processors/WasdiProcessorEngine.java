@@ -214,7 +214,7 @@ public abstract class WasdiProcessorEngine {
 			
 			String sBaseUrl = oProcessor.getNodeUrl();
 			
-			if (Utils.isNullOrEmpty(sBaseUrl)) sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
+			if (Utils.isNullOrEmpty(sBaseUrl)) sBaseUrl = WasdiConfig.Current.baseUrl;
 
 		    String sUrl = sBaseUrl + "/processors/downloadprocessor?processorId="+sProcessorId;
 		    

@@ -74,7 +74,7 @@ public class WasdiScheduler
 		
 		oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
-		String sConfigFilePath = "/data/wasdi/config.json";
+		String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
 		
 		try {
 	        // parse the command line arguments

@@ -7,8 +7,10 @@
 package wasdi.shared.utils;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author c.nattero
@@ -25,8 +27,8 @@ public class TimeEpochUtils {
 
 	public static String fromEpochToDateString(long lEpochMilliSeconds) {
 		try {
-			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(TimeEpochUtils.s_sDATEFORMAT);
-			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone(TimeEpochUtils.s_sTIMEZONE));
+			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(s_sDATEFORMAT);
+			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone(s_sTIMEZONE));
 			return oSimpleDateFormat.format(new Date(lEpochMilliSeconds));
 		}
 		catch (Exception oE) {
@@ -38,8 +40,8 @@ public class TimeEpochUtils {
 	public static Long fromDateStringToEpoch(String sDate) {
 		Long lEpochMilliSeconds = null;
 		try {
-			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(TimeEpochUtils.s_sDATEFORMAT);
-			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone(TimeEpochUtils.s_sTIMEZONE));
+			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(s_sDATEFORMAT);
+			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone(s_sTIMEZONE));
 			Date oDate = oSimpleDateFormat.parse(sDate);
 			lEpochMilliSeconds = oDate.getTime();
 		} catch (Exception oE) {
@@ -47,6 +49,52 @@ public class TimeEpochUtils {
 		}
 		return lEpochMilliSeconds;
 
+	}
+
+	/**
+	 * Count the days of an interval, considering both the start and the end dates.
+	 * @param sFromDate the start of the interval
+	 * @param sToDate the end of the interval
+	 * @return the number of days of the interval
+	 */
+	public static int countDaysIncluding(String sFromDate, String sToDate) {
+		long lStart = fromDateStringToEpoch(sFromDate);
+		long lEnd = fromDateStringToEpoch(sToDate);
+
+		long lDiffInMillies = Math.abs(lEnd - lStart);
+		long lDays = TimeUnit.DAYS.convert(lDiffInMillies, TimeUnit.MILLISECONDS) + 1;
+
+		return (int) lDays;
+	}
+
+	/**
+	 * Get a date in in the future obtained by adding a specified number of days to the specified starting date.
+	 * 
+	 * @param lTimeInMillis the time in millis of the starting date
+	 * @param iDaysLater the number of days to be added
+	 * @return the new date
+	 */
+	public static Date getLaterDate(long lTimeInMillis, int iDaysLater) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(lTimeInMillis);
+		cal.add(Calendar.DATE, iDaysLater);
+
+		return cal.getTime();
+	}
+
+	/**
+	 * Get a date in in the future obtained by adding a specified number of days to the specified starting date.
+	 * 
+	 * @param oCurrentDate the starting date
+	 * @param iDaysLater the number of days to be added
+	 * @return the new date
+	 */
+	public static Date getLaterDate(Date oCurrentDate, int iDaysLater) {
+		if (oCurrentDate == null) {
+			return null;
+		}
+
+		return getLaterDate(oCurrentDate.getTime(), iDaysLater);
 	}
 
 }
