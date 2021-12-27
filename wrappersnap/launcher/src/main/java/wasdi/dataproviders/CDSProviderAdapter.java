@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.BoundingBoxUtils;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
@@ -313,7 +314,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sExtension = "." + sFormat;
 
 		// filename: reanalysis-era5-pressure-levels_UV_20211201
-		String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
+		String sFileName = String.join("_", Platforms.ERA5, sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
 
 		return sFileName;
 	}
