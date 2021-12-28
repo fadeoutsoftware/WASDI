@@ -26,7 +26,7 @@ angular.module('wasdi.wapSelectArea', [])
             // the first on relies on a library, UI-boostrap, the second one relies on a directive 
             template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right"></div>`,
 
-            controller: function () {
+            controller: function ($translate) {
 
 
 
@@ -135,20 +135,24 @@ angular.module('wasdi.wapSelectArea', [])
 
                         let bIsValid = true;
 
-                        let SErrorMessage = "The selected area exceeds the limits imposed for the application:";
+                        let msg = $translate.getTranslationTable().WAP_SELECT_AREA_BASE;
+
+                        
+
+                        let SErrorMessage = $translate.getTranslationTable().WAP_SELECT_AREA_BASE;
 
                         if (fArea > oController.maxarea && oController.maxarea != 0) {
-                            SErrorMessage = SErrorMessage.concat("<br> - The area is too big");
-                            bIsValid = false;
-                        }
-
-                        if (fRatio > oController.maxratioside && oController.maxratioside != 0) {
-                            SErrorMessage = SErrorMessage.concat("<br> - One side is too large compared to the other");
+                            SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_AREA);
                             bIsValid = false;
                         }
 
                         if (fMaxSide > oController.maxside && oController.maxside != 0) {
-                            SErrorMessage = SErrorMessage.concat("<br> - The larger side selected is too big");
+                            SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_SIDE);
+                            bIsValid = false;
+                        }
+
+                        if (fRatio > oController.maxratioside && oController.maxratioside != 0) {
+                            SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_RATIO);
                             bIsValid = false;
                         }
 
@@ -156,12 +160,11 @@ angular.module('wasdi.wapSelectArea', [])
                         if (!bIsValid) {
                             //show error message 
                             utilsVexDialogAlertTop(SErrorMessage.toLocaleUpperCase());
+                            // turn the bounding box red 
                             layer.options.color = "#ff0000";
-                        }// turn it red 
+                        }
                         //save new shape in map
                         oController.m_oDrawnItems.addLayer(layer);
-
-
                     });
 
 
