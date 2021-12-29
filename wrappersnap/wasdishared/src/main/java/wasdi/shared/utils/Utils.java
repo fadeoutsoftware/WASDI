@@ -142,6 +142,15 @@ public class Utils {
 			}
 		}
 	}
+
+	/**
+	 * Format the date using the yyyyMMdd date format.
+	 * @param oDate the date to be formatted
+	 * @return the string containing the formatted date
+	 */
+	public static String formatToYyyyMMdd(Date oDate) {
+		return new SimpleDateFormat("yyyyMMdd").format(oDate);
+	}
 	
 	public static String getFormatDate(Date oDate) {
 

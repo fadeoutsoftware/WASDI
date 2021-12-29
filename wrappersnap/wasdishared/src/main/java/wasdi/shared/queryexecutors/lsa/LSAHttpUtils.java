@@ -9,10 +9,12 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.net.io.Util;
 
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
 public class LSAHttpUtils {
@@ -69,66 +71,15 @@ public class LSAHttpUtils {
 	 */
 	public static String httpGetResults(String sUrl, CookieManager oCookieManager) {
 		Utils.debugLog("QueryExecutorLSA.httpGetResults( " + sUrl + " )");
-		String sResult = null;
-		long lStart = 0l;
-		int iResponseSize = -1;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
-			
-			Utils.debugLog("Sending 'GET' request to URL : " + sUrl);
 
-			lStart = System.nanoTime();
-			try {
-				int responseCode =  oConnection.getResponseCode();
-				Utils.debugLog("QueryExecutorLSA.httpGetResults: Response Code : " + responseCode);
-				String sResponseExtract = null;
-				if(200 == responseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if(null!=oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-					}					
-				} else {
-					Utils.debugLog("QueryExecutorLSA.httpGetResults: provider did not return 200 but "+responseCode+ " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-					
-					String sMessage = oBytearrayOutputStream.toString();
-					if(null!=sMessage) {
-						sResponseExtract = sMessage.substring(0,  Math.min(sMessage.length(), 200)) + "...";
-						Utils.debugLog("QueryExecutorLSA.httpGetResults: provider did not return 200 but "+responseCode+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
-						if(iResponseSize <= 0) {
-							iResponseSize = sMessage.length();
-						}						
-					}
-				}				
-			}
-			catch (Exception oEint) {
-				Utils.debugLog("QueryExecutorLSA.httpGetResults: Exception " + oEint);
-			} 
-			finally {
-				oConnection.disconnect();
-			}
-			
-			long lEnd = System.nanoTime();
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-			double dSpeed = 0;
-			if(iResponseSize > 0) {
-				dSpeed = ( (double) iResponseSize ) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutorLSA.httpGetResults( " + sUrl + " ) performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
-		}
-		catch (Exception oE) {
-			Utils.debugLog("QueryExecutorLSA.httpGetResults: Exception " + oE);
-		}
+		HashMap<String, String> asHeaders = new HashMap<String, String>();
+
+		long lStart = System.nanoTime();
+		String sResult = HttpUtils.standardHttpGETQuery(sUrl, asHeaders);
+		long lEnd = System.nanoTime();
+
+		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
+
 		return sResult;
 	}
 

@@ -20,4 +20,5 @@ public class Platforms {
 	
 	public static String COPERNICUS_MARINE = "Copernicus-Marine";
 	public static String VIIRS = "Viirs";
+	public static String ERA5 = "ERA5";
 }

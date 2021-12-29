@@ -83,7 +83,11 @@ public abstract class QueryTranslator {
 	/**
 	 * Token of VIIRS platform
 	 */
-	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";	
+	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";
+	/**
+	 * Token of ERA5 platform
+	 */
+	private static final String s_sPLATFORMNAME_ERA5 = "platformname:ERA5";
 	/**
 	 * Token of product type
 	 */
@@ -443,6 +447,9 @@ public abstract class QueryTranslator {
 			// Try get Info about VIIRS
 			parseVIIRS(sQuery, oResult);
 			
+			// Try get Info about ERA5
+			parseERA5(sQuery, oResult);
+			
 			// Try to get info about Landsat
 			parseLandsat(sQuery, oResult);
 			
@@ -722,7 +729,76 @@ public abstract class QueryTranslator {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
-	
+	/**
+	 * Fills the Query View Model with ERA5 info
+	 * 
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseERA5(String sQuery, QueryViewModel oResult) {
+		System.out.println("parseERA5 sQuery: " + sQuery);
+		try {
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_ERA5);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_ERA5.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.ERA5;
+
+					oResult.productName = extractValue(sQuery, "dataset");
+					oResult.productType = extractValue(sQuery, "productType");
+					oResult.productLevel = extractValue(sQuery, "pressureLevels");
+					oResult.sensorMode = extractValue(sQuery, "variables");
+					oResult.timeliness = extractValue(sQuery, "format");
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+		}
+	}
+
+	/**
+	 * Extract the value corresponding to the key from the simplifiedquery.
+	 * <br><br>
+	 * For example, using the query <i>AND dataset:reanalysis-era5-pressure-levels AND productType:Reanalysis AND pressureLevels:1 hPa AND variables:U V AND format:netcdf</i>
+	 * and the key <i>dataset</i>, it should return <i>reanalysis-era5-pressure-levels</i>.
+	 * 
+	 * @param sQuery the simplified query
+	 * @param sKey the key
+	 * @return the corresponding value
+	 */
+	private static String extractValue(String sQuery, String sKey) {
+		int iStart = -1;
+		int iEnd = -1;
+
+		if (sQuery.contains(sKey)) {
+			iStart = sQuery.indexOf(sKey);
+
+			iStart += (sKey.length() + 1);
+			iEnd = sQuery.indexOf(" AND ", iStart);
+
+			if (iEnd < 0) {
+				iEnd = sQuery.length();
+			}
+
+			String sType = sQuery.substring(iStart, iEnd);
+			sType = sType.trim();
+
+			return sType;
+		}
+
+		return null;
+	}
 	
 	/**
 	 * Parse Landsat filters

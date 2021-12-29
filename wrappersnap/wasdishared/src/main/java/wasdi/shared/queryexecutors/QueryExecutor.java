@@ -1,17 +1,13 @@
 package wasdi.shared.queryexecutors;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.net.io.Util;
-
 import wasdi.shared.utils.AuthenticationCredentials;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
@@ -211,183 +207,58 @@ public abstract class QueryExecutor {
 			m_oQueryTranslator.setAppconfigPath(sAppConfigPath);
 		}
 	}
-	
+
 	protected String standardHttpGETQuery(String sUrl) {
 		Utils.debugLog("QueryExecutor.standardHttpGETQuery start");
-		String sResult = null;
-		long lStart = 0l;
-		int iResponseSize = -1;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
 
-			if (m_bUseBasicAuthInHttpQuery) {
-				if (m_sUser != null && m_sPassword != null) {
-					String sUserCredentials = m_sUser + ":" + m_sPassword;
+		HashMap<String, String> asHeaders = new HashMap<String, String>();
+
+		if (m_bUseBasicAuthInHttpQuery) {
+			if (m_sUser != null && m_sPassword != null) {
+				String sUserCredentials = m_sUser + ":" + m_sPassword;
+				try {
 					String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
-					oConnection.setRequestProperty("Authorization", sBasicAuth);
-				}				
-			}
-
-			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
-
-			lStart = System.nanoTime();
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				Utils.debugLog("QueryExecutor.standardHttpGETQuery: Response Code : " + iResponseCode);
-				String sResponseExtract = null;
-				if (200 == iResponseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-					}
-
-					if (sResult != null) {
-						if (sResult.length() > 201) {
-							sResponseExtract = sResult.substring(0, 200) + "...";
-						} else {
-							sResponseExtract = new String(sResult);
-						}
-						Utils.debugLog("QueryExecutor.standardHttpGETQuery: Response extract: " + sResponseExtract);
-						iResponseSize = sResult.length();
-					} else {
-						Utils.debugLog("QueryExecutor.standardHttpGETQuery: reponse is empty");
-					}
-				} else {
-					Utils.debugLog("QueryExecutor.standardHttpGETQuery: provider did not return 200 but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-					String sMessage = oBytearrayOutputStream.toString();
-					if (null != sMessage) {
-						sResponseExtract = sMessage.substring(0, Math.min(sMessage.length(), 200)) + "...";
-						Utils.debugLog(
-								"QueryExecutor.standardHttpGETQuery: provider did not return 200 but " + iResponseCode
-										+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
-						if (iResponseSize <= 0) {
-							iResponseSize = sMessage.length();
-						}
-					}
+					asHeaders.put("Authorization", sBasicAuth);
+				} catch (UnsupportedEncodingException oE) {
+					Utils.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
 				}
-			} catch (Exception oEint) {
-				Utils.debugLog("QueryExecutor.standardHttpGETQuery: " + oEint);
-			} finally {
-				oConnection.disconnect();
 			}
-
-			long lEnd = System.nanoTime();
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-			double dSpeed = 0;
-			if (iResponseSize > 0) {
-				dSpeed = ((double) iResponseSize) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutor.standardHttpGETQuery( " + sUrl + " ) performance: " + dMillis + " ms, "
-					+ iResponseSize + " B (" + dSpeed + " B/s)");
-		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
 		}
+
+		long lStart = System.nanoTime();
+		String sResult = HttpUtils.standardHttpGETQuery(sUrl, asHeaders);
+		long lEnd = System.nanoTime();
+
+		HttpUtils.logOperationSpeed(sUrl, "standardHttpGETQuery", lStart, lEnd, sResult);
+
 		return sResult;
 	}
-
+	
 	protected String standardHttpPOSTQuery(String sUrl, String sPayload) {
 		Utils.debugLog("QueryExecutor.standardHttpPOSTQuery( " + sUrl + " )");
-		String sResult = null;
-		long lStart = 0l;
-		int iResponseSize = -1;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Accept", "*/*");
-			
-			if (m_bUseBasicAuthInHttpQuery) {
-				if (m_sUser != null && m_sPassword != null) {
-					String sUserCredentials = m_sUser + ":" + m_sPassword;
+
+		HashMap<String, String> asHeaders = new HashMap<String, String>();
+		asHeaders.put("Content-Type", "application/xml");
+
+		if (m_bUseBasicAuthInHttpQuery) {
+			if (m_sUser != null && m_sPassword != null) {
+				String sUserCredentials = m_sUser + ":" + m_sPassword;
+				try {
 					String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
-					oConnection.setRequestProperty("Authorization", sBasicAuth);
-				}				
-			}
-
-			oConnection.setDoOutput(true);
-			byte[] ayBytes = sPayload.getBytes();
-			oConnection.setFixedLengthStreamingMode(ayBytes.length);
-			oConnection.setRequestProperty("Content-Type", "application/xml");
-			oConnection.connect();
-			try (OutputStream os = oConnection.getOutputStream()) {
-				os.write(ayBytes);
-			}
-
-			Utils.debugLog("QueryExecutor.standardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
-
-			lStart = System.nanoTime();
-			try {
-				int responseCode = oConnection.getResponseCode();
-				Utils.debugLog("QueryExecutor.httpGetResults: Response Code : " + responseCode);
-				String sResponseExtract = null;
-				if (200 == responseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-					}
-
-					if (sResult != null) {
-						if (sResult.length() > 200) {
-							sResponseExtract = sResult.substring(0, 200) + "...";
-						} else {
-							sResponseExtract = new String(sResult);
-						}
-						Utils.debugLog("QueryExecutor.standardHttpPOSTQuery: Response extract: " + sResponseExtract);
-						iResponseSize = sResult.length();
-					} else {
-						Utils.debugLog("QueryExecutor.standardHttpPOSTQuery: reponse is empty");
-					}
-				} else {
-					Utils.debugLog("QueryExecutor.standardHttpPOSTQuery: provider did not return 200 but "
-							+ responseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-					String sMessage = oBytearrayOutputStream.toString();
-					if (null != sMessage) {
-						sResponseExtract = sMessage.substring(0, 200) + "...";
-						Utils.debugLog(
-								"QueryExecutor.standardHttpPOSTQuery: provider did not return 200 but " + responseCode
-										+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
-						if (iResponseSize <= 0) {
-							iResponseSize = sMessage.length();
-						}
-					}
+					asHeaders.put("Authorization", sBasicAuth);
+				} catch (UnsupportedEncodingException oE) {
+					Utils.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
 				}
-			} catch (Exception oEint) {
-				Utils.debugLog("QueryExecutor.standardHttpPOSTQuery: " + oEint);
-			} finally {
-				oConnection.disconnect();
 			}
-
-			long lEnd = System.nanoTime();
-			long lTimeElapsed = lEnd - lStart;
-			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
-			double dSpeed = 0;
-			if (iResponseSize > 0) {
-				dSpeed = ((double) iResponseSize) / dMillis;
-				dSpeed *= 1000.0;
-			}
-			Utils.debugLog("QueryExecutor.standardHttpPOSTQuery( " + sUrl + " ) performance: " + dMillis + " ms, "
-					+ iResponseSize + " B (" + dSpeed + " B/s)");
-		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutor.standardHttpPOSTQuery: " + oE);
 		}
+
+		long lStart = System.nanoTime();
+		String sResult = HttpUtils.standardHttpPOSTQuery(sUrl, asHeaders, sPayload);
+		long lEnd = System.nanoTime();
+
+		HttpUtils.logOperationSpeed(sUrl, "standardHttpPOSTQuery", lStart, lEnd, sResult);
+
 		return sResult;
 	}
+
 }

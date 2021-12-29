@@ -32,9 +32,9 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
@@ -354,7 +354,7 @@ public class ProcessWorkspaceResource {
 						Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
 						
 						
-						String sResponse = Wasdi.httpGet(sUrl, asHeaders);
+						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
 							ArrayList<ProcessHistoryViewModel> aoNodeHistory = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessHistoryViewModel>>(){});
@@ -490,7 +490,7 @@ public class ProcessWorkspaceResource {
 						Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
 						
 						
-						String sResponse = Wasdi.httpGet(sUrl, asHeaders);
+						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
 							AppStatsViewModel oNodeStats = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<AppStatsViewModel>(){});

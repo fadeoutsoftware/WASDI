@@ -56,7 +56,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
     		Group rootGroup = oFile.getRootGroup();
     		List<Group> rootGroupGroups = rootGroup.getGroups();
 
-        	ArrayList<BandViewModel> oBands = new ArrayList<BandViewModel>();
+        	List<BandViewModel> oBands = new ArrayList<>();
 
     		for (Group g : rootGroupGroups) {
     			if (g.getShortName().equalsIgnoreCase("PRODUCT")) {
@@ -113,7 +113,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		try {
 			return extractBboxFromFile(m_oProductFile.getAbsolutePath());
 		} catch (Exception e) {
-    		LauncherMain.s_oLogger.debug("Sentinel5ProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+    		LauncherMain.s_oLogger.debug("Sentinel5ProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
 
     		return null;
 		}

@@ -207,6 +207,29 @@ public class WasdiFileUtils {
 		return outcome;
 	}
 
+	public static String renameFile(String sOldFileFullName, String sNewFileSimpleName) {
+		if (sOldFileFullName == null) {
+			Utils.log("ERROR", "WasdiFileUtils.renameFile: sSourceAbsoluteFullName is null");
+			return null;
+		}
+
+		if (sNewFileSimpleName == null) {
+			Utils.log("ERROR", "WasdiFileUtils.renameFile: sNewFileName is null");
+			return null;
+		}
+
+		File sourceFile = new File(sOldFileFullName);
+		if (!fileExists(sourceFile)) {
+			Utils.log("ERROR", "WasdiFileUtils.renameFile: sourceFile does not exist");
+			return null;
+		}
+
+		File newFile = new File(sourceFile.getParent(), sNewFileSimpleName);
+		sourceFile.renameTo(newFile);
+
+		return newFile.getAbsolutePath();
+	}
+
 	/**
 	 * Delete a file from the filesystem. If the file is a directory, also delete the child directories and files.
 	 * @param filePath the absolute path of the file

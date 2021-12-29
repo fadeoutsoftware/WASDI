@@ -15,36 +15,10 @@
                             <th scope="col">Value</th>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Date</td>
-                                    <td>{{m_oController.m_oProduct.properties.beginposition}}</td>
+                                <tr ng-repeat="property in m_oController.m_oPropertiesList" ng-hide="m_oController.m_oPropertiesList.length === 0">
+                                    <td>{{property.label}}</td>
+                                    <td>{{property.value}}</td>
                                 </tr>
-                                <tr>
-                                    <td>Instrument</td>
-                                    <td>{{m_oController.m_oProduct.properties.instrumentshortname}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Satellite</td>
-                                    <td>{{m_oController.m_oProduct.properties.platformname}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Mode</td>
-                                    <td>{{m_oController.m_oProduct.properties.sensoroperationalmode}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Relative orbit</td>
-                                    <td>{{m_oController.m_oProduct.properties.relativeorbitnumber}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Size</td>
-                                    <td>{{m_oController.m_oProduct.properties.size}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Polarisation</td>
-                                    <td>{{m_oController.m_oProduct.properties.polarisationmode}}</td>
-                                </tr>
-
-
                             </tbody>
                             <tfoot></tfoot>
                         </table>
