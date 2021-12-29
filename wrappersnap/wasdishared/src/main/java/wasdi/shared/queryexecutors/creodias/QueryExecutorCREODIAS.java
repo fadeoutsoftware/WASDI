@@ -22,13 +22,6 @@ public class QueryExecutorCREODIAS extends QueryExecutorHttpGet {
 		m_sProvider="CREODIAS";
 		this.m_oQueryTranslator = new QueryTranslatorCREODIAS();
 		this.m_oResponseTranslator = new ResponseTranslatorCREODIAS();
-		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL5P);
-		m_asSupportedPlatforms.add(Platforms.LANDSAT8);
-		m_asSupportedPlatforms.add(Platforms.ENVISAT);
 	}
 	
 }

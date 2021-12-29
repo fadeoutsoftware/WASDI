@@ -5,7 +5,9 @@ import java.io.File;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
 public class LSAProviderAdapter extends ProviderAdapter {
@@ -24,6 +26,16 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	 * URL domain (i.e. https://collgs.lu/repository/).
 	 */
 	private String m_sProviderUrlDomain = "";
+	
+	public LSAProviderAdapter() {
+		super();
+		m_sDataProviderCode = "LSA";
+	}
+	
+	public LSAProviderAdapter(LoggerWrapper logger) {
+		super(logger);
+		m_sDataProviderCode = "LSA";
+	}
 
 
 	@Override
@@ -196,10 +208,10 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	}
 	
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("LSA");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 			m_sDefaultProtocol = oConfig.defaultProtocol; 
 			m_sProviderBasePath = oConfig.localFilesBasePath;
 			m_sProviderUrlDomain = oConfig.urlDomain;
@@ -209,5 +221,20 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		}		
 	}
 
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2)) {
+			if (isWorkspaceOnSameCloud()) {
+				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			}
+			else {
+				return DataProviderScores.DOWNLOAD.getValue();
+			}
+		}
+		
+		return 0;
+		
+	}
 	
 }

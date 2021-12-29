@@ -1,6 +1,7 @@
 package wasdi.operations;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -73,27 +74,29 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         try {
         	
         	DownloadFileParameter oParameter = (DownloadFileParameter) oParam;
-        	
-        	if (!Utils.isNullOrEmpty(oParameter.getName())) {
-        		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oParameter.getProvider());
-        		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oParameter.getProvider()); 
-        		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), oDataProviderConfig.defaultProtocol);
-        		m_oLocalLogger.debug("File Uri: " + sFileUri);
-        	}
-        	
-            m_oProcessWorkspaceLogger.log("Fetch Start - PROVIDER " + oParameter.getProvider());
+        	        	
+            m_oProcessWorkspaceLogger.log("Fetch Start - REQUESTED PROVIDER " + oParameter.getProvider());
 
-            ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
-			oProviderAdapter.readConfig();
-
-            if (oProviderAdapter != null) {
-                oProviderAdapter.subscribe(this);
+            ProviderAdapter oProviderAdapter = null; 
+            
+            if (Utils.isNullOrEmpty(oParameter.getProvider())) {
+            	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
+            }
+            else if (oParameter.getProvider().equals("AUTO")) {
+            	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
+            }
+            else {
+            	oProviderAdapter = getProviderAdapater(oParameter.getProvider(), oParameter, oProcessWorkspace);
             }
             
-            oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
-            oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
+            if (oProviderAdapter == null) {
+            	m_oProcessWorkspaceLogger.log("ERROR searching a Data Provider. Abort.");
+            	return false;
+            }
             
-            oProviderAdapter.setProcessWorkspace(oProcessWorkspace);
+            m_oLocalLogger.error("Got Data Provider " + oProviderAdapter.getCode());
+            m_oProcessWorkspaceLogger.log("Fetch Start - GOT DATA PROVIDER " + oProviderAdapter.getCode());
+            
             
             // get file size
             long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
@@ -111,45 +114,10 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             m_oLocalLogger.debug("Download.executeOperation: File to download: " + sFileNameWithoutPath);
             m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
 
-            DownloadedFile oAlreadyDownloaded = null;
+            DownloadedFile oAlreadyDownloaded = fileAlreadyAvailable(sFileNameWithoutPath);
+            
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
             
-            // If we have the name of the file
-            if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
-
-                // First check if it is already in this workspace:
-                oAlreadyDownloaded = oDownloadedRepo.getDownloadedFileByPath(sDownloadPath + sFileNameWithoutPath);
-
-                if (oAlreadyDownloaded == null) {
-                	
-                	// Check if it is already downloaded, in any workpsace
-                	
-                    m_oLocalLogger.debug("Download.executeOperation: Product NOT found in the workspace, search in other workspaces");
-                    
-                    List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
-
-                    // Check if any of this is in this node
-                    for (DownloadedFile oDownloadedCandidate : aoExistingList) {
-
-                        if (new File(oDownloadedCandidate.getFilePath()).exists()) {
-                            oAlreadyDownloaded = oDownloadedCandidate;
-                            m_oLocalLogger.debug("Download.executeOperation: found already existing copy on this computing node");
-                            break;
-                        }
-                    }
-                }
-                else {
-                	File oAlreadyDownloadedFileCheck = new File(oAlreadyDownloaded.getFilePath());
-                	if (oAlreadyDownloadedFileCheck.exists() == false) {
-                  	  	m_oLocalLogger.debug("Download.executeOperation: Product found in the database but the file does not exists in the node");
-                  	  	oAlreadyDownloaded = null;
-                	}
-                	else {
-                		m_oLocalLogger.debug("Download.executeOperation: Product already found in the node");
-                	}
-                }
-            }
-
             if (oAlreadyDownloaded == null) {
                 m_oLocalLogger.debug("Download.executeOperation: File not already downloaded. Download it");
 
@@ -167,6 +135,10 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     m_oLocalLogger.error("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
                 }
 
+                if (oProviderAdapter != null) {
+                    oProviderAdapter.subscribe(this);
+                }
+                
                 // Download the File
                 sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
 
@@ -326,7 +298,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         }
     }
     
-
+    /**
+     * Check if the file is already available
+     * @param sFileNameWithoutPath
+     * @return
+     */
 	protected DownloadedFile fileAlreadyAvailable(String sFileNameWithoutPath) {
 
         String sDownloadPath = WasdiConfig.Current.paths.downloadRootPath;
@@ -404,12 +380,104 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
-        //m_oLocalLogger.debug("Download.executeOperation: return file name " + sFileName);
-
-        return oAlreadyDownloaded;
-		
+        return oAlreadyDownloaded;		
 	}
     
+	/**
+	 * Select the best Provider Adapter for this Parameter (so file to download)
+	 * @param oParameter
+	 * @param oProcessWorkspace
+	 * @return
+	 */
+	public ProviderAdapter getBestProviderAdapater(DownloadFileParameter oParameter, ProcessWorkspace oProcessWorkspace) {
+		
+		// List of Data Providers ordered for ranking: the first is the best
+		ArrayList<ProviderAdapter> aoDataProviderRanking = new ArrayList<ProviderAdapter>();
+		// Parallel list of scores for each Data Provider
+		ArrayList<Integer> aiScores = new ArrayList<Integer>();
+		
+		try {
+			
+			// For all the Data Providers			
+			for (DataProviderConfig oDataProviderConfig : WasdiConfig.Current.dataProviders) {
+				
+				// Create and configure the Provider Adapter
+	            ProviderAdapter oProviderAdapter = getProviderAdapater(oDataProviderConfig.name, oParameter, oProcessWorkspace);
+	            
+	            // Compute the score for this Provider Adapter				
+	            int iScore = oProviderAdapter.getScoreForFile(oParameter.getName());
+	            
+	            // Score must be > 0, otherwise file is not supported
+	            if (iScore > 0) {
+	            	
+	            	// Search the position of this score in the ranking
+	            	int iIndex = 0;
+	            	
+	            	for (iIndex = 0; iIndex < aiScores.size(); iIndex++) {
+	            		if (aiScores.get(iIndex)<iScore) break; 
+	            	}
+	            	
+	            	// Insert the data Provider in the correct position
+	            	aiScores.add(iIndex, iScore);
+	            	aoDataProviderRanking.add(iIndex,oProviderAdapter);
+	            }	            
+			}
+			
+			// For the selected data providers, starting from the best
+			for (int iIndex = 0; iIndex<aoDataProviderRanking.size(); iIndex++) {
+				
+				// Check if the file is in the catalogues
+				ProviderAdapter oProviderAdapter = aoDataProviderRanking.get(iIndex);
+	    		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oParameter.getProvider());
+	    		
+	    		// Must obtain the URI!!
+	    		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol);
+	    		
+	    		if (!Utils.isNullOrEmpty(sFileUri)) {
+	    			// If we got the URI, this is the best Provider Adapter
+	    			
+	    			// Set the URI to the parameter
+	    			oParameter.setUrl(sFileUri);
+	    			// Return the Provider Adapter
+	    			return oProviderAdapter;
+	    		}
+			}
+		}
+		catch (Exception oEx) {
+        	
+            m_oLocalLogger.error("Download.getBestProviderAdapater: Exception "
+                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        }
+		
+		return null;
+	}
 	
+	/**
+	 * Get a configured instance of a Provider Adapter
+	 * @param sCode Code of the provider adapter
+	 * @param oParameter DownloedFileParameter
+	 * @param oProcessWorkspace Process Workspace
+	 * @return ProviderAdapter configured
+	 */
+	public ProviderAdapter getProviderAdapater(String sCode, DownloadFileParameter oParameter, ProcessWorkspace oProcessWorkspace) {
+		try {
+			
+            ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(sCode);
+			oProviderAdapter.readConfig();
+            oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
+            oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
+            oProviderAdapter.setProcessWorkspace(oProcessWorkspace);
+            
+            return oProviderAdapter;
+
+		}
+		catch (Exception oEx) {
+        	
+            m_oLocalLogger.error("Download.getBestProviderAdapater: Exception "
+                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        }
+		
+		return null;
+	}
 
 }

@@ -33,8 +33,11 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.LoggerWrapper;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * @author c.nattero
@@ -46,7 +49,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * 
 	 */
 	public ONDAProviderAdapter() {
-
+		m_sDataProviderCode = "ONDA";
 	}
 
 	/**
@@ -54,6 +57,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 */
 	public ONDAProviderAdapter(LoggerWrapper logger) {
 		super(logger);
+		m_sDataProviderCode = "ONDA";
 	}
 
 	/* (non-Javadoc)
@@ -557,8 +561,36 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	}
 	
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
 	}
+	
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
+				|| sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P) ||
+				sPlatformType.equals(Platforms.LANDSAT8)) {
+			Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+			
+			Date oNow = new Date();
+			
+			long lDistance = oNow.getTime() - oImageDate.getTime();
+			
+			if (lDistance> 4*30*24*60*60*1000) {
+				return DataProviderScores.LTA.getValue();
+			}
+			
+			if (isWorkspaceOnSameCloud()) {
+				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			}
+			else {
+				return DataProviderScores.DOWNLOAD.getValue();
+			}
+		}
+		
+		return 0;
+	}
+
 
 }

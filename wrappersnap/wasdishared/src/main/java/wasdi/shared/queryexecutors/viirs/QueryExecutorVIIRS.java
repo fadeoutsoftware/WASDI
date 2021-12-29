@@ -51,7 +51,6 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		this.m_oQueryTranslator = new QueryTranslatorVIIRS();
 		this.m_oResponseTranslator = new ResponseTranslatorVIIRS();
 		
-		m_asSupportedPlatforms.add(Platforms.VIIRS);
 	}
 	
 	@Override

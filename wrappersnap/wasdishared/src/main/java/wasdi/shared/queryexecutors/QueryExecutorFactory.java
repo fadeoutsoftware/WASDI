@@ -114,6 +114,12 @@ public class QueryExecutorFactory {
 						oCredentials,
 						sParserConfigPath, sAppConfigPath);
 				
+				oExecutor.getSupportedPlatforms().clear();
+				
+				for (String sSupportedPlatform : oDataProviderConfig.supportedPlatforms) {
+					oExecutor.getSupportedPlatforms().add(sSupportedPlatform);
+				}
+				
 				oExecutor.init();
 			}
 		} catch (Exception oE) {

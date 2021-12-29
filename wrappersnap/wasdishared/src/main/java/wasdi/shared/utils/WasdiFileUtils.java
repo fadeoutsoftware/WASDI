@@ -14,12 +14,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.google.common.base.Preconditions;
+
+import wasdi.shared.queryexecutors.Platforms;
 
 /**
  * @author c.nattero
@@ -418,6 +421,155 @@ public class WasdiFileUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * Get the Platform code of the mission starting from the file Name
+	 * @param sFileName File Name to investigate
+	 * @return Code of the Platform as definied in the Platforms class. Null if not recognized
+	 */
+	public static String getPlatformFromSatelliteImageFileName(String sFileName) {
+		try {
+			if (Utils.isNullOrEmpty(sFileName)) return null;
+			
+			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_")) {
+				return Platforms.SENTINEL1;
+			}
+			else if (sFileName.toUpperCase().startsWith("S2A_") || sFileName.toUpperCase().startsWith("S2B_")) {
+				return Platforms.SENTINEL2;
+			}
+			else if (sFileName.toUpperCase().startsWith("S3A_") || sFileName.toUpperCase().startsWith("S3B_") || sFileName.toUpperCase().startsWith("S3__")) {
+				return Platforms.SENTINEL3;
+			}
+			else if (sFileName.toUpperCase().startsWith("S5P_")) {
+				return Platforms.SENTINEL5P;
+			}
+			else if (sFileName.toUpperCase().startsWith("LC08_")) {
+				return Platforms.LANDSAT8;
+			}
+			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
+				return Platforms.ENVISAT;
+			}
+			else if (sFileName.toUpperCase().startsWith("RIVER-FLD")) {
+				return Platforms.VIIRS;
+			}
+			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {
+				return Platforms.PROVAV;
+			}
+			
+			return null;
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("WasdiFileUtils.getPlatformFromFileName: exception " + oEx.toString());
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Get the reference date of a Satellite Image from the file Name
+	 * If not available, not relevant or in case of error returns "now".
+	 * @param sFileName Name of the Satellite Image File
+	 * @return Reference Date 
+	 */
+	public static Date getDateFromSatelliteImageFileName(String sFileName) {
+		
+		try {
+			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
+			if (Utils.isNullOrEmpty(sPlatform)) return new Date();
+			
+			if (sPlatform.equals(Platforms.SENTINEL1)) {
+				String [] asS1Parts = sFileName.split("_");
+				String sDate = asS1Parts[4];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.SENTINEL2)) {
+				String [] asS2Parts = sFileName.split("_");
+				String sDate = asS2Parts[2];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);				
+			}
+			else if (sPlatform.equals(Platforms.SENTINEL3)) {
+				sFileName = sFileName.substring(4);
+				String [] asS3Parts = sFileName.split("_");
+				String sDate = asS3Parts[3];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
+				String sDate = sFileName.substring(20, 15);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.ENVISAT)) {
+				String sDate = sFileName.substring(14, 6);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.LANDSAT8)) {
+				String [] asL8Parts = sFileName.split("_");
+				String sDate = asL8Parts[3];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
+				return new Date(lTime);				
+			}
+			else if (sPlatform.equals(Platforms.VIIRS)) {
+				String [] asViirsParts = sFileName.split("_");
+				String sDate = asViirsParts[1];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
+				return new Date(lTime);				
+			}			
+			
+			// For CMEMS, ERA5 are Not relevant 
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+		}
+		
+		return new Date();
+	}
+	
+	
+	
+	/**
+	 * Get the Product Type of a Satellite Image from the file Name
+	 * If not available, not relevant or in case of error returns "".
+	 * @param sFileName Name of the Satellite Image File
+	 * @return Product Type, or ""  
+	 */
+	public static String getProductTypeSatelliteImageFileName(String sFileName) {
+		
+		try {
+			String sPlatform = getPlatformFromSatelliteImageFileName(sFileName);
+			if (Utils.isNullOrEmpty(sPlatform)) return "";
+			
+			if (sPlatform.equals(Platforms.SENTINEL1)) {
+				String [] asS1Parts = sFileName.split("_");
+				String sType = asS1Parts[2];
+				return sType.substring(0,3);
+			}
+			else if (sPlatform.equals(Platforms.SENTINEL2)) {
+				String [] asS2Parts = sFileName.split("_");
+				String sType = asS2Parts[1];
+				return sType;				
+			}
+			else if (sPlatform.equals(Platforms.SENTINEL3)) {
+				String sType = sFileName.substring(9,6);
+				return sType;
+			}
+			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
+				String sType = sFileName.substring(9, 10);
+				return sType;
+			}
 
+			// For Others are Not relevant 
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+		}
+		
+		return "";
+	}
+	
+	
 
 }

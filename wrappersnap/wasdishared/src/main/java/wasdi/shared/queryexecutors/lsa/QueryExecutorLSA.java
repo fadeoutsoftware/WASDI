@@ -43,8 +43,6 @@ public class QueryExecutorLSA extends QueryExecutor {
 		this.m_oQueryTranslator = new QueryTranslatorLSA();
 		this.m_oResponseTranslator = new ResponseTranslatorLSA();
 		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
 	}
 	
 	@Override

@@ -35,15 +35,6 @@ public class QueryExecutorONDA extends QueryExecutorOpenSearch {
 		m_sProvider="ONDA";
 		this.m_oQueryTranslator = new QueryTranslatorONDA();
 		this.m_oResponseTranslator = new ResponseTranslatorONDA();
-		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
-		
-		m_asSupportedPlatforms.add(Platforms.ENVISAT);
-		m_asSupportedPlatforms.add(Platforms.LANDSAT8);
-		m_asSupportedPlatforms.add(Platforms.COPERNICUS_MARINE);
-		
 	}
 
 	/* (non-Javadoc)

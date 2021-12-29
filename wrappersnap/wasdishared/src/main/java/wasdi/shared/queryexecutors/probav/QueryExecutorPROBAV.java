@@ -51,7 +51,6 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 		m_sProvider = "PROBAV";
 		m_oQueryTranslator = new QueryTranslatorProbaV();
 		
-		m_asSupportedPlatforms.add(Platforms.PROVAV);
 	}
 
 	@Override

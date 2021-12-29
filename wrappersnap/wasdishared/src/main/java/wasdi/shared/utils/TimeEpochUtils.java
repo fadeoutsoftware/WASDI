@@ -36,11 +36,17 @@ public class TimeEpochUtils {
 			return "";
 		}
 	}
-
-	public static Long fromDateStringToEpoch(String sDate) {
+	
+	/**
+	 * Return the Epoch Milli Seconds of a String date with the sDateFormat
+	 * @param sDate String representing the date
+	 * @param sDateFormat String Date Format
+	 * @return time epoch
+	 */
+	public static Long fromDateStringToEpoch(String sDate, String sDateFormat) {
 		Long lEpochMilliSeconds = null;
 		try {
-			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(s_sDATEFORMAT);
+			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(sDateFormat);
 			oSimpleDateFormat.setTimeZone(TimeZone.getTimeZone(s_sTIMEZONE));
 			Date oDate = oSimpleDateFormat.parse(sDate);
 			lEpochMilliSeconds = oDate.getTime();
@@ -49,6 +55,16 @@ public class TimeEpochUtils {
 		}
 		return lEpochMilliSeconds;
 
+	}
+	
+	/**
+	 * Return the Epoch Milli Seconds of a String date with the default format "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+	 * for UTC zone  
+	 * @param sDate String representing the date
+	 * @return time epoch
+	 */
+	public static Long fromDateStringToEpoch(String sDate) {
+		return fromDateStringToEpoch(sDate, s_sDATEFORMAT);
 	}
 
 	/**

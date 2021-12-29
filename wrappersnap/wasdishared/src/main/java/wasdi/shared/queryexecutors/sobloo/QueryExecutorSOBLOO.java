@@ -29,9 +29,6 @@ public class QueryExecutorSOBLOO extends QueryExecutorHttpGet {
 		
 		m_bUseBasicAuthInHttpQuery = false;
 		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
 	}
 
 }

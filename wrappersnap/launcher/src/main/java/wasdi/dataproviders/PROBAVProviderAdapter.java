@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -25,9 +26,11 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	@SuppressWarnings("unchecked")
 	public PROBAVProviderAdapter() {
 		super();
-
+		
+		m_sDataProviderCode = "PROBAV";
+		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("PROBAV");
+			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 			
 			String sFile = oConfig.fileDescriptors;
 
@@ -43,6 +46,8 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	public PROBAVProviderAdapter(LoggerWrapper logger) {
 		super(logger);
+		
+		m_sDataProviderCode = "PROBAV";
 	}
 
 	@Override
@@ -429,8 +434,22 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
+	}
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		if (sPlatformType.equals(Platforms.PROVAV)) {
+			if (isWorkspaceOnSameCloud()) {
+				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			}
+			else {
+				return DataProviderScores.DOWNLOAD.getValue();
+			}
+		}
+		
+		return 0;
 	}
 
 }

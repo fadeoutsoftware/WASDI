@@ -36,9 +36,6 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 		m_sProvider = "SENTINEL";
 		m_oQueryTranslator = new QueryTranslatorSentinelHub();
 		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
 	}
 	
 	@Override
