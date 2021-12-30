@@ -84,15 +84,16 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         try {
         	
         	DownloadFileParameter oParameter = (DownloadFileParameter) oParam;
+        	
+        	if (Utils.isNullOrEmpty(oParameter.getProvider())) {
+        		oParameter.setProvider("AUTO");
+        	}
         	        	
             m_oProcessWorkspaceLogger.log("Fetch Start - REQUESTED PROVIDER " + oParameter.getProvider());
 
             ProviderAdapter oProviderAdapter = null; 
             
-            if (Utils.isNullOrEmpty(oParameter.getProvider())) {
-            	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
-            }
-            else if (oParameter.getProvider().equals("AUTO")) {
+            if (oParameter.getProvider().equals("AUTO")) {
             	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
             }
             else {
@@ -278,6 +279,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             setPayload(oProcessWorkspace, oDownloadPayload);
             
             m_oLocalLogger.debug("Download.executeOperation: operation done");
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
             
             return true;
             
@@ -481,6 +483,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 			ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(m_iDataProviderIndex);
 			
 			if (doesProviderAdapterFindFile(oProviderAdapter, oParameter)) {
+				
+	            DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
+	            oParameter.setDownloadUser(oDataProviderConfig.user);
+	            oParameter.setDownloadPassword(oDataProviderConfig.password);
+				
 				// Ok return this
 				return oProviderAdapter;
 			}
@@ -525,6 +532,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		try {
 			
             ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(sCode);
+            
+            DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sCode);
+            oParameter.setDownloadUser(oDataProviderConfig.user);
+            oParameter.setDownloadPassword(oDataProviderConfig.password);
+            
 			oProviderAdapter.readConfig();
             oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
             oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());

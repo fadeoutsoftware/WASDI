@@ -70,6 +70,8 @@ public class Mosaic extends Operation {
 
                 m_oLocalLogger.debug("Mosaic.executeOperation: product added to workspace");
                 
+                updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+                
                 return true;
             } else {
                 // error

@@ -396,6 +396,8 @@ public class Publishband extends Operation {
                 oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
             }
             
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+            
             return true;
             
         } catch (Exception oEx) {
