@@ -26,7 +26,7 @@ public class KillProcessTreeParameter extends BaseParameter {
 	 */
 	private boolean killTree = true;
 	
-	/*
+	/**
 	 * If true, then DB entries will be removed too
 	 */
 	private boolean cleanDb = false;

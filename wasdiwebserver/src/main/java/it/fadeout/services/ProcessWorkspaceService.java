@@ -71,8 +71,12 @@ public class ProcessWorkspaceService {
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			String sOwner = oWorkspace.getUserId();
 			oKillProcessParameter.setWorkspaceOwnerId(sOwner);
+			
 			if(null!=bCleanDB) {
-				oKillProcessParameter.setCleanDb(true);
+				oKillProcessParameter.setCleanDb(bCleanDB);
+			}
+			else {
+				oKillProcessParameter.setCleanDb(false);
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
