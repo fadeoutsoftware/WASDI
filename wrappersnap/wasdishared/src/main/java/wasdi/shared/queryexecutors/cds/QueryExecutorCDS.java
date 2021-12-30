@@ -47,111 +47,126 @@ public class QueryExecutorCDS extends QueryExecutor {
 		this.m_oQueryTranslator = new QueryTranslatorCDS();
 		this.m_oResponseTranslator = new ResponseTranslatorCDS();
 		
-		m_asSupportedPlatforms.add(Platforms.ERA5);
 	}
 
 	@Override
 	public int executeCount(String sQuery) {
-		int iCount = 0;
+		
+		try {
+			int iCount = 0;
 
-		// Parse the query
-		QueryViewModel oCDSQuery = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			// Parse the query
+			QueryViewModel oCDSQuery = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 
-		if (!m_asSupportedPlatforms.contains(oCDSQuery.platformName)) {
-			return 0;
+			if (!m_asSupportedPlatforms.contains(oCDSQuery.platformName)) {
+				return -1;
+			}
+
+			int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
+
+			iCount = iDays;
+
+			return iCount;			
 		}
-
-		int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
-
-		iCount = iDays;
-
-		return iCount;
+		catch (Exception oEx) {
+			Utils.debugLog("QueryExecutorCDS.executeCount: error " + oEx.toString());
+		}
+		
+		return -1;
 	}
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		List<QueryResultViewModel> aoResults = new ArrayList<>();
-
-		int iActualElement = 0;
-
-		// Parse the query
-		QueryViewModel oCDSQuery = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
-
-		if (!m_asSupportedPlatforms.contains(oCDSQuery.platformName)) {
-			return aoResults;
-		}
-
-		long lStart = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.startFromDate);
-
-		String sOffset = oQuery.getOffset();
-		String sLimit = oQuery.getLimit();
-
-		int iOffset = 0;
-		int iLimit = 10;
-
+		
 		try {
-			iOffset = Integer.parseInt(sOffset);
-		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
-		}
+			List<QueryResultViewModel> aoResults = new ArrayList<>();
 
-		try {
-			iLimit = Integer.parseInt(sLimit);
-		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
-		}
+			int iActualElement = 0;
 
-		int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
-		for (int i = 0; i < iDays; i++) {
-			Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
+			// Parse the query
+			QueryViewModel oCDSQuery = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 
-			if (iActualElement >= iOffset && iActualElement < iOffset + iLimit) {
-				QueryResultViewModel oResult = new QueryResultViewModel();
-
-				String sDataset = oCDSQuery.productName;
-				String sProductType = oCDSQuery.productType;
-				String sPresureLevels = oCDSQuery.productLevel;
-				String sVariables = oCDSQuery.sensorMode;
-				String sFormat = oCDSQuery.timeliness;
-
-				String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
-
-				String sDate = Utils.formatToYyyyMMdd(oActualDay);
-				String sExtension = "." + sFormat;
-
-				String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
-
-				oResult.setId(sFileName);
-				oResult.setTitle(sFileName);
-
-				String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, sBoundingBox, sFormat);
-
-				String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
-				String sUrlEncoded = encodeUrl(sUrl);
-
-				oResult.setLink(sUrlEncoded);
-				String sDateTime = TimeEpochUtils.fromEpochToDateString(oActualDay.getTime());
-				oResult.setSummary("Date: "  + sDateTime +  ", Mode: " + oCDSQuery.sensorMode +  ", Instrument: " + oCDSQuery.timeliness);
-				oResult.setProvider(s_oDataProviderConfig.name);
-				oResult.setFootprint(extractFootprint(oQuery.getQuery()));
-				oResult.getProperties().put("platformname", Platforms.ERA5);
-				oResult.getProperties().put("dataset", oCDSQuery.productName);
-				oResult.getProperties().put("productType", oCDSQuery.productType);
-				oResult.getProperties().put("presureLevels", oCDSQuery.productLevel);
-				oResult.getProperties().put("variables", oCDSQuery.sensorMode);
-				oResult.getProperties().put("format", oCDSQuery.timeliness);
-				oResult.getProperties().put("startDate", sDateTime);
-				oResult.getProperties().put("beginposition", sDateTime);
-
-				aoResults.add(oResult);
+			if (!m_asSupportedPlatforms.contains(oCDSQuery.platformName)) {
+				return aoResults;
 			}
 
-			iActualElement ++;
+			long lStart = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.startFromDate);
 
-			if (iActualElement > iOffset + iLimit) break;
+			String sOffset = oQuery.getOffset();
+			String sLimit = oQuery.getLimit();
+
+			int iOffset = 0;
+			int iLimit = 10;
+
+			try {
+				iOffset = Integer.parseInt(sOffset);
+			} catch (Exception oE) {
+				Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
+			}
+
+			try {
+				iLimit = Integer.parseInt(sLimit);
+			} catch (Exception oE) {
+				Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
+			}
+
+			int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
+			for (int i = 0; i < iDays; i++) {
+				Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
+
+				if (iActualElement >= iOffset && iActualElement < iOffset + iLimit) {
+					QueryResultViewModel oResult = new QueryResultViewModel();
+
+					String sDataset = oCDSQuery.productName;
+					String sProductType = oCDSQuery.productType;
+					String sPresureLevels = oCDSQuery.productLevel;
+					String sVariables = oCDSQuery.sensorMode;
+					String sFormat = oCDSQuery.timeliness;
+
+					String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
+
+					String sDate = Utils.formatToYyyyMMdd(oActualDay);
+					String sExtension = "." + sFormat;
+
+					String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
+
+					oResult.setId(sFileName);
+					oResult.setTitle(sFileName);
+
+					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, sBoundingBox, sFormat);
+
+					String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
+					String sUrlEncoded = encodeUrl(sUrl);
+
+					oResult.setLink(sUrlEncoded);
+					String sDateTime = TimeEpochUtils.fromEpochToDateString(oActualDay.getTime());
+					oResult.setSummary("Date: "  + sDateTime +  ", Mode: " + oCDSQuery.sensorMode +  ", Instrument: " + oCDSQuery.timeliness);
+					oResult.setProvider(s_oDataProviderConfig.name);
+					oResult.setFootprint(extractFootprint(oQuery.getQuery()));
+					oResult.getProperties().put("platformname", Platforms.ERA5);
+					oResult.getProperties().put("dataset", oCDSQuery.productName);
+					oResult.getProperties().put("productType", oCDSQuery.productType);
+					oResult.getProperties().put("presureLevels", oCDSQuery.productLevel);
+					oResult.getProperties().put("variables", oCDSQuery.sensorMode);
+					oResult.getProperties().put("format", oCDSQuery.timeliness);
+					oResult.getProperties().put("startDate", sDateTime);
+					oResult.getProperties().put("beginposition", sDateTime);
+
+					aoResults.add(oResult);
+				}
+
+				iActualElement ++;
+
+				if (iActualElement > iOffset + iLimit) break;
+			}
+
+			return aoResults;			
 		}
-
-		return aoResults;
+		catch (Exception oEx) {
+			Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: error " + oEx.toString());
+		}
+		
+		return null;
 	}
 
 	private static String prepareLinkJsonPayload(String sDataset, String sProductType, String sVariables, String sPresureLevels, String sDate, String sBoundingBox, String sFormat) {

@@ -6,7 +6,6 @@
  */
 package wasdi.shared.queryexecutors.creodias;
 
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 
 /**

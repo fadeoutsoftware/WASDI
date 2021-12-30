@@ -13,7 +13,6 @@ import java.util.List;
 import org.apache.abdera.i18n.templates.Template;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;

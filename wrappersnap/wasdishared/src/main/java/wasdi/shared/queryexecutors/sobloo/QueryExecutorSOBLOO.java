@@ -6,7 +6,6 @@
  */
 package wasdi.shared.queryexecutors.sobloo;
 
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 
 /**

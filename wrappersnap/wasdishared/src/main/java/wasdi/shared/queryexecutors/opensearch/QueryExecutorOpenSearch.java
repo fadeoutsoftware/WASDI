@@ -129,7 +129,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 			} else {
 				return buildResultLightViewModel(oDocument, oClient, oOptions);
 			}
-		} catch (NumberFormatException oE) {
+		} catch (Exception oE) {
 			Utils.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
 			return null;
 		}

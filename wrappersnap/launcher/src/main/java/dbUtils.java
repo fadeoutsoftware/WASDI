@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -31,7 +30,6 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
-import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
