@@ -135,10 +135,6 @@ angular.module('wasdi.wapSelectArea', [])
 
                         let bIsValid = true;
 
-                        let msg = $translate.getTranslationTable().WAP_SELECT_AREA_BASE;
-
-                        
-
                         let SErrorMessage = $translate.getTranslationTable().WAP_SELECT_AREA_BASE;
 
                         if (fArea > oController.maxarea && oController.maxarea != 0) {
@@ -162,6 +158,9 @@ angular.module('wasdi.wapSelectArea', [])
                             utilsVexDialogAlertTop(SErrorMessage.toLocaleUpperCase());
                             // turn the bounding box red 
                             layer.options.color = "#ff0000";
+                            // erase the bounding box
+                            oController.boundingBox.northEast = "";
+                            oController.boundingBox.southWest = "";
                         }
                         //save new shape in map
                         oController.m_oDrawnItems.addLayer(layer);

@@ -163,8 +163,9 @@ function ViewElementFactory() {
 class UIComponent {
     constructor() {
         //TODO remove text and defaults to empty string
-        this.tooltip = "tool tip";
+        this.tooltip = "";
     }
+
 }
 
 /**
@@ -333,6 +334,10 @@ class SelectArea extends UIComponent {
             catch (e) {
                 return "";
             }
+        }
+        this.isValid = function(){
+            // this checks that the value assigned is different from the default.
+            return this.oBoundingBox.northEast != "" && this.oBoundingBox.southWest != "" ; 
         }
     };
 }
