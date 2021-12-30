@@ -442,7 +442,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
-		if (sPlatformType.equals(Platforms.PROVAV)) {
+		if (sPlatformType.equals(Platforms.PROBAV)) {
 			if (isWorkspaceOnSameCloud()) {
 				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
 			}

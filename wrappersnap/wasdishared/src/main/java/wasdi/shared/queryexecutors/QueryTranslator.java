@@ -13,6 +13,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
@@ -736,7 +737,7 @@ public abstract class QueryTranslator {
 	 * @param oResult
 	 */
 	private void parseERA5(String sQuery, QueryViewModel oResult) {
-		System.out.println("parseERA5 sQuery: " + sQuery);
+		
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
 
@@ -878,7 +879,7 @@ public abstract class QueryTranslator {
 					}
 					sQuery = sQuery.trim();
 
-					oResult.platformName = Platforms.PROVAV;
+					oResult.platformName = Platforms.PROBAV;
 
 					// check for product type
 					try {
@@ -1297,9 +1298,16 @@ public abstract class QueryTranslator {
 			} else if(sProductName.startsWith("LC08_")) {
 				oQueryViewModel.platformName = "Landsat8";
 			}  else {
-				//todo add other platforms:
-				// Sentinel-5p, Copernicus-marine, Envisat, ...
-				Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+				
+				String sPlatformName = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProductName);
+				
+				if (!Utils.isNullOrEmpty(sPlatformName)) {
+					oQueryViewModel.platformName = sPlatformName;
+				}
+				else {
+					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+				}
+				
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: " + oE);

@@ -476,7 +476,7 @@ public class WasdiFileUtils {
 				return Platforms.VIIRS;
 			}
 			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {
-				return Platforms.PROVAV;
+				return Platforms.PROBAV;
 			}
 			else if (sFileName.toUpperCase().startsWith("ERA5_")) {
 				return Platforms.ERA5;

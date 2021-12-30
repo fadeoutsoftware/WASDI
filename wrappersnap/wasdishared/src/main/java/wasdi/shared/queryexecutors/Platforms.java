@@ -14,11 +14,11 @@ public class Platforms {
 	public static String SENTINEL3 = "Sentinel-3";
 	public static String SENTINEL5P = "Sentinel-5P";
 	
-	public static String PROVAV = "ProvaV";
+	public static String PROBAV = "Proba-V";
 	public static String LANDSAT8 = "Landsat-8";
 	public static String ENVISAT = "Envisat";
 	
 	public static String COPERNICUS_MARINE = "Copernicus-Marine";
-	public static String VIIRS = "Viirs";
+	public static String VIIRS = "VIIRS";
 	public static String ERA5 = "ERA5";
 }

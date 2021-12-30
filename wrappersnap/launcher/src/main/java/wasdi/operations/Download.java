@@ -101,7 +101,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             }
             
             if (oProviderAdapter == null) {
-            	m_oProcessWorkspaceLogger.log("ERROR searching a Data Provider. Abort.");
+            	m_oProcessWorkspaceLogger.log("ERROR searching a valid Data Provider. Abort.");
             	return false;
             }
             
@@ -151,8 +151,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 }
                 
                 while (Utils.isNullOrEmpty(sFileName)) {
+                	
+                	DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
+                	
                     // Download the File
-                    sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
+                    sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
                     
                     // Is it null?!?
                     if (Utils.isNullOrEmpty(sFileName)) {
@@ -475,6 +478,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	 * @return
 	 */
 	public ProviderAdapter getNextDataProvider(DownloadFileParameter oParameter) {
+		
+		// Move to the next Data Provider
+		m_iDataProviderIndex++;
 		
 		// For the selected data providers, starting from the last
 		for (; m_iDataProviderIndex<m_aoDataProviderRanking.size(); m_iDataProviderIndex++) {

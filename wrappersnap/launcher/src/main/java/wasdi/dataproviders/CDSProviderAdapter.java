@@ -16,6 +16,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.BoundingBoxUtils;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 
@@ -23,6 +24,21 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 	private static final String CDS_URL_SEARCH = "https://cds.climate.copernicus.eu/api/v2/resources";
 	private static final String CDS_URL_GET_STATUS = "https://cds.climate.copernicus.eu/broker/api/v1/0/request/";
+	
+	/**
+	 * Basic constructor
+	 */
+	public CDSProviderAdapter() {
+		m_sDataProviderCode = "CDS";
+	}
+
+	/**
+	 * @param logger
+	 */
+	public CDSProviderAdapter(LoggerWrapper logger) {
+		super(logger);
+		m_sDataProviderCode = "CDS";
+	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {

@@ -64,7 +64,7 @@ public class DhUSProviderAdapter extends ProviderAdapter {
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
-				|| sPlatformType.equals(Platforms.SENTINEL5P)) {
+				|| sPlatformType.equals(Platforms.SENTINEL3)) {
 			return DataProviderScores.SLOW_DOWNLOAD.getValue();
 		}
 

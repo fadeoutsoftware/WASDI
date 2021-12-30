@@ -95,6 +95,21 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 				return aoResults;
 			}
 			
+			// If the user is requesting a specific file
+			if (!Utils.isNullOrEmpty(oVIIRSQuery.productName)) {
+    			QueryResultViewModel oResult = new QueryResultViewModel();
+    			    			
+    			oResult.setId(oVIIRSQuery.productName);
+    			oResult.setTitle(oVIIRSQuery.productName);
+    			oResult.setLink("https://floodlight.ssec.wisc.edu/composite/" + oVIIRSQuery.productName);
+    			oResult.setProvider("VIIRS");
+    			oResult.getProperties().put("platformname", "VIIRS");
+    			
+    			aoResults.add(oResult);
+    			
+    			return aoResults;
+			}
+			
 			ArrayList<String> asSections = getInvolvedSections(oVIIRSQuery);
 			
 			long lStart = TimeEpochUtils.fromDateStringToEpoch(oVIIRSQuery.startFromDate);

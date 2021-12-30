@@ -9,6 +9,7 @@ import java.util.List;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -141,9 +142,15 @@ public abstract class QueryExecutor {
 		try {
 			String sClientQuery = "";
 			
-			sClientQuery = sProduct + "beginPosition:[1893-09-07T00:00:00.000Z TO 1893-09-07T23:59:59.999Z]&endPosition:[2893-09-07T00:00:00.000Z TO 2893-09-07T23:59:59.999Z]";
+			sClientQuery = sProduct + " AND ( beginPosition:[1893-09-07T00:00:00.000Z TO 2893-09-07T00:00:00.000Z] AND endPosition:[1893-09-07T23:59:59.999Z TO 2893-09-07T23:59:59.999Z] ) ";
 			
-			PaginatedQuery oQuery = new PaginatedQuery(sClientQuery, null, null, null, null);
+			String sPlatform = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProduct);
+			
+			if (!Utils.isNullOrEmpty(sPlatform)) {
+				sClientQuery = sClientQuery + "AND (platformname:" + sPlatform + " )";
+			}
+			
+			PaginatedQuery oQuery = new PaginatedQuery(sClientQuery, "0", "10", null, null);
 			List<QueryResultViewModel> aoResults = executeAndRetrieve(oQuery);
 			
 			if (aoResults != null) {
