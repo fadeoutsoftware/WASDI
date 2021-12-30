@@ -243,6 +243,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         	if (oNode != null) {
         		return oNode.getCloudProvider();
         	}
+        	else {
+        		return WasdiConfig.Current.mainNodeCloud;
+        	}
     	}
     	catch (Exception oEx) {
     		if (m_oLogger!=null) {
@@ -262,7 +265,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		
 		boolean bOnCloud = false;
 		if (!Utils.isNullOrEmpty(sCloud)) {
-			if (m_sCloudProvider.equals(sCloud)) {
+			if (m_sCloudProvider.toUpperCase().equals(sCloud.toUpperCase())) {
 				bOnCloud = true;
 			}
 		}

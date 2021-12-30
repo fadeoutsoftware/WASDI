@@ -33,8 +33,10 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 			
 			String sFile = oConfig.fileDescriptors;
-
-			m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);
+			
+			if (new File(sFile).exists()) {
+				m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);				
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();

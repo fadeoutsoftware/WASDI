@@ -32,6 +32,11 @@ public class WasdiConfig {
 	public String nodeCode = "wasdi";
 	
 	/**
+	 * Cloud of the main node
+	 */
+	public String mainNodeCloud = "CREODIAS";
+	
+	/**
 	 * Default node assigned to users when they create a new node
 	 */
 	public String usersDefaultNode;

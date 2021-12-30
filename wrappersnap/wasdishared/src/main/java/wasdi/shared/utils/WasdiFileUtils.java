@@ -478,6 +478,9 @@ public class WasdiFileUtils {
 			else if (sFileName.toUpperCase().startsWith("PROBAV_")) {
 				return Platforms.PROVAV;
 			}
+			else if (sFileName.toUpperCase().startsWith("ERA5_")) {
+				return Platforms.ERA5;
+			}			
 			
 			return null;
 		}
@@ -501,6 +504,7 @@ public class WasdiFileUtils {
 			if (Utils.isNullOrEmpty(sPlatform)) return new Date();
 			
 			if (sPlatform.equals(Platforms.SENTINEL1)) {
+				sFileName = sFileName.replace("__", "_");
 				String [] asS1Parts = sFileName.split("_");
 				String sDate = asS1Parts[4];
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
@@ -513,19 +517,17 @@ public class WasdiFileUtils {
 				return new Date(lTime);				
 			}
 			else if (sPlatform.equals(Platforms.SENTINEL3)) {
-				sFileName = sFileName.substring(4);
-				String [] asS3Parts = sFileName.split("_");
-				String sDate = asS3Parts[3];
+				String sDate = sFileName.substring(16,31);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
 				return new Date(lTime);
 			}
 			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
-				String sDate = sFileName.substring(20, 15);
+				String sDate = sFileName.substring(20, 20+15);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
 				return new Date(lTime);
 			}
 			else if (sPlatform.equals(Platforms.ENVISAT)) {
-				String sDate = sFileName.substring(14, 6);
+				String sDate = sFileName.substring(14, 14+8);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
 				return new Date(lTime);
 			}
@@ -576,11 +578,11 @@ public class WasdiFileUtils {
 				return sType;				
 			}
 			else if (sPlatform.equals(Platforms.SENTINEL3)) {
-				String sType = sFileName.substring(9,6);
+				String sType = sFileName.substring(9,9+6);
 				return sType;
 			}
 			else if (sPlatform.equals(Platforms.SENTINEL5P)) {
-				String sType = sFileName.substring(9, 10);
+				String sType = sFileName.substring(9, 9+10);
 				return sType;
 			}
 
@@ -595,4 +597,45 @@ public class WasdiFileUtils {
 	
 	
 
+	
+	public static void testImageDecoders() {
+		
+		testImageDecode("S1A_IW_GRDH_1SDV_20211227T052748_20211227T052813_041190_04E503_D2FB");
+		testImageDecode("S1B_IW_RAW__0SDV_20211222T171436_20211222T171508_030141_039960_631F");
+		testImageDecode("S1B_IW_SLC__1SDV_20211222T171528_20211222T171556_030141_039960_73C3");
+		testImageDecode("S2A_MSIL1C_20211222T070311_N0301_R063_T40SBA_20211222T080206");
+		testImageDecode("S2A_MSIL2A_20211222T070311_N0301_R063_T39RXN_20211222T091646");
+		testImageDecode("S3B_SY_2_VG1____20211222T000000_20211222T235959_20211228T125214_EUROPE____________LN2_O_NT_002");
+		testImageDecode("S3B_SY_2_VGP____20211222T061412_20211222T065817_20211223T184339_2645_060_305______LN2_O_NT_002");
+		testImageDecode("S3B_OL_2_WRR____20211222T061412_20211222T065817_20211222T084230_2645_060_305______MAR_O_NR_003");
+		testImageDecode("S3B_OL_1_ERR____20211222T061412_20211222T065817_20211222T084221_2645_060_305______MAR_O_NR_002");
+		testImageDecode("S3B_OL_2_LRR____20211222T061412_20211222T065817_20211223T112207_2645_060_305______LN1_O_NT_002");
+		testImageDecode("S3B_OL_2_WRR____20211222T061412_20211222T065817_20211223T114743_2645_060_305______MAR_O_NT_003");
+		testImageDecode("S5P_OFFL_L2__NP_BD6_20211222T090116_20211222T104246_21721_02_010300_20211223T224704");
+		testImageDecode("S5P_OFFL_L1B_RA_BD4_20211222T090116_20211222T104246_21721_02_020000_20211222T122628");
+		testImageDecode("S5P_NRTI_L2__AER_AI_20211222T100245_20211222T100745_21721_02_020301_20211222T103531");
+		testImageDecode("S5P_NRTI_L2__HCHO___20211222T100245_20211222T100745_21721_02_020201_20211222T105201");
+		testImageDecode("S5P_NRTI_L2__O3_____20211222T100245_20211222T100745_21721_02_020201_20211222T105159");
+		testImageDecode("LC08_L1TP_200030_20211223_20211223_01_RT");
+		testImageDecode("LC08_L1GT_196028_20211227_20211227_01_RT");
+		testImageDecode("MER_FRS_1PPEPA20041222_110737_000003212033_00123_14706_0540");		
+		testImageDecode("ASA_IMS_1PNESA20041224_100709_000000152033_00151_14734_0000");
+		testImageDecode("ASA_IMP_1PNESA20041224_100724_000000152033_00151_14734_0000");
+		testImageDecode("RIVER-FLDglobal-composite1_20211222_000000.part057.tif");
+		testImageDecode("RIVER-FLDglobal-composite1_20211222_000000.part071");
+	}
+	
+	public static void testImageDecode(String sImage) {
+		String sResult = "";
+		Date oDate;
+		
+		sResult = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sImage);
+		System.out.println(sResult);
+		
+		sResult = WasdiFileUtils.getProductTypeSatelliteImageFileName(sImage);
+		System.out.println(sResult);
+		
+		oDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sImage);
+		System.out.println(oDate.toString());		
+	}
 }

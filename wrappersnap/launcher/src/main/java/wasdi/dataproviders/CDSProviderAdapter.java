@@ -319,9 +319,20 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		return sFileName;
 	}
 
+
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
+	}
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (sPlatformType.equals(Platforms.ERA5)) {
+			return DataProviderScores.SLOW_DOWNLOAD.getValue();
+		}
+		
+		return 0;
 	}
 
 }

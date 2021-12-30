@@ -2,6 +2,7 @@ package wasdi.operations;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -53,6 +54,16 @@ import wasdi.shared.viewmodels.products.ProductViewModel;
  *
  */
 public class Download extends Operation implements ProcessWorkspaceUpdateSubscriber {
+	
+	/**
+	 * List of Data Providers ordered for ranking: the first is the best
+	 */
+	ArrayList<ProviderAdapter> m_aoDataProviderRanking = new ArrayList<ProviderAdapter>();
+	
+	/**
+	 * Index of the Data Provider actually used in the ranked list
+	 */
+	private int m_iDataProviderIndex = 0;
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
@@ -139,23 +150,37 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     oProviderAdapter.subscribe(this);
                 }
                 
-                // Download the File
-                sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
-
-                if (Utils.isNullOrEmpty(sFileName)) {
-
-                    int iLastError = oProviderAdapter.getLastServerError();
-                    String sError = "There was an error contacting the provider";
-
-                    if (iLastError > 0)
-                        sError += ": query obtained HTTP Error Code " + iLastError;
-
-                    m_oProcessWorkspaceLogger.log(sError);
+                while (Utils.isNullOrEmpty(sFileName)) {
+                    // Download the File
+                    sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
                     
-                    oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-                    
-                    return false;
+                    // Is it null?!?
+                    if (Utils.isNullOrEmpty(sFileName)) {
+
+                        int iLastError = oProviderAdapter.getLastServerError();
+                        String sError = "There was an error contacting the provider";
+
+                        if (iLastError > 0)
+                            sError += ": query obtained HTTP Error Code " + iLastError;
+
+                        m_oProcessWorkspaceLogger.log(sError);
+                        
+                        oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+                        
+                        oProviderAdapter = getNextDataProvider(oParameter);
+                        
+                        m_oProcessWorkspaceLogger.log("Try to get next Data Provider");
+                        m_oLocalLogger.warn("Download.executeOperation: get next data provider ");
+                        
+                        if (oProviderAdapter == null) {
+                        	m_oLocalLogger.warn("Download.executeOperation: data provider finished, return false");
+                        	return false;
+                        }
+                        
+                        m_oLocalLogger.warn("Download.executeOperation: got " + oProviderAdapter.getCode());
+                    }
                 }
+
 
                 oProviderAdapter.unsubscribe(this);
 
@@ -391,10 +416,10 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	 */
 	public ProviderAdapter getBestProviderAdapater(DownloadFileParameter oParameter, ProcessWorkspace oProcessWorkspace) {
 		
-		// List of Data Providers ordered for ranking: the first is the best
-		ArrayList<ProviderAdapter> aoDataProviderRanking = new ArrayList<ProviderAdapter>();
-		// Parallel list of scores for each Data Provider
-		ArrayList<Integer> aiScores = new ArrayList<Integer>();
+		/**
+		 * Parallel list of scores for each Data Provider
+		 */
+		ArrayList<Integer> aiScores = new ArrayList<Integer>();		
 		
 		try {
 			
@@ -419,28 +444,20 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	            	
 	            	// Insert the data Provider in the correct position
 	            	aiScores.add(iIndex, iScore);
-	            	aoDataProviderRanking.add(iIndex,oProviderAdapter);
+	            	m_aoDataProviderRanking.add(iIndex,oProviderAdapter);
 	            }	            
 			}
 			
 			// For the selected data providers, starting from the best
-			for (int iIndex = 0; iIndex<aoDataProviderRanking.size(); iIndex++) {
+			for (m_iDataProviderIndex = 0; m_iDataProviderIndex<m_aoDataProviderRanking.size(); m_iDataProviderIndex++) {
 				
 				// Check if the file is in the catalogues
-				ProviderAdapter oProviderAdapter = aoDataProviderRanking.get(iIndex);
-	    		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oParameter.getProvider());
-	    		
-	    		// Must obtain the URI!!
-	    		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol);
-	    		
-	    		if (!Utils.isNullOrEmpty(sFileUri)) {
-	    			// If we got the URI, this is the best Provider Adapter
-	    			
-	    			// Set the URI to the parameter
-	    			oParameter.setUrl(sFileUri);
-	    			// Return the Provider Adapter
-	    			return oProviderAdapter;
-	    		}
+				ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(m_iDataProviderIndex);
+				
+				if (doesProviderAdapterFindFile(oProviderAdapter, oParameter)) {
+					// Ok return this
+					return oProviderAdapter;
+				}
 			}
 		}
 		catch (Exception oEx) {
@@ -450,6 +467,52 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         }
 		
 		return null;
+	}
+	
+	/**
+	 * If something goes wrong, returns the next valid Data Provider
+	 * @return
+	 */
+	public ProviderAdapter getNextDataProvider(DownloadFileParameter oParameter) {
+		
+		// For the selected data providers, starting from the last
+		for (; m_iDataProviderIndex<m_aoDataProviderRanking.size(); m_iDataProviderIndex++) {
+			
+			// Check if the file is in the catalogues
+			ProviderAdapter oProviderAdapter = m_aoDataProviderRanking.get(m_iDataProviderIndex);
+			
+			if (doesProviderAdapterFindFile(oProviderAdapter, oParameter)) {
+				// Ok return this
+				return oProviderAdapter;
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Check if a Data Provider finds the requested file in the catalogue	
+	 * @param oProviderAdapter
+	 * @param oParameter
+	 * @return
+	 */
+	boolean doesProviderAdapterFindFile(ProviderAdapter oProviderAdapter, DownloadFileParameter oParameter) {
+		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oProviderAdapter.getCode());
+		
+		// Must obtain the URI!!
+		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol);
+		
+		if (!Utils.isNullOrEmpty(sFileUri)) {
+			// If we got the URI, this is the best Provider Adapter
+			
+			// Set the URI to the parameter
+			oParameter.setUrl(sFileUri);
+			// Return the Provider Adapter
+			return true;
+		}
+		
+		return false;
+		
 	}
 	
 	/**
