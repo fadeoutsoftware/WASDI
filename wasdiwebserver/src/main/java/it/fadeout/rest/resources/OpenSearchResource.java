@@ -156,6 +156,11 @@ public class OpenSearchResource {
 		String sPlatformType = getPlatform(sQuery);
 		sProvider = getProvider(sProvider, sPlatformType);
 		
+		if (Utils.isNullOrEmpty(sProvider)) {
+			Utils.debugLog(m_sClassName + ".search: Impossible to find the Provider ");
+			return null;
+		}
+		
 		Utils.debugLog(m_sClassName + ".search: Selected Provider " +sProvider);
 				
 		// Get the number of elements per page

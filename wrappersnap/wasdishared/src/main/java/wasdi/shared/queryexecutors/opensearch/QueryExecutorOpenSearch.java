@@ -99,11 +99,13 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 			// get default request option
 			RequestOptions oOptions = oClient.getDefaultRequestOptions();
 	
-			// set authorization
-			if (m_sUser!=null && m_sPassword!=null) {
-				String sUserCredentials = m_sUser + ":" + m_sPassword;
-				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
-				oOptions.setAuthorization(sBasicAuth);			
+			if (m_bUseBasicAuthInHttpQuery) {
+				// set authorization
+				if (m_sUser!=null && m_sPassword!=null) {
+					String sUserCredentials = m_sUser + ":" + m_sPassword;
+					String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
+					oOptions.setAuthorization(sBasicAuth);			
+				}				
 			}
 
 			String sResultAsString = standardHttpGETQuery(sUrl);
@@ -203,7 +205,6 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
-			//			Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Parsing new Entry");
 
 			//retrive the title
 			oResult.setTitle(oEntry.getTitle());			

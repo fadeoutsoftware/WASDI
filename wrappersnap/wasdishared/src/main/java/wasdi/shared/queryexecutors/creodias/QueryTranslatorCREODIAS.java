@@ -108,7 +108,11 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				// Set Timeliness if present
 				if (!Utils.isNullOrEmpty(oQueryViewModel.timeliness)) {
 					sResult += "&timeliness=" + oQueryViewModel.timeliness.replace(" ", "+");
-				}				
+				}
+				
+				if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
+					sResult += "&productIdentifier=%25" +oQueryViewModel.productName+"%25";
+				}
 				
 			}
 			else {

@@ -20,6 +20,11 @@ public class DownloadPayload extends OperationPayload {
 	 */
 	private String fileName;
 	
+	/**
+	 * In case of AUTO provider, this is the one finally used
+	 */
+	private String selectedProvider;
+	
 	public DownloadPayload() {
 		operation = LauncherOperations.DOWNLOAD.name();
 	}
@@ -35,6 +40,12 @@ public class DownloadPayload extends OperationPayload {
 	}
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+	public String getSelectedProvider() {
+		return selectedProvider;
+	}
+	public void setSelectedProvider(String selectedProvider) {
+		this.selectedProvider = selectedProvider;
 	}
 
 }

@@ -7,6 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -48,6 +51,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 	public QueryExecutorPROBAV(){
 		m_sProvider = "PROBAV";
+		m_bUseBasicAuthInHttpQuery = false;
 		m_oQueryTranslator = new QueryTranslatorProbaV();
 		
 	}
@@ -74,7 +78,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 	protected String getSearchUrl(PaginatedQuery oQuery){
 		Utils.debugLog("QueryExecutorPROBAV.buildUrl");
 
-		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
+		String sUrl = "https://services.terrascope.be/catalogue/products?";
 		String sPolygon = null;
 		String sDate = null;
 		String sCollection = null;
@@ -90,15 +94,14 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 					String[] asPolygon = sRefString.split("POLYGON\\(\\(");
 					if (asPolygon.length > 0)
 					{
-						String[] asCoordinates = asPolygon[1].split("\\)\\)")[0].split(",");
-						String sPoints = "";
-						for (String sCoord : asCoordinates) {
-							if (!sPoints.equals(""))
-								sPoints+=",";
-							sPoints += sCoord.replace(" ", ",");
-
-						}
-						sPolygon = String.format("geometry=polygon((%s))", sPoints);						
+						String[] asCoordinates = asPolygon[1].split("\\)\\)");
+						
+						try {
+							asCoordinates[0] = URLEncoder.encode(asCoordinates[0], "UTF-8"); 
+						} catch (UnsupportedEncodingException e) {
+						}						
+						
+						sPolygon = String.format("geometry=POLYGON((%s))", asCoordinates[0]);
 					}
 				}
 
@@ -109,7 +112,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 					String sStartdate = asDate[0].trim().substring(0, 16);
 					String sEnddate = asDate[1].trim().substring(0, 16);
 
-					sDate = String.format("start=%s&end%s", sStartdate, sEnddate);
+					sDate = String.format("start=%s:00&end=%s:00", sStartdate, sEnddate);
 				}
 
 				if (sItem.contains("collection"))
@@ -147,10 +150,24 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			sUrl+="&" + sCloudCover;
 		if (sSnowCover != null)
 			sUrl+="&" + sSnowCover;
-		if (oQuery.getOffset() != null)
-			sUrl+="&startIndex=" + oQuery.getOffset();
+		if (oQuery.getOffset() != null) {
+			
+			int iStartIndex = 1;
+			
+			try {
+				iStartIndex = Integer.parseInt(oQuery.getOffset());
+				iStartIndex++;
+			}
+			catch (Exception oEx) {
+			}
+			
+			sUrl+="&startIndex=" + iStartIndex;
+		}
 		if (oQuery.getLimit() != null)
 			sUrl+="&count=" + oQuery.getLimit();
+		
+		sUrl+= "&httpAccept=application%2Fatom%2Bxml";
+		
 		return sUrl;
 	}
 
@@ -183,18 +200,19 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			oParserOptions.setFilterRestrictedCharacters(true);
 			oParserOptions.setMustPreserveWhitespace(false);
 			oParserOptions.setParseFilter(null);
-			// set authorization
-			if (m_sUser!=null && m_sPassword!=null) {
-				String sUserCredentials = m_sUser + ":" + m_sPassword;
-				String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
-				oOptions.setAuthorization(sBasicAuth);			
+			
+			if (m_bUseBasicAuthInHttpQuery) {
+				// set authorization
+				if (m_sUser!=null && m_sPassword!=null) {
+					String sUserCredentials = m_sUser + ":" + m_sPassword;
+					String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
+					oOptions.setAuthorization(sBasicAuth);			
+				}				
 			}
-
-			//		Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
+			
 			ClientResponse response = oClient.get(sUrl, oOptions);
 
 			Document<Feed> oDocument = null;
-
 
 			if (response.getType() != ResponseType.SUCCESS) {
 				Utils.debugLog("QueryExecutor.executeCount: Response ERROR: " + response.getType());
@@ -253,9 +271,11 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
-
+			
+			String sTitle = extractTitle(oEntry.getTitle());
+			
 			//retrive the title
-			oResult.setTitle(oEntry.getTitle());			
+			oResult.setTitle(sTitle);			
 
 			//retrive the summary
 			oResult.setSummary(oEntry.getSummary());
@@ -265,7 +285,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 			//retrieve the link
 			Link oLink = oEntry.getEnclosureLink();
-			if (oLink != null)oResult.setLink(oLink.getHref().toString()); //TODO
+			if (oLink != null)oResult.setLink(oLink.getHref().toString());
 
 			//retrieve the footprint and all others properties
 			oResult.setFootprint(oMap.get(oResult.getId()));
@@ -313,10 +333,11 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
-			//			Utils.debugLog("Parsing new Entry");
-
+			
+			String sTitle = extractTitle(oEntry.getTitle());
+						
 			//retrive the title
-			oResult.setTitle(oEntry.getTitle());			
+			oResult.setTitle(sTitle);			
 
 			//retrive the summary
 			oResult.setSummary(oEntry.getSummary());
@@ -357,9 +378,6 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 					Utils.debugLog("Image Preview Cycle Exception " + e.toString());
 				}					
 			}
-			else {
-				Utils.debugLog("Link Not Available" );
-			}
 
 			aoResults.add(oResult);
 		} 
@@ -390,8 +408,9 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 		
 		InputStream oInputStreamReader = new ByteArrayInputStream(outStream.toByteArray());
 		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
-		oDocBuildFactory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
-		oDocBuildFactory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalSchema", "");
+		//oDocBuildFactory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+		//oDocBuildFactory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalSchema", "");
+				
 		DocumentBuilder oDocBuilder;
 		try {
 			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
@@ -425,8 +444,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 							{
 								if (iPointCount + 1 < asPoints.length)
 								{
-									//switch lat and lon
-									sFootprint += String.format("%s %s", asPoints[iPointCount + 1], asPoints[iPointCount]);
+									sFootprint += String.format("%s %s", asPoints[iPointCount], asPoints[iPointCount+1]);
 
 									if (iPointCount + 2 < asPoints.length)
 										sFootprint += ",";
@@ -459,5 +477,16 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 		return oMap;
 	}
 
+	public String extractTitle(String sTitle) {
+		
+		String [] asTitleParts = sTitle.split(":");
+		if (asTitleParts!=null) {
+			if (asTitleParts.length>6) {
+				sTitle = asTitleParts[6];
+			}
+		}
+		
+		return sTitle;
+	}
 
 }

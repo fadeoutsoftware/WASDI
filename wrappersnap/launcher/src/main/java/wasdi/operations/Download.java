@@ -95,6 +95,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             
             if (oParameter.getProvider().equals("AUTO")) {
             	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
+            	
+                m_oLocalLogger.error("Got Data Provider " + oProviderAdapter.getCode());
+                m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	
             }
             else {
             	oProviderAdapter = getProviderAdapater(oParameter.getProvider(), oParameter, oProcessWorkspace);
@@ -104,10 +107,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	m_oProcessWorkspaceLogger.log("ERROR searching a valid Data Provider. Abort.");
             	return false;
             }
-            
-            m_oLocalLogger.error("Got Data Provider " + oProviderAdapter.getCode());
-            m_oProcessWorkspaceLogger.log("Fetch Start - GOT DATA PROVIDER " + oProviderAdapter.getCode());
-            
             
             // get file size
             long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
@@ -124,7 +123,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
             m_oLocalLogger.debug("Download.executeOperation: File to download: " + sFileNameWithoutPath);
             m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
-
+            
+            // Check if the file is already available
             DownloadedFile oAlreadyDownloaded = fileAlreadyAvailable(sFileNameWithoutPath);
             
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -133,23 +133,22 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 m_oLocalLogger.debug("Download.executeOperation: File not already downloaded. Download it");
 
                 if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
+                	
                     oProcessWorkspace.setProductName(sFileNameWithoutPath);
+                    
                     // update the process
-                    if (!m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace))
-                        m_oLocalLogger.debug("Download.executeOperation: Error during process update with file name");
-
-                    // send update process message
-                    if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-                        m_oLocalLogger.debug("Download.executeOperation: Error sending rabbitmq message to update process list");
-                    }
+                    m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
+                    
+                    // Send Rabbit notification
+                    m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace);
+                    
                 } else {
                     m_oLocalLogger.error("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
                 }
 
-                if (oProviderAdapter != null) {
-                    oProviderAdapter.subscribe(this);
-                }
+                oProviderAdapter.subscribe(this);
                 
+                // Until we cannot fetch the file                
                 while (Utils.isNullOrEmpty(sFileName)) {
                 	
                 	DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
@@ -171,16 +170,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
                         
                         oProviderAdapter = getNextDataProvider(oParameter);
-                        
-                        m_oProcessWorkspaceLogger.log("Try to get next Data Provider");
-                        m_oLocalLogger.warn("Download.executeOperation: get next data provider ");
-                        
+                                                
                         if (oProviderAdapter == null) {
                         	m_oLocalLogger.warn("Download.executeOperation: data provider finished, return false");
                         	return false;
                         }
                         
-                        m_oLocalLogger.warn("Download.executeOperation: got " + oProviderAdapter.getCode());
+                        m_oLocalLogger.warn("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
+                        m_oLocalLogger.warn("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
                     }
                 }
 
@@ -278,6 +275,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             DownloadPayload oDownloadPayload = new DownloadPayload();
             oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
             oDownloadPayload.setProvider(oParameter.getProvider());
+            if (oProviderAdapter != null) {
+            	oDownloadPayload.setSelectedProvider(oProviderAdapter.getCode());
+            }
 
             setPayload(oProcessWorkspace, oDownloadPayload);
             
@@ -512,7 +512,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		QueryExecutor oQueryExecutor = QueryExecutorFactory.getExecutor(oProviderAdapter.getCode());
 		
 		// Must obtain the URI!!
-		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol);
+		String sFileUri = oQueryExecutor.getUriFromProductName(oParameter.getName(), WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode()).defaultProtocol, oParameter.getUrl());
 		
 		if (!Utils.isNullOrEmpty(sFileUri)) {
 			// If we got the URI, this is the best Provider Adapter

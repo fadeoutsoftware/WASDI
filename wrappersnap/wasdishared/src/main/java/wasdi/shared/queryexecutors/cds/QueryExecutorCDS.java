@@ -48,6 +48,18 @@ public class QueryExecutorCDS extends QueryExecutor {
 		this.m_oResponseTranslator = new ResponseTranslatorCDS();
 		
 	}
+	
+	/**
+	 * Overload of the get URI from Product Name method.
+	 * For CDS, we need just the original link..
+	 */
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+		if (sProduct.startsWith(Platforms.ERA5)) {
+			return sOriginalUrl;
+		}
+		return null;
+	}
 
 	@Override
 	public int executeCount(String sQuery) {
@@ -128,7 +140,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 					String sDate = Utils.formatToYyyyMMdd(oActualDay);
 					String sExtension = "." + sFormat;
 
-					String sFileName = String.join("_", sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
+					String sFileName = String.join("_", Platforms.ERA5, sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
 
 					oResult.setId(sFileName);
 					oResult.setTitle(sFileName);

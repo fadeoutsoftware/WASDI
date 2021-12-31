@@ -1277,7 +1277,7 @@ public abstract class QueryTranslator {
 			}
 			//mission
 			if(sProductName.startsWith("S1")) {
-				oQueryViewModel.platformName = "Sentinel-1";
+				oQueryViewModel.platformName = Platforms.SENTINEL1;
 				
 				String[] asTypesA = {"RAW", "GRD", "SLC", "OCN"};
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
@@ -1286,7 +1286,7 @@ public abstract class QueryTranslator {
 					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
 			} else if (sProductName.startsWith("S2")) {
-				oQueryViewModel.platformName = "Sentinel-2";
+				oQueryViewModel.platformName = Platforms.SENTINEL2;
 				String[] asTypesA = {"L1C", "L2A"};
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
 					oQueryViewModel.productType="S2MSI" + sProductName.substring(8, 10);
@@ -1294,9 +1294,9 @@ public abstract class QueryTranslator {
 					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
 			} else if(sProductName.startsWith("S3A_") || sProductName.startsWith("S3B_")) {
-				oQueryViewModel.platformName = "Sentinel-3";
+				oQueryViewModel.platformName = Platforms.SENTINEL3;
 			} else if(sProductName.startsWith("LC08_")) {
-				oQueryViewModel.platformName = "Landsat8";
+				oQueryViewModel.platformName = Platforms.LANDSAT8;
 			}  else {
 				
 				String sPlatformName = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProductName);

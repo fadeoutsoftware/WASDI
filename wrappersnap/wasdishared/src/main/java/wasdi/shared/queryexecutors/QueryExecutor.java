@@ -138,7 +138,7 @@ public abstract class QueryExecutor {
 	 * @param sProtocol Protocol of interest that determinate the return string (ie http link or local path)
 	 * @return URI to the file, usually an http/https link or a local file path
 	 */
-	public String getUriFromProductName(String sProduct, String sProtocol) {
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
 		try {
 			String sClientQuery = "";
 			

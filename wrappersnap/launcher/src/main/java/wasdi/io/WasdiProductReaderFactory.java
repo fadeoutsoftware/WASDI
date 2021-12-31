@@ -37,7 +37,6 @@ public class WasdiProductReaderFactory {
 		}
 		
 		if(WasdiFileUtils.isSentinel3Name(oFile)) {
-		//if (oFile.getName().toLowerCase().startsWith("s3")) { 
 			return new Sentinel3ProductReader(oFile);
 		}
 		
