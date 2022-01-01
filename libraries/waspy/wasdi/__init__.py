@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.0
+Version 0.7.5
 
-Last Update: 03/12/2021
+Last Update: 01/01/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -1752,7 +1752,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
 
-    :param sProvider: WASDI Data Provider to query (LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = LSA.
+    :param sProvider: WASDI Data Provider to query (AUTO|LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = AUTO.
 
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
@@ -1946,13 +1946,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"
 
     if sProvider is None:
-        if sPlatform == "VIIRS":
-            sProvider = "VIIRS"
-        elif sPlatform == "ENVI" or sPlatform == "L8":
-            sProvider = "CREODIAS"
-        else:
-            sProvider = "LSA"
-
+        sProvider = "AUTO"
+    
     sQuery = "providers=" + sProvider
 
     try:
@@ -2118,7 +2113,7 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
+def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None, sName=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
@@ -2127,20 +2122,16 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider to use. Use None for Default
+    
+    :param sName: Name of the file to import as returned by the Data Provider
+    
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
 
-    _log('[INFO] waspy.importProductByFileUrl( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ' )')
-
     sReturn = "ERROR"
 
-    if sFileUrl is None:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot find a link to download the requested product' +
-                 '  ******************************************************************************')
-        return sReturn
-
     if sProvider is None:
-        sProvider = "ONDA"
+        sProvider = "AUTO"
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?fileUrl="
@@ -2148,11 +2139,15 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     sUrl += "&provider=" + sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
+    
 
     if sBoundingBox is not None:
         sUrl += "&bbox="
         sUrl += sBoundingBox
-
+        
+    if sName is not None:
+        sUrl += "&name="+sName
+    
     if m_bIsOnServer:
         sUrl += "&parent="
         sUrl += getProcId()
@@ -2181,27 +2176,23 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None, sName=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
-    :param sFileUrl: url of the file to import
+    :param sFileUrl: url of the file to import as returned by the data provider
 
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider. Use None for default
+    
+    :param sName: Name of the file to import as returned by the Data Provider 
+    
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
-
-    _log('[INFO] waspy.importProductByFileUrl( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ' )')
-
+    
     sReturn = "ERROR"
-
-    if sFileUrl is None:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot find a link to download the requested product' +
-                 '  ******************************************************************************')
-        return sReturn
-
+    
     if sProvider is None:
         sProvider = "ONDA"
 
@@ -2212,9 +2203,13 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
     sUrl += sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
+    
     if sBoundingBox is not None:
         sUrl += "&bbox="
         sUrl += sBoundingBox
+        
+    if sName is not None:
+        sUrl += "&name="+sName    
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2260,16 +2255,22 @@ def importProduct(oProduct, sProvider=None):
     _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
-        sBoundingBox = None
+        
         sFileUrl = oProduct["link"]
+        
+        sBoundingBox = None
         if "footprint" in oProduct:
             sBoundingBox = oProduct["footprint"]
 
         if sProvider is None:
             if "provider" in oProduct:
                 sProvider = oProduct["provider"]
+                
+        sName = None
+        if "title" in oProduct:
+            sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+        return importProductByFileUrl(sFileUrl, sBoundingBox, sProvider, sName)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2292,16 +2293,22 @@ def asynchImportProduct(oProduct, sProvider=None):
     _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
-        sBoundingBox = None
+        
         sFileUrl = oProduct["link"]
+        
+        sBoundingBox = None
         if "footprint" in oProduct:
             sBoundingBox = oProduct["footprint"]
 
         if sProvider is None:
             if "provider" in oProduct:
                 sProvider = oProduct["provider"]
+                
+        sName = None
+        if "title" in oProduct:
+            sName = oProduct["title"]
 
-        return asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+        return asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider, sName)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2333,6 +2340,10 @@ def importProductList(aoProducts, sProvider=None):
             sFileUrl = oProduct["link"]
             if "footprint" in oProduct:
                 sBoundingBox = oProduct["footprint"]
+                
+            sName = None
+            if "title" in oProduct:
+                sName = oProduct["title"]
 
             sActualProvider = sProvider
 
@@ -2341,7 +2352,7 @@ def importProductList(aoProducts, sProvider=None):
                     sActualProvider = oProduct["provider"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sActualProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sActualProvider, sName)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2385,9 +2396,13 @@ def asynchImportProductList(aoProducts, sProvider=None):
             if sActualProvider is None:
                 if "provider" in oProduct:
                     sActualProvider = oProduct["provider"]
+                    
+            sName = None
+            if "title" in oProduct:
+                sName = oProduct["title"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider, sName)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:

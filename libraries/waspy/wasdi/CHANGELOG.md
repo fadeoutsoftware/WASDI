@@ -3,6 +3,11 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.7.1] - 2021-11-24
+
+### Added
+- Support to the AUTO Data Provider
+
 ## [0.7.0] - 2021-11-24
 
 ### Added

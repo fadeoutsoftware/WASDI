@@ -2,10 +2,13 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.7.0
-; Last Update: 2021-11-24
+; IDL WASDI Lib Version 0.7.1
+; Last Update: 2022-01-01
 ;
 ; History
+; 0.7.1 - 2022-01-01
+;	added support to AUTO Data Provider
+;
 ; 0.7.0 - 2021-11-24
 ;	added getWorkspaceNameById
 ;	adapted to new API
@@ -1783,6 +1786,7 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
 
 	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
 	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sName = GETVALUEBYKEY(oEOImage,'title')
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
@@ -1791,7 +1795,7 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
 
 	sProvider = "LSA"
 
-	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB + "&name="+sName
 
 	UrlPath = UrlPath + '?' + sQuery
 

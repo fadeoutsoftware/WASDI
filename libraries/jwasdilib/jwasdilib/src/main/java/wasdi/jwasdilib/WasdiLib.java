@@ -33,6 +33,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.net.io.Util;
 
+import com.fasterxml.jackson.core.sym.Name;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -2335,8 +2336,13 @@ public class WasdiLib {
 			if (oProduct.containsKey("footprint")) {
 				sBoundingBox = oProduct.get("footprint").toString();
 			}
+			
+			String sName = null;
+			if (oProduct.containsKey("title")) {
+				sName = oProduct.get("title").toString();
+			}
 
-			return asynchImportProduct(sFileUrl, sBoundingBox, sProvider);
+			return asynchImportProduct(sFileUrl, sName, sBoundingBox, sProvider);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -2363,8 +2369,14 @@ public class WasdiLib {
 			if (oProduct.containsKey("footprint")) {
 				sBoundingBox = oProduct.get("footprint").toString();
 			}
+			
+			String sName = null;
+			if (oProduct.containsKey("title")) {
+				sName = oProduct.get("title").toString();
+			}
+			
 
-			return importProduct(sFileUrl, sBoundingBox);
+			return importProduct(sFileUrl, sName, sBoundingBox);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -2378,8 +2390,8 @@ public class WasdiLib {
 	 * @param sFileUrl Direct link of the product
 	 * @return status of the Import process
 	 */
-	public String importProduct(String sFileUrl) {
-		return importProduct(sFileUrl, "");
+	public String importProduct(String sFileUrl, String sName) {
+		return importProduct(sFileUrl, sName, "");
 	}
 
 	/**
@@ -2387,9 +2399,8 @@ public class WasdiLib {
 	 * @param sFileUrl Direct link of the product
 	 * @return status of the Import process
 	 */
-	public String asynchImportProduct(String sFileUrl) {
-		log("WasdiLib.asynchImportProduct( " + sFileUrl + " )");
-		return asynchImportProduct(sFileUrl, "");
+	public String asynchImportProduct(String sFileUrl, String sName) {
+		return asynchImportProduct(sFileUrl, sName, "");
 	}
 
 
@@ -2399,9 +2410,8 @@ public class WasdiLib {
 	 * @param sBoundingBox bounding box
 	 * @return
 	 */
-	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
-		log("WasdiLib.asynchImportProduct( " + sFileUrl + ", " + sBoundingBox + " )");
-		return asynchImportProduct(sFileUrl, sBoundingBox, null);
+	public String asynchImportProduct(String sFileUrl, String sName, String sBoundingBox) {
+		return asynchImportProduct(sFileUrl, sName, sBoundingBox, null);
 	}
 
 	/**
@@ -2410,8 +2420,7 @@ public class WasdiLib {
 	 * @param sBoundingBox Bounding Box of the product
 	 * @return status of the Import process
 	 */
-	public String asynchImportProduct(String sFileUrl, String sBoundingBox, String sProvider) {
-		log("WasdiLib.asynchImportProduct( " + sFileUrl + ", " + sBoundingBox + ", " + sProvider + " )");
+	public String asynchImportProduct(String sFileUrl, String sName, String sBoundingBox, String sProvider) {
 		String sReturn = "ERROR";
 
 		try {
@@ -2424,6 +2433,10 @@ public class WasdiLib {
 
 			String sUrl = m_sBaseUrl + "/filebuffer/download?fileUrl=" + sEncodedFileLink+"&provider="+
 					sProvider +"&workspace="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
+			
+			if (sName != null) {
+				sUrl = sUrl + "&name="+sName;
+			}
 
 			// Call the server
 			String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2444,8 +2457,8 @@ public class WasdiLib {
 		return sReturn;
 	}
 
-	public String importProduct(String sFileUrl, String sBoundingBox) {
-		return importProduct(sFileUrl, sBoundingBox, null);
+	public String importProduct(String sFileUrl, String sName, String sBoundingBox) {
+		return importProduct(sFileUrl, sName, sBoundingBox, null);
 	}
 
 	/**
@@ -2454,11 +2467,11 @@ public class WasdiLib {
 	 * @param sBoundingBox Bounding Box of the product
 	 * @return status of the Import process
 	 */
-	public String importProduct(String sFileUrl, String sBoundingBox, String sProvider) {
+	public String importProduct(String sFileUrl, String sName, String sBoundingBox, String sProvider) {
 		String sReturn = "ERROR";
 
 		try {
-			String sProcessId = asynchImportProduct(sFileUrl, sBoundingBox, sProvider);
+			String sProcessId = asynchImportProduct(sFileUrl, sName, sBoundingBox, sProvider);
 			sReturn = waitProcess(sProcessId);
 
 			// Return the status of the import WASDI process
@@ -2493,7 +2506,7 @@ public class WasdiLib {
 	 * @param aoProductsToImport
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
-	public List<String> asynchImportProductList(List<String> asProductsToImport){
+	public List<String> asynchImportProductList(List<String> asProductsToImport, List<String> asNames){
 		log("WasdiLib.asynchImportProductList ( with list )");
 		if(null==asProductsToImport) {
 			log("WasdiLib.asynchImportProductList: list is null, aborting");
@@ -2505,39 +2518,23 @@ public class WasdiLib {
 		}
 		log("WasdiLib.asynchImportProductList: list has " + asProductsToImport.size() + " elements");
 		List<String> asIds = new ArrayList<String>(asProductsToImport.size());
-		for (String sProductUrl: asProductsToImport) {
-			asIds.add(asynchImportProduct(sProductUrl));
+		
+		for (int i=0; i<asProductsToImport.size(); i++) {
+			String sProductUrl = asProductsToImport.get(i);
+			String sName = null;
+			
+			if (asNames != null) {
+				if (i<asNames.size()) {
+					sName = asNames.get(i);
+				}				
+			}
+			
+			asIds.add(asynchImportProduct(sProductUrl, sName));
 		}
+		
 		return asIds;
 	}
 	
-	public List<String> asynchImportProductList( String sJsonArray ){
-		log("WasdiLib.asynchImportProductList ( " + sJsonArray + " )");
-		if(null==sJsonArray || sJsonArray.isEmpty()) {
-			log("WasdiLib.asynchImportProductList: string is null or empty, aborting");
-			return null;
-		}
-		if(sJsonArray.startsWith("{")) {
-			sJsonArray = sJsonArray.substring(1);
-		}
-		if(sJsonArray.endsWith("}")) {
-			sJsonArray = sJsonArray.substring(0,sJsonArray.length()-1);
-		}
-		if(!sJsonArray.startsWith("[")||!sJsonArray.endsWith("]")) {
-			log("WasdiLib.asynchImportProductList: string passed is not a well formatted JSON array: "+
-					"it must begin with [ and end with ], aborting");
-			return null;
-		}
-		sJsonArray=sJsonArray.substring(1, sJsonArray.length()-1);
-		//remove all spaces
-		sJsonArray = sJsonArray.replaceAll("\\s+","").trim();
-		String[] asSplit = sJsonArray.split(",");
-		List<String> asProductsToImport = Arrays.asList(asSplit);
-		return asynchImportProductList(asProductsToImport);
-		
-	}
-
-
 	/**
 	 * Imports a list of product asynchronously
 	 * @param aoProductsToImport
@@ -2552,8 +2549,8 @@ public class WasdiLib {
 	 * @param aoProductsToImport
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
-	public List<String> importProductList(List<String> asProductsToImport){
-		return waitProcesses(asynchImportProductList(asProductsToImport));
+	public List<String> importProductList(List<String> asProductsToImport, List<String> asNames){
+		return waitProcesses(asynchImportProductList(asProductsToImport, asNames));
 	}
 
 	/***
@@ -3399,7 +3396,7 @@ public class WasdiLib {
 		}
 
 		//start downloads
-		List<String> asDownloadIds = asynchImportProductList(asProductsLinks);
+		List<String> asDownloadIds = asynchImportProductList(asProductsLinks, asProductsNames);
 
 		List<String> asWorkflowIds = asynchPreprocessProductsOnceDownloadedWithNames(asProductsNames, sWorkflow,
 				sPreProcSuffix, asDownloadIds);

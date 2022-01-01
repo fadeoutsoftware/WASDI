@@ -49,7 +49,7 @@ end
 %add internal path
 %addpath(genpath(sPath))
 %add WASDI Library Jar
-wasdilib = 'jwasdilib-0.7.0.jar';
+wasdilib = 'jwasdilib-0.7.1.jar';
 if isdeployed
     javaaddpath(['./', wasdilib])
 else
@@ -67,4 +67,4 @@ else
 end
 
 %Log
-disp('WASDI: WASDI MATLAB LIB INITIALIZED (v.0.07.00). Welcome to Space')
+disp('WASDI: WASDI MATLAB LIB INITIALIZED (v.0.07.01). Welcome to Space')
