@@ -1774,53 +1774,6 @@ FUNCTION GETFOUNDPRODUCTLINK, oFoundProduct
 END
 
 
-; Import EO Image in WASDI
-FUNCTION WASDIIMPORTEOIMAGE, oEOImage
-
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
-
-	sessioncookie = token
-
-	; API url
-	UrlPath = '/wasdiwebserver/rest/filebuffer/download'
-
-	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
-	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
-	sName = GETVALUEBYKEY(oEOImage,'title')
-
-	; Create a new url object
-	oUrl = OBJ_NEW('IDLnetUrl')
-	sEncodedLink = oUrl->URLEncode(sFileLink)
-	sEncodedBB = oUrl->URLEncode(sBoundingBox)
-
-	sProvider = "LSA"
-
-	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB + "&name="+sName
-
-	UrlPath = UrlPath + '?' + sQuery
-
-	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-
-	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-
-	sProcessID = ''
-
-	; get the process id
-	IF sResponse then BEGIN
-		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
-		sProcessID=sValue
-	ENDIF
-
-	sStatus = "ERROR"
-
-	; Wait for the process to finish
-	IF sProcessID ne '' then BEGIN
-		sStatus = WASDIWAITPROCESS(sProcessID)
-	ENDIF  
-
-	RETURN, wasdiResult
-END
-
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
 
@@ -2393,6 +2346,53 @@ FUNCTION WASDISETSUBPID, sProcessId, iSubPid
 END
 
 
+; Import EO Image in WASDI
+FUNCTION WASDIIMPORTEOIMAGE, oEOImage
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+
+	sessioncookie = token
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/filebuffer/download'
+
+	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
+	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sName = GETVALUEBYKEY(oEOImage,'title')
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+	sEncodedLink = oUrl->URLEncode(sFileLink)
+	sEncodedBB = oUrl->URLEncode(sBoundingBox)
+	sEncodedName = oUrl->URLEncode(sName)
+
+	sProvider = "AUTO"
+
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB + "&name="+sEncodedName
+
+	UrlPath = UrlPath + '?' + sQuery
+
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse then BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID ne '' then BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF  
+
+	RETURN, wasdiResult
+END
 
 ; ASYNCH Import EO Image in WASDI
 FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
@@ -2406,13 +2406,17 @@ FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
 
 	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
 	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sName = GETVALUEBYKEY(oEOImage,'title')
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
+	sEncodedName = oUrl->URLEncode(sName)
+	
+	sProvider = "AUTO"
 
-	sQuery = "fileUrl=" + sEncodedLink + "&provider=LSA&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+ sProvider + "&workspace=" + activeworkspace + "&bbox=" + sEncodedBB + "&name="+sEncodedName
 
 	UrlPath = UrlPath + '?' + sQuery
 
