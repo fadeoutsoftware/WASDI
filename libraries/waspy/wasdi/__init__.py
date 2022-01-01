@@ -2113,17 +2113,17 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None, sName=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
     :param sFileUrl: url of the file to import
+    
+    :param sName: Name of the file to import as returned by the Data Provider
 
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider to use. Use None for Default
-    
-    :param sName: Name of the file to import as returned by the Data Provider
     
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
@@ -2176,17 +2176,17 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None, sNa
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None, sName=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
     :param sFileUrl: url of the file to import as returned by the data provider
+    
+    :param sName: Name of the file to import as returned by the Data Provider 
 
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider. Use None for default
-    
-    :param sName: Name of the file to import as returned by the Data Provider 
     
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
@@ -2194,7 +2194,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
     sReturn = "ERROR"
     
     if sProvider is None:
-        sProvider = "ONDA"
+        sProvider = "AUTO"
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?fileUrl="
@@ -2270,7 +2270,7 @@ def importProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl, sBoundingBox, sProvider, sName)
+        return importProductByFileUrl(sFileUrl=sFileUrl,sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2308,7 +2308,7 @@ def asynchImportProduct(oProduct, sProvider=None):
         if "title" in oProduct:
             sName = oProduct["title"]
 
-        return asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider, sName)
+        return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2352,7 +2352,7 @@ def importProductList(aoProducts, sProvider=None):
                     sActualProvider = oProduct["provider"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sActualProvider, sName)
+            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sActualProvider)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2402,7 +2402,7 @@ def asynchImportProductList(aoProducts, sProvider=None):
                 sName = oProduct["title"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider, sName)
+            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:
