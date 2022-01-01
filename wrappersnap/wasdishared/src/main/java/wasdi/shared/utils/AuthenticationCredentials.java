@@ -18,9 +18,7 @@ public class AuthenticationCredentials {
 		if(!Utils.isNullOrEmpty(sUser) && !Utils.isNullOrEmpty(sPassword)) {
 			this.sUser = sUser;
 			this.sPassword = sPassword;
-		} else {
-			throw new NullPointerException("AuthenticationCredentials.AuthenticationCredential(String sUser, String sPassword): null argument(s)");
-		}
+		} 
 	}
 	
 	public String getUser() {
