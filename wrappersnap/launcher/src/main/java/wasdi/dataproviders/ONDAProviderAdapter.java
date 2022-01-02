@@ -587,6 +587,16 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				return DataProviderScores.DOWNLOAD.getValue();
 			}
 		}
+		else if (sPlatformType.equals(Platforms.ENVISAT)) {
+			if (sFileName.startsWith("ASA_")) {
+				if (isWorkspaceOnSameCloud()) {
+					return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+				}
+				else {
+					return DataProviderScores.DOWNLOAD.getValue();
+				}
+			}
+		}
 		
 		return 0;
 	}

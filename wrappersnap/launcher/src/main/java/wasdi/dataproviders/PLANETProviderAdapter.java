@@ -64,11 +64,11 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					}
 					
 					if (oConfig.containsKey("maxActivationCycles")) {
-						m_lRetrySleepSeconds = (long) oConfig.get("maxActivationCycles");
+						m_iMaxActivationCycles = (int) oConfig.get("maxActivationCycles");
 					}
 					
 					if (oConfig.containsKey("activationCyclesSleepSeconds")) {
-						m_lRetrySleepSeconds = (long) oConfig.get("activationCyclesSleepSeconds");
+						m_lActivationCyclesSleepSeconds = (long) oConfig.get("activationCyclesSleepSeconds");
 					}
 				}
 			}
@@ -135,6 +135,8 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					for (int iWaitCycles = 0; iWaitCycles<m_iMaxActivationCycles; iWaitCycles++) {
 						
 						try {
+							m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: waiting for activation, going to sleep for " + m_lActivationCyclesSleepSeconds + " [s]");
+							
 							Thread.sleep(m_lActivationCyclesSleepSeconds*1000);
 							
 							sDirectFileUrl = isAssetReady(sAssetUrl);
@@ -173,6 +175,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 				
 				// Take a nap before
 				try {
+					m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: retry cycle, going to sleep for " + m_lRetrySleepSeconds + " [s]");
 					Thread.sleep(m_lRetrySleepSeconds*1000);	
 				}
 				catch (Exception oSleepEx) {
@@ -273,14 +276,18 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					
 					// Post the request
 					HttpUtils.httpPost(sActivateLink, null, getPlanetHeaders());
+					
+					m_oLogger.debug("PLANETProviderAdapter.activateAsset: activation request sent");
+					
+					return;
 				}
 			}
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("PLANETProviderAdapter.activateAsset: " + oEx.toString());
-		}	
-			
+		}
 		
+		m_oLogger.debug("PLANETProviderAdapter.activateAsset: impossible to send the activation request");
 	}
 
 	@Override

@@ -28,20 +28,6 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		
 		m_sDataProviderCode = "PROBAV";
 		
-		try {
-			
-			String sFile = m_oDataProviderConfig.adapterConfig;
-			
-			if (new File(sFile).exists()) {
-				m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);				
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	public PROBAVProviderAdapter(LoggerWrapper logger) {
@@ -427,7 +413,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			m_oLogger.error("PROBAVProviderAdapter.getFileName: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 
 		return "";
@@ -435,6 +421,19 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected void internalReadConfig() {
+		try {
+			
+			String sFile = m_oDataProviderConfig.adapterConfig;
+			
+			if (new File(sFile).exists()) {
+				m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);				
+			}
+
+		} catch (IOException e) {
+			m_oLogger.error("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
+		} catch (Exception e) {
+			m_oLogger.error("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
+		}
 		
 	}
 
