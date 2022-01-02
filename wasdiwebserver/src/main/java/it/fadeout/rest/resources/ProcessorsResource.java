@@ -1724,17 +1724,9 @@ public class ProcessorsResource  {
 			}
 			
 			// Check User 
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: session is null or empty, aborting");
-				return Response.status(401).build();
-			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid session, aborting");
-				return Response.status(401).build();
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: userid of user (from session) is null or empty, aborting");
 				return Response.status(401).build();
 			}
 			
@@ -1922,11 +1914,9 @@ public class ProcessorsResource  {
 		Utils.debugLog("ProcessorResources.updateProcessorDetails( Processor: " + sProcessorId + " )");
 		
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorDetails: get Processor " + sProcessorId);	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();

@@ -343,13 +343,15 @@ public final class HttpUtils {
 	 * @param asHeaders headers to use
 	 * @throws IOException
 	 */
-	public static void httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) throws IOException {
+	public static boolean httpPostFile(String sUrl, String sFileName, Map<String, String> asHeaders) throws IOException {
 		//local file -> automatically checks for null
 		File oFile = new File(sFileName);
 		if (!oFile.exists()) {
-			throw new IOException("Wasdi.httpPostFile: file not found");
+			Utils.debugLog("Wasdi.httpPostFile: file not found");
+			return false;
 		}
 
+		
 		String sZippedFile = null;
 
 		// Check if we need to zip this file
@@ -390,6 +392,7 @@ public final class HttpUtils {
 
 			sFileName = oFile.getName();
 		}
+		
 
 		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
 		try (FileInputStream oInputStream = new FileInputStream(oFile)) {
@@ -456,11 +459,11 @@ public final class HttpUtils {
 
 			} catch(Exception oE) {
 				Utils.debugLog("HttpUtils.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
-				throw oE;
+				return false;
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
-			throw oE;
+			return false;
 		}
 
 		if (!Utils.isNullOrEmpty(sZippedFile)) {
@@ -471,6 +474,8 @@ public final class HttpUtils {
 				Utils.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
 			}
 		}
+		
+		return true;
 	}
 
 	/**
