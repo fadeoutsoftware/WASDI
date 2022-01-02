@@ -40,7 +40,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 /**
- * [0.7.0] - 2021-11-29
+ * [0.7.4] - 2022-01-01
+ * 
+ * ### Added
+ * 	- support to Auto Data Provider
  * 	
  * ### Added
  * - getWorkspaceNameById: return the name of a workspace from the id
@@ -142,7 +145,7 @@ public class WasdiLib {
 	/*
 	 * Default data provider to be used for search and import operations 
 	 */
-	private String m_sDefaultProvider = "LSA";
+	private String m_sDefaultProvider = "AUTO";
 
 
 	/**

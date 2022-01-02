@@ -32,7 +32,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.5
+Version 0.7.4
 
 Last Update: 01/01/2022
 
@@ -1931,7 +1931,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # Date Block
     sQuery += "AND ( beginPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
-    sQuery += "AND ( endPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
+    sQuery += "AND endPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
 
     # Close the second block
     sQuery += ") "
@@ -2328,7 +2328,7 @@ def importProductList(aoProducts, sProvider=None):
         wasdiLog("[ERROR] waspy.importProductList: input asPRoduct is none")
         return "ERROR"
 
-    _log('[INFO] waspy.importProductList( ' + str(aoProducts) + ' )')
+    _log('[INFO] waspy.importProductList()')
 
     asReturnList = []
 

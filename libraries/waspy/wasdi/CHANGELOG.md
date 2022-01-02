@@ -3,10 +3,13 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
-## [0.7.1] - 2021-11-24
+## [0.7.4] - 2021-01-01
 
 ### Added
 - Support to the AUTO Data Provider
+
+### Fixed
+- Bug on the searchEOImages query dates composition
 
 ## [0.7.0] - 2021-11-24
 
