@@ -103,6 +103,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * List of subscriber that receives the progress update of the download operation
      */
     private List<ProcessWorkspaceUpdateSubscriber> m_aoSubscribers;
+    
+    /**
+     * Data Provider Config
+     */
+    protected DataProviderConfig m_oDataProviderConfig;
 
     /**
      * Constructor: uses LauncerMain logger
@@ -126,12 +131,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     public void readConfig() {
     	try {
     		// Get the config
-    		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
+    		m_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
     		// Read the cloud provider
-    		m_sCloudProvider = oDataProviderConfig.cloudProvider;
+    		m_sCloudProvider = m_oDataProviderConfig.cloudProvider;
     		
     		// Add supported platform
-    		for (String sSupportedPlatform : oDataProviderConfig.supportedPlatforms) {
+    		for (String sSupportedPlatform : m_oDataProviderConfig.supportedPlatforms) {
     			m_asSupportedPlatforms.add(sSupportedPlatform);
 			}
     		
@@ -368,17 +373,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			
 	        String sUser = "";
 	        String sPassword = "";
-	        
-	        // TODO: Still needed? Really?
-			try {
-				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
-				
-				sUser = oConfig.user;
-				sPassword = oConfig.password;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
 
 			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
 			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;

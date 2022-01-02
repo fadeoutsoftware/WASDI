@@ -12,7 +12,6 @@ import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.LoggerWrapper;
@@ -30,9 +29,8 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "PROBAV";
 		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
 			
-			String sFile = oConfig.fileDescriptors;
+			String sFile = m_oDataProviderConfig.adapterConfig;
 			
 			if (new File(sFile).exists()) {
 				m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);				

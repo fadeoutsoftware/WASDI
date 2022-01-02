@@ -211,10 +211,9 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	protected void internalReadConfig() {
 		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
-			m_sDefaultProtocol = oConfig.defaultProtocol; 
-			m_sProviderBasePath = oConfig.localFilesBasePath;
-			m_sProviderUrlDomain = oConfig.urlDomain;
+			m_sDefaultProtocol = m_oDataProviderConfig.defaultProtocol; 
+			m_sProviderBasePath = m_oDataProviderConfig.localFilesBasePath;
+			m_sProviderUrlDomain = m_oDataProviderConfig.urlDomain;
 			
 		} catch (Exception e) {
 			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");

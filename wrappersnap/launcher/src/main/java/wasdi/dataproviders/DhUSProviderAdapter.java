@@ -57,7 +57,10 @@ public class DhUSProviderAdapter extends ProviderAdapter {
     
 	@Override
 	protected void internalReadConfig() {
-		
+		if (m_oDataProviderConfig != null) {
+			m_sProviderUser = m_oDataProviderConfig.user;
+			m_sProviderPassword = m_oDataProviderConfig.password;
+		}
 	}
 
 	@Override

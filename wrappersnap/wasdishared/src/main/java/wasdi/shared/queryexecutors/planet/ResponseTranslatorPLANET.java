@@ -155,10 +155,10 @@ public class ResponseTranslatorPLANET extends ResponseTranslator {
 		try {
 			TypeReference<HashMap<String,Object>> oMapType = new TypeReference<HashMap<String,Object>>() {};
 			
-			HashMap<String,Object> oResults = MongoRepository.s_oMapper.readValue(sQueryResult, oMapType);
+			HashMap<String,Object> oResults = MongoRepository.s_oMapper.readValue(sQueryResult, oMapType);			
 			
-			
-			return 0;
+			// TODO: not precise at all, we do not have a count
+			return oResults.size();
 			
 		}
 		catch (Exception oEx) {

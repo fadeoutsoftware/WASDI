@@ -1,5 +1,6 @@
 package wasdi.dataproviders;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -23,14 +24,14 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 	int m_iMaxActivationCycles = 10;
 	
 	/**
-	 * Sleep period of the activation
+	 * Sleep period of the activation in Seconds
 	 */
-	long m_lActivationCyclesSleep = 60*1000;
+	long m_lActivationCyclesSleepSeconds = 60;
 	
 	/**
-	 * Sleep period for retry
+	 * Sleep period for retry in Seconds
 	 */
-	long m_lRetrySleep = 60*1000;
+	long m_lRetrySleepSeconds = 60;
 	
 	public PLANETProviderAdapter() {
 		super();
@@ -45,10 +46,35 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 	@Override
 	protected void internalReadConfig() {
 		
-		DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
-		
-		if (oDataProviderConfig != null) {
-			m_sProviderUser = oDataProviderConfig.user;
+		if (m_oDataProviderConfig != null) {
+			
+			m_sProviderUser = m_oDataProviderConfig.user;
+			
+			// We should have a config file with the retry and sleep settings
+			try {
+				String sFile = m_oDataProviderConfig.adapterConfig;
+				File oConfigFile = new File(sFile);
+				
+				if (oConfigFile.exists()) {
+					TypeReference<HashMap<String,Object>> oMapType = new TypeReference<HashMap<String,Object>>() {};					
+					HashMap<String,Object> oConfig = MongoRepository.s_oMapper.readValue(oConfigFile, oMapType);
+					
+					if (oConfig.containsKey("retrySleepSeconds")) {
+						m_lRetrySleepSeconds = (long) oConfig.get("retrySleepSeconds");
+					}
+					
+					if (oConfig.containsKey("maxActivationCycles")) {
+						m_lRetrySleepSeconds = (long) oConfig.get("maxActivationCycles");
+					}
+					
+					if (oConfig.containsKey("activationCyclesSleepSeconds")) {
+						m_lRetrySleepSeconds = (long) oConfig.get("activationCyclesSleepSeconds");
+					}
+				}
+			}
+			catch (Exception oEx) {
+				Utils.debugLog("PLANETProviderAdapter.internalReadConfig: " + oEx.toString());
+			}
 		}
 	}
 
@@ -106,10 +132,10 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					activateAsset(sAssetUrl);
 					
 					// We can wait for the asset to be ready
-					for (int iWaitCycles = 0; iWaitCycles<iMaxRetry; iWaitCycles++) {
+					for (int iWaitCycles = 0; iWaitCycles<m_iMaxActivationCycles; iWaitCycles++) {
 						
 						try {
-							Thread.sleep(m_lActivationCyclesSleep);
+							Thread.sleep(m_lActivationCyclesSleepSeconds*1000);
 							
 							sDirectFileUrl = isAssetReady(sAssetUrl);
 							
@@ -144,6 +170,14 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 				
 				// or not ready, or not downlaoded. Let see if we have other try...
 				iAttemp ++;
+				
+				// Take a nap before
+				try {
+					Thread.sleep(m_lRetrySleepSeconds*1000);	
+				}
+				catch (Exception oSleepEx) {
+				}
+				
 			}
 			
 		}
