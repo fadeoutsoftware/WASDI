@@ -129,7 +129,7 @@ public class FileBufferResource {
 
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileName, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
 			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
