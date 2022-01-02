@@ -409,7 +409,19 @@ public class WasdiLib {
 	 * @return Params Dictionary
 	 */
 	public Map<String, String> getParams() {
-		return m_aoParams;
+		Map<String, String> aoParamsCopy = new HashMap<>(m_aoParams);
+		
+		if (aoParamsCopy.containsKey("user")) {
+			aoParamsCopy.remove("user");
+		}
+		if (aoParamsCopy.containsKey("sessionid")) {
+			aoParamsCopy.remove("sessionid");
+		}
+		if (aoParamsCopy.containsKey("workspaceid")) {
+			aoParamsCopy.remove("workspaceid");
+		}
+		
+		return aoParamsCopy;
 	}
 
 	public String getParamsAsJsonString() {

@@ -10,6 +10,7 @@ WASDI python programming library CHANGELOG.md, according to the
 
 ### Fixed
 - Bug on the searchEOImages query dates composition
+- Removed internal params from getParametersDict
 
 ## [0.7.0] - 2021-11-24
 

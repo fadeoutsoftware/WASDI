@@ -80,8 +80,8 @@ m_bVerbose = True
 m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
-m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_iRequestsTimeout = 2 * 60
 
@@ -168,7 +168,19 @@ def getParametersDict():
     :return: a dictionary containing the parameters
     """
     global m_aoParamsDictionary
-    return m_aoParamsDictionary
+    
+    aoReturnDict = dict(m_aoParamsDictionary)
+    
+    if "user" in aoReturnDict:
+        del aoReturnDict["user"]
+
+    if "sessionid" in aoReturnDict:
+        del aoReturnDict["sessionid"]
+
+    if "workspaceid" in aoReturnDict:
+        del aoReturnDict["workspaceid"]    
+    
+    return aoReturnDict
 
 
 def setParametersDict(aoParams):
