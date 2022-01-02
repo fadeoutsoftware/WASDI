@@ -37,16 +37,17 @@ public class ProcessWorkspaceService {
 			Utils.debugLog("ProcessWorkspaceService.killFathers: list of processes is empty, aborting");
 			return true;
 		}
-
-
+		
 		try {
+			
+			if (bKillProcessTree == null) {
+				bKillProcessTree = true;
+			}
 
 			KillProcessTreeParameter oKillProcessParameter = new KillProcessTreeParameter();
-			if (null != bKillProcessTree && bKillProcessTree) {
-				oKillProcessParameter.setKillTree(true);
-			} else {
-				oKillProcessParameter.setKillTree(false);
-			}
+			
+			oKillProcessParameter.setKillTree(bKillProcessTree);
+			
 			oKillProcessParameter.setSessionID(sSessionId);
 
 			String sWorkspaceId = null;
