@@ -89,21 +89,11 @@ public class FileBufferResource {
 		try {
 			
 			Utils.debugLog("FileBufferResource.Download, session: " + sSessionId);
-
-			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
-			if (!bSessionIsValid) {
-				oResult.setIntValue(401);
-				return oResult;
-			}
-
+			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
 				Utils.debugLog("FileBufferResource.Download(): session is not valid");
-				oResult.setIntValue(401);
-				return oResult;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -179,16 +169,15 @@ public class FileBufferResource {
 			Utils.debugLog("FileBufferResource.PublishBand");
 			
 			// Check Authentication
-			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("FileBufferResource.PublishBand: session " + sSessionId + " is invalid"); 
 				return oReturnValue;
 			}
-			String sUserId = oUser.getUserId();
-			if (Utils.isNullOrEmpty(sUserId)) return oReturnValue;
 			
-			Utils.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", workspace: " + sWorkspaceId);
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("FileBufferResource.PublishBand, user: " + sUserId + ", workspace: " + sWorkspaceId);
 			
 			// Get the full product path
 			String sFullProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);

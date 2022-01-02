@@ -471,7 +471,7 @@ public class CatalogResources {
 
 		// Check user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
+		if (oUser == null) return Response.status(Status.UNAUTHORIZED).build();		
 		String sUserId = oUser.getUserId();		
 
 		// Find the sftp folder
@@ -538,7 +538,7 @@ public class CatalogResources {
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+		if (oUser == null) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;		
@@ -631,7 +631,7 @@ public class CatalogResources {
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+		if (oUser == null) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;		

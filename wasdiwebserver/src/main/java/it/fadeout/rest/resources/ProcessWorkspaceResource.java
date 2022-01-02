@@ -772,7 +772,7 @@ public class ProcessWorkspaceResource {
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " ): invalid session");
 				return Response.status(401).build();
 			}
