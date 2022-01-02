@@ -135,7 +135,7 @@ public final class HttpUtils {
 	}
 
 	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
-		Utils.debugLog("HttpUtils.standardHttpGETQuery start");
+		
 		String sResult = null;
 		try {
 			URL oURL = new URL(sUrl);
@@ -200,7 +200,7 @@ public final class HttpUtils {
 	}
 
 	public static String standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
-		Utils.debugLog("HttpUtils.standardHttpPOSTQuery( " + sUrl + " )");
+		
 		String sResult = null;
 		try {
 			URL oURL = new URL(sUrl);
@@ -608,7 +608,7 @@ public final class HttpUtils {
 			dSpeed *= 1000.0;
 		}
 
-		Utils.debugLog("HttpUtils." + sMethodName + "( " + sUrl + " ) performance: " + dMillis + " ms, "
+		Utils.debugLog("HttpUtils." + sMethodName + " performance: " + dMillis + " ms, "
 				+ iResponseSize + " B (" + dSpeed + " B/s)");
 	}
 

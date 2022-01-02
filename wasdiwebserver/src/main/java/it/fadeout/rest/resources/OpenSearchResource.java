@@ -387,6 +387,8 @@ public class OpenSearchResource {
 			// Prepare the output list
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 			
+			if (Utils.isNullOrEmpty(sProvider)) sProvider = "AUTO";
+			
 			// Save the original provider
 			String sOriginalProviders = sProvider;
 			

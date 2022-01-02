@@ -343,15 +343,17 @@ public class Wasdi extends ResourceConfig {
 	 * @return
 	 */
 	public static User getUserFromSession(String sSessionId) {
+		
 		User oUser = null;
+		
 		try {
 			// validate sSessionId
 			if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 				return null;
 			}
-
+			
+			// Check The Session with Keycloak
 			String sUserId = null;
-			//todo validate token with JWT
 			
 			try  {
 				//introspect
@@ -381,8 +383,9 @@ public class Wasdi extends ResourceConfig {
 				
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
+				
 				if(null==oUserSession) {
-					throw new NullPointerException("checking against DB failed: session " + sSessionId + " is not valid");
+					return null;
 				} else {
 					sUserId = oUserSession.getUserId();
 				}
@@ -390,7 +393,7 @@ public class Wasdi extends ResourceConfig {
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
 				} else {
-					throw new NullPointerException("User is null from WASDI session " + sSessionId );
+					return null;
 				}
 			}
 		} catch (Exception oE) {

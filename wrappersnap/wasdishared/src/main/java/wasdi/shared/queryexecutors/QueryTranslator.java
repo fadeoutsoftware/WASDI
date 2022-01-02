@@ -661,6 +661,10 @@ public abstract class QueryTranslator {
 					String sSubQuery = sQuery.substring(iStart, iEnd);
 
 					String[] asCloudLimits = sSubQuery.split(" TO ");
+					
+					if (asCloudLimits.length == 1) {
+						asCloudLimits = sSubQuery.split("<");
+					}
 
 					// these variables could be omitted, but in this way we check we are reading
 					// numbers

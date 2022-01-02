@@ -61,15 +61,12 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 	public int executeCount(String sQuery) {
 		try {
 			
-			
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			
 			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
 				return 0;
 			}
 			
-			
-			Utils.debugLog("QueryExecutorSENTINEL.executeCount ( " + sQuery + " )");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 			String sUrl = getSearchUrl(oQuery);
 			//create abdera client
