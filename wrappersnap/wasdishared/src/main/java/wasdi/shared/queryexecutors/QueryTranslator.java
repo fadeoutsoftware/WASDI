@@ -90,6 +90,10 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_ERA5 = "platformname:ERA5";
 	/**
+	 * Token of PLANET platform
+	 */
+	private static final String s_sPLATFORMNAME_PLANET = "platformname:PLANET";
+	/**
 	 * Token of product type
 	 */
 	private static final String s_sPRODUCTTYPE = "producttype:";
@@ -467,7 +471,9 @@ public abstract class QueryTranslator {
 			parseCopernicusMarine(sQuery, oResult);
 			
 			// Try to get Info about Sentinel 5P
-			parseSentinel5P(sQuery, oResult);			
+			parseSentinel5P(sQuery, oResult);
+			
+			parsePlanet(sQuery, oResult);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
@@ -1213,6 +1219,25 @@ public abstract class QueryTranslator {
 			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
 		}
 	}	
+	
+	
+	
+	/**
+	 * Parse Planet Data
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parsePlanet(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_PLANET)) {
+				
+				oResult.platformName = Platforms.PLANET;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+		}
+	}	
+	
 	/**
 	 * read a int from the query
 	 * 

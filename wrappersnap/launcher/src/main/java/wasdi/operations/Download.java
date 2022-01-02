@@ -96,8 +96,15 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             if (oParameter.getProvider().equals("AUTO")) {
             	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
             	
-                m_oLocalLogger.error("Got Data Provider " + oProviderAdapter.getCode());
-                m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	
+            	if (oProviderAdapter != null) {
+                    m_oLocalLogger.error("Got Data Provider " + oProviderAdapter.getCode());
+                    m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	            		
+            	}
+            	else {
+                    m_oLocalLogger.error("Download.executeOperation: Impossible to get a valid Data Provider");
+                    m_oProcessWorkspaceLogger.log("ERROR - Impossible to get a valid Data Provider");
+                    return false;
+            	}
             }
             else {
             	oProviderAdapter = getProviderAdapater(oParameter.getProvider(), oParameter, oProcessWorkspace);
@@ -112,7 +119,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             long lFileSizeByte = oProviderAdapter.getDownloadFileSize(oParameter.getUrl());
             // set file size
             setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
-
             
             String sDownloadPath = LauncherMain.getWorkspacePath(oParameter);
 

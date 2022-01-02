@@ -704,7 +704,14 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			
 			return DataProviderScores.LTA.getValue();
 		}
-		else if (sPlatformType.equals(Platforms.ENVISAT) || sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P)
+		else if (sPlatformType.equals(Platforms.ENVISAT)) {
+			if (sFileName.startsWith("ASA_")) {
+				return -1;
+			}
+			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+			else return DataProviderScores.DOWNLOAD.getValue();			
+		}
+		else if (sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P)
 				|| sPlatformType.equals(Platforms.LANDSAT8)) {
 			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 			else return DataProviderScores.DOWNLOAD.getValue();

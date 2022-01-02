@@ -161,7 +161,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param sDownloadPassword Password to authenticate to the provider
 	 * @param sSaveDirOnServer Local save path
 	 * @param oProcessWorkspace Process Workspace to update the user
-	 * @return
+	 * @return Downloaded File Full Path, or "" in case of problems
 	 */
     public abstract String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception;
     
@@ -224,7 +224,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     
     /**
      * Get the code of the cloud provider of the actual workspace
-     * @return
+     * @return Code of the cloud provider of the actual workspace
      */
     protected String getWorkspaceCloud() {
     	if (m_oProcessWorkspace == null) return "";
@@ -256,7 +256,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     
     /**
      * Return true if the workspace is on the same cloud of the data provider
-     * @return
+     * @return true if the workspace is on the same cloud of the data provider
      */
     protected boolean isWorkspaceOnSameCloud() {
 		String sCloud = getWorkspaceCloud();
@@ -296,6 +296,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
 	}
 	
+	/**
+	 * Set the process workspace member
+	 * @param oProcessWorkspace
+	 */
 	public void setProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
 		if(null!=oProcessWorkspace) {
 			m_oProcessWorkspace = oProcessWorkspace;

@@ -436,6 +436,20 @@
                     "indexvalue":"netcdf"
                 }
             ]
+        },
+        {
+            "name": "PLANET",
+            "indexname": "platformname",
+            "indexvalue": "PLANET",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Planet Item Type",
+                    "indexvalues": "PSScene|PSScene3Band|PSScene4Band|PSOrthoTile|REOrthoTile|REScene|SkySatScene|SkySatCollect|SkySatVideo",
+                    "regex": ".*",
+                    "indexvalue":"PSScene3Band"
+                }
+            ]
         }
     ],
     "orbitsearch":{

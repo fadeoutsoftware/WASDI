@@ -18,6 +18,7 @@ import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
 import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
 import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
+import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
 import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
@@ -46,6 +47,7 @@ public class QueryExecutorFactory {
 		aoMap.put("VIIRS", QueryExecutorVIIRS::new);
 		aoMap.put("CDS", QueryExecutorCDS::new);
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
+		aoMap.put("PLANET", QueryExecutorPLANET::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
