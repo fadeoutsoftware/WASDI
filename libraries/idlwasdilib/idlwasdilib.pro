@@ -2,11 +2,11 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.7.1
+; IDL WASDI Lib Version 0.7.4
 ; Last Update: 2022-01-01
 ;
 ; History
-; 0.7.1 - 2022-01-01
+; 0.7.4 - 2022-01-01
 ;	added support to AUTO Data Provider
 ;
 ; 0.7.0 - 2021-11-24
