@@ -30,9 +30,10 @@ public class ProductViewModel {
     private String metadataFileReference;
     
     private boolean metadataFileCreated = false;
-
     
-    public ProductViewModel() {
+    private String style;
+    
+	public ProductViewModel() {
 	}
     
     public ProductViewModel(ProductViewModel base) {
@@ -99,4 +100,13 @@ public class ProductViewModel {
 	public void setMetadataFileCreated(boolean metadataFileCreated) {
 		this.metadataFileCreated = metadataFileCreated;
 	}
+	
+    public String getStyle() {
+		return style;
+	}
+
+	public void setStyle(String style) {
+		this.style = style;
+	}
+
 }

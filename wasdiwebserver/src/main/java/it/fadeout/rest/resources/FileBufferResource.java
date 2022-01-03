@@ -2,9 +2,11 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -35,6 +37,7 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
@@ -276,7 +279,7 @@ public class FileBufferResource {
 			@QueryParam("style") String sStyle)
 	{			
 
-		Utils.debugLog("FileBufferResource.downloadStyleByName( WorkflowId: " + sStyle + " )");
+		Utils.debugLog("FileBufferResource.downloadStyleByName( Style: " + sStyle + " )");
 
 		try {
 
@@ -362,7 +365,7 @@ public class FileBufferResource {
 			}
 
 			// Generate Workflow Id and file
-			File oStyleXmlFile = new File(sDownloadRootPath + "workflows/" + sName + ".sld");
+			File oStyleXmlFile = new File(sDownloadRootPath + "styles/" + sName + ".sld");
 
 			Utils.debugLog("FileBufferResource.uploadStyle: style file Path: " + oStyleXmlFile.getPath());
 
@@ -385,6 +388,60 @@ public class FileBufferResource {
 		return Response.ok().build();
 	}
 	
+	
+	@GET
+	@Path("/styles")	
+	public Response getStyles(@HeaderParam("x-session-token") String sSessionId)
+	{			
+
+		Utils.debugLog("FileBufferResource.getStyles");
+
+		try {
+
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
+				Utils.debugLog("FileBufferResource.getStyles: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			// Take path
+			String sDownloadRootPath = Wasdi.getDownloadPath();
+			String sStyleSldPath = sDownloadRootPath + "styles/";
+
+			File oFile = new File(sStyleSldPath);
+			
+			File [] aoStyleFiles = oFile.listFiles(new FilenameFilter() {
+			    @Override
+			    public boolean accept(File dir, String sName) {
+			        return sName.toLowerCase().endsWith(".sld");
+			    }
+			});
+			
+			ArrayList<String> asStyles = new ArrayList<>(); 
+
+			if (aoStyleFiles != null) {
+				for (File oSldFile : aoStyleFiles) {
+					try {
+						String sFileName = oSldFile.getName();
+						
+						String sStyle = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sFileName);
+						
+						asStyles.add(sStyle);
+					}
+					catch (Exception e) {
+					}
+				}				
+			}
+
+			return Response.ok(asStyles).build();
+		} 
+		catch (Exception oEx) {
+			Utils.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
+		}
+
+		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}	
 	
 
 }

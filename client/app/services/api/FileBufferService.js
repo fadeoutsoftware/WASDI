@@ -40,4 +40,7 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publishband?fileUrl='+encodeURIComponent(sUrl)+"&workspace="+sWorkspaceId+'&band='+sBand);
     }
 
+    this.getStyles = function() {
+        return this.m_oHttp.get(this.APIURL + '/filebuffer//styles');
+    }
 }]);

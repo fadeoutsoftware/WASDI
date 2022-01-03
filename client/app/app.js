@@ -224,8 +224,6 @@ wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
 
-wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
-
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){

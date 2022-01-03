@@ -356,6 +356,8 @@ public class ProductResource {
                     	// Convert the view model in Georef version
                         GeorefProductViewModel oGeoRefProductViewModel = new GeorefProductViewModel(oProductViewModel);
                         oGeoRefProductViewModel.setBbox(oDownloaded.getBoundingBox());
+                        
+                        oGeoRefProductViewModel.setStyle(oDownloaded.getDefaultStyle());
 
                         oGeoRefProductViewModel.setMetadata(null);
                         aoProductList.add(oGeoRefProductViewModel);
@@ -511,7 +513,7 @@ public class ProductResource {
      * Update a Product from the correspondig View Model
      * @param sSessionId User Session
      * @param sWorkspaceId Workspace Id
-     * @param oProductViewModel Product View Model
+     * @param oProductViewModel Product View Model: NOTE IT UPDATES ONLY productFriendlyName and Style
      * @return std http response
      */
     @POST
@@ -545,32 +547,49 @@ public class ProductResource {
             // Create repo
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
-            DownloadedFile oDownlaoded = oDownloadedFilesRepository
-                    .getDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
+            // Get the Entity
+            DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
 
-            if (oDownlaoded == null) {
+            if (oDownloaded == null) {
                 Utils.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
                 return Response.status(500).build();
             }
+            
+            
+            String sOriginalName = oDownloaded.getProductViewModel().getProductFriendlyName();
+            if (sOriginalName == null) sOriginalName = "";
+            
+            String sOriginalStyle = oDownloaded.getDefaultStyle();
+            if (sOriginalStyle == null) sOriginalStyle = "";
+            
+            String sNewStyle = oProductViewModel.getStyle();
+            if (sNewStyle == null) sNewStyle = "";
+            
+            String sNewName = oProductViewModel.getProductFriendlyName();
+            if (sNewName == null) sNewName = "";
+            
+            
+            if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle))) {
+                // Update the 2 fields that can be updated
+                oDownloaded.getProductViewModel().setProductFriendlyName(oProductViewModel.getProductFriendlyName());
+                oDownloaded.setDefaultStyle(oProductViewModel.getStyle());             
 
-            // P.Campanella 26/05/2017: keep safe the metadata view model that is not
-            // exchanged in the API
-            oProductViewModel.setMetadata(oDownlaoded.getProductViewModel().getMetadata());
-            // Set the updated one
-            oDownlaoded.setProductViewModel(oProductViewModel);
-
-            // Save
-            if (oDownloadedFilesRepository.updateDownloadedFile(oDownlaoded) == false) {
-                Utils.debugLog("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
-                return Response.status(500).build();
+                // Save
+                if (oDownloadedFilesRepository.updateDownloadedFile(oDownloaded) == false) {
+                    Utils.debugLog("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
+                    return Response.status(500).build();
+                }
+                
+                Utils.debugLog("ProductResource.UpdateProductViewModel: Updated ");
+            }
+            else {
+            	Utils.debugLog("ProductResource.UpdateProductViewModel: Nothing Changed");
             }
 
         } catch (Exception oEx) {
             Utils.debugLog("ProductResource.UpdateProductViewModel: " + oEx);
             return Response.status(500).build();
         }
-
-        Utils.debugLog("ProductResource.UpdateProductViewModel: Updated ");
 
         return Response.status(200).build();
     }
@@ -590,7 +609,7 @@ public class ProductResource {
     @POST
     @Path("/uploadfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName) throws Exception {
+    public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("style") String sStyle) throws Exception {
         Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " )");
 
         // before any operation check that this is not an injection attempt from the user
@@ -599,19 +618,12 @@ public class ProductResource {
             return Response.status(400).build();
         }
 
-        // Check the user session
-        if (Utils.isNullOrEmpty(sSessionId)) {
-            return Response.status(401).build();
-        }
-
         User oUser = Wasdi.getUserFromSession(sSessionId);
         if (oUser == null) {
             Utils.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
             return Response.status(401).build();
         }
-        if (Utils.isNullOrEmpty(oUser.getUserId())) {
-            return Response.status(401).build();
-        }
+        
         String sUserId = oUser.getUserId();
 
         // Check the file name
@@ -660,6 +672,7 @@ public class ProductResource {
             oParameter.setUserId(sUserId);
             oParameter.setExchange(sWorkspaceId);
             oParameter.setFilePath(oOutputFilePath.getAbsolutePath());
+            oParameter.setStyle(sStyle);
             oParameter.setProcessObjId(sProcessObjId);
             oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
