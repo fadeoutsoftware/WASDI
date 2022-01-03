@@ -31,7 +31,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     //'wasdi.FilterService',
-    'wasdi.ProcessorService',
+    'wasdi.ProcessorService', 
+    'wasdi.WorkflowService', 
 //    'wasdi.AuthServiceGoogle',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
@@ -232,6 +233,7 @@ wasdiApp.controller("ImportAdvanceFiltersController", window.ImportAdvanceFilter
 wasdiApp.controller("WorkFlowManagerController", window.WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController", window.GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", window.ProcessorController);
+wasdiApp.controller("WorkflowController", window.WorkflowController);
 wasdiApp.controller("WorkspaceDetailsController", window.WorkspaceDetailsController);
 //wasdiApp.controller("WpsController", window.WpsController);
 wasdiApp.controller("WappsController", window.WappsController);
