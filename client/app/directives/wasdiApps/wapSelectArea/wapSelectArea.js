@@ -27,11 +27,11 @@ angular.module('wasdi.wapSelectArea', [])
                 //CHECK IF Height or width are null or undefined
                 if(utilsIsANumber(this.heightMap ) === false ){
                     this.heightMap = 0;
-                    console.error('height-map parameter is not a number');
+                    //console.error('height-map parameter is not a number');
                 }
                 if(utilsIsANumber(this.widthMap ) === false ){
                     this.widthMap = 0;
-                    console.error('width-map parameter is not a number');
+                    //console.error('width-map parameter is not a number');
                 }
 
                 this.oMapStyle = { height: this.heightMap + 'px',
