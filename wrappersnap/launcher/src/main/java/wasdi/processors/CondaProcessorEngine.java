@@ -31,72 +31,52 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 		super.onAfterUnzipProcessor(sProcessorFolder);
 		
 		try {
-			LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: sanitize pip.txt");
+			LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: adjust env.yml");
 			
 			// Check the pip file
-			File oPipFile = new File(sProcessorFolder+"env.yml");
+			File oEnvFile = new File(sProcessorFolder+"env.yml");
 			
-			if (!oPipFile.exists()) {
-				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: pip file not present, done");
+			if (!oEnvFile.exists()) {
+				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: env file not present, done");
 				return;
 			}
 			
-//			// Read all the packages requested by the user
-//			ArrayList<String> asUserPackages = new ArrayList<String>(); 
-//			
-//			try (BufferedReader oPipBufferedReader = new BufferedReader(new FileReader(oPipFile))) {
-//			    String sLine;
-//			    while ((sLine = oPipBufferedReader.readLine()) != null) {
-//			    	asUserPackages.add(sLine);
-//			    }
-//			}
-//			
-//			// For all the packages already included in the docker template
-//			for (int iPackages = 0; iPackages <asDockerTemplatePackages.length; iPackages ++) {
-//				
-//				// Take the name
-//				String sExistingPackage = asDockerTemplatePackages[iPackages];
-//				
-//				// Check if it was included also by the user
-//				if (!Utils.isNullOrEmpty(sExistingPackage)) {
-//					if (asUserPackages.contains(sExistingPackage)) {
-//						
-//						// Remove it
-//						LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: removing already existing package " + sExistingPackage);
-//						asUserPackages.remove(sExistingPackage);
-//					}					
-//				}
-//			}
-//			
-//			// Do we still have packages
-//			if (asUserPackages.size()>0) {
-//				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: writing new pip.txt file");
-//				
-//				FileOutputStream oNewPipFile = new FileOutputStream(oPipFile);
-//				 
-//				BufferedWriter oPipWriter = new BufferedWriter(new OutputStreamWriter(oNewPipFile));
-//			 
-//				for (int iPackages = 0; iPackages < asUserPackages.size(); iPackages++) {
-//					
-//					String sPackage = asUserPackages.get(iPackages);
-//					
-//					if (!checkPipPackage(sPackage)) {
-//						m_oProcessWorkspaceLogger.log("We did not find PIP package [" + sPackage + "], are you sure is correct?");
-//					}
-//					
-//					oPipWriter.write(sPackage);
-//					oPipWriter.newLine();
-//				}
-//			 
-//				oPipWriter.close();	
-//				oNewPipFile.flush();
-//				oNewPipFile.close();
-//			}
-//			else {
-//				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: no more packages after filtering: delete pip file");
-//				oPipFile.delete();
-//			}
+			// Read all the packages requested by the user
+			ArrayList<String> asEnvRows = new ArrayList<String>(); 
 			
+			try (BufferedReader oEnvBufferedReader = new BufferedReader(new FileReader(oEnvFile))) {
+			    String sLine;
+			    while ((sLine = oEnvBufferedReader.readLine()) != null) {
+			    	asEnvRows.add(sLine);
+			    }
+			}
+			
+			LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: writing new env.txt file");
+			
+			FileOutputStream oNewEnvFile = new FileOutputStream(oEnvFile);
+			 
+			BufferedWriter oEnvWriter = new BufferedWriter(new OutputStreamWriter(oNewEnvFile));
+		 
+			for (int iRows = 0; iRows < asEnvRows.size(); iRows++) {
+				
+				String sRow = asEnvRows.get(iRows);
+				
+				if (sRow.startsWith("name: ")) {
+					LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: changing name");
+					sRow = "name: base";
+				}
+				else if (sRow.startsWith("prefix: ")) {
+					LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
+					sRow = "prefix: /home/tomcat/miniconda";
+				}
+								
+				oEnvWriter.write(sRow);
+				oEnvWriter.newLine();
+			}
+		 
+			oEnvWriter.close();	
+			oNewEnvFile.flush();
+			oNewEnvFile.close();			
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("CondaProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
