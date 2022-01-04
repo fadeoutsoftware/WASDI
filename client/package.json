@@ -39,6 +39,7 @@
         "protractor": "protractor e2e-tests/protractor.conf.js"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^5.15.4",
         "angular": "~1.5",
         "angular-animate": "~1.5",
         "angular-bootstrap": "",

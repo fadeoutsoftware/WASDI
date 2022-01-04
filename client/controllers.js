@@ -41,7 +41,7 @@ require('./app/dialogs/wapps/WappsController.js');
 require('./app/dialogs/edit_user/EditUserController.js');
 require('./app/dialogs/ftp_service/FTPController.js');
 //require('./app/dialogs/image_editor/image-editor.component.js');
-require('./app/dialogs/upload_file/UploadFileController.js');
+//require('./app/dialogs/upload_file/UploadFileController.js');
 require('./app/dialogs/Import/UploadController.js');
 require('./app/dialogs/mosaic/MosaicController.js');
 //require('./app/dialogs/edit_panel/EditPanelController.js');

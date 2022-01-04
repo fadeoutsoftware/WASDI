@@ -248,7 +248,7 @@ wasdiApp.controller("ShareWorkspaceController", window.ShareWorkspaceController)
 wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
-wasdiApp.controller("UploadFileController", window.UploadFileController);
+//wasdiApp.controller("UploadFileController", window.UploadFileController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);
 
 
