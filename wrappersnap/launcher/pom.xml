@@ -280,7 +280,12 @@
 			<artifactId>lib-gdal</artifactId>
 			<version>${s2tbx.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-forest-cover-change</artifactId>
+			<version>${s2tbx.version}</version>
+		</dependency>
+		
 		<!-- S3 -->
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>

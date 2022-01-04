@@ -140,6 +140,9 @@ org.esa.s2tbx.radiometry.ArviOp$Spi
 
 org.esa.s2tbx.biophysical.BiophysicalOp$Spi
 
+org.esa.s2tbx.fcc.common.BandsExtractorOp$Spi
+org.esa.s2tbx.fcc.common.BandsDifferenceOp$Spi
+org.esa.s2tbx.fcc.ForestCoverChangeOp$Spi
 
 #S3
 org.esa.s3tbx.aatsr.sst.AatsrSstOp$Spi
