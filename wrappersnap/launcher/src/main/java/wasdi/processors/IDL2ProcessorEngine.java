@@ -48,8 +48,6 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterUnzipProcessor: Exception :"+oEx.toString());
 		}
-		
-		//super.onAfterUnzipProcessor(sProcessorFolder);
 	}
 
 	/**
@@ -152,32 +150,6 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					oWasdiWrapperWriter.close();
 				}							
 			}
-			
-			/*
-			 * 
-			File oRunFile = new File(sRunFile);
-			
-			try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
-				if(null!= oRunWriter) {
-					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.DeployProcessor: Creating runProcessor.sh file");
-
-					oRunWriter.write("#!/bin/bash");
-					oRunWriter.newLine();
-					oRunWriter.write("wkdir=\""+sLocalProcessorFolder+"\"");
-					oRunWriter.newLine();
-					oRunWriter.write("script_file=\"${wkdir}/call_idl.pro\"");
-					oRunWriter.newLine();
-					oRunWriter.write("echo \"executing WASDI idl script...\"");
-					oRunWriter.newLine();
-					oRunWriter.write("umask 000; /usr/local/bin/idl ${script_file}");
-					oRunWriter.newLine();
-					oRunWriter.write("echo \"IDL Processor done!\"");
-					oRunWriter.newLine();
-					oRunWriter.flush();
-					oRunWriter.close();
-				}			
-			}
-			*/
 						
 			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
 

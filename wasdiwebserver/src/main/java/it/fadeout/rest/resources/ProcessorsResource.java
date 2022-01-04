@@ -1985,11 +1985,12 @@ public class ProcessorsResource  {
 		
 		try {
 			
+			// Use the right token
+            if( Utils.isNullOrEmpty(sSessionId) == false) {
+                sTokenSessionId = sSessionId;
+            }
+            
 			// Check authorization
-			if( Utils.isNullOrEmpty(sSessionId) == false) {
-				sTokenSessionId = sSessionId;
-			}
-			
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
@@ -2017,7 +2018,7 @@ public class ProcessorsResource  {
 				return Response.serverError().build();
 			}
 
-			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorId + ".zip";
+			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorName + ".zip";
 			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
 			
 			File oFile = oFilePath.toFile();
@@ -2055,9 +2056,10 @@ public class ProcessorsResource  {
 
 			int iBaseLen = sBasePath.length();
 
-			String sProcTemplatePath = Wasdi.getDownloadPath();
-			sProcTemplatePath += "dockertemplate/";
-			sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + "/";
+			
+			String sProcTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;			
+			if (!sProcTemplatePath.endsWith(File.separator)) sProcTemplatePath += File.separator;
+			sProcTemplatePath += ProcessorTypes.getTemplateFolder(oProcessor.getType()) + File.separator;
 
 			ArrayList<String> asTemplateFiles = new ArrayList<String>();
 			File oProcTemplateFolder = new File(sProcTemplatePath);
@@ -2065,11 +2067,20 @@ public class ProcessorsResource  {
 			Utils.debugLog("ProcessorsResource.zipProcessor: Proc Template Path " + sProcTemplatePath);
 
 			File[] aoTemplateChildren = oProcTemplateFolder.listFiles();
-			for (File oChild : aoTemplateChildren) {
-				asTemplateFiles.add(oChild.getName());
+			
+			if (aoTemplateChildren != null) {
+				for (File oChild : aoTemplateChildren) {
+					asTemplateFiles.add(oChild.getName());
+				}
 			}
-
-
+			
+			ArrayList<String> asAdditionalFilter = ProcessorTypes.getAdditionalTemplateGeneratedFiles(oProcessor.getType());
+			
+			if (asAdditionalFilter.size()>0) {
+				Utils.debugLog("ProcessorsResource.zipProcessor: adding more proc type filter file names ");
+				asTemplateFiles.addAll(asAdditionalFilter);
+			}
+			
 			// Create a map of the files to zip
 			Map<String, File> aoFileEntries = new HashMap<>();
 
@@ -2129,7 +2140,7 @@ public class ProcessorsResource  {
 			}
 			//oResponseBuilder.header("Content-Length", lLength);
 			Utils.debugLog("ProcessorsResource.zipProcessor: done");
-			return oResponseBuilder.build();
+			return oResponseBuilder.	build();
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessorsResource.zipProcessor: " + oE);
 		}
