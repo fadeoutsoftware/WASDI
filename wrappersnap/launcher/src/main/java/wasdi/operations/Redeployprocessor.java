@@ -1,10 +1,15 @@
 package wasdi.operations;
 
+import java.io.File;
+
+import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -29,7 +34,34 @@ public class Redeployprocessor extends Operation {
 		
 		try {
 	        // redeploy User Processor
-	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
+	        ProcessorParameter oParameter = (ProcessorParameter) oParam;			
+			
+            // First Check if processor exists
+            String sProcessorName = oParameter.getName();
+            String sProcessorId = oParameter.getProcessorID();
+
+            ProcessorRepository oProcessorRepository = new ProcessorRepository();
+            Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+            // Check processor
+            if (oProcessor == null) {
+                LauncherMain.s_oLogger.error("Redeployprocessor.executeOperation: oProcessor is null [" + sProcessorId + "]");
+                return false;
+            }
+
+            // Set the processor path
+            String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
+            if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+
+            String sProcessorFolder = sDownloadRootPath + "/processors/" + sProcessorName + "/";            
+            File oProcessorFolder = new File(sProcessorFolder);
+            
+            // Is the processor installed in this node?
+            if (!oProcessorFolder.exists()) {
+                LauncherMain.s_oLogger.error("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
+                return true;            	
+            }
+
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
