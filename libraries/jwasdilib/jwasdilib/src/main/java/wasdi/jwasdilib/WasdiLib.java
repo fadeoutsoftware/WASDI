@@ -2180,8 +2180,7 @@ public class WasdiLib {
 		}
 
 		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2") || sPlatform.equals("S3") || sPlatform.equals("S5P") || sPlatform.equals("ENVI") || sPlatform.equals("VIIRS") || sPlatform.equals("ERA5") || sPlatform.equals("L8"))) {
-			log("searchEOImages: platform must be one of S1, S2, S3, S5P, ENVI, VIIRS, ERA5, L8. Received [" + sPlatform + "]");
-			return aoReturnList;
+			log("searchEOImages: platform should be one of S1, S2, S3, S5P, ENVI, VIIRS, ERA5, L8. Received [" + sPlatform + "]");
 		}
 
 		if (sPlatform.equals("S1")) {
@@ -2210,7 +2209,7 @@ public class WasdiLib {
 		
 		if (sDateFrom == null) {
 			log("searchEOImages: sDateFrom cannot be null");
-			return aoReturnList;			
+			return aoReturnList;
 		}
 
 		if (sDateFrom.length()<10) {
@@ -2232,14 +2231,15 @@ public class WasdiLib {
 
 		// Platform name for sure
 		String sQuery = "( platformname:";
-		if (sPlatform.equals("S2")) sQuery += "Sentinel-2 ";
+		if (sPlatform.equals("S1")) sQuery += "Sentinel-1";
+		else if (sPlatform.equals("S2")) sQuery += "Sentinel-2";
 		else if (sPlatform.equals("S3")) sQuery += "Sentinel-3";
 		else if (sPlatform.equals("S5P")) sQuery += "Sentinel-5P";
 		else if (sPlatform.equals("ENVI")) sQuery += "Envisat";
 		else if (sPlatform.equals("L8")) sQuery += "Landsat-*";
 		else if (sPlatform.equals("VIIRS")) sQuery += "VIIRS";
 		else if (sPlatform.equals("ERA5")) sQuery += "ERA5";
-		else sQuery += "Sentinel-1";
+		else sQuery += sPlatform;
 
 		// If available add product type
 		if (sProductType != null) {

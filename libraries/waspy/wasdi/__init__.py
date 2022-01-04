@@ -80,8 +80,8 @@ m_bVerbose = True
 m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
-#m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_iRequestsTimeout = 2 * 60
 
@@ -1742,7 +1742,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     """
     Search EO images
 
-    :param sPlatform: satellite platform:(S1|S2|VIIRS|L8|ENVI)
+    :param sPlatform: satellite platform:(S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5)
 
     :param sDateFrom: inital date YYYY-MM-DD
 
@@ -1774,58 +1774,46 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         print('[ERROR] waspy.searchEOImages: platform cannot be None' +
               '  ******************************************************************************')
         return aoReturnList
-
-    # todo support other platforms
-    if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (
-            sPlatform != "ENVI") and (sPlatform != "S5P") and (sPlatform != "S3"): 
-        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|S3|VIIRS|L8|ENVI|S5P. Received [' + sPlatform + ']' +
-                 '  ******************************************************************************')
-        return aoReturnList
-
+    
     if sPlatform == "S1":
         if sProductType is not None:
             if not (sProductType == "SLC" or sProductType == "GRD" or sProductType == "OCN"):
-                wasdiLog("[ERROR] waspy.searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" +
+                wasdiLog("[WARNING] waspy.searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" +
                          sProductType +
                          '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "S2":
         if sProductType is not None:
             if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "VIIRS":
         if sProductType is not None:
             if not (sProductType == "VIIRS_5d_composite" or sProductType == "VIIRS_1d_composite"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; VIIRS_1d_composite, VIIRS_5d_composite. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for VIIRS; VIIRS_1d_composite, VIIRS_5d_composite. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "L8":
         if sProductType is not None:
             if not (
                     sProductType == "L1T" or sProductType == "L1G" or sProductType == "L1GT" or sProductType == "L1GS" or sProductType == "L1TP"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; L1T, L1G, L1GT, L1GS, L1TP. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for L8; L1T, L1G, L1GT, L1GS, L1TP. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "ENVI":
         if sProductType is not None:
             if not (sProductType == "ASA_IM__0P" or sProductType == "ASA_WS__0P"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; ASA_IM__0P, ASA_WS__0P. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for VIIRS; ASA_IM__0P, ASA_WS__0P. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sDateFrom is None:
         wasdiLog("[ERROR] waspy.searchEOImages: sDateFrom cannot be None" +
@@ -1906,8 +1894,12 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     elif sPlatform == "ENVI":
         sQuery += "Envisat"
     elif sPlatform == "S5P":
-        sQuery += "Sentinel-5P"        
-
+        sQuery += "Sentinel-5P"
+    elif sPlatform == "ERA5":
+        sQuery += "ERA5"
+    else:        
+        sQuery += sPlatform
+    
     # If available add product type
     if sProductType is not None:
         sQuery += " AND producttype:" + str(sProductType)

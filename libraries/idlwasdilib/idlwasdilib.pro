@@ -1679,8 +1679,10 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   
   sQuery = "( platformname:";
   
-  IF (sPlatform eq 'S2') THEN BEGIN
-	 sQuery = sQuery + "Sentinel-2"
+  IF (sPlatform eq 'S1') THEN BEGIN
+	 sQuery = sQuery + "Sentinel-1"
+  END ELSE IF (sPlatform eq 'S2') THEN BEGIN
+     sQuery = sQuery + "Sentinel-2"
   END ELSE IF (sPlatform eq 'S3') THEN BEGIN
      sQuery = sQuery + "Sentinel-3"
   END ELSE IF (sPlatform eq 'S5P') THEN BEGIN
@@ -1691,8 +1693,10 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
      sQuery = sQuery + "Envisat"
   END ELSE IF (sPlatform eq 'L8') THEN BEGIN
      sQuery = sQuery + "Landsat-*"
+  END ELSE IF (sPlatform eq 'ERA5') THEN BEGIN
+     sQuery = sQuery + "ERA5"
   END ELSE BEGIN
-	 sQuery = sQuery + "Sentinel-1"
+	 sQuery = sQuery + sPlatform
   END
 
   IF (sProductType NE !NULL) THEN BEGIN
