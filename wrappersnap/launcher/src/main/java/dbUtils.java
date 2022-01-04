@@ -347,7 +347,7 @@ public class dbUtils {
             System.out.println("\t3 - Redeploy");
             System.out.println("\t4 - Fix Processor Creation/Update date");
             System.out.println("\t5 - Update db UI from local ui.json files");
-            System.out.println("\t6 - Force Lib Update for all");
+            System.out.println("\t6 - Force Lib Update");
             System.out.println("\t7 - Redeploy all processors");
             System.out.println("\tx - Back");
             System.out.println("");
@@ -486,48 +486,56 @@ public class dbUtils {
                         }
                     }
                 }
-            } else if (sInputString.equals("6")) {
+            }            
+            else if (sInputString.equals("6")) {
+            	
+                System.out.println("Please input Processors Type:");
+                String sProcessorType = s_oScanner.nextLine();
+                
                 ProcessorRepository oProcessorRepository = new ProcessorRepository();
                 List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
 
-                System.out.println("Found " + aoProcessors.size() + " Processors");
+                System.out.println("Updating libs of processors of type " + sProcessorType);
 
                 for (Processor oProcessor : aoProcessors) {
+                	
+                	if (oProcessor.getType().equals(sProcessorType)) {
+                        String sProcessorName = oProcessor.getName();
+                        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
+                        String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+                        File oProcessorFolder = new File(sProcessorPath);
 
-                    String sProcessorName = oProcessor.getName();
-                    String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                    String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
-                    File oProcessorFolder = new File(sProcessorPath);
+                        if (oProcessorFolder.exists()) {
 
-                    if (oProcessorFolder.exists()) {
+                            System.out.println("Processor " + sProcessorName + " present in the node");
 
-                        System.out.println("Processor " + sProcessorName + " present in the node");
+                            WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
 
-                        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
+                            ProcessorParameter oParameter = new ProcessorParameter();
 
-                        ProcessorParameter oParameter = new ProcessorParameter();
+                            oParameter.setName(oProcessor.getName());
+                            oParameter.setProcessorID(oProcessor.getProcessorId());
 
-                        oParameter.setName(oProcessor.getName());
-                        oParameter.setProcessorID(oProcessor.getProcessorId());
+                            System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
 
-                        System.out.println("Created Parameter with Name: " + oProcessor.getName() + " ProcessorId: " + oProcessor.getProcessorId());
+                            oEngine.setParameter(oParameter);
 
-                        oEngine.setParameter(oParameter);
-
-                        oEngine.libraryUpdate(oParameter);    	
+                            oEngine.libraryUpdate(oParameter);    	
 
 
-                    } else {
-                        System.out.println("Processor " + sProcessorName + " NOT present in the node, JUMP");
-                    }
+                        } else {
+                            System.out.println("Processor " + sProcessorName + " NOT present in the node, JUMP");
+                        }                		
+                	}
                 }
 
-            }else if (sInputString.equals("7")) {
+            } 
+            else if (sInputString.equals("7")) {
             	
                 System.out.println("Please input Processors Type:");
                 String sProcessorType = s_oScanner.nextLine();
             	
-                System.out.println("Redeploy All processor start");
+                System.out.println("Redeploy Processor of selected type start");
                 
 
                 ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -546,8 +554,8 @@ public class dbUtils {
                 		System.out.println("Exception redeploying " + oProcessor.getName() + " " + oEx.toString());
 					}
                 }                    
-
             } 
+      
         } catch (Exception oEx) {
             System.out.println("processors redeploying Exception: " + oEx);
             oEx.printStackTrace();
