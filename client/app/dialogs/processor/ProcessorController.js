@@ -594,6 +594,29 @@ var ProcessorController = (function() {
      };
 
      /**
+      * Force the update of the lib for the processor on the server
+      * @param sProcessorId
+      * @returns {boolean}
+      */
+      ProcessorController.prototype.forceLibUpdate = function(sProcessorId) {
+
+        if (utilsIsObjectNullOrUndefined(sProcessorId) === true)
+        {
+            return false;
+        }
+
+        this.m_oProcessorService.forceLibUpdate(sProcessorId)
+            .then(function (data) {
+                var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>LIB UPDATE SCHEDULED");
+                utilsVexCloseDialogAfter(5000,oDialog);
+            },function (error) {
+               utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING LIB");
+        });
+
+        return true;
+    };
+
+     /**
       * Force the redeploy of the processor on the server
       * @param sProcessorId
       * @returns {boolean}
@@ -608,7 +631,7 @@ var ProcessorController = (function() {
          // TODO: ADD CONFIRMATION DIALOG
          this.m_oProcessorService.redeployProcessor(sProcessorId)
              .then(function (data) {
-                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>REFRESH SCHEDULED");
+                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>RE-DEPLOY  SCHEDULED");
                  utilsVexCloseDialogAfter(5000,oDialog);
              },function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR REFRESHING PROCESSOR");

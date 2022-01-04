@@ -43,6 +43,7 @@ import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
+import it.fadeout.threads.ForceLibraryUpdateWorker;
 import it.fadeout.threads.RedeployProcessorWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
@@ -1553,17 +1554,13 @@ public class ProcessorsResource  {
 		Utils.debugLog("ProcessorResources.libraryUpdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): passed a null session id");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
+			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
 				Utils.debugLog("ProcessorResources.libraryUpdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 			String sUserId = oUser.getUserId();
 			
@@ -1582,15 +1579,20 @@ public class ProcessorsResource  {
 			}
 
 			// Schedule the process to run the processor
-			
 			String sProcessObjId = Utils.getRandomName();
 			
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
+			// Get the dedicated special workpsace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			
+			Utils.debugLog("ProcessorsResource.libraryUpdate: create local operation");
+			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
 			oProcessorParameter.setProcessorID(oProcessorToForceUpdate.getProcessorId());
-			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
 			oProcessorParameter.setProcessObjId(sProcessObjId);
@@ -1599,7 +1601,30 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);
+			
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				
+				// In the main node: start a thread to update all the computing nodes
+				
+				try {
+					Utils.debugLog("ProcessorsResource.libraryUpdate: this is the main node, starting Worker to update computing nodes");
+					
+					//This is the main node: forward the request to other nodes
+					ForceLibraryUpdateWorker oUpdateWorker = new ForceLibraryUpdateWorker();
+					
+					NodeRepository oNodeRepo = new NodeRepository();
+					List<Node> aoNodes = oNodeRepo.getNodesList();
+					
+					oUpdateWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId);
+					oUpdateWorker.start();
+					
+					Utils.debugLog("ProcessorsResource.libraryUpdate: Worker started");						
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessorsResource.libraryUpdate: error starting ForceLibraryUpdateWorker " + oEx.toString());
+				}
+			}			
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -1609,7 +1634,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessorResource.redeployProcessor: " + oEx);
+			Utils.debugLog("ProcessorResource.libraryUpdate: " + oEx);
 			return Response.serverError().build();
 		}
 	}

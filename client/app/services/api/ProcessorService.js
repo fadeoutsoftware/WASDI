@@ -259,7 +259,6 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     /**
      * Force processor Refresh
      * @param sProcessorId
-     * @param sUserId
      * @returns {*}
      */
     this.redeployProcessor = function(sProcessorId){
@@ -273,6 +272,23 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
 
         return this.m_oHttp.get(this.APIURL + '/processors/redeploy?processorId=' + sProcessorId + "&workspace=" + sWorkspaceId);
     };
+
+    /**
+     * Force library Update
+     * @param sProcessorId
+     * @returns {*}
+     */
+         this.forceLibUpdate = function(sProcessorId){
+
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            var sWorkspaceId = "-";
+    
+            if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
+                sWorkspaceId = oWorkspace.workspaceId;
+            }
+    
+            return this.m_oHttp.get(this.APIURL + '/processors/libupdate?processorId=' + sProcessorId + "&workspace=" + sWorkspaceId);
+        };
 
     /**
      * Download a processor
