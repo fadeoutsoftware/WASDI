@@ -48,9 +48,9 @@ public class NodeResource {
 		
 		// get list of all active nodes
 		NodeRepository oNodeRepository = new NodeRepository();
-		List<Node> asNodes = oNodeRepository.getNodesList();
+		List<Node> aoNodes = oNodeRepository.getNodesList();
 	
-		if (asNodes == null) {
+		if (aoNodes == null) {
 			Utils.debugLog("NodeResource.getAllNodes: Node list is null");
 			return null;
 		}
@@ -59,27 +59,37 @@ public class NodeResource {
 		List<NodeViewModel> aoNodeViewModelList = new ArrayList<>();
 		
 		// For all the nodes
-		for (Node node:asNodes) {
-			
-			// checks whether the node is active
-			if (node.getActive()) {  
+		for (Node oNode:aoNodes) {
+			try {
 				
-				// Create the view model and fill it
-				NodeViewModel oNodeViewModel = new NodeViewModel();
-				
-				if (node.getCloudProvider()!=null) {
-					oNodeViewModel.setCloudProvider(node.getCloudProvider());
+				// checks whether the node is active
+				if (oNode.getActive()) {
+					
+					// Create the view model and fill it
+					NodeViewModel oNodeViewModel = new NodeViewModel();
+					
+					if (oNode.getCloudProvider()!=null) {
+						oNodeViewModel.setCloudProvider(oNode.getCloudProvider());
+					}
+					else {
+						oNodeViewModel.setCloudProvider(oNode.getNodeCode());
+					}
+					
+					oNodeViewModel.setNodeCode(oNode.getNodeCode());
+
+					oNodeViewModel.setApiUrl(oNode.getNodeBaseAddress());
+					
+					// Add to the return list
+					aoNodeViewModelList.add(oNodeViewModel);
+					
 				}
-				else {
-					oNodeViewModel.setCloudProvider(node.getNodeCode());
-				}
-				
-				oNodeViewModel.setNodeCode(node.getNodeCode());
-				
-				// Add to the return list
-				aoNodeViewModelList.add(oNodeViewModel);
+			}
+			catch (Throwable oEx) {
+				Utils.debugLog("NodeResource.getAllNodes: Exception " + oEx.toString());
 			}
 		}
+		
+		Utils.debugLog("NodeResource.getAllNodes: end cycle");
 		
 		// done, return the list to the user
 		return aoNodeViewModelList;

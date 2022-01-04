@@ -127,7 +127,7 @@ var RootController = (function() {
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
             if(utilsIsObjectNullOrUndefined(newValue) === false)
             {
-                if(newValue.name === "Untitled Workspace")
+                if(newValue.name.includes("Untitled Workspace"))
                 {
                     $scope.m_oController.getWorkspacesInfo();
                     $scope.m_oController.editModelWorkspaceNameSetTrue();
@@ -565,10 +565,12 @@ var RootController = (function() {
             {
                 return;
             }
-            if( value === "Untitled Workspace" )
-            {
-                value = oController.forcedChangeNameWorkspace();
-            }
+
+            // Disabled on front-end side as the forced-renaming is now done on the server side
+            // if( value === "Untitled Workspace" )
+            // {
+            //     value = oController.forcedChangeNameWorkspace();
+            // }
             var oWorkspace = oController.m_oConstantsService.getActiveWorkspace();
             oWorkspace.name = value;
 
@@ -699,7 +701,7 @@ var RootController = (function() {
             oController.openProcessorLogsDialog(process);
             return true;
         }else{
-        //    console.error("Cannot find process ID " + processId + " in the processes list") 
+        //    console.error("Cannot find process ID " + processId + " in the processes list")
             return false;
         }
     };

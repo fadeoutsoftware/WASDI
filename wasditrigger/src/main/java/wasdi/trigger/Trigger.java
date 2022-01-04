@@ -30,7 +30,7 @@ public class Trigger {
 	/**
 	 * Default Base Url
 	 */
-	String m_sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest/";
+	String m_sBaseUrl = WasdiConfig.Current.baseUrl;
 	/**
 	 * Static Logger that references the "Trigger" logger
 	 */
@@ -82,7 +82,7 @@ public class Trigger {
 		oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
 		String sScheduleId = "";
-		String sConfigFilePath = "/data/wasdi/config.json";
+		String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
 
 		try {
 

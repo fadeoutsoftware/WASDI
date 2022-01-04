@@ -18,6 +18,7 @@ var WappsController = (function() {
         this.m_sFileName = "";
         this.m_oProcessorService = oProcessorService;
         this.m_aoProcessorList = [];
+        this.m_bIsLoadingProcessorList = false;
         this.m_bIsJsonEditModeActive = false;
         this.m_sJson = {};
         this.m_sMyJsonString = "";
@@ -40,11 +41,14 @@ var WappsController = (function() {
      */
     WappsController.prototype.getProcessorsList = function() {
         var oController = this;
+        // swap to true after loading icon is properly rendered
+        oController.m_bIsLoadingProcessorList = true;
 
         this.m_oProcessorService.getProcessorsList().then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 oController.m_aoProcessorList = oController.setDefaultImages(data.data);
+                oController.m_bIsLoadingProcessorList = false;
             }
             else
             {
@@ -216,6 +220,44 @@ var WappsController = (function() {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
+            });
+        });
+
+    }
+
+    WappsController.prototype.paramsClick = function(oProcessor) {
+        var oController = this;
+
+        this.m_sJson = "m_sJson";
+
+        this.m_sMyJsonString = "m_sMyJsonString";
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/processor_parameters_template/ProcessorParametersTemplateView.html",
+            controller: "ProcessorParametersTemplateController",
+            inputs: {
+                extras: {
+                    processor:oProcessor
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                if (utilsIsObjectNullOrUndefined(oResult) === false) {
+
+                    let sJson = decodeURIComponent(oResult);
+
+                    try {
+                        var oParsed = JSON.parse(sJson);
+                        sPrettyPrint = JSON.stringify(oParsed, null, 2);
+
+                        oController.m_sMyJsonString = sPrettyPrint;
+                    }
+                    catch (oError) {
+
+                    }
+
+                }
             });
         });
 

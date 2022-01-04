@@ -32,10 +32,11 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.6.5
-Last Update: 02/09/2021
+Version 0.7.4
 
-Tested with: Python 2.7, Python 3.7
+Last Update: 01/01/2022
+
+Tested with: Python 3.7, Python 3.8, Python 3.9
 
 Created on 11 Jun 2018
 
@@ -44,14 +45,7 @@ Created on 11 Jun 2018
 from time import sleep
 from telnetlib import AO
 from urllib.parse import urlencode
-
-try:
-    from __builtin__ import str
-except Exception as oE0:
-    try:
-        from builtins import str
-    except Exception as oE1:
-        print('Cannot import str. This is bad')
+from builtins import str
 
 name = "wasdi"
 
@@ -87,6 +81,7 @@ m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_iRequestsTimeout = 2 * 60
 
@@ -173,7 +168,19 @@ def getParametersDict():
     :return: a dictionary containing the parameters
     """
     global m_aoParamsDictionary
-    return m_aoParamsDictionary
+    
+    aoReturnDict = dict(m_aoParamsDictionary)
+    
+    if "user" in aoReturnDict:
+        del aoReturnDict["user"]
+
+    if "sessionid" in aoReturnDict:
+        del aoReturnDict["sessionid"]
+
+    if "workspaceid" in aoReturnDict:
+        del aoReturnDict["workspaceid"]    
+    
+    return aoReturnDict
 
 
 def setParametersDict(aoParams):
@@ -519,21 +526,15 @@ def init(sConfigFilePath=None):
             _loadParams()
 
     if m_sUser is None and m_sPassword is None:
-
-        if (sys.version_info > (3, 0)):
-            m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
-        else:
-            m_sUser = raw_input('[INFO] waspy.init: Please Insert WASDI User:')
+        
+        m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
 
         m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
 
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
-
-        if (sys.version_info > (3, 0)):
-            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
-        else:
-            sWname = raw_input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+        
+        sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
@@ -767,6 +768,37 @@ def getWorkspaceIdByName(sName):
             try:
                 if oWorkspace['workspaceName'] == sName:
                     return oWorkspace['workspaceId']
+            except:
+                return ''
+
+    return ''
+
+def getWorkspaceNameById(sWorkspaceId):
+    """
+    Get Name of a Workspace from the id
+
+    :param sWorkspaceId: Workspace Id
+    :return: the Workspace Name as a String, '' if there is any error
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+
+    asHeaders = _getStandardHeaders()
+
+    sUrl = m_sBaseUrl + '/ws/byuser'
+
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResult = oResult.json()
+
+        for oWorkspace in oJsonResult:
+            try:
+                if oWorkspace['workspaceId'] == sWorkspaceId:
+                    return oWorkspace['workspaceName']
             except:
                 return ''
 
@@ -1710,7 +1742,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     """
     Search EO images
 
-    :param sPlatform: satellite platform:(S1|S2|VIIRS|L8|ENVI)
+    :param sPlatform: satellite platform:(S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5)
 
     :param sDateFrom: inital date YYYY-MM-DD
 
@@ -1732,7 +1764,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
 
-    :param sProvider: WASDI Data Provider to query (LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = LSA.
+    :param sProvider: WASDI Data Provider to query (AUTO|LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = AUTO.
 
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
@@ -1742,58 +1774,46 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         print('[ERROR] waspy.searchEOImages: platform cannot be None' +
               '  ******************************************************************************')
         return aoReturnList
-
-    # todo support other platforms
-    if (sPlatform != "S1") and (sPlatform != "S2") and (sPlatform != "VIIRS") and (sPlatform != "L8") and (
-            sPlatform != "ENVI"):
-        wasdiLog('[ERROR] waspy.searchEOImages: platform must be S1|S2|VIIRS|L8|ENVI. Received [' + sPlatform + ']' +
-                 '  ******************************************************************************')
-        return aoReturnList
-
+    
     if sPlatform == "S1":
         if sProductType is not None:
             if not (sProductType == "SLC" or sProductType == "GRD" or sProductType == "OCN"):
-                wasdiLog("[ERROR] waspy.searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" +
+                wasdiLog("[WARNING] waspy.searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" +
                          sProductType +
                          '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "S2":
         if sProductType is not None:
             if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "VIIRS":
         if sProductType is not None:
             if not (sProductType == "VIIRS_5d_composite" or sProductType == "VIIRS_1d_composite"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; VIIRS_1d_composite, VIIRS_5d_composite. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for VIIRS; VIIRS_1d_composite, VIIRS_5d_composite. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "L8":
         if sProductType is not None:
             if not (
                     sProductType == "L1T" or sProductType == "L1G" or sProductType == "L1GT" or sProductType == "L1GS" or sProductType == "L1TP"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; L1T, L1G, L1GT, L1GS, L1TP. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for L8; L1T, L1G, L1GT, L1GS, L1TP. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sPlatform == "ENVI":
         if sProductType is not None:
             if not (sProductType == "ASA_IM__0P" or sProductType == "ASA_WS__0P"):
                 wasdiLog(
-                    "[ERROR] waspy.searchEOImages: Available Product Types for VIIRS; ASA_IM__0P, ASA_WS__0P. Received ["
+                    "[WARNING] waspy.searchEOImages: Available Product Types for VIIRS; ASA_IM__0P, ASA_WS__0P. Received ["
                     + sProductType + "]" +
                     '  ******************************************************************************')
-                return aoReturnList
 
     if sDateFrom is None:
         wasdiLog("[ERROR] waspy.searchEOImages: sDateFrom cannot be None" +
@@ -1865,13 +1885,21 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sQuery += "Sentinel-2 "
     elif sPlatform == "S1":
         sQuery += "Sentinel-1"
+    elif sPlatform == "S3":
+        sQuery += "Sentinel-3"        
     elif sPlatform == "VIIRS":
         sQuery += "VIIRS"
     elif sPlatform == "L8":
         sQuery += "Landsat-*"
     elif sPlatform == "ENVI":
         sQuery += "Envisat"
-
+    elif sPlatform == "S5P":
+        sQuery += "Sentinel-5P"
+    elif sPlatform == "ERA5":
+        sQuery += "ERA5"
+    else:        
+        sQuery += sPlatform
+    
     # If available add product type
     if sProductType is not None:
         sQuery += " AND producttype:" + str(sProductType)
@@ -1907,7 +1935,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     # Date Block
     sQuery += "AND ( beginPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
-    sQuery += "AND ( endPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
+    sQuery += "AND endPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
 
     # Close the second block
     sQuery += ") "
@@ -1922,13 +1950,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"
 
     if sProvider is None:
-        if sPlatform == "VIIRS":
-            sProvider = "VIIRS"
-        elif sPlatform == "ENVI" or sPlatform == "L8":
-            sProvider = "CREODIAS"
-        else:
-            sProvider = "LSA"
-
+        sProvider = "AUTO"
+    
     sQuery = "providers=" + sProvider
 
     try:
@@ -2094,29 +2117,25 @@ def getProductBBOX(sFileName):
     return ""
 
 
-def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
+def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
     """
     Imports a product from a Provider in WASDI, starting from the File URL.
 
     :param sFileUrl: url of the file to import
+    
+    :param sName: Name of the file to import as returned by the Data Provider
 
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider to use. Use None for Default
+    
     :return: execution status as a STRING. Can be DONE, ERROR, STOPPED.
     """
 
-    _log('[INFO] waspy.importProductByFileUrl( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ' )')
-
     sReturn = "ERROR"
 
-    if sFileUrl is None:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot find a link to download the requested product' +
-                 '  ******************************************************************************')
-        return sReturn
-
     if sProvider is None:
-        sProvider = "ONDA"
+        sProvider = "AUTO"
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?fileUrl="
@@ -2124,11 +2143,15 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     sUrl += "&provider=" + sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
+    
 
     if sBoundingBox is not None:
         sUrl += "&bbox="
         sUrl += sBoundingBox
-
+        
+    if sName is not None:
+        sUrl += "&name="+sName
+    
     if m_bIsOnServer:
         sUrl += "&parent="
         sUrl += getProcId()
@@ -2157,29 +2180,25 @@ def importProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
     return sReturn
 
 
-def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=None):
+def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvider=None):
     """
     Asynch Import of a product from a Provider in WASDI, starting from file URL
 
-    :param sFileUrl: url of the file to import
+    :param sFileUrl: url of the file to import as returned by the data provider
+    
+    :param sName: Name of the file to import as returned by the Data Provider 
 
     :param sBoundingBox: declared bounding box of the file to import
 
     :param sProvider: WASDI Data Provider. Use None for default
+    
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
-
-    _log('[INFO] waspy.importProductByFileUrl( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ' )')
-
+    
     sReturn = "ERROR"
-
-    if sFileUrl is None:
-        wasdiLog('[ERROR] waspy.importProductByFileUrl: cannot find a link to download the requested product' +
-                 '  ******************************************************************************')
-        return sReturn
-
+    
     if sProvider is None:
-        sProvider = "ONDA"
+        sProvider = "AUTO"
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?fileUrl="
@@ -2188,9 +2207,13 @@ def asynchImportProductByFileUrl(sFileUrl=None, sBoundingBox=None, sProvider=Non
     sUrl += sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
+    
     if sBoundingBox is not None:
         sUrl += "&bbox="
         sUrl += sBoundingBox
+        
+    if sName is not None:
+        sUrl += "&name="+sName    
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2236,16 +2259,22 @@ def importProduct(oProduct, sProvider=None):
     _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
-        sBoundingBox = None
+        
         sFileUrl = oProduct["link"]
+        
+        sBoundingBox = None
         if "footprint" in oProduct:
             sBoundingBox = oProduct["footprint"]
 
         if sProvider is None:
             if "provider" in oProduct:
                 sProvider = oProduct["provider"]
+                
+        sName = None
+        if "title" in oProduct:
+            sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+        return importProductByFileUrl(sFileUrl=sFileUrl,sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2268,16 +2297,22 @@ def asynchImportProduct(oProduct, sProvider=None):
     _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
-        sBoundingBox = None
+        
         sFileUrl = oProduct["link"]
+        
+        sBoundingBox = None
         if "footprint" in oProduct:
             sBoundingBox = oProduct["footprint"]
 
         if sProvider is None:
             if "provider" in oProduct:
                 sProvider = oProduct["provider"]
+                
+        sName = None
+        if "title" in oProduct:
+            sName = oProduct["title"]
 
-        return asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+        return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2297,7 +2332,7 @@ def importProductList(aoProducts, sProvider=None):
         wasdiLog("[ERROR] waspy.importProductList: input asPRoduct is none")
         return "ERROR"
 
-    _log('[INFO] waspy.importProductList( ' + str(aoProducts) + ' )')
+    _log('[INFO] waspy.importProductList()')
 
     asReturnList = []
 
@@ -2309,6 +2344,10 @@ def importProductList(aoProducts, sProvider=None):
             sFileUrl = oProduct["link"]
             if "footprint" in oProduct:
                 sBoundingBox = oProduct["footprint"]
+                
+            sName = None
+            if "title" in oProduct:
+                sName = oProduct["title"]
 
             sActualProvider = sProvider
 
@@ -2317,7 +2356,7 @@ def importProductList(aoProducts, sProvider=None):
                     sActualProvider = oProduct["provider"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sActualProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sActualProvider)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2361,9 +2400,13 @@ def asynchImportProductList(aoProducts, sProvider=None):
             if sActualProvider is None:
                 if "provider" in oProduct:
                     sActualProvider = oProduct["provider"]
+                    
+            sName = None
+            if "title" in oProduct:
+                sName = oProduct["title"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl, sBoundingBox, sProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:

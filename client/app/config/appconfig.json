@@ -275,10 +275,9 @@
                 {
                     "indexname": "collection",
                     "indexlabel": "Collection",
-                    "indexvaluesOLD_TODO_ALLPROBAV_COLLECTIONS":"urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001|urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001|urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_1KM_V001|urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001|urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001|urn:ogc:def:EOP:VITO:PROBAV_P_V001|urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_100M_V001|urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_100M_V001|urn:ogc:def:EOP:VITO:PROBAV_S1-TOC-NDVI_100M_V001|urn:ogc:def:EOP:VITO:PROBAV_S5-TOA_100M_V001|urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001|urn:ogc:def:EOP:VITO:PROBAV_S5-TOC-NDVI_100M_V001|urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001|urn:ogc:def:EOP:VITO:VGT_P|urn:ogc:def:EOP:VITO:VGT_S1",
-                    "indexvalues":"urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001|urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001",
+                    "indexvalues":"urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001",
                     "regex": ".*",
-                    "indexvalue":"urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001"
+                    "indexvalue":"urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001"
 
                 },
                 {
@@ -395,6 +394,62 @@
                 "indexvalue":"VIIRS_1d_composite"
 
             }]
+        },
+        {
+            "name": "ERA5",
+            "indexname": "platformname",
+            "indexvalue": "ERA5",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "reanalysis-era5-pressure-levels|reanalysis-era5-single-levels",
+                    "regex": ".*",
+                    "indexvalue":"reanalysis-era5-pressure-levels"
+                },
+                {
+                    "indexname": "productType",
+                    "indexlabel": "Product type",
+                    "indexvalues": "reanalysis|ensemble_mean|ensemble_members|ensemble_spread",
+                    "regex": ".*",
+                    "indexvalue":"reanalysis"
+                },
+                {
+                    "indexname": "pressureLevels",
+                    "indexlabel": "Pressure levels in hPa",
+                    "indexvalues": "1|2|1+2|1000",
+                    "regex": ".*",
+                    "indexvalue":"1000"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "RH|U|V|RH+U+V|SST+SP+TP|10U+10V+2DT+2T+SP",
+                    "regex": ".*",
+                    "indexvalue":"RH+U+V"
+                },
+                {
+                    "indexname": "format",
+                    "indexlabel": "Format",
+                    "indexvalues":"grib|netcdf",
+                    "regex": ".*",
+                    "indexvalue":"netcdf"
+                }
+            ]
+        },
+        {
+            "name": "PLANET",
+            "indexname": "platformname",
+            "indexvalue": "PLANET",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Planet Item Type",
+                    "indexvalues": "PSScene|PSScene3Band|PSScene4Band|PSOrthoTile|REOrthoTile|REScene|SkySatScene|SkySatCollect|SkySatVideo",
+                    "regex": ".*",
+                    "indexvalue":"PSScene3Band"
+                }
+            ]
         }
     ],
     "orbitsearch":{

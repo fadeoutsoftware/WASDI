@@ -13,10 +13,12 @@ import java.util.function.Supplier;
 
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
 import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
 import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
+import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
 import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
@@ -43,7 +45,9 @@ public class QueryExecutorFactory {
 		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
 		aoMap.put("LSA", QueryExecutorLSA::new);
 		aoMap.put("VIIRS", QueryExecutorVIIRS::new);
+		aoMap.put("CDS", QueryExecutorCDS::new);
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
+		aoMap.put("PLANET", QueryExecutorPLANET::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
@@ -113,6 +117,12 @@ public class QueryExecutorFactory {
 						sProvider,
 						oCredentials,
 						sParserConfigPath, sAppConfigPath);
+				
+				oExecutor.getSupportedPlatforms().clear();
+				
+				for (String sSupportedPlatform : oDataProviderConfig.supportedPlatforms) {
+					oExecutor.getSupportedPlatforms().add(sSupportedPlatform);
+				}
 				
 				oExecutor.init();
 			}

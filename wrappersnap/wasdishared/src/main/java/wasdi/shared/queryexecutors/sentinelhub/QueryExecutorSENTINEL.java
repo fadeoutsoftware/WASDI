@@ -16,7 +16,6 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -36,9 +35,6 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 		m_sProvider = "SENTINEL";
 		m_oQueryTranslator = new QueryTranslatorSentinelHub();
 		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL3);
 	}
 	
 	@Override
@@ -65,15 +61,12 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 	public int executeCount(String sQuery) {
 		try {
 			
-			
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			
 			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
 				return 0;
 			}
 			
-			
-			Utils.debugLog("QueryExecutorSENTINEL.executeCount ( " + sQuery + " )");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 			String sUrl = getSearchUrl(oQuery);
 			//create abdera client

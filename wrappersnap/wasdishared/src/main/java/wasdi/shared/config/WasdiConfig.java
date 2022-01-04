@@ -32,6 +32,11 @@ public class WasdiConfig {
 	public String nodeCode = "wasdi";
 	
 	/**
+	 * Cloud of the main node
+	 */
+	public String mainNodeCloud = "CREODIAS";
+	
+	/**
 	 * Default node assigned to users when they create a new node
 	 */
 	public String usersDefaultNode;
@@ -92,6 +97,11 @@ public class WasdiConfig {
 	public NotificationsConfig notifications;
 	
 	/**
+	 * List of Catalogues for each Platform type
+	 */
+	public ArrayList<CatalogueConfig> catalogues;
+	
+	/**
 	 * List of supported Data Providers
 	 */
 	public ArrayList<DataProviderConfig> dataProviders;
@@ -115,6 +125,24 @@ public class WasdiConfig {
 	 * Schedulers config
 	 */
 	public SchedulerConfig scheduler;
+	
+	/**
+	 * Get the Catalogue Config for the specified Platform Type
+	 * @param sPlatformType Platform of interest
+	 * @return Catalogue configuration for the specified platform
+	 */
+	public CatalogueConfig getCatalogueConfig(String sPlatformType) {
+		
+		if (catalogues == null) return null;
+		
+		for (CatalogueConfig oCatalogue : catalogues) {
+			if (oCatalogue.platform.equals(sPlatformType)) {
+				return oCatalogue;
+			}
+		}
+		
+		return null;
+	}
 	
 	/**
 	 * Get a Data Provider config from the Data Provider Code

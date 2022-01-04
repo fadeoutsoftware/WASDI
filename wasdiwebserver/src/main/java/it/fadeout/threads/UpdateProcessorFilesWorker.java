@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -79,7 +79,7 @@ public class UpdateProcessorFilesWorker extends Thread {
 				
 				Utils.debugLog("UpdateProcessorFilesWorker.run: calling url: " + sUrl);
 				
-				Wasdi.httpPostFile(sUrl, m_sFilePath, asHeaders);
+				HttpUtils.httpPostFile(sUrl, m_sFilePath, asHeaders);
 				
 				Utils.debugLog("UpdateProcessorFilesWorker.run: node updated " + oNode.getNodeCode());
 				

@@ -178,6 +178,8 @@ public class Multisubset extends Operation {
 
             m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(), "Multisubset Done", oParameter.getExchange());
             
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+            
             return true;
         } catch (Exception oEx) {
 

@@ -28,6 +28,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.ProcessorService',
+    'wasdi.ProcessorParametersTemplateService',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
@@ -210,6 +211,7 @@ wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersControl
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
+wasdiApp.controller("ProcessorParametersTemplateController", ProcessorParametersTemplateController);
 wasdiApp.controller("WorkflowController", WorkflowController);
 wasdiApp.controller("WorkspaceDetailsController", WorkspaceDetailsController);
 wasdiApp.controller("WappsController", WappsController);
@@ -221,8 +223,6 @@ wasdiApp.controller("ProcessorLogsController", ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
-
-wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 

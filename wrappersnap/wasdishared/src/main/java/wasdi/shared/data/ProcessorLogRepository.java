@@ -198,6 +198,10 @@ public class ProcessorLogRepository extends MongoRepository {
         return false;
     }
     
+    public boolean deleteLogsByProcessWorkspaceIds(List<String> asProcessObjIds) {
+    	return false;
+    }
+    
     /**
      * Get all the log rows containing a specified text
      * @param sLogText Text to search for
@@ -321,6 +325,7 @@ public class ProcessorLogRepository extends MongoRepository {
 
         return aoReturnList;
     }
+
 	
 
 }

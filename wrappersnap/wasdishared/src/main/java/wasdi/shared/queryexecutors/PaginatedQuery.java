@@ -59,9 +59,35 @@ public class PaginatedQuery {
 		if (sOrder == null) {
 			sOrder = "asc";
 		}
+		
+		if (sOffset == null) sOffset = "0";
+		if (sLimit == null) sLimit = "25";		
+		
+		int iLimit = 25;
+		
+		try {
+			iLimit = Integer.parseInt(sLimit);
+		} 
+		catch (NumberFormatException oE1) {
+		}
+		
+		if (iLimit < 0) {
+			// Not possible: back to default:
+			iLimit = 25;
+		}
+		
+		int iOffset = 0;
+		
+		try {
+			iOffset = Integer.parseInt(sOffset);
+		} 
+		catch (NumberFormatException oE2) {
+		}
+		
+		
 		this.m_sQuery = sQuery;
-		this.m_sOffset = sOffset;
-		this.m_sLimit = sLimit;
+		this.m_sOffset = ""+iOffset;
+		this.m_sLimit = ""+iLimit;
 		this.m_sSortedBy = sSortedBy;
 		this.m_sOrder = sOrder;
 		this.m_sOriginalLimit = sOriginalLimit;

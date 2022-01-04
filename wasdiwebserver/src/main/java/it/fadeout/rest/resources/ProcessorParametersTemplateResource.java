@@ -2,6 +2,7 @@ package it.fadeout.rest.resources;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,6 +117,9 @@ public class ProcessorParametersTemplateResource {
 
 		ProcessorParametersTemplate oTemplate = getTemplateFromDetailViewModel(oDetailViewModel, sUserId, oDetailViewModel.getTemplateId());
 
+		Date oDate = new Date();
+		oTemplate.setUpdateDate((double) oDate.getTime());
+
 		boolean isUpdated = oProcessorParametersTemplateRepository.updateProcessorParametersTemplate(oTemplate);
 		if (isUpdated) {
 			return Response.status(Status.OK).build();
@@ -169,6 +173,10 @@ public class ProcessorParametersTemplateResource {
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
 
 		ProcessorParametersTemplate oTemplate = getTemplateFromDetailViewModel(oDetailViewModel, sUserId, Utils.getRandomName());
+
+		Date oDate = new Date();
+		oTemplate.setCreationDate((double) oDate.getTime());
+		oTemplate.setUpdateDate((double) oDate.getTime());
 
 		oProcessorParametersTemplateRepository.insertProcessorParametersTemplate(oTemplate);
 
@@ -244,10 +252,6 @@ public class ProcessorParametersTemplateResource {
 		List<ProcessorParametersTemplate> aoTemplates = oProcessorParametersTemplateRepository
 				.getProcessorParametersTemplatesByUserAndProcessor(sUserId, sProcessorId);
 
-		if (aoTemplates == null || aoTemplates.size() == 0) {
-			return Response.ok(new ProcessorParametersTemplateListViewModel()).build();
-		}
-
 		// Cast in a list
 		List<ProcessorParametersTemplateListViewModel> aoListViewModel = getListViewModels(aoTemplates);
 
@@ -277,11 +281,19 @@ public class ProcessorParametersTemplateResource {
 	 * @return a new list view model object
 	 */
 	private static ProcessorParametersTemplateListViewModel getListViewModel(ProcessorParametersTemplate oTemplate) {
+		if (oTemplate == null) {
+			return null;
+		}
+
 		ProcessorParametersTemplateListViewModel oListViewModel = new ProcessorParametersTemplateListViewModel();
 		oListViewModel.setTemplateId(oTemplate.getTemplateId());
 		oListViewModel.setUserId(oTemplate.getUserId());
 		oListViewModel.setProcessorId(oTemplate.getProcessorId());
 		oListViewModel.setName(oTemplate.getName());
+
+		if (oTemplate.getUpdateDate() != null) {
+			oListViewModel.setUpdateDate(Utils.getFormatDate(new Date(oTemplate.getUpdateDate().longValue())));
+		}
 
 		return oListViewModel;
 	}
@@ -293,6 +305,10 @@ public class ProcessorParametersTemplateResource {
 	 * @return a new detail view model object
 	 */
 	private static ProcessorParametersTemplateDetailViewModel getDetailViewModel(ProcessorParametersTemplate oTemplate) {
+		if (oTemplate == null) {
+			return null;
+		}
+
 		ProcessorParametersTemplateDetailViewModel oDetailViewModel = new ProcessorParametersTemplateDetailViewModel();
 		oDetailViewModel.setTemplateId(oTemplate.getTemplateId());
 		oDetailViewModel.setUserId(oTemplate.getUserId());
@@ -300,6 +316,14 @@ public class ProcessorParametersTemplateResource {
 		oDetailViewModel.setName(oTemplate.getName());
 		oDetailViewModel.setDescription(oTemplate.getDescription());
 		oDetailViewModel.setJsonParameters(oTemplate.getJsonParameters());
+
+		if (oTemplate.getCreationDate() != null) {
+			oDetailViewModel.setCreationDate(Utils.getFormatDate(new Date(oTemplate.getCreationDate().longValue())));
+		}
+
+		if (oTemplate.getUpdateDate() != null) {
+			oDetailViewModel.setUpdateDate(Utils.getFormatDate(new Date(oTemplate.getUpdateDate().longValue())));
+		}
 
 		return oDetailViewModel;
 	}
@@ -313,19 +337,20 @@ public class ProcessorParametersTemplateResource {
 	 * @return a new template object
 	 */
 	private static ProcessorParametersTemplate getTemplateFromDetailViewModel(ProcessorParametersTemplateDetailViewModel oDetailViewModel, String sUserId, String sId) {
-		if (oDetailViewModel != null) {
-			ProcessorParametersTemplate oTemplate = new ProcessorParametersTemplate();
-			oTemplate.setTemplateId(sId);
-			oTemplate.setUserId(sUserId);
-			oTemplate.setProcessorId(oDetailViewModel.getProcessorId());
-			oTemplate.setName(oDetailViewModel.getName());
-			oTemplate.setDescription(oDetailViewModel.getDescription());
-			oTemplate.setJsonParameters(oDetailViewModel.getJsonParameters());
-
-			return oTemplate;
+		if (oDetailViewModel == null) {
+			return null;
 		}
 
-		return null;
+		ProcessorParametersTemplate oTemplate = new ProcessorParametersTemplate();
+		oTemplate.setTemplateId(sId);
+		oTemplate.setUserId(sUserId);
+		oTemplate.setProcessorId(oDetailViewModel.getProcessorId());
+		oTemplate.setName(oDetailViewModel.getName());
+		oTemplate.setDescription(oDetailViewModel.getDescription());
+		oTemplate.setJsonParameters(oDetailViewModel.getJsonParameters());
+		oTemplate.setCreationDate(Utils.getWasdiDateAsDouble(oDetailViewModel.getCreationDate()));
+
+		return oTemplate;
 	}
 
 }

@@ -27,31 +27,87 @@ import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * Base Download Utility Class 
  * Created by s.adamo on 06/10/2016.
  */
 public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier {
-
+	
+	/**
+	 * Unique Code of this data provider
+	 */
+	protected String m_sDataProviderCode = "";
+	
+	/**
+	 * Size of the buffer for the copy stream operations
+	 */
 	protected final int BUFFER_SIZE = 4096;
+	
+	/**
+	 * Max number of zeros allowed to read during the read
+	 */
     protected final int MAX_NUM_ZEORES_DURING_READ = 20;
+    
+    /**
+     * Logger
+     */
     protected LoggerWrapper m_oLogger;
+    
+    /**
+     * Last error as returned by http operations
+     */
     protected int m_iLastError = 0;
 	
+    /**
+     * Provider User 
+     */
     protected String m_sProviderUser;
+    
+    /**
+     * Provider Password
+     */
     protected String m_sProviderPassword;
     
+    /**
+     * Default Protocol
+     */
     protected String m_sDefaultProtocol = "https://";
     
+    /**
+     * List of supported classes
+     */
+    protected ArrayList<String> m_asSupportedPlatforms = new ArrayList<String>();
+    
+    /**
+     * Process workspace representing the actual operation
+     */
     ProcessWorkspace m_oProcessWorkspace;
     
+    /**
+     * Cloud Provider of the Data Provider
+     */
+    protected String m_sCloudProvider = "";
+    
+    /**
+     * List of subscriber that receives the progress update of the download operation
+     */
     private List<ProcessWorkspaceUpdateSubscriber> m_aoSubscribers;
+    
+    /**
+     * Data Provider Config
+     */
+    protected DataProviderConfig m_oDataProviderConfig;
 
     /**
      * Constructor: uses LauncerMain logger
@@ -60,8 +116,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		this(LauncherMain.s_oLogger);	
 	}
     
-    public abstract void readConfig();
-    
     /**
      * Constructor with user defined logger
      * @param logger
@@ -69,7 +123,34 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     public ProviderAdapter(LoggerWrapper logger) {
 		this.m_oLogger = logger;
 		m_aoSubscribers = new ArrayList<ProcessWorkspaceUpdateSubscriber>();
-	}
+	}    
+    
+    /**
+     * Read base configuration
+     */
+    public void readConfig() {
+    	try {
+    		// Get the config
+    		m_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sDataProviderCode);
+    		// Read the cloud provider
+    		m_sCloudProvider = m_oDataProviderConfig.cloudProvider;
+    		
+    		// Add supported platform
+    		for (String sSupportedPlatform : m_oDataProviderConfig.supportedPlatforms) {
+    			m_asSupportedPlatforms.add(sSupportedPlatform);
+			}
+    		
+    		// Call internal function for further specialized config
+    		internalReadConfig();
+    	}
+    	catch (Exception oEx) {
+    		if (m_oLogger != null) {
+    			m_oLogger.error("Exception reading Data Provider Config: " + oEx.toString());
+    		}
+		}
+    }
+    
+    protected abstract void internalReadConfig(); 
 
     /**
      * Abstract method to get the size of the downloaded file
@@ -85,7 +166,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param sDownloadPassword Password to authenticate to the provider
 	 * @param sSaveDirOnServer Local save path
 	 * @param oProcessWorkspace Process Workspace to update the user
-	 * @return
+	 * @return Downloaded File Full Path, or "" in case of problems
 	 */
     public abstract String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception;
     
@@ -95,6 +176,105 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * @return
      */
     public abstract String getFileName(String sFileURL) throws Exception;
+    
+    /**
+     * Get the Data Provider Code
+     */
+    public String getCode() {
+    	return m_sDataProviderCode;
+    }
+    
+    /**
+     * Get the score of this Data Provider for the specified file. 
+     * The score is -1 if the file is not supported.
+     * High score means the fast availalbilty of the file
+     * Low score means slow availability of the file 
+     * 
+     * @param sFileName File to investigate
+     * @return Provider score. -1 if not supported
+     */
+    public int getScoreForFile(String sFileName) {
+    	
+    	try {
+    		
+    		String sPlatformType = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sFileName);
+    		
+    		if (Utils.isNullOrEmpty(sPlatformType)) {
+    			m_oLogger.debug("ProviderAdapter.getScoreForFile: platform not recognized");
+    			return -1;
+    		}
+    		
+    		if (!m_asSupportedPlatforms.contains(sPlatformType)) {
+    			return -1;
+    		}
+    		
+    		return internalGetScoreForFile(sFileName, sPlatformType);
+    	}
+    	catch (Exception oEx) {
+    		if (m_oLogger!=null) {
+    			m_oLogger.error("ProviderAdapter.getScoreForFile: exception " + oEx.toString());
+    		}
+		}
+    	
+    	return -1;
+    }
+    
+    /**
+     * Internal abstract method to determine the score of this Data Provider for a input file
+     * @param sFileName sFileName File to investigate
+     * @param sPlatformType Platform type of the file
+     * @return Provider score. -1 if not supported
+     */
+    protected abstract int internalGetScoreForFile(String sFileName, String sPlatformType);
+    
+    /**
+     * Get the code of the cloud provider of the actual workspace
+     * @return Code of the cloud provider of the actual workspace
+     */
+    protected String getWorkspaceCloud() {
+    	if (m_oProcessWorkspace == null) return "";
+    	
+    	try {
+        	String sWorkspaceId = m_oProcessWorkspace.getWorkspaceId();
+        	
+        	WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+        	Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+        	
+        	NodeRepository oNodeRepository = new NodeRepository();
+        	Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+        	
+        	if (oNode != null) {
+        		return oNode.getCloudProvider();
+        	}
+        	else {
+        		return WasdiConfig.Current.mainNodeCloud;
+        	}
+    	}
+    	catch (Exception oEx) {
+    		if (m_oLogger!=null) {
+    			m_oLogger.error("ProviderAdapter.getScoreForFile: exception " + oEx.toString());
+    		}
+		}    	
+    	
+    	return "";
+    }
+    
+    /**
+     * Return true if the workspace is on the same cloud of the data provider
+     * @return true if the workspace is on the same cloud of the data provider
+     */
+    protected boolean isWorkspaceOnSameCloud() {
+		String sCloud = getWorkspaceCloud();
+		
+		boolean bOnCloud = false;
+		if (!Utils.isNullOrEmpty(sCloud)) {
+			if (m_sCloudProvider.toUpperCase().equals(sCloud.toUpperCase())) {
+				bOnCloud = true;
+			}
+		}
+		
+		return bOnCloud;
+    }
     
 
     @Override
@@ -121,6 +301,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
 	}
 	
+	/**
+	 * Set the process workspace member
+	 * @param oProcessWorkspace
+	 */
 	public void setProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
 		if(null!=oProcessWorkspace) {
 			m_oProcessWorkspace = oProcessWorkspace;
@@ -189,17 +373,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			
 	        String sUser = "";
 	        String sPassword = "";
-	        
-	        // TODO: Still needed? Really?
-			try {
-				DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("DHUS");
-				
-				sUser = oConfig.user;
-				sPassword = oConfig.password;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
 
 			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
 			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;

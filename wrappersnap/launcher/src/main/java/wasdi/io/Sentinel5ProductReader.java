@@ -15,7 +15,7 @@ import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -56,7 +56,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
     		Group rootGroup = oFile.getRootGroup();
     		List<Group> rootGroupGroups = rootGroup.getGroups();
 
-        	ArrayList<BandViewModel> oBands = new ArrayList<BandViewModel>();
+        	List<BandViewModel> oBands = new ArrayList<>();
 
     		for (Group g : rootGroupGroups) {
     			if (g.getShortName().equalsIgnoreCase("PRODUCT")) {
@@ -113,7 +113,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		try {
 			return extractBboxFromFile(m_oProductFile.getAbsolutePath());
 		} catch (Exception e) {
-    		LauncherMain.s_oLogger.debug("Sentinel5ProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+    		LauncherMain.s_oLogger.debug("Sentinel5ProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
 
     		return null;
 		}
@@ -259,7 +259,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		String sFileName = sDownloadedFileFullPath;
 		
 		try {
-			if (sDownloadedFileFullPath.startsWith("S5P") && sDownloadedFileFullPath.toLowerCase().endsWith(".zip")) {
+			if (sFileNameFromProvider.startsWith("S5P") && sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File is a Sentinel 5P image, start unzip");
 				String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 				
@@ -267,13 +267,15 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 
 				File oSourceFile = new File(sDownloadedFileFullPath);
 				File oTargetDirectory = new File(sTargetDirectoryPath);
-				WasdiFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
+				ZipFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
 
-				String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", "");
+				String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 				
 				sFileName = sFolderName + ".nc";
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+
+				m_oProductFile = new File(sFileName);
 			}			
 		}
 		catch (Exception oEx) {

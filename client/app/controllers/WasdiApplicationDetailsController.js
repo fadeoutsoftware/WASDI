@@ -84,6 +84,18 @@ var WasdiApplicationDetailsController = (function() {
         this.m_sSelectedReviewId = this.m_oConstantsService.getSelectedReviewId();
 
         /**
+         * Selected review
+         * @type {*}
+         */
+        this.m_oSelectedReview = this.m_oConstantsService.getSelectedReview();
+
+        /**
+         * The selected comment
+         * @type {*}
+         */
+        this.m_oSelectedComment = this.m_oConstantsService.getSelectedComment();
+
+        /**
          * array of images
          * @type {*[]}
          */
@@ -285,7 +297,7 @@ var WasdiApplicationDetailsController = (function() {
             {
                 oController.m_oCommentsWrapper[oController.m_sSelectedReviewId] = data.data;
 
-                if (data.data.comments.length == 0) oController.m_bShowLoadComments = false;
+                if (data.data.length == 0) oController.m_bShowLoadComments = false;
             }
             else
             {
@@ -393,9 +405,76 @@ var WasdiApplicationDetailsController = (function() {
         });
     }
 
+    /**
+     * Updates a review
+     */
+    WasdiApplicationDetailsController.prototype.updateReview = function () {
+        var oController = this;
+
+        this.m_oUserReview.processorId = this.m_oApplication.processorId;
+
+        this.m_oUserReview.id = this.m_oSelectedReview.id;
+        this.m_oSelectedReview = null;
+
+        this.m_oProcessorMediaService.updateProcessorReview(this.m_oUserReview).then(function (data) {
+            oController.m_oUserReview.title="";
+            oController.m_oUserReview.comment="";
+            oController.m_oUserReview.vote=-1;
+
+            var oDialog = utilsVexDialogAlertBottomRightCorner("REVIEW UPDATED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iReviewsPage = 0;
+            oController.refreshReviews();
+
+        },function (error) {
+            oController.m_oUserReview.title="";
+            oController.m_oUserReview.comment="";
+            oController.m_oUserReview.vote=-1;
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE REVIEW");
+        });
+    }
+
     WasdiApplicationDetailsController.prototype.setSelectedReviewId = function (reviewId) {
         this.m_sSelectedReviewId = reviewId;
         this.m_oReview.reviewId = reviewId;
+    }
+
+    WasdiApplicationDetailsController.prototype.setSelectedReview = function (review) {
+        this.m_oSelectedReview = review;
+
+        if (review) {
+            this.m_oUserReview = {
+                id: review.id,
+                title: review.title,
+                comment: review.comment,
+                vote: review.vote
+            }
+        } else {
+            this.m_oUserReview = {
+                id: "",
+                title: "",
+                comment: "",
+                vote: -1
+            }
+        }
+    }
+
+    WasdiApplicationDetailsController.prototype.setSelectedComment = function (comment) {
+        this.m_oSelectedComment = comment;
+
+        if (comment) {
+            this.m_oReviewComment = {
+                reviewId: comment.reviewId,
+                text: comment.text
+            }
+        } else {
+            this.m_oReviewComment = {
+                reviewId: "",
+                text: ""
+            }
+        }
     }
 
     /**
@@ -424,6 +503,31 @@ var WasdiApplicationDetailsController = (function() {
     }
 
     /**
+     * Updates a comment
+     */
+    WasdiApplicationDetailsController.prototype.updateComment = function () {
+        var oController = this;
+
+        this.m_oReviewComment.commentId = this.m_oSelectedComment.commentId;
+        this.m_oSelectedComment = null;
+
+        this.m_oProcessorMediaService.updateReviewComment(this.m_oReviewComment).then(function (data) {
+
+            oController.m_oReviewComment.text = "";
+            var oDialog = utilsVexDialogAlertBottomRightCorner("COMMENT UPDATED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iCommentsPage = 0;
+            oController.refreshComments(oController.m_oReviewComment.reviewId);
+
+        },function (error) {
+            oController.m_oReviewComment.text = "";
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE COMMENT");
+        });
+    }
+
+    /**
      * Deletes a review
      */
     WasdiApplicationDetailsController.prototype.deleteReview = function (sReviewId) {
@@ -433,8 +537,12 @@ var WasdiApplicationDetailsController = (function() {
         var oDeleteReviewCallback = function (value) {
 
             if (value) {
-                oController.m_oProcessorMediaService.deleteProcessorReview(oController.m_oApplication.processorId,sReviewId);
-                oController.refreshReviews();
+                oController.m_oProcessorMediaService.deleteProcessorReview(oController.m_oApplication.processorId, sReviewId).then(function (data) {
+                    oController.refreshReviews();
+                },function (error) {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING THE REVIEWS");
+                });
+
                 return true;
             } else {
                 return false;

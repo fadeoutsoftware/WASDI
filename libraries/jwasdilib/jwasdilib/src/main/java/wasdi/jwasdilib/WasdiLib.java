@@ -33,17 +33,33 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.net.io.Util;
 
+import com.fasterxml.jackson.core.sym.Name;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.jwasdilib.utils.MosaicSetting;
 
 /**
+ * [0.7.4] - 2022-01-01
+ * 
+ * ### Added
+ * 	- support to Auto Data Provider
+ * 	
+ * ### Added
+ * - getWorkspaceNameById: return the name of a workspace from the id
+ * - searchEOImages support to S3, S5P, ENVISAT, VIIRS, L8, ERA5
+ * ### Fixed
+ * - updated all methods to new APIs
+ * - checked null or empty list in waitProcesses
+ * 
  * @author c.nattero
  *
  */
 public class WasdiLib {
-
+	
+	/**
+	 * Object mapper to convert json to java and java to json
+	 */
 	protected static ObjectMapper s_oMapper = new ObjectMapper();
 
 	/**
@@ -129,7 +145,7 @@ public class WasdiLib {
 	/*
 	 * Default data provider to be used for search and import operations 
 	 */
-	private String m_sDefaultProvider = "LSA";
+	private String m_sDefaultProvider = "AUTO";
 
 
 	/**
@@ -393,7 +409,19 @@ public class WasdiLib {
 	 * @return Params Dictionary
 	 */
 	public Map<String, String> getParams() {
-		return m_aoParams;
+		Map<String, String> aoParamsCopy = new HashMap<>(m_aoParams);
+		
+		if (aoParamsCopy.containsKey("user")) {
+			aoParamsCopy.remove("user");
+		}
+		if (aoParamsCopy.containsKey("sessionid")) {
+			aoParamsCopy.remove("sessionid");
+		}
+		if (aoParamsCopy.containsKey("workspaceid")) {
+			aoParamsCopy.remove("workspaceid");
+		}
+		
+		return aoParamsCopy;
 	}
 
 	public String getParamsAsJsonString() {
@@ -2111,7 +2139,7 @@ public class WasdiLib {
 
 	/**
 	 * Search EO-Images 
-	 * @param sPlatform Satellite Platform. Accepts "S1","S2"
+	 * @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS","ERA5"
 	 * @param sDateFrom Starting date in format "YYYY-MM-DD"
 	 * @param sDateTo End date in format "YYYY-MM-DD"
 	 * @param dULLat Upper Left Lat Coordinate. Can be null.
@@ -2151,9 +2179,8 @@ public class WasdiLib {
 			return aoReturnList;
 		}
 
-		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2"))) {
-			log("searchEOImages: platform must be S1 or S2. Received [" + sPlatform + "]");
-			return aoReturnList;
+		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2") || sPlatform.equals("S3") || sPlatform.equals("S5P") || sPlatform.equals("ENVI") || sPlatform.equals("VIIRS") || sPlatform.equals("ERA5") || sPlatform.equals("L8"))) {
+			log("searchEOImages: platform should be one of S1, S2, S3, S5P, ENVI, VIIRS, ERA5, L8. Received [" + sPlatform + "]");
 		}
 
 		if (sPlatform.equals("S1")) {
@@ -2171,10 +2198,18 @@ public class WasdiLib {
 				}
 			}
 		}
-
+		
+		if (sPlatform.equals("S3")) {
+			if (sProductType != null) {
+				if (!(sProductType.equals("SR_1_SRA___") || sProductType.equals("SR_1_SRA_A_")  || sProductType.equals("SR_1_SRA_BS")  || sProductType.equals("SR_2_LAN___") )) {
+					log("searchEOImages: Available Product Types for S3; SR_1_SRA___, SR_1_SRA_A_, SR_1_SRA_BS, SR_2_LAN___. Received [" + sProductType + "]");
+				}
+			}
+		}
+		
 		if (sDateFrom == null) {
 			log("searchEOImages: sDateFrom cannot be null");
-			return aoReturnList;			
+			return aoReturnList;
 		}
 
 		if (sDateFrom.length()<10) {
@@ -2196,12 +2231,24 @@ public class WasdiLib {
 
 		// Platform name for sure
 		String sQuery = "( platformname:";
-		if (sPlatform.equals("S2")) sQuery += "Sentinel-2 ";
-		else sQuery += "Sentinel-1";
+		if (sPlatform.equals("S1")) sQuery += "Sentinel-1";
+		else if (sPlatform.equals("S2")) sQuery += "Sentinel-2";
+		else if (sPlatform.equals("S3")) sQuery += "Sentinel-3";
+		else if (sPlatform.equals("S5P")) sQuery += "Sentinel-5P";
+		else if (sPlatform.equals("ENVI")) sQuery += "Envisat";
+		else if (sPlatform.equals("L8")) sQuery += "Landsat-*";
+		else if (sPlatform.equals("VIIRS")) sQuery += "VIIRS";
+		else if (sPlatform.equals("ERA5")) sQuery += "ERA5";
+		else sQuery += sPlatform;
 
 		// If available add product type
 		if (sProductType != null) {
 			sQuery += " AND producttype:" + sProductType;
+		}
+		else {
+			if (sPlatform.equals("VIIRS")) {
+				sQuery += " AND producttype:VIIRS_1d_composite";
+			}
 		}
 
 		// If available Sensor Operational Mode
@@ -2244,7 +2291,7 @@ public class WasdiLib {
 			String sResponse = httpPost(sUrl, sQueryBody, getStandardHeaders());
 			List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
 
-			log("" + aoJSONMap);
+			//log("" + aoJSONMap);
 
 			return aoJSONMap;		
 		}
@@ -2304,8 +2351,13 @@ public class WasdiLib {
 			if (oProduct.containsKey("footprint")) {
 				sBoundingBox = oProduct.get("footprint").toString();
 			}
+			
+			String sName = null;
+			if (oProduct.containsKey("title")) {
+				sName = oProduct.get("title").toString();
+			}
 
-			return asynchImportProduct(sFileUrl, sBoundingBox, sProvider);
+			return asynchImportProduct(sFileUrl, sName, sBoundingBox, sProvider);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -2332,8 +2384,14 @@ public class WasdiLib {
 			if (oProduct.containsKey("footprint")) {
 				sBoundingBox = oProduct.get("footprint").toString();
 			}
+			
+			String sName = null;
+			if (oProduct.containsKey("title")) {
+				sName = oProduct.get("title").toString();
+			}
+			
 
-			return importProduct(sFileUrl, sBoundingBox);
+			return importProduct(sFileUrl, sName, sBoundingBox);
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -2347,8 +2405,8 @@ public class WasdiLib {
 	 * @param sFileUrl Direct link of the product
 	 * @return status of the Import process
 	 */
-	public String importProduct(String sFileUrl) {
-		return importProduct(sFileUrl, "");
+	public String importProduct(String sFileUrl, String sName) {
+		return importProduct(sFileUrl, sName, "");
 	}
 
 	/**
@@ -2356,9 +2414,8 @@ public class WasdiLib {
 	 * @param sFileUrl Direct link of the product
 	 * @return status of the Import process
 	 */
-	public String asynchImportProduct(String sFileUrl) {
-		log("WasdiLib.asynchImportProduct( " + sFileUrl + " )");
-		return asynchImportProduct(sFileUrl, "");
+	public String asynchImportProduct(String sFileUrl, String sName) {
+		return asynchImportProduct(sFileUrl, sName, "");
 	}
 
 
@@ -2368,9 +2425,8 @@ public class WasdiLib {
 	 * @param sBoundingBox bounding box
 	 * @return
 	 */
-	public String asynchImportProduct(String sFileUrl, String sBoundingBox) {
-		log("WasdiLib.asynchImportProduct( " + sFileUrl + ", " + sBoundingBox + " )");
-		return asynchImportProduct(sFileUrl, sBoundingBox, null);
+	public String asynchImportProduct(String sFileUrl, String sName, String sBoundingBox) {
+		return asynchImportProduct(sFileUrl, sName, sBoundingBox, null);
 	}
 
 	/**
@@ -2379,8 +2435,7 @@ public class WasdiLib {
 	 * @param sBoundingBox Bounding Box of the product
 	 * @return status of the Import process
 	 */
-	public String asynchImportProduct(String sFileUrl, String sBoundingBox, String sProvider) {
-		log("WasdiLib.asynchImportProduct( " + sFileUrl + ", " + sBoundingBox + ", " + sProvider + " )");
+	public String asynchImportProduct(String sFileUrl, String sName, String sBoundingBox, String sProvider) {
 		String sReturn = "ERROR";
 
 		try {
@@ -2393,6 +2448,10 @@ public class WasdiLib {
 
 			String sUrl = m_sBaseUrl + "/filebuffer/download?fileUrl=" + sEncodedFileLink+"&provider="+
 					sProvider +"&workspace="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
+			
+			if (sName != null) {
+				sUrl = sUrl + "&name="+sName;
+			}
 
 			// Call the server
 			String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -2413,8 +2472,8 @@ public class WasdiLib {
 		return sReturn;
 	}
 
-	public String importProduct(String sFileUrl, String sBoundingBox) {
-		return importProduct(sFileUrl, sBoundingBox, null);
+	public String importProduct(String sFileUrl, String sName, String sBoundingBox) {
+		return importProduct(sFileUrl, sName, sBoundingBox, null);
 	}
 
 	/**
@@ -2423,11 +2482,11 @@ public class WasdiLib {
 	 * @param sBoundingBox Bounding Box of the product
 	 * @return status of the Import process
 	 */
-	public String importProduct(String sFileUrl, String sBoundingBox, String sProvider) {
+	public String importProduct(String sFileUrl, String sName, String sBoundingBox, String sProvider) {
 		String sReturn = "ERROR";
 
 		try {
-			String sProcessId = asynchImportProduct(sFileUrl, sBoundingBox, sProvider);
+			String sProcessId = asynchImportProduct(sFileUrl, sName, sBoundingBox, sProvider);
 			sReturn = waitProcess(sProcessId);
 
 			// Return the status of the import WASDI process
@@ -2462,7 +2521,7 @@ public class WasdiLib {
 	 * @param aoProductsToImport
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
-	public List<String> asynchImportProductList(List<String> asProductsToImport){
+	public List<String> asynchImportProductList(List<String> asProductsToImport, List<String> asNames){
 		log("WasdiLib.asynchImportProductList ( with list )");
 		if(null==asProductsToImport) {
 			log("WasdiLib.asynchImportProductList: list is null, aborting");
@@ -2474,39 +2533,23 @@ public class WasdiLib {
 		}
 		log("WasdiLib.asynchImportProductList: list has " + asProductsToImport.size() + " elements");
 		List<String> asIds = new ArrayList<String>(asProductsToImport.size());
-		for (String sProductUrl: asProductsToImport) {
-			asIds.add(asynchImportProduct(sProductUrl));
+		
+		for (int i=0; i<asProductsToImport.size(); i++) {
+			String sProductUrl = asProductsToImport.get(i);
+			String sName = null;
+			
+			if (asNames != null) {
+				if (i<asNames.size()) {
+					sName = asNames.get(i);
+				}				
+			}
+			
+			asIds.add(asynchImportProduct(sProductUrl, sName));
 		}
+		
 		return asIds;
 	}
 	
-	public List<String> asynchImportProductList( String sJsonArray ){
-		log("WasdiLib.asynchImportProductList ( " + sJsonArray + " )");
-		if(null==sJsonArray || sJsonArray.isEmpty()) {
-			log("WasdiLib.asynchImportProductList: string is null or empty, aborting");
-			return null;
-		}
-		if(sJsonArray.startsWith("{")) {
-			sJsonArray = sJsonArray.substring(1);
-		}
-		if(sJsonArray.endsWith("}")) {
-			sJsonArray = sJsonArray.substring(0,sJsonArray.length()-1);
-		}
-		if(!sJsonArray.startsWith("[")||!sJsonArray.endsWith("]")) {
-			log("WasdiLib.asynchImportProductList: string passed is not a well formatted JSON array: "+
-					"it must begin with [ and end with ], aborting");
-			return null;
-		}
-		sJsonArray=sJsonArray.substring(1, sJsonArray.length()-1);
-		//remove all spaces
-		sJsonArray = sJsonArray.replaceAll("\\s+","").trim();
-		String[] asSplit = sJsonArray.split(",");
-		List<String> asProductsToImport = Arrays.asList(asSplit);
-		return asynchImportProductList(asProductsToImport);
-		
-	}
-
-
 	/**
 	 * Imports a list of product asynchronously
 	 * @param aoProductsToImport
@@ -2521,8 +2564,8 @@ public class WasdiLib {
 	 * @param aoProductsToImport
 	 * @return a list of String containing the WASDI process ids of all the imports 
 	 */
-	public List<String> importProductList(List<String> asProductsToImport){
-		return waitProcesses(asynchImportProductList(asProductsToImport));
+	public List<String> importProductList(List<String> asProductsToImport, List<String> asNames){
+		return waitProcesses(asynchImportProductList(asProductsToImport, asNames));
 	}
 
 	/***
@@ -3368,7 +3411,7 @@ public class WasdiLib {
 		}
 
 		//start downloads
-		List<String> asDownloadIds = asynchImportProductList(asProductsLinks);
+		List<String> asDownloadIds = asynchImportProductList(asProductsLinks, asProductsNames);
 
 		List<String> asWorkflowIds = asynchPreprocessProductsOnceDownloadedWithNames(asProductsNames, sWorkflow,
 				sPreProcSuffix, asDownloadIds);

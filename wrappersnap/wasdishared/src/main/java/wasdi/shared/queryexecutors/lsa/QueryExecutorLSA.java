@@ -14,7 +14,6 @@ import org.apache.abdera.parser.ParserOptions;
 import org.json.JSONObject;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -43,8 +42,6 @@ public class QueryExecutorLSA extends QueryExecutor {
 		this.m_oQueryTranslator = new QueryTranslatorLSA();
 		this.m_oResponseTranslator = new ResponseTranslatorLSA();
 		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);
 	}
 	
 	@Override
@@ -74,12 +71,12 @@ public class QueryExecutorLSA extends QueryExecutor {
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 		
 		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-			return 0;
+			return -1;
 		}
 		
 		String sLSAQuery = m_oQueryTranslator.translateAndEncodeParams(sQuery);
 		
-		if (Utils.isNullOrEmpty(sLSAQuery)) return 0;
+		if (Utils.isNullOrEmpty(sLSAQuery)) return -1;
 		
 		if (!m_bAuthenticated) {
 			LSAHttpUtils.authenticate(m_sUser, m_sPassword);
@@ -111,7 +108,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 			
 			if (oDocument == null) {
 				Utils.debugLog("QueryExecutorLSA.executeCount: Document response null, aborting");
-				return 0;
+				return -1;
 			}
 			
 			// Extract the count
@@ -153,7 +150,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 		
 		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-			return aoReturnList;
+			return null;
 		}		
 		
 		try {
@@ -174,6 +171,10 @@ public class QueryExecutorLSA extends QueryExecutor {
 			
 			// Make the query
 			String sRLSAResults = LSAHttpUtils.httpGetResults(sLSAQuery, (CookieManager) CookieHandler.getDefault());
+			
+			if (sRLSAResults ==null) {
+				return null;
+			}
 			
 			Utils.debugLog("QueryExecutorLSA.executeAndRetrieve: got result, start conversion");
 			

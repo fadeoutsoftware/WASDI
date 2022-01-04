@@ -64,6 +64,7 @@ import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -153,7 +154,7 @@ public class Wasdi extends ResourceConfig {
 
 		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 		
-		String sConfigFilePath = "/data/wasdi/config.json"; 
+		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
 		
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
@@ -342,15 +343,17 @@ public class Wasdi extends ResourceConfig {
 	 * @return
 	 */
 	public static User getUserFromSession(String sSessionId) {
+		
 		User oUser = null;
+		
 		try {
 			// validate sSessionId
 			if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
 				return null;
 			}
-
+			
+			// Check The Session with Keycloak
 			String sUserId = null;
-			//todo validate token with JWT
 			
 			try  {
 				//introspect
@@ -380,8 +383,9 @@ public class Wasdi extends ResourceConfig {
 				
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
+				
 				if(null==oUserSession) {
-					throw new NullPointerException("checking against DB failed: session " + sSessionId + " is not valid");
+					return null;
 				} else {
 					sUserId = oUserSession.getUserId();
 				}
@@ -389,7 +393,7 @@ public class Wasdi extends ResourceConfig {
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
 				} else {
-					throw new NullPointerException("User is null from WASDI session " + sSessionId );
+					return null;
 				}
 			}
 		} catch (Exception oE) {
@@ -659,6 +663,7 @@ public class Wasdi extends ResourceConfig {
 
 				Boolean bNew = false;
 				//store the keycloak access token instead, so we can retrieve the user and perform a further check
+				// NO!!! LIBS does not have the ability to refresh the token!!
 				if (Utils.isNullOrEmpty(sParentId)) {
 					sSessionId = UUID.randomUUID().toString();
 					bNew = true;
@@ -838,7 +843,7 @@ public class Wasdi extends ResourceConfig {
 			
 			File oZippedFile = new File(sTempPath+iRandom + ".zip");
 			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			WasdiFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
 			
 			oOutZipStream.close();
 			
@@ -1038,33 +1043,37 @@ public class Wasdi extends ResourceConfig {
 	public static String readHttpResponse(HttpURLConnection oConnection) {
 		try {
 			// response
-			int iResponseCode = oConnection.getResponseCode();
-			//Utils.debugLog("Wasdi.readHttpResponse: server returned " + iResponseCode);
 
 			InputStream oResponseInputStream = null;
+			try {
+				oResponseInputStream = oConnection.getInputStream();
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.readHttpResponse: could not getInputStream due to: " + oE );
+			}
+			
+			try {
+				if(null==oResponseInputStream) {
+					oResponseInputStream = oConnection.getErrorStream();
+				}
+			} catch (Exception oE) {
+				Utils.debugLog("Wasdi.readHttpResponse: could not getErrorStream due to: " + oE );
+			}
+			
 
 			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+			
 
-			if( 200 <= iResponseCode && 299 >= iResponseCode ) {
-				oResponseInputStream = oConnection.getInputStream();
+			Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+			String sMessage = oByteArrayOutputStream.toString();
+			if( 200 <= oConnection.getResponseCode() && 299 >= oConnection.getResponseCode() ) {
+				return sMessage;
 			} else {
-				Utils.debugLog("Wasdi.readHttpResponse: failed with error " + iResponseCode);
-				oResponseInputStream = oConnection.getErrorStream();
+				Utils.debugLog("Wasdi.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
+				return "";
 			}
-			if(null!=oResponseInputStream) {
-				Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-				String sMessage = oByteArrayOutputStream.toString();
-				if( 200 <= iResponseCode && 299 >= iResponseCode ) {
-					return sMessage;
-				} else {
-					Utils.debugLog("Wasdi.readHttpResponse: error message: " + sMessage);
-					return "";
-				}
-			} else {
-				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
-			}
+			
 		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.readHttpResponse: " + oE );
+			Utils.debugLog("Wasdi.readHttpResponse: exception: " + oE );
 		}
 		return "";
 	}

@@ -30,12 +30,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 
 /**
  * @author c.nattero
@@ -54,6 +54,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 * Basic constructor
 	 */
 	public CREODIASProviderAdapter() {
+		m_sDataProviderCode = "CREODIAS";
 	}
 
 	/**
@@ -61,6 +62,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	 */
 	public CREODIASProviderAdapter(LoggerWrapper logger) {
 		super(logger);
+		m_sDataProviderCode = "CREODIAS";
 	}
 
 	/**
@@ -332,7 +334,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         File fileToZip = new File(sourceFile);
 
-        WasdiFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+        ZipFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
         zipOut.close();
         fos.close();
 	}
@@ -663,14 +665,55 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
 		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("CREODIAS");
-			m_sDefaultProtocol = oConfig.defaultProtocol; 
-			m_sProviderBasePath = oConfig.localFilesBasePath;
+			m_sDefaultProtocol = m_oDataProviderConfig.defaultProtocol; 
+			m_sProviderBasePath = m_oDataProviderConfig.localFilesBasePath;
 		} catch (Exception e) {
 			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
 		}
+	}
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		boolean bOnCloud = isWorkspaceOnSameCloud();
+		
+		if (sPlatformType.equals(Platforms.SENTINEL1)) {
+			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+			
+			if (sType.equals("GRD") || sType.equals("OCN")) {
+				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+				else return DataProviderScores.DOWNLOAD.getValue();
+			}
+			
+			// TODO: SLC in europe are available. Look if we can get the bbox
+			return DataProviderScores.LTA.getValue();
+		}
+		else if (sPlatformType.equals(Platforms.SENTINEL2)) {
+			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+			
+			if (sType.equals("MSIL1C")) {
+				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+				else return DataProviderScores.DOWNLOAD.getValue();				
+			}
+			
+			return DataProviderScores.LTA.getValue();
+		}
+		else if (sPlatformType.equals(Platforms.ENVISAT)) {
+			if (sFileName.startsWith("ASA_")) {
+				return -1;
+			}
+			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+			else return DataProviderScores.DOWNLOAD.getValue();			
+		}
+		else if (sPlatformType.equals(Platforms.SENTINEL3) || sPlatformType.equals(Platforms.SENTINEL5P)
+				|| sPlatformType.equals(Platforms.LANDSAT8)) {
+			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+			else return DataProviderScores.DOWNLOAD.getValue();
+		}
+		
+		return 0;
 	}
 }

@@ -3,9 +3,22 @@ package wasdi.dataproviders;
 import java.io.File;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class EODCProviderAdapter extends ProviderAdapter{
+	
+	public EODCProviderAdapter() {
+		super();
+		m_sDataProviderCode = "EODC";
+	}
+	
+	public EODCProviderAdapter(LoggerWrapper logger) {
+		super(logger);
+		m_sDataProviderCode = "EODC";
+	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
@@ -76,9 +89,38 @@ public class EODCProviderAdapter extends ProviderAdapter{
 	}
 	
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
 	}
 	
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (isWorkspaceOnSameCloud()) {
+			if (sPlatformType.equals(Platforms.SENTINEL1)) {
+				
+				String sProductType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+				
+				if (sProductType.equals("GRD")) {
+					return DataProviderScores.FILE_ACCESS.getValue();
+				}
+			}
+			else if (sPlatformType.equals(Platforms.SENTINEL2)) {
+				String sProductType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+				
+				if (sProductType.equals("MSIL1C")) {
+					return DataProviderScores.FILE_ACCESS.getValue();
+				}				
+			}
+			else if (sPlatformType.equals(Platforms.SENTINEL3)) {
+				String sProductType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
+				
+				if (sProductType.equals("EFR___") || sProductType.equals("ERR___")) {
+					return DataProviderScores.FILE_ACCESS.getValue();
+				}				
+			}
+		}
+		return 0;
+	}
 
 }

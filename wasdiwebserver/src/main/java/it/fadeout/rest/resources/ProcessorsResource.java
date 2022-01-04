@@ -75,7 +75,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppDetailViewModel;
 import wasdi.shared.viewmodels.processors.AppFilterViewModel;
@@ -1448,7 +1448,6 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorResources.redeployProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 
 			String sUserId = oUser.getUserId();
 			
@@ -1477,7 +1476,7 @@ public class ProcessorsResource  {
 			}
 			
 			
-			if (Wasdi.s_sMyNodeCode == "wasdi") {
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
 				// Start a thread to update all the computing nodes
 				try {
 					Utils.debugLog("ProcessorsResource.redeployProcessor: this is the main node, starting Worker to redeploy Processor also on computing nodes");
@@ -1725,17 +1724,9 @@ public class ProcessorsResource  {
 			}
 			
 			// Check User 
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: session is null or empty, aborting");
-				return Response.status(401).build();
-			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " ): invalid session, aborting");
-				return Response.status(401).build();
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.updateProcessorFiles: userid of user (from session) is null or empty, aborting");
 				return Response.status(401).build();
 			}
 			
@@ -1923,11 +1914,9 @@ public class ProcessorsResource  {
 		Utils.debugLog("ProcessorResources.updateProcessorDetails( Processor: " + sProcessorId + " )");
 		
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 			
 			Utils.debugLog("ProcessorsResource.updateProcessorDetails: get Processor " + sProcessorId);	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -2157,7 +2146,7 @@ public class ProcessorsResource  {
      */
 	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
 		try {
-			ZipExtractor oZipExtractor = new ZipExtractor(sSessionId + " : " + sProcessorId);
+			ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
 
 			//get containing dir 
 			String sProcessorFolder = oProcessorZipFile.getParent();

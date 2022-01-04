@@ -56,7 +56,6 @@
 @import "../dialogs/delete_process/delete_process";
 @import "../dialogs/snake_dialog/snake_dialog";
 @import "../dialogs/workspace_processes_list/workspace_processes";
-@import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
 @import "../dialogs/import_advance_filters/import_advance_filters";
 @import "../dialogs/workflow_manager/workflow_manager";
@@ -66,7 +65,6 @@
 @import "../dialogs/wapps/wapps";
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
-@import "../dialogs/upload_file/upload_file";
 @import "../dialogs/Import/import";
 @import "../dialogs/mosaic/mosaic";
 @import "../dialogs/processor_logs/processor_logs_dialog";
@@ -374,10 +372,6 @@ textarea{
             background-color: #44536C;
             color: white;
         }
-    }
-    tr, th {
-    }
-    tbody {
     }
     .tr-over {
         &:hover {

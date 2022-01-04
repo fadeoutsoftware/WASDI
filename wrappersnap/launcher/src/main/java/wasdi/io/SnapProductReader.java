@@ -14,7 +14,7 @@ import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.products.*;
 
 public class SnapProductReader extends WasdiProductReader {
@@ -22,6 +22,7 @@ public class SnapProductReader extends WasdiProductReader {
 	public SnapProductReader(File oProductFile) {
 		super(oProductFile);
 	}
+	
 	public ProductViewModel getProductViewModel() {
 		
 		LauncherMain.s_oLogger.debug("SnapProductReader.getProductViewModel: start");
@@ -54,12 +55,12 @@ public class SnapProductReader extends WasdiProductReader {
     protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null return");
+            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null, return");
             return;
         }
 
         if (oProduct == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null");
+            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null, return");
             return;
         }
 
@@ -177,7 +178,7 @@ public class SnapProductReader extends WasdiProductReader {
 	        if (sFileNameFromProvider.startsWith("S3") && sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
 	        	String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 	        	LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
-	            ZipExtractor oZipExtractor = new ZipExtractor("");
+	            ZipFileUtils oZipExtractor = new ZipFileUtils();
 	            oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
 	            String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", ".SEN3");
 	            LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);

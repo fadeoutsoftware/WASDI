@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
-import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
@@ -30,7 +29,7 @@ import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipExtractor;
+import wasdi.shared.utils.ZipFileUtils;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -188,15 +187,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (bFirstDeploy)
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
-            try {
-                // The workspace id is the special one... in the exchange there is the real id of the workspace where the user started the op
-                if (LauncherMain.s_oSendToRabbit != null) {
-                    String sInfo = "Processor Deployed " + oProcessor.getName();
-                    LauncherMain.s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), oParameter.getExchange(), sInfo, oProcessWorkspace.getWorkspaceId());
-                }
-            } catch (Exception oInnerEx) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception sending rabbit info message ", oInnerEx);
-            }
+            // Moved in the Operation Class
+//            try {
+//                // The workspace id is the special one... in the exchange there is the real id of the workspace where the user started the op
+//                if (LauncherMain.s_oSendToRabbit != null) {
+//                    String sInfo = "Processor Deployed " + oProcessor.getName();
+//                    LauncherMain.s_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), oParameter.getExchange(), sInfo, oProcessWorkspace.getWorkspaceId());
+//                }
+//            } catch (Exception oInnerEx) {
+//                LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception sending rabbit info message ", oInnerEx);
+//            }
 
             processWorkspaceLog(new EndMessageProvider().getGood());
 
@@ -275,7 +275,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 return false;
             }
             try {
-                ZipExtractor oZipExtractor = new ZipExtractor(sProcessObjId);
+                ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
                 oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
             } catch (Exception oE) {
                 LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
@@ -594,7 +594,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 }
             } else {
                 // Old processor engine: force safe status
-                LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: impossible to read processor outptu in a json. Force closed");
+                LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: impossible to read processor output in a json. Force closed");
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
             }
 
@@ -613,6 +613,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             return false;
+        }
+        finally {
+        	if (oProcessWorkspace != null) {
+        		m_oProcessWorkspace.setStatus(oProcessWorkspace.getStatus());
+        	}
         }
 
         return true;
@@ -641,6 +646,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
         try {
 
+        	
             oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
             oProcessWorkspace = m_oProcessWorkspace;
 

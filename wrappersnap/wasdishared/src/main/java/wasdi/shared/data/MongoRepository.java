@@ -291,6 +291,20 @@ public class MongoRepository {
 
         return 0;
 	}
+
+	public int deleteMany(BasicDBObject oCriteria, String sCollectionName){
+        try {
+            DeleteResult oDeleteResult = getCollection(sCollectionName).deleteMany(oCriteria);
+            if (oDeleteResult != null)
+            {
+                return (int) oDeleteResult.getDeletedCount();
+            }
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+	}
 	
 	public void setRepoDb(String sRepoDb) {	
 			this.m_sRepoDb = sRepoDb;

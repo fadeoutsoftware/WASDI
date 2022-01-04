@@ -12,14 +12,23 @@ import wasdi.shared.utils.Utils;
  * 
  * Basic info are:
  * 	.Title -> Name of the file
- * 	.Summary -> Description
+ * 	.Summary -> Description. Supports a sort of std like: "Date: 2021-12-25T18:25:03.242Z, Instrument: SAR, Mode: IW, Satellite: S1A, Size: 0.95 GB" but is not mandatory
  * 	.Id -> Provider unique id
  * 	.Link -> Link to download the file
- * 	.Footprint -> Bounding box
+ * 	.Footprint -> Bounding box in WKT ie POLYGON ((-7.087445 31.109682, -4.389633 31.524973, -4.062707 29.77639, -6.712266 29.357685, -7.087445 31.109682))
+ * 				   Note: for POLYGON the convention is LON LAT, LON LAT...
  * 	.Provider -> Provider used to get this info.
  * 
  * Properties is a dictionary filled with all the properties supported by the data provider.
  * Can be seen with the "info" button in the client.
+ * 		Some Commonly used, and shown in the client, are:
+ * 			."date": reference Date
+ * 			."instrument": used instrument 
+ * 			."sensoroperationalmode": sensing mode
+ * 			."size": image size as string
+ * 			."relativeOrbit": relative orbit of the acquisition
+ * 			."relativeorbitnumber": same of above, used by the client
+ * 			."platformname": Platform Name
  * 
  * The libs searchs for a property called relativeOrbit
  * 

@@ -22,13 +22,14 @@ import wasdi.shared.data.NodeRepository;
  *
  */
 public class WasdiBinder extends AbstractBinder {
-    @Override
-    protected void configure() {
-        bind(ConfigProvidersCatalog.class).to(ProvidersCatalog.class).in(Singleton.class);
-        
-        bind(KeycloakService.class).to(AuthProviderService.class).in(Singleton.class);
+	@Override
+	protected void configure() {
+		//providers catalog
+		bind(ConfigProvidersCatalog.class).to(ProvidersCatalog.class).in(Singleton.class);
+		//authentication provider -> keycloak
+		bind(KeycloakService.class).to(AuthProviderService.class).in(Singleton.class);
+		// repositories binding
+		bind(NodeRepository.class).to(NodeRepository.class);
 
-        // repositories binding
-        bind(NodeRepository.class).to(NodeRepository.class);
-    }
+	}
 }

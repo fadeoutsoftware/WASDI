@@ -234,7 +234,7 @@ var WorkflowController = (function () {
         var oBody = new FormData();
         oBody.append('file', this.m_oFile[0]);
         //this.m_oConstantService.getActiveWorkspace().sWorkspaceId
-        this.uploadByFile("idworkspace", // Current Workspace from constant service <-> unused on API
+        this.uploadGraph("idworkspace", // Current Workspace from constant service <-> unused on API
             this.m_oWorkflow.name, this.m_oWorkflow.description, this.m_oWorkflow.public, // name, description and boolean for isPublic
             oBody); // content of the file
 

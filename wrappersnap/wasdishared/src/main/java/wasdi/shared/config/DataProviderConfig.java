@@ -1,5 +1,7 @@
 package wasdi.shared.config;
 
+import java.util.List;
+
 /**
  * Data Provider Configuration
  * 
@@ -78,7 +80,16 @@ public class DataProviderConfig {
 	 */
 	public String readTimeout;
 	/**
-	 * Other support file path for configuration
+	 * Path to a file that can be used to store specific Provider Adapter configs
 	 */
-	public String fileDescriptors;
+	public String adapterConfig;
+	/**
+	 * Code of the cloud provider where the Data Provider is hosted. The code must 
+	 * be one of the codes of the entities in the cloudproviders Database table
+	 */
+	public String cloudProvider;
+	/**
+	 * List of the platforms supported by this data provider 
+	 */
+	public List<String> supportedPlatforms;
 }

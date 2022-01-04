@@ -3,6 +3,7 @@ package wasdi.dataproviders;
 import java.io.IOException;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
@@ -15,10 +16,12 @@ public class DhUSProviderAdapter extends ProviderAdapter {
 	
     public DhUSProviderAdapter() {
 		super();
+		m_sDataProviderCode = "SENTINEL";
 	}
     
     public DhUSProviderAdapter(LoggerWrapper logger) {
 		super(logger);
+		m_sDataProviderCode = "SENTINEL";
 	}
 
     @Override
@@ -53,8 +56,23 @@ public class DhUSProviderAdapter extends ProviderAdapter {
     }
     
 	@Override
-	public void readConfig() {
-		
+	protected void internalReadConfig() {
+		if (m_oDataProviderConfig != null) {
+			m_sProviderUser = m_oDataProviderConfig.user;
+			m_sProviderPassword = m_oDataProviderConfig.password;
+		}
 	}
-    
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
+				|| sPlatformType.equals(Platforms.SENTINEL3)) {
+			return DataProviderScores.SLOW_DOWNLOAD.getValue();
+		}
+
+		return 0;
+	}
+
 }
+

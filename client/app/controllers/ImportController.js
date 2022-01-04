@@ -828,11 +828,11 @@ var ImportController = (function() {
          * @param sUrl
          * @param sWorkspaceId
          * @param sBounds
-         * @param oProvider
+         * @param sProvider
          * @param oCallback
          * @param oError
          */
-    ImportController.prototype.downloadProduct = function(sUrl,sWorkspaceId,sBounds,oProvider,oCallback,oError)
+    ImportController.prototype.downloadProduct = function(sUrl, sFileName, sWorkspaceId,sBounds,sProvider,oCallback,oError)
     {
         if(utilsIsObjectNullOrUndefined(oCallback) === true)
         {
@@ -848,7 +848,7 @@ var ImportController = (function() {
                 // oProduct.isDisabledToDoDownload = false;
             };
         }
-        this.m_oFileBufferService.download(sUrl,sWorkspaceId,sBounds,oProvider).then(oCallback, oError);
+        this.m_oFileBufferService.download(sUrl,sFileName, sWorkspaceId,sBounds,sProvider).then(oCallback, oError);
     };
 
     ImportController.prototype.openSelectWorkspaceDialog = function(oCallback){
@@ -910,16 +910,9 @@ var ImportController = (function() {
                 utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
                 oProduct.isDisabledToDoDownload = false;
             }
-            oThat.downloadProduct(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider,null,oError);
-            // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider).then(function (data, status) {
-            //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-            //     utilsVexCloseDialogAfter("3000",oDialog);
-            //
-            //
-            // }).error(function (data,status) {
-            //     utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
-            //     oProduct.isDisabledToDoDownload = false;
-            // });
+
+            oThat.downloadProduct(url,oProduct.title,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider,null,oError);
+
             return true;
         };
 
@@ -953,18 +946,7 @@ var ImportController = (function() {
                     aoProducts[iIndexProduct].isDisabledToDoDownload = false;
                 }
 
-                oThat.downloadProduct(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),aoProducts[iIndexProduct].provider,null,oError);
-
-                // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),
-                //     aoProducts[iIndexProduct].provider).then(function (data, status)
-                // {
-                //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-                //     utilsVexCloseDialogAfter("3000",oDialog);
-                //
-                // }).error(function (data,status) {
-                //     utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
-                //     aoProducts[iIndexProduct].isDisabledToDoDownload = false;
-                // });
+                oThat.downloadProduct(url,aoProducts[iIndexProduct].title, oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),aoProducts[iIndexProduct].provider,null,oError);
             }
             return true;
         };
@@ -1069,7 +1051,9 @@ var ImportController = (function() {
             aaoAllBounds.push(oController.m_aoProductsList[iIndexData].bounds);
         }
 
-        oController.m_oMapService.zoomOnBounds(aaoAllBounds);
+        if (aaoAllBounds.length > 0 && aaoAllBounds[0] && aaoAllBounds[0].length) {
+            oController.m_oMapService.zoomOnBounds(aaoAllBounds);
+        }
     };
 
     /*
@@ -1273,6 +1257,10 @@ var ImportController = (function() {
             console.log("Error: rectangle is undefined ");
             return false;
         }
+        if(utilsIsObjectNullOrUndefined(oRectangle._rawPxBounds))
+        {
+            return false;
+        }
         oRectangle.setStyle({weight:3,fillOpacity:0.7});
         console.log("changeStyleRectangleMouseOver");
     };
@@ -1285,6 +1273,10 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oRectangle))
         {
             console.log("Error: rectangle is undefined ");
+            return false;
+        }
+        if(utilsIsObjectNullOrUndefined(oRectangle._rawPxBounds))
+        {
             return false;
         }
         oRectangle.setStyle({weight:1,fillOpacity:0.2});
@@ -1408,12 +1400,12 @@ var ImportController = (function() {
     };
     /**
      *
-     * @param oLayer
+     * @param oProduct
      * @returns {boolean}
      */
-    ImportController.prototype.openModalDownloadProductInSelectedWorkspaces = function(oLayer)
+    ImportController.prototype.openModalDownloadProductInSelectedWorkspaces = function(oProduct)
     {
-        if(utilsIsObjectNullOrUndefined(oLayer) === true)
+        if(utilsIsObjectNullOrUndefined(oProduct) === true)
         {
             return false;
         }
@@ -1441,19 +1433,19 @@ var ImportController = (function() {
             // download product in all workspaces
             for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
             {
-                oLayer.isDisabledToDoDownload = true;
-                var sUrl = oLayer.link;
+                oProduct.isDisabledToDoDownload = true;
+                var sUrl = oProduct.link;
                 var oError = function (data,status) {
                             utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
-                            oLayer.isDisabledToDoDownload = false;
+                            oProduct.isDisabledToDoDownload = false;
                         };
 
                 var sBound = "";
 
-                if (utilsIsObjectNullOrUndefined(oLayer.bounds) == false) {
-                    sBound = oLayer.bounds.toString();
+                if (utilsIsObjectNullOrUndefined(oProduct.bounds) == false) {
+                    sBound = oProduct.bounds.toString();
                 }
-                oThat.downloadProduct(sUrl,aoWorkSpaces[iIndexWorkspace].workspaceId,sBound,oLayer.provider,null,oError);
+                oThat.downloadProduct(sUrl,oProduct.title, aoWorkSpaces[iIndexWorkspace].workspaceId,sBound,oProduct.provider,null,oError);
 
             }
 
@@ -1508,7 +1500,7 @@ var ImportController = (function() {
                         aoListOfSelectedProducts[iIndexProduct].isDisabledToDoDownload = false;
                     }
 
-                    oThat.downloadProduct(url,aoWorkSpaces[iIndexWorkspace].workspaceId,aoListOfSelectedProducts[iIndexProduct].bounds.toString(),aoListOfSelectedProducts[iIndexProduct].provider,null,oError);
+                    oThat.downloadProduct(url, aoListOfSelectedProducts[iIndexProduct].title, aoWorkSpaces[iIndexWorkspace].workspaceId,aoListOfSelectedProducts[iIndexProduct].bounds.toString(),aoListOfSelectedProducts[iIndexProduct].provider,null,oError);
 
                 }
             }

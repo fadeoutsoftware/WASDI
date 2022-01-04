@@ -5,18 +5,11 @@ import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.net.io.Util;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ProductUtils;
@@ -28,7 +21,6 @@ import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.io.WasdiProductWriter;
-import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
@@ -45,6 +37,7 @@ import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.payloads.PublishBandPayload;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
@@ -403,6 +396,8 @@ public class Publishband extends Operation {
                 oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
             }
             
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+            
             return true;
             
         } catch (Exception oEx) {
@@ -507,10 +502,10 @@ public class Publishband extends Operation {
 			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
 			Process oProcess;
 		
-			String sCommand = "";
-			for (String sArg : asArgs) {
-				sCommand += sArg + " ";
-			}
+//			String sCommand = "";
+//			for (String sArg : asArgs) {
+//				sCommand += sArg + " ";
+//			}
 			
 			oProcessBuidler.redirectErrorStream(true);
 			oProcess = oProcessBuidler.start();
@@ -536,10 +531,10 @@ public class Publishband extends Operation {
 			
 			oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
 		
-			sCommand = "";
-			for (String sArg : asArgs) {
-				sCommand += sArg + " ";
-			}
+//			sCommand = "";
+//			for (String sArg : asArgs) {
+//				sCommand += sArg + " ";
+//			}
 			
 			oProcessBuidler.redirectErrorStream(true);
 			oProcess = oProcessBuidler.start();
@@ -580,82 +575,17 @@ public class Publishband extends Operation {
                 return "";
             }
 
-            String sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
+            String sBaseUrl = WasdiConfig.Current.baseUrl;
 
             String sUrl = sBaseUrl + "/filebuffer/downloadstyle?style=" + sStyle;
 
-            HashMap<String, String> asHeaders = WasdiProcessorEngine.getStandardHeaders(sSessionId);
-
-            try {
-                URL oURL = new URL(sUrl);
-                HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-                // optional default is GET
-                oConnection.setRequestMethod("GET");
-
-                if (asHeaders != null) {
-                    for (String sKey : asHeaders.keySet()) {
-                        oConnection.setRequestProperty(sKey, asHeaders.get(sKey));
-                    }
-                }
-
-                int responseCode = oConnection.getResponseCode();
-
-                if (responseCode == 200) {
-
-                    Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
-                    List<String> asContents = null;
-                    if (null != aoHeaders) {
-                        asContents = aoHeaders.get("Content-Disposition");
-                    }
-                    String sAttachmentName = null;
-                    if (null != asContents) {
-                        String sHeader = asContents.get(0);
-                        sAttachmentName = sHeader.split("filename=")[1];
-                        if (sAttachmentName.startsWith("\"")) {
-                            sAttachmentName = sAttachmentName.substring(1);
-                        }
-                        if (sAttachmentName.endsWith("\"")) {
-                            sAttachmentName = sAttachmentName.substring(0, sAttachmentName.length() - 1);
-                        }
-                        System.out.println(sAttachmentName);
-
-                    }
-
-                    File oTargetFile = new File(sDestinationFileFullPath);
-                    File oTargetDir = oTargetFile.getParentFile();
-                    oTargetDir.mkdirs();
-
-                    // opens an output stream to save into file
-                    try (FileOutputStream oOutputStream = new FileOutputStream(sDestinationFileFullPath)) {
-                        InputStream oInputStream = oConnection.getInputStream();
-
-                        Util.copyStream(oInputStream, oOutputStream);
-
-                        if (null != oOutputStream) {
-                            oOutputStream.close();
-                        }
-                        if (null != oInputStream) {
-                            oInputStream.close();
-                        }
-                    }
-
-
-                    return sDestinationFileFullPath;
-                } else {
-                    String sMessage = oConnection.getResponseMessage();
-                    System.out.println(sMessage);
-                    return "";
-                }
-
-            } catch (Exception oEx) {
-                oEx.printStackTrace();
-                return "";
-            }
+            Map<String, String> asHeaders = HttpUtils.getStandardHeaders(sSessionId);
+            return HttpUtils.downloadFile(sUrl, asHeaders, sDestinationFileFullPath);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
             return "";
         }
     }
+
 }

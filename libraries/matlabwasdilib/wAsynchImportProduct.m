@@ -1,10 +1,11 @@
-function sProcessObjId=wAsynchImportProduct(Wasdi, sProductLink, sBoundingBox='', sProvider='LSA')
+function sProcessObjId=wAsynchImportProduct(Wasdi, sProductLink, sName, sBoundingBox='', sProvider='AUTO')
 %Import an EO Image in WASDI. This is the asynchronous version
 %Syntax
-%sStatus=wImportProduct(Wasdi, sProductLink)
+%sStatus=wImportProduct(Wasdi, sProductLink, sName)
 %
 %:param Wasdi: Wasdi object created after the wasdilib call
 %:param sProductLink: Product Direct Link as returned by wSearchEOImage
+%:param sName: Product Name as returned by wSearchEOImage
 %:param sBoundingBox: product bounding box, optional
 %:param sProvider: data provider, optional
 %
@@ -17,7 +18,7 @@ function sProcessObjId=wAsynchImportProduct(Wasdi, sProductLink, sBoundingBox=''
     return
    end
    
-   sProcessObjId = Wasdi.asynchImportProduct(sProductLink, sBoundingBox, sProvider);
+   sProcessObjId = Wasdi.asynchImportProduct(sProductLink, sName, sBoundingBox, sProvider);
    
    
 end

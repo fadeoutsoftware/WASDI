@@ -437,27 +437,34 @@ var WorkspaceController = (function () {
     WorkspaceController.prototype.DeleteWorkspace = function (sWorkspaceId) {
 
         var oController = this;
+        let oWorkspaceViewModel = undefined;
+        oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+            oWorkspaceViewModel = data.data;
+            utilsVexDialogConfirm("DELETING WORKSPACE " + oWorkspaceViewModel.name +" <br>ARE YOU SURE?", function (value) {
+                if (value) {
+                    bDeleteFile = true;
+                    bDeleteLayer = true;
+    
+            
+    
+                        oController.m_oWorkspaceService.DeleteWorkspace(oWorkspaceViewModel , bDeleteFile, bDeleteLayer)
+                            .then(function () {
+                                oController.deselectWorskpace();
+                                oController.fetchWorkspaceInfoList();
+                            },(function () {
+                                console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
+                            }));
+                    
+    
+                }
+            });
 
-        utilsVexDialogConfirm("DELETING WORKSPACE<br>ARE YOU SURE?", function (value) {
-            if (value) {
-                bDeleteFile = true;
-                bDeleteLayer = true;
 
-                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+    },(function () {
+        console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
+    }));
 
-                    oController.m_oWorkspaceService.DeleteWorkspace(data.data, bDeleteFile, bDeleteLayer)
-                        .then(function () {
-                            oController.deselectWorskpace();
-                            oController.fetchWorkspaceInfoList();
-                        },(function () {
-                            console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
-                        }));
-                },(function () {
-                    console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
-                }));
-
-            }
-        });
+        
     };
 
   /*  WorkspaceController.prototype.getTrackSatellite = function () {

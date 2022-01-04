@@ -8,9 +8,12 @@ package wasdi.shared.queryexecutors;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
@@ -81,7 +84,15 @@ public abstract class QueryTranslator {
 	/**
 	 * Token of VIIRS platform
 	 */
-	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";	
+	private static final String s_sPLATFORMNAME_VIIRS = "platformname:VIIRS";
+	/**
+	 * Token of ERA5 platform
+	 */
+	private static final String s_sPLATFORMNAME_ERA5 = "platformname:ERA5";
+	/**
+	 * Token of PLANET platform
+	 */
+	private static final String s_sPLATFORMNAME_PLANET = "platformname:PLANET";
 	/**
 	 * Token of product type
 	 */
@@ -441,6 +452,9 @@ public abstract class QueryTranslator {
 			// Try get Info about VIIRS
 			parseVIIRS(sQuery, oResult);
 			
+			// Try get Info about ERA5
+			parseERA5(sQuery, oResult);
+			
 			// Try to get info about Landsat
 			parseLandsat(sQuery, oResult);
 			
@@ -457,10 +471,14 @@ public abstract class QueryTranslator {
 			parseCopernicusMarine(sQuery, oResult);
 			
 			// Try to get Info about Sentinel 5P
-			parseSentinel5P(sQuery, oResult);			
+			parseSentinel5P(sQuery, oResult);
+			
+			parsePlanet(sQuery, oResult);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
+			String sStack = ExceptionUtils.getStackTrace(oEx);
+			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: stack " + sStack);
 		}
 
 		return oResult;
@@ -643,6 +661,10 @@ public abstract class QueryTranslator {
 					String sSubQuery = sQuery.substring(iStart, iEnd);
 
 					String[] asCloudLimits = sSubQuery.split(" TO ");
+					
+					if (asCloudLimits.length == 1) {
+						asCloudLimits = sSubQuery.split("<");
+					}
 
 					// these variables could be omitted, but in this way we check we are reading
 					// numbers
@@ -718,7 +740,76 @@ public abstract class QueryTranslator {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
-	
+	/**
+	 * Fills the Query View Model with ERA5 info
+	 * 
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseERA5(String sQuery, QueryViewModel oResult) {
+		
+		try {
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
+
+				int iStart = sQuery.indexOf(s_sPLATFORMNAME_ERA5);
+
+				if (iStart >= 0) {
+
+					iStart += s_sPLATFORMNAME_ERA5.length();
+					int iEnd = sQuery.indexOf(')', iStart);
+					if (iEnd < 0) {
+						sQuery = sQuery.substring(iStart);
+					} else {
+						sQuery = sQuery.substring(iStart, iEnd);
+					}
+					sQuery = sQuery.trim();
+
+					oResult.platformName = Platforms.ERA5;
+
+					oResult.productName = extractValue(sQuery, "dataset");
+					oResult.productType = extractValue(sQuery, "productType");
+					oResult.productLevel = extractValue(sQuery, "pressureLevels");
+					oResult.sensorMode = extractValue(sQuery, "variables");
+					oResult.timeliness = extractValue(sQuery, "format");
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+		}
+	}
+
+	/**
+	 * Extract the value corresponding to the key from the simplifiedquery.
+	 * <br><br>
+	 * For example, using the query <i>AND dataset:reanalysis-era5-pressure-levels AND productType:Reanalysis AND pressureLevels:1 hPa AND variables:U V AND format:netcdf</i>
+	 * and the key <i>dataset</i>, it should return <i>reanalysis-era5-pressure-levels</i>.
+	 * 
+	 * @param sQuery the simplified query
+	 * @param sKey the key
+	 * @return the corresponding value
+	 */
+	private static String extractValue(String sQuery, String sKey) {
+		int iStart = -1;
+		int iEnd = -1;
+
+		if (sQuery.contains(sKey)) {
+			iStart = sQuery.indexOf(sKey);
+
+			iStart += (sKey.length() + 1);
+			iEnd = sQuery.indexOf(" AND ", iStart);
+
+			if (iEnd < 0) {
+				iEnd = sQuery.length();
+			}
+
+			String sType = sQuery.substring(iStart, iEnd);
+			sType = sType.trim();
+
+			return sType;
+		}
+
+		return null;
+	}
 	
 	/**
 	 * Parse Landsat filters
@@ -798,7 +889,7 @@ public abstract class QueryTranslator {
 					}
 					sQuery = sQuery.trim();
 
-					oResult.platformName = Platforms.PROVAV;
+					oResult.platformName = Platforms.PROBAV;
 
 					// check for product type
 					try {
@@ -1132,6 +1223,25 @@ public abstract class QueryTranslator {
 			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
 		}
 	}	
+	
+	
+	
+	/**
+	 * Parse Planet Data
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parsePlanet(String sQuery, QueryViewModel oResult) {
+		try {
+			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_PLANET)) {
+				
+				oResult.platformName = Platforms.PLANET;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+		}
+	}	
+	
 	/**
 	 * read a int from the query
 	 * 
@@ -1196,7 +1306,7 @@ public abstract class QueryTranslator {
 			}
 			//mission
 			if(sProductName.startsWith("S1")) {
-				oQueryViewModel.platformName = "Sentinel-1";
+				oQueryViewModel.platformName = Platforms.SENTINEL1;
 				
 				String[] asTypesA = {"RAW", "GRD", "SLC", "OCN"};
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
@@ -1205,7 +1315,7 @@ public abstract class QueryTranslator {
 					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
 			} else if (sProductName.startsWith("S2")) {
-				oQueryViewModel.platformName = "Sentinel-2";
+				oQueryViewModel.platformName = Platforms.SENTINEL2;
 				String[] asTypesA = {"L1C", "L2A"};
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
 					oQueryViewModel.productType="S2MSI" + sProductName.substring(8, 10);
@@ -1213,13 +1323,20 @@ public abstract class QueryTranslator {
 					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
 			} else if(sProductName.startsWith("S3A_") || sProductName.startsWith("S3B_")) {
-				oQueryViewModel.platformName = "Sentinel-3";
+				oQueryViewModel.platformName = Platforms.SENTINEL3;
 			} else if(sProductName.startsWith("LC08_")) {
-				oQueryViewModel.platformName = "Landsat8";
+				oQueryViewModel.platformName = Platforms.LANDSAT8;
 			}  else {
-				//todo add other platforms:
-				// Sentinel-5p, Copernicus-marine, Envisat, ...
-				Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+				
+				String sPlatformName = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProductName);
+				
+				if (!Utils.isNullOrEmpty(sPlatformName)) {
+					oQueryViewModel.platformName = sPlatformName;
+				}
+				else {
+					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+				}
+				
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: " + oE);

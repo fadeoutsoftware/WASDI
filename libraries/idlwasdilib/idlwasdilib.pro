@@ -2,10 +2,18 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.6.3
-; Last Update: 2021-05-06
+; IDL WASDI Lib Version 0.7.4
+; Last Update: 2022-01-01
 ;
 ; History
+; 0.7.4 - 2022-01-01
+;	added support to AUTO Data Provider
+;
+; 0.7.0 - 2021-11-24
+;	added getWorkspaceNameById
+;	adapted to new API
+;	added searchEOImages support to L8,ENVI, S3, S5P, VIIRS
+;
 ; 0.6.3 - 2021-05-06
 ;	support start by workspace id and copy to sftp relative path
 ;
@@ -849,6 +857,44 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
   
 END
 
+; converts a ws id in a ws name
+FUNCTION WASDIGETWORKSPACENAMEBYID, workspaceId
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+
+	workspaceName = "";
+
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/ws/byuser'
+
+	; Get the list of users workpsaces
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	; Search the Workspace with the desired id
+	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
+
+		oWorkspace = wasdiResult[i]
+
+		; Check the id property
+		sId = GETVALUEBYKEY(oWorkspace, 'workspaceID')
+
+		IF sId EQ workspaceId THEN BEGIN
+			; found it
+			sName = GETVALUEBYKEY(oWorkspace, 'workspaceName')
+			workspaceName = sName
+			BREAK
+		ENDIF
+	ENDFOR
+
+	IF (workspaceName EQ '') THEN BEGIN
+		print, 'WASDIGETWORKSPACENAMEBYID Workspace ', workspaceId, ' NOT FOUND'
+	END
+
+	; return the found id or ""
+	RETURN, workspaceName
+  
+END
+
 ; Get the URL of a Workspace
 FUNCTION WASDIGETWORKSPACEURLBYWSID, workspaceid
 
@@ -1358,27 +1404,31 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 	sessioncookie = token
 
 	; API url
-	UrlPath = '/wasdiwebserver/rest/processors/run?workspace='+activeworkspace+'&name='+sProcessorName+'&encodedJson='
+	UrlPath = '/wasdiwebserver/rest/processors/run?workspace='+activeworkspace+'&name='+sProcessorName
 
 	; Generate input file names JSON array
 	sParamsJSON = '{'
+	
+	IF aoParameters NE !NULL THEN BEGIN
 
-	; For each input name
-	FOREACH sKey , aoParameters.Keys() DO BEGIN
+		; For each input name
+		FOREACH sKey , aoParameters.Keys() DO BEGIN
 
-		sParamsJSON = sParamsJSON + '"' + sKey + '":'
-		
-		sValue = aoParameters[sKey]
-		
-		IF (sValue NE !NULL) THEN BEGIN
-			sParamsJSON = sParamsJSON + '"' + sValue + '" , '
-		END ELSE BEGIN
-			sParamsJSON = sParamsJSON + '"" , '
+			sParamsJSON = sParamsJSON + '"' + sKey + '":'
+			
+			sValue = aoParameters[sKey]
+			
+			IF (sValue NE !NULL) THEN BEGIN
+				sParamsJSON = sParamsJSON + '"' + sValue + '" , '
+			END ELSE BEGIN
+				sParamsJSON = sParamsJSON + '"" , '
+			END
+			
 		END
-		
-	END
 
-	sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+		sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+	END
+	
 	sParamsJSON = sParamsJSON + '}'
 	
 	IF (verbose EQ 1) THEN BEGIN
@@ -1387,11 +1437,8 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 	
 	;Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
-	sEncodedParametersJSON = oUrl->URLEncode(sParamsJSON)
-
-	UrlPath = UrlPath + sEncodedParametersJSON
-
-	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+	
+	wasdiResult = WASDIHTTPPOST(UrlPath, sParamsJSON, !NULL)
 
 	sProcessID = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
 	
@@ -1597,9 +1644,9 @@ FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asL
 END
 
 
-; Search Sentinel EO Images
+; Search EO Images
 ;
-; @param sPlatform Satellite Platform. Accepts "S1","S2"
+; @param sPlatform Satellite Platform. Accepts "S1","S2","S3","S5P","ENVI","L8","VIIRS"
 ; @param sDateFrom Starting date in format "YYYY-MM-DD"
 ; @param sDateTo End date in format "YYYY-MM-DD"
 ; @param dULLat Upper Left Lat Coordinate. Can be null.
@@ -1621,7 +1668,7 @@ END
 ; 		properties = < Another JSON Object containing other product-specific info >
 ; }
 ;
-FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage 
+FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage, sProvider
 
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
   
@@ -1632,14 +1679,32 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   
   sQuery = "( platformname:";
   
-  IF (sPlatform eq 'S2') THEN BEGIN
-	 sQuery = sQuery + "Sentinel-2 "
-  END ELSE BEGIN
+  IF (sPlatform eq 'S1') THEN BEGIN
 	 sQuery = sQuery + "Sentinel-1"
+  END ELSE IF (sPlatform eq 'S2') THEN BEGIN
+     sQuery = sQuery + "Sentinel-2"
+  END ELSE IF (sPlatform eq 'S3') THEN BEGIN
+     sQuery = sQuery + "Sentinel-3"
+  END ELSE IF (sPlatform eq 'S5P') THEN BEGIN
+     sQuery = sQuery + "Sentinel-5P"
+  END ELSE IF (sPlatform eq 'VIIRS') THEN BEGIN
+     sQuery = sQuery + "VIIRS"
+  END ELSE IF (sPlatform eq 'ENVI') THEN BEGIN
+     sQuery = sQuery + "Envisat"
+  END ELSE IF (sPlatform eq 'L8') THEN BEGIN
+     sQuery = sQuery + "Landsat-*"
+  END ELSE IF (sPlatform eq 'ERA5') THEN BEGIN
+     sQuery = sQuery + "ERA5"
+  END ELSE BEGIN
+	 sQuery = sQuery + sPlatform
   END
 
   IF (sProductType NE !NULL) THEN BEGIN
 	 sQuery = sQuery + " AND producttype:" + sProductType
+  END ELSE BEGIN
+	 IF (sPlatform eq 'VIIRS') THEN BEGIN
+		sQuery = sQuery + " AND producttype:VIIRS_1d_composite"
+	 END
   END
   
   IF (sSensorOperationalMode NE !NULL) THEN BEGIN
@@ -1649,6 +1714,10 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   IF (sCloudCoverage NE !NULL) THEN BEGIN
 	 sQuery = sQuery + " AND cloudcoverpercentage:" + sCloudCoverage
   END  
+  
+  IF (sProvider EQ !NULL) THEN BEGIN
+	 sProvider = 'LSA'
+  END
 		
   ; TODO: CloudCoverage for S2
   
@@ -1666,10 +1735,9 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   
   ;Close the second block
   sQuery = sQuery + ") "
-  
     
   IF ((dULLat NE !NULL) AND  (dULLon NE !NULL) AND (dLRLat NE !NULL) AND (dLRLon NE !NULL) ) THEN BEGIN
-	sFootPrint = '( footprint:"intersects(POLYGON(( ' + dULLon + " " +dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " +dLRLat + ')))") AND ';
+	sFootPrint = '( footprint:"intersects(POLYGON(( ' + STRTRIM(STRING(dULLon),2) + " " +STRTRIM(STRING(dLRLat),2) + "," + STRTRIM(STRING(dULLon),2) + " " + STRTRIM(STRING(dULLat),2) + "," + STRTRIM(STRING(dLRLon),2) + " " + STRTRIM(STRING(dULLat),2) + "," + STRTRIM(STRING(dLRLon),2) + " " + STRTRIM(STRING(dLRLat),2) + "," + STRTRIM(STRING(dULLon),2) + " " +STRTRIM(STRING(dLRLat),2) + ')))") AND ';
 	
 	sQuery = sFootPrint + sQuery;
   END
@@ -1683,9 +1751,9 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   oUrl = OBJ_NEW('IDLnetUrl')
   sEncodedQuery = oUrl->URLEncode(sQuery)
 
-  sQuery = "providers=LSA";
+  sQuery = "providers=" + sProvider;
   
-  UrlPath = UrlPath + '?' + sQuery
+  UrlPath = UrlPath + sQuery
     
   IF (verbose eq '1') THEN BEGIN
 	print, 'SEARCH BODY  ' , sQueryBody
@@ -1709,52 +1777,6 @@ FUNCTION GETFOUNDPRODUCTLINK, oFoundProduct
 	RETURN, GETVALUEBYKEY(oFoundProduct,'link')
 END
 
-
-; Import EO Image in WASDI
-FUNCTION WASDIIMPORTEOIMAGE, oEOImage
-
-	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
-
-	sessioncookie = token
-
-	; API url
-	UrlPath = '/wasdiwebserver/rest/filebuffer/download'
-
-	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
-	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
-
-	; Create a new url object
-	oUrl = OBJ_NEW('IDLnetUrl')
-	sEncodedLink = oUrl->URLEncode(sFileLink)
-	sEncodedBB = oUrl->URLEncode(sBoundingBox)
-
-	sProvider = "LSA"
-
-	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
-
-	UrlPath = UrlPath + '?' + sQuery
-
-	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
-
-	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-
-	sProcessID = ''
-
-	; get the process id
-	IF sResponse then BEGIN
-		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
-		sProcessID=sValue
-	ENDIF
-
-	sStatus = "ERROR"
-
-	; Wait for the process to finish
-	IF sProcessID ne '' then BEGIN
-		sStatus = WASDIWAITPROCESS(sProcessID)
-	ENDIF  
-
-	RETURN, wasdiResult
-END
 
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
@@ -2328,6 +2350,53 @@ FUNCTION WASDISETSUBPID, sProcessId, iSubPid
 END
 
 
+; Import EO Image in WASDI
+FUNCTION WASDIIMPORTEOIMAGE, oEOImage
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner, workspaceurl, urlschema, wsurlschema
+
+	sessioncookie = token
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/filebuffer/download'
+
+	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
+	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sName = GETVALUEBYKEY(oEOImage,'title')
+
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+	sEncodedLink = oUrl->URLEncode(sFileLink)
+	sEncodedBB = oUrl->URLEncode(sBoundingBox)
+	sEncodedName = oUrl->URLEncode(sName)
+
+	sProvider = "AUTO"
+
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+sProvider+"&workspace=" + activeworkspace + "&bbox=" + sEncodedBB + "&name="+sEncodedName
+
+	UrlPath = UrlPath + '?' + sQuery
+
+	wasdiResult = WASDIHTTPGET(UrlPath, !NULL)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse then BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID ne '' then BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF  
+
+	RETURN, wasdiResult
+END
 
 ; ASYNCH Import EO Image in WASDI
 FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
@@ -2341,13 +2410,17 @@ FUNCTION WASDIASYNCHIMPORTEOIMAGE, oEOImage
 
 	sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
 	sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+	sName = GETVALUEBYKEY(oEOImage,'title')
 
 	; Create a new url object
 	oUrl = OBJ_NEW('IDLnetUrl')
 	sEncodedLink = oUrl->URLEncode(sFileLink)
 	sEncodedBB = oUrl->URLEncode(sBoundingBox)
+	sEncodedName = oUrl->URLEncode(sName)
+	
+	sProvider = "AUTO"
 
-	sQuery = "fileUrl=" + sEncodedLink + "&provider=LSA&workspace=" + activeworkspace + "&bbox=" + sEncodedBB
+	sQuery = "fileUrl=" + sEncodedLink + "&provider="+ sProvider + "&workspace=" + activeworkspace + "&bbox=" + sEncodedBB + "&name="+sEncodedName
 
 	UrlPath = UrlPath + '?' + sQuery
 

@@ -1,6 +1,6 @@
 package wasdi.processors;
 
-public class UbuntuPython37ProcessorEngine extends DockerProcessorEngine {
+public class UbuntuPython37ProcessorEngine extends PipProcessorEngine {
 	
 	public UbuntuPython37ProcessorEngine() {
 		super();

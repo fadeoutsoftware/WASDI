@@ -12,8 +12,8 @@ import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -25,24 +25,15 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	@SuppressWarnings("unchecked")
 	public PROBAVProviderAdapter() {
 		super();
-
-		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("PROBAV");
-			
-			String sFile = oConfig.fileDescriptors;
-
-			m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		
+		m_sDataProviderCode = "PROBAV";
+		
 	}
 
 	public PROBAVProviderAdapter(LoggerWrapper logger) {
 		super(logger);
+		
+		m_sDataProviderCode = "PROBAV";
 	}
 
 	@Override
@@ -422,15 +413,42 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			m_oLogger.error("PROBAVProviderAdapter.getFileName: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 
 		return "";
 	}
 
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
+		try {
+			
+			String sFile = m_oDataProviderConfig.adapterConfig;
+			
+			if (new File(sFile).exists()) {
+				m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject(sFile);				
+			}
+
+		} catch (IOException e) {
+			m_oLogger.error("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
+		} catch (Exception e) {
+			m_oLogger.error("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
+		}
 		
+	}
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		if (sPlatformType.equals(Platforms.PROBAV)) {
+			if (isWorkspaceOnSameCloud()) {
+				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			}
+			else {
+				return DataProviderScores.DOWNLOAD.getValue();
+			}
+		}
+		
+		return 0;
 	}
 
 }

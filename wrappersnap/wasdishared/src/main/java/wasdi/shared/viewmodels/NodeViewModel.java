@@ -9,6 +9,7 @@ public class NodeViewModel {
 
     private String nodeCode;
     private String cloudProvider;
+    private String apiUrl;
     
 	public String getNodeCode() {
 		return nodeCode;
@@ -22,6 +23,6 @@ public class NodeViewModel {
 	public void setCloudProvider(String cloudProvider) {
 		this.cloudProvider = cloudProvider;
 	}
-
-	
+	public String getApiUrl() { return apiUrl; }
+	public void setApiUrl(String apiUrl) {this.apiUrl = apiUrl; }
 }

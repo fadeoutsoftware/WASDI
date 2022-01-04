@@ -3,9 +3,21 @@ package wasdi.dataproviders;
 import java.io.File;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
 public class VIIRSProviderAdapter extends ProviderAdapter {
+	
+	public VIIRSProviderAdapter() {
+		super();
+		m_sDataProviderCode = "VIIRS";
+	}
+	
+	public VIIRSProviderAdapter(LoggerWrapper logger) {
+		super(logger);
+		m_sDataProviderCode = "VIIRS";
+	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
@@ -64,8 +76,18 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
+	}
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		if (sPlatformType.equals(Platforms.VIIRS)) {
+			return DataProviderScores.DOWNLOAD.getValue();
+		}
+		
+		return 0;
 	}
 
 }

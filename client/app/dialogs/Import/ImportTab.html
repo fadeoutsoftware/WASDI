@@ -21,12 +21,30 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="row-v4"> 
+        <div class="col-v4-2" >
+            <label>{{'DIALOG_IMPORT_UPLOAD_STYLE'|translate}}</label>
+        </div>
+        <div class="col-v4-8">
+            <!--input type="text" name="style"  class="wasdi-input" style="width: 100%;" value="" title="" placeholder="{{'DIALOG_IMPORT_UPLOAD_STYLE'|translate}}" ng-model="m_oController.m_sStyle"-->
 
+            <wapdropdown list-of-values="m_oController.m_aoStylesMap"
+                selected-value="m_oController.m_oStyle"
+                enable-search-filter="true"
+                dropdown-name="Style">
+            </wapdropdown>
+
+        </div>
+    </div>
+
+    <div class="row-v4"> 
+        <div class="col-v4 container">
             <button type="button" ng-click="run(null)" class="btn btn-primary btn-wasdi"
-                    ng-disabled="m_oController.isFileChosen()" ng-show="m_oController.m_bIsUploading === false">
+            ng-disabled="m_oController.isFileChosen()" ng-show="m_oController.m_bIsUploading === false">
                 Upload file
             </button>
-
         </div>
 
     </div>

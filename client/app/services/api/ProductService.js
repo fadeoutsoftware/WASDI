@@ -62,7 +62,7 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
 
 
 
-        this.uploadFile = function (sWorkspaceInput, oBody, sName) {
+        this.uploadFile = function (sWorkspaceInput, oBody, sName, sStyle) {
 
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             var sUrl = this.APIURL;
@@ -75,7 +75,12 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
                 // headers: {'Content-Type': 'multipart/form-data'}
                 headers: { 'Content-Type': undefined }
             };
-            return this.m_oHttp.post(sUrl + '/product/uploadfile?workspace=' + sWorkspaceInput + '&name=' + sName, oBody, oOptions);
+
+            sUrl = sUrl + '/product/uploadfile?workspace=' + sWorkspaceInput + '&name=' + sName;
+            if (!utilsIsStrNullOrEmpty(sStyle)) {
+                sUrl = sUrl + '&style=' + sStyle;
+            }
+            return this.m_oHttp.post(sUrl, oBody, oOptions);
         };
     }]);
 

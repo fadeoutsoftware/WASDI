@@ -1,5 +1,6 @@
 package wasdi.shared.data;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -265,14 +266,22 @@ public class DownloadedFilesRepository extends MongoRepository {
     	
     	if (sWorkspaceId!=null && !sWorkspaceId.isEmpty()) {
     		Document oRegQuery = new Document();
-    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId+"/"));
+    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId + "\\"));
     		oRegQuery.append("$options", "i");
     		Document oFindQuery = new Document();
     		oFindQuery.append("filePath", oRegQuery);
     		aoFilters.add(oFindQuery);
+    		
+    		oRegQuery = new Document();
+    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId + "/"));
+    		oRegQuery.append("$options", "i");
+    		oFindQuery = new Document();
+    		oFindQuery.append("filePath", oRegQuery);
+    		aoFilters.add(oFindQuery);
+
     	}
     	    	
-    	Bson filter = Filters.and(aoFilters);
+    	Bson filter = Filters.or(aoFilters);
     	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection(m_sThisCollection).find() : getCollection(m_sThisCollection).find(filter);
     	
     	fillList(aoFiles, aoDocs, DownloadedFile.class);

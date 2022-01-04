@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -141,6 +142,15 @@ public class Utils {
 			}
 		}
 	}
+
+	/**
+	 * Format the date using the yyyyMMdd date format.
+	 * @param oDate the date to be formatted
+	 * @return the string containing the formatted date
+	 */
+	public static String formatToYyyyMMdd(Date oDate) {
+		return new SimpleDateFormat("yyyyMMdd").format(oDate);
+	}
 	
 	public static String getFormatDate(Date oDate) {
 
@@ -154,6 +164,27 @@ public class Utils {
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Parse the date into a Double fit for MongoDb.
+	 * @param sWasdiDate the date as a string in the yyyy-MM-dd HH:mm:ss format
+	 * @return the time in millis in the form of a Double
+	 */
+	public static Double getWasdiDateAsDouble(String sWasdiDate) {
+		if (sWasdiDate == null) {
+			return null;
+		}
+
+		Date oDate = getWasdiDate(sWasdiDate);
+
+		if (oDate == null) {
+			return null;
+		}
+
+		long lTimeInMillis = oDate.getTime();
+
+		return new Double(lTimeInMillis);
 	}
 	
 	public static long getProcessWorkspaceSecondsDuration(ProcessWorkspace oProcessWorkspace) {
@@ -440,5 +471,40 @@ public class Utils {
 	 */
 	public static int getRandomNumber(int iMin, int iMax) {
 		return iMin + new SecureRandom().nextInt(iMax - iMin);
-	}	
+	}
+
+	/**
+	 * Get a clone of the workspace name.
+	 * If the name ends with an ordinal (i.e. 1) it is increased (i.e. 2).
+	 * Otherwise, it appends the (1) termination
+	 * @param originalName the original name of the workspace
+	 * @return the new name of the workspace
+	 */
+	public static String cloneWorkspaceName(String originalName) {
+
+		if (originalName == null || originalName.isEmpty()) {
+			return "Untitled Workspace";
+		}
+
+		List<String> tokens = Arrays.asList(originalName.split("[\\(\\)]"));
+
+		String newName;
+
+		if (tokens.size() == 1) {
+			newName = originalName + "(1)";
+		} else {
+			String lastToken = tokens.get(tokens.size() - 1);
+
+			try {
+				int ordinal = Integer.parseInt(lastToken);
+				int incrementedOrdinal = ordinal + 1;
+				int index = originalName.lastIndexOf(lastToken);
+				newName = originalName.substring(0, index) + incrementedOrdinal + ")";
+			} catch (NumberFormatException e) {
+				newName = originalName + "(1)";
+			}
+		}
+
+		return newName;
+	}
 }

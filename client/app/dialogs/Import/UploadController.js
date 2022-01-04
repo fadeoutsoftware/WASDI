@@ -4,13 +4,14 @@
 
 var UploadController = (function() {
 
-    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService) {
+    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService,oFileBufferService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
         this.m_oCatalogService = oCatalogService;
         this.m_oConstantsService = oConstantsService;
         this.m_oProductService = oProductService;
+        this.m_oFileBufferService = oFileBufferService;
         this.m_aoListOfFiles = [];
         this.m_bIsAccountCreated = null;
         this.m_sEmailNewPassword="";
@@ -21,12 +22,30 @@ var UploadController = (function() {
         this.m_aoSelectedFiles = [];
         this.m_sTabSelected = "Upload";
         this.m_bIsUploading = false;
-        // this.m_bIsUploading = true;
         this.m_sWorkspaceId = oExtras.WorkSpaceId;
+        this.m_oStyle = "";
+        this.m_asStyles = [];
+        this.m_aoStylesMap = {};
 
         this.isCreatedAccountUpload();
 
         var oController = this;
+
+        this.m_oFileBufferService.getStyles().then(function(data){
+                if(data.status !== 200)
+                {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR GETTING STYLES");
+                    utilsVexCloseDialogAfter(5000,oDialog);
+                }
+                else {
+                    oController.m_asStyles = data.data;
+                    oController.m_aoStylesMap = oController.m_asStyles.map(name => ({name}))
+                }
+            },function(data){
+                var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR GETTING STYLES");
+                utilsVexCloseDialogAfter(5000,oDialog);
+        });
+
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
@@ -56,7 +75,14 @@ var UploadController = (function() {
 
         this.m_bIsUploading = true;
         var oController = this;
-        this.m_oProductService.uploadFile(this.m_sWorkspaceId,oBody,this.m_oFile[0].name)
+
+        var sStyle = "";
+
+        if (!utilsIsObjectNullOrUndefined(this.m_oStyle)) {
+            sStyle = this.m_oStyle.name;
+        }
+
+        this.m_oProductService.uploadFile(this.m_sWorkspaceId,oBody,this.m_oFile[0].name, sStyle)
             .then(function(data){
                 if(data.status !== 200)
                 {
@@ -111,11 +137,6 @@ var UploadController = (function() {
         this.m_bIsVisibleLoadIcon = true;
         var oController = this;
         this.m_oAuthService.updatePasswordUpload(this.m_sEmailNewPassword).then(function (data, status) {
-            // if (data != null) {
-            //     if (data != undefined) {
-            //
-            //     }
-            // }
             oController.m_bIsVisibleLoadIcon = false;
         },function (data, status) {
             if(data.data)
@@ -133,7 +154,7 @@ var UploadController = (function() {
         if(utilsIsObjectNullOrUndefined(this.m_sEmailNewUser) === true || utilsIsStrNullOrEmpty(this.m_sEmailNewUser) === true || utilsIsEmail(this.m_sEmailNewUser)=== false )
             return false;
         var oController = this;
-        // var sTestEmail = "a.corrado@fadeout.it";
+
         this.m_bIsVisibleLoadIcon = true;
         this.m_oAuthService.createAccountUpload(this.m_sEmailNewUser).then(function (data, status) {
             if (data.data !== null || status === 200) {
@@ -228,11 +249,7 @@ var UploadController = (function() {
             return false;
         this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId)
             .then(function (data, status) {
-            // if (data != null) {
-            //     if (data != undefined) {
-            //
-            //     }
-            // }
+
         },function (data, status) {
             if(data.data)
             {
@@ -250,6 +267,7 @@ var UploadController = (function() {
         'ConstantsService',
         'CatalogService',
         'ProductService',
+        'FileBufferService'
     ];
     return UploadController;
 })();

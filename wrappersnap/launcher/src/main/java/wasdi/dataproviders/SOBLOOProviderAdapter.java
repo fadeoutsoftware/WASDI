@@ -8,6 +8,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
@@ -17,7 +18,10 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
@@ -33,6 +37,15 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	private static final int s_iSLACKTOWAIT = 5;
 	
 
+	public SOBLOOProviderAdapter() {
+		super();
+		m_sDataProviderCode = "SOBLOO";
+	}
+	
+	public SOBLOOProviderAdapter(LoggerWrapper logger) {
+		super(logger);
+		m_sDataProviderCode = "SOBLOO";
+	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
@@ -347,8 +360,35 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	}
 	
 	@Override
-	public void readConfig() {
+	protected void internalReadConfig() {
 		
+	}
+
+	@Override
+	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
+		
+		
+		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2) 
+				|| sPlatformType.equals(Platforms.SENTINEL3)) {
+			Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+			
+			Date oNow = new Date();
+			
+			long lDistance = oNow.getTime() - oImageDate.getTime();
+			
+			if (lDistance> 2*30*24*60*60*1000) {
+				return DataProviderScores.LTA.getValue();
+			}
+			
+			if (isWorkspaceOnSameCloud()) {
+				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
+			}
+			else {
+				return DataProviderScores.DOWNLOAD.getValue();
+			}
+		}
+		
+		return 0;
 	}
 
 }

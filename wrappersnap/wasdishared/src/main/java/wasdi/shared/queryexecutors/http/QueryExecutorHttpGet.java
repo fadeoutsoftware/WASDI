@@ -133,8 +133,8 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: exception " + oEx.toString());
 		}
 		
-		Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Something went wrong, return empty list");
-		return new ArrayList<QueryResultViewModel>();
+		Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Something went wrong, return null list");
+		return null;
 	}
 
 }

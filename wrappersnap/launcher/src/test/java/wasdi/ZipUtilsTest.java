@@ -10,7 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -26,7 +26,7 @@ public class ZipUtilsTest {
 		File fileZip = new File(fileZipPath);
 		File destDir = new File(destDirPath);
 
-		WasdiFileUtils.unzipFile(fileZip, destDir);
+		new ZipFileUtils().unzip(fileZip.getAbsolutePath(), destDir.getAbsolutePath());
 	}
 
 	@Test
@@ -39,7 +39,7 @@ public class ZipUtilsTest {
 		FileOutputStream fos = new FileOutputStream(outputFilePath);
 		ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-		WasdiFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
+		ZipFileUtils.zipFile(fileToZip, fileToZip.getName(), zipOut);
 		zipOut.close();
 		fos.close();
 

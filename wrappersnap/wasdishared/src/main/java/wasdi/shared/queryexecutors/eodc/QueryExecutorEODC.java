@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
-import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -32,9 +31,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 	public QueryExecutorEODC() {
 		m_oQueryTranslator = new QueryTranslatorEODC();
 		m_oResponseTranslator = new ResponseTranslatorEODC();
-		
-		m_asSupportedPlatforms.add(Platforms.SENTINEL1);
-		m_asSupportedPlatforms.add(Platforms.SENTINEL2);		
+				
 	}
 
 
@@ -71,7 +68,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 		
 		if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-			return new ArrayList<QueryResultViewModel>();
+			return null;
 		}
 		
 		String sResult = null;
@@ -144,10 +141,11 @@ public class QueryExecutorEODC extends QueryExecutor {
 				// build result view model
 				aoResult = m_oResponseTranslator.translateBatch(sResult, bFullViewModel);
 				if(null==aoResult) {
-					throw new NullPointerException("QueryExecutorEODC.executeAndRetrieve: aoResult is null"); 
+					return null; 
 				}
 			} else {
 				Utils.debugLog("QueryExecutorEODC.executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
+				return null;
 			}
 			return aoResult;
 		} catch (Exception oE) {
