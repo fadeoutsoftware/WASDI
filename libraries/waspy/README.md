@@ -13,6 +13,9 @@ The source code can be found [here](https://github.com/fadeoutsoftware/WASDI/tre
 
 WASPY is the **WAS**DI **Py**thon Library. 
 
+
+**GET UPDATED DOCUMENTATION, TUTORIALS AND MORE [here](https://wasdi.readthedocs.io/en/latest/index.html)**
+
 ### Prerequisites:
 
 mandatory:
@@ -20,10 +23,6 @@ mandatory:
 - a [WASDI](http://www.wasdi.net) registered user (with a username/password, google users are not supported yet)
 - at least one workspace
 - some EO products in your workspace
-
-Optional:
-
-- [SNAP Python (snappy) interface](https://senbox.atlassian.net/wiki/spaces/SNAP/pages/50855941/Configure+Python+to+use+the+SNAP-Python+snappy+interface): this is not necessary but you may find these useful, especially for reading and writing images locally ([howto](https://senbox.atlassian.net/wiki/spaces/SNAP/pages/19300362/How+to+use+the+SNAP+API+from+Python)). Anyway, most of the SNAP functionalities are wrapped by WASDI, so don't worry.
 
 ### Installation
 
