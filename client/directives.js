@@ -12,6 +12,7 @@ require('./app/directives/Toggle/ToggleSwitchDirective.js');
 //require('./app/directives/image_editor/ImageEditorController.js');
 require('./app/directives/DropDownMenu/DropDownMenuDirective.js');
 require('./app/directives/wasdiApps/wapTextBox/wapTextBox.js');
+require('./app/directives/wasdiApps/wapNumericBox/wapNumericBox.js');
 require('./app/directives/wasdiApps/wapSelectArea/wapSelectArea.js');
 require('./app/directives/wasdiApps/wapDateTimePicker/wapDateTimePicker.js');
 require('./app/directives/wasdiApps/wapProductList/wapProductList.js');
