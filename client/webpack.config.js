@@ -39,7 +39,7 @@ module.exports = {
         // Watch out for this one the app.js used was required to be migrated,
         // excluding some unused js controllers and services.
         // This file resides in /client directory and is the one used
-        // the declare the app and its dependencies.
+        // to declare the app and its dependencies.
         // The legacy one is in /client/app !
         app: {
             import: './app.js',
