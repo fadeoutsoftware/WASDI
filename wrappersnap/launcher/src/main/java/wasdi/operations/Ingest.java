@@ -100,7 +100,7 @@ public class Ingest extends Operation {
                     if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
 
                         // May be.
-                        m_oLocalLogger.info("Ingest.executeOperation: File to ingest looks can be a zipped shape file, try to unzip");
+                        m_oLocalLogger.info("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
 
                         // Unzip
                         ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
