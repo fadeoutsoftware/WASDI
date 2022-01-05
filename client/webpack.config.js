@@ -23,11 +23,12 @@ module.exports = {
         vendor: {
             import: './vendor.js'
         },
+        // this entry includes all the services declared in wasdi.
+        // Each service must declare a global variable under
+        // window scope, in order to work
         services:{
             import :'./services.js'
         },
-
-
         // this entry include all controllers
         // each controller must be declared inside the window object in order to be
         // initialized as module by app.js
@@ -61,7 +62,6 @@ module.exports = {
         // Bundle entry contains CSS loaded throught style loader and
         // WASDI Services
         bundle: './index.js',
-
     },
     module: {
         rules: [
