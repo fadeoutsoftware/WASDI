@@ -77,9 +77,15 @@ public class Ingest extends Operation {
             // Usually, we do not unzip after the copy
             boolean bUnzipAfterCopy = false;
 
+            WasdiProductReader oReadProduct = null;
+            ProductViewModel oImportProductViewModel = null;
             // Try to read the Product view Model
-			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
-			ProductViewModel oImportProductViewModel = oReadProduct.getProductViewModel();
+            try {
+				oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
+				oImportProductViewModel = oReadProduct.getProductViewModel();
+            } catch (Exception oE) {
+            	m_oLocalLogger.error("Ingest.executeOperation: cannot read product. Maybe file needs unzipping?");
+			}
 
             String sDestinationFileName = oFileToIngestPath.getName();
 
