@@ -1,4 +1,6 @@
-import './node_modules/font-awesome/css/font-awesome.min.css'; // test with reference in node_modules
+//import './node_modules/font-awesome/css/font-awesome.min.css'; // test with reference in node_modules
+
+import './node_modules/@fortawesome/fontawesome-free/css/all.min.css';
 import './node_modules/jstree/dist/themes/default/style.min.css';
 import './app/fonts/astronaut/stylesheet.css';
 import './app/fonts/starlight/stylesheet.css';
