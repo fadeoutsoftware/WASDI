@@ -10,15 +10,17 @@ angular.module('wasdi.wapDateTimePicker', [])
             // * Two-way binding ('=' or '=?') *
             // * Function binding ('&' or '&?') *
             bindToController: {
-                dateTime : '='
+                dateTime : '=',
+                tooltip:'='
             },
             template: `
-            <div class="date-directive">
+            <div class="date-directive" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right">
                 <div class=" time-picker-container ">
                     <div    class="input-group"
                         moment-picker="$ctrl.dateTime"
                         format="YYYY-MM-DD"
-                        today="true">
+                        today="true"
+                        >
 
                         <input  class="form-control"
                             placeholder="Select Date"

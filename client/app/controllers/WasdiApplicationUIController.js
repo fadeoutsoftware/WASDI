@@ -363,6 +363,11 @@ var WasdiApplicationUIController = (function () {
                     }
                 }
 
+                //checks wether the function exists 
+                if (typeof oElement.isValid === "function") { 
+                    if (!oElement.isValid()) return false;
+                }
+
 
             }
         }

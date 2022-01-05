@@ -14,6 +14,8 @@ function ViewElementFactory() {
         if (utilsIsObjectNullOrUndefined(oControl)) return oViewElement;
         // If mandatory is not set, assume false
         if (utilsIsObjectNullOrUndefined(oControl.required)) oControl.required = false;
+        // // adding an optional tooltip to all the possible components
+        //
 
         // Find the right type and create the element
         if (oControl.type === "textbox") {
@@ -60,7 +62,28 @@ function ViewElementFactory() {
         }
         else if (oControl.type === "bbox") {
             // Bounding Box from Map
+
             oViewElement = new SelectArea();
+            //oViewElement.maxarea = oControl.maxarea;
+
+            // oViewElement.maxarea= oControl.maxArea;
+            // oViewElement.maxside  = oControl.maxSide;
+            // oViewElement.maxratioSide  = oControl.maxRatioSide;
+            if (!utilsIsObjectNullOrUndefined(oControl.maxArea)) {
+                oViewElement.maxArea = oControl.maxArea;
+            }
+            if (!utilsIsObjectNullOrUndefined(oControl.maxSide)) {
+                oViewElement.maxSide = oControl.maxSide;
+            }
+
+            if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)) {
+                oViewElement.maxRatioSide = oControl.maxRatioSide;
+            }
+
+
+
+
+
         }
         else if (oControl.type === "date") {
             oViewElement = new DateTimePicker();
@@ -106,36 +129,52 @@ function ViewElementFactory() {
         else {
             oViewElement = new TextBox();
         }
+        if (!utilsIsObjectNullOrUndefined(oControl.tooltip)) {
+            oViewElement.tooltip = oControl.tooltip;
+        }
 
-            oViewElement.type = oControl.type;
-            oViewElement.label = oControl.label;
-            oViewElement.paramName = oControl.param;
-            oViewElement.required = oControl.required
+        oViewElement.type = oControl.type;
+        oViewElement.label = oControl.label;
+        oViewElement.paramName = oControl.param;
+        oViewElement.required = oControl.required
 
-            return oViewElement;
+        return oViewElement;
     }
 
     this.getTabElements = function (oTab) {
 
-            let aoTabElements = [];
+        let aoTabElements = [];
 
-            for (let iControl = 0; iControl < oTab.controls.length; iControl++) {
-                let oControl = oTab.controls[iControl];
+        for (let iControl = 0; iControl < oTab.controls.length; iControl++) {
+            let oControl = oTab.controls[iControl];
 
-                let oViewElement = this.createViewElement(oControl);
+            let oViewElement = this.createViewElement(oControl);
 
-                aoTabElements.push(oViewElement);
-            }
-
-            return aoTabElements;
+            aoTabElements.push(oViewElement);
         }
+
+        return aoTabElements;
+    }
+}
+
+/**
+ * Basic class for UI components
+ */
+class UIComponent {
+    constructor() {
+        //TODO remove text and defaults to empty string
+        this.tooltip = "";
     }
 
-    /**
-     * Search EO Image Control Class
-     * @constructor
-     */
-    let SearchEOImage = function () {
+}
+
+/**
+ * Search EO Image Control Class
+ * @constructor
+ */
+class SearchEOImage extends UIComponent {
+    constructor() {
+        super();
         this.oTableOfProducts = new ProductList();
         this.oStartDate = new DateTimePicker();
         this.oEndDate = new DateTimePicker();
@@ -174,12 +213,16 @@ function ViewElementFactory() {
             return "";
         }
     };
+}
 
-    /**
-     * Product List Control Class
-     * @constructor
-     */
-    let ProductList = function () {
+/**
+ * Product List Control Class
+ * @constructor
+ */
+class ProductList extends UIComponent {
+    constructor() {
+        super();
+
         this.aoProducts = [];
         this.isAvailableSelection = false;
         this.isSingleSelection = true;
@@ -202,12 +245,17 @@ function ViewElementFactory() {
         }
 
     };
+}
 
-    /**
-     * Date Time Picker Control Class
-     * @constructor
-     */
-    let DateTimePicker = function () {
+/**
+ * Date Time Picker Control Class
+ * @constructor
+ */
+class DateTimePicker extends UIComponent {
+    constructor() {
+        super();
+
+
         this.m_sDate = null;
 
         /**
@@ -217,8 +265,7 @@ function ViewElementFactory() {
         this.getValue = function () {
             if (this.m_sDate) {
                 return this.m_sDate;
-            }
-            else {
+            } else {
                 return "";
             }
         }
@@ -230,19 +277,27 @@ function ViewElementFactory() {
         this.getStringValue = function () {
             if (this.m_sDate) {
                 return this.m_sDate;
-            }
-            else {
+            } else {
                 return "";
             }
         }
 
     };
+}
 
-    /**
-     * Select Area (bbox) Control Class
-     * @constructor
-     */
-    let SelectArea = function () {
+
+
+/**
+ * Select Area (bbox) Control Class
+ * @constructor
+ */
+class SelectArea extends UIComponent {
+    constructor() {
+        super();
+        // using zero as default to relax the constraints
+        this.maxArea = 0;
+        this.maxSide = 0;
+        this.maxRatioSide = 0;
         this.oBoundingBox = {
             northEast: "",
             southWest: ""
@@ -280,15 +335,23 @@ function ViewElementFactory() {
                 return "";
             }
         }
+        this.isValid = function(){
+            // this checks that the value assigned is different from the default.
+            return this.oBoundingBox.northEast != "" && this.oBoundingBox.southWest != "" ; 
+        }
     };
+}
 
 
 
-    /**
-     * Text Box Control Class
-     * @constructor
-     */
-    let TextBox = function () {
+/**
+ * Text Box Control Class
+ * @constructor
+ */
+class TextBox extends UIComponent {
+    constructor() {
+        super();
+
         this.m_sText = "";
 
         /**
@@ -307,61 +370,101 @@ function ViewElementFactory() {
             return this.m_sText;
         }
     };
+}
 /**
  * Numeric Control Class
  * @constructor
  */
- let NumericBox = function () {
-    this.m_sValue = 0;
-    this.m_sText = this.m_sValue.toString();
+class NumericBox extends UIComponent {
+    constructor() {
+        super();
 
-    /**
-     * Get the value of the numericbox
-     * @returns {string} Value in the numericbox
-     */
-    this.getValue = function () {
-        return parseFloat(this.m_sText);
-    }
+        this.m_sValue = 0;
+        this.m_sText = this.m_sValue.toString();
 
-    /**
-     * Get the string from the numericbox
-     * @returns {string} String in the numericbox
-     */
-    this.getStringValue = function () {
-        return this.m_sValue.toString();
+        /**
+         * Get the value of the numericbox
+         * @returns {string} Value in the numericbox
+         */
+        this.getValue = function () {
+            return parseFloat(this.m_sText);
+        }
+
+        /**
+         * Get the string from the numericbox
+         * @returns {string} String in the numericbox
+         */
+        this.getStringValue = function () {
+            return this.m_sValue.toString();
+        }
+    };
+}
+
+/**
+ * Drop Down Control Class
+ * @constructor
+ */
+class DropDown extends UIComponent {
+    constructor() {
+        super();
+
+        this.asListValues = [];
+        this.sSelectedValues = "";
+        this.oOnClickFunction = null;
+        this.bEnableSearchFilter = true;
+        this.sDropdownName = "";
+
+        /**
+         * Get the selected value
+         * @returns {string}
+         */
+        this.getValue = function () {
+            return this.sSelectedValues.name;
+        }
+
+        /**
+         * Get the selected value
+         * @returns {string}
+         */
+        this.getStringValue = function () {
+            return this.sSelectedValues.name;
+        }
     }
 };
 
 
-    /**
-     * Hidden Control Class
-     * @constructor
-     */
-    let Hidden = function () {
-        this.m_oValue = "";
 
-        /**
-         * Get the value of the control
-         * @returns {string} String in the control
-         */
-        this.getValue = function () {
-            return this.m_oValue;
-        }
-
-        /**
-         * Get the value of the control
-         * @returns {string} String in the control
-         */
-        this.getStringValue = function () {
-            return String(this.m_oValue);
-        }
-    };
+/**
+ * Hidden Control Class
+ * @constructor
+ */
+let Hidden = function () {
+    this.m_oValue = "";
 
     /**
-     * Check box Control Class
-     * @constructor
+     * Get the value of the control
+     * @returns {string} String in the control
      */
-    let CheckBox = function () {
+    this.getValue = function () {
+        return this.m_oValue;
+    }
+
+    /**
+     * Get the value of the control
+     * @returns {string} String in the control
+     */
+    this.getStringValue = function () {
+        return String(this.m_oValue);
+    }
+};
+
+/**
+ * Check box Control Class
+ * @constructor
+ */
+class CheckBox extends UIComponent {
+    constructor() {
+        super();
         this.m_bValue = true;
 
         /**
@@ -387,41 +490,19 @@ function ViewElementFactory() {
         }
 
     };
-
-    /**
-     * Drop Down Control Class
-     * @constructor
-     */
-    let DropDown = function () {
-        this.asListValues = [];
-        this.sSelectedValues = "";
-        this.oOnClickFunction = null;
-        this.bEnableSearchFilter = true;
-        this.sDropdownName = "";
-
-        /**
-         * Get the selected value
-         * @returns {string}
-         */
-        this.getValue = function () {
-            return this.sSelectedValues.name;
-        }
-
-        /**
-         * Get the selected value
-         * @returns {string}
-         */
-        this.getStringValue = function () {
-            return this.sSelectedValues.name;
-        }
-    };
+}
 
 
-    /**
-     * Products Combo Control Class
-     * @constructor
-     */
-    let ProductsCombo = function (bShowExt) {
+
+
+/**
+ * Products Combo Control Class
+ * @constructor
+ */
+class ProductsCombo extends UIComponent {
+    constructor(bShowExt) {
+        super();
+
         this.asListValues = [];
         this.sSelectedValues = "";
         this.oOnClickFunction = null;
@@ -441,12 +522,16 @@ function ViewElementFactory() {
             return this.sSelectedValues.name;
         }
     };
+}
 
-    /**
-     * Slider for a numeric input
-     * @constructor
-     */
-    let Slider = function () {
+/**
+ * Slider for a numeric input
+ * @constructor
+ */
+class Slider extends UIComponent {
+    constructor() {
+        super();
+
         this.m_iMin = 0;
         this.m_iMax = 10;
         this.m_iValue = 5;
@@ -468,3 +553,4 @@ function ViewElementFactory() {
         }
 
     }
+}
