@@ -2,7 +2,7 @@
 WASDI : Web Advanced Space Developer Interface
 ==================================================
 
-WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers). 
+WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers), private companies (i.e. insurance, agricolture). 
 
 WASDI allows researchers to gather satellite data, in particular the Sentinel ones, display them on-line, run algorithms, displaying and evaluating the results, and allows to share these projects among different users.
 
