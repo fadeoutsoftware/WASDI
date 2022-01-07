@@ -47,7 +47,7 @@ public class ShapeFileUtils {
 					return false;
 				}
 				
-				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
+				if (WasdiFileUtils.isShapeFile(oZipEntry.getName())) {
 					return true;
 				}
 				iFileCounter++;
