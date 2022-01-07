@@ -9,9 +9,11 @@ Python Landsat Tutorial
 
 Requirements
 ---------------------------
-This tutorial is designed to document the handling of Landsat 8 files with WASDI: is out of the scope of this tutorial to configure your own environment or to go in details of Landsat 8 mision.
-We use PyCharm free tool, but the code can be ran on every different Python environment.
+This tutorial is designed to show how to work with Landsat 8 files in WASDI: is out of the scope of this tutorial to configure your own environment or to go in details of Landsat 8 mission.
+In this tutorial we use PyCharm as a free Python Development tool, but the code can be ran on every different Python environment.
+
 This tutorial requires gdal working in your python env: we know this can be not easy.
+
 For Windows 10, we suggest to follow this tutorial:
 
 https://opensourceoptions.com/blog/how-to-install-gdal-for-python-with-pip-on-windows/
@@ -75,7 +77,7 @@ Create python file
 
 .. image:: _static/python_tutorial_images/createMyProcessor_py.png
 
-Create myProcessor.py
+Call it myProcessor.py
 
 .. image:: _static/python_tutorial_images/createFile.png
 
@@ -105,7 +107,7 @@ Come back in the edit section, and check that WASDI has been able to fetch the i
 
 .. image:: _static/python_l8_tutorial_images/imageInWorkspace.jpg
 
-Take note of the file you imported!! We will need it later!! For this tutorial we assume:
+Take note of the file you imported, we will need it later. For this tutorial we assume:
 
 LC08_L1GT_196029_20211227_20211227_01_RT
 
@@ -115,16 +117,15 @@ Leave the browser open on that page, we’ll need it later on.
 
 First lines
 ----------------------
-Let's begin by editing the config.json file. It's a JSON file, containing the user credentials and some fundamental parameters to get you started:
+Let's begin by editing the config.json file. It's a JSON file, containing the user credentials and some fundamental parameters to get you started (see :doc:`Wasdi Libraries Concepts </LibsConcepts>`):
 
 .. code-block:: JSON
-
- {
-   "USER": "your user name here",
-   "PASSWORD": "your password here",
-   "PARAMETERSFILEPATH": "./params.json"
-   "WORKSPACE": "AdvancedTutorialTest"
- }
+    {
+      "USER": "your user name here",
+      "PASSWORD": "your password here",
+      "PARAMETERSFILEPATH": "./params.json"
+      "WORKSPACE": "AdvancedTutorialTest"
+    }
  
 NOTE: please, keep this file for yourself. You should never give this file to anyone else, and you do not need to upload to WASDI, as we'll see later on. You just need this file in your project for working with the WASDI python library.
 Use this file to change the workspace where you want to work.
@@ -133,12 +134,11 @@ Let's then edit params.json file. It's a JSON file that represents the inputs ne
 params.json is where you declare and valorize your inputs. The same inputs will be avaiable in the WASDI Web Interface when we will publish the processor.
 
 .. code-block:: JSON
-
- {
-   "BANDS": ["B5", "B4"],
-    "RESOLUTION": "30",
-    "L8FILE": "LC08_L1GT_196029_20211227_20211227_01_RT.zip"
- }
+    {
+      "BANDS": ["B5", "B4"],
+       "RESOLUTION": "30",
+       "L8FILE": "LC08_L1GT_196029_20211227_20211227_01_RT.zip"
+    }
 
 Now, open myProcessor.py, create a main and a method called run. The latter is required for WASDI to work (more on that later on).
 
@@ -151,7 +151,7 @@ After that, you can include as many python files as you need, no matter if they 
 
 The main method will initiate the WASDI library and call the run method:
 
-.. code-block::
+.. code-block:: python
 
    import wasdi
    
@@ -175,26 +175,25 @@ Let's debug to see the effects of this. Note: if a file main.py was created auto
 If the setup is correct so far, we should see the output from the wasdi library that shows the initialization has gone well. Something like this:
 
 .. code-block:: python
-
- [INFO] _loadParams: wasdi could not load param file. That is fine, you can still load it later, don't worry
- [INFO] waspy.init: returned session is: 0d3f3ef1-f4c3-4202-9015-6ca17fc21cc7
- [INFO] waspy.init: WASPY successfully initiated :-)
- [INFO] waspy.printStatus: user: username@email.address
- [INFO] waspy.printStatus: password: ***********
- [INFO] waspy.printStatus: session id: 0d3f3ef1-f4c3-4202-9015-6ca17fc21cc7
- [INFO] waspy.printStatus: active workspace: 4f541d2c-4b29-445b-9869-9c8d185932ce
- [INFO] waspy.printStatus: workspace owner: username@email.address
- [INFO] waspy.printStatus: parameters file path: [...]/params.json
- [INFO] waspy.printStatus: base path: C:\Users\username\.wasdi\
- [INFO] waspy.printStatus: download active: True
- [INFO] waspy.printStatus: upload active: True
- [INFO] waspy.printStatus: verbose: True
- [INFO] waspy.printStatus: param dict: {'BANDS': ['B5', 'B4'], 'RESOLUTION': '30', 'L8FILE': 'LC08_L1GT_196029_20211227_20211227_01_RT.zip'}
- [INFO] waspy.printStatus: proc id:
- [INFO] waspy.printStatus: base url: http://www.wasdi.net/wasdiwebserver/rest
- [INFO] waspy.printStatus: is on server: False
- [INFO] waspy.printStatus: workspace base url: http://www.wasdi.net/wasdiwebserver/rest
- [INFO] waspy.printStatus: session is valid :-)
+    [INFO] _loadParams: wasdi could not load param file. That is fine, you can still load it later, don't worry
+    [INFO] waspy.init: returned session is: 0d3f3ef1-f4c3-4202-9015-6ca17fc21cc7
+    [INFO] waspy.init: WASPY successfully initiated :-)
+    [INFO] waspy.printStatus: user: username@email.address
+    [INFO] waspy.printStatus: password: ***********
+    [INFO] waspy.printStatus: session id: 0d3f3ef1-f4c3-4202-9015-6ca17fc21cc7
+    [INFO] waspy.printStatus: active workspace: 4f541d2c-4b29-445b-9869-9c8d185932ce
+    [INFO] waspy.printStatus: workspace owner: username@email.address
+    [INFO] waspy.printStatus: parameters file path: [...]/params.json
+    [INFO] waspy.printStatus: base path: C:\Users\username\.wasdi\
+    [INFO] waspy.printStatus: download active: True
+    [INFO] waspy.printStatus: upload active: True
+    [INFO] waspy.printStatus: verbose: True
+    [INFO] waspy.printStatus: param dict: {'BANDS': ['B5', 'B4'], 'RESOLUTION': '30', 'L8FILE': 'LC08_L1GT_196029_20211227_20211227_01_RT.zip'}
+    [INFO] waspy.printStatus: proc id:
+    [INFO] waspy.printStatus: base url: http://www.wasdi.net/wasdiwebserver/rest
+    [INFO] waspy.printStatus: is on server: False
+    [INFO] waspy.printStatus: workspace base url: http://www.wasdi.net/wasdiwebserver/rest
+    [INFO] waspy.printStatus: session is valid :-)
 
 If you have the same situation, we are configured and ready to start!!
 
@@ -364,7 +363,7 @@ NDVI = NIR-RED/NIR+RED
        # Return the name of our NDVI create file
        return sNDVIOutputFile
 
-This tutorial shows an NDVI as a sample, but is clear that with this technique you can maniupalte L8 data to fit your needs.
+This tutorial shows an NDVI as a sample, but is clear that with this technique you can manipulate L8 data to fit your needs.
 
 Main Function
 -----------------
@@ -411,7 +410,7 @@ In the same way, when you add the file to WASDI, the lib will updload for your r
 Now that the core of our processor is done, lets make it a little bit more WASDI-integrated.
 We want to give some feedback to the user while the app is runnig and we do this using:
 
-wasdi.wasdiLog: locally just a print, when on the server, it sends the logs to the web user interface
+wasdi.wasdiLog: locally just a print to console, when on the server, it sends the logs to the web user interface
 wasdi.updateProgressPerc: when on the server, updates the progress bar of the processor
 wasdi.setPayload: allows to save a user-defined object associated to the processor run
 
@@ -455,6 +454,5 @@ wasdi.setPayload: allows to save a user-defined object associated to the process
        # Close the process setting the status to DONE
        wasdi.updateStatus("DONE", 100)
 
-
-Have fun, and `let us know your thoughts <http://fadeout.it/#contact>`_
+Welcome to Space, Have fun!
 

@@ -1765,6 +1765,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
 
     :param sProvider: WASDI Data Provider to query (AUTO|LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = AUTO.
+    
+    :param oBoundingBox: alternative to the float lat-lon corners: an object expected to have these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
 
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
