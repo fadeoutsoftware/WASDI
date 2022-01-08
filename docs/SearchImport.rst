@@ -54,42 +54,42 @@ It is a single function with different options.
 
 .. code-block:: python
 
-def searchEOImages(sPlatform, sDateFrom, sDateTo,
-                   fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
-                   sProductType=None, iOrbitNumber=None,
-                   sSensorOperationalMode=None, sCloudCoverage=None,
-                   sProvider=None, oBoundingBox=None):
-    """
-    Search EO images
+	def searchEOImages(sPlatform, sDateFrom, sDateTo,
+					   fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
+					   sProductType=None, iOrbitNumber=None,
+					   sSensorOperationalMode=None, sCloudCoverage=None,
+					   sProvider=None, oBoundingBox=None):
+		"""
+		Search EO images
 
-    :param sPlatform: satellite platform:(S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5)
+		:param sPlatform: satellite platform:(S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5)
 
-    :param sDateFrom: inital date YYYY-MM-DD
+		:param sDateFrom: inital date YYYY-MM-DD
 
-    :param sDateTo: final date YYYY-MM-DD
+		:param sDateTo: final date YYYY-MM-DD
 
-    :param fULLat: Latitude of Upper-Left corner
+		:param fULLat: Latitude of Upper-Left corner
 
-    :param fULLon: Longitude of Upper-Left corner
+		:param fULLon: Longitude of Upper-Left corner
 
-    :param fLRLat: Latitude of Lower-Right corner
+		:param fLRLat: Latitude of Lower-Right corner
 
-    :param fLRLon: Longitude of Lower-Right corner
+		:param fLRLon: Longitude of Lower-Right corner
 
-    :param sProductType: type of EO product; Can be null. FOR "S1" -> "SLC","GRD", "OCN". FOR "S2" -> "S2MSI1C","S2MSI2Ap","S2MSI2A". FOR "VIIRS" -> "VIIRS_1d_composite","VIIRS_5d_composite". FOR "L8" -> "L1T","L1G","L1GT","L1GS","L1TP". For "ENVI" -> "ASA_IM__0P", "ASA_WS__0P"
+		:param sProductType: type of EO product; Can be null. FOR "S1" -> "SLC","GRD", "OCN". FOR "S2" -> "S2MSI1C","S2MSI2Ap","S2MSI2A". FOR "VIIRS" -> "VIIRS_1d_composite","VIIRS_5d_composite". FOR "L8" -> "L1T","L1G","L1GT","L1GS","L1TP". For "ENVI" -> "ASA_IM__0P", "ASA_WS__0P"
 
-    :param iOrbitNumber: orbit number
+		:param iOrbitNumber: orbit number
 
-    :param sSensorOperationalMode: sensor operational mode
+		:param sSensorOperationalMode: sensor operational mode
 
-    :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
+		:param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
 
-    :param sProvider: WASDI Data Provider to query (AUTO|LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = AUTO.
-	
-	:param oBoundingBox: alternative to the float lat-lon corners: an object expected to have these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
+		:param sProvider: WASDI Data Provider to query (AUTO|LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = AUTO.
+		
+		:param oBoundingBox: alternative to the float lat-lon corners: an object expected to have these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
 
-    :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
-    """
+		:return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
+		"""
 	
 The only mandatory params are:
 *sPlatform: a string with the code of the platform. Each search is done for a single platform. S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5 are the actually supported platforms
@@ -200,7 +200,7 @@ This means you can access the file name with this code:
 
 .. code-block:: python
 
-	aoFound = wasdi.searchEOImages("S1", sDateFrom="2021-02-01", sDateTo="2021-03-01")
+	aoFound = wasdi.searchEOImages("S1", sDateFrom="2021-02-01", sDateTo="2021-02-02", sProductType="GRD", fULLat=44.5, fULLon=8.5, fLRLat=44.0, fLRLon=9.0)
 	if len(aoFound) > 0:
 		wasdi.wasdiLog("Image 0 name: " + aoFound[0]["fileName"]
 
@@ -219,8 +219,8 @@ First of all fill your params.json file:
 	{
 	  "bbox": {
 		"northEast": {
-		  "lat": 30.3,
-		  "lng": -95.6
+		  "lat": 30.0,
+		  "lng": -96.0
 		},
 		"southWest": {
 		  "lat": 29.5,
@@ -228,7 +228,7 @@ First of all fill your params.json file:
 		}
 	  },
 	  "date": "2020-10-09",
-	  "searchdays": 30,
+	  "searchdays": 10,
 	  "provider": "AUTO",
 	  "maxCloud": 30,
 	  "s1Type": "GRD"
@@ -255,7 +255,7 @@ The full code is here:
 			# Read the provider
 			sProvider = wasdi.getParameter("provider")
 			# Read the number of days we want to search back from reference date
-			iDays = wasdi.getParameter("searchdays", 20)
+			iDays = wasdi.getParameter("searchdays", 10)
 			# Cloud Cover
 			iMaxCloud = wasdi.getParameter("maxCloud", 30)
 			# S1 Product Type
@@ -312,7 +312,7 @@ The full code is here:
 			aoFound = wasdi.searchEOImages("S2", sDateFrom=sStartDate, sDateTo=sEndDate, sCloudCoverage=sCloudCoverage, sProvider=sProvider, oBoundingBox=oBbox)
 
 			# Log results, as before
-			wasdi.wasdiLog("S5P found " + str(len(aoFound)))
+			wasdi.wasdiLog("S2 found " + str(len(aoFound)))
 
 			iCount = 0
 
@@ -327,7 +327,7 @@ The full code is here:
 			aoFound = wasdi.searchEOImages("S3", sDateFrom=sStartDate, sDateTo=sEndDate, sProvider=sProvider, oBoundingBox=oBbox)
 
 			# Log results, as before
-			wasdi.wasdiLog("S5P found " + str(len(aoFound)))
+			wasdi.wasdiLog("S3 found " + str(len(aoFound)))
 
 			iCount = 0
 
@@ -457,7 +457,7 @@ The following python app make a search of S1 images and import the results in sy
 			# Read the provider
 			sProvider = wasdi.getParameter("provider")
 			# Read the number of days we want to search back from reference date
-			iDays = wasdi.getParameter("searchdays", 20)
+			iDays = wasdi.getParameter("searchdays", 10)
 			# Cloud Cover
 			iMaxCloud = wasdi.getParameter("maxCloud", 30)
 			# S1 Product Type
@@ -544,7 +544,7 @@ The same work can be done in an asynch way:
 			# Read the provider
 			sProvider = wasdi.getParameter("provider")
 			# Read the number of days we want to search back from reference date
-			iDays = wasdi.getParameter("searchdays", 20)
+			iDays = wasdi.getParameter("searchdays", 10)
 			# Cloud Cover
 			iMaxCloud = wasdi.getParameter("maxCloud", 30)
 			# S1 Product Type
@@ -621,3 +621,5 @@ The same work can be done in an asynch way:
 		run()
 
 Note that, while you are importing images, if you open the workspace on WASDI, you will see your operations on going.
+
+Welcome to space.
