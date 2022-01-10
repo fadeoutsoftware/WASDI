@@ -13,22 +13,34 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
     this.m_oOpenSearchService.getListOfProvider().then(function (data) {
         if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.length > 0)
         {
+
+            oController.m_aListOfProvider[0] = {
+                "name": "AUTO",
+                "totalOfProducts":0,
+                "totalPages":1,
+                "currentPage":1,
+                "productsPerPageSelected":10,
+                "selected":true,
+                "isLoaded":false,
+                "description": "WASDI Automatic Data Provider",
+                "link": "https://www.wasdi.net"
+            };
+
             var iLengthData = data.data.length;
             for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
             {
-                oController.m_aListOfProvider[iIndexProvider] = {
+                oController.m_aListOfProvider[iIndexProvider+1] = {
                     "name": data.data[iIndexProvider].code,
                     "totalOfProducts":0,
                     "totalPages":1,
                     "currentPage":1,
                     "productsPerPageSelected":10,
-                    "selected":true,
+                    "selected":false,
                     "isLoaded":false,
                     "description": data.data[iIndexProvider].description,
                     "link": data.data[iIndexProvider].link
                 };
             }
-            // oController.m_aListOfProvider = data;
         }
 
     },function (data) {

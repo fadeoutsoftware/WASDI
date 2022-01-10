@@ -1,21 +1,17 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.SnapWorkflow;
-import wasdi.shared.business.WorkflowSharing;
 import wasdi.shared.utils.Utils;
 
 public class SnapWorkflowRepository extends MongoRepository {
@@ -84,20 +80,8 @@ public class SnapWorkflowRepository extends MongoRepository {
             Bson oOrFilter = Filters.or(new Document("userId", sUserId), new Document("isPublic", true));
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oOrFilter);
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    SnapWorkflow oWorkflow = null;
-                    try {
-                        oWorkflow = s_oMapper.readValue(sJSON, SnapWorkflow.class);
-                        aoReturnList.add(oWorkflow);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oWSDocuments, SnapWorkflow.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -118,21 +102,9 @@ public class SnapWorkflowRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    SnapWorkflow oWorkflow = null;
-                    try {
-                        oWorkflow = s_oMapper.readValue(sJSON, SnapWorkflow.class);
-                        aoReturnList.add(oWorkflow);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
+            
+            fillList(aoReturnList, oWSDocuments, SnapWorkflow.class);
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

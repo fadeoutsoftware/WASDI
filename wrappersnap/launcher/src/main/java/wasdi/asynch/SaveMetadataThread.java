@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.utils.SerializationUtils;
-import wasdi.shared.viewmodels.MetadataViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
 
 /**
  * Save Metadata file Thread
@@ -19,14 +20,14 @@ public class SaveMetadataThread extends Thread {
 	
 	public SaveMetadataThread(String sMetadataFilePath, String sProductFile) {
 		m_sMetadataFilePath = sMetadataFilePath;
-		m_oReadProduct = new WasdiProductReader();
 		m_oProductFile = new File(sProductFile);
+		m_oReadProduct = WasdiProductReaderFactory.getProductReader(m_oProductFile);
 	}
 	@Override
 	public void run() {
 		try {
 			
-			MetadataViewModel oMetadataViewModel = m_oReadProduct.getProductMetadataViewModel(m_oProductFile);
+			MetadataViewModel oMetadataViewModel = m_oReadProduct.getProductMetadataViewModel();
 			
 			if (oMetadataViewModel != null) {
 				SerializationUtils.serializeObjectToXML(m_sMetadataFilePath, oMetadataViewModel);

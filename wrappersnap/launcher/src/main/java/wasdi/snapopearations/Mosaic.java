@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
+
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.parameters.MosaicParameter;
-import wasdi.shared.parameters.MosaicSetting;
+import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 
@@ -29,10 +31,6 @@ public class Mosaic {
 	 */
 	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
 	
-	/**
-	 * Local WASDI base path
-	 */
-	private String m_sBasePath = "";
 	
 	/**
 	 * Output file format
@@ -52,31 +50,14 @@ public class Mosaic {
     protected static final String PROPERTY_MAX_VALUE = "maxValue";
     protected static final String PROPERTY_MIN_VALUE = "minValue";	
 	
-	public Mosaic(MosaicParameter oParameter, String sBasePath) {
+	public Mosaic(MosaicParameter oParameter) {
 		m_oMosaicSetting = (MosaicSetting) oParameter.getSettings();
 		m_oMosaicParameter = oParameter;
-		m_sBasePath = sBasePath;
 		m_sOuptutFile = oParameter.getDestinationProductName();
 		
 		if (!Utils.isNullOrEmpty(m_oMosaicSetting.getOutputFormat())) {
 			m_sOutputFileFormat = m_oMosaicSetting.getOutputFormat();
 		}
-	}
-	
-	/**
-	 * Get Base Path
-	 * @return
-	 */
-	public String getBasePath() {
-		return m_sBasePath;
-	}
-
-	/** 
-	 * Set Base Path
-	 * @param sBasePath
-	 */
-	public void setBasePath(String sBasePath) {
-		this.m_sBasePath = sBasePath;
 	}
 
 	/**
@@ -121,7 +102,7 @@ public class Mosaic {
 		try {
 			String sGdalCommand = "gdal_merge.py";
 			
-			String sOutputFormat = LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat);
+			String sOutputFormat = snapFormat2GDALFormat(m_sOutputFileFormat);
 			Boolean bVrt = false;
 			
 			if (sOutputFormat.equals("VRT")) {
@@ -129,13 +110,15 @@ public class Mosaic {
 				bVrt = true;
 			}
 			
+			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
+			
 			ArrayList<String> asArgs = new ArrayList<String>();
 			asArgs.add(sGdalCommand);
 			
 			if (!bVrt) {
 				// Output file
 				asArgs.add("-o");
-				asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				asArgs.add(LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
 				// Output format
@@ -205,13 +188,13 @@ public class Mosaic {
 				}
 				
 			
-				asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				asArgs.add(LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
 			}
 						
 			// Get Base Path
-			String sWorkspacePath = LauncherMain.getWorspacePath(m_oMosaicParameter);
+			String sWorkspacePath = LauncherMain.getWorkspacePath(m_oMosaicParameter);
 			
 			// for each product
 			for (int iProducts = 0; iProducts<m_oMosaicSetting.getSources().size(); iProducts ++) {
@@ -265,7 +248,7 @@ public class Mosaic {
 		} 
         catch (Throwable e) {
         	processWorkspaceLog("There was an exception...");
-			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
+			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 			m_oLogger.error("Mosaic.runGDALMosaic: " + e.toString());
 			return false;
 		}
@@ -299,6 +282,25 @@ public class Mosaic {
 			m_oProcessWorkspaceLogger.log(sLog);
 		}
 	}
+	
+    public String snapFormat2GDALFormat(String sFormatName) {
+
+        if (Utils.isNullOrEmpty(sFormatName)) {
+            return "";
+        }
+
+        switch (sFormatName) {
+            case GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME:
+                return "GTiff";
+            case "BEAM-DIMAP":
+                return "DIMAP";
+            case "VRT":
+                return "VRT";
+            default:
+                return "GTiff";
+        }
+    }
+	
 	
 	
 	

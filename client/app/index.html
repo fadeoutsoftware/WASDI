@@ -51,7 +51,7 @@
 
 
     <!-- FontAwesome -->
-    <link rel="stylesheet" href="bower_components/fontawesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="bower_components/fontawesome-free-5.15.4-web/css/all.css">
     <!-- jQuery -->
 <!--    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>-->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -85,13 +85,8 @@
     <script src="assets/slider-appdetails/js/lightslider.js"></script>
 
     <!-- LEAFLET -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-          crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-            integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-            crossorigin=""></script>
-
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" integrity="sha384-mc6rNK5V0bzWGJ1EUEAR2o+a/oH6qaVl+NCF63Et+mVpGnlSnyVSBhSP/wp4ir+O" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM" crossorigin="anonymous">
     <script src="https://code.createjs.com/createjs-2014.12.12.min.js"></script>
 
     <!--LEAFLET MOUSE POSITION-->
@@ -189,32 +184,32 @@
 <script src="models/TabType.js"></script>
 <script src="models/MessageHelper.js"></script>
 
-<!-- Wasdi Services -->
+<!-- Client Services -->
 <script src="services/ConstantsService.js"></script>
 <script src="services/SessionInjector.js"></script>
-<script src="services/AuthService.js"></script>
-<script src="services/AuthServiceFacebook.js"></script>
 <script src="services/MapService.js"></script>
 <script src="services/GlobeService.js"></script>
-<script src="services/WorkspaceService.js"></script>
-<script src="services/NodeService.js"></script>
-<script src="services/FileBufferService.js"></script>
-<script src="services/ProductService.js"></script>
 <script src="services/ConfigurationService.js"></script>
-<script src="services/OpenSearchService.js"></script>
-<script src="services/ProcessesLaunchedService.js"></script>
-<script src="services/SearchOrbitService.js"></script>
 <script src="services/RabbitStompService.js"></script>
 <script src="services/ResultsOfSearchService.js"></script>
-<script src="services/SnapOperationService.js"></script>
-<script src="services/SatelliteService.js"></script>
-<script src="services/CatalogService.js"></script>
 <script src="services/PagesService.js"></script>
-<script src="services/FilterService.js"></script>
-<script src="services/ProcessorService.js"></script>
-<!--<script src="services/AuthServiceGoogle.js_DISABLED"></script>-->
 <script src="services/TreeService.js"></script>
-<script src="services/ProcessorMediaService.js"></script>
+
+<!-- API Services -->
+<script src="services/api/AuthService.js"></script>
+<script src="services/api/WorkspaceService.js"></script>
+<script src="services/api/NodeService.js"></script>
+<script src="services/api/FileBufferService.js"></script>
+<script src="services/api/ProductService.js"></script>
+<script src="services/api/OpenSearchService.js"></script>
+<script src="services/api/ProcessWorkspaceService.js"></script>
+<script src="services/api/OpportunitySearchService.js"></script>
+<script src="services/api/ProcessingService.js"></script>
+<script src="services/api/CatalogService.js"></script>
+<script src="services/api/ProcessorService.js"></script>
+<script src="services/api/ProcessorParametersTemplateService.js"></script>
+<script src="services/api/ProcessorMediaService.js"></script>
+<script src="services/api/WorkflowService.js"></script>
 
 <!-- Wasdi Directives -->
 <script src="directives/SnakeDirective.js"></script>
@@ -227,11 +222,10 @@
 <script src="directives/multiselect_dropdown_menu/MultiselectDropdownMenuDirective.js"></script>
 <script src="directives/DrawSquares/SquaresDirective.js"></script>
 <script src="directives/multiradiobutton_dropdown_menu/MultiRadioButtonDropdownMenuDirective.js"></script>
-<script src="directives/image_preview/ImagePreviewDirective.js"></script>
 <script src="directives/Toggle/ToggleSwitchDirective.js"></script>
-<script src="directives/image_editor/ImageEditorController.js"></script>
 <script src="directives/DropDownMenu/DropDownMenuDirective.js"></script>
 <script src="directives/wasdiApps/wapTextBox/wapTextBox.js"></script>
+<script src="directives/wasdiApps/wapNumericBox/wapNumericBox.js"></script>
 <script src="directives/wasdiApps/wapSelectArea/wapSelectArea.js"></script>
 <script src="directives/wasdiApps/wapDateTimePicker/wapDateTimePicker.js"></script>
 <script src="directives/wasdiApps/wapProductList/wapProductList.js"></script>
@@ -254,7 +248,6 @@
 <script src="controllers/RootController.js"></script>
 <script src="controllers/ImportController.js"></script>
 <script src="controllers/SearchOrbitController.js"></script>
-<script src="controllers/CatalogController.js"></script>
 <script src="controllers/ValidateUserController.js"></script>
 <script src="controllers/WasdiApplicationUIController.js"></script>
 <script src="controllers/MarketPlaceController.js"></script>
@@ -264,32 +257,25 @@
 <script src="dialogs/orbit_info/OrbitInfoController.js"></script>
 <script src="dialogs/product_info/ProductInfoController.js"></script>
 <script src="dialogs/get_capabilities_dialog/GetCapabilitiesController.js"></script>
-<script src="dialogs/merge_products_dialog/MergeProductsController.js"></script>
 <script src="dialogs/product_editor_info/ProductEditorInfoController.js"></script>
 <script src="dialogs/attributes_metadata_info/AttributesMetadataController.js"></script>
 <script src="dialogs/sftp_upload/SftpUploadController.js"></script>
 <script src="dialogs/delete_process/DeleteProcessController.js"></script>
 <script src="dialogs/workspace_processes_list/WorkspaceProcessesList.js"></script>
 <script src="dialogs/snake_dialog/SnakeController.js"></script>
-<script src="dialogs/get_info_product_catalog/GetInfoProductCatalog.js"></script>
 <script src="dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceController.js"></script>
-<script src="dialogs/filter_band_operation/FilterBandController.js"></script>
-<script src="dialogs/mask_manager/MaskManagerController.js"></script>
 <script src="dialogs/import_advance_filters/ImportAdvanceFiltersController.js"></script>
 <script src="dialogs/workflow_manager/WorkFlowManagerController.js"></script>
 <script src="dialogs/get_list_of_workspace_selected/GetListOfWorkspacesSelectedController.js"></script>
 <script src="dialogs/processor/ProcessorController.js"></script>
+<script src="dialogs/processor_parameters_template/ProcessorParametersTemplateController.js"></script>
 <script src="dialogs/workflow_edit/WorkflowController.js"></script>
 <script src="dialogs/workspace_details/WorkspaceDetailsController.js"></script>
-<script src="dialogs/wps_dialog/WpsController.js"></script>
 <script src="dialogs/wapps/WappsController.js"></script>
 <script src="dialogs/edit_user/EditUserController.js"></script>
 <script src="dialogs/ftp_service/FTPController.js"></script>
-<script src="dialogs/image_editor/image-editor.component.js"></script>
-<script src="dialogs/upload_file/UploadFileController.js"></script>
 <script src="dialogs/Import/UploadController.js"></script>
 <script src="dialogs/mosaic/MosaicController.js"></script>
-<script src="dialogs/edit_panel/EditPanelController.js"></script>
 <script src="dialogs/processor_logs/ProcessorLogsController.js"></script>
 <script src="dialogs/share_workspace/ShareWorkspaceController.js"></script>
 <script src="dialogs/manual_insert_bbox/ManualInsertBboxController.js"></script>

@@ -5,7 +5,7 @@
             <label for="procname">Name</label>
             <input id="procname" ng-readonly="m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sName">
         </div>
-        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label>Type</label>
             <div ng-show="!m_oController.m_bEditMode"> <dropdownmenudirective  list-of-values="m_oController.m_aoProcessorTypes"
                                                                                selected-value="m_oController.m_sSelectedType"
@@ -16,11 +16,19 @@
 
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-bottom">
             <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
-                    ng-click="m_oController.forceProcessorRefresh(m_oController.m_sProcessorId)">
+                    ng-click="m_oController.forceLibUpdate(m_oController.m_sProcessorId)">
                 <em class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></em>
-                <span class="ng-binding">Force Refresh</span>
+                <span class="ng-binding">Update Lib</span>
             </button>
         </div>
+        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 d-flex justify-content-end align-bottom"></div>
+            <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
+                    ng-click="m_oController.forceProcessorRefresh(m_oController.m_sProcessorId)">
+                <em class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></em>
+                <span class="ng-binding">Re-Deploy</span>
+            </button>
+        </div>
+
     </div>
     <div class="row">
         <br/>
@@ -71,10 +79,10 @@
                    </div>
                    <!--public-->
                     <div class="col-md-12 mt-5">
-                        <i class="fa fa-square-o " aria-hidden="true"
+                        <i class="fa fa-square " aria-hidden="true"
                            ng-hide = "m_oController.m_oPublic === true"
                            ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
-                        <i class="fa fa-check-square-o " aria-hidden="true"
+                        <i class="fa fa-check-square " aria-hidden="true"
                            ng-hide="m_oController.m_oPublic === false"
                            ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
                         <span>Make Application Public</span>

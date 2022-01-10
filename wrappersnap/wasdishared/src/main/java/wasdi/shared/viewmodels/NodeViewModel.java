@@ -1,12 +1,15 @@
 package wasdi.shared.viewmodels;
 
 /**
+ * Represents a WASDI Node.
+ * 
  * Created by m.menapace on 11/02/2021
  */
 public class NodeViewModel {
 
     private String nodeCode;
     private String cloudProvider;
+    private String apiUrl;
     
 	public String getNodeCode() {
 		return nodeCode;
@@ -20,6 +23,6 @@ public class NodeViewModel {
 	public void setCloudProvider(String cloudProvider) {
 		this.cloudProvider = cloudProvider;
 	}
-
-	
+	public String getApiUrl() { return apiUrl; }
+	public void setApiUrl(String apiUrl) {this.apiUrl = apiUrl; }
 }

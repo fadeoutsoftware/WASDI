@@ -3,8 +3,8 @@ Waspy - WASDI Python Library
 
 Created on 11 Jun 2018
 
-@author: p.campanella - FadeOut Software
-@author: c.nattero - FadeOut Software
+@author: p.campanella - FadeOut Software - WASDI Sarl
+@author: c.nattero - FadeOut Software - WASDI Sarl
 """
 import setuptools
 import io
@@ -12,29 +12,31 @@ import io
 with io.open("README.md", "r", encoding="utf8") as oFh:
     sLong_description = oFh.read()
 
-
 setuptools.setup(
     name="wasdi",
-    version="0.6.4",
-    author="FadeOut Software",
-    author_email="info@fadeout.biz",
-    description="The Wasdi Python library",
+    version="0.7.3.3",
+    author="WASDI Sarl",
+    author_email="info@wasdi.cloud",
+    description="The WASDI Python library",
     long_description=sLong_description,
     long_description_content_type="text/markdown",
     url="https://www.wasdi.net",
     packages=setuptools.find_packages(),
-    install_requires = [
-        'requests', 
+    install_requires=[
+        'requests',
     ],
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 2",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Atmospheric Science",
         "Topic :: Scientific/Engineering :: GIS",
+        "Topic :: Scientific/Engineering :: Image Processing",
         "Topic :: Software Development :: Libraries"
     ],
     project_urls={

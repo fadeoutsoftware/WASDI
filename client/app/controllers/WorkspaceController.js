@@ -4,7 +4,7 @@
 
 var WorkspaceController = (function () {
     function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
-                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oSatelliteService,
+                                 oProductService, oRabbitStompService, oGlobeService, $rootScope, oOpportunitySearchService,
                                  $interval) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
@@ -26,7 +26,7 @@ var WorkspaceController = (function () {
         this.m_oRootScope = $rootScope;
         this.m_oSelectedProduct = null;
         this.m_oWorkspaceSelected = null;
-        this.m_oSatelliteService = oSatelliteService;
+        this.m_oOpportunitySearchService = oOpportunitySearchService;
         this.m_aoSatellitePositions = [];
         this.m_aoSateliteInputTraks = [];
         this.m_oFakePosition = null;
@@ -199,7 +199,6 @@ var WorkspaceController = (function () {
         if (this.m_bOpeningWorkspace) return;
 
         this.m_bLoadingWSFiles = true;
-        //this.m_oWorkspaceSelected = null;
 
         if (utilsIsObjectNullOrUndefined(oWorkspace)) return false;
         if (utilsIsStrNullOrEmpty(oWorkspace.workspaceId)) return false;
@@ -217,12 +216,9 @@ var WorkspaceController = (function () {
 
 
         var oController = this;
-
         this.m_bIsVisibleFiles = true;
         this.m_bIsOpenInfo = false;
-
         var oWorkspaceId = oWorkspace.workspaceId;
-
         this.m_bIsVisibleFiles = true;
 
 
@@ -441,27 +437,34 @@ var WorkspaceController = (function () {
     WorkspaceController.prototype.DeleteWorkspace = function (sWorkspaceId) {
 
         var oController = this;
+        let oWorkspaceViewModel = undefined;
+        oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+            oWorkspaceViewModel = data.data;
+            utilsVexDialogConfirm("DELETING WORKSPACE " + oWorkspaceViewModel.name +" <br>ARE YOU SURE?", function (value) {
+                if (value) {
+                    bDeleteFile = true;
+                    bDeleteLayer = true;
+    
+            
+    
+                        oController.m_oWorkspaceService.DeleteWorkspace(oWorkspaceViewModel , bDeleteFile, bDeleteLayer)
+                            .then(function () {
+                                oController.deselectWorskpace();
+                                oController.fetchWorkspaceInfoList();
+                            },(function () {
+                                console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
+                            }));
+                    
+    
+                }
+            });
 
-        utilsVexDialogConfirm("DELETING WORKSPACE<br>ARE YOU SURE?", function (value) {
-            if (value) {
-                bDeleteFile = true;
-                bDeleteLayer = true;
 
-                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
+    },(function () {
+        console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
+    }));
 
-                    oController.m_oWorkspaceService.DeleteWorkspace(data.data, bDeleteFile, bDeleteLayer)
-                        .then(function () {
-                            oController.deselectWorskpace();
-                            oController.fetchWorkspaceInfoList();
-                        },(function () {
-                            console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.DeleteWorkspace failed")
-                        }));
-                },(function () {
-                    console.log("WorkspaceController.prototype.DeleteWorkspace: oController.m_oWorkspaceService.getWorkspaceEditorViewModel failed")
-                }));
-
-            }
-        });
+        
     };
 
     WorkspaceController.prototype.getTrackSatellite = function () {
@@ -478,7 +481,7 @@ var WorkspaceController = (function () {
             var oActualSat = this.m_aoSateliteInputTraks[iSat];
 
 
-            this.m_oSatelliteService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
+            this.m_oOpportunitySearchService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then(function successCallback(response) {
 
                 if (utilsIsObjectNullOrUndefined(response) === false) {
                     var oData = response.data;
@@ -552,7 +555,7 @@ var WorkspaceController = (function () {
 
         var oController = this;
 
-        this.m_oSatelliteService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
+        this.m_oOpportunitySearchService.getUpdatedTrackSatellite(sSatellites).then(function successCallback(response) {
             if (utilsIsObjectNullOrUndefined(response) === false) {
                 var oData = response.data;
                 if (utilsIsObjectNullOrUndefined(oData) === false) {
@@ -641,7 +644,7 @@ var WorkspaceController = (function () {
         'RabbitStompService',
         'GlobeService',
         '$rootScope',
-        'SatelliteService',
+        'OpportunitySearchService',
         '$interval'
     ];
     return WorkspaceController;

@@ -43,11 +43,11 @@
                     </div>
                     <button class="btn btn-wasdi btn-outline-light no-border btn-sm" ng-show="$ctrl.m_bIsVisibleListOfLayers"
                             ng-click="$ctrl.deselectAllProducts()">
-                        <i class="fa fa-square-o mr-0" aria-hidden="true"></i>
+                        <i class="fa fa-square mr-0" aria-hidden="true"></i>
                     </button>
                     <button class="btn btn-wasdi btn-outline-light no-border btn-sm" ng-show="$ctrl.m_bIsVisibleListOfLayers"
                             ng-click="$ctrl.selectAllProducts()">
-                        <i class="fa fa-check-square-o mr-0" aria-hidden="true"></i>
+                        <i class="fa fa-check-square mr-0" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="card-body p-0 d-flex flex-column sidebar-wrapper">
@@ -162,9 +162,9 @@
                                     <div class="container-fluid-v4"><label>Select missions</label></div>
                                     <ul class="nav-v4 nav-v4-tabs nav-v4-fill">
                                         <li class="nav-v4-item" ng-repeat="mission in $ctrl.getMissions()"
-                                            ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.selectTabMission(mission, $index, $event)">
+                                            ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.toggleMissionSelection(mission, $index, $event)">
                                             <div class="nav-v4-link" ng-class="{active: $ctrl.m_activeMissionTab === $index}">
-                                                <i class="mr-2 fa" aria-hidden="true" ng-class="{'fa-square-o' : mission.selected != true, 'fa-check-square' : mission.selected == true}" ng-click="$ctrl.toggleMissionSelection(mission, $index, $event)"></i>
+                                               <!-- <i class="mr-2 fa" aria-hidden="true" ng-class="{'fa-square' : mission.selected != true, 'fa-check-square' : mission.selected == true}" ></i>  -->
                                                 <span>{{mission.name}}</span>
                                             </div>
                                         </li>

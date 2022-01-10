@@ -1,7 +1,4 @@
 /**
- * Created by s.adamo on 15/12/2016.
- */
-/**
  * Created by p.campanella on 25/10/2016.
  */
 

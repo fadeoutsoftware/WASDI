@@ -6,12 +6,11 @@
 
 var ShareWorkspaceController = (function() {
 
-    function ShareWorkspaceController($scope, oClose,oExtras,oSnapOperationService,oConstantsService,oWorkspaceService) {
+    function ShareWorkspaceController($scope, oClose,oExtras,oConstantsService,oWorkspaceService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        this.m_oSnapOperationService = oSnapOperationService;
         this.m_oWorkspaceService = oWorkspaceService;
 
         this.m_oFile = null;
@@ -127,7 +126,6 @@ var ShareWorkspaceController = (function() {
         '$scope',
         'close',
         'extras',
-        'SnapOperationService',
         'ConstantsService',
         'WorkspaceService'
 

@@ -14,10 +14,10 @@ var WasdiApplicationDetailsController = (function() {
      * @param oAuthService
      * @param oProcessorService
      * @param oModalService
-     * @param oProcessesLaunchedService
+     * @param oProcessWorkspaceService
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessesLaunchedService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessWorkspaceService) {
         /**
          * Angular Scope
          */
@@ -57,7 +57,7 @@ var WasdiApplicationDetailsController = (function() {
         /**
          * Process Workspaces service
          */
-        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
 
         /**
          * Flat to decide to show or not more reviews link
@@ -66,10 +66,34 @@ var WasdiApplicationDetailsController = (function() {
         this.m_bShowLoadMoreReviews = true;
 
         /**
+         * Flat to decide to show or not comments link
+         * @type {boolean}
+         */
+        this.m_bShowLoadComments = true;
+
+        /**
          * Name of the selected application
          * @type {*[]}
          */
         this.m_sSelectedApplication = this.m_oConstantsService.getSelectedApplication();
+
+        /**
+         * Id of the selected review
+         * @type {*[]}
+         */
+        this.m_sSelectedReviewId = this.m_oConstantsService.getSelectedReviewId();
+
+        /**
+         * Selected review
+         * @type {*}
+         */
+        this.m_oSelectedReview = this.m_oConstantsService.getSelectedReview();
+
+        /**
+         * The selected comment
+         * @type {*}
+         */
+        this.m_oSelectedComment = this.m_oConstantsService.getSelectedComment();
 
         /**
          * array of images
@@ -93,6 +117,14 @@ var WasdiApplicationDetailsController = (function() {
         }
 
         /**
+         * Comments Wrapper View Model with the summary and the list of comments
+         * @type {{reviews: []}}
+         */
+        this.m_oCommentsWrapper = {
+            reviews: []
+        }
+
+        /**
          * View Model of the Review Modal Window
          * @type {{processorId: string, comment: string, title: string, vote: number}}
          */
@@ -101,6 +133,15 @@ var WasdiApplicationDetailsController = (function() {
             title: "",
             comment: "",
             processorId: ""
+        }
+
+        /**
+         * View Model of the Comment Modal Window
+         * @type {{reviewId: string, text: string}}
+         */
+        this.m_oReviewComment = {
+            reviewId: "",
+            text: ""
         }
 
         /**
@@ -114,6 +155,12 @@ var WasdiApplicationDetailsController = (function() {
          * @type {{}}
          */
         this.m_oApplication = {};
+
+        /**
+         * Review Object
+         * @type {{}}
+         */
+        this.m_oReview = {};
 
         /**
          * Application Statistics Object
@@ -143,6 +190,12 @@ var WasdiApplicationDetailsController = (function() {
          * @type {boolean}
          */
         this.m_bReviewsWaiting = false;
+
+        /**
+         * Flag to know when the page is waiting for comments data to come
+         * @type {boolean}
+         */
+        this.m_bCommentsWaiting = false;
 
         // Local reference to the controller
         let oController = this;
@@ -184,7 +237,7 @@ var WasdiApplicationDetailsController = (function() {
         /**
          * Ask the list of Applications to the WASDI server
          */
-        this.m_oProcessesLaunchedService.getProcessorStatistics(this.m_sSelectedApplication).then(function (data) {
+        this.m_oProcessWorkspaceService.getProcessorStatistics(this.m_sSelectedApplication).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_oStats = data.data;
@@ -230,6 +283,36 @@ var WasdiApplicationDetailsController = (function() {
     }
 
     /**
+     * Refresh the list of review comments
+     */
+    WasdiApplicationDetailsController.prototype.refreshComments = function(sSelectedReviewId) {
+        this.m_sSelectedReviewId = sSelectedReviewId;
+
+        this.m_bCommentsWaiting = true;
+
+        var oController = this;
+
+        this.m_oProcessorMediaService.getReviewComments(sSelectedReviewId).then(function (data) {
+            if(utilsIsObjectNullOrUndefined(data.data) == false)
+            {
+                oController.m_oCommentsWrapper[oController.m_sSelectedReviewId] = data.data;
+
+                if (data.data.length == 0) oController.m_bShowLoadComments = false;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING REVIEW COMMENTS");
+            }
+
+            oController.m_bCommentsWaiting = false;
+        },function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING REVIEW COMMENTS");
+            oController.m_bCommentsWaiting = false;
+        });
+
+    }
+
+    /**
      * Open Application Page
      * @returns {*[]} Array of strings, names of the tabs
      */
@@ -241,8 +324,8 @@ var WasdiApplicationDetailsController = (function() {
 
 
     /**
-     * Get the name of a category from the id
-     * @param sCategoryId
+     * Format the date
+     * @param iTimestamp
      * @returns {*}
      */
     WasdiApplicationDetailsController.prototype.formatDate = function(iTimestamp)
@@ -250,6 +333,18 @@ var WasdiApplicationDetailsController = (function() {
         // Create a new JavaScript Date object based on the timestamp
         let oDate = new Date(iTimestamp);
         return oDate.toLocaleDateString();
+    };
+
+    /**
+     * Format the time
+     * @param iTimestamp
+     * @returns {*}
+     */
+    WasdiApplicationDetailsController.prototype.formatTimestamp = function(iTimestamp)
+    {
+        // Create a new JavaScript Date object based on the timestamp
+        let oDate = new Date(iTimestamp);
+        return oDate.toLocaleDateString() + " " + oDate.toLocaleTimeString();
     };
 
     /**
@@ -311,6 +406,128 @@ var WasdiApplicationDetailsController = (function() {
     }
 
     /**
+     * Updates a review
+     */
+    WasdiApplicationDetailsController.prototype.updateReview = function () {
+        var oController = this;
+
+        this.m_oUserReview.processorId = this.m_oApplication.processorId;
+
+        this.m_oUserReview.id = this.m_oSelectedReview.id;
+        this.m_oSelectedReview = null;
+
+        this.m_oProcessorMediaService.updateProcessorReview(this.m_oUserReview).then(function (data) {
+            oController.m_oUserReview.title="";
+            oController.m_oUserReview.comment="";
+            oController.m_oUserReview.vote=-1;
+
+            var oDialog = utilsVexDialogAlertBottomRightCorner("REVIEW UPDATED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iReviewsPage = 0;
+            oController.refreshReviews();
+
+        },function (error) {
+            oController.m_oUserReview.title="";
+            oController.m_oUserReview.comment="";
+            oController.m_oUserReview.vote=-1;
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE REVIEW");
+        });
+    }
+
+    WasdiApplicationDetailsController.prototype.setSelectedReviewId = function (reviewId) {
+        this.m_sSelectedReviewId = reviewId;
+        this.m_oReview.reviewId = reviewId;
+    }
+
+    WasdiApplicationDetailsController.prototype.setSelectedReview = function (review) {
+        this.m_oSelectedReview = review;
+
+        if (review) {
+            this.m_oUserReview = {
+                id: review.id,
+                title: review.title,
+                comment: review.comment,
+                vote: review.vote
+            }
+        } else {
+            this.m_oUserReview = {
+                id: "",
+                title: "",
+                comment: "",
+                vote: -1
+            }
+        }
+    }
+
+    WasdiApplicationDetailsController.prototype.setSelectedComment = function (comment) {
+        this.m_oSelectedComment = comment;
+
+        if (comment) {
+            this.m_oReviewComment = {
+                reviewId: comment.reviewId,
+                text: comment.text
+            }
+        } else {
+            this.m_oReviewComment = {
+                reviewId: "",
+                text: ""
+            }
+        }
+    }
+
+    /**
+     * Add a new comment to a review
+     */
+    WasdiApplicationDetailsController.prototype.addNewComment = function () {
+        var oController = this;
+
+        this.m_oReviewComment.reviewId = this.m_oReview.reviewId;
+
+        this.m_oProcessorMediaService.addReviewComment(this.m_oReviewComment).then(function (data) {
+
+            oController.m_oReviewComment.text="";
+
+            var oDialog = utilsVexDialogAlertBottomRightCorner("COMMENT SAVED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iCommentsPage = 0;
+            oController.refreshComments(oController.m_oReviewComment.reviewId);
+
+        },function (error) {
+            oController.m_oReviewComment.text="";
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SAVING THE COMMENT");
+        });
+    }
+
+    /**
+     * Updates a comment
+     */
+    WasdiApplicationDetailsController.prototype.updateComment = function () {
+        var oController = this;
+
+        this.m_oReviewComment.commentId = this.m_oSelectedComment.commentId;
+        this.m_oSelectedComment = null;
+
+        this.m_oProcessorMediaService.updateReviewComment(this.m_oReviewComment).then(function (data) {
+
+            oController.m_oReviewComment.text = "";
+            var oDialog = utilsVexDialogAlertBottomRightCorner("COMMENT UPDATED");
+            utilsVexCloseDialogAfter(4000,oDialog);
+
+            oController.m_iCommentsPage = 0;
+            oController.refreshComments(oController.m_oReviewComment.reviewId);
+
+        },function (error) {
+            oController.m_oReviewComment.text = "";
+
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE COMMENT");
+        });
+    }
+
+    /**
      * Deletes a review
      */
     WasdiApplicationDetailsController.prototype.deleteReview = function (sReviewId) {
@@ -320,8 +537,12 @@ var WasdiApplicationDetailsController = (function() {
         var oDeleteReviewCallback = function (value) {
 
             if (value) {
-                oController.m_oProcessorMediaService.deleteProcessorReview(oController.m_oApplication.processorId,sReviewId);
-                oController.refreshReviews();
+                oController.m_oProcessorMediaService.deleteProcessorReview(oController.m_oApplication.processorId, sReviewId).then(function (data) {
+                    oController.refreshReviews();
+                },function (error) {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING THE REVIEWS");
+                });
+
                 return true;
             } else {
                 return false;
@@ -333,11 +554,38 @@ var WasdiApplicationDetailsController = (function() {
     }
 
     /**
-     * Decide is the comment is of the actual user or not
+     * Deletes a comment
+     */
+    WasdiApplicationDetailsController.prototype.deleteComment = function (oComment) {
+        var oController = this;
+        this.m_oReviewComment.reviewId = oComment.reviewId;
+        this.m_oReviewComment.commentId = oComment.commentId;
+
+        var oDeleteCommentCallback = function (value) {
+
+            if (value) {
+                oController.m_oProcessorMediaService.deleteReviewComment(oController.m_oReviewComment.reviewId, oController.m_oReviewComment.commentId).then(function (data) {
+                    oController.refreshComments(oController.m_oReviewComment.reviewId);
+                },function (error) {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING THE COMMENTS");
+                });
+
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        //ask user if he confirms to delete the review
+        utilsVexDialogConfirm("DELETE COMMENT:<br>ARE YOU SURE?", oDeleteCommentCallback);
+    }
+
+    /**
+     * Decide is the review is of the actual user or not
      * @param oReview
      * @returns {boolean}
      */
-    WasdiApplicationDetailsController.prototype.isMineComment = function (oReview) {
+    WasdiApplicationDetailsController.prototype.isMineReview = function (oReview) {
 
         if (utilsIsObjectNullOrUndefined(oReview)) return  false;
 
@@ -349,6 +597,24 @@ var WasdiApplicationDetailsController = (function() {
 
         return  false;
 
+    }
+
+    /**
+     * Decide is the comment is of the actual user or not
+     * @param oReview
+     * @returns {boolean}
+     */
+    WasdiApplicationDetailsController.prototype.isMineComment = function (oComment) {
+
+        if (utilsIsObjectNullOrUndefined(oComment)) return  false;
+
+        let sActualUser = this.m_oConstantsService.getUserId();
+
+        if (sActualUser == oComment.userId) {
+            return true;
+        }
+
+        return  false;
     }
 
     /**
@@ -413,7 +679,7 @@ var WasdiApplicationDetailsController = (function() {
         'ProcessorService',
         'ProcessorMediaService',
         'ModalService',
-        'ProcessesLaunchedService'
+        'ProcessWorkspaceService'
     ];
 
     return WasdiApplicationDetailsController;

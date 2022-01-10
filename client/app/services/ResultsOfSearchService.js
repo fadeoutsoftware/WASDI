@@ -223,29 +223,4 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService','OpenSearchServi
         return this.m_aoMissions;
     };
 
-    // this.getProviders = function()
-    // {
-    //
-    //     return this.m_aoProviders;
-    // };
-
-    // this.getDefaultValueOfProvidersByServer = function()
-    // {
-    //     var oController = this;
-    //     this.m_oOpenSearchService.getListOfProvider().success(function (data) {
-    //         if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
-    //         {
-    //             var iLengthData = data.length;
-    //             for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
-    //             {
-    //                 oController.m_aoProviders[iIndexProvider] = {"name":data[iIndexProvider], "selected":true};
-    //             }
-    //             // oController.m_aListOfProvider = data;
-    //         }
-    //
-    //     }).error(function (data) {
-    //
-    //     });
-    // };
-
 }]);

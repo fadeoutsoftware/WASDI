@@ -13,9 +13,19 @@
 **/.metadata	
 /Servers/
 /.metadata/
+/docs/build/
 
 wasdiwebserver/WebContent/META-INF/
 wasdiwebserver/WebContent/WEB-INF/web.xml
+
+wasdiwebserver/WebContent/WEB-INF/providersConf/creodiasParserConfig.json
+wasdiwebserver/WebContent/WEB-INF/providersConf/lsaParserConfig.json
+wasdiwebserver/WebContent/WEB-INF/providersConf/viirsParserConfig.json
+
+client/package.json
+
+client/angular-seed/
+client/app/config/viirsParserConfig.json
 
 /playground
 .recommenders/
@@ -1206,5 +1216,10 @@ docs/build/html/java/package-index.html
 docs/build/html/java/WasdiLib.html
 wasdiIDLDocker/.pydevproject
 wasdiOctaveDocker/.pydevproject
-/docs/build/
-
+client/app/assets/img/space-market-logo_old.png
+wasdiCondaDocker/.pydevproject
+wasdiwebserver/WebContent/webTEST.xml
+libraries/waspy/test/config.json
+libraries/waspy/test/256x256.tif
+wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestUtils.java
+wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestWorkspaceResource.java

@@ -4,18 +4,50 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.Node;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Thread that calls all the computing nodes to ask to redeploy a processor
+ * @author p.campanella
+ *
+ */
 public class RedeployProcessorWorker extends Thread  {
+	/**
+	 * List of nodes to update
+	 */
 	List<Node> m_aoNodes;
+	/**
+	 * User Session ID
+	 */
 	String m_sSessionId;
+	/**
+	 * Workspace id
+	 */
 	String m_sWorkspaceId;
+	/**
+	 * Processor Id
+	 */
 	String m_sProcessorId;
+	/**
+	 * Processor Name
+	 */
 	String m_sProcessorName;
+	/**
+	 * Processor Type
+	 */
 	String m_sProcessorType;
 	
+	/**
+	 * Initializes the thread members' varialbes.
+	 * @param aoNodes List of nodes
+	 * @param sSessionId session id 
+	 * @param sWorkspaceId workspace id
+	 * @param sProcessorId processor id
+	 * @param sProcessorName Processor Name
+	 * @param sProcessorType Processor Type
+	 */
 	public void init(List<Node> aoNodes, String sSessionId, String sWorkspaceId, String sProcessorId, String sProcessorName, String sProcessorType) {
 		m_aoNodes = aoNodes;
 		m_sSessionId = sSessionId;
@@ -25,30 +57,43 @@ public class RedeployProcessorWorker extends Thread  {
 		m_sProcessorType = sProcessorType;
 	}
 	
+	/**
+	 * Starts the thread: will try to call the 
+	 * processors/redeploy
+	 * API to all the involved nodes 
+	 */
 	@Override
 	public void run() {
 		
 		Utils.debugLog("RedeployProcessorWorker.run: start nodes redeploy for processor " + m_sProcessorId);
 		
+		// For each node		
 		for (Node oNode : m_aoNodes) {
 			
+			// Jump the main one that is the only one that has to start this thread			
 			if (oNode.getNodeCode().equals("wasdi")) continue;
 			
+			// The node must be active			
 			if (oNode.getActive() == false) continue;
 			
 			try {
+				// Get the url
 				String sUrl = oNode.getNodeBaseAddress();
 				
+				// Safe programming				
 				if (!sUrl.endsWith("/")) sUrl += "/";
 				
-				sUrl += "processors/redeploy?processorId="+m_sProcessorId+"&workspaceId="+m_sWorkspaceId;
+				// Compose the API string				
+				sUrl += "processors/redeploy?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId;
 				
+				// Add the auth header				
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
 				
 				Utils.debugLog("RedeployProcessorWorker.run: calling url: " + sUrl);
 				
-				Wasdi.httpGet(sUrl, asHeaders);
+				// It is a get call				
+				HttpUtils.httpGet(sUrl, asHeaders);
 				
 				Utils.debugLog("RedeployProcessorWorker.run: redeployed on node " + oNode.getNodeCode());
 				
@@ -57,7 +102,8 @@ public class RedeployProcessorWorker extends Thread  {
 				Utils.debugLog("RedeployProcessorWorker.run: Exception " + oEx.toString());
 			}
 		}
-				
+
+		// All nodes updated
 		Utils.debugLog("RedeployProcessorWorker.run: distribuited redeploy done");
 	}
 }

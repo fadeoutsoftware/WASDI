@@ -3,6 +3,17 @@ package wasdi.shared.parameters;
 import wasdi.shared.LauncherOperations;
 
 /**
+ * Base Parameter.
+ * 
+ * Parameters are a set of class that represents the input needed by each Launcher Operation
+ * 
+ * Each Operation is triggered from an API; this API collects the data needed by the launcher to execute the operation.
+ * All these info are stored in a parameter.
+ * 
+ * Parameters are stored in the file system using the SerializationUtils.
+ * 
+ * Almost each operation has its own parameter, even if some operations can share the same param.
+ * 
  * Created by s.adamo on 16/03/2017.
  */
 public class BaseParameter {
@@ -18,7 +29,7 @@ public class BaseParameter {
     private String workspace;
     
     /**
-     * Workspace Onwer
+     * Workspace Owner
      */
     private String workspaceOwnerId;
 
@@ -125,9 +136,6 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.UPDATEPROCESSES.name())) {
 			oParam = new ProcessorParameter();
 		}
-		else if (sOperationType.equals(LauncherOperations.WPS.name())) {
-			oParam = new WpsParameters();
-		}
 		else if (sOperationType.equals(LauncherOperations.REDEPLOYPROCESSOR.name())) {
 			oParam = new ProcessorParameter();
 		}
@@ -143,8 +151,11 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.READMETADATA.name())) {
 			oParam = new ReadMetadataParameter();
 		}
-		
-		return oParam;
+		else if (sOperationType.equals(LauncherOperations.SEN2COR.name())){
+			oParam = new Sen2CorParameter();
+		}
+
+			return oParam;
 	}
 	
 	

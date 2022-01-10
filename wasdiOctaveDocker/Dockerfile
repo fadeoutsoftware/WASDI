@@ -1,68 +1,123 @@
 FROM ubuntu:21.04
 
-MAINTAINER Fadeout Software <info@fadeout.it>
+MAINTAINER WASDI <info@wasdi.cloud>
 
-# Install Java and common tools
-RUN apt-get update && apt-get install -y \
-	openjdk-8-jre \
-	software-properties-common \
-	locate \
-	nano
 
-# Install Python 3.x
-RUN apt-get update && apt-get install -y \
-	python3
+# Define argument used to create a user and a group in the container
+# Values are provided with the docker build command
+ARG USR_NAME
+ARG USR_ID
+ARG GRP_NAME
+ARG GRP_ID
+ARG USR_HOME="/home/wasdi"
+ARG PIP_INSTALL_WASDI_ARGUMENTS
 
-RUN apt-get update && apt-get install -y python-dev
 
-RUN mkdir /home/wasdi && chmod o+wrx /home/wasdi
+# Create environment variables:
+#   - DEBIAN_FRONTEND: to avoid packages to ask a confirmation
+#   - VIRTUAL_ENV: to define the path to the venv we will use
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV VIRTUAL_ENV=$USR_HOME/venv
 
-# Go at Home and copy files
-WORKDIR "/home/wasdi"
 
-#Install Pip
-RUN apt-get -y install python3-pip
+# Create a user, create a group and change rights on /home
+RUN groupadd --gid $GRP_ID --non-unique $USR_NAME && \
+    useradd --create-home --home-dir $USR_HOME --uid $USR_ID --gid $GRP_ID --non-unique --shell /bin/bash $USR_NAME && \
+    chmod 755 /home
 
-RUN pip3 install pip -U
 
-# Install Flask
-RUN pip3 install flask
+# Set the workdir to $USR_HOME
+WORKDIR "$USR_HOME"
 
-# Install gunicorn
-RUN pip3 install gunicorn
 
-# Install Requests
-RUN pip3 install requests
+# Update the system and install packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+        build-essential \
+        curl \
+        gdal-bin \
+        keyboard-configuration \
+        libffi-dev \
+        libgdal-dev \
+        libpq-dev \
+        libssl-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        locate \
+        nano \
+        octave-* \
+        openjdk-8-jre \
+        python3 \
+        python3-dev \
+        python3-gdal \
+        python3-pip \
+        python3-venv \
+        software-properties-common \
+        wget \
+        zlib1g-dev
 
-# Install Numpy
-RUN pip3 install numpy
 
-# Install Pandas
-RUN pip3 install pandas
+# Copy our files
+COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
 
-# Install GDAL
-RUN apt-get install -y build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev
-RUN apt -y install libpq-dev
-RUN apt-get install -y gdal-bin 
-RUN apt-get install -y libgdal-dev 
 
-#Install Octave
-RUN DEBIAN_FRONTEND=noninteractive apt-get install keyboard-configuration
-RUN apt-get install -y octave
-RUN apt install octave-* -y
+# Change rights
+RUN chmod -R 755 $USR_HOME/
 
-# Copy WASDI Server Files
-COPY ./ /home/wasdi/
 
-# Install Wasdi
-RUN pip3 install wasdi
+# From now, all commands executed are executed with the user $USR_NAME who must not be root
+USER $USR_NAME
 
-# Install User packages
-RUN apt-get install -y `cat /home/wasdi/packages.txt | tr "\n" " "`; exit 0
 
-# Set working dir
-WORKDIR /home/wasdi
+# Create a virtual environment
+RUN python3 -m venv $VIRTUAL_ENV
 
-# Start the server
+
+# Override the environment PATH variable to be able to use binaries provided by our virtual environment
+# From here, all pip3 commands are executed in our virtual environment because of this setting
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+
+# [IN OUR VENV] Install needed Python libraries
+RUN pip3 install flask \
+    gunicorn \
+    requests \
+    numpy \
+    pandas \
+    rasterio \
+    wheel
+
+
+# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
+RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
+
+
+# [IN OUR VENV] Install needed Python GDAL library
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+    export C_INCLUDE_PATH=/usr/include/gdal && \
+    pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
+
+
+# From now, all commands executed are executed as root
+USER root
+
+
+# Install user's packages:
+#   - only if $USR_HOME/packages.txt exists
+#   - we have to become root using USER instruction
+RUN test -f $USR_HOME/packages.txt && apt-get install -y `cat $USR_HOME/packages.txt | tr "\n" " "`; exit 0
+
+
+# From now, all commands executed are executed with the user $USR_NAME who must not be root
+USER $USR_NAME
+
+
+# Install user's Python libraries:
+#   - only if $USR_HOME/pip.txt exists
+RUN test -f $USR_HOME/pip.txt && pip3 install `cat $USR_HOME/pip.txt | tr "\n" " "`; exit 0
+
+
+# Start our webserver
 RUN chmod 777 ./runServer.sh
 CMD ./runServer.sh

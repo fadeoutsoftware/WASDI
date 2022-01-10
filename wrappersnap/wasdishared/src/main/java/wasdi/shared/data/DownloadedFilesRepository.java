@@ -1,6 +1,6 @@
 package wasdi.shared.data;
 
-import java.io.IOException;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -132,20 +131,8 @@ public class DownloadedFilesRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find(new Document("fileName", sFileName));
-
-            oDFDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    DownloadedFile oDwFile = null;
-                    try {
-                        oDwFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
-                        aoReturnList.add(oDwFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oDFDocuments, DownloadedFile.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -168,20 +155,8 @@ public class DownloadedFilesRepository extends MongoRepository {
         	oLikeQuery.put("filePath", oRegEx);
         	
             FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find(oLikeQuery);
-
-            oDFDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    DownloadedFile oDwFile = null;
-                    try {
-                        oDwFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
-                        aoReturnList.add(oDwFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oDFDocuments, DownloadedFile.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -200,7 +175,7 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @return list of entries found
      */
     public List<DownloadedFile> search(Date oDateFrom, Date oDateTo, String sFreeText, String sCategory) {
-    	final List<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
+    	ArrayList<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
     	List<Bson> aoFilters = new ArrayList<Bson>();
     	
     	if (oDateFrom!=null && oDateTo!=null) {
@@ -226,19 +201,8 @@ public class DownloadedFilesRepository extends MongoRepository {
     	Bson filter = Filters.and(aoFilters);
     	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection(m_sThisCollection).find() : getCollection(m_sThisCollection).find(filter);
     	
-    	aoDocs.forEach(new Block<Document>() {
-            public void apply(Document oDocument) {
-                String sJson = oDocument.toJson();
-                try {
-                    DownloadedFile oDownloadedFile = s_oMapper.readValue(sJson, DownloadedFile.class);
-                    aoFiles.add(oDownloadedFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-    	
+    	fillList(aoFiles, aoDocs, DownloadedFile.class);
+    	    	
 		return aoFiles ;
     }
     
@@ -276,20 +240,8 @@ public class DownloadedFilesRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oDFDocuments = getCollection(m_sThisCollection).find();
-
-            oDFDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    DownloadedFile oDwFile = null;
-                    try {
-                        oDwFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
-                        aoReturnList.add(oDwFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            
+            fillList(aoReturnList, oDFDocuments, DownloadedFile.class);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -308,35 +260,32 @@ public class DownloadedFilesRepository extends MongoRepository {
      * @return list of entries found
      */
     public List<DownloadedFile> getByWorkspace(String sWorkspaceId) {
-    	final List<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
+    	ArrayList<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
     	List<Bson> aoFilters = new ArrayList<Bson>();
     	
     	
     	if (sWorkspaceId!=null && !sWorkspaceId.isEmpty()) {
     		Document oRegQuery = new Document();
-    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId+"/"));
+    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId + "\\"));
     		oRegQuery.append("$options", "i");
     		Document oFindQuery = new Document();
     		oFindQuery.append("filePath", oRegQuery);
     		aoFilters.add(oFindQuery);
+    		
+    		oRegQuery = new Document();
+    		oRegQuery.append("$regex", Pattern.quote(sWorkspaceId + "/"));
+    		oRegQuery.append("$options", "i");
+    		oFindQuery = new Document();
+    		oFindQuery.append("filePath", oRegQuery);
+    		aoFilters.add(oFindQuery);
+
     	}
     	    	
-    	Bson filter = Filters.and(aoFilters);
+    	Bson filter = Filters.or(aoFilters);
     	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection(m_sThisCollection).find() : getCollection(m_sThisCollection).find(filter);
     	
-    	aoDocs.forEach(new Block<Document>() {
-            public void apply(Document oDocument) {
-                String sJson = oDocument.toJson();
-                try {
-                    DownloadedFile oDownloadedFile = s_oMapper.readValue(sJson, DownloadedFile.class);
-                    aoFiles.add(oDownloadedFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-    	
+    	fillList(aoFiles, aoDocs, DownloadedFile.class);
+    	    	
 		return aoFiles;
     }    
     

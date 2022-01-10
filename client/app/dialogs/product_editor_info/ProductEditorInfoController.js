@@ -4,37 +4,55 @@
 
 var ProductEditorInfoController = (function() {
 
-    function ProductEditorInfoController($scope, oClose,oExtras,oProductService, oConstantsService) {//,
+    function ProductEditorInfoController($scope, oClose,oExtras,oProductService, oConstantsService,oFileBufferService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oProduct = oExtras.product;
         this.m_oProductService = oProductService;
+        this.m_oFileBufferService = oFileBufferService;
         this.m_oReturnProduct = oExtras.product;
         this.m_oOldFriendlyName = oExtras.product.productFriendlyName;
         this.workspaceId = oConstantsService.getActiveWorkspace().workspaceId;
-        //$scope.close = oClose;
+        this.m_asStyles = [];
+        this.m_aoStylesMap = {};
+        this.m_oStyle = {};
+        this.m_bLoadingStyle = true;
+
 
         var oController=this;
+
         $scope.close = function(result) {
             oController.updateProduct(oController.m_oProduct, oController.workspaceId);
 
             oClose(oController.m_oReturnProduct, 500); // close, but give 500ms for bootstrap to animate
         };
 
+        this.m_oFileBufferService.getStyles().then(function(data){
+                if(data.status !== 200)
+                {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR GETTING STYLES");
+                    utilsVexCloseDialogAfter(5000,oDialog);
+                }
+                else {
+                    oController.m_asStyles = data.data;
+                    oController.m_aoStylesMap = oController.m_asStyles.map(name => ({name}))
+
+                    oController.m_aoStylesMap.forEach((oValue, sKey) => {
+                        if (oValue.name == oController.m_oProduct.style) {
+                            oController.m_oStyle = oValue;
+                        }
+                    });
+                }
+
+                oController.m_bLoadingStyle = false;
+            },function(data){
+                var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR GETTING STYLES");
+                utilsVexCloseDialogAfter(5000,oDialog);
+                oController.m_bLoadingStyle = false;
+        });        
+
     }
 
-    ProductEditorInfoController.prototype.getSummaryPropertyNames = function()
-    {
-        //var group = this.m_oProduct.summary;
-
-        var allPropertyNames = Object.keys(this.m_oProduct.summary);
-        return allPropertyNames;
-        //for (var j=0; j<allPropertyNames.length; j++) {
-        //    var name = allPropertyNames[j];
-        //    var value = group[name];
-        //    // Do something
-        //}
-    }
     ProductEditorInfoController.prototype.updateProduct = function()
     {
 
@@ -45,11 +63,21 @@ var ProductEditorInfoController = (function() {
         var oOldMetadata = this.m_oProduct.metadata;
         this.m_oProduct.metadata = null;
 
-        if(this.m_oProduct.productFriendlyName === this.m_oOldFriendlyName)
-            return false;
+        var sStyle = "";
 
+        if (!utilsIsObjectNullOrUndefined(this.m_oStyle)) {
+            sStyle = this.m_oStyle.name;
+        }
 
-        this.m_oProductService.updateProduct(this.m_oProduct, this.workspaceId).then(function (data, status)
+        this.m_oProduct.style = sStyle;
+
+        var oUpdatedViewModel = {};
+
+        oUpdatedViewModel["fileName"] = this.m_oProduct.fileName;
+        oUpdatedViewModel["productFriendlyName"] = this.m_oProduct.productFriendlyName;
+        oUpdatedViewModel["style"] = this.m_oProduct.style;
+
+        this.m_oProductService.updateProduct(oUpdatedViewModel, this.workspaceId).then(function (data)
         {
             if(data.data === "") {
                 _this.m_oProduct.metadata = oOldMetadata;
@@ -60,12 +88,12 @@ var ProductEditorInfoController = (function() {
             else
                 console.log("Error update product: there was an error to the server");
 
-        },function (data,status) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE TO UPDATE THE PRODUCT");
+        },function (error) {
+            var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR: IMPOSSIBLE TO UPDATE THE PRODUCT");
+            utilsVexCloseDialogAfter(5000,oDialog);
 
             // restore product friendly name due to update failed
             _this.m_oProduct.productFriendlyName = _this.m_oOldFriendlyName;
-
         });
 
 
@@ -77,7 +105,8 @@ var ProductEditorInfoController = (function() {
         'close',
         'extras',
         'ProductService',
-        'ConstantsService'
+        'ConstantsService',
+        'FileBufferService'
     ];
     return ProductEditorInfoController;
 })();

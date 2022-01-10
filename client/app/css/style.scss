@@ -40,9 +40,7 @@
 @import "../directives/DrawSquares/squares";
 @import "../css/_dialog";
 @import "../directives/multiradiobutton_dropdown_menu/multi_radiobutton_dropdown_menu";
-@import "../directives/image_preview/image_preview";
 @import "../directives/Toggle/toggle_switch";
-@import "../directives/image_editor/image_editor_directive";
 @import "../directives/DropDownMenu/dropdown_menu";
 @import "../directives/wasdiApps/wapDateTimePicker/wapDateTimePicker";
 @import "../directives/wasdiApps/wapProductList/wapProductList";
@@ -53,31 +51,22 @@
 @import "../dialogs/orbit_info/orbit_info";
 @import "../dialogs/product_info/product_info";
 @import "../dialogs/get_capabilities_dialog/get_capabilities_dialog";
-@import "../dialogs/merge_products_dialog/merge_products_dialog";
-@import "../dialogs/product_editor_info/product_editor_info";
 @import "../dialogs/attributes_metadata_info/attributes_metadata";
 @import "../dialogs/sftp_upload/sftp_upload";
 @import "../dialogs/delete_process/delete_process";
 @import "../dialogs/snake_dialog/snake_dialog";
 @import "../dialogs/workspace_processes_list/workspace_processes";
-@import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
-@import "../dialogs/filter_band_operation/filter_band";
-@import "../dialogs/mask_manager/mask_manager";
 @import "../dialogs/import_advance_filters/import_advance_filters";
 @import "../dialogs/workflow_manager/workflow_manager";
 @import "../dialogs/workspace_details/workspace_details";
 @import "../dialogs/get_list_of_workspace_selected/get_list_of_workspaces_selected";
 @import "../dialogs/processor/processor";
-@import "../dialogs/wps_dialog/wps";
 @import "../dialogs/wapps/wapps";
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
-@import "../dialogs/image_editor/image-editor.component";
-@import "../dialogs/upload_file/upload_file";
 @import "../dialogs/Import/import";
 @import "../dialogs/mosaic/mosaic";
-@import "../dialogs/edit_panel/edit_panel";
 @import "../dialogs/processor_logs/processor_logs_dialog";
 @import "../dialogs/share_workspace/share_workspace";
 
@@ -383,10 +372,6 @@ textarea{
             background-color: #44536C;
             color: white;
         }
-    }
-    tr, th {
-    }
-    tbody {
     }
     .tr-over {
         &:hover {

@@ -179,7 +179,7 @@
                                     <th><a ng-click="m_oController.resetFilters()" style="cursor:pointer"><span><i
                                         class="custom-icon fa fa-remove"></i>&nbsp;Reset Filters</span></a></th>
                                     <th></th>
-                                    <th><a ng-href="{{m_oController.m_sHrefLogFile}}" download="download"
+                                    <th><a ng-click="m_oController.downloadProcessesFile()" download="download"
                                            style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download</span></a>
                                     </th>
                                     <th></th>
@@ -269,7 +269,7 @@
                                     <td>
                                         <td class="over-icon" ng-click="m_oController.openProcessorLogsDialog(oProcess)"
                                                 style="margin-bottom: 5px;margin-right: 5px;color:#43516A;">
-                                            <i class="fa fa-file-text" aria-hidden="true" title="Logs"
+                                            <i class="fa fa-file-alt" aria-hidden="true" title="Logs"
                                                data-placement="bottom" data-toggle="tooltip"></i>
                                         </td>
                                         <td class="over-icon"

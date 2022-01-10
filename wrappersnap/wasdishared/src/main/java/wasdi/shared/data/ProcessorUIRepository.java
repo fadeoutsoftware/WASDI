@@ -43,6 +43,10 @@ public class ProcessorUIRepository extends MongoRepository {
         try {
             Document oWSDocument = getCollection(m_sThisCollection).find(new Document("processorId", sProcessorId)).first();
 
+            if (oWSDocument == null) {
+            	return null;
+            }
+
             String sJSON = oWSDocument.toJson();
 
             ProcessorUI oProcessorUI = s_oMapper.readValue(sJSON,ProcessorUI.class);

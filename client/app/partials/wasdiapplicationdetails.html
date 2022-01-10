@@ -307,7 +307,10 @@
                                     <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
                                     <span class="reviews-name">{{review.userId}}</span>
                                 </div>
-                                <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>Delete</div>
+                                <div class="d-flex justify-content-end">
+                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" data-toggle="modal" ng-show="true" data-target="#writeReviewsModal" ng-click="m_oController.setSelectedReview(review)">&nbsp;<span class="fa fa-edit mr-2"> </span>UPDATE</div>
+                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
+                                </div>
                             </div>
                             <!--RATE-->
                             <div class="my-2">
@@ -326,6 +329,65 @@
                             <div class="text-green-wasdi mt-2">
                                 {{m_oController.formatDate(review.date)}}
                             </div>
+
+                            <div class="d-flex justify-content-end">
+                                <div>
+                                    <div class="d-flex align-items-center"></div>
+                                    <div class="delete-btn ml-3" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedReviewId(review.id)">&nbsp;<span class="fa fa-comment mr-2"> </span>ADD A COMMENT</div>
+                                </div>
+                                
+                                <div ng-click="m_oController.refreshComments(review.id)">
+                                    <div ng-model="collapsed" ng-click="collapsed=!collapsed" ng-show="!collapsed">
+                                        <div class="d-flex align-items-center"></div>
+                                        <div class="delete-btn ml-3" >&nbsp;<span class="fa fa-comments-o mr-2"> </span>SHOW COMMENTS</div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div ng-model="collapsed" ng-click="collapsed=!collapsed" ng-show="collapsed">
+                                        <div class="d-flex align-items-center"></div>
+                                        <div class="delete-btn ml-3" >&nbsp;<span class="fa fa-comments-o mr-2"> </span>HIDE COMMENTS</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row" ng-model="collapsed" ng-show="collapsed">
+                                <div class="col-1 col-md-2"></div>
+
+                                <div class="col-5 col-md-10">
+                                    <div ng-show="m_oController.m_oCommentsWrapper[review.id].length">
+                                        <div ng-repeat="comment in m_oController.m_oCommentsWrapper[review.id]" class="reviews-list border shadow-sm p-3 mb-4">
+
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="userImage mr-3" style="background-image: url('assets/img/placeholder/user-placeholder.png')"></div>
+                                                    <span class="reviews-name">{{comment.userId}}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-end">
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedComment(comment)">&nbsp;<span class="fa fa-edit mr-2"> </span>UPDATE</div>
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.deleteComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
+                                                </div>
+                                            </div>
+            
+                                            <div class="reviews-comment mt-2">
+                                                {{comment.text}}
+                                            </div>
+                                            <div class="text-green-wasdi mt-2">
+                                                {{m_oController.formatTimestamp(comment.date)}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-show="!m_oController.m_oCommentsWrapper[review.id].length && !oController.m_bShowLoadComments">
+                                        <div class="reviews-list border shadow-sm p-3 mb-4" >
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                THERE ARE NO COMMENTS
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                     <div class="reviews-load-more text-center" ng-click="m_oController.loadMoreReviews()" ng-show="m_oController.m_bShowLoadMoreReviews">
@@ -338,13 +400,13 @@
                 </div>
 
 
-                <!-- Modal -->
+                <!-- Modal Review -->
                 <div class="modal fade writeReviewsModal" id="writeReviewsModal" tabindex="-1" role="dialog" aria-labelledby="writeReviewsModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content rounded-0">
                             <div class="modal-header d-flex justify-content-between">
-                                <h2 class="modal-title w-100">Write Review</h2>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <h2 class="modal-title w-100">{{m_oController.m_oSelectedReview ? 'Update Review' : 'Add Review'}}</h2>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="m_oController.setSelectedReview(null)">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -380,13 +442,42 @@
 
                             </div>
                             <div class="modal-footer rounded-0">
-                                <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal"> <span class="fa fa-trash mr-2"></span>Cancel</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0"  data-dismiss="modal" ng-class="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1?'':'disabled'" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>Save My Review</button>
+                                <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal"> <span class="fa fa-trash mr-2" ng-click="m_oController.setSelectedReview(null)"></span>Cancel</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedReview"  data-dismiss="modal" ng-class="(m_oController.m_oUserReview.title.length > 0 && m_oController.m_oUserReview.comment.length > 0 && m_oController.m_oUserReview.vote > 0) ? '' : 'disabled'" ng-click="m_oController.updateReview()"><span class="fa fa-save mr-2"></span>Update My Review</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedReview" data-dismiss="modal" ng-class="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1?'':'disabled'" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>Add My Review</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Modal Comment -->
+                <div class="modal fade writeCommentModal" id="writeCommentModal" tabindex="-1" role="dialog" aria-labelledby="writeCommentModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content rounded-0">
+                            <div class="modal-header d-flex justify-content-between">
+                                <h2 class="modal-title w-100">{{m_oController.m_oSelectedComment ? 'Update Comment' : 'Add Comment'}}</h2>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="m_oController.setSelectedComment(null)">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!--REVIEW FORM-->
+                                <form class="py-4">
+                                    <div class="form-group">
+                                        <label for="comment">Write a comment*</label>
+                                        <textarea type="text" class="form-control" id="comment" placeholder="A long time ago, in a galaxy far far away..." ng-model="m_oController.m_oReviewComment.text"></textarea>
+                                        <small id="coomentHelp" class="form-text text-muted">Leave a comment about the review</small>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer rounded-0">
+                                <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal" ng-click="m_oController.setSelectedComment(null)"> <span class="fa fa-trash mr-2"></span>Cancel</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedComment"  data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.updateComment()"><span class="fa fa-save mr-2"></span>Update My Comment</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedComment" data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.addNewComment()"><span class="fa fa-save mr-2"></span>Add My Comment</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>

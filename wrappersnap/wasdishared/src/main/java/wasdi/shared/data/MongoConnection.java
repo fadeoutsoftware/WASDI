@@ -1,6 +1,6 @@
 package wasdi.shared.data;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.*;
 import com.mongodb.client.MongoDatabase;
 
 /**

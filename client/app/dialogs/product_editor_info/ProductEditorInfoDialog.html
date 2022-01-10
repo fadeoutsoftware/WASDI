@@ -3,18 +3,11 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title ">Properties</h4>
+                <h4 class="modal-title ">Product Properties</h4>
             </div>
             <div class="modal-body">
                 <h4 class="my-input-text">
                     <table class="table table-hover">
-                        <caption>Product editors</caption>
-                        <thead>
-                        <tr>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
-                        </tr>
-                        </thead>
                         <tbody>
                         <tr>
                             <td> <label>{{"DIALOG_PRODUCT_EDITOR_INFO_DIALOG_ORIGINAL_NAME_LABEL"|translate}}</label> </td>
@@ -25,21 +18,22 @@
                             <td> <input type="text" name="name" class="form-control" ng-model="m_oController.m_oProduct.productFriendlyName"> </td>
                         </tr>
                         <tr>
-                            <td>  <label>{{"DIALOG_PRODUCT_EDITOR_INFO_DIALOG_ADDED_DATA_LABEL"|translate}}</label></td>
-                            <td> </td>
+                            <td>  <label>{{"DIALOG_PRODUCT_EDITOR_INFO_DIALOG_STYLE"|translate}}</label></td>
+                            <td> 
+                                <div ng-show="!m_oController.m_bLoadingStyle">
+                                    <wapdropdown list-of-values="m_oController.m_aoStylesMap"
+                                        selected-value="m_oController.m_oStyle"
+                                        enable-search-filter="true"
+                                        dropdown-name="Style">
+                                    </wapdropdown>
+                                </div>
+                                <div ng-show="m_oController.m_bLoadingStyle">
+                                    <invader></invader>
+                                </div>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
-
-
-
-                    <div class="friendly-name">
-
-
-                    </div>
-
-
-
                 </h4>
 
             </div>

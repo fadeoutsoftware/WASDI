@@ -2,7 +2,7 @@
 WASDI : Web Advanced Space Developer Interface
 ==================================================
 
-WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers). 
+WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers), private companies (i.e. insurance, agricolture).
 
 WASDI allows researchers to gather satellite data, in particular the Sentinel ones, display them on-line, run algorithms, displaying and evaluating the results, and allows to share these projects among different users.
 
@@ -14,6 +14,9 @@ WASDI web platform is the best starting point for your journey on Earth Observat
 
 This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your EO research.
 
+If you're acquired the basic concepts of WASDI and you're interested in how processors can be launched,  take a look at
+:doc:`this tutorial </SynchAsynch>`. This will highlights Synchronous and Asynchronous WASDI programming.
+
 
 .. toctree::
    :maxdepth: 2
@@ -21,6 +24,7 @@ This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main conce
    :caption: Getting started
 
    WasdiTutorial.rst
+   SynchAsynch.rst
 
 WASDI Marketplace
 ---------------------------
@@ -69,6 +73,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    :caption: Libraries
 
    python/waspy.rst
+   LibsConcepts.rst
    octave/octave.rst
    java/WasdiLib.rst
 

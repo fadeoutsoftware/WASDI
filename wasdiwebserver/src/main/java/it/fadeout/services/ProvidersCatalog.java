@@ -1,6 +1,6 @@
 package it.fadeout.services;
 
-import it.fadeout.business.Provider;
+import wasdi.shared.business.DataProvider;
 
 /**
  * Holds information about the registered providers
@@ -12,14 +12,14 @@ public interface ProvidersCatalog {
      * @param sName Name of the provider
      * @return requested provider if any
      */
-    Provider getProvider(String sName);
+    DataProvider getProvider(String sName);
 
     /**
      * Retrieve the default provider for a node
      * @param sNode name of the node
      * @return requested provider if any
      */
-    Provider getDefaultProvider(String sNode);
+    DataProvider getDefaultProvider(String sNode);
 
 
 }

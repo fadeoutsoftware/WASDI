@@ -15,9 +15,9 @@
                 </div>
             </div>
             <!-- BODY  -->
-            <div class="modal-body container-fluid-v4">
-                <div class="container-v4">
-                    <div class="col-v4" >
+            <div class="modal-body container-fluid-v12">
+                <div class="row d-flex">
+                    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" >
                         Search by text: <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch"> Operation: <strong>{{m_oController.getOperationDescription()}}</strong> Name: <strong>{{m_oController.getProcessorName()}}</strong> Status: <strong>{{m_oController.getProcessorStatus()}}</strong>
                         <!--<button style="margin-left: 20px;" type="button" ng-click="m_oController.getPayload()" class="btn btn-primary btn-wasdi " >
                             View Payload
@@ -25,6 +25,10 @@
                         <button style="margin-left: 20px;" type="button" ng-click="m_oController.copyPayload()" class="btn btn-primary btn-wasdi " >
                             Copy Payload
                         </button>-->
+                    </div>
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" >
+                        <a ng-click="m_oController.downloadLogFile()" download="download"
+                            style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download</span></a>
                     </div>
                 </div>
               	<div class="container-v4 table-container">
@@ -56,7 +60,7 @@
                     </table>
 				</div>
                 <div class="container-v4 ">
-                    <ul uib-pagination total-items="m_oController.m_iNumberOfLogs" ng-model="m_oController.m_iCurrentPage" max-size="5" class="pagination-sm" boundary-links="true" num-pages="numPages"></ul>
+                    <ul uib-pagination total-items="m_oController.m_iNumberOfLogs" items-per-page="m_oController.m_iNumberOfLogsPerPage" ng-model="m_oController.m_iCurrentPage" max-size="5" class="pagination-sm" boundary-links="true" num-pages="numPages"></ul>
                 </div>
 
             </div>

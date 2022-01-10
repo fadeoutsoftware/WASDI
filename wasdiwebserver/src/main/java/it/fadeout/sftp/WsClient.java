@@ -14,62 +14,104 @@ import javax.websocket.WebSocketContainer;
 
 import wasdi.shared.utils.Utils;
 
+/**
+ * Web Socket client. Used to talk with the mini web-socket server
+ * installed in each server to handle the sftp credentials of the users.
+ * This class is used only SFTPManager
+ * @author p.campanella
+ *
+ */
 @ClientEndpoint
 public class WsClient extends Semaphore {
 	
-	String m_sMessage;
-	boolean ok;
-	String data;
-//	private Session m_sUserSession;
 
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Message to send
+	 */
+	String m_sMessage;
+	/**
+	 * True if the command succedeed, false otherwise
+	 */
+	boolean m_bOk;
+	/**
+	 * Complete server response
+	 */
+	String m_sData;
+	
+	/**
+	 * Create a new Web Socket client
+	 * @param sWsAddress Address of the local server
+	 * @param sMessage Message to send
+	 * @throws InterruptedException
+	 */
 	public WsClient(String sWsAddress, String sMessage) throws InterruptedException {
 		super(0, true);
 		m_sMessage = sMessage;
-		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+		WebSocketContainer oContainer = ContainerProvider.getWebSocketContainer();
 		try {
-			container.connectToServer(this, new URI(sWsAddress));
+			oContainer.connectToServer(this, new URI(sWsAddress));
 			acquire();
 		} catch (Exception e) {
 			e.printStackTrace();
 			release();
 		}		
 	}
-		
+	
+	/**
+	 * Callback when the communication is open: sends the message
+	 * @param oUserSession
+	 */
    @OnOpen
-    public void onOpen(Session userSession) {
+    public void onOpen(Session oUserSession) {
+	   
         Utils.debugLog("opening websocket...");
-//        m_sUserSession = userSession;
-        Utils.debugLog("WsClient.onOpen: userSession = " + userSession.getId() );
-        userSession.getAsyncRemote().sendText(m_sMessage);	        
+        Utils.debugLog("WsClient.onOpen: userSession = " + oUserSession.getId() );
+        // Send the message
+        oUserSession.getAsyncRemote().sendText(m_sMessage);	        
    }
    
+   /**
+    * Callback when the connection is closed
+    * @param oUserSession
+    * @param oReason
+    */
 	@OnClose
-	public void onClose(Session userSession, CloseReason reason) {
+	public void onClose(Session oUserSession, CloseReason oReason) {
 	    Utils.debugLog("closing websocket");		    
 	}
 
     /**
      * Callback hook for Message Events. This method will be invoked when a client send a message.
      *
-     * @param message The text message
+     * @param sMessage The text message
      */
     @OnMessage
-    public void onMessage(String message) {
+    public void onMessage(String sMessage) {
     	
-    	Utils.debugLog(message);
+    	Utils.debugLog(sMessage);
     	
-    	ok = message.startsWith("OK;");
-    	String[] toks = message.split(",|;");
-		data = toks.length>1 ? toks[1] : "";
+    	m_bOk = sMessage.startsWith("OK;");
+    	String[] toks = sMessage.split(",|;");
+		m_sData = toks.length>1 ? toks[1] : "";
     	release();
     }
-
+    
+    /**
+     * Returns the status of the communication
+     * @return
+     */
 	public boolean isOk() {
-		return ok;
+		return m_bOk;
 	}
-
+	
+	/**
+	 * Obtain the data received from the server
+	 * @return
+	 */
 	public String getData() {
-		return data;
+		return m_sData;
 	}
     
 }

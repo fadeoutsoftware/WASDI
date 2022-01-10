@@ -1,592 +1,639 @@
 package it.fadeout.rest.resources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
-import wasdi.shared.opensearch.PaginatedQuery;
-import wasdi.shared.opensearch.QueryExecutor;
-import wasdi.shared.opensearch.QueryExecutorFactory;
-import wasdi.shared.utils.AuthenticationCredentials;
+import wasdi.shared.config.CatalogueConfig;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.ConcreteQueryTranslator;
+import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.SearchProviderViewModel;
+import wasdi.shared.viewmodels.search.DataProviderViewModel;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
+/**
+ * Open Search Resource.
+ * Hosts API for:
+ * 	.query the Data Providers
+ * @author p.campanella
+ *
+ */
 @Path("/search")
 public class OpenSearchResource {
-
-	private static QueryExecutorFactory s_oQueryExecutorFactory;
-	private static String s_sClassName;
-	private Map<String,AuthenticationCredentials> m_aoCredentials;
-
-	static {
-		s_oQueryExecutorFactory = new QueryExecutorFactory();
-		s_sClassName = "OpenSearchResource";
-	}
-
-	public OpenSearchResource() {
-		m_aoCredentials = new HashMap<>();
-	}
-
-	@Context
-	ServletConfig m_oServletConfig;
+	/**
+	 * Static reference to this class name for logs
+	 */
+	private String m_sClassName;
 	
-
+	/**
+	 * Concrete Query Translator to get the View Model from the input query
+	 */
+	private ConcreteQueryTranslator m_oConcreteQueryTranslator = new ConcreteQueryTranslator();
+	
+	/**
+	 * Constructor
+	 */
+	public OpenSearchResource() {
+		// Set this class name
+		m_sClassName = "OpenSearchResource";		
+	}
+	
+	/**
+	 * Get the number of total results for a query
+	 * @param sSessionId User Session Id
+	 * @param sQuery Query
+	 * @param sProviders Data Provider.
+	 * @return number of results. -1 in case of any problem
+	 */
 	@GET
 	@Path("/query/count")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
+	public int count(@HeaderParam("x-session-token") String sSessionId, @QueryParam("query") String sQuery,
 			@QueryParam("providers") String sProviders) {
-
-		Utils.debugLog(s_sClassName + ".getProductsCount( Query: " + sQuery + ", Providers: " + sProviders + " )");
+		
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				return -1;
-			}
+			
+			// Check the session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".getProductsCount: invalid session");
+			
+			if (oUser == null) {
+				Utils.debugLog(m_sClassName + ".count: invalid session");
 				return -1;
 			}
 	
 			int iCounter = 0;
-			if (sProviders != null) {
-				Utils.debugLog(s_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
+			
+			Utils.debugLog(m_sClassName + ".count, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
+			
+			if (Utils.isNullOrEmpty(sProviders)) sProviders = "AUTO";
+			String sOriginalProvider = sProviders;
+			String sPlatformType = getPlatform(sQuery);
+			sProviders = getProvider(sProviders, sPlatformType);
+			int iNextProvider = 1;
+			
+			while (sProviders!=null) {
 				try {
-					Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
 					
-					if (aiQueryCountResultsPerProvider != null) {
-						for (Integer count : aiQueryCountResultsPerProvider.values()) {
-							iCounter += count;
-						}						
+					QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProviders);
+					
+					iCounter = oExecutor.executeCount(sQuery);
+					
+					if (iCounter>=0) {
+						return iCounter;
 					}
-				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
-					return -1;
+					
+				} catch (Exception oE) {
+					Utils.debugLog(m_sClassName + ".count: " + oE);
 				}
+				
+				sProviders = getProvider(sOriginalProvider, sPlatformType,iNextProvider);
+				iNextProvider++;
+				
+				if (sProviders!=null) {
+					Utils.debugLog(m_sClassName + ".count: selected next provider " + sProviders);
+				}				
 			}
+
 			return iCounter;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
+			Utils.debugLog(m_sClassName + ".count: " + oE);
 		}
 		return -1;
 	}
-
-	private Map<String, Integer> getQueryCountResultsPerProvider(String sQuery, String sProviders) {
-
-		Utils.debugLog(s_sClassName + ".getQueryCounters( Query: " + sQuery + ", Providers: " + sProviders + " )");
-		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<>();
-		try {
-			String asProviders[] = sProviders.split(",|;");
-			for (String sProvider : asProviders) {
-				Integer iProviderCountResults = 0;
-				try {
-					QueryExecutor oExecutor = getExecutor(sProvider);
-					
-					if (oExecutor == null) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: Query Executor = null ");
-						aiQueryCountResultsPerProvider.put(sProvider, -1);
-						continue;
-					}
-					
-					try {
-						iProviderCountResults = oExecutor.executeCount(sQuery);
-					} 
-					catch (NumberFormatException oNumberFormatException) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NumberFormatException: " + oNumberFormatException);
-						iProviderCountResults = -1;
-					} 
-					catch (IOException oIOException) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught IOException: " + oIOException);
-						iProviderCountResults = -1;
-					}
-					catch (NullPointerException oNp) {
-						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NullPointerException: " +oNp);
-						iProviderCountResults = -1;
-					}
-				} catch (Exception oE) {
-					Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
-					iProviderCountResults = -1;
-				}
-				aiQueryCountResultsPerProvider.put(sProvider, iProviderCountResults);
-			}
-			return aiQueryCountResultsPerProvider;
-		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
-		}
-		return aiQueryCountResultsPerProvider;
-	}
-
+	
+	/**
+	 * Make a paginated query to a provider.
+	 * The API converts the input query in a query for the data provider.
+	 * It executes the query and get results from data provider.
+	 * Results are converted in a unique Query Result View Model
+	 * 
+	 * These operation are handled by specific Data Providers objects in wasdi.shared.queryexecutors 
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProvider Provider code. 
+	 * @param sQuery Query
+	 * @param sOffset results offset
+	 * @param sLimit number of elements 
+	 * @param sSortedBy sort column
+	 * @param sOrder Order by column
+	 * @return List of Query Result View Models
+	 */
 	@GET
 	@Path("/query")
 	@Produces({ "application/json", "text/html" })
 	public QueryResultViewModel[] search(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("providers") String sProviders, @QueryParam("sQuery") String sQuery,
+			@QueryParam("providers") String sProvider, @QueryParam("query") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		
-		Utils.debugLog(s_sClassName + ".search( Providers: " + sProviders + ", Query: " +
+		Utils.debugLog(m_sClassName + ".search( Providers: " + sProvider + ", Query: " +
 				sQuery + ", Offset: " + sOffset + ", Limit: " + sLimit + ", SortedBy: " + sSortedBy + ", Order: " + sOrder + " )");
 		
 		// Domain Check
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
-			Utils.debugLog(s_sClassName + ".search: invalid session");
-			return null;
-		}
-		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			Utils.debugLog(m_sClassName + ".search: invalid session");
 			return null;
 		}
 		
-		// If we have providers to query
-		if (sProviders != null) {
-			
-			// Control and check input parameters for pagination
-			
-			if (sOffset == null) {
-				sOffset = "0";
-			}
-				
-			if (sLimit == null) {
-				sLimit = "25";
-			}
-				
-			if (sSortedBy == null) {
-				sSortedBy = "ingestiondate";
-			}
-				
-			if (sOrder == null) {
-				sOrder = "asc";
-			}
-			
-			// Get the number of elements per page
-			ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
-			int iLimit = 25;
-			
-			try {
-				iLimit = Integer.parseInt(sLimit);
-			} 
-			catch (NumberFormatException oE1) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
-				return null;
-			}
-			
-			if (iLimit < 0) {
-				// Not possible: back to default:
-				iLimit = 25;
-			}			
-			
-			int iOffset = 0;
-			
-			try {
-				iOffset = Integer.parseInt(sOffset);
-			} 
-			catch (NumberFormatException oE2) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
-				return null;
-			}
-			
-			// Query the result count for each provider
-			Map<String, Integer> aiCounterMap = new HashMap<>();
-			
-
-			try {
-				String asProviders[] = sProviders.split(",|;");
-				for (String sProvider : asProviders) {
-					Integer iProviderCountResults = iLimit;
-					aiCounterMap.put(sProvider, iProviderCountResults);
-				}
-			} catch (Exception oE) {
-				Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
-			}
-			
-			// For each provider
-			for (Entry<String, Integer> oEntry : aiCounterMap.entrySet()) {
-				
-				// Get the provider and the total count of its results
-				String sProvider = oEntry.getKey();
-				
-				String sCurrentLimit = "" + iLimit;
-				
-				int iCurrentOffset = Math.max(0, iOffset);
-				String sCurrentOffset = "" + iCurrentOffset;
-				
-				
-				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
-				
-				try {
-					// Get the query executor
-					QueryExecutor oExecutor = getExecutor(sProvider);
-					
-					if (oExecutor == null) {
-						Utils.debugLog(s_sClassName + ".search: executor null for Provider: " + sProvider);
-						aoResults.add(null);
-						continue;
-					}
-					
-					try {
-						// Create the paginated query
-						PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
-						// Execute the query
-						List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
-						
-						// Do we have results?
-						if (aoTmp != null && !aoTmp.isEmpty()) {
-							// Yes perfect add all
-							aoResults.addAll(aoTmp);
-							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
-						} 
-						else {
-							// Nothing to add
-							Utils.debugLog(s_sClassName + ".search: no results found for " + sProvider);
-						}
-					} 
-					catch (NumberFormatException oNumberFormatException) {
-						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
-						aoResults.add(null);
-					} 
-					catch (IOException oIOException) {
-						Utils.debugLog(s_sClassName + ".search: " + oIOException);
-						aoResults.add(null);
-					}
-					
-				}
-				catch (Exception oE) {
-					Utils.debugLog(s_sClassName + ".search: " + oE);
-					aoResults.add(null);
-				}
-			}
-			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
+		// Check the data provider
+		if (Utils.isNullOrEmpty(sProvider)) sProvider = "AUTO";
+		String sOriginalProvider = sProvider;
+		String sPlatformType = getPlatform(sQuery);
+		sProvider = getProvider(sProvider, sPlatformType);
+		
+		if (Utils.isNullOrEmpty(sProvider)) {
+			Utils.debugLog(m_sClassName + ".search: Impossible to find the Provider ");
+			return null;
 		}
-		return null;
+		
+		Utils.debugLog(m_sClassName + ".search: Selected Provider " +sProvider);
+				
+		// Get the number of elements per page
+		ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
+		
+		int iNextProvider = 1;
+		
+		// If we have providers to query
+		while (sProvider != null) {
+			
+			try {
+				// Get the query executor
+				QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProvider);
+				
+				// Create the paginated query
+				PaginatedQuery oQuery = new PaginatedQuery(sQuery, sOffset, sLimit, sSortedBy, sOrder);
+				// Execute the query
+				List<QueryResultViewModel> aoProviderResults = oExecutor.executeAndRetrieve(oQuery);
+				
+				// Do we have results?
+				if (aoProviderResults != null) {
+					
+					if (sOriginalProvider.equals("AUTO")) {
+						// Set the provider as it was in original
+						for (QueryResultViewModel oResult : aoProviderResults) {
+							oResult.setProvider(sOriginalProvider);
+						}								
+					}
+					
+					Utils.debugLog(m_sClassName + ".search: found " + aoProviderResults.size() + " results for " + sProvider);
+					
+					if (aoProviderResults.size()>0) {
+						// Yes perfect add all
+						aoResults.addAll(aoProviderResults);
+					}
+					else {
+						// Nothing to add
+						Utils.debugLog(m_sClassName + ".search: no results found for " + sProvider);
+					}					
+					
+					return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
+				} 
+			}
+			catch (Exception oE) {
+				Utils.debugLog(m_sClassName + ".search: " + oE);
+			}
+			
+			sProvider = getProvider(sOriginalProvider, sPlatformType, iNextProvider);
+			iNextProvider ++;
+			
+			if (sProvider!=null) {
+				Utils.debugLog(m_sClassName + ".search: selected next provider " + sProvider);
+			}			
+		}
+		
+		return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 	}
-
+	
+	/**
+	 * Get the list of Data Providers
+	 * @param sSessionId User Session
+	 * @return List of Search Provider View Models
+	 */
 	@GET
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
-	public ArrayList<SearchProviderViewModel> getSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog(s_sClassName + ".getSearchProviders");
+	public ArrayList<DataProviderViewModel> getDataProviders(@HeaderParam("x-session-token") String sSessionId) {
+		Utils.debugLog(m_sClassName + ".getDataProviders");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return null;
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".getSearchProviders: invalid session");
+				Utils.debugLog(m_sClassName + ".getDataProviders: invalid session");
 				return null;
+			}			
+			
+			ArrayList<DataProviderViewModel> aoRetProviders = new ArrayList<>();
+			
+			for (DataProviderConfig oDataProviderConfig: WasdiConfig.Current.dataProviders) {
+				DataProviderViewModel oSearchProvider = new DataProviderViewModel();
+				oSearchProvider.setCode(oDataProviderConfig.name);
+				
+				String sDescription = oDataProviderConfig.description;
+				if (Utils.isNullOrEmpty(sDescription)) sDescription = oDataProviderConfig.name;
+				oSearchProvider.setDescription(sDescription);
+				
+				String sLink = oDataProviderConfig.link;
+				oSearchProvider.setLink(sLink);
+				aoRetProviders.add(oSearchProvider);
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return null;
-			}
-
-			// TODO use the ProviderCatalog and map the business objects to the expected view models
-
-			ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
-			String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
-			if (sProviders != null && sProviders.length() > 0) {
-				String[] asProviders = sProviders.split(",|;");
-	
-				for (int iProviders = 0; iProviders < asProviders.length; iProviders++) {
-					SearchProviderViewModel oSearchProvider = new SearchProviderViewModel();
-					oSearchProvider.setCode(asProviders[iProviders]);
-					String sDescription = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Description");
-					if (Utils.isNullOrEmpty(sDescription))
-						sDescription = asProviders[iProviders];
-					oSearchProvider.setDescription(sDescription);
-					String sLink = m_oServletConfig.getInitParameter(asProviders[iProviders] + ".Link");
-					oSearchProvider.setLink(sLink);
-					aoRetProviders.add(oSearchProvider);
-				}
-			}
+			
 			return aoRetProviders;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getSearchProviders: " + oE);
+			Utils.debugLog(m_sClassName + ".getDataProviders: " + oE);
 			return null;
 		}
 	}
-
+	
+	/**
+	 * Get the total count of results for different queries
+	 * @param sSessionId User Session
+	 * @param sProviders Provider data provider
+	 * @param asQueries list of strings, each representing a query
+	 * @return Total number of products found
+	 */
 	@POST
 	@Path("/query/countlist")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public int getListProductsCount(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders,
+	public int countList(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("providers") String sProviders,
 			ArrayList<String> asQueries) {
+		
+		String sQuery = "";
 
-		Utils.debugLog(s_sClassName + ".GetListProductsCount( Query: " + sQuery + ", Providers: " + sProviders + ", Queries: " + asQueries + " )");
+		Utils.debugLog(m_sClassName + ".countList( Providers: " + sProviders + ", Queries: " + asQueries + " )");
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session is null");
-				return -1;
-			}
+			
+			// Validate the input			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: invalid");
+			if (oUser == null) {
+				Utils.debugLog(m_sClassName + ".countList, session: invalid");
 				return -1;
 			}
+			
+			// We need query!
 			if(null==asQueries || asQueries.size() <= 0) {
-				Utils.debugLog(s_sClassName + ".GetListProductsCount, asQueries is null");
+				Utils.debugLog(m_sClassName + ".countList, asQueries is null");
 				return -1;
 			}
+			
+			// Total results counter
 			int iCounter = 0;
+			
+			// Save the original Provider
+			String sOriginalProvider = sProviders;
 	
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
+				
+				// Select the query
 				sQuery = asQueries.get(iQueries);
-				try {
-					if (sProviders != null) {
-						Map<String, Integer> aoMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+				
+				// Get Platform and Data Provider
+				String sPlatformType = getPlatform(sQuery);
+				sProviders = getProvider(sOriginalProvider, sPlatformType);
+				
+				int iNextProvider = 1;
+				
+				// We need a valid provider
+				while(sProviders != null) {
+					
+					try {
 						
-						if (aoMap != null) {
-							for (Integer iCount : aoMap.values()) {
-								iCounter += iCount;
-							}							
+						// Get the Executor
+						QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProviders);
+						
+						// Make the count
+						int iQueryCount = oExecutor.executeCount(sQuery);
+						
+						// Every result >= 0 means a valid result
+						if (iQueryCount>=0) {
+							// Increment the counter and go to the next query
+							iCounter += iQueryCount;
+							break;
 						}
+						
+					} catch (Exception oE) {
+						Utils.debugLog(m_sClassName + ".countList: " + oE);
 					}
-				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: " + sQuery + " ?): " + oE);
-					return -1;
+					
+					// Try to get next provider
+					sProviders = getProvider(sOriginalProvider, sPlatformType, iNextProvider);
+					iNextProvider++;
+					
+					if (sProviders!=null) {
+						Utils.debugLog(m_sClassName + ".countList: selected next provider " + sProviders);
+					}
 				}
 			}
+			
 			return iCounter;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
+			Utils.debugLog(m_sClassName + ".countList (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
 		}
 		return -1;
 	}
-
+	
+	/**
+	 * Make a NOT paginated query to a provider.
+	 * The API converts the input query in a query for the data provider.
+	 * It executes the query and get results from data provider.
+	 * Results are converted in a unique Query Result View Model
+	 * 
+	 * These operation are handled by specific Data Providers objects in wasdi.shared.opensearch 
+	 * 
+	 * @param sSessionId User Session
+	 * @param sProvider Data Provider
+	 * @param asQueries Array of strings with the query to execute
+	 * @return
+	 */
 	@POST
 	@Path("/querylist")
 	@Produces({ "application/json", "text/html" })
 	public QueryResultViewModel[] searchList(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("providers") String sProviders, @QueryParam("sQuery") String sQuery,
-			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
-			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
+			@QueryParam("providers") String sProvider, ArrayList<String> asQueries) {
 
-		Utils.debugLog(s_sClassName + ".SearchList( Providers: " + sProviders + ", Query: " + sQuery+
-				", Offset: " + sOffset + ", Limit: " + sLimit + ", Sorted: " + sSortedBy + ", Order: " + sOrder + ", Queries: " + asQueries + " )");
+		Utils.debugLog(m_sClassName + ".searchList( Providers: " + sProvider + " )");
 		try { 
 			
 			// Validate the User
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog(s_sClassName + ".SearchList, session is invalid");
+				Utils.debugLog(m_sClassName + ".searchList, session is invalid");
 				return null;
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog(s_sClassName + ".SearchList, null userId");
-				return null;
-			}
-			if(Utils.isNullOrEmpty(sProviders)) {
-				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", sProviders is null");
-				return null;
-			}
+						
+			// Check if we have at least one query
 			if(null==asQueries || asQueries.size()<= 0) {
-				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
+				Utils.debugLog(m_sClassName + ".searchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
 				return null;
 			}
 	
 			// Prepare the output list
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 			
+			if (Utils.isNullOrEmpty(sProvider)) sProvider = "AUTO";
+			
+			// Save the original provider
+			String sOriginalProviders = sProvider;
+			
 			// For Each Input query
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
+				
 				try {
-					sQuery = asQueries.get(iQueries);
+					String sQuery = asQueries.get(iQueries);
 					
-					// Get for each provider the total count
-					Map<String, Integer> aoCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
+					// Get the query
+					Utils.debugLog(m_sClassName + ".searchList; query = " + sQuery);
 					
-					if (aoCounterMap == null) {
-						Utils.debugLog(s_sClassName + ".SearchList aoCounterMap null ");
-						aoResults.add(null);
-						continue;
-					}
+					String sPlatformType = getPlatform(sQuery);
+					sProvider = getProvider(sOriginalProviders, sPlatformType);
+					Utils.debugLog(m_sClassName + ".searchList; selected provider = " + sProvider);
+					
+					int iNextProvider = 1;
 					
 					// For each provider
-					for (Entry<String, Integer> entry : aoCounterMap.entrySet()) {
+					while (sProvider != null) {
 						
-						// Get the Provider Name
-						String sProvider = entry.getKey();
+						// Get the executor
+						QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProvider);
+						
 						// Get the Provider Total Count
-						int iTotalResultsForProviders = entry.getValue();
+						int iTotalResultsForProviders = oExecutor.executeCount(sQuery);
 						
-						Utils.debugLog(sProvider + " Images Found " + iTotalResultsForProviders);
-						
-						// Get the real results, paginated
-						int iObtainedResults = 0;
-						
-						// Page size
-						int iLimit = 100;
-						
-						String sProviderLimit = m_oServletConfig.getInitParameter(sProvider+".SearchListPageSize");
-						
-						if (!Utils.isNullOrEmpty(sProviderLimit)) {
-							try {
-								iLimit = Integer.parseInt(sProviderLimit);
-								Utils.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
-							}
-							catch (Exception e) {
-							}
-						}
-						
-						// Check the value, never known...
-						if (iLimit<=0) iLimit = 100;
-						
-						QueryExecutor oExecutor = getExecutor(sProvider);
-						
-						if (oExecutor == null) {
-							Utils.debugLog(s_sClassName + ".SearchList: Executor Null for Provider: " + sProvider);
-							continue;
-						}
-						
-						
-						float fMaxPages = iTotalResultsForProviders / (float)iLimit;
-						int iMaxPages = (int) Math.ceil(fMaxPages);
-						iMaxPages *= 2;
-						Utils.debugLog(s_sClassName + ".SearchList: Augmentented Max Pages: " + iMaxPages + " Total Results: " + iTotalResultsForProviders + " Limit " + iLimit);
-						
-						
-						int iActualPage = 0;
-						
-						// Until we do not get all the results
-						while (iObtainedResults < iTotalResultsForProviders) {
+						// Any result >= 0 is valid 
+						if (iTotalResultsForProviders>=0) {
+							Utils.debugLog(m_sClassName + ".searchList: [" + sProvider + "] Images Found " + iTotalResultsForProviders);
 							
-							if (iActualPage>iMaxPages) {
-								Utils.debugLog(s_sClassName + ".SearchList: cycle running out of control, actual page " + iActualPage + " , Max " + iMaxPages + " break");
-								break;
-							}
+							// Get the real results, paginated
+							int iObtainedResults = 0;
 							
-							// Actual Offset
-							String sCurrentOffset = "" + iObtainedResults;
+							// Page size
+							int iLimit = getPageLimitForProvider(sProvider);
+														
+							float fMaxPages = iTotalResultsForProviders / (float)iLimit;
+							int iMaxPages = (int) Math.ceil(fMaxPages);
+							iMaxPages *= 2;
+							Utils.debugLog(m_sClassName + ".searchList: Augmentented Max Pages: " + iMaxPages + " Total Results: " + iTotalResultsForProviders + " Limit " + iLimit);
 							
-							String sOriginalLimit = "" + iLimit;
-	
-							// How many elements do we need yet?
-							if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
-								iLimit = iTotalResultsForProviders - iObtainedResults;
-							}
-		
-							String sCurrentLimit = "" + iLimit;
 							
-							// Create the paginated Query
-							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder, sOriginalLimit);
-							// Log the query
-							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
+							int iActualPage = 0;
 							
-							try {
-								// Execute the query
-								List<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
+							// Until we do not get all the results
+							while (iObtainedResults < iTotalResultsForProviders) {
 								
-								// Did we got a result?
-								if (aoTmp != null && !aoTmp.isEmpty()) {
-									
-									// Sum the grand total
-									iObtainedResults += aoTmp.size();
-									
-									// Add the result to the output list
-									//aoResults.addAll(aoTmp);
-									
-									int iAddedResults = 0;
-									
-									// Here add the results checking to avoid duplicates
-									for (QueryResultViewModel oTempResult : aoTmp) {
-										if (!aoResults.contains(oTempResult)) {
-											aoResults.add(oTempResult);
-											iAddedResults++;
-										}
-										else {
-											Utils.debugLog(s_sClassName + ".SearchList: found duplicate image " + oTempResult.getTitle());
-										}
-									}
-									
-									Utils.debugLog(s_sClassName + ".SearchList added " + iAddedResults + " results for Query#" + iQueries +" for " + sProvider);
-								} else {
-									Utils.debugLog(s_sClassName + ".SearchList, NO results found for " + sProvider);
+								if (iActualPage>iMaxPages) {
+									Utils.debugLog(m_sClassName + ".searchList: cycle running out of control, actual page " + iActualPage + " , Max " + iMaxPages + " break");
+									break;
 								}
-							} catch (Exception oEx) {
-								Utils.debugLog(s_sClassName + ".SearchList: " + oEx);
+								
+								// Actual Offset
+								String sCurrentOffset = "" + iObtainedResults;
+								
+								String sOriginalLimit = "" + iLimit;
+		
+								// How many elements do we need yet?
+								if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
+									iLimit = iTotalResultsForProviders - iObtainedResults;
+								}
+			
+								String sCurrentLimit = "" + iLimit;
+								
+								// Create the paginated Query
+								PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, null, null, sOriginalLimit);
+								
+								// Log the query
+								Utils.debugLog(m_sClassName + ".searchList, query page " + iActualPage);
+								
+								try {
+									// Execute the query
+									List<QueryResultViewModel> aoProviderPageResult = oExecutor.executeAndRetrieve(oQuery, false);
+									
+									// Did we got a result?
+									if (aoProviderPageResult != null && !aoProviderPageResult.isEmpty()) {
+										
+										// Sum the grand total
+										iObtainedResults += aoProviderPageResult.size();
+										
+										int iAddedResults = 0;
+										
+										// Here add the results checking to avoid duplicates
+										for (QueryResultViewModel oTempResult : aoProviderPageResult) {
+											if (!aoResults.contains(oTempResult)) {
+												aoResults.add(oTempResult);
+												iAddedResults++;
+											}
+											else {
+												Utils.debugLog(m_sClassName + ".searchList: found duplicate image " + oTempResult.getTitle());
+											}
+										}
+										
+										Utils.debugLog(m_sClassName + ".searchList added " + iAddedResults + " results for Query#" + iQueries +" for " + sProvider);
+									} else {
+										Utils.debugLog(m_sClassName + ".searchList, NO results found for " + sProvider);
+									}
+								} catch (Exception oEx) {
+									Utils.debugLog(m_sClassName + ".searchList: " + oEx);
+								}
+								
+								iActualPage ++;
 							}
 							
-							iActualPage ++;
+							// Exit from the providers cylcle
+							sProvider = null;				
+						}
+						else {
+							Utils.debugLog(m_sClassName + " Error contacting " + sProvider + " try next provider");
+							sProvider = getProvider(sOriginalProviders, sPlatformType, iNextProvider);
+							iNextProvider++;
+							
+							if (sProvider != null) {
+								Utils.debugLog(m_sClassName + " selected Provider " + sProvider);
+							}
+							else {
+								Utils.debugLog(m_sClassName + " no more providers abailable ");	
+							}
 						}
 					}
-				} catch (NumberFormatException oE) {
-					Utils.debugLog(s_sClassName + ".SearchList: (maybe your request was ill-formatted: " + sQuery + " ?). : " + oE);
-					aoResults.add(null); 
+				} catch (Exception oE) {
+					Utils.debugLog(m_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
 				}
 			}
+			
+			// Set the provider as it was in origin
+			for (QueryResultViewModel oRes : aoResults) {
+				oRes.setProvider(sOriginalProviders);
+			}
+			
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".SearchList: " + oE);
+			Utils.debugLog(m_sClassName + ".SearchList: " + oE);
 		}
 		return null;
 	}
-
-	/**
-	 * Get the Query Executor for a specific provider
-	 * @param sProvider Provider code
-	 * @return QueryExecutor of the specific provider
-	 */
-	private QueryExecutor getExecutor(String sProvider) {
-		Utils.debugLog(s_sClassName + ".getExecutor, provider: " + sProvider);
-		QueryExecutor oExecutor = null;
-		try {
-			if(null!=sProvider) {
-				AuthenticationCredentials oCredentials = getCredentials(sProvider);
-				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
-				String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
 	
-				String sParserConfigPath = m_oServletConfig.getInitParameter(sProvider+".parserConfig");
-				String sAppConfigPath = m_oServletConfig.getInitParameter("MissionsConfigFilePath");
-				oExecutor = s_oQueryExecutorFactory.getExecutor(
-						sProvider,
-						oCredentials,
-						//TODO change into config method
-						sDownloadProtocol, sGetMetadata,
-						sParserConfigPath, sAppConfigPath);
-				
-				oExecutor.init();
-			}
-		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
-		}
-		return oExecutor;
-
-	}
-
+	
 	/**
-	 * Get Auth Credentials for a specific provider
-	 * @param sProvider Provider Code
-	 * @return AuthenticationCredentials entity
+	 * Get the provider type from the provider submitted by the user and the platform type 
+	 * @param sProviderInput User supplied provider request
+	 * @param sPlatform Platform type
+	 * @return Provider Code or null if there are no more choices
 	 */
-	private AuthenticationCredentials getCredentials(String sProvider) {
-		//Utils.debugLog(s_sClassName + ".getCredentials( Provider: " + sProvider + " )");
-		AuthenticationCredentials oCredentials = null;
+	String getProvider(String sProviderInput, String sPlatform) {
+		return getProvider(sProviderInput, sPlatform, 0);
+	}
+	
+	/**
+	 * Get the Provider Code from the provider submitted by the user, the platform type 
+	 * and the priority
+	 * 
+	 * @param sProviderInput User supplied provider request
+	 * @param sPlatform Platform type of the actual query
+	 * @param iPriority Priority of the catalogue (provider) to obtain
+	 * @return Provider Code or null if there are no more choices
+	 */
+	String getProvider(String sProviderInput, String sPlatform, int iPriority) {
 		try {
-			oCredentials = m_aoCredentials.get(sProvider);
-			if(null == oCredentials) {
-				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
-				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
-				oCredentials = new AuthenticationCredentials(sUser, sPassword);
-				m_aoCredentials.put(sProvider, oCredentials);
+			boolean bAuto = false;
+			if (Utils.isNullOrEmpty(sProviderInput)) {
+				bAuto = true;
 			}
-		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
+			else if (sProviderInput.equals("AUTO")) {
+				bAuto = true;
+			}
+			
+			if (bAuto) {
+				CatalogueConfig oCatalogueConfig = WasdiConfig.Current.getCatalogueConfig(sPlatform);
+				
+				if (oCatalogueConfig!=null) {
+					if (oCatalogueConfig.catalogues != null) {
+						if (iPriority<oCatalogueConfig.catalogues.size()) {
+							return oCatalogueConfig.catalogues.get(iPriority);
+						}
+					}
+				}
+				
+				return null;
+			}
 		}
-		return oCredentials;
+		catch (Exception oEx) {
+			Utils.debugLog(m_sClassName + ".getProvider: " + oEx.toString());
+		}
+		
+		if (iPriority == 0) {
+			return sProviderInput;
+		}
+		else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get the Platform from the user query
+	 * @param sQuery User Query
+	 * @return Platform Type as enumered in Platforms
+	 */
+	public String getPlatform(String sQuery) {
+		
+		QueryViewModel oQuery = m_oConcreteQueryTranslator.parseWasdiClientQuery(sQuery);
+		
+		if (oQuery != null) {
+			return oQuery.platformName;
+		}
+		else {
+			return "";
+		}
+	}
+	
+	/**
+	 * Get the limit of results that can be queried to each Data Provider
+	 * @param sProvider Data Provider
+	 * @return Specific Limit
+	 */
+	public int getPageLimitForProvider(String sProvider) {
+		// Page size
+		int iLimit = 100;
+		
+		try {
+			
+			DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
+			
+			String sProviderLimit = oDataProviderConfig.searchListPageSize;
+			
+			if (!Utils.isNullOrEmpty(sProviderLimit)) {
+				try {
+					iLimit = Integer.parseInt(sProviderLimit);
+					Utils.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
+				}
+				catch (Exception e) {
+				}
+			}
+			
+			// Check the value, never known...
+			if (iLimit<=0) iLimit = 100;
+			
+			return iLimit;			
+		}
+		catch (Exception oEx) {
+		}
+		
+		return iLimit;
+		
 	}
 
 }

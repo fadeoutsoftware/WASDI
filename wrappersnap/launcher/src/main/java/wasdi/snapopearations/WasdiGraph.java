@@ -1,12 +1,7 @@
 package wasdi.snapopearations;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,11 +19,11 @@ import org.esa.snap.core.gpf.graph.Node;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 
-import sun.management.VMManagement;
-import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductReaderFactory;
+import wasdi.operations.Operation;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessStatus;
@@ -38,14 +33,13 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
-import wasdi.shared.payload.ExecuteGraphPayload;
+import wasdi.shared.parameters.settings.GraphSetting;
+import wasdi.shared.payloads.ExecuteGraphPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.LoggerWrapper;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 
 /**
@@ -102,6 +96,11 @@ public class WasdiGraph {
 	private ProcessWorkspaceLogger m_oProcessWorkspaceLogger;
 	
 	/**
+	 * Father operation that is running the Graph
+	 */
+	private Operation m_oOperation;
+	
+	/**
 	 * Construct the Graph object
 	 * @param oParams Parameters 
 	 * @param oRabbitSender Rabbit Sender
@@ -109,21 +108,22 @@ public class WasdiGraph {
 	 * @param oProcessWorkspace Process Workspace Entity
 	 * @throws Exception
 	 */
-	public WasdiGraph(GraphParameter oParams, Send oRabbitSender, ProcessWorkspaceLogger oLogger, ProcessWorkspace oProcessWorkspace) throws Exception {
+	public WasdiGraph(GraphParameter oParams, Operation oOperation,ProcessWorkspace oProcessWorkspace) throws Exception {
 		
+		// Set operation member
+		this.m_oOperation = oOperation;
+		//set the graph parameters
+		this.m_oParams = oParams;		
 		
-		this.m_oProcessWorkspaceLogger = oLogger;
-		
-		//set the pgraph parameters
-		this.m_oParams = oParams;
-		
+		// Set the proc workspace logger
+		this.m_oProcessWorkspaceLogger = m_oOperation.getProcessWorkspaceLogger();
+				
 		//set the rabbit sender
-		this.m_oRabbitSender = oRabbitSender;
+		this.m_oRabbitSender = m_oOperation.getSendToRabbit();
 		
 		GraphSetting oGraphSettings = (GraphSetting) oParams.getSettings();
 		
 		m_oProcessWorkspaceLogger.log("Execute SNAP graph " + oGraphSettings.getWorkflowName());
-		
 		
 		//build snap graph object
 		m_oGraph = GraphIO.read(new StringReader(((GraphSetting)(oParams.getSettings())).getGraphXml()));
@@ -197,7 +197,7 @@ public class WasdiGraph {
 			m_oLogger.info("WasdiGraph.execute: start");
 			
 	        //check input file
-	        String sWorkspaceDir = LauncherMain.getWorspacePath(m_oParams);
+	        String sWorkspaceDir = LauncherMain.getWorkspacePath(m_oParams);
 	        File oWorkspaceDir = new File(sWorkspaceDir);
 	        
 	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 
@@ -290,18 +290,10 @@ public class WasdiGraph {
 		        				
 				m_oLogger.info("WasdiGraph.execute: output file set " + oOutputFile.getAbsolutePath());
 			}
-			
-			m_oLogger.info("WasdiGraph.execute: call SetFileSizeToProcess");
-			
-			// P.Campanella 16/06/2017: should add real file size to the Process Log
-            //set file size     
-            LauncherMain.setFileSizeToProcess(m_oInputFile, m_oProcess);
-			
+						
 			//build the snap graph context and processor
 			GraphContext oContext = new GraphContext(m_oGraph);		
-			GraphProcessor oProcessor = new GraphProcessor();
-			
-			m_oLogger.info("WasdiGraph.execute: call init process");
+			GraphProcessor oProcessor = new GraphProcessor();			
 			
 			//update the wasdi process 
 			initProcess();
@@ -363,17 +355,15 @@ public class WasdiGraph {
 	 */
 	private void initProcess() throws Exception {
 		if (m_oProcess != null) {
-			//set source file size in the process
-			long lInputFileSize = m_oInputFile.length();
-		    double dInputFileSizeGiga = ( (double) lInputFileSize )/ (1024.0 * 1024.0 * 1024.0);
-		    DecimalFormat oFormat = new DecimalFormat("#.00"); 	        
-		    m_oLogger.debug("WasdiGraph.initProcess: File size [Gb] = " + oFormat.format(dInputFileSizeGiga));
-		    m_oProcess.setFileSize(oFormat.format(dInputFileSizeGiga));
-		    //set process pid, status and progress
-			//m_oProcess.setPid(GetProcessId());
+			
+			// P.Campanella 16/06/2017: should add real file size to the Process Log
+            //set file size     
+            m_oOperation.setFileSizeToProcess(m_oInputFile, m_oProcess);
+            
 			m_oProcess.setStatus(ProcessStatus.RUNNING.name());
 			m_oProcess.setProgressPerc(0);
 			//update the process
+			
 		    if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		    	m_oLogger.error("WasdiGraph.initProcess: Error during process update (pip + starting)");
 		    } else {
@@ -461,8 +451,8 @@ public class WasdiGraph {
         }
         
         // Read the View Model
-        WasdiProductReader oReadProduct = new WasdiProductReader();
-		ProductViewModel oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
+        WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
+		ProductViewModel oVM = oReadProduct.getProductViewModel();
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -480,24 +470,8 @@ public class WasdiGraph {
             oOutputProduct.setFilePath(oProductFile.getAbsolutePath());
             oOutputProduct.setProductViewModel(oVM);
             oOutputProduct.setBoundingBox(sBBox);
-            
-    		// Write Metadata to file system
-            try {
-                // Get Metadata Path a Random File Name
-                String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
-        		if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
-        		String sMetadataFileName = Utils.GetRandomName();
-
-    			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel(oProductFile));
-    			
-    			oOutputProduct.getProductViewModel().setMetadataFileReference(sMetadataFileName);
-    			
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    		}            
-            
+            oOutputProduct.getProductViewModel().setMetadataFileReference(null);
+                        
             if (!oDownloadedRepo.insertDownloadedFile(oOutputProduct)) {
             	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }
@@ -506,17 +480,9 @@ public class WasdiGraph {
             }
         }
         
-        //if (bAddProductToWS) {
         addProductToWorkspace(oProductFile.getAbsolutePath(),sBBox);
-        //}
-        //else {
-        //	m_oLogger.error("Product NOT added to the Workspace");
-        //}
         
         m_oLogger.debug("OK DONE");
-        
-        //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
-        //oVM.setMetadata(null);
 
         if (m_oRabbitSender!=null) m_oRabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), m_oParams.getWorkspace(), oVM, m_oParams.getExchange());
     }
@@ -551,21 +517,6 @@ public class WasdiGraph {
 		else {
 			m_oLogger.debug("WasdiGraph.addProductToWorkspace: Product " + sProductName + " Already exists in WS " + m_oParams.getWorkspace());
 		}
-    }
-
-	/**
-	 * Get Process Id
-	 * @return
-	 * @throws Exception
-	 */
-	private int GetProcessId() throws Exception {
-        RuntimeMXBean oRuntimeMXBean = ManagementFactory.getRuntimeMXBean();
-        Field oJvmField = oRuntimeMXBean.getClass().getDeclaredField("jvm");
-        oJvmField.setAccessible(true);
-        VMManagement oVmManagement = (VMManagement) oJvmField.get(oRuntimeMXBean);
-        Method oGetProcessIdMethod = oVmManagement.getClass().getDeclaredMethod("getProcessId");
-        oGetProcessIdMethod.setAccessible(true);
-        return (int)oGetProcessIdMethod.invoke(oVmManagement);
     }
 	
 	/**

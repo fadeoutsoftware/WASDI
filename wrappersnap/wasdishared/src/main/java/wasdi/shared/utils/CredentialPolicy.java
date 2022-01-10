@@ -4,10 +4,10 @@ package wasdi.shared.utils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import wasdi.shared.business.User;
-import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
-import wasdi.shared.viewmodels.LoginInfo;
-import wasdi.shared.viewmodels.RegistrationInfoViewModel;
-import wasdi.shared.viewmodels.UserViewModel;
+import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
+import wasdi.shared.viewmodels.users.LoginInfo;
+import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.UserViewModel;
 
 public class CredentialPolicy {
 
@@ -116,18 +116,6 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-
-	private boolean validAuthServiceProvider(String sAuthServiceProvider) {
-		if(isNullOrEmpty(sAuthServiceProvider)) {
-			return false;
-		} else {
-			return( sAuthServiceProvider.toLowerCase().equals("wasdi") ||
-					sAuthServiceProvider.toLowerCase().equals("keycloak") ||
-					sAuthServiceProvider.toLowerCase().equals("google")
-			);
-		}
-	}
-
 
 	public Boolean validFirstAccessUUID(String sUUID) {
 		if(isNullOrEmpty(sUUID)) {

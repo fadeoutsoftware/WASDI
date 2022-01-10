@@ -1,5 +1,14 @@
 package wasdi.shared.business;
 
+/**
+ * WASDI Computing Node entity.
+ * Nodes has a code and are identified by an IP Address.
+ * 
+ * Nodes can be disabled when are no longer avaiable.
+ * 
+ * @author p.campanella
+ *
+ */
 public class Node {
 	/**
 	 * Unique code of the node
@@ -27,6 +36,7 @@ public class Node {
 	 * Flag to know if the node is active or not
 	 */
 	private boolean active = true;
+	
 	/**
 	 * String that represents the cloud provider
 	 */

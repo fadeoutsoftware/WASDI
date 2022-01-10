@@ -1,19 +1,22 @@
 package wasdi.shared.parameters;
 
 /**
+ * Parameter of the DOWNLOAD Operation
  * Created by s.adamo on 10/10/2016.
  */
-
-
-
 public class DownloadFileParameter extends BaseParameter{
 
     /**
      * Download url
      */
     private String url;
-
+    
     /**
+     * File name
+     */
+    private String name;
+    
+	/**
      * download user
      */
     private String downloadUser;
@@ -98,4 +101,12 @@ public class DownloadFileParameter extends BaseParameter{
 	public void setProvider(String provider) {
 		this.provider = provider;
 	}
+	
+    public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}	
 }
