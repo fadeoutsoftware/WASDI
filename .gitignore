@@ -13,6 +13,7 @@
 **/.metadata	
 /Servers/
 /.metadata/
+/docs/build/
 
 wasdiwebserver/WebContent/META-INF/
 wasdiwebserver/WebContent/WEB-INF/web.xml
