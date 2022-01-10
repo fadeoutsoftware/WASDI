@@ -22,16 +22,17 @@ For WASDI is the same.
 The world is full of different possibilities and environments and we do not want to introduce a new one. We think that every one should concentrate to obtain the result not to learn a new tool. 
 So WASDI libraries are designed to be intalled and used in every environment. 
 
-In `python <https://pypi.org/project/wasdi/>` you can use:
+In `python <https://pypi.org/project/wasdi/>`_ you can use:
 
 .. code-block:: python
-	pip install wasdi
+
+    pip install wasdi
 	
-In `IDL <https://www.wasdi.net/idlwasdilib.zip>` or `Matlab/Octave <https://www.wasdi.net/matlabwasdilib.zip>`, just donwload the lib files and save on your computer. 
+In `IDL <https://www.wasdi.net/idlwasdilib.zip>`_ or `Matlab/Octave <https://www.wasdi.net/matlabwasdilib.zip>`_, just donwload the lib files and save on your computer.
 
-For `Java <https://www.wasdi.net/javawasdilib.zip>`, just download and link our jar to you project.
+For `Java <https://www.wasdi.net/javawasdilib.zip>`_, just download and link our jar to your project.
 
-All the `WASDI libraries are Open Source <https://github.com/fadeoutsoftware/WASDI/tree/master/libraries>`.
+All the `WASDI libraries are Open Source <https://github.com/fadeoutsoftware/WASDI/tree/master/libraries>`_.
 
 
 Main Goals
@@ -44,19 +45,21 @@ The main goals on the libraries are:
 	
 The file access abstraction is very simple to use: make your code in a way that, when must access one file, it can ask the path to wasdi:
 
-.. code-block::
-	#python
+.. code-block:: python
+
 	fileFullPath = wasdi.getPath("S2B_MSIL1C_20210124T141049_N0209_R110_T20KNV_20210124T160035.zip")
 	
-.. code-block::
-	;IDL
+.. code-block:: IDL
+
 	fileFullPath = WASDIGETPATH("S2B_MSIL1C_20210124T141049_N0209_R110_T20KNV_20210124T160035.zip")
 	
 .. code-block:: java
+
 	//Java: we created an object WasdiLib oWasdiLib = new WasdiLib();
 	String sFileFullPath = oWasdiLib.getPath("S2B_MSIL1C_20210124T141049_N0209_R110_T20KNV_20210124T160035.zip");
 	
 .. code-block:: matlab
+
 	% We obtained a lib object calling Wasdi = startWasdi(config_path)
 	fileFullPath = wGetPath("S2B_MSIL1C_20210124T141049_N0209_R110_T20KNV_20210124T160035.zip")
 	
