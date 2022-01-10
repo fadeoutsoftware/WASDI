@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const CompressionPlugin = require("compression-webpack-plugin");
 const path = require("path");
 
 module.exports = {
@@ -106,6 +107,11 @@ module.exports = {
         clean: true
     },
     plugins: [
+        new CompressionPlugin(
+            {   
+                test: /\.js(\?.*)?$/i,
+              }
+        ),
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, ".", "index-optimized.html")
         }),
