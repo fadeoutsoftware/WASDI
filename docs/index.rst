@@ -14,6 +14,9 @@ WASDI web platform is the best starting point for your journey on Earth Observat
 
 This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main concepts and use WASDI for your EO research.
 
+If you're acquired the basic concepts of WASDI and you're interested in how processors can be launched,  take a look at
+:doc:`this tutorial </SynchAsynch>`. This will highlights Synchronous and Asynchronous WASDI programming.
+
 
 .. toctree::
    :maxdepth: 2
@@ -21,6 +24,7 @@ This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main conce
    :caption: Getting started
 
    WasdiTutorial.rst
+   SynchAsynch.rst
 
 WASDI Marketplace
 ---------------------------
@@ -68,6 +72,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    :hidden:
    :caption: Libraries
 
+   LibsConcepts.rst
    octave/octave.rst
    java/WasdiLib.rst
    python/waspy.rst
