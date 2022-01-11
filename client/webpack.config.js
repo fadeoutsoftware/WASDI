@@ -113,7 +113,10 @@ module.exports = {
               }
         ),
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, ".", "index-optimized.html")
+            template: path.resolve(__dirname, ".", "index-optimized.html"),
+            templateParameters: {
+                KCURL : process.env.KEYCLOAK_URL
+            }
         }),
         new CopyPlugin({
             patterns: [
