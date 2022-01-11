@@ -3,6 +3,12 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+
+## [0.7.0.1] - 2022-01-11
+
+### Fixed
+- error introduced in asyncMosaic
+
 ## [0.7.0] - 2021-11-24
 
 ### Added
