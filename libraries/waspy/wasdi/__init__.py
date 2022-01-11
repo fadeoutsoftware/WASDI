@@ -32,7 +32,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.0
+Version 0.7.0.1
 
 Last Update: 03/12/2021
 
@@ -2997,7 +2997,7 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
 
-    return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, True)
+    return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, fPixelSizeX=None, fPixelSizeY=None, bAsynch=True)
 
 
 def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None,
