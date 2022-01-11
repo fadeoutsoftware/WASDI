@@ -58,6 +58,9 @@ If you already know WASDI features and you are a Python developer check out the 
    :hidden:
    :caption: Programming tutorials
 
+   LibsConcepts.rst
+   PythonLandsatTutorial.rst
+   LibWorkspaces.rst
    PythonTutorial.rst
 
 
@@ -70,10 +73,9 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Libraries
+   :caption: Libraries references
 
    python/waspy.rst
-   LibsConcepts.rst
    octave/octave.rst
    java/WasdiLib.rst
 
