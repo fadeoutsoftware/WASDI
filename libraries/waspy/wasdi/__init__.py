@@ -3018,7 +3018,7 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
 
-    return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, fPixelSizeX=None, fPixelSizeY=None, bAsynch=True)
+    return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, fPixelSizeX=fPixelSizeX, fPixelSizeY=fPixelSizeY, bAsynch=True)
 
 
 def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None,
