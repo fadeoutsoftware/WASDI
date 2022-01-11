@@ -22,10 +22,10 @@ Developers can access their own workspaces or the workspaces other users shared 
 Workspace functionalities
 ------------------------------------------
 Using the libraries, a developer can:
-*Get the id of the active workspace
-*Get the name of a workpace from the Id or viceversa
-*Open another workspace
-*Get the list of user workspaces
+*Get the id of the active workspace*
+*Get the name of a workpace from the Id or viceversa*
+*Open another workspace*
+*Get the list of user workspaces*
 
 Workspaces Sample Code
 ------------------------------------------
@@ -33,6 +33,7 @@ Workspaces Sample Code
 The following python app make some sample of what you can do with workspaces:
 
 .. code-block:: python
+
 	import wasdi
 
 	def run():
@@ -73,7 +74,8 @@ At the beginning we read the Id of the active workspace (getActiveWorkspaceId). 
 Then we get the name of this workspace (getWorkspaceNameById).
 We want next to get the list of the users' workspaces (getWorkspaces): this method returns a list of dictionaries: each object has these properties
 
-.. code-block::
+.. code-block:: java
+
 	"ownerUserId":STRING,
 	"sharedUsers":[STRING],
 	"workspaceId":STRING,
@@ -84,6 +86,7 @@ Finally, we come back to our original workspace using the id we collected before
 
 The output will be something similar to this:
 .. code-block::
+
 	WorkspaceId is: a5dc8f79-3e89-46b5-8d39-169e9ecb0a98
 	WorkspaceName is: TutorialWorkspace
 	User has 108 Workspaces
@@ -95,10 +98,10 @@ Products functionalities
 ------------------------------------------
 The functionalities to work with products are:
 
-*get the list of products in a workspace
-*check if a product is in the workspace or not
-*get the local path of the product
-*add a new product to the workspace
+*get the list of products in a workspace*
+*check if a product is in the workspace or not*
+*get the local path of the product*
+*add a new product to the workspace*
 
 
 Products Sample Code
@@ -111,6 +114,7 @@ Please note that this code can take some time to be executed the first time you 
 The goal of this tutorial is not to manipulate files so, the "new" file, is created just making a copy of an existing one with a different name.
 
 .. code-block:: python
+
 	import wasdi
 	import os
 	from shutil import copyfile
