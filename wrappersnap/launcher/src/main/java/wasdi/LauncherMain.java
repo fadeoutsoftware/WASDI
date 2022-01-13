@@ -299,8 +299,8 @@ public class LauncherMain  {
 			try {
 				// Stop SNAP Engine
 				Engine.getInstance().stop();
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (Exception oE) {
+				s_oLogger.error("main: while doing Engine.getInstance().stop(): " + oE);
 			}
         }
     }

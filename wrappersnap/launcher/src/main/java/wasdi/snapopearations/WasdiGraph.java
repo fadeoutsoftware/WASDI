@@ -290,18 +290,10 @@ public class WasdiGraph {
 		        				
 				m_oLogger.info("WasdiGraph.execute: output file set " + oOutputFile.getAbsolutePath());
 			}
-			
-			m_oLogger.info("WasdiGraph.execute: call SetFileSizeToProcess");
-			
-			// P.Campanella 16/06/2017: should add real file size to the Process Log
-            //set file size     
-            m_oOperation.setFileSizeToProcess(m_oInputFile, m_oProcess);
-			
+						
 			//build the snap graph context and processor
 			GraphContext oContext = new GraphContext(m_oGraph);		
-			GraphProcessor oProcessor = new GraphProcessor();
-			
-			m_oLogger.info("WasdiGraph.execute: call init process");
+			GraphProcessor oProcessor = new GraphProcessor();			
 			
 			//update the wasdi process 
 			initProcess();
@@ -363,17 +355,15 @@ public class WasdiGraph {
 	 */
 	private void initProcess() throws Exception {
 		if (m_oProcess != null) {
-			//set source file size in the process
-			long lInputFileSize = m_oInputFile.length();
-		    double dInputFileSizeGiga = ( (double) lInputFileSize )/ (1024.0 * 1024.0 * 1024.0);
-		    DecimalFormat oFormat = new DecimalFormat("#.00"); 	        
-		    m_oLogger.debug("WasdiGraph.initProcess: File size [Gb] = " + oFormat.format(dInputFileSizeGiga));
-		    m_oProcess.setFileSize(oFormat.format(dInputFileSizeGiga));
-		    //set process pid, status and progress
-			//m_oProcess.setPid(GetProcessId());
+			
+			// P.Campanella 16/06/2017: should add real file size to the Process Log
+            //set file size     
+            m_oOperation.setFileSizeToProcess(m_oInputFile, m_oProcess);
+            
 			m_oProcess.setStatus(ProcessStatus.RUNNING.name());
 			m_oProcess.setProgressPerc(0);
 			//update the process
+			
 		    if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		    	m_oLogger.error("WasdiGraph.initProcess: Error during process update (pip + starting)");
 		    } else {

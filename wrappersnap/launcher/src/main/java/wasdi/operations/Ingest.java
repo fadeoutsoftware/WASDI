@@ -77,9 +77,15 @@ public class Ingest extends Operation {
             // Usually, we do not unzip after the copy
             boolean bUnzipAfterCopy = false;
 
+            WasdiProductReader oReadProduct = null;
+            ProductViewModel oImportProductViewModel = null;
             // Try to read the Product view Model
-			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
-			ProductViewModel oImportProductViewModel = oReadProduct.getProductViewModel();
+            try {
+				oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
+				oImportProductViewModel = oReadProduct.getProductViewModel();
+            } catch (Exception oE) {
+            	m_oLocalLogger.error("Ingest.executeOperation: cannot read product. Maybe file needs unzipping?");
+			}
 
             String sDestinationFileName = oFileToIngestPath.getName();
 
@@ -94,7 +100,7 @@ public class Ingest extends Operation {
                     if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
 
                         // May be.
-                        m_oLocalLogger.info("Ingest.executeOperation: File to ingest looks can be a zipped shape file, try to unzip");
+                        m_oLocalLogger.info("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
 
                         // Unzip
                         ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
@@ -103,9 +109,10 @@ public class Ingest extends Operation {
                         // Get the name of shp from the zip file (case safe)
                         String sShapeFileTest = oShapeFileUtils.getShpFileNameFromZipFile(oFileToIngestPath.getPath(), 30);
 
-                        if (Utils.isNullOrEmpty(sShapeFileTest) == false) {
+                        File oShapeFileIngestPath = null;
+                        if (!Utils.isNullOrEmpty(sShapeFileTest)) {
                             // Ok, we have our file
-                            File oShapeFileIngestPath = new File(oFileToIngestPath.getParent() + "/" + sShapeFileTest);
+                            oShapeFileIngestPath = new File(oFileToIngestPath.getParent() + "/" + sShapeFileTest);
 							
 							WasdiProductReader oReadShapeProduct = WasdiProductReaderFactory.getProductReader(oShapeFileIngestPath);
 							
@@ -117,6 +124,11 @@ public class Ingest extends Operation {
                             m_oProcessWorkspaceLogger.log("Found shape file");
 
                             sDestinationFileName = sShapeFileTest;
+                        }
+                        if(oShapeFileIngestPath != null && oFileToIngestPath.exists()) {
+	                        deleteZipFile(oFileToIngestPath);
+	                        //point the file to be ingested to the .shp extracted shapefile
+	                        oFileToIngestPath = new File(oShapeFileIngestPath.getAbsolutePath());
                         }
                     }
                 }
@@ -196,6 +208,18 @@ public class Ingest extends Operation {
         }
         
 		return false;
+	}
+
+	private void deleteZipFile(File oZippedFileToIngestWithAbsolutePath) {
+		String sFileName = null;
+		try {
+			sFileName = oZippedFileToIngestWithAbsolutePath.getName();
+		    if(!oZippedFileToIngestWithAbsolutePath.delete()) {
+		    	m_oLocalLogger.error("Ingest.executeOperation: could not delete zip file " + oZippedFileToIngestWithAbsolutePath.getName());
+		    }
+		} catch (Exception oE) {
+			m_oLocalLogger.warn("Ingest.executeOperation: exception while trying to delete zip file "  + sFileName +  ": " + oE);
+		}
 	}
 
 }

@@ -1,78 +1,50 @@
-# \_\_/== Changelog ==\\\_\_
-
-WASDI python programming library CHANGELOG.md, according to the 
-[standard proposed by keepchangelog](https://keepachangelog.com/)
-
-## [0.7.4] - 2021-01-01
-
-### Added
-- Support to the AUTO Data Provider
-
-### Fixed
-- Bug on the searchEOImages query dates composition
-- Removed internal params from getParametersDict
-
-## [0.7.0.1] - 2022-01-11
-
-### Fixed
-- error introduced in asyncMosaic
 
 
-## [0.7.0] - 2021-11-24
 
-### Added
-- getWorkspaceNameById: return the name of a workspace from the id
-- sen2Core: executes sen2Core on a S2L1 image
+### [0.6.5] - 2021-09-02
 
-### Fixed
-- updated all methods to new APIs
-- checked null or empty list in waitProcesses
-- Wrong paths in some calls (paths changed after server refactoring)
-
-## [0.6.5] - 2021-09-02
-
-### Added
+ Added
 - REQUEST TIMEOUT: added a timeout to all the requests calls. It is 2 min by default. Can be configured in config.json, key REQUESTSTIMEOUT, value is the number of seconds
-### Fixed
+ Fixed
 - searchEOImages: fixed file name in VIIRS (replace .part with _part)
 
 
-## [0.6.4] - 2021-05-21
+### [0.6.4] - 2021-05-21
 
-### Fixed
+ Fixed
 - searchEOImages: fixed file name in VIIRS (replace .part with _part)
 
-## [0.6.3] - 2021-05-21
+### [0.6.3] - 2021-05-21
 
-### Added
+ Added
 - searchEOImages: support to Landsat8, VIIRS, ENVISAT
 
-### Changed
+ Changed
 
 - added support to relative path in copy to sftp
 
-## [0.6.2] - 2021-03-10
+### [0.6.2] - 2021-03-10
 
-### Changed
+ Changed
 
 - moved to https
 
-## [0.6.1] - 2021-01-14
+### [0.6.1] - 2021-01-14
 
-### Added
+ Added
 - getProcessesByWorkspace: gets a list of the processes executed in the active workspace
 
-### Fixed
+ Fixed
 
-- import `__builtin__` or `builtins` depending on the version of Python being used 
+- import `__builtin__` or `builtins` depending on the version of Python being used
 
-### Changed
+ Changed
 
-- removed log in `updateProcessStatus` when the percent == -1, as that value is assigned by default by other calls 
+- removed log in `updateProcessStatus` when the percent == -1, as that value is assigned by default by other calls
 
-## [0.6.0] - 2020-10-28
+### [0.6.0] - 2020-10-28
 
-### Added
+ Added
 
 - support to the auto upload and download by nodes
 - getProcessorPath method to have the absolute path of the running processor
@@ -80,275 +52,275 @@ WASDI python programming library CHANGELOG.md, according to the
 - Support for string and json bounding box in the searchEOImages method
 - importImage methods use the provider specified in the image properties if not set
 
-### Fixed
+ Fixed
 
 - Removed internal libraries logs
 
-## [0.5.1] - 2020-05-27
+### [0.5.1] - 2020-05-27
 
-### Fixed
+ Fixed
 
 - add File to WASDI did a double file Ingest
 - Auto upload was active also on server
 - Moved upload and download as private methods
 
-## [0.5.0] - 2020-05-15
+### [0.5.0] - 2020-05-15
 
-### Added
+ Added
 
 - support to the optmized Distributed Architecture
 
-## [0.4.2] - 2020-04-30
+### [0.4.2] - 2020-04-30
 
-### Added
+ Added
 
 - added deleteWorkspace method
 
-## [0.4.1] - 2020-04-22
+### [0.4.1] - 2020-04-22
 
-### Added
+ Added
 
 - added log in searchEOImages
 
-## [0.4.0] - 2020-04-22
+### [0.4.0] - 2020-04-22
 
-### Added
+ Added
 
 - check for availability of params file
 - executeProcessor supporting POST other than GET
 
-### Fixed
+ Fixed
 
 - bug in getProcessorPayload due to string concatenation with non string
 
-## [0.3.5] - 2020-04-21
+### [0.3.5] - 2020-04-21
 
-### Added
+ Added
 
 - get payload given process id
 
-### Changed
+ Changed
 
 - added retry and logs to the executeProcess
 - added check to the getProcess Status to return ERROR if processId is null or empty
-- use of optimized API to get process status 
+- use of optimized API to get process status
 
-## [0.3.3] - 2020-04-10
+### [0.3.3] - 2020-04-10
 
-### Added
+ Added
 
 - Added big tiff support to multiSubset (added flag, False by default)
-- Added wasdi.copyFileToSftp to copy a file from a workpsace to the user wasdi sftp folder 
+- Added wasdi.copyFileToSftp to copy a file from a workpsace to the user wasdi sftp folder
 
-## [0.3.2] - 2020-04-02
+### [0.3.2] - 2020-04-02
 
-### Added
+ Added
 
 - Updated waitProcesses to use Massive API
 - Updated importAndPreprocess to start all downloads in asynch way from the beginning
 - Fixed log in update Progress Perc
 
 
-## [0.3.1] - 2020-03-26
+### [0.3.1] - 2020-03-26
 
-### Added
+ Added
 
 - Private API to set the subprocess id
 
-## [0.3.0] - 2020-03-20
+### [0.3.0] - 2020-03-20
 
-### Added
+ Added
 
 - Support to distributed WASDI nodes
 
-## [0.2.12] - 2020-03-18
+### [0.2.12] - 2020-03-18
 
-### Added
+ Added
 
 - (Automatic) upload (& ingestion) of files in wasdi
 
-## [0.2.11] - 2020-03-11
+### [0.2.11] - 2020-03-11
 
-### Added
+ Added
 
 - users can now log at different levels: DEBUG, INFO, WARNING, ERROR and CRITICAL, using respectively: debugLog, infoLog, warningLog, errorLog and criticalLog
 
-### Fixed
+ Fixed
 
 - solved error in getProductBBOX internal url construction (it was introduced in last update)
 
-## [0.2.10] - 2020-03-06
+### [0.2.10] - 2020-03-06
 
-### Added
+ Added
 
 - DEBUG log at the beginning of each method (except those that would log anyway)
 
-### Changed
+ Changed
 
 - improved 'pythonicyty' of IFs
 - improved exception handling
 - improved clarity of log messages
 
-## [0.2.9] - 2020-02-24
+### [0.2.9] - 2020-02-24
 
-### Changed
+ Changed
 
 - Separate changelog according to [keepachangelog](https://keepachangelog.com/)
 - Introduced use of python logging instead of prints and _log
-  - Log at DEBUG level each time a method is accessed
-  - Log (at ERROR or WARNING, as appropriate), each time an exception is caught 
+    - Log at DEBUG level each time a method is accessed
+    - Log (at ERROR or WARNING, as appropriate), each time an exception is caught
 
-### Fixed
+ Fixed
 
 - minor errors in f-strings construction
 
 
-## [0.2.8] - 2020-02-05
+### [0.2.8] - 2020-02-05
 
-### Fixed
+ Fixed
 
 - Solved a bug in the _waitForResume private method.
 
-## [0.2.7] - 2020-01-25
+### [0.2.7] - 2020-01-25
 
-## Added
+ Added
 
 - Support to Provider selection for search and import
 - Generic getPath method for both writing and reading
 - Exception handling in getProductBBOX
-- Limit to 10 tiles in multiSubset 
+- Limit to 10 tiles in multiSubset
 
-## [0.2.3] - 2020-01-23
+### [0.2.3] - 2020-01-23
 
-### Added
+ Added
 
 - Support to WAITING and READY Process State
 
-## [0.1.34] - 2019-12/20
+### [0.1.34] - 2019-12/20
 
-### Added
+ Added
 
 - createWorkspace
 
-### Fixed
+ Fixed
 
 - asynchExecuteProcess bug
 
-### Changed
+ Changed
 
 - Reviewed comment based documentation of all methods
 
-## [0.1.32] - 2019-12-19
+### [0.1.32] - 2019-12-19
 
-### Fixed
+ Fixed
 
 - import bug on a not requested package
 
-## [0.1.31] - 2019-12-18
+### [0.1.31] - 2019-12-18
 
-### Added
+ Added
 
 - multiSubset support
 - console input of user, pw and workspace if config is not specified
 
-## [0.1.30] - 2019-12-10
+### [0.1.30] - 2019-12-10
 
-### Added
+ Added
 
 - asynch version of the import Products Method
 - import Product for a list of files
 - get Product Bounding Box
 - first version of importAndPreprocess Version
 
-### Fixed
+ Fixed
 
 - bug on Verbose Flag
 
-## [0.1.29] - 2019-11-05
+### [0.1.29] - 2019-11-05
 
-### Fixed
+ Fixed
 
-- possible infinite loop in addFileToWASDI 
+- possible infinite loop in addFileToWASDI
 
-## [0.1.28] - 2019-10-28
+### [0.1.28] - 2019-10-28
 
-### Added
+ Added
 
-  - support to .vrt format for mosaic 
+- support to .vrt format for mosaic
 
-## [0.1.26] - 2019-10-24
+### [0.1.26] - 2019-10-24
 
-### Added
+ Added
 
 - try and catch to importProduct
 
-### Changed
+ Changed
 
 - getFullProductPath works also for non existing files
 
-## [0.1.23] - 2019-10-23
+### [0.1.23] - 2019-10-23
 
-### Fixed
+ Fixed
 
 - deleteProduct bug (did not get standard headers)
 
-## [0.1.22] - 2019-10-16
+### [0.1.22] - 2019-10-16
 
-### Changed
+ Changed
 
 - updated mosaic to last gdal-supported version
 
-## [0.1.21] - 2019-10-15
+### [0.1.21] - 2019-10-15
 
-### Changed
+ Changed
 
 - moved fileExistInWasdi from protected to public
 
-## [0.1.20] - 2019-10-15
+### [0.1.20] - 2019-10-15
 
-### Added
+ Added
 
 - possibility to run synch and asynch workflows without the need to use the array of input and ouput files if not needed: user can pass just strings
 
-## [0.1.19] - 15/10/2019
+### [0.1.19] - 15/10/2019
 
-### Removed
+ Removed
 
 - unwanted import from wasdi lib
-    
-## [0.1.18] - 2019-10-15
 
-### Changed
+### [0.1.18] - 2019-10-15
+
+ Changed
 
 - Splitted importEO product in two version: one with product dictionary object and one with url and bbox
 
-### Fixed
+ Fixed
 
 - waitProcesses syntax for python 2 compatibility
 
-## [0.1.17]- 2019-10-15
+### [0.1.17]- 2019-10-15
 
-### Added
+ Added
 
 - waitProcesses to wait for more than one asynch process
 - getParamter version with a second optional parameter to use as default
 
-### Fixed
+ Fixed
 
 - bug about cloud coverage in search EO Images
 
-## [0.1.16] - 2019-09-16
+### [0.1.16] - 2019-09-16
 
-### Added
+ Added
 
 - setPayload to set the payload of the actual running processor.
 
-### Fixed
+ Fixed
 
 - getFullProductPath bug to support many files on the same folder
-     
-## [0.1.15]
 
-### Fixed
+### [0.1.15]
+
+ Fixed
 
 - Path generation for execution on shared workspaces

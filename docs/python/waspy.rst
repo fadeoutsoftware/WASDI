@@ -11,7 +11,7 @@ Legal Notice
 -------------------
 WASDI Sàrl
 
-**Disclaimer **
+**Disclaimer**
 The library is provided "as-is" without warranty
 
 Neither FadeOut Software (IT) Srl or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
@@ -43,6 +43,9 @@ the return statues
 
 Version 0.6.2
 Last Update: 10/03/2021
+
+
+
 
 Tested with: Python 2.7, Python 3.7
 
@@ -561,15 +564,15 @@ _getDefaultCRS
    :members: _getDefaultCRS
 
 
-Process finished with exit code 0
+Changelog
+---------------------------------------
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+
+   changelog.md
 
 
-
-
-.. Logging Utils
-.. ^^^^^^^^^^^^^^^^^^^^ Reference for subsection with different modules. Check how to remove comments from automodule
-
-.. .. automodule:: wasdi :members: setVerbose, util
 
 
 

@@ -474,7 +474,7 @@ WASDI will take control of the process and handle the task by queuing the reques
 
 .. image:: _static/python_tutorial_images/downloading0.png
 
-If you clic on the list icon in the bottom right corner of the screen, you can also view details for each operation in progress:
+If you click on the list icon in the bottom right corner of the screen, you can also view details for each operation in progress:
 
 .. image:: _static/python_tutorial_images/downloading1.png
 

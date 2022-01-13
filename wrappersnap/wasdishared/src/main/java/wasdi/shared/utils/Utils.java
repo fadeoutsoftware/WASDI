@@ -232,16 +232,16 @@ public class Utils {
 
 	/**
 	 * Format in a human readable way a file dimension in bytes
-	 * @param bytes
+	 * @param lBytes
 	 * @return
 	 */
-	public static String GetFormatFileDimension(long bytes) {
-		int unit = 1024;
-		if (bytes < unit)
-			return bytes + " B";
-		int exp = (int) (Math.log(bytes) / Math.log(unit));
-		String pre = ("KMGTPE").charAt(exp - 1) + "";
-		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+	public static String GetFormatFileDimension(long lBytes) {
+		int iUnit = 1024;
+		if (lBytes < iUnit)
+			return lBytes + " B";
+		int iExp = (int) (Math.log(lBytes) / Math.log(iUnit));
+		String sPrefix = ("KMGTPE").charAt(iExp - 1) + "";
+		return String.format("%.1f %sB", lBytes / Math.pow(iUnit, iExp), sPrefix);
 	}
 	
 	/**
