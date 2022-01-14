@@ -428,17 +428,17 @@ public class ZipFileUtils {
 	 */
 	public static void cleanUnzipFile(File zipFile, File destDir) throws IOException {
 		if (zipFile == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile is null");
+			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile is null");
 			return;
 		} else if (!zipFile.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
+			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
 		}
 
 		if (destDir == null) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir is null");
+			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir is null");
 			return;
 		} else if (!destDir.exists()) {
-			Utils.log("ERROR", "WasdiFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
+			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
@@ -460,6 +460,52 @@ public class ZipFileUtils {
 				deleteFile(fileZipPath);
 			}
 		}
+	}
+
+	public static void fixZipFileInnerSafePath(String zipFilePath) throws IOException {
+		if (zipFilePath == null) {
+			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
+			return;
+		}
+		
+		File zipFile = new File(zipFilePath);
+		if (!zipFile.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
+			return;
+		}
+
+		String dirPath = completeDirPath(zipFile.getParentFile().getAbsolutePath());
+		String simpleName = removeZipExtension(zipFile.getName());
+
+		String unzippedDirectoryPath = dirPath + simpleName;
+		File unzippedDirectory = new File(unzippedDirectoryPath);
+
+		if  (!unzippedDirectory.exists()) {
+			unzippedDirectory.mkdirs();
+		}
+
+		ZipFileUtils oZipExtractor = new ZipFileUtils();
+		oZipExtractor.unzip(zipFilePath, unzippedDirectoryPath);
+
+		File[] files = unzippedDirectory.listFiles();
+		while (files != null && files.length > 0) {
+			for (File file : files) {
+				if (file.isDirectory()) {
+					if ((simpleName).equalsIgnoreCase(file.getName())) {
+						oZipExtractor.zip(file.getAbsolutePath(), dirPath + simpleName + "_temp" + ".zip");
+						files = null;
+						break;
+					} else {
+						files = file.listFiles();
+						continue;
+					}
+				}
+			}
+		}
+
+		deleteFile(unzippedDirectoryPath);
+		deleteFile(zipFilePath);
+		WasdiFileUtils.renameFile(dirPath + simpleName + "_temp" + ".zip", simpleName + ".zip");
 	}
 
 }

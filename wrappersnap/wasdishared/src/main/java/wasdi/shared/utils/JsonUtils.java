@@ -69,6 +69,20 @@ public final class JsonUtils {
 		return null;
 	}
 
+	public static List<String> jsonToListOfStrings(String sJson) {
+
+		List<String> aoJSONList;
+		try {
+			aoJSONList = s_oMapper.readValue(sJson, new TypeReference<List<String>>(){});
+
+			return aoJSONList;
+		} catch (JsonProcessingException oE) {
+			Utils.debugLog("JsonUtils.jsonToListOfStringss: could not parse the JSON payload due to " + oE + ".");
+		}
+
+		return null;
+	}
+
 	public static String getProperty(Map<String, String> aoJSONMap, String sKey) {
 		if (aoJSONMap == null) {
 			return null;
@@ -117,6 +131,10 @@ public final class JsonUtils {
 			List<?> list = (List<?>) oObject;
 
 			int ordinal = Integer.parseInt(aoTokens[0]);
+
+			if (list.size() <= ordinal) {
+				return null;
+			}
 
 			if (aoTokens.length == 1) {
 				return list.get(ordinal);

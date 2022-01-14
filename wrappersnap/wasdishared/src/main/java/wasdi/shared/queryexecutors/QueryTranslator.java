@@ -89,6 +89,17 @@ public abstract class QueryTranslator {
 	 * Token of ERA5 platform
 	 */
 	private static final String s_sPLATFORMNAME_ERA5 = "platformname:ERA5";
+
+	/**
+	 * Token of DEM platform
+	 */
+	private static final String s_sPLATFORMNAME_DEM = "platformname:DEM";
+
+	/**
+	 * Token of WorldCover platform
+	 */
+	private static final String s_sPLATFORMNAME_WORLD_COVER = "platformname:WorldCover";
+
 	/**
 	 * Token of PLANET platform
 	 */
@@ -475,6 +486,12 @@ public abstract class QueryTranslator {
 			
 			parsePlanet(sQuery, oResult);
 
+			// Try get Info about DEM
+			parseDEM(sQuery, oResult);
+
+			// Try get Info about WorldCover
+			parseWorldCover(sQuery, oResult);
+
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -482,6 +499,30 @@ public abstract class QueryTranslator {
 		}
 
 		return oResult;
+	}
+
+	/**
+	 * Remove the platform token from the query.
+	 * 
+	 * @param sQuery the query
+	 * @param sPlatformToken the platform token
+	 * @return
+	 */
+	private static String removePlatformToken(String sQuery, String sPlatformToken) {
+		int iStart = sQuery.indexOf(sPlatformToken);
+
+		if (iStart >= 0) {
+			iStart += sPlatformToken.length();
+			int iEnd = sQuery.indexOf(')', iStart);
+			if (iEnd < 0) {
+				sQuery = sQuery.substring(iStart);
+			} else {
+				sQuery = sQuery.substring(iStart, iEnd);
+			}
+			sQuery = sQuery.trim();
+		}
+
+		return sQuery;
 	}
 
 	/**
@@ -493,111 +534,98 @@ public abstract class QueryTranslator {
 	private void parseSentinel1(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_1)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_1);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_1);
+				oResult.platformName = Platforms.SENTINEL1;
 
-				if (iStart >= 0) {
+				// check for product type
+				try {
+					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
+						int iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find product type");
+						}
+						iStart += s_sPRODUCTTYPE.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types can be OCN, GRD, SLC, all of three letters
+							iEnd = iStart + 3;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
 
-					iStart += s_sPLATFORMNAME_SENTINEL_1.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
+						oResult.productType = sType;
 					}
-					sQuery = sQuery.trim();
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
+							+ " ): error while parsing product type: " + oE);
+				}
 
-					oResult.platformName = Platforms.SENTINEL1;
+				// check for product type
+				try {
+					if (sQuery.contains(QueryTranslator.s_sSENSORMODE)) {
+						int iStart = sQuery.indexOf(s_sSENSORMODE);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find sensor mode");
+						}
+						iStart += s_sSENSORMODE.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types can be SM, IW, EW, WV all of two letters
+							iEnd = iStart + 2;
+						}
+						String sMode = sQuery.substring(iStart, iEnd);
+						sMode = sMode.trim();
 
-					// check for product type
+						oResult.sensorMode = sMode;
+					}
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
+							+ " ): error while parsing product type: " + oE);
+				}
+
+				// check for relative orbit
+				if (sQuery.contains(QueryTranslator.s_sRELATIVEORBITNUMBER)) {
 					try {
-						if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
-							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find product type");
-							}
-							iStart += s_sPRODUCTTYPE.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// the types can be OCN, GRD, SLC, all of three letters
-								iEnd = iStart + 3;
-							}
-							String sType = sQuery.substring(iStart, iEnd);
-							sType = sType.trim();
-
-							oResult.productType = sType;
+						int iStart = sQuery.indexOf(s_sRELATIVEORBITNUMBER);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find relative orbit number");
 						}
+						iStart += s_sRELATIVEORBITNUMBER.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')');
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// if anything else failed, skip digits
+							iEnd = iStart;
+							while (iEnd < sQuery.length() && Character.isDigit(sQuery.charAt(iEnd))) {
+								iEnd++;
+							}
+						}
+						String sOrbit = sQuery.substring(iStart, iEnd);
+						int iOrbit = Integer.parseInt(sOrbit);
+
+						oResult.relativeOrbit = iOrbit;
+
 					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
-								+ " ): error while parsing product type: " + oE);
-					}
-
-					// check for product type
-					try {
-						if (sQuery.contains(QueryTranslator.s_sSENSORMODE)) {
-							iStart = sQuery.indexOf(s_sSENSORMODE);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find sensor mode");
-							}
-							iStart += s_sSENSORMODE.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// the types can be SM, IW, EW, WV all of two letters
-								iEnd = iStart + 2;
-							}
-							String sMode = sQuery.substring(iStart, iEnd);
-							sMode = sMode.trim();
-
-							oResult.sensorMode = sMode;
-						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
-								+ " ): error while parsing product type: " + oE);
-					}
-
-					// check for relative orbit
-					if (sQuery.contains(QueryTranslator.s_sRELATIVEORBITNUMBER)) {
-						try {
-							iStart = sQuery.indexOf(s_sRELATIVEORBITNUMBER);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find relative orbit number");
-							}
-							iStart += s_sRELATIVEORBITNUMBER.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')');
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// if anything else failed, skip digits
-								iEnd = iStart;
-								while (iEnd < sQuery.length() && Character.isDigit(sQuery.charAt(iEnd))) {
-									iEnd++;
-								}
-							}
-							String sOrbit = sQuery.substring(iStart, iEnd);
-							int iOrbit = Integer.parseInt(sOrbit);
-
-							oResult.relativeOrbit = iOrbit;
-
-						} catch (Exception oE) {
-							Utils.debugLog("QueryTranslator.parseWasdiClientQuery(" + sQuery
-									+ " ): error while parsing relative orbit: " + oE);
-						}
+						Utils.debugLog("QueryTranslator.parseWasdiClientQuery(" + sQuery
+								+ " ): error while parsing relative orbit: " + oE);
 					}
 				}
 			}
@@ -616,23 +644,12 @@ public abstract class QueryTranslator {
 
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_2)) {
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_2);
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_2);
 
-				if (iStart >= 0) {
+				oResult.platformName = Platforms.SENTINEL2;
 
-					iStart += s_sPLATFORMNAME_SENTINEL_2.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-
-					oResult.platformName = Platforms.SENTINEL2;
-
-					// check for cloud coverage
-					parseCloudCoverage(sQuery, oResult);
-				}
+				// check for cloud coverage
+				parseCloudCoverage(sQuery, oResult);
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("QueryTranslator.parseSentinel_2( " + sQuery + " ): " + oE);
@@ -646,18 +663,15 @@ public abstract class QueryTranslator {
 	 */
 	private void parseCloudCoverage(String sQuery, QueryViewModel oResult) {
 		
-		int iStart = 0;
-		int iEnd = 0;
-		
 		// check for cloud coverage
 		try {
 			if (sQuery.toLowerCase().contains(QueryTranslator.s_sCLOUDCOVERPERCENTAGE)) {
-				iStart = sQuery.toLowerCase().indexOf(s_sCLOUDCOVERPERCENTAGE);
+				int iStart = sQuery.toLowerCase().indexOf(s_sCLOUDCOVERPERCENTAGE);
 
 				if (iStart >= 0) {
 
 					iStart += s_sCLOUDCOVERPERCENTAGE.length();
-					iEnd = sQuery.indexOf(']', iStart);
+					int iEnd = sQuery.indexOf(']', iStart);
 					String sSubQuery = sQuery.substring(iStart, iEnd);
 
 					String[] asCloudLimits = sSubQuery.split(" TO ");
@@ -691,90 +705,92 @@ public abstract class QueryTranslator {
 	private void parseVIIRS(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_VIIRS)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_VIIRS);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_VIIRS);
+				oResult.platformName = Platforms.VIIRS;
 
-				if (iStart >= 0) {
-
-					iStart += s_sPLATFORMNAME_VIIRS.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
-
-					oResult.platformName = Platforms.VIIRS;
-
-					// check for product type
-					try {
-						if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
-							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find product type");
-							}
-							iStart += s_sPRODUCTTYPE.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// the types can be VIIRS_1d_composite, VIIRS_5d_composite all 18 letters
-								iEnd = iStart + 18;
-							}
-							String sType = sQuery.substring(iStart, iEnd);
-							sType = sType.trim();
-
-							oResult.productType = sType;
+				// check for product type
+				try {
+					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
+						int iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find product type");
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
+						iStart += s_sPRODUCTTYPE.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types can be VIIRS_1d_composite, VIIRS_5d_composite all 18 letters
+							iEnd = iStart + 18;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
+
+						oResult.productType = sType;
 					}
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
+
 	/**
 	 * Fills the Query View Model with ERA5 info
 	 * 
-	 * @param sQuery
-	 * @param oResult
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
 	 */
 	private void parseERA5(String sQuery, QueryViewModel oResult) {
-		
-		try {
-			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ERA5)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ERA5);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_ERA5);
+			oResult.platformName = Platforms.ERA5;
 
-				if (iStart >= 0) {
+			oResult.productName = extractValue(sQuery, "dataset");
+			oResult.productType = extractValue(sQuery, "productType");
+			oResult.productLevel = extractValue(sQuery, "pressureLevels");
+			oResult.sensorMode = extractValue(sQuery, "variables");
+			oResult.timeliness = extractValue(sQuery, "format");
+		}
+	}
 
-					iStart += s_sPLATFORMNAME_ERA5.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
+	/**
+	 * Fills the Query View Model with DEM info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseDEM(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_DEM)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_DEM);
 
-					oResult.platformName = Platforms.ERA5;
+			oResult.platformName = Platforms.DEM;
 
-					oResult.productName = extractValue(sQuery, "dataset");
-					oResult.productType = extractValue(sQuery, "productType");
-					oResult.productLevel = extractValue(sQuery, "pressureLevels");
-					oResult.sensorMode = extractValue(sQuery, "variables");
-					oResult.timeliness = extractValue(sQuery, "format");
-				}
-			}
-		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+			oResult.productType = extractValue(sQuery, "dataset");
+		}
+	}
+
+	/**
+	 * Fills the Query View Model with WorldCover info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseWorldCover(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_WORLD_COVER)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_WORLD_COVER);
+
+			oResult.platformName = Platforms.WORLD_COVER;
+
+			oResult.productType = extractValue(sQuery, "dataset");
 		}
 	}
 
@@ -819,53 +835,40 @@ public abstract class QueryTranslator {
 	private void parseLandsat(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_LANDSAT);
+				oResult.platformName = Platforms.LANDSAT8;
 
-				if (iStart >= 0) {
-
-					iStart += s_sPLATFORMNAME_LANDSAT.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
-
-					oResult.platformName = Platforms.LANDSAT8;
-
-					// check for product type
-					try {
-						if (sQuery.contains(s_sLANDSATPRODUCTTYPE)) {
-							iStart = sQuery.indexOf(s_sLANDSATPRODUCTTYPE);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find product type");
-							}
-							iStart += s_sLANDSATPRODUCTTYPE.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// the types can be of three or four letters
-								iEnd = iStart + 4;
-							}
-							String sType = sQuery.substring(iStart, iEnd);
-							sType = sType.trim();
-
-							oResult.productType = sType;
+				// check for product type
+				try {
+					if (sQuery.contains(s_sLANDSATPRODUCTTYPE)) {
+						int iStart = sQuery.indexOf(s_sLANDSATPRODUCTTYPE);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find product type");
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseLandsat( " + sQuery
-								+ " ): error while parsing product type: " + oE);
+						iStart += s_sLANDSATPRODUCTTYPE.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types can be of three or four letters
+							iEnd = iStart + 4;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
+
+						oResult.productType = sType;
 					}
-					
-					parseCloudCoverage(sQuery, oResult);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseLandsat( " + sQuery
+							+ " ): error while parsing product type: " + oE);
 				}
+				
+				parseCloudCoverage(sQuery, oResult);
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("QueryTranslator.parseLandsat( " + sQuery + " ): " + oE);
@@ -875,53 +878,40 @@ public abstract class QueryTranslator {
 	private void parseProbaV(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_PROBAV)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_PROBAV);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_PROBAV);
+				oResult.platformName = Platforms.PROBAV;
 
-				if (iStart >= 0) {
-
-					iStart += s_sPLATFORMNAME_PROBAV.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
-
-					oResult.platformName = Platforms.PROBAV;
-
-					// check for product type
-					try {
-						if (sQuery.contains(s_sPROBAVCOLLECTION)) {
-							iStart = sQuery.indexOf(s_sPROBAVCOLLECTION);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find product type");
-							}
-							iStart += s_sPROBAVCOLLECTION.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// the types can be of different letters, try this medium if we are lucky
-								iEnd = iStart + 42;
-							}
-							String sType = sQuery.substring(iStart, iEnd);
-							sType = sType.trim();
-
-							oResult.productType = sType;
+				// check for product type
+				try {
+					if (sQuery.contains(s_sPROBAVCOLLECTION)) {
+						int iStart = sQuery.indexOf(s_sPROBAVCOLLECTION);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find product type");
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseProbaV( " + sQuery
-								+ " ): error while parsing product type: " + oE);
+						iStart += s_sPROBAVCOLLECTION.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types can be of different letters, try this medium if we are lucky
+							iEnd = iStart + 42;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
+
+						oResult.productType = sType;
 					}
-					
-					parseCloudCoverage(sQuery, oResult);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseProbaV( " + sQuery
+							+ " ): error while parsing product type: " + oE);
 				}
+				
+				parseCloudCoverage(sQuery, oResult);
 			}
 		} catch (Exception oE) {
 			Utils.debugLog("QueryTranslator.parseProbaV( " + sQuery + " ): " + oE);
@@ -936,76 +926,63 @@ public abstract class QueryTranslator {
 	private void parseSentinel3(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_3)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_3);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_3);
+				oResult.platformName = Platforms.SENTINEL3;
 
-				if (iStart >= 0) {
-
-					iStart += s_sPLATFORMNAME_SENTINEL_3.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
-
-					oResult.platformName = Platforms.SENTINEL3;
-
-					// check for product type
-					try {
-						if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
-							iStart = sQuery.indexOf(s_sPRODUCTTYPE);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find product type");
-							}
-							iStart += s_sPRODUCTTYPE.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								// the types can be OCN, GRD, SLC, all of three letters
-								iEnd = iStart + 3;
-							}
-							String sType = sQuery.substring(iStart, iEnd);
-							sType = sType.trim();
-
-							oResult.productType = sType;
+				// check for product type
+				try {
+					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
+						int iStart = sQuery.indexOf(s_sPRODUCTTYPE);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find product type");
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
-					}
-
-					// check for product type
-					try {
-						if (sQuery.contains(QueryTranslator.s_s_TIMELINESS)) {
-							iStart = sQuery.indexOf(s_s_TIMELINESS);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find sensor mode");
-							}
-							iStart += s_s_TIMELINESS.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = iStart + 12;
-							}
-							String sTimeliness = sQuery.substring(iStart, iEnd);
-							sTimeliness = sTimeliness.trim();
-
-							oResult.timeliness = sTimeliness;
+						iStart += s_sPRODUCTTYPE.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types can be OCN, GRD, SLC, all of three letters
+							iEnd = iStart + 3;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
+
+						oResult.productType = sType;
 					}
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+				}
+
+				// check for product type
+				try {
+					if (sQuery.contains(QueryTranslator.s_s_TIMELINESS)) {
+						int iStart = sQuery.indexOf(s_s_TIMELINESS);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find sensor mode");
+						}
+						iStart += s_s_TIMELINESS.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = iStart + 12;
+						}
+						String sTimeliness = sQuery.substring(iStart, iEnd);
+						sTimeliness = sTimeliness.trim();
+
+						oResult.timeliness = sTimeliness;
+					}
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 			}
 		} catch (Exception oE) {
@@ -1021,114 +998,101 @@ public abstract class QueryTranslator {
 	private void parseSentinel5P(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_5P)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_5P);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_SENTINEL_5P);
+				oResult.platformName = Platforms.SENTINEL5P;
 
-				if (iStart >= 0) {
+				// check for product type
+				try {
+					if (sQuery.contains(QueryTranslator.s_sPRODUCTLEVEL)) {
+						int iStart = sQuery.indexOf(s_sPRODUCTLEVEL);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find product level");
+						}
+						iStart += s_sPRODUCTLEVEL.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// the types are all of ten letters
+							iEnd = iStart + 10;
+						}
+						String sLevel = sQuery.substring(iStart, iEnd);
+						sLevel = sLevel.trim();
 
-					iStart += s_sPLATFORMNAME_SENTINEL_5P.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
+						oResult.productLevel = sLevel;
 					}
-					sQuery = sQuery.trim();
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
+				}
 
-					oResult.platformName = Platforms.SENTINEL5P;
+				// check for timeliness
+				try {
+					if (sQuery.contains(QueryTranslator.s_s_TIMELINESS)) {
+						int iStart = sQuery.indexOf(s_s_TIMELINESS);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find sensor mode");
+						}
+						iStart += s_s_TIMELINESS.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = iStart + 12;
+						}
+						String sTimeliness = sQuery.substring(iStart, iEnd);
+						sTimeliness = sTimeliness.trim();
 
-					// check for product type
-					try {
-						if (sQuery.contains(QueryTranslator.s_sPRODUCTLEVEL)) {
-							iStart = sQuery.indexOf(s_sPRODUCTLEVEL);
+						oResult.timeliness = sTimeliness;
+					}
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
+				}
+				
+				
+				try {
+					// check for relative orbit
+					if (sQuery.contains(QueryTranslator.s_sABSOLUTEORBITNUMBER)) {
+						try {
+							int iStart = sQuery.indexOf(s_sABSOLUTEORBITNUMBER);
 							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find product level");
+								throw new IllegalArgumentException("Could not find absolute orbit number");
 							}
-							iStart += s_sPRODUCTLEVEL.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
+							iStart += s_sABSOLUTEORBITNUMBER.length();
+							int iEnd = sQuery.indexOf(" AND ", iStart);
 							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
+								iEnd = sQuery.indexOf(')');
 							}
 							if (iEnd < 0) {
 								iEnd = sQuery.indexOf(' ', iStart);
 							}
 							if (iEnd < 0) {
-								// the types are all of ten letters
-								iEnd = iStart + 10;
+								// if anything else failed, skip digits
+								iEnd = iStart;
+								while (iEnd < sQuery.length() && Character.isDigit(sQuery.charAt(iEnd))) {
+									iEnd++;
+								}
 							}
-							String sLevel = sQuery.substring(iStart, iEnd);
-							sLevel = sLevel.trim();
+							String sOrbit = sQuery.substring(iStart, iEnd);
+							int iOrbit = Integer.parseInt(sOrbit);
 
-							oResult.productLevel = sLevel;
+							oResult.absoluteOrbit = iOrbit;
+
+						} catch (Exception oE) {
+							Utils.debugLog("QueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
-					}
-
-					// check for timeliness
-					try {
-						if (sQuery.contains(QueryTranslator.s_s_TIMELINESS)) {
-							iStart = sQuery.indexOf(s_s_TIMELINESS);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find sensor mode");
-							}
-							iStart += s_s_TIMELINESS.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = iStart + 12;
-							}
-							String sTimeliness = sQuery.substring(iStart, iEnd);
-							sTimeliness = sTimeliness.trim();
-
-							oResult.timeliness = sTimeliness;
-						}
-					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
-					}
-					
-					
-					try {
-						// check for relative orbit
-						if (sQuery.contains(QueryTranslator.s_sABSOLUTEORBITNUMBER)) {
-							try {
-								iStart = sQuery.indexOf(s_sABSOLUTEORBITNUMBER);
-								if (iStart < 0) {
-									throw new IllegalArgumentException("Could not find absolute orbit number");
-								}
-								iStart += s_sABSOLUTEORBITNUMBER.length();
-								iEnd = sQuery.indexOf(" AND ", iStart);
-								if (iEnd < 0) {
-									iEnd = sQuery.indexOf(')');
-								}
-								if (iEnd < 0) {
-									iEnd = sQuery.indexOf(' ', iStart);
-								}
-								if (iEnd < 0) {
-									// if anything else failed, skip digits
-									iEnd = iStart;
-									while (iEnd < sQuery.length() && Character.isDigit(sQuery.charAt(iEnd))) {
-										iEnd++;
-									}
-								}
-								String sOrbit = sQuery.substring(iStart, iEnd);
-								int iOrbit = Integer.parseInt(sOrbit);
-
-								oResult.absoluteOrbit = iOrbit;
-
-							} catch (Exception oE) {
-								Utils.debugLog("QueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
-							}
-						}						
-					}
-					catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
-					}
+					}						
+				}
+				catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
 				}
 			}
 		} catch (Exception oE) {
@@ -1144,52 +1108,39 @@ public abstract class QueryTranslator {
 	private void parseEnvisat(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ENVISAT)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ENVISAT);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_ENVISAT);
+				oResult.platformName = Platforms.ENVISAT;
 
-				if (iStart >= 0) {
-
-					iStart += s_sPLATFORMNAME_ENVISAT.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
-
-					oResult.platformName = Platforms.ENVISAT;
-
-					// check for product type
-					try {
-						if (sQuery.contains(s_sENVISATORBITDIRECTION)) {
-							iStart = sQuery.indexOf(s_sENVISATORBITDIRECTION);
-							if (iStart < 0) {
-								throw new IllegalArgumentException("Could not find orbit direction");
-							}
-							iStart += s_sENVISATORBITDIRECTION.length();
-							iEnd = sQuery.indexOf(" AND ", iStart);
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(')', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = sQuery.indexOf(' ', iStart);
-							}
-							if (iEnd < 0) {
-								iEnd = iStart + 9;
-							}
-							String sType = sQuery.substring(iStart, iEnd);
-							sType = sType.trim();
-
-							oResult.productType = sType;
+				// check for product type
+				try {
+					if (sQuery.contains(s_sENVISATORBITDIRECTION)) {
+						int iStart = sQuery.indexOf(s_sENVISATORBITDIRECTION);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find orbit direction");
 						}
-					} catch (Exception oE) {
-						Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
+						iStart += s_sENVISATORBITDIRECTION.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							iEnd = iStart + 9;
+						}
+						String sType = sQuery.substring(iStart, iEnd);
+						sType = sType.trim();
+
+						oResult.productType = sType;
 					}
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+			Utils.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
 		}
 	}	
 
@@ -1202,29 +1153,14 @@ public abstract class QueryTranslator {
 	private void parseCopernicusMarine(String sQuery, QueryViewModel oResult) {
 		try {
 			if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_COPERNICUS_MARINE)) {
+				sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_COPERNICUS_MARINE);
 
-				int iStart = sQuery.indexOf(s_sPLATFORMNAME_COPERNICUS_MARINE);
-
-				if (iStart >= 0) {
-
-					iStart += s_sPLATFORMNAME_COPERNICUS_MARINE.length();
-					int iEnd = sQuery.indexOf(')', iStart);
-					if (iEnd < 0) {
-						sQuery = sQuery.substring(iStart);
-					} else {
-						sQuery = sQuery.substring(iStart, iEnd);
-					}
-					sQuery = sQuery.trim();
-
-					oResult.platformName = Platforms.COPERNICUS_MARINE;
-				}
+				oResult.platformName = Platforms.COPERNICUS_MARINE;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+			Utils.debugLog("QueryTranslator.parseCopernicusMarine( " + sQuery + " ): " + oE);
 		}
-	}	
-	
-	
+	}
 	
 	/**
 	 * Parse Planet Data
@@ -1238,7 +1174,7 @@ public abstract class QueryTranslator {
 				oResult.platformName = Platforms.PLANET;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("parseEnvisat.parseEnvisat( " + sQuery + " ): " + oE);
+			Utils.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
 		}
 	}	
 	

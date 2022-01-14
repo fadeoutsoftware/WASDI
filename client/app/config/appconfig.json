@@ -450,6 +450,34 @@
                     "indexvalue":"PSScene3Band"
                 }
             ]
+        },
+        {
+            "name": "DEM",
+            "indexname": "platformname",
+            "indexvalue": "DEM",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "DEM_30M|DEM_90M",
+                    "regex": ".*",
+                    "indexvalue":"DEM_30M"
+                }
+            ]
+        },
+        {
+            "name": "WorldCover",
+            "indexname": "platformname",
+            "indexvalue": "WorldCover",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "10m_2020_V1",
+                    "regex": ".*",
+                    "indexvalue":"10m_2020_V1"
+                }
+            ]
         }
     ],
     "orbitsearch":{
