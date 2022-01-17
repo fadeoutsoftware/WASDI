@@ -483,7 +483,13 @@ public class WasdiFileUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("PLANET_")) {
 				return Platforms.PLANET;
-			}			
+			}
+			else if (sFileName.toUpperCase().startsWith("COPERNICUS_DSM_COG_")) {
+				return Platforms.DEM;
+			}
+			else if (sFileName.toUpperCase().startsWith("ESA_WORLDCOVER")) {
+				return Platforms.WORLD_COVER;
+			}
 			
 			return null;
 		}

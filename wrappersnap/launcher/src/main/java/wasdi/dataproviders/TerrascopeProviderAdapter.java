@@ -282,19 +282,6 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	}
 
 	@Override
-	public void readConfig() {
-
-		try {
-			DataProviderConfig oConfig = WasdiConfig.Current.getDataProviderConfig("TERRASCOPE");
-			m_sDefaultProtocol = oConfig.defaultProtocol; 
-			m_sProviderBasePath = oConfig.localFilesBasePath;
-			m_sProviderUrlDomain = oConfig.urlDomain;
-		} catch (Exception e) {
-			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
-		}		
-	}
-
-	@Override
 	protected void internalReadConfig() {
 
 		try {
@@ -302,14 +289,17 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 			m_sProviderBasePath = m_oDataProviderConfig.localFilesBasePath;
 			m_sProviderUrlDomain = m_oDataProviderConfig.urlDomain;
 		} catch (Exception e) {
-			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+			m_oLogger.error("TerrascopeProviderAdapter: Config reader is null");
 		}
 	}
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
 
-		if (sPlatformType.equals(Platforms.SENTINEL1) || sPlatformType.equals(Platforms.SENTINEL2)) {
+		if (sPlatformType.equals(Platforms.SENTINEL1) 
+//				|| sPlatformType.equals(Platforms.SENTINEL2)
+				|| sPlatformType.equals(Platforms.DEM)
+				|| sPlatformType.equals(Platforms.WORLD_COVER)) {
 			if (isWorkspaceOnSameCloud()) {
 				return DataProviderScores.SAME_CLOUD_DOWNLOAD.getValue();
 			}
