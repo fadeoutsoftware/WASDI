@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
