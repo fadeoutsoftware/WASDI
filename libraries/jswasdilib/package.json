@@ -1,0 +1,16 @@
+{
+  "name": "jswasdilib",
+  "version": "1.0.0",
+  "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "WASDI",
+    "EO",
+    "AI"
+  ],
+  "author": "mmenapace",
+  "license": "MIT"
+}
