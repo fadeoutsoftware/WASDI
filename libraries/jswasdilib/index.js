@@ -55,6 +55,7 @@ var wasdiInstance = new Wasdi();
 wasdiInstance.helloWasdiWorld();
 wasdiInstance.helloWasdiWorld();
 // Template - removed private credentials
+
 // wasdiInstance.login(username, password);
 
 
