@@ -2,10 +2,14 @@
   "name": "jswasdilib",
   "version": "0.0.1",
   "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
-  "type": "module",
   "main": "index.js",
   "scripts": {
+    "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "env": {
+    "node": true,
+    "commonjs": true
   },
   "keywords": [
     "WASDI",
@@ -14,10 +18,20 @@
   ],
   "author": "mmenapace",
   "license": "GPL-3.0",
-  "dependencies": {
-    "node-fetch": "^3.2.0"
-  },
   "devDependencies": {
-    "jest": "^27.4.7"
+    "babel-loader": "^8.2.3",
+    "webpack": "^5.67.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "assert": "^2.0.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "https-browserify": "^1.0.0",
+    "node-fetch": "^2.6.7",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.0",
+    "util": "^0.12.4"
   }
 }

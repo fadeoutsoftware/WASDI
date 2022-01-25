@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+fetch = require('node-fetch');
 
 
 'use strict';
@@ -39,7 +39,7 @@ class Wasdi {
             redirect: 'follow'
         };
 
-        fetch("http://www.wasdi.net/wasdiwebserver/rest/wasdi/hello", requestOptions)
+        fetch("https://www.wasdi.net/wasdiwebserver/rest/wasdi/hello", requestOptions)
             .then(response => response.text())
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
@@ -74,7 +74,7 @@ class Wasdi {
     }
 }
 
-export { Wasdi};
+/*export { Wasdi};*/
 
 var wasdiInstance = new Wasdi();
 wasdiInstance.helloWasdiWorld();
