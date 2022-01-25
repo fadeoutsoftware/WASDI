@@ -13,7 +13,7 @@
     "Earth observation"
   ],
   "author": "mmenapace",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "dependencies": {
     "node-fetch": "^3.2.0"
   }
