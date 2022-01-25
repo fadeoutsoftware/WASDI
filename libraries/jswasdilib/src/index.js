@@ -51,6 +51,37 @@ class Wasdi {
     }
 
     /**
+     * Print status utility
+     */
+    printStatus(){
+        console.log('');
+        console.log('[INFO] jswasdilib.printStatus: user: ' + this.User);
+        console.log('[INFO] jswasdilib.printStatus: password: ***********');
+        console.log('[INFO] jswasdilib.printStatus: session id: ' + this.SessionId);
+        console.log('[INFO] jswasdilib.printStatus: active workspace: ' + this.ActiveWorkspaceId);
+        console.log('[INFO] jswasdilib.printStatus: workspace owner: ' + this.m_sWorkspaceOwner);
+        console.log('[INFO] jswasdilib.printStatus: parameters file path: ' + this.ParametersFilePath);
+        console.log('[INFO] jswasdilib.printStatus: base path: ' + this.BasePath);
+        console.log('[INFO] jswasdilib.printStatus: download active: ' + this.DownloadActive);
+        console.log('[INFO] jswasdilib.printStatus: upload active: ' + this.UploadActive);
+        console.log('[INFO] jswasdilib.printStatus: verbose: ' + this.Verbose);
+        console.log('[INFO] jswasdilib.printStatus: param dict: ' + this.ParametersDict);
+        console.log('[INFO] jswasdilib.printStatus: proc id: ' + this.ProcId);
+        console.log('[INFO] jswasdilib.printStatus: base url: ' + this.BaseUrl);
+        console.log('[INFO] jswasdilib.printStatus: is on server: ' + this.IsOnServer);
+        console.log('[INFO] jswasdilib.printStatus: workspace base url: ' + this.WorkspaceBaseUrl);
+
+        if (this.ValidSession) {
+            console.log('[INFO] jswasdilib.printStatus: session is valid :-)');
+        }
+        else {
+            console.log('[ERROR] jswasdilib.printStatus: session is not valid :-(' +
+                '  ******************************************************************************');
+        }
+
+    }
+
+    /**
      * Test method to check wasdi instance, with a tiny bit of developer's traditions
      */
     helloWasdiWorld() {
@@ -93,6 +124,12 @@ class Wasdi {
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
     }
+    loadConfig(){
+        if (config != undefined){
+            console.log('variable exists !');
+        }
+    }
+
 
     get User() {
         return this._m_sUser;
@@ -161,7 +198,81 @@ class Wasdi {
     get RequestsTimeout() {
         return this._m_iRequestsTimeout;
     }
+
+
+    set m_sUser(value) {
+        this._m_sUser = value;
+    }
+
+    set m_sPassword(value) {
+        this._m_sPassword = value;
+    }
+
+    set m_sActiveWorkspace(value) {
+        this._m_sActiveWorkspace = value;
+    }
+
+    set m_sWorkspaceOwner(value) {
+        this._m_sWorkspaceOwner = value;
+    }
+
+    set m_sWorkspaceBaseUrl(value) {
+        this._m_sWorkspaceBaseUrl = value;
+    }
+
+    set m_sParametersFilePath(value) {
+        this._m_sParametersFilePath = value;
+    }
+
+    set m_sSessionId(value) {
+        this._m_sSessionId = value;
+    }
+
+    set m_bValidSession(value) {
+        this._m_bValidSession = value;
+    }
+
+    set m_sBasePath(value) {
+        this._m_sBasePath = value;
+    }
+
+    set m_bDownloadActive(value) {
+        this._m_bDownloadActive = value;
+    }
+
+    set m_bUploadActive(value) {
+        this._m_bUploadActive = value;
+    }
+
+    set m_bVerbose(value) {
+        this._m_bVerbose = value;
+    }
+
+    set m_aoParamsDictionary(value) {
+        this._m_aoParamsDictionary = value;
+    }
+
+    set m_sMyProcId(value) {
+        this._m_sMyProcId = value;
+    }
+
+    set m_sBaseUrl(value) {
+        this._m_sBaseUrl = value;
+    }
+
+    set m_bIsOnServer(value) {
+        this._m_bIsOnServer = value;
+    }
+
+    set m_iRequestsTimeout(value) {
+        this._m_iRequestsTimeout = value;
+    }
 }
+
+var wasdiInstance = new Wasdi();
+wasdiInstance.helloWasdiWorld();
+wasdiInstance.loadConfig();
+wasdiInstance.printStatus();
 
 
 
