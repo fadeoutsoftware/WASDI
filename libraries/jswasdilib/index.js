@@ -1,10 +1,35 @@
 import fetch from 'node-fetch';
 
+
 'use strict';
 
 class Wasdi {
+
     constructor() {
+        this.m_sUser = undefined;
+        this.m_sPassword = undefined;
+
+        this.m_sActiveWorkspace = undefined;
+        this.m_sWorkspaceOwner = '';
+        this.m_sWorkspaceBaseUrl = '';
+
+        this.m_sParametersFilePath = undefined;
+        this.m_sSessionId = '';
+        this.m_bValidSession = false;
+        this.m_sBasePath = undefined;
+
+        this.m_bDownloadActive = true;
+        this.m_bUploadActive = true;
+        this.m_bVerbose = true;
+        this.m_aoParamsDictionary = {};
+
+        this.m_sMyProcId = '';
+        this.m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest';
+        this.m_bIsOnServer = false;
+        this.m_iRequestsTimeout = 2 * 60;
     }
+
+    init
 
     /**
      * Test method to check wasdi instance, with a tiny bit of developer's traditions
@@ -51,12 +76,15 @@ class Wasdi {
     }
 }
 
+export { Wasdi};
+
 var wasdiInstance = new Wasdi();
 wasdiInstance.helloWasdiWorld();
 wasdiInstance.helloWasdiWorld();
 // Template - removed private credentials
 
 // wasdiInstance.login(username, password);
+
 
 
 
