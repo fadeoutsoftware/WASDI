@@ -29,8 +29,6 @@ class Wasdi {
         this.m_iRequestsTimeout = 2 * 60;
     }
 
-    init
-
     /**
      * Test method to check wasdi instance, with a tiny bit of developer's traditions
      */
