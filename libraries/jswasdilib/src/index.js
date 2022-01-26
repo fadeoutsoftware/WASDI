@@ -124,11 +124,16 @@ class Wasdi {
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
     }
-    loadConfig(){
-        if (config != undefined){
-            console.log('variable exists !');
+    loadConfig(filename){
+
+            let wasdiConfig = fetch(filename)
+                .then(response => {
+                    return response.json();
+                })
+                .then(jsondata => console.log(jsondata));
+
         }
-    }
+
 
 
     get User() {
@@ -271,7 +276,7 @@ class Wasdi {
 
 var wasdiInstance = new Wasdi();
 wasdiInstance.helloWasdiWorld();
-wasdiInstance.loadConfig();
+wasdiInstance.loadConfig("./config.json");
 wasdiInstance.printStatus();
 
 
