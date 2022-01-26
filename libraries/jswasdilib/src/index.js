@@ -137,7 +137,7 @@ class Wasdi {
      */
     async loadConfig(filename) {
 
-        let promise = fetch(filename)
+        let initPromiseChain = fetch(filename)
             .then(response => {
                 return response.json();
             })
@@ -156,9 +156,19 @@ class Wasdi {
                 this._m_sBaseUrl = jsondata.BASEURL;
                 this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
                 // suppose that, at least, user and password are set
-                return (this._m_sUser != undefined && this._m_sPassword != undefined);
+                let bIsValid = this._m_sUser != undefined && this._m_sPassword != undefined;
+                if (!bIsValid) {console.log('[ERROR] jswasdilib._loadConfig: something went wrong' +
+                    '  ******************************************************************************')}
+                return bIsValid;
+            }).then( isValid => {
+                if (isValid && this._m_sParametersFilePath != undefined){
+                    fetch(this._m_sParametersFilePath)
+                        .then(response => {return response.json();})
+                        .then(jsondata => this._m_aoParamsDictionary = jsondata)
+                }
+
             });
-        return promise;
+        return  initPromiseChain;
 
     }
 
@@ -315,6 +325,7 @@ class Wasdi {
     set WorkspaceId(value) {
         this._m_sWorkspaceId = value;
     }
+
 
 
 }
