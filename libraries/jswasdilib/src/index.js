@@ -64,15 +64,15 @@ class Wasdi {
         console.log('[INFO] jswasdilib.printStatus: user: ' + this.User);
         console.log('[INFO] jswasdilib.printStatus: password: ***********');
         console.log('[INFO] jswasdilib.printStatus: session id: ' + this.SessionId);
-        console.log('[INFO] jswasdilib.printStatus: active workspace: ' + this.ActiveWorkspaceId);
+        console.log('[INFO] jswasdilib.printStatus: active workspace: ' + this.ActiveWorkspace);
         console.log('[INFO] jswasdilib.printStatus: workspace owner: ' + this.m_sWorkspaceOwner);
         console.log('[INFO] jswasdilib.printStatus: parameters file path: ' + this.ParametersFilePath);
         console.log('[INFO] jswasdilib.printStatus: base path: ' + this.BasePath);
         console.log('[INFO] jswasdilib.printStatus: download active: ' + this.DownloadActive);
         console.log('[INFO] jswasdilib.printStatus: upload active: ' + this.UploadActive);
         console.log('[INFO] jswasdilib.printStatus: verbose: ' + this.Verbose);
-        console.log('[INFO] jswasdilib.printStatus: param dict: ' + this.ParametersDict);
-        console.log('[INFO] jswasdilib.printStatus: proc id: ' + this.ProcId);
+        console.log('[INFO] jswasdilib.printStatus: param dict: ' + this.ParamsDictionary);
+        console.log('[INFO] jswasdilib.printStatus: proc id: ' + this.MyProcId);
         console.log('[INFO] jswasdilib.printStatus: base url: ' + this.BaseUrl);
         console.log('[INFO] jswasdilib.printStatus: is on server: ' + this.IsOnServer);
         console.log('[INFO] jswasdilib.printStatus: workspace base url: ' + this.WorkspaceBaseUrl);
@@ -130,12 +130,58 @@ class Wasdi {
             .catch(error => console.log('error', error));
     }
 
+    loadConfig(configFile,parametersFile) {
+        let sUrl = configFile;
+        if (configFile == undefined) {
+            sUrl = './config.json';
+        }
+        var request = new XMLHttpRequest();
+        request.open('GET', sUrl, false);  // `false` makes the request synchronous
+        request.send(null);
+
+        if (request.status === 200) {
+            let jsondata = JSON.parse(request.responseText);
+            this._m_sUser = jsondata.USER;
+            this._m_sPassword = jsondata.PASSWORD;
+            this._m_sWorkspaceName = jsondata.WORKSPACE;
+            this._m_sWorkspaceId = jsondata.WORKSPACEID;
+            this._m_sBasePath = jsondata.BASEPATH;
+            this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH;
+            this._m_bDownloadActive = jsondata.DOWNLOADACTIVE;
+            this._m_bUploadActive = jsondata.UPLOADACTIVE;
+            this._m_bVerbose = jsondata.VERBOSE;
+            this._m_sBaseUrl = jsondata.BASEURL;
+            this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
+
+        }
+        if (this._m_sUser != undefined && this._m_sPassword != undefined){
+            this.loadParameters(parametersFile);
+        }
+
+    }
+
+    loadParameters(filename) {
+        let sUrl = filename;
+        if (filename == undefined) {
+            sUrl = './parameters.json';
+        }
+        var request = new XMLHttpRequest();
+        request.open('GET', sUrl, false);  // `false` makes the request synchronous
+        request.send(null);
+
+        if (request.status === 200) {
+            let jsondata = JSON.parse(request.responseText);
+            this._m_aoParamsDictionary = jsondata;
+        }
+
+    }
+
     /**
      * Asyncronous call to load and initialize base parameters of the library
      * @param filename
      * @returns {Promise<void>}
      */
-    async loadConfig(filename) {
+    async asyncLoadConfig(filename) {
 
         let initPromiseChain = fetch(filename)
             .then(response => {
@@ -157,21 +203,27 @@ class Wasdi {
                 this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
                 // suppose that, at least, user and password are set
                 let bIsValid = this._m_sUser != undefined && this._m_sPassword != undefined;
-                if (!bIsValid) {console.log('[ERROR] jswasdilib._loadConfig: something went wrong' +
-                    '  ******************************************************************************')}
+                if (!bIsValid) {
+                    console.log('[ERROR] jswasdilib._loadConfig: something went wrong' +
+                        '  ******************************************************************************')
+                }
                 return bIsValid;
-            }).then( isValid => {
-                if (isValid && this._m_sParametersFilePath != undefined){
+            }).then(isValid => {
+                if (isValid && this._m_sParametersFilePath != undefined) {
                     fetch(this._m_sParametersFilePath)
-                        .then(response => {return response.json();})
-                        .then(jsondata => this._m_aoParamsDictionary = jsondata)
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(jsondata => {
+                            this._m_aoParamsDictionary = jsondata;
+                        })
                 }
 
             });
-        return  initPromiseChain;
+        let result = await initPromiseChain;
+        return result;
 
     }
-
 
 
     get User() {
@@ -327,18 +379,20 @@ class Wasdi {
     }
 
 
-
+    get ParamsDictionary() {
+        return this._m_aoParamsDictionary;
+    }
 }
 
 
 var wasdiInstance = new Wasdi();
+
+//
+wasdiInstance.loadConfig();
+
+wasdiInstance.printStatus();
+// from now on everything is asynch !
 wasdiInstance.helloWasdiWorld();
-
-wasdiInstance.loadConfig("./config.json").then(boolReturn => {
-    console.log(boolReturn);
-    wasdiInstance.printStatus();
-});
-
 
 
 
