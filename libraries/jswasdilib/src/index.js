@@ -25,6 +25,9 @@ class Wasdi {
     _m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest';
     _m_bIsOnServer;
     _m_iRequestsTimeout = 2 * 60;
+    // handled through field instead of local variables
+    _m_sWorkspaceName = '';
+    _m_sWorkspaceId = '';
 
     constructor() {
         this._m_sUser = undefined;
@@ -48,12 +51,15 @@ class Wasdi {
         this._m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest';
         this._m_bIsOnServer = false;
         this._m_iRequestsTimeout = 2 * 60;
+
+        this._m_sWorkspaceName = '';
+        this._m_sWorkspaceId = '';
     }
 
     /**
      * Print status utility
      */
-    printStatus(){
+    printStatus() {
         console.log('');
         console.log('[INFO] jswasdilib.printStatus: user: ' + this.User);
         console.log('[INFO] jswasdilib.printStatus: password: ***********');
@@ -73,8 +79,7 @@ class Wasdi {
 
         if (this.ValidSession) {
             console.log('[INFO] jswasdilib.printStatus: session is valid :-)');
-        }
-        else {
+        } else {
             console.log('[ERROR] jswasdilib.printStatus: session is not valid :-(' +
                 '  ******************************************************************************');
         }
@@ -124,16 +129,44 @@ class Wasdi {
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
     }
-    loadConfig(filename){
 
-            let wasdiConfig = fetch(filename)
-                .then(response => {
-                    return response.json();
-                })
-                .then(jsondata => console.log(jsondata));
+    /**
+     * Asyncronous call to load and initialize base parameters of the library
+     * @param filename
+     * @returns {Promise<void>}
+     */
+    async loadConfig(filename) {
 
-        }
+        let promise = fetch(filename)
+            .then(response => {
+                return response.json();
+            })
+            .then(jsondata => {
+                // async, so must init here
 
+                this._m_sUser = jsondata.USER;
+                this._m_sPassword = jsondata.PASSWORD;
+                this._m_sWorkspaceName = jsondata.WORKSPACE;
+                    // suppose that, at least, user and password are set
+                    return(this._m_sUser != undefined && this._m_sPassword != undefined);
+            });
+        let result = await promise;
+        return result;
+        /*
+            global m_sUser
+   global m_sPassword
+   global m_sParametersFilePath
+   global m_sSessionId
+   global m_sBasePath
+
+   global m_bDownloadActive
+   global m_bUploadActive
+   global m_bVerbose
+
+         */
+
+
+    }
 
 
     get User() {
@@ -204,6 +237,13 @@ class Wasdi {
         return this._m_iRequestsTimeout;
     }
 
+    get WorkspaceId() {
+        return this._m_sWorkspaceId;
+    }
+
+    get WorkspaceName() {
+        return this._m_sWorkspaceName;
+    }
 
     set m_sUser(value) {
         this._m_sUser = value;
@@ -272,12 +312,29 @@ class Wasdi {
     set m_iRequestsTimeout(value) {
         this._m_iRequestsTimeout = value;
     }
+
+    set WorkspaceName(value) {
+        this._m_sWorkspaceName = value;
+    }
+
+    set WorkspaceId(value) {
+        this._m_sWorkspaceId = value;
+    }
+
+    async run(){
+        var wasdiInstance = new Wasdi();
+        this.helloWasdiWorld();
+
+        var boolReturn = await this.loadConfig("./config.json");
+
+
+        this.printStatus();
+    }
 }
 
 var wasdiInstance = new Wasdi();
-wasdiInstance.helloWasdiWorld();
-wasdiInstance.loadConfig("./config.json");
-wasdiInstance.printStatus();
+wasdiInstance.run();
+
 
 
 
