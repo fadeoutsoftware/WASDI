@@ -135,7 +135,7 @@ class Wasdi {
      * @param filename
      * @returns {Promise<void>}
      */
-    async asyncLoadConfig(filename) {
+    async loadConfig(filename) {
 
         let promise = fetch(filename)
             .then(response => {
@@ -155,21 +155,13 @@ class Wasdi {
                 this._m_bVerbose = jsondata.VERBOSE;
                 this._m_sBaseUrl = jsondata.BASEURL;
                 this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
-                    // suppose that, at least, user and password are set
-                    return(this._m_sUser != undefined && this._m_sPassword != undefined);
+                // suppose that, at least, user and password are set
+                return (this._m_sUser != undefined && this._m_sPassword != undefined);
             });
         return promise;
 
     }
 
-    /**
-     * Syncronous wrapper function of asynchLoadConfig
-     * @param filename
-     * @returns {Promise<void>}
-     */
-    async loadConfig(filename){
-        return await this.asyncLoadConfig(filename);
-    }
 
 
     get User() {
@@ -326,7 +318,6 @@ class Wasdi {
 
 
 }
-
 
 
 var wasdiInstance = new Wasdi();
