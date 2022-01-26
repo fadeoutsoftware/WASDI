@@ -387,7 +387,7 @@ class Wasdi {
 
 var wasdiInstance = new Wasdi();
 
-//
+// syncronous call and init
 wasdiInstance.loadConfig();
 
 wasdiInstance.printStatus();
