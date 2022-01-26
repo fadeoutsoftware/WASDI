@@ -135,7 +135,7 @@ class Wasdi {
      * @param filename
      * @returns {Promise<void>}
      */
-    async loadConfig(filename) {
+    async asyncLoadConfig(filename) {
 
         let promise = fetch(filename)
             .then(response => {
@@ -147,25 +147,28 @@ class Wasdi {
                 this._m_sUser = jsondata.USER;
                 this._m_sPassword = jsondata.PASSWORD;
                 this._m_sWorkspaceName = jsondata.WORKSPACE;
+                this._m_sWorkspaceId = jsondata.WORKSPACEID;
+                this._m_sBasePath = jsondata.BASEPATH;
+                this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH;
+                this._m_bDownloadActive = jsondata.DOWNLOADACTIVE;
+                this._m_bUploadActive = jsondata.UPLOADACTIVE;
+                this._m_bVerbose = jsondata.VERBOSE;
+                this._m_sBaseUrl = jsondata.BASEURL;
+                this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
                     // suppose that, at least, user and password are set
                     return(this._m_sUser != undefined && this._m_sPassword != undefined);
             });
-        let result = await promise;
-        return result;
-        /*
-            global m_sUser
-   global m_sPassword
-   global m_sParametersFilePath
-   global m_sSessionId
-   global m_sBasePath
+        return promise;
 
-   global m_bDownloadActive
-   global m_bUploadActive
-   global m_bVerbose
+    }
 
-         */
-
-
+    /**
+     * Syncronous wrapper function of asynchLoadConfig
+     * @param filename
+     * @returns {Promise<void>}
+     */
+    async loadConfig(filename){
+        return await this.asyncLoadConfig(filename);
     }
 
 
@@ -321,19 +324,24 @@ class Wasdi {
         this._m_sWorkspaceId = value;
     }
 
-    async run(){
-        var wasdiInstance = new Wasdi();
-        this.helloWasdiWorld();
 
-        var boolReturn = await this.loadConfig("./config.json");
-
-
-        this.printStatus();
-    }
 }
 
+
+
 var wasdiInstance = new Wasdi();
-wasdiInstance.run();
+wasdiInstance.helloWasdiWorld();
+
+wasdiInstance.loadConfig("./config.json").then(boolReturn => {
+    console.log(boolReturn);
+    wasdiInstance.printStatus();
+});
+
+
+
+
+
+
 
 
 
