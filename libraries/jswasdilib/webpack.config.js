@@ -6,8 +6,14 @@ module.exports = {
     target: 'web',
     mode : 'development',
     output: {
-        filename: 'main.js',
+        filename: 'wasdi.js',
         clean: true,
         path: path.resolve(__dirname, 'dist'),
+        library: {
+            name: 'wasdi',
+            type: 'umd',
+
+        },
+        libraryTarget: 'var'
     }
 };
