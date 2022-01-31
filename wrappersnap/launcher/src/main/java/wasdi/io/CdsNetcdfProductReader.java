@@ -65,8 +65,7 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 			List<Integer> timeHoursList = Collections.emptyList();
 
 			for (Variable v : variablesList) {
-				String variableShortName = v.getShortName();v.getName();
-				System.out.println("variableShortName: " + variableShortName);
+				String variableShortName = v.getShortName();
 
 				if (variableShortName.equalsIgnoreCase("longitude")) {
 					longitudeLength = extractValueFromShape(v);
@@ -85,7 +84,6 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 			for (Variable v : variablesList) {
 				String variableShortName = v.getShortName();
 				String description = v.getDescription();
-				System.out.println("variableShortName: " + variableShortName + "; " + "description: " + description);
 				if (!excludedVariableSet.contains(variableShortName)) {
 					for (Integer timeHour : timeHoursList) {
 						// Create the single band representing the shape

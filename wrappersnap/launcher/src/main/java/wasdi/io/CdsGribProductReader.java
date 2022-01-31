@@ -64,7 +64,6 @@ public class CdsGribProductReader extends WasdiProductReader {
 
 			for (Variable v : variablesList) {
 				String variableShortName = v.getShortName();v.getName();
-				System.out.println("variableShortName: " + variableShortName);
 
 				if (variableShortName.equalsIgnoreCase("lon")) {
 					longitudeLength = extractValueFromShape(v);
@@ -184,16 +183,7 @@ public class CdsGribProductReader extends WasdiProductReader {
 
 					double endx = makeHorizCoordSys.getEndX();
 					double endy = makeHorizCoordSys.getEndX();
-
-					System.out.println("startx: " + startx);
-					System.out.println("starty: " + starty);
-					System.out.println("endx: " + endx);
-					System.out.println("endy: " + endy);
-				} else {
-					System.out.println("GdsHash class :" + object.getClass());
 				}
-			} else {
-				System.out.println("SPobject class :" + object.getClass());
 			}
 		}
 

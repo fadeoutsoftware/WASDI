@@ -52,6 +52,9 @@ public abstract class LauncherMainTest {
 		
 		m_aoCredentials = new HashMap<>();
 
+        String sConfigFilePath = "C:\\temp\\data\\wasdi\\config.json";
+        WasdiConfig.readConfig(sConfigFilePath);
+
 		SERIALIZATION_PATH = WasdiConfig.Current.paths.serializationPath;
 		DOWNLOAD_ROOT_PATH = WasdiConfig.Current.paths.downloadRootPath;
 

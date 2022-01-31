@@ -549,15 +549,7 @@ public class OpenSearchResource {
 	 */
 	String getProvider(String sProviderInput, String sPlatform, int iPriority) {
 		try {
-			boolean bAuto = false;
-			if (Utils.isNullOrEmpty(sProviderInput)) {
-				bAuto = true;
-			}
-			else if (sProviderInput.equals("AUTO")) {
-				bAuto = true;
-			}
-			
-			if (bAuto) {
+			if (Utils.isNullOrEmpty(sProviderInput) || sProviderInput.equals("AUTO")) {
 				CatalogueConfig oCatalogueConfig = WasdiConfig.Current.getCatalogueConfig(sPlatform);
 				
 				if (oCatalogueConfig!=null) {

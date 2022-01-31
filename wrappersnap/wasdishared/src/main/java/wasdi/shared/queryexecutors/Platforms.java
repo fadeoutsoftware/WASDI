@@ -23,4 +23,8 @@ public class Platforms {
 	public static String ERA5 = "ERA5";
 	
 	public static String PLANET= "PLANET";
+
+	public static String DEM = "DEM";
+	public static String WORLD_COVER = "WorldCover";
+
 }

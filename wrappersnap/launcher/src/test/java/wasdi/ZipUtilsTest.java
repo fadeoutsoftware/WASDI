@@ -52,4 +52,12 @@ public class ZipUtilsTest {
 		return file != null && file.exists();
 	}
 
+	@Test
+	public void test_3_fixZipFileInnerSafePath() throws Exception {
+//		String fileZipPath = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\" + "S2B_MSIL1C_20220102T104339_N0301_R008_T31UGR_20220102T113621.zip";
+		String fileZipPath = "C:\\Users\\PetruPetrescu\\.wasdi\\petru.petrescu@wasdi.cloud\\7e800be1-5df2-464c-811d-d7a4c6b0b9d6\\20220111_TERRASCOPE\\" + "S2B_MSIL1C_20220102T104339_N0301_R008_T31UGR_20220102T113621.zip";
+
+		ZipFileUtils.fixZipFileInnerSafePath(fileZipPath);
+	}
+
 }

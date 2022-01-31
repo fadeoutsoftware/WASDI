@@ -1223,3 +1223,4 @@ libraries/waspy/test/config.json
 libraries/waspy/test/256x256.tif
 wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestUtils.java
 wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestWorkspaceResource.java
+client/dist/
