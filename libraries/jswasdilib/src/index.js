@@ -86,20 +86,40 @@ class Wasdi {
 
     }
 
+
     /**
      * Test method to check wasdi instance, with a tiny bit of developer's traditions
      */
     helloWasdiWorld() {
-        let response;
-        var requestOptions = {
-            method: 'GET',
-            redirect: 'follow'
-        };
 
-        fetch("https://www.wasdi.net/wasdiwebserver/rest/wasdi/hello", requestOptions)
-            .then(response => response.text())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error));
+        var xhr = new XMLHttpRequest();
+        let response = undefined;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                response = this.responseText;
+                console.log(response);
+            }
+        });
+
+        xhr.open("GET", this._m_sBaseUrl + "/wasdi/hello", false);
+
+        xhr.send();
+        return response;
+
+    }
+
+    /**
+     * Util methods to check initialization of the correct base url to contact wasdi services
+     * @returns {boolean}
+     */
+    checkBaseUrl() {
+        let response = this.helloWasdiWorld();
+        if (response.includes("Hello Wasdi")) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
     /**
@@ -107,32 +127,46 @@ class Wasdi {
      * @param sUserName The username, corresponding to the e-mail used during registration
      * @param sPassword The selected password
      */
-    login(sUserName, sPassword) {
-        /*var myHeaders = new fetch.Headers();
-        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");*/
+    login() {
 
-        var urlencoded = new URLSearchParams();
-        urlencoded.append("client_id", "wasdi_client");
-        urlencoded.append("grant_type", "password");
-        urlencoded.append("username", sUserName);
-        urlencoded.append("password", sPassword);
+        var oCredentials = JSON.stringify({
+            "userId": this.User,
+            "userPassword": this.Password
+        });
 
-        var requestOptions = {
-            method: 'POST',
-            headers: {"Content-Type": "application/x-www-form-urlencoded"},
-            body: urlencoded,
-            redirect: 'follow'
-        };
+        var xhr = new XMLHttpRequest();
+        //xhr.withCredentials = true;
 
-        fetch("https://www.wasdi.net/auth/realms/wasdi/protocol/openid-connect/token", requestOptions)
-            .then(response => response.text())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error));
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+            }
+        });
+
+        xhr.open("POST", this._m_sBaseUrl + "/auth/login/", false);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.send(oCredentials);
+        // local scope
+        let response = JSON.parse(xhr.response);
+        console.log(response);
+
+        if ('sessionId' in response && response.sessionId != undefined) {
+            this._m_sSessionId = response.sessionId; // init the current session id
+        }
+
     }
 
-    loadConfig(configFile,parametersFile) {
+    /**
+     * Loads configuration and parameters. If no filename is specified, it
+     * loads the file config.json and parameters.json from the same level directory of the calling
+     * URL
+     * @param configFile
+     * @param parametersFile
+     */
+    loadConfig(configFile, parametersFile) {
         let sUrl = configFile;
-        if (configFile == undefined) {
+        if (configFile == undefined) { // default value
             sUrl = './config.json';
         }
         var request = new XMLHttpRequest();
@@ -141,28 +175,37 @@ class Wasdi {
 
         if (request.status === 200) {
             let jsondata = JSON.parse(request.responseText);
-            this._m_sUser = jsondata.USER;
-            this._m_sPassword = jsondata.PASSWORD;
-            this._m_sWorkspaceName = jsondata.WORKSPACE;
-            this._m_sWorkspaceId = jsondata.WORKSPACEID;
-            this._m_sBasePath = jsondata.BASEPATH;
-            this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH;
-            this._m_bDownloadActive = jsondata.DOWNLOADACTIVE;
-            this._m_bUploadActive = jsondata.UPLOADACTIVE;
-            this._m_bVerbose = jsondata.VERBOSE;
-            this._m_sBaseUrl = jsondata.BASEURL;
-            this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
+            this._m_sUser = jsondata.USER ? jsondata.USER : this._m_sUser;
+            this._m_sPassword = jsondata.PASSWORD ? jsondata.PASSWORD : this._m_sPassword;
+            this._m_sWorkspaceName = jsondata.WORKSPACE ? jsondata.WORKSPACE : this._m_sWorkspaceName;
+            this._m_sWorkspaceId = jsondata.WORKSPACEID ? jsondata.WORKSPACEID : this._m_sWorkspaceId;
+            this._m_sBasePath = jsondata.BASEPATH ? jsondata.BASEPATH : this._m_sBasePath;
+            this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH ? jsondata.PARAMETERSFILEPATH : this._m_sParametersFilePath;
+            this._m_bDownloadActive = jsondata.DOWNLOADACTIVE ? jsondata.DOWNLOADACTIVE : this._m_bDownloadActive;
+            this._m_bUploadActive = jsondata.UPLOADACTIVE ? jsondata.UPLOADACTIVE : this._m_bUploadActive;
+            this._m_bVerbose = jsondata.VERBOSE ? jsondata.VERBOSE : this._m_bVerbose;
+            this._m_sBaseUrl = jsondata.BASEURL ? jsondata.BASEURL : this._m_sBaseUrl;
+            this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT ? jsondata.REQUESTTIMEOUT : this._m_iRequestsTimeout;
 
         }
-        if (this._m_sUser != undefined && this._m_sPassword != undefined){
+
+        if (!this.checkBaseUrl()) {
+            console.log("[jswasdilib] Error in base Url - Can't contact wasdi instance, please check configuration ");
+        }
+
+        if (this._m_sUser != undefined && this._m_sPassword != undefined) {
             this.loadParameters(parametersFile);
         }
 
     }
 
+    /**
+     * Loads Parameters.json, if filename is not specified
+     * @param filename
+     */
     loadParameters(filename) {
         let sUrl = filename;
-        if (filename == undefined) {
+        if (filename == undefined) { // default value
             sUrl = './parameters.json';
         }
         var request = new XMLHttpRequest();
@@ -199,7 +242,7 @@ class Wasdi {
                 this._m_bDownloadActive = jsondata.DOWNLOADACTIVE;
                 this._m_bUploadActive = jsondata.UPLOADACTIVE;
                 this._m_bVerbose = jsondata.VERBOSE;
-                this._m_sBaseUrl = jsondata.BASEURL;
+
                 this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
                 // suppose that, at least, user and password are set
                 let bIsValid = this._m_sUser != undefined && this._m_sPassword != undefined;
@@ -222,6 +265,94 @@ class Wasdi {
             });
         let result = await initPromiseChain;
         return result;
+
+    }
+
+    // GET calls
+    getWorkspaceById(workspaceID) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+            }
+        });
+
+        xhr.open("GET", this._m_sBaseUrl + "/ws/getws?workspace=" + workspaceID, false);
+        xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+        xhr.setRequestHeader("x-session-token", this._m_sSessionId);
+
+        xhr.send();
+        return xhr.response;
+    }
+
+    /**
+     * Private util method to return parsed object from string. Due to requirements, uses the async http call
+     * @url String containing the url of the required resource
+     * @param params String containing the parameters, must include the correct syntax like '?=[...]'
+     * @returns {number|string|{}|any}
+     */
+    #getObject(url, params) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+            }
+        });
+
+        xhr.open("GET", this._m_sBaseUrl + url + params, false);
+        xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+        xhr.setRequestHeader("x-session-token", this._m_sSessionId);
+
+        xhr.send();
+        return JSON.parse(xhr.response);
+    }
+
+    /**
+     * Opens a workspace and set it as active workspace
+     * @param workspaceID The id of the selected workspace
+     * @returns {{workspaceId}|number|string|{}|*}
+     */
+    openWorkspace(workspaceID) {
+        let ws = this.#getObject("/ws/getws", "?workspace=" + workspaceID);
+        if (ws.workspaceId) {
+            this.m_sActiveWorkspace = ws.workspaceId;
+            this._m_sWorkspaceName = ws.name;
+            console.log("[INFO] jswasdilib.openWorkspace: Opened Workspace " + this._m_sWorkspaceName);
+            return ws;
+        } else {
+            console.log("Could not find Workspace, please check parameters");
+            return;
+        }
+
+    }
+
+
+    createWorkspace(wsName) {
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log("New workspace " + wsName + " created");
+
+            }
+        });
+        xhr.open("GET", this._m_sBaseUrl + "/ws/create?name=" + wsName, false);
+
+        xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+        xhr.setRequestHeader("x-session-token", this._m_sSessionId);
+
+
+        xhr.send();
+        let wsId = JSON.parse(xhr.response).stringValue;
+        if (wsId) {
+            console.log("Workspace Id " + wsId);
+            this.m_sActiveWorkspace = wsId;
+            console.log("Active workspace set");
+        }
+        return xhr.response;
 
     }
 
@@ -302,88 +433,17 @@ class Wasdi {
         return this._m_sWorkspaceName;
     }
 
-    set m_sUser(value) {
-        this._m_sUser = value;
-    }
-
-    set m_sPassword(value) {
-        this._m_sPassword = value;
-    }
-
-    set m_sActiveWorkspace(value) {
-        this._m_sActiveWorkspace = value;
-    }
-
-    set m_sWorkspaceOwner(value) {
-        this._m_sWorkspaceOwner = value;
-    }
-
-    set m_sWorkspaceBaseUrl(value) {
-        this._m_sWorkspaceBaseUrl = value;
-    }
-
-    set m_sParametersFilePath(value) {
-        this._m_sParametersFilePath = value;
-    }
-
-    set m_sSessionId(value) {
-        this._m_sSessionId = value;
-    }
-
-    set m_bValidSession(value) {
-        this._m_bValidSession = value;
-    }
-
-    set m_sBasePath(value) {
-        this._m_sBasePath = value;
-    }
-
-    set m_bDownloadActive(value) {
-        this._m_bDownloadActive = value;
-    }
-
-    set m_bUploadActive(value) {
-        this._m_bUploadActive = value;
-    }
-
-    set m_bVerbose(value) {
-        this._m_bVerbose = value;
-    }
-
-    set m_aoParamsDictionary(value) {
-        this._m_aoParamsDictionary = value;
-    }
-
-    set m_sMyProcId(value) {
-        this._m_sMyProcId = value;
-    }
-
-    set m_sBaseUrl(value) {
-        this._m_sBaseUrl = value;
-    }
-
-    set m_bIsOnServer(value) {
-        this._m_bIsOnServer = value;
-    }
-
-    set m_iRequestsTimeout(value) {
-        this._m_iRequestsTimeout = value;
-    }
-
-    set WorkspaceName(value) {
-        this._m_sWorkspaceName = value;
-    }
-
-    set WorkspaceId(value) {
-        this._m_sWorkspaceId = value;
-    }
-
-
     get ParamsDictionary() {
         return this._m_aoParamsDictionary;
     }
 }
 
+
+const wasdiInstance = new Wasdi();
+module.exports = wasdiInstance;
+
+
+/*
 
 var wasdiInstance = new Wasdi();
 
@@ -394,7 +454,18 @@ wasdiInstance.printStatus();
 // from now on everything is asynch !
 wasdiInstance.helloWasdiWorld();
 
+wasdiInstance.login(wasdiInstance.User,wasdiInstance.Password);
 
+*/
+// syncronous call and init
+wasdiInstance.loadConfig();
+
+// then login to obtain a valid session ID
+wasdiInstance.login()
+
+wasdiInstance.getWorkspaceById("f7807072-9d84-4ee0-9bcf-686e72a4c0dd");
+
+// then check the session id
 
 
 
