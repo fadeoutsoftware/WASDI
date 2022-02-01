@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+using WasdiLib.Client.Configuration;
 
 namespace WasdiLib.Client
 {
@@ -6,11 +9,15 @@ namespace WasdiLib.Client
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Program.Main()");
+            Startup.RegisterServices();
+            var _logger = Startup.ServiceProvider.GetService<ILogger<Program>>();
+
+            _logger.LogInformation("Program.Main()");
 
             WasdiLib wasdi = new WasdiLib();
-            Console.WriteLine(wasdi.HelloWasdi());
+            _logger.LogInformation(wasdi.HelloWasdi());
         }
+
     }
 
 }
