@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using NLog.Extensions.Logging;
 
 using WasdiLib.Services;
@@ -16,15 +17,19 @@ namespace WasdiLib.Configuration
         public static void RegisterServices()
         {
 
-            // add configuration
-            ConfigurationRoot = new ConfigurationBuilder()
-                .AddJsonFile(Path.GetFullPath("appsettings.json"), optional: false, reloadOnChange: true)
-                .Build();
-
             // configure services
             var services = new ServiceCollection()
+                .AddScoped<IProcessWorkspaceService, ProcessWorkspaceService>()
+                .AddScoped<IProductService, ProductService>()
                 .AddScoped<IWasdiService, WasdiService>()
-                .AddScoped<IWasdiRepository, WasdiRepository>();
+                .AddScoped<IWorkflowService, WorkflowService>()
+                .AddScoped<IWorkspaceService, WorkspaceService>()
+
+                .AddScoped<IProcessWorkspaceRepository, ProcessWorkspaceRepository>()
+                .AddScoped<IProductRepository, ProductRepository>()
+                .AddScoped<IWasdiRepository, WasdiRepository>()
+                .AddScoped<IWorkflowRepository, WorkflowRepository>()
+                .AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 
 
             // configure logger
@@ -41,6 +46,17 @@ namespace WasdiLib.Configuration
             services.ConfigureHttpClients(ConfigurationRoot);
 
             ServiceProvider = services.BuildServiceProvider();
+        }
+
+        public static void LoadConfiguration(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Path.GetFullPath("appsettings.json");
+
+            // add configuration
+            ConfigurationRoot = new ConfigurationBuilder()
+                .AddJsonFile(path, optional: false, reloadOnChange: true)
+                .Build();
         }
 
         public static void SetupErrorLogger()

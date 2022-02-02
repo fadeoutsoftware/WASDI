@@ -3,7 +3,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace WasdiLib.Helpers
 {
-    internal class SerializationHelper
+    public class SerializationHelper
     {
         public static JsonSerializerSettings Settings { get; private set; }
 
