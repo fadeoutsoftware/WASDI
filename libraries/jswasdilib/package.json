@@ -16,7 +16,7 @@
     "EO",
     "Earth observation"
   ],
-  "author": "mmenapace",
+  "author": "WASDI (LU) Sarl",
   "license": "GPL-3.0",
   "devDependencies": {
     "babel-loader": "^8.2.3",

@@ -29,6 +29,8 @@ class Wasdi {
     _m_sWorkspaceName = '';
     _m_sWorkspaceId = '';
 
+    _m_asRunningProcessorIds = [];
+
     constructor() {
         this._m_sUser = undefined;
         this._m_sPassword = undefined;
@@ -65,7 +67,7 @@ class Wasdi {
         console.log('[INFO] jswasdilib.printStatus: password: ***********');
         console.log('[INFO] jswasdilib.printStatus: session id: ' + this.SessionId);
         console.log('[INFO] jswasdilib.printStatus: active workspace: ' + this.ActiveWorkspace);
-        console.log('[INFO] jswasdilib.printStatus: workspace owner: ' + this.m_sWorkspaceOwner);
+        console.log('[INFO] jswasdilib.printStatus: workspace owner: ' + this.WorkspaceOwner);
         console.log('[INFO] jswasdilib.printStatus: parameters file path: ' + this.ParametersFilePath);
         console.log('[INFO] jswasdilib.printStatus: base path: ' + this.BasePath);
         console.log('[INFO] jswasdilib.printStatus: download active: ' + this.DownloadActive);
@@ -76,7 +78,7 @@ class Wasdi {
         console.log('[INFO] jswasdilib.printStatus: base url: ' + this.BaseUrl);
         console.log('[INFO] jswasdilib.printStatus: is on server: ' + this.IsOnServer);
         console.log('[INFO] jswasdilib.printStatus: workspace base url: ' + this.WorkspaceBaseUrl);
-
+        this._m_bValidSession = this._m_sSessionId != undefined;
         if (this.ValidSession) {
             console.log('[INFO] jswasdilib.printStatus: session is valid :-)');
         } else {
@@ -90,14 +92,14 @@ class Wasdi {
     /**
      * Test method to check wasdi instance, with a tiny bit of developer's traditions
      */
-    helloWasdiWorld() {
+    helloWasdiWorld(checkInstance) {
 
         var xhr = new XMLHttpRequest();
         let response = undefined;
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
                 response = this.responseText;
-                console.log(response);
+                if (!checkInstance) console.log(response);
             }
         });
 
@@ -113,7 +115,7 @@ class Wasdi {
      * @returns {boolean}
      */
     checkBaseUrl() {
-        let response = this.helloWasdiWorld();
+        let response = this.helloWasdiWorld(true);
         if (response.includes("Hello Wasdi")) {
             return true;
         } else {
@@ -139,7 +141,6 @@ class Wasdi {
 
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
-                console.log(this.responseText);
             }
         });
 
@@ -149,12 +150,13 @@ class Wasdi {
         xhr.send(oCredentials);
         // local scope
         let response = JSON.parse(xhr.response);
-        console.log(response);
 
         if ('sessionId' in response && response.sessionId != undefined) {
             this._m_sSessionId = response.sessionId; // init the current session id
+            return "[jswasdilib]login : User authenticated ";
         }
 
+        return "[jswasdilib]login : Login failed, please check configuration";
     }
 
     /**
@@ -297,11 +299,10 @@ class Wasdi {
 
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
-                console.log(this.responseText);
             }
         });
 
-        xhr.open("GET", this._m_sBaseUrl + url + params, false);
+        xhr.open("GET",  url + params, false);
         xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
         xhr.setRequestHeader("x-session-token", this._m_sSessionId);
 
@@ -310,52 +311,137 @@ class Wasdi {
     }
 
     /**
-     * Opens a workspace and set it as active workspace
-     * @param workspaceID The id of the selected workspace
-     * @returns {{workspaceId}|number|string|{}|*}
+     * Private util method to return parsed object from string. Due to requirements, uses the async http call
+     * @url String containing the url of the required resource
+     * @param params String containing the parameters, must include the correct syntax like '?=[...]'
+     * @returns {number|string|{}|any}
      */
-    openWorkspace(workspaceID) {
-        let ws = this.#getObject("/ws/getws", "?workspace=" + workspaceID);
-        if (ws.workspaceId) {
-            this.m_sActiveWorkspace = ws.workspaceId;
-            this._m_sWorkspaceName = ws.name;
-            console.log("[INFO] jswasdilib.openWorkspace: Opened Workspace " + this._m_sWorkspaceName);
-            return ws;
-        } else {
-            console.log("Could not find Workspace, please check parameters");
-            return;
-        }
-
-    }
-
-
-    createWorkspace(wsName) {
+    #postObject(url, params, data) {
 
         var xhr = new XMLHttpRequest();
 
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
-                console.log("New workspace " + wsName + " created");
-
+                //        console.log(this.responseText);
             }
         });
-        xhr.open("GET", this._m_sBaseUrl + "/ws/create?name=" + wsName, false);
 
+        xhr.open("POST", url + params, false);
         xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
-        xhr.setRequestHeader("x-session-token", this._m_sSessionId);
+        xhr.setRequestHeader("x-session-token", "882501e0-347f-4a36-b03b-91b0671809a3");
 
+        xhr.send(data);
+        return JSON.parse(xhr.response);
+    }
 
-        xhr.send();
-        let wsId = JSON.parse(xhr.response).stringValue;
-        if (wsId) {
-            console.log("Workspace Id " + wsId);
-            this.m_sActiveWorkspace = wsId;
-            console.log("Active workspace set");
+    workspaceList() {
+        var workspaceList = this.#getObject(this._m_sBaseUrl +"/ws/byuser", "");
+        console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
+        workspaceList.forEach(a => console.log(a.workspaceName + " - Id" + a.workspaceId));
+        return workspaceList;
+    }
+
+    productListByActiveWs() {
+        let productList = this.#getObject(this._m_sBaseUrl +"/product/byws", "?workspace=" + this.ActiveWorkspace)
+        console.log("[INFO] jswasdilib.productListByActiveWs: Products in the active workspace ");
+        productList.forEach(a => console.log(a.name));
+        return productList;
+    }
+
+    /**
+     * Opens a workspace and set it as active workspace
+     * @param workspaceID The id of the selected workspace
+     * @returns {{workspaceId}|number|string|{}|*}
+     */
+    openWorkspaceById(workspaceID) {
+        let ws = this.#getObject(this._m_sBaseUrl + "/ws/getws", "?workspace=" + workspaceID);// retrieves workspace viewmodel
+        if (ws.workspaceId) {
+            this._m_sActiveWorkspace = ws.workspaceId;
+            this._m_sWorkspaceName = ws.name;
+            this._m_sWorkspaceBaseUrl = ws.apiUrl;
+            console.log("[INFO] jswasdilib.openWorkspace: Opened Workspace " + this._m_sWorkspaceName);
+            return ws;
+        } else {
+            console.log("[ERROR] Could not find Workspace, please check parameters");
+            return;
         }
-        return xhr.response;
 
     }
 
+    /**
+     * Open a workspace and set it as active workspace
+     * @param workspaceID The id of the selected workspace
+     * @returns {{workspaceId}|number|string|{}|*}
+     */
+    openWorkspace(workspaceName) {
+        let wsList = this.workspaceList();
+        if (wsList) {
+            let ws;
+            wsList.forEach(a => {
+                if (a.workspaceName == workspaceName) {
+                    ws = a;
+                }
+            });
+            if (ws.workspaceId) {
+                console.log("[INFO] jswasdilib.openWorkspaceByName: Opened Workspace " + ws.workspaceName);
+                return this.openWorkspaceById(ws.workspaceId);
+            } else {
+                console.log("[INFO] jswasdilib.openWorkspaceByName: Could not find workspace \"" + workspaceName + "\"");
+            }
+        } else {
+            console.log("[ERROR] jswasdilib.openWorkspaceByName: please check parameters");
+            return;
+        }
+
+    }
+
+    /**
+     * Launch a process in the current workspace
+     * @param appname the application name
+     */
+    launchProcessor(appname) {
+        if (this._m_sActiveWorkspace) {
+            let response = this.#postObject(this._m_sWorkspaceBaseUrl + "/processors/run", "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace)
+            return response;
+        } else {
+            console.log("[INFO] jswasdilib.LaunchProcessor: no workspace opened, please use wasdi.openWorkspace se the active workspace or wasdi.createWorkspace for a new one")
+        }
+    }
+
+    /**
+     * Set the payload of a process, identified by its processId
+     * @param sProcessId the processId to add the payload
+     * @param data JSON string containing the payload
+     */
+    setProcessPayload(sProcessId,data){
+        return this.#getObject(this._m_sWorkspaceBaseUrl + "/process/setpayload","?procws="+sProcessId+
+            "&payload="+ encodeURIComponent(data));
+    }
+
+
+    /**
+     * Create a new workspace for the active user
+     * @param wsName The workspace name
+     */
+    createWorkspace(wsName) {
+        let ws = this.#getObject(this._m_sBaseUrl + "/ws/create", "?name=" + wsName);
+        if (ws.stringValue) {
+            console.log("[INFO] jswasdilib.CreateWorkspace: New workspace " + wsName + " created");
+            console.log("[INFO] jswasdilib.CreateWorkspace: Workspace Id " + ws.stringValue);
+            this.m_sActiveWorkspace = ws.stringValue;
+            console.log("[INFO] jswasdilib.CreateWorkspace: Active workspace set");
+        }
+        return;
+
+    }
+
+    getProcessStatus(processId) {
+        let procWs = this.#getObject(this._m_sWorkspaceBaseUrl + "/process/byid", "?procws=" + processId);
+        if (procWs.status) {
+            console.log("[INFO] jswasdilib.getProcessStatus: Process status " + procWs.status
+                + " Percentage " + procWs.progressPerc + " %");
+        }
+    }
 
     get User() {
         return this._m_sUser;
@@ -438,25 +524,9 @@ class Wasdi {
     }
 }
 
-
 const wasdiInstance = new Wasdi();
 module.exports = wasdiInstance;
 
-
-/*
-
-var wasdiInstance = new Wasdi();
-
-// syncronous call and init
-wasdiInstance.loadConfig();
-
-wasdiInstance.printStatus();
-// from now on everything is asynch !
-wasdiInstance.helloWasdiWorld();
-
-wasdiInstance.login(wasdiInstance.User,wasdiInstance.Password);
-
-*/
 // syncronous call and init
 wasdiInstance.loadConfig();
 
