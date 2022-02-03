@@ -206,7 +206,17 @@ namespace WasdiLib
             if (File.Exists(m_sParametersFilePath))
             {
                 var sParametersJson = File.ReadAllText(m_sParametersFilePath);
-                m_aoParams = SerializationHelper.FromJson<Dictionary<string, string>>(sParametersJson);
+                try
+                {
+                    m_aoParams = SerializationHelper.FromJson<Dictionary<string, string>>(sParametersJson);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("LoadParametersFile: the content of the {0} file could not be read as a JSON file.", m_sParametersFilePath);
+                }
+
+                if (m_aoParams == null)
+                    m_aoParams = new Dictionary<string, string>();
             }
         }
 
