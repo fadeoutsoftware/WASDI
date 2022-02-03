@@ -25,14 +25,17 @@ namespace WasdiLib.Client
             WasdiLib wasdi = new WasdiLib();
             wasdi.Init();
 
-
             HelloWasdi(wasdi);
+            WasdiLog(wasdi);
+            UpdateStatus(wasdi);
+            
             GetWorkspaces(wasdi);
             CreateWorkspace_DeleteWorkspace(wasdi);
             GetProcessWorkspacesByWorkspaceId(wasdi);
             GetWorkspaceIdByName(wasdi);
             GetProductsByWorkspaceId(wasdi);
             GetWorkflows(wasdi);
+            
         }
 
         private static void HelloWasdi(WasdiLib wasdi)
@@ -41,6 +44,29 @@ namespace WasdiLib.Client
             Console.WriteLine("HelloWasdi:");
 
             Console.WriteLine(wasdi.HelloWasdi());
+
+            Console.WriteLine();
+        }
+
+        private static void WasdiLog(WasdiLib wasdi)
+        {
+            Console.WriteLine();
+            Console.WriteLine("WasdiLog:");
+
+            wasdi.WasdiLog("Prova");
+
+            Console.WriteLine();
+        }
+
+        private static void UpdateStatus(WasdiLib wasdi)
+        {
+            Console.WriteLine();
+            Console.WriteLine("UpdateStatus:");
+
+            string sStatus = "DONE";
+            int iPerc = 100;
+
+            wasdi.UpdateStatus(sStatus, iPerc);
 
             Console.WriteLine();
         }

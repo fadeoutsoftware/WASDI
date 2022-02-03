@@ -24,19 +24,17 @@ namespace WasdiLib.Repositories
         {
             _logger.LogDebug("GetProductsByWorkspaceId()");
 
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("workspace", sWorkspaceId);
 
             var content = new FormUrlEncodedContent(parameters);
             string query = content.ReadAsStringAsync().Result;
             if (!string.IsNullOrEmpty(query))
-            {
                 query = "?" + query;
-            }
-
-            _wasdiHttpClient.DefaultRequestHeaders.Clear();
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
             var response = await _wasdiHttpClient.GetAsync(sBaseUrl + PRODUCTS_BY_WS_ID_PATH + query);
             response.EnsureSuccessStatusCode();

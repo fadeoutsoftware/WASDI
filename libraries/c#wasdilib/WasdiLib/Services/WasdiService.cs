@@ -75,5 +75,12 @@ namespace WasdiLib.Services
             return _repository.AddProcessorsLog(sWorkspaceBaseUrl, sSessionId, sProcessId, sLogRow).GetAwaiter().GetResult();
         }
 
+        public PrimitiveResult ProcessingSubset(string sBaseUrl, string sSessionId, string sWorkspaceId, string sInputFile, string sOutputFile, string sSubsetSetting)
+        {
+            _logger.LogDebug("ProcessingSubset()");
+
+            return _repository.ProcessingSubset(sBaseUrl, sSessionId, sWorkspaceId, sInputFile, sOutputFile, sSubsetSetting).GetAwaiter().GetResult();
+        }
+
     }
 }

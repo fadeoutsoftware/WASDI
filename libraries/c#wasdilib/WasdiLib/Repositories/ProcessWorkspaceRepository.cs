@@ -32,19 +32,17 @@ namespace WasdiLib.Repositories
         {
             _logger.LogDebug("GetProcessWorkspacesByWorkspaceId()");
 
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("workspace", sWorkspaceId);
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
             if (!String.IsNullOrEmpty(query))
-            {
                 query = "?" + query;
-            }
-
-            _wasdiHttpClient.DefaultRequestHeaders.Clear();
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
             var response = await _wasdiHttpClient.GetAsync(sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query);
             response.EnsureSuccessStatusCode();
@@ -56,19 +54,17 @@ namespace WasdiLib.Repositories
         {
             _logger.LogDebug("GetProcessWorkspacesByProcessId()");
 
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("procws", sProcessId);
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
             if (!String.IsNullOrEmpty(query))
-            {
                 query = "?" + query;
-            }
-
-            _wasdiHttpClient.DefaultRequestHeaders.Clear();
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
             string url = sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_PROCESS_ID_PATH + query;
             var response = await _wasdiHttpClient.GetAsync(url);
@@ -81,13 +77,13 @@ namespace WasdiLib.Repositories
         {
             _logger.LogDebug("GetProcessesStatus()");
 
-            var json = SerializationHelper.ToJson(asIds);
-
-            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json");
-
             _wasdiHttpClient.DefaultRequestHeaders.Clear();
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+            var json = SerializationHelper.ToJson(asIds);
+
+            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json");
 
             string url = sWorkspaceBaseUrl + PROCESSES_STATUS_BY_IDS_PATH;
             var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
@@ -104,6 +100,10 @@ namespace WasdiLib.Repositories
         {
             _logger.LogDebug("UpdateProcessStatus()");
 
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("procws", sProcessId);
             parameters.Add("status", sStatus);
@@ -116,13 +116,7 @@ namespace WasdiLib.Repositories
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
             if (!String.IsNullOrEmpty(query))
-            {
                 query = "?" + query;
-            }
-
-            _wasdiHttpClient.DefaultRequestHeaders.Clear();
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
             string url = sWorkspaceBaseUrl + PROCESSES_UPDATE_PATH + query;
             var response = await _wasdiHttpClient.GetAsync(url);
@@ -135,6 +129,10 @@ namespace WasdiLib.Repositories
         {
             _logger.LogDebug("UpdateProcessPayload()");
 
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("procws", sProcessId);
             parameters.Add("payload", sData);
@@ -142,13 +140,7 @@ namespace WasdiLib.Repositories
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
             if (!String.IsNullOrEmpty(query))
-            {
                 query = "?" + query;
-            }
-
-            _wasdiHttpClient.DefaultRequestHeaders.Clear();
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
             string url = sWorkspaceBaseUrl + PROCESSES_UPDATE_PAYLOAD_PATH + query;
             var response = await _wasdiHttpClient.GetAsync(url);
