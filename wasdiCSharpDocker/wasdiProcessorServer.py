@@ -215,12 +215,13 @@ def run(processId):
 		oConfigFile.write('"USER": "' + sUser+'",\r\n');
 		oConfigFile.write('"WORKSPACEID": "' + sWorkspaceId +'",\r\n');
 		oConfigFile.write('"SESSIONID": "'+sSessionId+'",\r\n');
-		oConfigFile.write('"ISONSERVER":1'+'\r\n');
-		oConfigFile.write('"DOWNLOADACTIVE":0'+'\r\n');
-		oConfigFile.write('"UPLOADACTIVE":0'+'\r\n');
-		oConfigFile.write('"VERBOSE":0'+'\r\n');
-		oConfigFile.write('"PARAMETERSFILEPATH":' + sParamFilePath+'\r\n');
-		oConfigFile.write('"MYPROCID":'+ processId +'\r\n');
+		oConfigFile.write('"ISONSERVER": "1",'+'\r\n');
+		oConfigFile.write('"DOWNLOADACTIVE": "0",'+'\r\n');
+		oConfigFile.write('"UPLOADACTIVE": "0",'+'\r\n');
+		oConfigFile.write('"VERBOSE": "0",'+'\r\n');
+		oConfigFile.write('"PARAMETERSFILEPATH": "' + sParamFilePath+'",\r\n');
+		#oConfigFile.write('"BASEURL": "https://test.wasdi.net/wasdiwebserver/rest/",\r\n')
+		oConfigFile.write('"MYPROCID": "'+ processId +'"\r\n');
 		oConfigFile.write("}")
 		oConfigFile.close()
 		
