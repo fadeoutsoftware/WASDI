@@ -1224,3 +1224,6 @@ libraries/waspy/test/256x256.tif
 wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestUtils.java
 wasdiwebserver/src/test/java/it/fadeout/rest/resources/TestWorkspaceResource.java
 client/dist/
+libraries/c#wasdilib/WasdiLib.Client/obj/
+libraries/c#wasdilib/WasdiLib.Test/obj/
+libraries/c#wasdilib/WasdiLib/obj/
