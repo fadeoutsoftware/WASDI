@@ -220,16 +220,17 @@ def run(processId):
 		oConfigFile.write('"UPLOADACTIVE": "0",'+'\r\n');
 		oConfigFile.write('"VERBOSE": "0",'+'\r\n');
 		oConfigFile.write('"PARAMETERSFILEPATH": "' + sParamFilePath+'",\r\n');
-		#oConfigFile.write('"BASEURL": "https://test.wasdi.net/wasdiwebserver/rest/",\r\n')
+		oConfigFile.write('"BASEURL": "https://test.wasdi.net/wasdiwebserver/rest/",\r\n')
 		oConfigFile.write('"MYPROCID": "'+ processId +'"\r\n');
 		oConfigFile.write("}")
 		oConfigFile.close()
 		
 		
+		json_string = json.dumps(parameters)
+				
 		#Write Params:
 		oParamsFile = open(sParamFilePath, "w+")
-		for sKey in parameters:
-			oParamsFile.write(sKey+"=" + str(parameters[sKey])+"\r\n")
+		oParamsFile.write(json_string)
 		oParamsFile.close()
 		
 		

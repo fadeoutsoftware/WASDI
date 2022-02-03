@@ -21,17 +21,57 @@ namespace WasdiLib.Client
             WasdiLib wasdi = new WasdiLib();
             wasdi.Init();
 
+            /*
             HelloWasdi(wasdi);
             WasdiLog(wasdi);
-            
             GetWorkspaces(wasdi);
             CreateWorkspace_DeleteWorkspace(wasdi);
             GetProcessWorkspacesByWorkspaceId(wasdi);
             GetWorkspaceIdByName(wasdi);
             GetProductsByWorkspaceId(wasdi);
             GetWorkflows(wasdi);
+            */
 
-            //wasdi.SearchEOImages
+            String sStartDate = wasdi.GetParam("DATEFROM");
+            String sEndDate= wasdi.GetParam("DATETO");
+            String sBbox = wasdi.GetParam("BBOX");
+            String sWorkflow = wasdi.GetParam("WORKFLOW");
+
+            double dLatN = 44.0;
+            double dLonW = 35.0;
+            double dLatS = 45.0;
+            double dLonE = 36.0;
+
+
+            if (sBbox != null)
+            {
+                String[] asLatLons = sBbox.Split(',');
+
+                dLatN = Double.Parse(asLatLons[0]);
+                dLonW = Double.Parse(asLatLons[1]);
+                dLatS = Double.Parse(asLatLons[2]);
+                dLonE = Double.Parse(asLatLons[3]);
+            }
+
+            wasdi.WasdiLog("Start searching images");
+
+            List<QueryResultViewModel> aoResults = wasdi.SearchEOImages("S1", sStartDate, sEndDate,dLatN,dLonW,dLatS,dLonE,"GRD",null,null,null);
+
+            wasdi.WasdiLog("Found " + aoResults.Count + " Images");
+
+            if (aoResults.Count > 0)
+            {
+                wasdi.ImportProduct(aoResults[0]);
+
+                List<string> asInputs = new List<string>();
+                List<string> asOutputs = new List<string>();
+
+                asInputs.Add(aoResults[0].Title + ".zip");
+                asOutputs.Add("preprocessed.tif");
+
+                wasdi.ExecuteWorkflow(asInputs, asOutputs, sWorkflow);
+            }
+
 
             wasdi.WasdiLog("FINISHED");
             UpdateStatus(wasdi);

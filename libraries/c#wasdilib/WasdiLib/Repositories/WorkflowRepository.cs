@@ -41,7 +41,7 @@ namespace WasdiLib.Repositories
             return await response.ConvertResponse<List<Workflow>>();
         }
 
-        public async Task<PrimitiveResult> CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow)
+        public async Task<PrimitiveResult> CreateWorkflow(string sBaseUrl, string sSessionId, string sWorkspace, string? sParentId, Workflow oWorkflow)
         {
             _logger.LogDebug("CreateWorkflow()");
 
@@ -58,7 +58,14 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.PostAsync(sBaseUrl + WORKFLOWS_CREATE_PATH, requestPayload);
+            string sQueryParam = "?workspace=" + sWorkspace;
+            if (sParentId != null)
+            {
+                sQueryParam += "&parent=" + sParentId;
+            }
+
+
+            var response = await _wasdiHttpClient.PostAsync(sBaseUrl + WORKFLOWS_CREATE_PATH + sQueryParam, requestPayload);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();

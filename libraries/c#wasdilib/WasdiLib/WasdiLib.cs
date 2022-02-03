@@ -921,7 +921,14 @@ namespace WasdiLib
                 OutputFileNames = asOutputFileNames
             };
 
-            PrimitiveResult wasdiResponse = _workflowService.CreateWorkflow(m_sBaseUrl, m_sSessionId, workflow);
+            string? sParentId = null;
+
+            if (m_bIsOnServer)
+            {
+                sParentId = m_sMyProcId;
+            }
+
+            PrimitiveResult wasdiResponse = _workflowService.CreateWorkflow(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sParentId, workflow);
             sProcessId = wasdiResponse.StringValue;
 
             if (bAsynch)
@@ -1476,7 +1483,7 @@ namespace WasdiLib
         }
 
         public List<QueryResultViewModel> SearchEOImages(string sPlatform, string sDateFrom, string sDateTo, Double dULLat, Double dULLon, Double dLRLat, Double dLRLon,
-            string sProductType, Int32 iOrbitNumber, string sSensorOperationalMode, string sCloudCoverage)
+            string sProductType, int? iOrbitNumber, string? sSensorOperationalMode, string? sCloudCoverage)
         {
             _logger.LogDebug("SearchEOImages()( " + sPlatform + ", [ " + sDateFrom + ", " + sDateTo + " ], " +
                 "[ " + dULLat + ", " + dULLon + ", " + dLRLat + ", " + dLRLon + " ], " +
@@ -1692,6 +1699,29 @@ namespace WasdiLib
                 string sFileUrl = GetFoundProductLink(oProduct);
                 string sBoundingBox = GetFoundProductFootprint(oProduct);
                 string sName = GetFoundProductName(oProduct);
+
+                return ImportProduct(sFileUrl, sName, sBoundingBox);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return sReturn;
+        }
+
+        public string ImportProduct(QueryResultViewModel oProduct)
+        {
+            _logger.LogDebug("ImportProduct()");
+
+            string sReturn = "ERROR";
+
+            try
+            {
+                // Get URL And Bounding Box from the JSON representation
+                string sFileUrl = oProduct.Link;
+                string sBoundingBox = oProduct.Footprint;
+                string sName = oProduct.Title;
 
                 return ImportProduct(sFileUrl, sName, sBoundingBox);
             }

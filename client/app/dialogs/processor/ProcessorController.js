@@ -345,12 +345,9 @@ var ProcessorController = (function() {
         if (this.m_bEditMode == false) {
             return true;
         }
-
-        if (this.m_sTypeIdOnly === "ubuntu_idl372" || this.m_sTypeIdOnly === "ubuntu_python37_snap"
-        || this.m_sTypeIdOnly === "conda" || this.m_sTypeIdOnly === "octave")  {
+        else {
             return true;
         }
-        return false;
     };
 
      /**

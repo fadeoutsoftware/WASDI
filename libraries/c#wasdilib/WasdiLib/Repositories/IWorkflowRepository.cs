@@ -6,7 +6,7 @@ namespace WasdiLib.Repositories
     {
         Task<List<Workflow>> GetWorkflows(string sBaseUrl, string sSessionId);
 
-        Task<PrimitiveResult> CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow);
+        Task<PrimitiveResult> CreateWorkflow(string sBaseUrl, string sSessionId, string sWorkspace, string? sParentId, Workflow oWorkflow);
 
     }
 }

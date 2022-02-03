@@ -24,11 +24,11 @@ namespace WasdiLib.Services
             return _repository.GetWorkflows(sBaseUrl, sSessionId).GetAwaiter().GetResult();
         }
 
-        public PrimitiveResult CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow)
+        public PrimitiveResult CreateWorkflow(string sBaseUrl, string sSessionId, string sWorkspace, string? sParentId, Workflow oWorkflow)
         {
             _logger.LogDebug("CreateWorkflow()");
 
-            return _repository.CreateWorkflow(sBaseUrl, sSessionId, oWorkflow).GetAwaiter().GetResult();
+            return _repository.CreateWorkflow(sBaseUrl, sSessionId, sWorkspace, sParentId, oWorkflow).GetAwaiter().GetResult();
         }
 
     }
