@@ -1886,9 +1886,17 @@ namespace WasdiLib
             }
 
             PrimitiveResult wasdiResponse = _workspaceService.CreateWorkspace(m_sBaseUrl, m_sSessionId, workspaceName, nodeCode);
-            string workspaceId = wasdiResponse.StringValue;
 
-            return workspaceId;
+            if (wasdiResponse!= null)
+            {
+                string workspaceId = wasdiResponse.StringValue;
+
+                return workspaceId;
+            }
+            else
+            {
+                return "";
+            }
         }
 
         public string DeleteWorkspace(string workspaceId)

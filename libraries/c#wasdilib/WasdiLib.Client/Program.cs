@@ -15,19 +15,14 @@ namespace WasdiLib.Client
     {
 
         private static string _workspaceName = "ERA5_WORKSPACE_TEST";
+
         static void Main(string[] args)
         {
-            Startup.RegisterServices();
-            var _logger = Startup.ServiceProvider.GetService<ILogger<Program>>();
-
-            _logger.LogInformation("Program.Main()");
-
             WasdiLib wasdi = new WasdiLib();
             wasdi.Init();
 
             HelloWasdi(wasdi);
             WasdiLog(wasdi);
-            UpdateStatus(wasdi);
             
             GetWorkspaces(wasdi);
             CreateWorkspace_DeleteWorkspace(wasdi);
@@ -35,117 +30,97 @@ namespace WasdiLib.Client
             GetWorkspaceIdByName(wasdi);
             GetProductsByWorkspaceId(wasdi);
             GetWorkflows(wasdi);
-            
+
+            //wasdi.SearchEOImages
+
+            wasdi.WasdiLog("FINISHED");
+            UpdateStatus(wasdi);
+
         }
 
         private static void HelloWasdi(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("HelloWasdi:");
-
-            Console.WriteLine(wasdi.HelloWasdi());
-
-            Console.WriteLine();
+            wasdi.WasdiLog("HelloWasdi:");
+            wasdi.WasdiLog(wasdi.HelloWasdi());
         }
 
         private static void WasdiLog(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("WasdiLog:");
-
-            wasdi.WasdiLog("Prova");
-
-            Console.WriteLine();
+            wasdi.WasdiLog("WasdiLog: Prova");
         }
 
         private static void UpdateStatus(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("UpdateStatus:");
+            wasdi.WasdiLog("UpdateStatus:");
 
             string sStatus = "DONE";
             int iPerc = 100;
 
             wasdi.UpdateStatus(sStatus, iPerc);
-
-            Console.WriteLine();
         }
 
         private static void GetWorkspaces(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("GetWorkspaces:");
+            wasdi.WasdiLog("GetWorkspaces:");
 
             List<Workspace> workspaces = wasdi.GetWorkspaces();
 
             foreach (Workspace workspace in workspaces)
             {
-                Console.WriteLine(JsonConvert.SerializeObject(workspace));
+                wasdi.WasdiLog(JsonConvert.SerializeObject(workspace));
             }
-
-            Console.WriteLine();
         }
 
         private static void CreateWorkspace_DeleteWorkspace(WasdiLib wasdi)
         {
-            Console.WriteLine("");
-            Console.WriteLine("CreateWorkspace_DeleteWorkspace:");
+            wasdi.WasdiLog("CreateWorkspace_DeleteWorkspace:");
 
-            string workspaceName = "TestWorkspace";
+            string workspaceName = wasdi.GetParam("WSNAME");
 
             string workspaceId = wasdi.GetWorkspaceIdByName(workspaceName);
 
             if (workspaceId == null)
                 workspaceId = wasdi.CreateWorkspace(workspaceName);
 
-            Console.WriteLine("Workspace: " + "Name: " + workspaceName + "; " + "Id: " + workspaceId);
+            wasdi.WasdiLog("Workspace: " + "Name: " + workspaceName + "; " + "Id: " + workspaceId);
 
 
             string outcome = wasdi.DeleteWorkspace(workspaceId);
-            Console.WriteLine("Deleted Workspace: {0}", outcome);
-
-            Console.WriteLine("");
+            wasdi.WasdiLog("Deleted Workspace: " + outcome);
         }
 
         private static void GetProcessWorkspacesByWorkspaceId(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("GetProcessWorkspacesByWorkspaceId:");
+            wasdi.WasdiLog("GetProcessWorkspacesByWorkspaceId:");
 
 
-            string workspaceId = wasdi.GetWorkspaceIdByName(_workspaceName);
+            //string workspaceId = wasdi.GetWorkspaceIdByName(_workspaceName);
+            //wasdi.OpenWorkspace(_workspaceName);
 
-            wasdi.OpenWorkspace(_workspaceName);
-
-            List<ProcessWorkspace> processWorkspaces = wasdi.GetProcessWorkspacesByWorkspaceId(workspaceId);
+            List<ProcessWorkspace> processWorkspaces = wasdi.GetProcessWorkspacesByWorkspaceId(wasdi.GetActiveWorkspace());
 
             foreach (ProcessWorkspace processWorkspace in processWorkspaces)
             {
-                Console.WriteLine(SerializationHelper.ToJson(processWorkspace));
+                wasdi.WasdiLog(SerializationHelper.ToJson(processWorkspace));
             }
-
-            Console.WriteLine();
         }
 
         private static void GetWorkspaceIdByName(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("GetWorkspaceIdByName:");
+            wasdi.WasdiLog("GetWorkspaceIdByName:");
 
 
             string workspaceId = wasdi.GetWorkspaceIdByName(_workspaceName);
 
             string workspaceUrl = wasdi.GetWorkspaceUrlByWsId(workspaceId);
 
-            Console.WriteLine("workspaceUrl: " + workspaceUrl);
+            wasdi.WasdiLog("workspaceUrl: " + workspaceUrl);
 
-            Console.WriteLine();
         }
 
         private static void GetProductsByWorkspaceId(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("GetProductsByWorkspaceId:");
+            wasdi.WasdiLog("GetProductsByWorkspaceId:");
 
 
             string workspaceId = wasdi.GetWorkspaceIdByName(_workspaceName);
@@ -154,25 +129,20 @@ namespace WasdiLib.Client
 
             foreach (string product in productList)
             {
-                Console.WriteLine(product);
+                wasdi.WasdiLog(product);
             }
-
-            Console.WriteLine();
         }
 
         private static void GetWorkflows(WasdiLib wasdi)
         {
-            Console.WriteLine();
-            Console.WriteLine("GetWorkflows:");
+            wasdi.WasdiLog("GetWorkflows:");
 
             List<Workflow> workflows = wasdi.GetWorkflows();
 
             foreach (Workflow workflow in workflows)
             {
-                Console.WriteLine(JsonConvert.SerializeObject(workflow));
+                wasdi.WasdiLog(JsonConvert.SerializeObject(workflow));
             }
-
-            Console.WriteLine();
         }
 
     }
