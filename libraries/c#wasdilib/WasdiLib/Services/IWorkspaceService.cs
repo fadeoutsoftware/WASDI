@@ -5,13 +5,13 @@ namespace WasdiLib.Services
     internal interface IWorkspaceService
     {
 
-        List<Workspace> GetWorkspaces(string sSessionId);
+        List<Workspace> GetWorkspaces(string sBaseUrl, string sSessionId);
 
-        WorkspaceEditorViewModel GetWorkspace(string sSessionId, string workspaceId);
+        WorkspaceEditorViewModel GetWorkspace(string sBaseUrl, string sSessionId, string workspaceId);
 
-        WasdiResponse CreateWorkspace(string sSessionId, string workspaceName, string nodeCode);
+        PrimitiveResult CreateWorkspace(string sBaseUrl, string sSessionId, string workspaceName, string nodeCode);
 
-        string DeleteWorkspace(string sSessionId, string workspaceId);
+        string DeleteWorkspace(string sBaseUrl, string sSessionId, string workspaceId);
 
     }
 }

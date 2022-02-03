@@ -4,17 +4,15 @@ namespace WasdiLib.Repositories
 {
     internal interface IProcessWorkspaceRepository
     {
-        Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspaceId(string sSessionId, string workspaceId);
+        Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspaceId(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId);
 
-        Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sSessionId, string processId, string sWorkspaceBaseUrl);
+        Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId);
 
-        Task<string> GetProcessesStatus(string sSessionId, List<string> asIds, string sWorkspaceBaseUrl);
+        Task<string> GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds);
 
-        Task<ProcessWorkspace> UpdateProcessStatus(string sSessionId, string processId, string sStatus,
-            int iPerc, string sWorkspaceBaseUrl);
+        Task<ProcessWorkspace> UpdateProcessStatus(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sStatus, int iPerc);
 
-        Task<ProcessWorkspace> UpdateProcessPayload(string sSessionId, string processId, string sData,
-            string sWorkspaceBaseUrl);
+        Task<ProcessWorkspace> UpdateProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sData);
 
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace WasdiLib.Models
 {
-    internal class WasdiResponse
+    internal class PrimitiveResult
     {
 
         public Boolean BoolValue { get; set; }

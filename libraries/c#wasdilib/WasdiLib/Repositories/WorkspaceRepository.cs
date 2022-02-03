@@ -22,9 +22,10 @@ namespace WasdiLib.Repositories
             _logger = logger;
 
             _wasdiHttpClient = httpClientFactory.CreateClient("WasdiApi");
+            _wasdiHttpClient.BaseAddress = new Uri("https://test.wasdi.net/wasdiwebserver/rest/");
         }
 
-        public async Task<List<Workspace>> GetWorkspaces(string sSessionId)
+        public async Task<List<Workspace>> GetWorkspaces(string sBaseUrl, string sSessionId)
         {
             _logger.LogDebug("GetWorkspaces()");
 
@@ -32,13 +33,13 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(WORKSPACES_BY_USER_PATH);
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACES_BY_USER_PATH);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<Workspace>>();
         }
 
-        public async Task<WorkspaceEditorViewModel> GetWorkspace(string sSessionId, string sWorkspaceId)
+        public async Task<WorkspaceEditorViewModel> GetWorkspace(string sBaseUrl, string sSessionId, string sWorkspaceId)
         {
             _logger.LogDebug("GetWorkspace({0})", sWorkspaceId);
 
@@ -56,25 +57,25 @@ namespace WasdiLib.Repositories
                 query = "?" + query;
             }
 
-            var response = await _wasdiHttpClient.GetAsync(WORKSPACE_BY_WS_ID_PATH + query);
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACE_BY_WS_ID_PATH + query);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<WorkspaceEditorViewModel>();
         }
 
-        public async Task<WasdiResponse> CreateWorkspace(string sSessionId, string workspaceName, string nodeCode)
+        public async Task<PrimitiveResult> CreateWorkspace(string sBaseUrl, string sSessionId, string sWorkspaceName, string sNodeCode)
         {
-            _logger.LogDebug("CreateWorkspace({0}, {1})", workspaceName, nodeCode);
+            _logger.LogDebug("CreateWorkspace({0}, {1})", sWorkspaceName, sNodeCode);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            if (!string.IsNullOrEmpty(workspaceName))
+            if (!string.IsNullOrEmpty(sWorkspaceName))
             {
-                parameters.Add("name", workspaceName);
+                parameters.Add("name", sWorkspaceName);
             }
 
-            if (!string.IsNullOrEmpty(nodeCode))
+            if (!string.IsNullOrEmpty(sNodeCode))
             {
-                parameters.Add("node", nodeCode);
+                parameters.Add("node", sNodeCode);
             }
 
             var content = new FormUrlEncodedContent(parameters);
@@ -88,18 +89,18 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(WORKSPACES_CREATE_PATH + query);
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACES_CREATE_PATH + query);
             response.EnsureSuccessStatusCode();
 
-            return await response.ConvertResponse<WasdiResponse>();
+            return await response.ConvertResponse<PrimitiveResult>();
         }
 
-        public async Task<string> DeleteWorkspace(string sSessionId, string workspaceId)
+        public async Task<string> DeleteWorkspace(string sBaseUrl, string sSessionId, string sWorkspaceId)
         {
-            _logger.LogDebug("DeleteWorkspace({0})", workspaceId);
+            _logger.LogDebug("DeleteWorkspace({0})", sWorkspaceId);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("workspace", workspaceId);
+            parameters.Add("workspace", sWorkspaceId);
 
             parameters.Add("deletelayer", "true");
             parameters.Add("deletefile", "true");
@@ -115,7 +116,7 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.DeleteAsync(WORKSPACES_DELETE_PATH + query);
+            var response = await _wasdiHttpClient.DeleteAsync(sBaseUrl + WORKSPACES_DELETE_PATH + query);
 
             var data = string.Empty;
 

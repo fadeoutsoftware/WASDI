@@ -16,32 +16,32 @@ namespace WasdiLib.Services
             _repository = repository;
         }
 
-        public List<Workspace> GetWorkspaces(string sSessionId)
+        public List<Workspace> GetWorkspaces(string sBaseUrl, string sSessionId)
         {
             _logger.LogDebug("GetWorkspaces()");
 
-            return _repository.GetWorkspaces(sSessionId).GetAwaiter().GetResult();
+            return _repository.GetWorkspaces(sBaseUrl, sSessionId).GetAwaiter().GetResult();
         }
 
-        public WorkspaceEditorViewModel GetWorkspace(string sSessionId, string workspaceId)
+        public WorkspaceEditorViewModel GetWorkspace(string sBaseUrl, string sSessionId, string workspaceId)
         {
             _logger.LogDebug("GetWorkspace({0})", workspaceId);
 
-            return _repository.GetWorkspace(sSessionId, workspaceId).GetAwaiter().GetResult();
+            return _repository.GetWorkspace(sBaseUrl, sSessionId, workspaceId).GetAwaiter().GetResult();
         }
 
-        public WasdiResponse CreateWorkspace(string sSessionId, string workspaceName, string nodeCode)
+        public PrimitiveResult CreateWorkspace(string sBaseUrl, string sSessionId, string workspaceName, string nodeCode)
         {
             _logger.LogDebug("CreateWorkspace({workspaceName}, {nodeCode})", workspaceName, nodeCode);
 
-            return _repository.CreateWorkspace(sSessionId, workspaceName, nodeCode).GetAwaiter().GetResult();
+            return _repository.CreateWorkspace(sBaseUrl, sSessionId, workspaceName, nodeCode).GetAwaiter().GetResult();
         }
 
-        public string DeleteWorkspace(string sSessionId, string workspaceId)
+        public string DeleteWorkspace(string sBaseUrl, string sSessionId, string workspaceId)
         {
             _logger.LogDebug("DeleteWorkspace({0})", workspaceId);
 
-            return _repository.DeleteWorkspace(sSessionId, workspaceId).GetAwaiter().GetResult();
+            return _repository.DeleteWorkspace(sBaseUrl, sSessionId, workspaceId).GetAwaiter().GetResult();
         }
 
     }

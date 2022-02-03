@@ -4,9 +4,9 @@ namespace WasdiLib.Repositories
 {
     internal interface IWorkflowRepository
     {
-        Task<List<Workflow>> GetWorkflows(string sSessionId);
+        Task<List<Workflow>> GetWorkflows(string sBaseUrl, string sSessionId);
 
-        Task<WasdiResponse> CreateWorkflow(string sSessionId, Workflow workflow);
+        Task<PrimitiveResult> CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow);
 
     }
 }

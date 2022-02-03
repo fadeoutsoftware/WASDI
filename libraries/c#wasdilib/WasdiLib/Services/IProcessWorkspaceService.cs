@@ -5,17 +5,15 @@ namespace WasdiLib.Services
 {
     internal interface IProcessWorkspaceService
     {
-        List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string sSessionId, string workspaceId);
+        List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId);
 
-        ProcessWorkspace GetProcessWorkspaceByProcessId(string sSessionId, string processId, string sWorkspaceBaseUrl);
+        ProcessWorkspace GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId);
 
-        string GetProcessesStatus(string sSessionId, List<string> asIds, string sWorkspaceBaseUrl);
+        string GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds);
 
-        ProcessWorkspace UpdateProcessStatus(string sSessionId, string processId, string sStatus,
-            int iPerc, string sWorkspaceBaseUrl);
+        ProcessWorkspace UpdateProcessStatus(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sStatus, int iPerc);
 
-        ProcessWorkspace UpdateProcessPayload(string sSessionId, string processId, string sData,
-            string sWorkspaceBaseUrl);
+        ProcessWorkspace UpdateProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sData);
 
     }
 }

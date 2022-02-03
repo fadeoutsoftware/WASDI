@@ -5,13 +5,13 @@ namespace WasdiLib.Repositories
     internal interface IWorkspaceRepository
     {
 
-        Task<List<Workspace>> GetWorkspaces(string sSessionId);
+        Task<List<Workspace>> GetWorkspaces(string sBaseUrl, string sSessionId);
 
-        Task<WorkspaceEditorViewModel> GetWorkspace(string sSessionId, string sWorkspaceId);
+        Task<WorkspaceEditorViewModel> GetWorkspace(string sBaseUrl, string sSessionId, string sWorkspaceId);
 
-        Task<WasdiResponse> CreateWorkspace(string sSessionId, string workspaceName, string nodeCode);
+        Task<PrimitiveResult> CreateWorkspace(string sBaseUrl, string sSessionId, string sWorkspaceName, string sNodeCode);
 
-        Task<string> DeleteWorkspace(string sSessionId, string workspaceId);
+        Task<string> DeleteWorkspace(string sBaseUrl, string sSessionId, string sWorkspaceId);
 
     }
 }

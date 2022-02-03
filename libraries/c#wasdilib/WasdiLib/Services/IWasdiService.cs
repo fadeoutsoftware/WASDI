@@ -4,16 +4,21 @@ namespace WasdiLib.Services
 {
     internal interface IWasdiService
     {
-        WasdiResponse HelloWasdi();
+        PrimitiveResult HelloWasdi(string sBaseUrl);
 
-        LoginResponse Authenticate(string sUser, string sPassword);
+        LoginResponse Authenticate(string sBaseUrl, string sUser, string sPassword);
 
-        LoginResponse CheckSession(string sSessionId);
+        LoginResponse CheckSession(string sBaseUrl, string sSessionId);
 
-        bool FileExistsOnServer(string sSessionId, string workspaceId, string sWorkspaceBaseUrl, bool bIsMainNode, string sFileName);
+        bool FileExistsOnServer(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsMainNode, string sFileName);
 
-        WasdiResponse CatalogUploadIngest(string sSessionId, string workspaceId, string sWorkspaceBaseUrl,
-            string sFileName, string sStyle);
+        PrimitiveResult CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle);
+
+        PrimitiveResult ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting);
+
+        List<QueryResultViewModel> SearchQueryList(string sUrl, string sSessionId, string sQueryBody);
+
+        PrimitiveResult FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox);
     }
 
 }

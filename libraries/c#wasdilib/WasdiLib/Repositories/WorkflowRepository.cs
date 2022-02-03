@@ -27,7 +27,7 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient = httpClientFactory.CreateClient("WasdiApi");
         }
 
-        public async Task<List<Workflow>> GetWorkflows(string sSessionId)
+        public async Task<List<Workflow>> GetWorkflows(string sBaseUrl, string sSessionId)
         {
             _logger.LogDebug("GetWorkflows()");
 
@@ -35,17 +35,17 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(WORKFLOWS_BY_USER_PATH);
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKFLOWS_BY_USER_PATH);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<Workflow>>();
         }
 
-        public async Task<WasdiResponse> CreateWorkflow(string sSessionId, Workflow workflow)
+        public async Task<PrimitiveResult> CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow)
         {
             _logger.LogDebug("CreateWorkflow()");
 
-            var json = JsonConvert.SerializeObject(workflow,
+            var json = JsonConvert.SerializeObject(oWorkflow,
                 new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -58,10 +58,10 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.PostAsync(WORKFLOWS_CREATE_PATH, requestPayload);
+            var response = await _wasdiHttpClient.PostAsync(sBaseUrl + WORKFLOWS_CREATE_PATH, requestPayload);
             response.EnsureSuccessStatusCode();
 
-            return await response.ConvertResponse<WasdiResponse>();
+            return await response.ConvertResponse<PrimitiveResult>();
         }
 
     }

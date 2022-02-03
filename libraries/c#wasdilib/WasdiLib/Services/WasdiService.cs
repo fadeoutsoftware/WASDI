@@ -16,39 +16,61 @@ namespace WasdiLib.Services
             _repository = repository;
         }
 
-        public WasdiResponse HelloWasdi()
+        public PrimitiveResult HelloWasdi(string sBaseUrl)
         {
             _logger.LogDebug("HelloWasdi()");
 
-            return _repository.HelloWasdi().GetAwaiter().GetResult();
+            return _repository.HelloWasdi(sBaseUrl).GetAwaiter().GetResult();
         }
 
-        public LoginResponse Authenticate(string sUser, string sPassword)
+        public LoginResponse Authenticate(string sBaseUrl, string sUser, string sPassword)
         {
-            return _repository.Login(sUser, sPassword).GetAwaiter().GetResult();
+            return _repository.Login(sBaseUrl, sUser, sPassword).GetAwaiter().GetResult();
         }
 
-        public LoginResponse CheckSession(string sSessionId)
+        public LoginResponse CheckSession(string sBaseUrl, string sSessionId)
         {
-            return _repository.CheckSession(sSessionId).GetAwaiter().GetResult();
+            return _repository.CheckSession(sBaseUrl, sSessionId).GetAwaiter().GetResult();
         }
 
-        public bool FileExistsOnServer(string sSessionId, string workspaceId, string sWorkspaceBaseUrl, bool bIsMainNode, string sFileName)
+        public bool FileExistsOnServer(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsMainNode, string sFileName)
         {
             _logger.LogDebug("FileExistsOnServer()");
 
-            return _repository.FileExistsOnServer(sSessionId, workspaceId, sWorkspaceBaseUrl, bIsMainNode, sFileName)
+            return _repository.FileExistsOnServer(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, bIsMainNode, sFileName)
                 .GetAwaiter().GetResult();
         }
 
-        public WasdiResponse CatalogUploadIngest(string sSessionId, string workspaceId, string sWorkspaceBaseUrl,
-            string sFileName, string sStyle)
+        public PrimitiveResult CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle)
         {
             _logger.LogDebug("CatalogUploadIngest()");
 
-            return _repository.CatalogUploadIngest(sSessionId, workspaceId, sWorkspaceBaseUrl, sFileName, sStyle)
+            return _repository.CatalogUploadIngest(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sFileName, sStyle)
                 .GetAwaiter().GetResult();
         }
 
+        public PrimitiveResult ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting)
+        {
+            _logger.LogDebug("ProcessingMosaic()");
+
+            return _repository.ProcessingMosaic(sUrl, sSessionId, oMosaicSetting)
+                .GetAwaiter().GetResult();
+        }
+
+        public List<QueryResultViewModel> SearchQueryList(string sUrl, string sSessionId, string sQueryBody)
+        {
+            _logger.LogDebug("SearchQueryList()");
+
+            return _repository.SearchQueryList(sUrl, sSessionId, sQueryBody)
+                .GetAwaiter().GetResult();
+        }
+
+        public PrimitiveResult FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox)
+        {
+            _logger.LogDebug("FilebufferDownload()");
+
+            return _repository.FilebufferDownload(sBaseUrl, sSessionId, sWorkspaceId, sProvider, sFileUrl, sFileName, sBoundingBox)
+                .GetAwaiter().GetResult();
+        }
     }
 }

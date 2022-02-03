@@ -136,6 +136,8 @@ namespace WasdiLib.Test
             string workspaceId = wasdi.GetWorkspaceIdByName(workspaceName);
             Assert.IsNotNull(workspaceId);
 
+            wasdi.OpenWorkspace(workspaceName);
+
             List<ProcessWorkspace> processWorkspaces = wasdi.GetProcessWorkspacesByWorkspaceId(workspaceId);
 
             Assert.IsNotNull(processWorkspaces);

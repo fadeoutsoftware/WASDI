@@ -4,9 +4,9 @@ namespace WasdiLib.Services
 {
     internal interface IWorkflowService
     {
-        List<Workflow> GetWorkflows(string sSessionId);
+        List<Workflow> GetWorkflows(string sBaseUrl, string sSessionId);
 
-        WasdiResponse CreateWorkflow(string sSessionId, Workflow workflow);
+        PrimitiveResult CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow);
 
     }
 }

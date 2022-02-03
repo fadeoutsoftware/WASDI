@@ -16,43 +16,39 @@ namespace WasdiLib.Services
             _repository = repository;
         }
 
-        public List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string sSessionId, string workspaceId)
+        public List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId)
         {
-            _logger.LogDebug("GetProcessWorkspacesByProcessId({0})", workspaceId);
+            _logger.LogDebug("GetProcessWorkspacesByProcessId({0})", sWorkspaceId);
 
-            return _repository.GetProcessWorkspacesByWorkspaceId(sSessionId, workspaceId).GetAwaiter().GetResult();
+            return _repository.GetProcessWorkspacesByWorkspaceId(sWorkspaceBaseUrl, sSessionId, sWorkspaceId).GetAwaiter().GetResult();
         }
 
-        public ProcessWorkspace GetProcessWorkspaceByProcessId(string sSessionId, string processId, string sWorkspaceBaseUrl)
+        public ProcessWorkspace GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId)
         {
-            _logger.LogDebug("GetProcessWorkspaceByProcessId({0})", processId);
+            _logger.LogDebug("GetProcessWorkspaceByProcessId({0})", sProcessId);
 
-            return _repository.GetProcessWorkspaceByProcessId(sSessionId, processId, sWorkspaceBaseUrl).GetAwaiter().GetResult();
+            return _repository.GetProcessWorkspaceByProcessId(sWorkspaceBaseUrl, sSessionId, sProcessId).GetAwaiter().GetResult();
         }
 
-        public string GetProcessesStatus(string sSessionId, List<string> asIds, string sWorkspaceBaseUrl)
+        public string GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds)
         {
             _logger.LogDebug("GetProcessesStatus()");
 
-            return _repository.GetProcessesStatus(sSessionId, asIds, sWorkspaceBaseUrl).GetAwaiter().GetResult();
+            return _repository.GetProcessesStatus(sWorkspaceBaseUrl, sSessionId, asIds).GetAwaiter().GetResult();
         }
 
-        public ProcessWorkspace UpdateProcessStatus(string sSessionId, string processId, string sStatus,
-            int iPerc, string sWorkspaceBaseUrl)
+        public ProcessWorkspace UpdateProcessStatus(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sStatus, int iPerc)
         {
             _logger.LogDebug("UpdateProcessStatus()");
 
-            return _repository.UpdateProcessStatus(sSessionId, processId, sStatus, iPerc, sWorkspaceBaseUrl)
-                .GetAwaiter().GetResult();
+            return _repository.UpdateProcessStatus(sWorkspaceBaseUrl, sSessionId, sProcessId, sStatus, iPerc).GetAwaiter().GetResult();
         }
 
-        public ProcessWorkspace UpdateProcessPayload(string sSessionId, string processId, string sData,
-            string sWorkspaceBaseUrl)
+        public ProcessWorkspace UpdateProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sData)
         {
             _logger.LogDebug("UpdateProcessPayload()");
 
-            return _repository.UpdateProcessPayload(sSessionId, processId, sData, sWorkspaceBaseUrl)
-                .GetAwaiter().GetResult();
+            return _repository.UpdateProcessPayload(sWorkspaceBaseUrl, sSessionId, sProcessId, sData).GetAwaiter().GetResult();
         }
 
     }

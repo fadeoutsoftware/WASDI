@@ -20,7 +20,7 @@ namespace WasdiLib.Repositories
 
             _wasdiHttpClient = httpClientFactory.CreateClient("WasdiApi");
         }
-        public async Task<List<Product>> GetProductsByWorkspaceId(string sSessionId, string sWorkspaceId)
+        public async Task<List<Product>> GetProductsByWorkspaceId(string sBaseUrl, string sSessionId, string sWorkspaceId)
         {
             _logger.LogDebug("GetProductsByWorkspaceId()");
 
@@ -38,7 +38,7 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(PRODUCTS_BY_WS_ID_PATH + query);
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + PRODUCTS_BY_WS_ID_PATH + query);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<Product>>();

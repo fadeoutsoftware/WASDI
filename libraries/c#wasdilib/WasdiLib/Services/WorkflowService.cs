@@ -17,18 +17,18 @@ namespace WasdiLib.Services
             _repository = repository;
         }
 
-        public List<Workflow> GetWorkflows(string sSessionId)
+        public List<Workflow> GetWorkflows(string sBaseUrl, string sSessionId)
         {
             _logger.LogDebug("GetWorkflows()");
 
-            return _repository.GetWorkflows(sSessionId).GetAwaiter().GetResult();
+            return _repository.GetWorkflows(sBaseUrl, sSessionId).GetAwaiter().GetResult();
         }
 
-        public WasdiResponse CreateWorkflow(string sSessionId, Workflow workflow)
+        public PrimitiveResult CreateWorkflow(string sBaseUrl, string sSessionId, Workflow oWorkflow)
         {
             _logger.LogDebug("CreateWorkflow()");
 
-            return _repository.CreateWorkflow(sSessionId, workflow).GetAwaiter().GetResult();
+            return _repository.CreateWorkflow(sBaseUrl, sSessionId, oWorkflow).GetAwaiter().GetResult();
         }
 
     }

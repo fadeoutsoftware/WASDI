@@ -89,6 +89,8 @@ namespace WasdiLib.Client
 
             string workspaceId = wasdi.GetWorkspaceIdByName(_workspaceName);
 
+            wasdi.OpenWorkspace(_workspaceName);
+
             List<ProcessWorkspace> processWorkspaces = wasdi.GetProcessWorkspacesByWorkspaceId(workspaceId);
 
             foreach (ProcessWorkspace processWorkspace in processWorkspaces)

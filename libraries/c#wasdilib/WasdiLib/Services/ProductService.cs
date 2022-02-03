@@ -16,11 +16,11 @@ namespace WasdiLib.Services
             _repository = repository;
         }
 
-        public List<Product> GetProductsByWorkspaceId(string sSessionId, string workspaceId)
+        public List<Product> GetProductsByWorkspaceId(string sBaseUrl, string sSessionId, string sWorkspaceId)
         {
-            _logger.LogDebug("GetProcessWorkspacesByProcessId({0})", workspaceId);
+            _logger.LogDebug("GetProcessWorkspacesByProcessId({0})", sWorkspaceId);
 
-            return _repository.GetProductsByWorkspaceId(sSessionId, workspaceId).GetAwaiter().GetResult();
+            return _repository.GetProductsByWorkspaceId(sBaseUrl, sSessionId, sWorkspaceId).GetAwaiter().GetResult();
         }
 
     }

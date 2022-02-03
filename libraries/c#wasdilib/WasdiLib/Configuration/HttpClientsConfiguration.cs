@@ -10,7 +10,6 @@ namespace WasdiLib.Configuration
         {
             services.AddHttpClient("WasdiApi", c =>
             {
-                c!.BaseAddress = new Uri(configuration!["BASEURL"]!);
                 c.DefaultRequestHeaders!.Add("User-Agent", "WasdiLib.C#");
             }).AddTransientHttpErrorPolicy(p =>
                 p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(500)

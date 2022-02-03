@@ -5,7 +5,7 @@ namespace WasdiLib.Services
     internal interface IProductService
     {
 
-        List<Product> GetProductsByWorkspaceId(string sSessionId, string sWorkspaceId);
+        List<Product> GetProductsByWorkspaceId(string sBaseUrl, string sSessionId, string sWorkspaceId);
 
     }
 }

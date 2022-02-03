@@ -28,12 +28,12 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient = httpClientFactory.CreateClient("WasdiApi");
         }
 
-        public async Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspaceId(string sSessionId, string workspaceId)
+        public async Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspaceId(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId)
         {
             _logger.LogDebug("GetProcessWorkspacesByWorkspaceId()");
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("workspace", workspaceId);
+            parameters.Add("workspace", sWorkspaceId);
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
@@ -46,18 +46,18 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query);
+            var response = await _wasdiHttpClient.GetAsync(sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<ProcessWorkspace>>();
         }
 
-        public async Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sSessionId, string processId, string sWorkspaceBaseUrl)
+        public async Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId)
         {
             _logger.LogDebug("GetProcessWorkspacesByProcessId()");
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("procws", processId);
+            parameters.Add("procws", sProcessId);
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
@@ -77,7 +77,7 @@ namespace WasdiLib.Repositories
             return await response.ConvertResponse<ProcessWorkspace>();
         }
 
-        public async Task<string> GetProcessesStatus(string sSessionId, List<string> asIds, string sWorkspaceBaseUrl)
+        public async Task<string> GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds)
         {
             _logger.LogDebug("GetProcessesStatus()");
 
@@ -100,13 +100,12 @@ namespace WasdiLib.Repositories
             return data;
         }
 
-        public async Task<ProcessWorkspace> UpdateProcessStatus(string sSessionId, string processId, string sStatus,
-            int iPerc, string sWorkspaceBaseUrl)
+        public async Task<ProcessWorkspace> UpdateProcessStatus(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sStatus, int iPerc)
         {
             _logger.LogDebug("UpdateProcessStatus()");
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("procws", processId);
+            parameters.Add("procws", sProcessId);
             parameters.Add("status", sStatus);
 
             if (iPerc >= 0 && iPerc <= 100)
@@ -132,13 +131,12 @@ namespace WasdiLib.Repositories
             return await response.ConvertResponse<ProcessWorkspace>();
         }
 
-        public async Task<ProcessWorkspace> UpdateProcessPayload(string sSessionId, string processId, string sData,
-            string sWorkspaceBaseUrl)
+        public async Task<ProcessWorkspace> UpdateProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sData)
         {
             _logger.LogDebug("UpdateProcessPayload()");
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("procws", processId);
+            parameters.Add("procws", sProcessId);
             parameters.Add("payload", sData);
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
