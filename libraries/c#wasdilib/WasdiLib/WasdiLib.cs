@@ -1771,12 +1771,61 @@ namespace WasdiLib
             }
 
             List<string> asIds = new List<string>(aoProductsToImport.Count);
-            //for (Dictionary<string, object> oProduct : aoProductsToImport)
-            //{
-            //    asIds.Add(AsynchImportProduct(oProduct));
-            //}
+            foreach (Dictionary<string, object> oProduct in aoProductsToImport)
+            {
+                asIds.Add(AsynchImportProduct(oProduct));
+            }
 
             return asIds;
+        }
+
+        public List<string> AsynchImportProductList(List<string> asProductsToImport, List<string> asNames)
+        {
+            _logger.LogDebug("AsynchImportProductList ( with list )");
+
+            if (null == asProductsToImport)
+            {
+                _logger.LogError("AsynchImportProductList: list is null, aborting");
+                return null;
+            }
+
+            if (asProductsToImport.Count <= 0)
+            {
+                _logger.LogError("AsynchImportProductList: list has no elements, aborting");
+                return null;
+            }
+
+            _logger.LogDebug("AsynchImportProductList: list has " + asProductsToImport.Count + " elements");
+
+            List<string> asIds = new List<string>(asProductsToImport.Count);
+
+            for (int i = 0; i < asProductsToImport.Count; i++)
+            {
+                string sProductUrl = asProductsToImport.ElementAt(i);
+                string sName = null;
+
+                if (asNames != null)
+                {
+                    if (i < asNames.Count)
+                    {
+                        sName = asNames.ElementAt(i);
+                    }
+                }
+
+                asIds.Add(AsynchImportProduct(sProductUrl, sName));
+            }
+
+            return asIds;
+        }
+
+        public List<string> ImportProductListWithMaps(List<Dictionary<string, object>> aoProductsToImport)
+        {
+            return WaitProcesses(AsynchImportProductListWithMaps(aoProductsToImport));
+        }
+
+        public List<string> ImportProductList(List<string> asProductsToImport, List<string> asNames)
+        {
+            return WaitProcesses(AsynchImportProductList(asProductsToImport, asNames));
         }
 
 
