@@ -1783,6 +1783,30 @@ namespace WasdiLib
 
 
 
+        public void WasdiLog(string sLogRow)
+        {
+            if (m_bIsOnServer)
+            {
+                // Check minimun input values
+                if (sLogRow == null)
+                {
+                    _logger.LogError("Log line null, aborting");
+                    return;
+                }
+
+                if (sLogRow == "")
+                {
+                    _logger.LogError("Log line empty, aborting");
+                    return;
+                }
+
+                _wasdiService.AddProcessorsLog(GetWorkspaceBaseUrl(), m_sSessionId, GetMyProcId(), sLogRow);
+            }
+            else
+                _logger.LogInformation(sLogRow);
+        }
+
+
 
 
 
@@ -1872,10 +1896,6 @@ namespace WasdiLib
 
 
         private void UploadFile(string sFileName)
-        { }
-
-
-        public void WasdiLog(string message)
         { }
 
 

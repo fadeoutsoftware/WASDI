@@ -23,6 +23,7 @@ namespace WasdiLib.Repositories
         private const string CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH = "/catalog/fileOnNode";
         private const string CATALOG_UPLOAD_INGETS_PATH = "/catalog/upload/ingestinws";
 
+        private const string PROCESSORS_LOGS_ADD_PATH = "processors/logs/add";
 
         private readonly ILogger<WasdiRepository> _logger;
 
@@ -230,6 +231,40 @@ namespace WasdiLib.Repositories
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();
+        }
+
+        public async Task<string> AddProcessorsLog(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sLogRow)
+        {
+            _logger.LogDebug("AddProcessorsLog()");
+
+            var requestPayload = new StringContent(sLogRow, Encoding.UTF8, "application/json");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("processworkspace", sProcessId);
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+            {
+                query = "?" + query;
+            }
+
+            string url = sWorkspaceBaseUrl + PROCESSORS_LOGS_ADD_PATH + query;
+
+            var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
+
+            var data = string.Empty;
+
+            if (response.IsSuccessStatusCode)
+                data = await response.ConvertResponse<string>();
+
+            return data;
         }
 
     }

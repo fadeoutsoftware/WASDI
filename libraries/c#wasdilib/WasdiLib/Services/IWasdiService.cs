@@ -19,6 +19,8 @@ namespace WasdiLib.Services
         List<QueryResultViewModel> SearchQueryList(string sUrl, string sSessionId, string sQueryBody);
 
         PrimitiveResult FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox);
+
+        string AddProcessorsLog(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sLogRow);
     }
 
 }

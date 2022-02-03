@@ -37,40 +37,43 @@ namespace WasdiLib.Services
         {
             _logger.LogDebug("FileExistsOnServer()");
 
-            return _repository.FileExistsOnServer(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, bIsMainNode, sFileName)
-                .GetAwaiter().GetResult();
+            return _repository.FileExistsOnServer(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, bIsMainNode, sFileName).GetAwaiter().GetResult();
         }
 
         public PrimitiveResult CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle)
         {
             _logger.LogDebug("CatalogUploadIngest()");
 
-            return _repository.CatalogUploadIngest(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sFileName, sStyle)
-                .GetAwaiter().GetResult();
+            return _repository.CatalogUploadIngest(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sFileName, sStyle).GetAwaiter().GetResult();
         }
 
         public PrimitiveResult ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting)
         {
             _logger.LogDebug("ProcessingMosaic()");
 
-            return _repository.ProcessingMosaic(sUrl, sSessionId, oMosaicSetting)
-                .GetAwaiter().GetResult();
+            return _repository.ProcessingMosaic(sUrl, sSessionId, oMosaicSetting).GetAwaiter().GetResult();
         }
 
         public List<QueryResultViewModel> SearchQueryList(string sUrl, string sSessionId, string sQueryBody)
         {
             _logger.LogDebug("SearchQueryList()");
 
-            return _repository.SearchQueryList(sUrl, sSessionId, sQueryBody)
-                .GetAwaiter().GetResult();
+            return _repository.SearchQueryList(sUrl, sSessionId, sQueryBody).GetAwaiter().GetResult();
         }
 
         public PrimitiveResult FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox)
         {
             _logger.LogDebug("FilebufferDownload()");
 
-            return _repository.FilebufferDownload(sBaseUrl, sSessionId, sWorkspaceId, sProvider, sFileUrl, sFileName, sBoundingBox)
-                .GetAwaiter().GetResult();
+            return _repository.FilebufferDownload(sBaseUrl, sSessionId, sWorkspaceId, sProvider, sFileUrl, sFileName, sBoundingBox).GetAwaiter().GetResult();
         }
+
+        public string AddProcessorsLog(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sLogRow)
+        {
+            _logger.LogDebug("AddProcessorsLog()");
+
+            return _repository.AddProcessorsLog(sWorkspaceBaseUrl, sSessionId, sProcessId, sLogRow).GetAwaiter().GetResult();
+        }
+
     }
 }
