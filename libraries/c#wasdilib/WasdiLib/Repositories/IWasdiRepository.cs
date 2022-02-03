@@ -25,5 +25,7 @@ namespace WasdiLib.Repositories
 
         Task<PrimitiveResult> ProcessingSubset(string sBaseUrl, string sSessionId, string sWorkspaceId, string sInputFile, string sOutputFile, string sSubsetSetting);
 
+        Task<RunningProcessorViewModel> ProcessorsRun(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProcessorName, string sEncodedParams);
+
     }
 }

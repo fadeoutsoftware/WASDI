@@ -1,9 +1,9 @@
 using System.Security.AccessControl;
+using System.Web;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using WasdiLib.Configuration;
 using WasdiLib.Helpers;
 using WasdiLib.Models;
@@ -1867,6 +1867,142 @@ namespace WasdiLib
         {
             return WaitProcesses(AsynchImportProductList(asProductsToImport, asNames));
         }
+
+        public string Subset(string sInputFile, string sOutputFile, double dLatN, double dLonW, double dLatS, double dLonE)
+        {
+            _logger.LogDebug("Subset()");
+
+            string sReturn = "ERROR";
+
+            try
+            {
+
+                // Check minimun input values
+                if (sInputFile == null)
+                {
+                    _logger.LogError("input file must not be null");
+                    return "";
+                }
+
+                if (sInputFile == "")
+                {
+                    _logger.LogError("input file must not be empty");
+                    return "";
+                }
+
+                if (sOutputFile == null)
+                {
+                    _logger.LogError("sOutputFile must not be null");
+                    return "";
+                }
+
+                if (sOutputFile == "")
+                {
+                    _logger.LogError("sOutputFile must not empty string");
+                    return "";
+                }
+
+
+                // Fill the Setting Object
+                String sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }";
+
+                PrimitiveResult wasdiResponse = _wasdiService.ProcessingSubset(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sInputFile, sOutputFile, sSubsetSetting);
+
+                if (wasdiResponse != null)
+                {
+                    string sProcessId = wasdiResponse.StringValue;
+                    if (sProcessId != null)
+                    {
+                        // Return process output status
+                        return WaitProcess(sProcessId);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return sReturn;
+        }
+
+        public string ExecuteProcessor(string sProcessorName, Dictionary<string, object> aoParams)
+        {
+            return WaitProcess(AsynchExecuteProcessor(sProcessorName, aoParams));
+        }
+
+        public string AsynchExecuteProcessor(string sProcessorName, Dictionary<string, object> aoParams)
+        {
+            _logger.LogDebug("AsynchExecuteProcessor( " + sProcessorName + ", Map<string, object> aoParams )");
+
+
+            try
+            {
+                // Initialize
+                string sParamsJson = "";
+
+                // Convert dictionary in a JSON
+                if (aoParams != null)
+                    sParamsJson = SerializationHelper.ToJson(aoParams);
+
+                // Encode the params
+                sParamsJson = HttpUtility.UrlEncode(sParamsJson);
+
+                //var formUrlEncodedContent = new FormUrlEncodedContent(aoParams);
+                //sParamsJson = formUrlEncodedContent.ReadAsStringAsync().Result;
+
+                // Use the string version
+                return AsynchExecuteProcessor(sProcessorName, sParamsJson);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+                return "";
+            }
+
+
+        }
+        public string ExecuteProcessor(string sProcessorName, string sEncodedParams)
+        {
+            return WaitProcess(AsynchExecuteProcessor(sProcessorName, sEncodedParams));
+        }
+
+        public string AsynchExecuteProcessor(string sProcessorName, string sEncodedParams)
+        {
+
+            _logger.LogDebug("AsynchExecuteProcessor( " + sProcessorName + ", " + sEncodedParams + " )");
+
+            //Domain check
+            if (sProcessorName == null)
+            {
+                _logger.LogError("ProcessorName is null, return");
+                return "";
+            }
+
+            if (sProcessorName == "")
+            {
+                _logger.LogError("ProcessorName is empty, return");
+                return "";
+            }
+
+            if (sEncodedParams == null)
+            {
+                _logger.LogError("EncodedParams is null, return");
+                return "";
+            }
+
+            RunningProcessorViewModel wasdiResponse = _wasdiService.ProcessorsRun(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sProcessorName, sEncodedParams);
+
+            if (wasdiResponse != null)
+            {
+                string sProcessId = wasdiResponse.ProcessingIdentifier;
+                return sProcessId;
+            }
+
+            return "";
+        }
+
 
 
 

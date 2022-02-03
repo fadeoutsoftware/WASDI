@@ -82,5 +82,12 @@ namespace WasdiLib.Services
             return _repository.ProcessingSubset(sBaseUrl, sSessionId, sWorkspaceId, sInputFile, sOutputFile, sSubsetSetting).GetAwaiter().GetResult();
         }
 
+        public RunningProcessorViewModel ProcessorsRun(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProcessorName, string sEncodedParams)
+        {
+            _logger.LogDebug("ProcessorsRun()");
+
+            return _repository.ProcessorsRun(sBaseUrl, sSessionId, sWorkspaceId, sProcessorName, sEncodedParams).GetAwaiter().GetResult();
+        }
+
     }
 }

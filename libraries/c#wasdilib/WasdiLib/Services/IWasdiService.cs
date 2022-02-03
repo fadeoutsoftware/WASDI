@@ -23,6 +23,8 @@ namespace WasdiLib.Services
         string AddProcessorsLog(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sLogRow);
 
         PrimitiveResult ProcessingSubset(string sBaseUrl, string sSessionId, string sWorkspaceId, string sInputFile, string sOutputFile, string sSubsetSetting);
+
+        RunningProcessorViewModel ProcessorsRun(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProcessorName, string sEncodedParams);
     }
 
 }

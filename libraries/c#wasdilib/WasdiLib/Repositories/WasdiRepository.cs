@@ -24,6 +24,7 @@ namespace WasdiLib.Repositories
         private const string CATALOG_UPLOAD_INGETS_PATH = "/catalog/upload/ingestinws";
 
         private const string PROCESSORS_LOGS_ADD_PATH = "processors/logs/add";
+        private const string PROCESSORS_RUN_PATH = "processors/run";
 
         private const string PROCESING_SUBSET_PATH = "processing/subset";
 
@@ -103,12 +104,6 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            string sUrl = sWorkspaceBaseUrl;
-            if (bIsMainNode)
-                sUrl += CATALOG_CHECK_FILE_EXISTS_ON_WASDI_PATH;
-            else
-                sUrl += CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH;
-
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("token", sSessionId);
@@ -119,6 +114,13 @@ namespace WasdiLib.Repositories
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
             if (!String.IsNullOrEmpty(query))
                 query = "?" + query;
+
+
+            string sUrl = sWorkspaceBaseUrl;
+            if (bIsMainNode)
+                sUrl += CATALOG_CHECK_FILE_EXISTS_ON_WASDI_PATH;
+            else
+                sUrl += CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH;
 
             sUrl += query;
 
@@ -146,9 +148,6 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            string sUrl = sWorkspaceBaseUrl;
-            sUrl += CATALOG_UPLOAD_INGETS_PATH;
-
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("token", sSessionId);
@@ -163,6 +162,9 @@ namespace WasdiLib.Repositories
             if (!String.IsNullOrEmpty(query))
                 query = "?" + query;
 
+
+            string sUrl = sWorkspaceBaseUrl;
+            sUrl += CATALOG_UPLOAD_INGETS_PATH;
             sUrl += query;
 
             var response = await _wasdiHttpClient.GetAsync(sUrl);
@@ -311,6 +313,36 @@ namespace WasdiLib.Repositories
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();
+        }
+
+        public async Task<RunningProcessorViewModel> ProcessorsRun(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProcessorName, string sEncodedParams)
+        {
+            _logger.LogDebug("ProcessorsRun()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("workspace", sWorkspaceId);
+            parameters.Add("name", sProcessorName);
+            parameters.Add("encodedJson", sEncodedParams);
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+
+
+            string sUrl = sBaseUrl;
+            sUrl += PROCESSORS_RUN_PATH;
+            sUrl += query;
+
+            var response = await _wasdiHttpClient.GetAsync(sUrl);
+
+            return await response.ConvertResponse<RunningProcessorViewModel>();
         }
 
     }
