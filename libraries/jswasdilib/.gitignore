@@ -3,3 +3,6 @@
 /node_modules/
 config.json
 parameters.json
+localBrowserTest.js
+localNodeTest.js
+index.html

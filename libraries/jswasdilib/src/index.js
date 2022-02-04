@@ -1,4 +1,4 @@
-fetch = require('node-fetch');
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 
 'use strict';
@@ -530,7 +530,8 @@ module.exports = wasdiInstance;
 
 
 
-
+wasdiInstance.loadConfig();
+console.log("hellowasdi node")
 
 
 
