@@ -5,6 +5,8 @@ namespace WasdiLib.Repositories
     internal interface IProcessWorkspaceRepository
     {
         Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspaceId(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId);
+        Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspace(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId,
+            int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern);
 
         Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId);
 

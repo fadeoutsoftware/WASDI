@@ -23,6 +23,14 @@ namespace WasdiLib.Services
             return _repository.GetProcessWorkspacesByWorkspaceId(sWorkspaceBaseUrl, sSessionId, sWorkspaceId).GetAwaiter().GetResult();
         }
 
+        public List<ProcessWorkspace> GetProcessWorkspacesByWorkspace(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId,
+            int iStartIndex, int iEndIndex, string sStatus, string sOperationType, string sNamePattern)
+        {
+            _logger.LogDebug("GetProcessWorkspacesByProcessId({0}, {1}, {2}, {3}, {4}, {5})", sWorkspaceId, iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
+
+            return _repository.GetProcessWorkspacesByWorkspace(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern).GetAwaiter().GetResult();
+        }
+
         public ProcessWorkspace GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId)
         {
             _logger.LogDebug("GetProcessWorkspaceByProcessId({0})", sProcessId);

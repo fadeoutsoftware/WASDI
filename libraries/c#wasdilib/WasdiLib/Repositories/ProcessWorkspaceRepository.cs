@@ -50,6 +50,42 @@ namespace WasdiLib.Repositories
             return await response.ConvertResponse<List<ProcessWorkspace>>();
         }
 
+        public async Task<List<ProcessWorkspace>> GetProcessWorkspacesByWorkspace(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId,
+            int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern)
+        {
+            _logger.LogDebug("GetProcessWorkspacesByWorkspace()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("workspace", sWorkspaceId);
+            parameters.Add("startindex", iStartIndex.ToString());
+
+            if (null != iEndIndex && iEndIndex > iStartIndex)
+                parameters.Add("endindex", iEndIndex.ToString());
+
+            if (!String.IsNullOrEmpty(sStatus))
+                parameters.Add("status", sStatus);
+
+            if (!String.IsNullOrEmpty(sStatus))
+                parameters.Add("operationType", sOperationType);
+
+            if (!String.IsNullOrEmpty(sStatus))
+                parameters.Add("namePattern", sNamePattern);
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+            var response = await _wasdiHttpClient.GetAsync(sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query);
+            response.EnsureSuccessStatusCode();
+
+            return await response.ConvertResponse<List<ProcessWorkspace>>();
+        }
+
         public async Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId)
         {
             _logger.LogDebug("GetProcessWorkspacesByProcessId()");

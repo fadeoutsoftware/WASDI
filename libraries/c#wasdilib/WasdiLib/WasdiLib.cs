@@ -2361,27 +2361,56 @@ namespace WasdiLib
             return sResult;
         }
 
-        public List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string workspaceId)
+        private List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string workspaceId)
         {
             _logger.LogDebug("GetProcessWorkspacesByWorkspaceId({0})", workspaceId);
 
-            List<ProcessWorkspace> processWorkspaces = new List<ProcessWorkspace>();
+            List<ProcessWorkspace> ProcessWorkspaceList = new List<ProcessWorkspace>();
 
             try
             {
-                processWorkspaces = _processWorkspaceService.GetProcessWorkspacesByWorkspaceId(GetWorkspaceBaseUrl(), m_sSessionId, workspaceId);
+                ProcessWorkspaceList = _processWorkspaceService.GetProcessWorkspacesByWorkspaceId(GetWorkspaceBaseUrl(), m_sSessionId, workspaceId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.StackTrace);
             }
 
-            return processWorkspaces;
+            return ProcessWorkspaceList;
         }
 
+        public List<string> GetProcessesByWorkspaceAsListOfJson(int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern)
+        {
+            _logger.LogDebug("GetProcessesByWorkspaceAsListOfJson({0}, {1}, {2}, {3}, {4})", iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
 
+            List<ProcessWorkspace> ProcessWorkspaceList = GetProcessesByWorkspace(iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
 
+            List<string> asJson = new List<string>(ProcessWorkspaceList.Count);
 
+            foreach (ProcessWorkspace processWorkspace in ProcessWorkspaceList)
+                asJson.Add(SerializationHelper.ToJson(processWorkspace));
+
+            return asJson;
+        }
+
+        public List<ProcessWorkspace> GetProcessesByWorkspace(int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern)
+        {
+            _logger.LogDebug("GetProcessesByWorkspace({0}, {1}, {2}, {3}, {4}, {5})", m_sActiveWorkspace, iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
+
+            List<ProcessWorkspace> processWorkspaceList = new List<ProcessWorkspace>();
+
+            try
+            {
+                processWorkspaceList = _processWorkspaceService
+                    .GetProcessWorkspacesByWorkspace(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return processWorkspaceList;
+        }
 
 
 
@@ -2414,13 +2443,6 @@ namespace WasdiLib
             _logger.LogDebug("DownloadFile({0})", sProductName);
 
             return "Not implemented, yet!";
-        }
-
-        public List<string> GetProcessesByWorkspaceAsListOfJson(int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern)
-        {
-            _logger.LogDebug("GetProcessWorkspacesByWorkspaceId({0}, {1}, {2}, {3}, {4})", iStartIndex, iEndIndex, sStatus, sOperationType, sNamePattern);
-
-            return null;
         }
 
     }

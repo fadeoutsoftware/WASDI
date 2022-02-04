@@ -268,14 +268,6 @@ namespace WasdiLib.Repositories
 
             string url = sWorkspaceBaseUrl + PROCESSORS_LOGS_ADD_PATH + query;
 
-            _logger.LogDebug("url: " + url);
-            _logger.LogDebug("url: " + url);
-            _logger.LogDebug("url: " + url);
-            _logger.LogDebug("url: " + url);
-            _logger.LogDebug("url: " + url);
-            _logger.LogDebug("url: " + url);
-            _logger.LogDebug("url: " + url);
-
             var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
 
             var data = string.Empty;
