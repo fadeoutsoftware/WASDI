@@ -619,6 +619,28 @@ namespace WasdiLib
 
 
 
+        public string GetWorkspaceBaseUrl()
+        {
+            return m_sWorkspaceBaseUrl;
+        }
+
+        public void SetWorkspaceBaseUrl(string sWorkspaceBaseUrl)
+        {
+            _logger.LogDebug("SetWorkspaceBaseUrl({0})", sWorkspaceBaseUrl);
+
+            Uri uriResult;
+            bool result = Uri.TryCreate(sWorkspaceBaseUrl, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+            if (!result || uriResult == null)
+            {
+                _logger.LogError("SetWorkspaceBaseUrl: \"" + sWorkspaceBaseUrl + "\" is not a valid URL: cannot obtain URI from URL, aborting");
+                return;
+            }
+
+            m_sWorkspaceBaseUrl = sWorkspaceBaseUrl;
+        }
+
 
 
         public string HelloWasdi()
@@ -2478,13 +2500,6 @@ namespace WasdiLib
 
 
 
-        public string SetWorkspaceBaseUrl(string sWorkspaceBaseUrl)
-        {
-            _logger.LogDebug("SetWorkspaceBaseUrl({0})", sWorkspaceBaseUrl);
-
-            return "Not implemented, yet!";
-        }
-
 
 
 
@@ -2495,10 +2510,6 @@ namespace WasdiLib
 
 
 
-        public string GetWorkspaceBaseUrl()
-        {
-            return m_sWorkspaceBaseUrl;
-        }
 
         public string DownloadFile(string sProductName)
         {
