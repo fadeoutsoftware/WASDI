@@ -229,7 +229,7 @@ namespace WasdiLib
             return InternalInit(GetUser(), GetPassword(), GetSessionId());
         }
 
-        public bool InternalInit(String sUser, String sPassword, String sSessionId)
+        public bool InternalInit(string sUser, string sPassword, string sSessionId)
         {
             _logger.LogDebug("InternalInit");
             _logger.LogDebug("C# WASDILib Init");
@@ -581,16 +581,38 @@ namespace WasdiLib
 
         public string ObtainSessionId(string sUser, string sPassword)
         {
-            LoginResponse loginResponse = _wasdiService.Authenticate(m_sBaseUrl, sUser, sPassword);
 
-            return loginResponse == null ? null : loginResponse.SessionId;
+            try
+            {
+                LoginResponse loginResponse = _wasdiService.Authenticate(m_sBaseUrl, sUser, sPassword);
+
+                if (loginResponse != null)
+                    return loginResponse.SessionId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return null;
         }
 
         public bool CheckSession(string sSessionID, string sUser)
         {
-            LoginResponse loginResponse = _wasdiService.CheckSession(m_sBaseUrl, sSessionID);
 
-            return loginResponse != null && loginResponse.UserId == sUser;
+            try
+            {
+                LoginResponse loginResponse = _wasdiService.CheckSession(m_sBaseUrl, sSessionID);
+
+                if (loginResponse != null)
+                    return loginResponse.UserId == sUser;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return false;
         }
 
 
@@ -603,35 +625,60 @@ namespace WasdiLib
         {
             _logger.LogDebug("HelloWasdi()");
 
-            PrimitiveResult wasdiResponse = _wasdiService.HelloWasdi(m_sBaseUrl);
+            try
+            {
+                PrimitiveResult primitiveResult = _wasdiService.HelloWasdi(m_sBaseUrl);
 
-            string message = String.Empty;
+                if (primitiveResult != null)
+                    return primitiveResult.StringValue;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
-            if (wasdiResponse != null)
-                message = wasdiResponse.StringValue;
-
-            return message;
+            return null;
         }
 
         public List<Workspace> GetWorkspaces()
         {
             _logger.LogDebug("GetWorkspaces()");
 
-            List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
+            try
+            {
+                List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
 
-            return workspaces;
+                return workspaces;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return null;
         }
 
         public List<string> GetWorkspacesNames()
         {
             _logger.LogDebug("GetWorkspacesNames()");
 
-            List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
-
             List<string> workspacesNames = new List<string>();
-            foreach (Workspace workspace in workspaces)
+
+            try
             {
-                workspacesNames.Add(workspace.WorkspaceName);
+                List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
+
+                if (workspaces != null)
+                {
+                    foreach (Workspace workspace in workspaces)
+                    {
+                        workspacesNames.Add(workspace.WorkspaceName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
             }
 
             return workspacesNames;
@@ -641,16 +688,28 @@ namespace WasdiLib
         {
             _logger.LogDebug("GetWorkspaceIdByName({0})", workspaceName);
 
-            List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
 
-            string workspacesId = null;
-            foreach (Workspace workspace in workspaces)
+            string workspacesId = "";
+
+            try
             {
-                if (workspaceName == workspace.WorkspaceName)
+                List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
+
+                if (workspaces != null)
                 {
-                    workspacesId = workspace.WorkspaceId;
-                    break;
+                    foreach (Workspace workspace in workspaces)
+                    {
+                        if (workspaceName == workspace.WorkspaceName)
+                        {
+                            workspacesId = workspace.WorkspaceId;
+                            break;
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
             }
 
             return workspacesId;
@@ -660,73 +719,106 @@ namespace WasdiLib
         {
             _logger.LogDebug("GetWorkspaceNameById({0})", workspacesId);
 
-            List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
 
-            string workspaceName = null;
-            foreach (Workspace workspace in workspaces)
+            string workspaceName = "";
+
+            try
             {
-                if (workspacesId == workspace.WorkspaceId)
+                List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
+
+                if (workspaces != null)
                 {
-                    workspaceName = workspace.WorkspaceName;
-                    break;
+                    foreach (Workspace workspace in workspaces)
+                    {
+                        if (workspacesId == workspace.WorkspaceId)
+                        {
+                            workspaceName = workspace.WorkspaceName;
+                            break;
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
             }
 
             return workspaceName;
         }
 
-        public string GetWorkspaceOwnerdByName(string workspaceName)
+        public string GetWorkspaceOwnerByName(string workspaceName)
         {
             _logger.LogDebug("GetWorkspaceOwnerdByName({0})", workspaceName);
 
-            List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
-
-            string workspacesOwnerUserId = null;
-            foreach (Workspace workspace in workspaces)
+            try
             {
-                if (workspaceName == workspace.WorkspaceName)
+                List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
+
+                if (workspaces != null)
                 {
-                    workspacesOwnerUserId = workspace.OwnerUserId;
-                    break;
+                    foreach (Workspace workspace in workspaces)
+                    {
+                        if (workspaceName == workspace.WorkspaceName)
+                        {
+                            return workspace.OwnerUserId;
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
-            return workspacesOwnerUserId;
+            return "";
         }
 
-        public string GetWorkspaceOwnerdByWSId(string workspaceId)
+        public string GetWorkspaceOwnerByWSId(string workspaceId)
         {
             _logger.LogDebug("GetWorkspaceOwnerdById({0})", workspaceId);
 
-            List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
-
-            string workspacesOwnerUserId = null;
-            foreach (Workspace workspace in workspaces)
+            try
             {
-                if (workspaceId == workspace.WorkspaceId)
+                List<Workspace> workspaces = _workspaceService.GetWorkspaces(m_sBaseUrl, m_sSessionId);
+
+                if (workspaces != null)
                 {
-                    workspacesOwnerUserId = workspace.OwnerUserId;
-                    break;
+                    foreach (Workspace workspace in workspaces)
+                    {
+                        if (workspaceId == workspace.WorkspaceId)
+                        {
+                            return workspace.OwnerUserId;
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
-            return workspacesOwnerUserId;
+            return "";
         }
 
         public string GetWorkspaceUrlByWsId(string workspaceId)
         {
             _logger.LogDebug("getWorkspaceUrlByWsId({0})", workspaceId);
 
-            WorkspaceEditorViewModel workspace = _workspaceService.GetWorkspace(m_sBaseUrl, m_sSessionId, workspaceId);
-
-            string workspaceUrl = null;
-
-            if (workspace != null)
+            try
             {
-                workspaceUrl = workspace.ApiUrl;
+                WorkspaceEditorViewModel workspace = _workspaceService.GetWorkspace(m_sBaseUrl, m_sSessionId, workspaceId);
+
+                if (workspace != null)
+                {
+                    return workspace.ApiUrl;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
             }
 
-            return workspaceUrl;
+            return "";
         }
 
         public string OpenWorkspaceById(string sWorkspaceId)
@@ -760,17 +852,32 @@ namespace WasdiLib
             return OpenWorkspaceById(GetWorkspaceIdByName(sWorkspaceName));
         }
 
+        public List<string> GetProductsByWorkspace(string sWorkspaceName)
+        {
+            return GetProductsByWorkspaceId(GetWorkspaceIdByName(sWorkspaceName));
+        }
+
         public List<string> GetProductsByWorkspaceId(string sWorkspaceId)
         {
             _logger.LogDebug("GetProductsByWorkspaceId({0})", sWorkspaceId);
 
-            List<Product> productList = _productService.GetProductsByWorkspaceId(m_sBaseUrl, m_sSessionId, sWorkspaceId);
-
             List<string> asProducts = new List<string>();
 
-            foreach (Product product in productList)
+            try
             {
-                asProducts.Add(product.FileName);
+                List<Product> productList = _productService.GetProductsByWorkspaceId(m_sBaseUrl, m_sSessionId, sWorkspaceId);
+
+                if (productList != null)
+                {
+                    foreach (Product product in productList)
+                    {
+                        asProducts.Add(product.FileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
             }
 
             return asProducts;
@@ -809,39 +916,47 @@ namespace WasdiLib
                 return "";
             }
 
-            string sFullPath = m_sBasePath;
-
-            if (!(sFullPath.EndsWith("\\") || sFullPath.EndsWith("/")))
-                sFullPath += Path.DirectorySeparatorChar;
-
-            sFullPath = sFullPath + m_sWorkspaceOwner + Path.DirectorySeparatorChar + m_sActiveWorkspace + Path.DirectorySeparatorChar + sProductName;
-            bool bFileExists = Directory.Exists(sFullPath);
-
-            if (!m_bIsOnServer)
+            try
             {
-                if (m_bDownloadActive && !bFileExists)
-                {
-                    _logger.LogDebug("Local file Missing. Start WASDI download. Please wait");
-                    DownloadFile(sProductName);
-                    _logger.LogDebug("File Downloaded on Local PC, keep on working!");
+                string sFullPath = m_sBasePath;
 
-                }
-            }
-            else
-            {
-                if (!bFileExists)
+                if (!(sFullPath.EndsWith("\\") || sFullPath.EndsWith("/")))
+                    sFullPath += Path.DirectorySeparatorChar;
+
+                sFullPath = sFullPath + m_sWorkspaceOwner + Path.DirectorySeparatorChar + m_sActiveWorkspace + Path.DirectorySeparatorChar + sProductName;
+                bool bFileExists = Directory.Exists(sFullPath);
+
+                if (!m_bIsOnServer)
                 {
-                    if (FileExistsOnWasdi(sProductName))
+                    if (m_bDownloadActive && !bFileExists)
                     {
                         _logger.LogDebug("Local file Missing. Start WASDI download. Please wait");
                         DownloadFile(sProductName);
-                        _logger.LogDebug("File Downloaded on Local Node, keep on working!");
+                        _logger.LogDebug("File Downloaded on Local PC, keep on working!");
+
                     }
                 }
-            }
+                else
+                {
+                    if (!bFileExists)
+                    {
+                        if (FileExistsOnWasdi(sProductName))
+                        {
+                            _logger.LogDebug("Local file Missing. Start WASDI download. Please wait");
+                            DownloadFile(sProductName);
+                            _logger.LogDebug("File Downloaded on Local Node, keep on working!");
+                        }
+                    }
+                }
 
-            return sFullPath;
-        }
+                return sFullPath;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+                return "";
+            }
+}
 
         private bool FileExistsOnWasdi(string sFileName)
         {
@@ -853,7 +968,17 @@ namespace WasdiLib
                 return false;
             }
 
-            return _wasdiService.FileExistsOnServer(GetWorkspaceBaseUrl(), m_sSessionId, m_sActiveWorkspace, true, sFileName);
+            try
+            {
+                return _wasdiService.FileExistsOnServer(GetWorkspaceBaseUrl(), m_sSessionId, m_sActiveWorkspace, true, sFileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            //false, because in general no upload is desirable 
+            return false;
         }
 
         private bool FileExistsOnNode(string sFileName)
@@ -866,7 +991,17 @@ namespace WasdiLib
                 return false;
             }
 
-            return _wasdiService.FileExistsOnServer(GetWorkspaceBaseUrl(), m_sSessionId, m_sActiveWorkspace, false, sFileName);
+            try
+            {
+                return _wasdiService.FileExistsOnServer(GetWorkspaceBaseUrl(), m_sSessionId, m_sActiveWorkspace, false, sFileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            //false, because in general no upload is desirable 
+            return false;
         }
 
         public string GetSavePath()
@@ -885,56 +1020,75 @@ namespace WasdiLib
         {
             _logger.LogDebug("GetWorkflows()");
 
-            List<Workflow> workflows = _workflowService.GetWorkflows(m_sBaseUrl, m_sSessionId);
+            try
+            {
+                List<Workflow> workflows = _workflowService.GetWorkflows(m_sBaseUrl, m_sSessionId);
 
-            return workflows;
+                return workflows;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return null;
         }
 
         protected string InternalExecuteWorkflow(List<string> asInputFileNames, List<string> asOutputFileNames,
             string sWorkflowName, Boolean bAsynch)
         {
-            List<Workflow> aoWorkflows = _workflowService.GetWorkflows(m_sBaseUrl, m_sSessionId);
-
-            string sProcessId = "";
-            string sWorkflowId = "";
-
-            foreach (Workflow oWorkflow in aoWorkflows)
+            try
             {
-                if (oWorkflow.Name == sWorkflowName)
+                List<Workflow> aoWorkflows = _workflowService.GetWorkflows(m_sBaseUrl, m_sSessionId);
+            
+
+                string sProcessId = "";
+                string sWorkflowId = "";
+
+                foreach (Workflow oWorkflow in aoWorkflows)
                 {
-                    sWorkflowId = oWorkflow.WorkflowId;
-                    break;
+                    if (oWorkflow.Name == sWorkflowName)
+                    {
+                        sWorkflowId = oWorkflow.WorkflowId;
+                        break;
+                    }
                 }
-            }
 
-            if (sWorkflowId == "")
+                if (sWorkflowId == "")
+                    return "";
+
+                Workflow workflow = new Workflow()
+                {
+                    Name = sWorkflowName,
+                    Description = "",
+                    WorkflowId = sWorkflowId,
+                    InputNodeNames = new List<string>(),
+                    InputFileNames = asInputFileNames,
+                    OutputNodeNames = new List<string>(),
+                    OutputFileNames = asOutputFileNames
+                };
+
+                string? sParentId = null;
+
+                if (m_bIsOnServer)
+                {
+                    sParentId = m_sMyProcId;
+                }
+
+                PrimitiveResult primitiveResult = _workflowService.CreateWorkflow(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sParentId, workflow);
+                if (primitiveResult != null)
+                    sProcessId = primitiveResult.StringValue;
+
+                if (bAsynch)
+                    return sProcessId;
+                else
+                    return WaitProcess(sProcessId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
                 return "";
-
-            Workflow workflow = new Workflow()
-            {
-                Name = sWorkflowName,
-                Description = "",
-                WorkflowId = sWorkflowId,
-                InputNodeNames = new List<string>(),
-                InputFileNames = asInputFileNames,
-                OutputNodeNames = new List<string>(),
-                OutputFileNames = asOutputFileNames
-            };
-
-            string? sParentId = null;
-
-            if (m_bIsOnServer)
-            {
-                sParentId = m_sMyProcId;
             }
-
-            PrimitiveResult wasdiResponse = _workflowService.CreateWorkflow(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sParentId, workflow);
-            sProcessId = wasdiResponse.StringValue;
-
-            if (bAsynch)
-                return sProcessId;
-            else
-                return WaitProcess(sProcessId);
         }
 
         public string AsynchExecuteWorkflow(List<string> asInputFileName, List<string> asOutputFileName,
@@ -959,25 +1113,48 @@ namespace WasdiLib
                 return "";
             }
 
-            ProcessWorkspace processWorkspace = _processWorkspaceService.GetProcessWorkspaceByProcessId(GetWorkspaceBaseUrl(), m_sSessionId, sProcessId);
-            string sStatus = processWorkspace.Status;
+            try
+            {
+                ProcessWorkspace processWorkspace = _processWorkspaceService.GetProcessWorkspaceByProcessId(GetWorkspaceBaseUrl(), m_sSessionId, sProcessId);
 
-            if (IsThisAValidStatus(sStatus))
-                return sStatus;
+                if (processWorkspace != null)
+                {
+                    string sStatus = processWorkspace.Status;
+
+                    if (IsThisAValidStatus(sStatus))
+                        return sStatus;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
             return "";
         }
 
         public string GetProcessesStatus(List<string> asIds)
         {
-            string sResponse = _processWorkspaceService.GetProcessesStatus(GetWorkspaceBaseUrl(), m_sSessionId, asIds);
+            try
+            {
+                string sResponse = _processWorkspaceService.GetProcessesStatus(GetWorkspaceBaseUrl(), m_sSessionId, asIds);
 
             return sResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return "";
         }
 
         public List<string> GetProcessesStatusAsList(List<string> asIds)
         {
             string sStatus = GetProcessesStatus(asIds);
+
+            if (sStatus.Length < 2)
+                return new List<string>();
 
             List<string> result = sStatus
                 .Substring(1, sStatus.Length - 1)
@@ -1034,9 +1211,19 @@ namespace WasdiLib
                 return "";
             }
 
-            ProcessWorkspace processWorkspace = _processWorkspaceService.UpdateProcessStatus(GetWorkspaceBaseUrl(), m_sSessionId, sProcessId, sStatus, iPerc);
+            try
+            {
+                ProcessWorkspace processWorkspace = _processWorkspaceService.UpdateProcessStatus(GetWorkspaceBaseUrl(), m_sSessionId, sProcessId, sStatus, iPerc);
 
-            return processWorkspace.Status;
+                if (processWorkspace != null)
+                    return processWorkspace.Status;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return "";
         }
 
         public string UpdateProgressPerc(int iPerc)
@@ -1058,9 +1245,19 @@ namespace WasdiLib
 
             string sStatus = "RUNNING";
 
-            ProcessWorkspace processWorkspace = _processWorkspaceService.UpdateProcessStatus(GetWorkspaceBaseUrl(), m_sSessionId, m_sMyProcId, sStatus, iPerc);
+            try
+            {
+                ProcessWorkspace processWorkspace = _processWorkspaceService.UpdateProcessStatus(GetWorkspaceBaseUrl(), m_sSessionId, m_sMyProcId, sStatus, iPerc);
 
-            return processWorkspace == null ? "" : processWorkspace.Status;
+                if (processWorkspace != null)
+                    return processWorkspace.Status;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return "";
         }
 
         public string WaitProcess(string sProcessId)
@@ -1259,9 +1456,20 @@ namespace WasdiLib
             if (!m_bIsOnServer)
                 return "RUNNING";
 
-            ProcessWorkspace processWorkspace = _processWorkspaceService.UpdateProcessPayload(GetWorkspaceBaseUrl(), GetSessionId(), sProcessId, sData);
 
-            return processWorkspace == null ? "" : processWorkspace.Status;
+            try
+            {
+                ProcessWorkspace processWorkspace = _processWorkspaceService.UpdateProcessPayload(GetWorkspaceBaseUrl(), GetSessionId(), sProcessId, sData);
+
+                if (processWorkspace != null)
+                    return processWorkspace.Status;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return "";
         }
 
         public void RefreshParameters()
@@ -1286,17 +1494,33 @@ namespace WasdiLib
                 return "";
             }
 
-            string sFilePath = GetSavePath() + sFileName;
-
-            Boolean bFileExists = File.Exists(sFilePath);
-
-            if (!m_bIsOnServer)
+            try
             {
-                if (GetUploadActive())
+
+                string sFilePath = GetSavePath() + sFileName;
+
+                Boolean bFileExists = File.Exists(sFilePath);
+
+                if (!m_bIsOnServer)
+                {
+                    if (GetUploadActive())
+                    {
+                        if (bFileExists)
+                        {
+                            if (!FileExistsOnWasdi(sFileName))
+                            {
+                                _logger.LogInformation("InternalAddFileToWASDI: Remote file Missing. Start WASDI upload. Please wait");
+                                UploadFile(sFileName);
+                                _logger.LogInformation("InternalAddFileToWASDI: File Uploaded on WASDI cloud, keep on working!");
+                            }
+                        }
+                    }
+                }
+                else
                 {
                     if (bFileExists)
                     {
-                        if (!FileExistsOnWasdi(sFileName))
+                        if (!FileExistsOnNode(sFileName))
                         {
                             _logger.LogInformation("InternalAddFileToWASDI: Remote file Missing. Start WASDI upload. Please wait");
                             UploadFile(sFileName);
@@ -1304,33 +1528,26 @@ namespace WasdiLib
                         }
                     }
                 }
-            }
-            else
-            {
-                if (bFileExists)
+
+                PrimitiveResult primitiveResult = _wasdiService.CatalogUploadIngest(GetWorkspaceBaseUrl(), m_sSessionId, m_sActiveWorkspace, sFileName, sStyle);
+
+                if (primitiveResult == null)
                 {
-                    if (!FileExistsOnNode(sFileName))
-                    {
-                        _logger.LogInformation("InternalAddFileToWASDI: Remote file Missing. Start WASDI upload. Please wait");
-                        UploadFile(sFileName);
-                        _logger.LogInformation("InternalAddFileToWASDI: File Uploaded on WASDI cloud, keep on working!");
-                    }
+                    return "";
                 }
+
+                string sProcessId = primitiveResult.StringValue;
+
+                if (bAsynch)
+                    return sProcessId;
+                else
+                    return WaitProcess(sProcessId);
             }
-
-            PrimitiveResult wasdiResponse = _wasdiService.CatalogUploadIngest(GetWorkspaceBaseUrl(), m_sSessionId, m_sActiveWorkspace, sFileName, sStyle);
-
-            if (wasdiResponse == null)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.StackTrace);
                 return "";
             }
-
-            string sProcessId = wasdiResponse.StringValue;
-
-            if (bAsynch)
-                return sProcessId;
-            else
-                return WaitProcess(sProcessId);
         }
 
         public string AddFileToWASDI(string sFileName, string sStyle)
@@ -1417,19 +1634,27 @@ namespace WasdiLib
             oMosaicSetting.Sources = asInputFiles;
 
 
-            PrimitiveResult wasdiResponse = _wasdiService.ProcessingMosaic(sUrl, m_sSessionId, oMosaicSetting);
+            try
+            {
+                PrimitiveResult primitiveResult = _wasdiService.ProcessingMosaic(sUrl, m_sSessionId, oMosaicSetting);
 
-            // Extract Process Id
-            string sProcessId = String.Empty;
+                // Extract Process Id
+                string sProcessId = String.Empty;
 
-            if (wasdiResponse != null)
-                sProcessId = wasdiResponse.StringValue;
+                if (primitiveResult != null)
+                    sProcessId = primitiveResult.StringValue;
 
-            // Return or wait
-            if (bAsynch)
-                return sProcessId;
-            else
-                return WaitProcess(sProcessId);
+                // Return or wait
+                if (bAsynch)
+                    return sProcessId;
+                else
+                    return WaitProcess(sProcessId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+                return "";
+            }
         }
 
         private int? ToInt(string value)
@@ -1595,7 +1820,15 @@ namespace WasdiLib
             sQuery = "providers=" + GetDefaultProvider();
 
             String sUrl = m_sBaseUrl + "/search/querylist?" + sQuery;
-            aoReturnList = _wasdiService.SearchQueryList(sUrl, m_sSessionId, sQueryBody);
+
+            try
+            {
+                aoReturnList = _wasdiService.SearchQueryList(sUrl, m_sSessionId, sQueryBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
             return aoReturnList;
         }
@@ -1759,12 +1992,12 @@ namespace WasdiLib
                 if (String.IsNullOrEmpty(sProvider))
                     sProvider = GetDefaultProvider();
 
-                PrimitiveResult wasdiResponse =
+                PrimitiveResult primitiveResult =
                     _wasdiService.FilebufferDownload(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sProvider, sFileUrl, sFileName, sBoundingBox);
 
-                if (wasdiResponse != null)
-                    if (wasdiResponse.BoolValue)
-                        sReturn = wasdiResponse.StringValue;
+                if (primitiveResult != null)
+                    if (primitiveResult.BoolValue)
+                        sReturn = primitiveResult.StringValue;
             }
             catch (Exception ex)
             {
@@ -1904,13 +2137,13 @@ namespace WasdiLib
 
 
                 // Fill the Setting Object
-                String sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }";
+                string sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }";
 
-                PrimitiveResult wasdiResponse = _wasdiService.ProcessingSubset(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sInputFile, sOutputFile, sSubsetSetting);
+                PrimitiveResult primitiveResult = _wasdiService.ProcessingSubset(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sInputFile, sOutputFile, sSubsetSetting);
 
-                if (wasdiResponse != null)
+                if (primitiveResult != null)
                 {
-                    string sProcessId = wasdiResponse.StringValue;
+                    string sProcessId = primitiveResult.StringValue;
                     if (sProcessId != null)
                     {
                         // Return process output status
@@ -1992,11 +2225,11 @@ namespace WasdiLib
                 return "";
             }
 
-            RunningProcessorViewModel wasdiResponse = _wasdiService.ProcessorsRun(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sProcessorName, sEncodedParams);
+            RunningProcessorViewModel primitiveResult = _wasdiService.ProcessorsRun(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sProcessorName, sEncodedParams);
 
-            if (wasdiResponse != null)
+            if (primitiveResult != null)
             {
-                string sProcessId = wasdiResponse.ProcessingIdentifier;
+                string sProcessId = primitiveResult.ProcessingIdentifier;
                 return sProcessId;
             }
 
@@ -2012,7 +2245,7 @@ namespace WasdiLib
                 PrimitiveResult primitiveResult = _productService.DeleteProduct(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, sProduct);
             
                 if (primitiveResult != null)
-                    return primitiveResult.ToString();
+                    return primitiveResult.StringValue;
             }
             catch (Exception ex)
             {
@@ -2044,7 +2277,15 @@ namespace WasdiLib
                     return;
                 }
 
-                _wasdiService.AddProcessorsLog(GetWorkspaceBaseUrl(), m_sSessionId, GetMyProcId(), sLogRow);
+
+                try
+                {
+                    _wasdiService.AddProcessorsLog(GetWorkspaceBaseUrl(), m_sSessionId, GetMyProcId(), sLogRow);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.StackTrace);
+                }
             }
             else
                 _logger.LogInformation(sLogRow);
@@ -2067,21 +2308,30 @@ namespace WasdiLib
 
             if (workspaceName == "")
             {
-                _logger.LogInformation("createWorkspace: WARNING workspace name null or empty, it will be defaulted");
+                _logger.LogInformation("CreateWorkspace: WARNING workspace name null or empty, it will be defaulted");
             }
 
-            PrimitiveResult wasdiResponse = _workspaceService.CreateWorkspace(m_sBaseUrl, m_sSessionId, workspaceName, nodeCode);
+            String sReturn = null;
 
-            if (wasdiResponse!= null)
+            try
             {
-                string workspaceId = wasdiResponse.StringValue;
+                PrimitiveResult primitiveResult = _workspaceService.CreateWorkspace(m_sBaseUrl, m_sSessionId, workspaceName, nodeCode);
 
-                return workspaceId;
+                if (primitiveResult != null)
+                    sReturn = primitiveResult.StringValue;
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+
+            if (sReturn != null)
+                OpenWorkspaceById(sReturn);
             else
-            {
-                return "";
-            }
+                _logger.LogError("CreateWorkspace: creation failed.");
+
+            return sReturn;
         }
 
         public string DeleteWorkspace(string workspaceId)
@@ -2090,33 +2340,41 @@ namespace WasdiLib
 
             if (String.IsNullOrEmpty(workspaceId))
             {
-                _logger.LogError("deleteWorkspace: none passed, aborting");
+                _logger.LogError("DeleteWorkspace: none passed, aborting");
                 return null;
             }
 
-            string stringValue = _workspaceService.DeleteWorkspace(m_sBaseUrl, m_sSessionId, workspaceId);
+            string sResult = null;
 
-            if (stringValue == null)
+            try
             {
-                _logger.LogError("DeleteWorkspace: could not delete workspace (please check the return value, it's going to be null)");
+                sResult = _workspaceService.DeleteWorkspace(m_sBaseUrl, m_sSessionId, workspaceId);
+
+                if (sResult == null)
+                    _logger.LogError("DeleteWorkspace: could not delete workspace (please check the return value, it's going to be null)");
             }
-            else if (stringValue == "")
+            catch (Exception ex)
             {
-                _logger.LogInformation("DeleteWorkspace: success");
-            }
-            else
-            {
-                _logger.LogError("DeleteWorkspace: failure: {0}", stringValue);
+                _logger.LogError(ex.StackTrace);
             }
 
-            return stringValue;
+            return sResult;
         }
 
         public List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string workspaceId)
         {
             _logger.LogDebug("GetProcessWorkspacesByWorkspaceId({0})", workspaceId);
 
-            List<ProcessWorkspace> processWorkspaces = _processWorkspaceService.GetProcessWorkspacesByWorkspaceId(GetWorkspaceBaseUrl(), m_sSessionId, workspaceId);
+            List<ProcessWorkspace> processWorkspaces = new List<ProcessWorkspace>();
+
+            try
+            {
+                processWorkspaces = _processWorkspaceService.GetProcessWorkspacesByWorkspaceId(GetWorkspaceBaseUrl(), m_sSessionId, workspaceId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
             return processWorkspaces;
         }
@@ -2128,12 +2386,6 @@ namespace WasdiLib
 
 
 
-        public string GetWorkspaceOwnerByWSId(string sNewActiveWorkspaceId)
-        {
-            _logger.LogDebug("GetWorkspaceOwnerByWSId({0})", sNewActiveWorkspaceId);
-
-            return "Not implemented, yet!";
-        }
 
         public string SetWorkspaceBaseUrl(string sWorkspaceBaseUrl)
         {
@@ -2157,8 +2409,12 @@ namespace WasdiLib
             return m_sWorkspaceBaseUrl;
         }
 
-        public void DownloadFile(string sProductName)
-        { }
+        public string DownloadFile(string sProductName)
+        {
+            _logger.LogDebug("DownloadFile({0})", sProductName);
+
+            return "Not implemented, yet!";
+        }
 
         public List<string> GetProcessesByWorkspaceAsListOfJson(int iStartIndex, Int32 iEndIndex, string sStatus, string sOperationType, string sNamePattern)
         {

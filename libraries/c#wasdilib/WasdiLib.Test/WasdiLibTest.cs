@@ -90,8 +90,8 @@ namespace WasdiLib.Test
         {
             string workspaceNameExpected = "TestWorkspace";
             string workspaceId = wasdi.GetWorkspaceIdByName(workspaceNameExpected);
-            string workspacesOwnerUserIdByName = wasdi.GetWorkspaceOwnerdByName(workspaceNameExpected);
-            string workspacesOwnerUserIdById = wasdi.GetWorkspaceOwnerdByWSId(workspaceId);
+            string workspacesOwnerUserIdByName = wasdi.GetWorkspaceOwnerByName(workspaceNameExpected);
+            string workspacesOwnerUserIdById = wasdi.GetWorkspaceOwnerByWSId(workspaceId);
 
             Assert.IsNotNull(workspaceId);
             Assert.IsNotNull(workspacesOwnerUserIdByName);
@@ -117,14 +117,16 @@ namespace WasdiLib.Test
         {
             string workspaceName = "TestWorkspace";
             string workspaceId = wasdi.GetWorkspaceIdByName(workspaceName);
-            Assert.IsNotNull(workspaceId);
 
-            string outcome = wasdi.DeleteWorkspace(workspaceId);
+            if (!string.IsNullOrEmpty(workspaceId))
+            {
+                string outcome = wasdi.DeleteWorkspace(workspaceId);
 
-            Assert.AreEqual("", outcome);
-            workspaceName = wasdi.GetWorkspaceNameById(workspaceId);
+                Assert.IsEmpty(outcome);
+                workspaceName = wasdi.GetWorkspaceNameById(workspaceId);
 
-            Assert.IsNull(workspaceName);
+                Assert.IsEmpty(workspaceName);
+            }
         }
 
         [Test]
