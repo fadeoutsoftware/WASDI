@@ -6,9 +6,6 @@ using Newtonsoft.Json;
 using WasdiLib.Helpers;
 using WasdiLib.Models;
 
-
-using WasdiLib.Client.Configuration;
-
 namespace WasdiLib.Client
 {
     internal class Program

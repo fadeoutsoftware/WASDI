@@ -18,7 +18,7 @@ namespace WasdiLib.Configuration
         {
 
             // configure services
-            var services = new ServiceCollection()
+            var aoServicies = new ServiceCollection()
                 .AddScoped<IProcessWorkspaceService, ProcessWorkspaceService>()
                 .AddScoped<IProductService, ProductService>()
                 .AddScoped<IWasdiService, WasdiService>()
@@ -31,21 +31,22 @@ namespace WasdiLib.Configuration
                 .AddScoped<IWorkflowRepository, WorkflowRepository>()
                 .AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 
+            Console.WriteLine("PAOLO MODIFICA");
 
             // configure logger
-            services
-                .AddLogging(configure =>
+            aoServicies
+                .AddLogging(oConfigure =>
                 {
-                    configure.AddNLog("WasdiLib.nlog.config");
-                    configure.AddConsole();
+                    if (File.Exists("WasdiLib.nlog.config")) oConfigure.AddNLog("WasdiLib.nlog.config");
+                    oConfigure.AddConsole();
                 })
-                .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Debug);
+                .Configure<LoggerFilterOptions>(oOptions => oOptions.MinLevel = LogLevel.Error);
 
 
             // add HttpClients extension
-            services.ConfigureHttpClients(ConfigurationRoot);
+            aoServicies.ConfigureHttpClients(ConfigurationRoot);
 
-            ServiceProvider = services.BuildServiceProvider();
+            ServiceProvider = aoServicies.BuildServiceProvider();
         }
 
         public static void LoadConfiguration(string path)
