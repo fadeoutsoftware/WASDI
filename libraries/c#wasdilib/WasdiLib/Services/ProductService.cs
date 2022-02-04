@@ -23,5 +23,12 @@ namespace WasdiLib.Services
             return _repository.GetProductsByWorkspaceId(sBaseUrl, sSessionId, sWorkspaceId).GetAwaiter().GetResult();
         }
 
+        public PrimitiveResult DeleteProduct(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sProduct)
+        {
+            _logger.LogDebug("DeleteProduct({0})", sProduct);
+
+            return _repository.DeleteProduct(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sProduct).GetAwaiter().GetResult();
+        }
+
     }
 }

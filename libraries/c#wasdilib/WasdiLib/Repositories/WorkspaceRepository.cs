@@ -9,8 +9,8 @@ namespace WasdiLib.Repositories
     {
 
         private const string WORKSPACES_BY_USER_PATH = "ws/byuser";
-        private const string WORKSPACES_CREATE_PATH = "ws/create";
-        private const string WORKSPACES_DELETE_PATH = "ws/delete";
+        private const string WORKSPACE_CREATE_PATH = "ws/create";
+        private const string WORKSPACE_DELETE_PATH = "ws/delete";
         private const string WORKSPACE_BY_WS_ID_PATH = "ws/getws";
 
         private readonly ILogger<WorkspaceRepository> _logger;
@@ -81,7 +81,7 @@ namespace WasdiLib.Repositories
             if (!string.IsNullOrEmpty(query))
                 query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACES_CREATE_PATH + query);
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACE_CREATE_PATH + query);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();
@@ -107,7 +107,7 @@ namespace WasdiLib.Repositories
                 query = "?" + query;
 
 
-            var response = await _wasdiHttpClient.DeleteAsync(sBaseUrl + WORKSPACES_DELETE_PATH + query);
+            var response = await _wasdiHttpClient.DeleteAsync(sBaseUrl + WORKSPACE_DELETE_PATH + query);
 
             var data = string.Empty;
 

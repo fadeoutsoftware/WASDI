@@ -2003,6 +2003,25 @@ namespace WasdiLib
             return "";
         }
 
+        public string DeleteProduct(string sProduct)
+        {
+            _logger.LogDebug("DeleteProduct({0})", sProduct);
+
+            try
+            {
+                PrimitiveResult primitiveResult = _productService.DeleteProduct(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, sProduct);
+            
+                if (primitiveResult != null)
+                    return primitiveResult.ToString();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return "ERROR";
+        }
+
 
 
 
