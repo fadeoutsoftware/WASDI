@@ -35,5 +35,8 @@
     "url": "^0.11.0",
     "util": "^0.12.4",
     "xmlhttprequest": "^1.8.0"
+  },
+  "browser": {
+    "child_process": false
   }
 }

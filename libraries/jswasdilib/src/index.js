@@ -1,4 +1,4 @@
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+//var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 
 'use strict';
@@ -28,6 +28,8 @@ class Wasdi {
     // handled through field instead of local variables
     _m_sWorkspaceName = '';
     _m_sWorkspaceId = '';
+
+    _m_aoRunningProcessId = [];
 
     _m_asRunningProcessorIds = [];
 
@@ -328,7 +330,7 @@ class Wasdi {
 
         xhr.open("POST", url + params, false);
         xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
-        xhr.setRequestHeader("x-session-token", "882501e0-347f-4a36-b03b-91b0671809a3");
+        xhr.setRequestHeader("x-session-token", this._m_sSessionId);
 
         xhr.send(data);
         return JSON.parse(xhr.response);
@@ -402,6 +404,9 @@ class Wasdi {
     launchProcessor(appname) {
         if (this._m_sActiveWorkspace) {
             let response = this.#postObject(this._m_sWorkspaceBaseUrl + "/processors/run", "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace)
+            if (response.processingIdentifier){
+                this._m_aoRunningProcessId.push(response.processingIdentifier);
+            }
             return response;
         } else {
             console.log("[INFO] jswasdilib.LaunchProcessor: no workspace opened, please use wasdi.openWorkspace se the active workspace or wasdi.createWorkspace for a new one")
@@ -435,12 +440,23 @@ class Wasdi {
 
     }
 
+    /**
+     * Retrieves the process status of a process, identified by its processId
+     * @param processId
+     */
     getProcessStatus(processId) {
         let procWs = this.#getObject(this._m_sWorkspaceBaseUrl + "/process/byid", "?procws=" + processId);
         if (procWs.status) {
             console.log("[INFO] jswasdilib.getProcessStatus: Process status " + procWs.status
                 + " Percentage " + procWs.progressPerc + " %");
         }
+    }
+
+    /**
+     * Prints details about the status if the processes launched during the last session
+     */
+    printProcesses(){
+        this._m_aoRunningProcessId.forEach(a => this.getProcessStatus(a));
     }
 
     get User() {
@@ -529,9 +545,6 @@ module.exports = wasdiInstance;
 
 
 
-
-wasdiInstance.loadConfig();
-console.log("hellowasdi node")
 
 
 

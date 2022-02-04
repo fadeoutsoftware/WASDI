@@ -15,5 +15,13 @@ module.exports = {
 
         },
         libraryTarget: 'var'
-    }
+    },
+   /*resolve :{
+       fallback: {
+           "child_process" : require.resolve("child_process"),
+           "fs" : false,
+           "http": require.resolve("stream-http"),
+           "https": require.resolve("https-browserify")
+       }
+   }*/
 };
