@@ -2451,6 +2451,31 @@ namespace WasdiLib
             }
         }
 
+        public string GetProductBbox(string sFileName)
+        {
+            _logger.LogDebug("GetProductBbox({0}", sFileName);
+
+            if (String.IsNullOrEmpty(sFileName))
+            {
+                _logger.LogError("GetProductBBOX: file name is null or empty, aborting");
+                return null;
+            }
+
+            try
+            {
+                Product product = _productService.GetProductByName(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sFileName);
+
+                if (product != null)
+                    return product.Bbox;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return null;
+        }
+
 
 
         public string SetWorkspaceBaseUrl(string sWorkspaceBaseUrl)

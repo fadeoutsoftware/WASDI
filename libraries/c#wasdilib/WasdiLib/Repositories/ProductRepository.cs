@@ -9,6 +9,7 @@ namespace WasdiLib.Repositories
     {
 
         private const string PRODUCTS_BY_WS_ID_PATH = "product/byws";
+        private const string PRODUCT_BY_NAME_PATH = "product/byname";
         private const string PRODUCT_DELETE_PATH = "product/delete";
 
         private readonly ILogger<ProductRepository> _logger;
@@ -21,6 +22,7 @@ namespace WasdiLib.Repositories
 
             _wasdiHttpClient = httpClientFactory.CreateClient("WasdiApi");
         }
+
         public async Task<List<Product>> GetProductsByWorkspaceId(string sBaseUrl, string sSessionId, string sWorkspaceId)
         {
             _logger.LogDebug("GetProductsByWorkspaceId()");
@@ -41,6 +43,29 @@ namespace WasdiLib.Repositories
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<Product>>();
+        }
+
+        public async Task<Product> GetProductByName(string sBaseUrl, string sSessionId, string sWorkspaceId, string sName)
+        {
+            _logger.LogDebug("GetProductByName()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("workspace", sWorkspaceId);
+            parameters.Add("name", sName);
+
+            var content = new FormUrlEncodedContent(parameters);
+            string query = content.ReadAsStringAsync().Result;
+            if (!string.IsNullOrEmpty(query))
+                query = "?" + query;
+
+            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + PRODUCT_BY_NAME_PATH + query);
+            response.EnsureSuccessStatusCode();
+
+            return await response.ConvertResponse<Product>();
         }
 
         public async Task<PrimitiveResult> DeleteProduct(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sProduct)

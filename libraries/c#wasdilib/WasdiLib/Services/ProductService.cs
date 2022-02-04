@@ -23,6 +23,13 @@ namespace WasdiLib.Services
             return _repository.GetProductsByWorkspaceId(sBaseUrl, sSessionId, sWorkspaceId).GetAwaiter().GetResult();
         }
 
+        public Product GetProductByName(string sBaseUrl, string sSessionId, string sWorkspaceId, string sName)
+        {
+            _logger.LogDebug("GetProcessWorkspaceByName({0}, {1})", sWorkspaceId, sName);
+
+            return _repository.GetProductByName(sBaseUrl, sSessionId, sWorkspaceId, sName).GetAwaiter().GetResult();
+        }
+
         public PrimitiveResult DeleteProduct(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sProduct)
         {
             _logger.LogDebug("DeleteProduct({0})", sProduct);

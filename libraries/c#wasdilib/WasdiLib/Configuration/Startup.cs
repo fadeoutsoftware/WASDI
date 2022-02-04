@@ -31,8 +31,6 @@ namespace WasdiLib.Configuration
                 .AddScoped<IWorkflowRepository, WorkflowRepository>()
                 .AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 
-            Console.WriteLine("PAOLO MODIFICA");
-
             // configure logger
             aoServicies
                 .AddLogging(oConfigure =>

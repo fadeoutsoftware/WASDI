@@ -2,18 +2,33 @@
 {
     public class Product
     {
-        public BandsGroups BandsGroups { get; set; }
+        public NodeGroup BandsGroups { get; set; }
         public string Bbox { get; set; }
         public string FileName { get; set; }
-        public object Metadata { get; set; }
+        public Metadata Metadata { get; set; }
         public bool MetadataFileCreated { get; set; }
-        public object MetadataFileReference { get; set; }
+        public string MetadataFileReference { get; set; }
         public string Name { get; set; }
-        public object ProductFriendlyName { get; set; }
-        public object Style { get; set; }
+        public string ProductFriendlyName { get; set; }
+        public string Style { get; set; }
     }
 
-    public class BandsGroups
+    public class Metadata
+    {
+        public string Name { get; set; }
+        public List<Metadata> Elements { get; set; }
+        public List<Attribute> Attributes { get; set; }
+    }
+
+    public class Attribute
+    {
+        public int DataType { get; set; }
+        public long NumElems { get; set; }
+        public string Description { get; set; }
+        public string Data { get; set; }
+    }
+
+    public class NodeGroup
     {
         public List<Band> Bands { get; set; }
         public string NodeName { get; set; }
@@ -21,13 +36,13 @@
 
     public class Band
     {
-        public object GeoserverBoundingBox { get; set; }
+        public string GeoserverBoundingBox { get; set; }
         public string GeoserverUrl { get; set; }
-        public int Height { get; set; }
-        public object LayerId { get; set; }
+        public int Height { get; set; } = 0;
+        public string LayerId { get; set; }
         public string Name { get; set; }
-        public bool Published { get; set; }
-        public int Width { get; set; }
+        public bool Published { get; set; } = false;
+        public int Width { get; set; } = 0;
     }
 
 }
