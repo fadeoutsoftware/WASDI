@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Web;
+using System.Net;
 
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +22,8 @@ namespace WasdiLib.Repositories
 
         private const string CATALOG_CHECK_FILE_EXISTS_ON_WASDI_PATH = "/catalog/checkdownloadavaialibitybyname";
         private const string CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH = "/catalog/fileOnNode";
-        private const string CATALOG_UPLOAD_INGETS_PATH = "/catalog/upload/ingestinws";
+        private const string CATALOG_DOWNLOAD_PATH = "/catalog/downloadbyname";
+        private const string CATALOG_UPLOAD_INGEST_PATH = "/catalog/upload/ingestinws";
 
         private const string PROCESSORS_LOGS_ADD_PATH = "processors/logs/add";
         private const string PROCESSORS_RUN_PATH = "processors/run";
@@ -139,8 +141,13 @@ namespace WasdiLib.Repositories
             return wasdiResponse.BoolValue;
         }
 
-        public async Task<PrimitiveResult> CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId,
-            string sFileName, string sStyle)
+        public void Download(string sUrl, string sSessionId, string sFileName)
+        {
+            _logger.LogDebug("Download()");
+            _logger.LogError("DownloadFile: not yet fully implemented");
+        }
+
+        public async Task<PrimitiveResult> CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle)
         {
             _logger.LogDebug("CatalogUploadIngest()");
 
@@ -164,7 +171,7 @@ namespace WasdiLib.Repositories
 
 
             string sUrl = sWorkspaceBaseUrl;
-            sUrl += CATALOG_UPLOAD_INGETS_PATH;
+            sUrl += CATALOG_UPLOAD_INGEST_PATH;
             sUrl += query;
 
             var response = await _wasdiHttpClient.GetAsync(sUrl);
@@ -174,6 +181,61 @@ namespace WasdiLib.Repositories
                 _logger.LogDebug(content.ToString());
 
             return await response.ConvertResponse<PrimitiveResult>();
+        }
+
+        public async Task<string> CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName)
+        {
+            _logger.LogDebug("CatalogUploadIngest()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("filename", sFileName);
+            parameters.Add("workspace", sWorkspaceId);
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+
+            string sUrl = sWorkspaceBaseUrl;
+            sUrl += CATALOG_DOWNLOAD_PATH;
+            sUrl += query;
+
+            var response = await _wasdiHttpClient.GetAsync(sUrl);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                var aoHeaders = response.Content.Headers;
+                _logger.LogDebug("aoHeaders:\n" + aoHeaders);
+
+                if (aoHeaders != null)
+                {
+                    var contentDisposition = aoHeaders.ContentDisposition;
+                    _logger.LogDebug("contentDisposition:\n" + contentDisposition);
+
+                    string sAttachmentName = null;
+                    if (contentDisposition != null)
+                    {
+                        sAttachmentName = contentDisposition.FileName;
+                        _logger.LogDebug("sAttachmentName:\n" + sAttachmentName);
+
+                        return sAttachmentName;
+                    }
+                }
+
+                _logger.LogDebug("No file Name was provided.");
+            }
+            else
+            {
+                _logger.LogDebug("response.StatusCode: " + response.StatusCode);
+            }
+
+            return string.Empty;
         }
 
         public async Task<PrimitiveResult> ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting)

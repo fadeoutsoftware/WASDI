@@ -468,8 +468,9 @@ namespace WasdiLib
             if (accessControlList == null)
                 return false;
 
-            var accessRules = accessControlList.GetAccessRules(true, true,
-                                        typeof(System.Security.Principal.SecurityIdentifier));
+            var accessRules = accessControlList.GetAccessRules(true, true,                        
+                typeof(System.Security.Principal.SecurityIdentifier));
+
             if (accessRules == null)
                 return false;
 
@@ -2498,6 +2499,45 @@ namespace WasdiLib
             return null;
         }
 
+        public string DownloadFile(string sFileName)
+        {
+            _logger.LogDebug("DownloadFile({0})", sFileName);
+
+            if (String.IsNullOrEmpty(sFileName))
+            {
+                _logger.LogError("DownloadFile: fileName must not be null or empty");
+                return "";
+            }
+
+            string sAttachmentName = _wasdiService.CatalogDownload(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, sFileName);
+
+            string sOutputFilePath = "";
+            string sSavePath = GetSavePath();
+            if (!String.IsNullOrEmpty(sAttachmentName))
+                sOutputFilePath = sSavePath + sAttachmentName;
+            else
+                sOutputFilePath = sSavePath + sFileName;
+
+
+            string parentDirectoryName = Path.GetFileName(Path.GetDirectoryName(sOutputFilePath));
+
+            //create the directory
+            if (!Directory.Exists(parentDirectoryName))
+            {
+                Directory.CreateDirectory(parentDirectoryName);
+            }
+
+
+            _logger.LogError("DownloadFile: not yet fully implemented");
+            _logger.LogError("DownloadFile: not yet fully implemented");
+            _logger.LogError("DownloadFile: not yet fully implemented");
+            _logger.LogError("DownloadFile: not yet fully implemented");
+            _logger.LogError("DownloadFile: not yet fully implemented");
+
+
+            return "";
+        }
+
 
 
 
@@ -2510,13 +2550,6 @@ namespace WasdiLib
 
 
 
-
-        public string DownloadFile(string sProductName)
-        {
-            _logger.LogDebug("DownloadFile({0})", sProductName);
-
-            return "Not implemented, yet!";
-        }
 
     }
 }
