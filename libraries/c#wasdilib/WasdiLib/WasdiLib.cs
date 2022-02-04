@@ -2361,7 +2361,7 @@ namespace WasdiLib
             return sResult;
         }
 
-        private List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string workspaceId)
+        public List<ProcessWorkspace> GetProcessWorkspacesByWorkspaceId(string workspaceId)
         {
             _logger.LogDebug("GetProcessWorkspacesByWorkspaceId({0})", workspaceId);
 
