@@ -527,15 +527,6 @@ class Wasdi {
 const wasdiInstance = new Wasdi();
 module.exports = wasdiInstance;
 
-// syncronous call and init
-wasdiInstance.loadConfig();
-
-// then login to obtain a valid session ID
-wasdiInstance.login()
-
-wasdiInstance.getWorkspaceById("f7807072-9d84-4ee0-9bcf-686e72a4c0dd");
-
-// then check the session id
 
 
 
