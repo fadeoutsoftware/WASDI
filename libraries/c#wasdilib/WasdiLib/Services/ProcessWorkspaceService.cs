@@ -45,6 +45,13 @@ namespace WasdiLib.Services
             return _repository.GetProcessesStatus(sWorkspaceBaseUrl, sSessionId, asIds).GetAwaiter().GetResult();
         }
 
+        public string GetProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessObjId)
+        {
+            _logger.LogDebug("GetProcessPayload()");
+
+            return _repository.GetProcessPayload(sWorkspaceBaseUrl, sSessionId, sProcessObjId).GetAwaiter().GetResult();
+        }
+
         public ProcessWorkspace UpdateProcessStatus(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, string sStatus, int iPerc)
         {
             _logger.LogDebug("UpdateProcessStatus()");

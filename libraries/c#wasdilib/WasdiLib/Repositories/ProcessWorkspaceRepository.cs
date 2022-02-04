@@ -1,5 +1,5 @@
 ﻿using System.Text;
-
+using System.Web;
 using Microsoft.Extensions.Logging;
 
 using WasdiLib.Extensions;
@@ -16,6 +16,7 @@ namespace WasdiLib.Repositories
         private const string PROCESSES_STATUS_BY_IDS_PATH = "/process/statusbyid";
         private const string PROCESSES_UPDATE_PATH = "/process/updatebyid";
         private const string PROCESSES_UPDATE_PAYLOAD_PATH = "/process/setpayload";
+        private const string PROCESS_PAYLOAD_PATH = "/process/payload";
 
         private readonly ILogger<ProcessWorkspaceRepository> _logger;
 
@@ -128,6 +129,37 @@ namespace WasdiLib.Repositories
 
             if (response.IsSuccessStatusCode)
                 data = await response.ConvertResponse<string>();
+
+            return data;
+        }
+
+        public async Task<string> GetProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessObjId)
+        {
+            _logger.LogDebug("GetProcessPayload()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("procws", sProcessObjId);
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+            string url = sWorkspaceBaseUrl + PROCESS_PAYLOAD_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
+
+            var data = string.Empty;
+
+            if (response.IsSuccessStatusCode)
+                data = await response.ConvertResponse<string>();
+
+            if (data != null)
+                data = HttpUtility.UrlDecode(data);
 
             return data;
         }

@@ -2412,7 +2412,44 @@ namespace WasdiLib
             return processWorkspaceList;
         }
 
+        public Dictionary<string, object> GetProcessorPayload(string sProcessObjId)
+        {
+            _logger.LogDebug("GetProcessesByWorkspace({0}", sProcessObjId);
 
+            if (String.IsNullOrEmpty(sProcessObjId))
+            {
+                _logger.LogError("GetProcessorPayload: the processor ID is null or empty");
+                return null;
+            }
+
+            string sJsonPayload = GetProcessorPayloadAsJSON(sProcessObjId);
+
+            if (sJsonPayload == null)
+                return null;
+
+            return SerializationHelper.FromJson<Dictionary<string, object>>(sJsonPayload);
+        }
+
+        public string GetProcessorPayloadAsJSON(string sProcessObjId)
+        {
+            _logger.LogDebug("GetProcessorPayloadAsJSON({0}", sProcessObjId);
+
+            if (String.IsNullOrEmpty(sProcessObjId))
+            {
+                _logger.LogError("GetProcessorPayloadAsJSON: the processor ID is null or empty");
+                return null;
+            }
+
+            try
+            {
+                return _processWorkspaceService.GetProcessPayload(m_sWorkspaceBaseUrl, m_sSessionId, sProcessObjId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+                return null;
+            }
+        }
 
 
 
