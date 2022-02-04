@@ -1,10 +1,11 @@
 {
   "name": "wasdi",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "env": {
