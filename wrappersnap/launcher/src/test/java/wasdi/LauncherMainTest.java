@@ -58,12 +58,12 @@ public abstract class LauncherMainTest {
 		SERIALIZATION_PATH = WasdiConfig.Current.paths.serializationPath;
 		DOWNLOAD_ROOT_PATH = WasdiConfig.Current.paths.downloadRootPath;
 
-		MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongo.address;
-		MongoRepository.SERVER_PORT = WasdiConfig.Current.mongo.port;
-		MongoRepository.DB_NAME = WasdiConfig.Current.mongo.dbName;
-		MongoRepository.DB_USER = WasdiConfig.Current.mongo.user;
-		MongoRepository.DB_PWD = WasdiConfig.Current.mongo.password;
-		MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT+1, MongoRepository.DB_NAME);
+		MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongoLocal.address;
+		MongoRepository.DB_NAME = WasdiConfig.Current.mongoLocal.dbName;
+		MongoRepository.DB_USER = WasdiConfig.Current.mongoLocal.user;
+		MongoRepository.DB_PWD = WasdiConfig.Current.mongoLocal.password;
+		MongoRepository.REPLICA_NAME = WasdiConfig.Current.mongoLocal.replicaName;
+		MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.REPLICA_NAME, MongoRepository.DB_NAME);
 	}
 
 	protected void copyDownloadFileToFileSystemPath(String sourceFilePath, String targetDirectoryPath, String targetFileName) {

@@ -326,9 +326,9 @@ public class LauncherMain  {
 
             // If this is not the main node
             if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
-            	// Configure also the local connection: by default is the "wasdi" port + 1
+            	// Configure also the local connection
                 s_oLogger.debug("Adding local mongo config");
-                MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT + 1, MongoRepository.DB_NAME);
+                MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
 
             // Set the java/system user home folder

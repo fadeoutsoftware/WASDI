@@ -1919,8 +1919,8 @@ public class dbUtils {
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
                 System.out.println("Adding local mongo config");
-                // Configure also the local connection: by default is the "wasdi" port + 1
-                MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT + 1, MongoRepository.DB_NAME);
+                // Configure also the local connection
+                MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
 
             boolean bExit = false;
