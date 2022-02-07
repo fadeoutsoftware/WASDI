@@ -40,11 +40,11 @@ namespace WasdiLib.Services
             return _repository.FileExistsOnServer(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, bIsMainNode, sFileName).GetAwaiter().GetResult();
         }
 
-        public string CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName)
+        public string CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sSavePath, string sFileName)
         {
             _logger.LogDebug("CatalogDownload()");
 
-            return _repository.CatalogDownload(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sFileName).GetAwaiter().GetResult();
+            return _repository.CatalogDownload(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sSavePath, sFileName).GetAwaiter().GetResult();
         }
 
         public PrimitiveResult CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle)

@@ -86,6 +86,36 @@ namespace WasdiLib.Test
         }
 
         [Test]
+        [Ignore("Ignore this test as it is not generic")]
+        public void Test_66_downloadFile()
+        {
+            string workspaceName = "ERA5_WORKSPACE_TEST";
+            string workspaceId = "8474061b-3c7c-4f72-9289-4ff9a67a8432";
+
+            string foundWorkspaceId = wasdi.GetWorkspaceIdByName(workspaceName);
+            Assert.AreEqual(workspaceId, foundWorkspaceId);
+
+            string openedWorkspaceId = wasdi.OpenWorkspace(workspaceName);
+            Assert.AreEqual(foundWorkspaceId, openedWorkspaceId);
+
+            string activeWorkspaceId = wasdi.GetActiveWorkspace();
+            Assert.AreEqual(foundWorkspaceId, activeWorkspaceId);
+
+            string sFileName = "RIVER-FLDglobal-composite1_20220111_000000_part071.tif";
+//            string sFileName = "S1A_IW_GRDH_1SDV_20220102T172430_20220102T172455_041285_04E83C_1902.zip";
+
+            string sFullPath = wasdi.GetPath(sFileName);
+
+            wasdi.WasdiLog("sFullPath: " + sFullPath);
+
+//            string expectedFullPath = "C:/temp/wasdi/petru.petrescu@wasdi.cloud\\" + workspaceId + "\\" + sFileName;
+            string expectedFullPath = "C:\\Users\\PetruPetrescu/.wasdi/petru.petrescu@wasdi.cloud\\" + workspaceId + "\\" + sFileName;
+
+            Assert.AreEqual(expectedFullPath, sFullPath);
+        }
+
+
+        [Test]
         public void Test_82_GetWorkspaceIdByName_And_GettWorkspaceOwnerByName_And_GettWorkspaceOwnerById()
         {
             string workspaceNameExpected = "TestWorkspace";

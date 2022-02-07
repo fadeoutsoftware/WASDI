@@ -979,7 +979,7 @@ namespace WasdiLib
                 _logger.LogError(ex.StackTrace);
                 return "";
             }
-}
+        }
 
         private bool FileExistsOnWasdi(string sFileName)
         {
@@ -2499,7 +2499,7 @@ namespace WasdiLib
             return null;
         }
 
-        public string DownloadFile(string sFileName)
+        private string DownloadFile(string sFileName)
         {
             _logger.LogDebug("DownloadFile({0})", sFileName);
 
@@ -2509,46 +2509,25 @@ namespace WasdiLib
                 return "";
             }
 
-            string sAttachmentName = _wasdiService.CatalogDownload(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, sFileName);
-
-            string sOutputFilePath = "";
             string sSavePath = GetSavePath();
-            if (!String.IsNullOrEmpty(sAttachmentName))
-                sOutputFilePath = sSavePath + sAttachmentName;
-            else
-                sOutputFilePath = sSavePath + sFileName;
 
-
-            string parentDirectoryName = Path.GetFileName(Path.GetDirectoryName(sOutputFilePath));
-
-            //create the directory
-            if (!Directory.Exists(parentDirectoryName))
+            try
             {
-                Directory.CreateDirectory(parentDirectoryName);
+                string sOutputFilePath = _wasdiService.CatalogDownload(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, sSavePath, sFileName);
+
+                return sOutputFilePath;
             }
-
-
-            _logger.LogError("DownloadFile: not yet fully implemented");
-            _logger.LogError("DownloadFile: not yet fully implemented");
-            _logger.LogError("DownloadFile: not yet fully implemented");
-            _logger.LogError("DownloadFile: not yet fully implemented");
-            _logger.LogError("DownloadFile: not yet fully implemented");
-
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
 
             return "";
         }
 
 
-
-
-
-
-
-
         private void UploadFile(string sFileName)
         { }
-
-
 
 
     }

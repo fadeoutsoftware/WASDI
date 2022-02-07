@@ -13,7 +13,7 @@ namespace WasdiLib.Repositories
 
         Task<bool> FileExistsOnServer(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsMainNode, string sFileName);
 
-        Task<string> CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName);
+        Task<string> CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sSavePath, string sFileName);
 
         Task<PrimitiveResult> CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle);
 

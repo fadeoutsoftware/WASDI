@@ -1,6 +1,5 @@
 ﻿using System.Text;
-using System.Web;
-using System.Net;
+using System.IO.Compression;
 
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +21,7 @@ namespace WasdiLib.Repositories
 
         private const string CATALOG_CHECK_FILE_EXISTS_ON_WASDI_PATH = "/catalog/checkdownloadavaialibitybyname";
         private const string CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH = "/catalog/fileOnNode";
-        private const string CATALOG_DOWNLOAD_PATH = "/catalog/downloadbyname";
+        private const string CATALOG_DOWNLOAD_PATH = "catalog/downloadbyname";
         private const string CATALOG_UPLOAD_INGEST_PATH = "/catalog/upload/ingestinws";
 
         private const string PROCESSORS_LOGS_ADD_PATH = "processors/logs/add";
@@ -183,7 +182,7 @@ namespace WasdiLib.Repositories
             return await response.ConvertResponse<PrimitiveResult>();
         }
 
-        public async Task<string> CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName)
+        public async Task<string> CatalogDownload(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sSavePath, string sFileName)
         {
             _logger.LogDebug("CatalogUploadIngest()");
 
@@ -224,7 +223,50 @@ namespace WasdiLib.Repositories
                         sAttachmentName = contentDisposition.FileName;
                         _logger.LogDebug("sAttachmentName:\n" + sAttachmentName);
 
-                        return sAttachmentName;
+
+
+                        string sOutputFilePath = "";
+                        if (!String.IsNullOrEmpty(sAttachmentName))
+                            sOutputFilePath = sSavePath + sAttachmentName;
+                        else
+                            sOutputFilePath = sSavePath + sFileName;
+
+
+                        string parentDirectoryName = Path.GetDirectoryName(sOutputFilePath);
+
+                        //create the directory
+                        if (!Directory.Exists(parentDirectoryName))
+                        {
+                            Directory.CreateDirectory(parentDirectoryName);
+                        }
+
+                        try
+                        {
+                            var oInputStream = await response.Content.ReadAsStreamAsync();
+                            CopyStream(oInputStream, sOutputFilePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogDebug("The file could not be downloaded.");
+
+                            return string.Empty;
+                        }
+
+                        if (null != sAttachmentName && !sFileName.Equals(sAttachmentName) && sAttachmentName.ToLower().EndsWith(".zip"))
+                        {
+                            try
+                            {
+                                Unzip(sAttachmentName, sSavePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogDebug("The zip file could not be unzipped.");
+
+                                return string.Empty;
+                            }
+                        }
+
+                        return sOutputFilePath;
                     }
                 }
 
@@ -236,6 +278,44 @@ namespace WasdiLib.Repositories
             }
 
             return string.Empty;
+        }
+
+        private void CopyStream(Stream stream, string destPath)
+        {
+            try
+            {
+                using (var fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
+                {
+                    stream.CopyTo(fileStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+
+                throw ex;
+            }
+        }
+
+        private void Unzip(string sAttachmentName, string sPath)
+        {
+            if (!sPath.EndsWith("/") && !sPath.EndsWith("\\") && !sPath.EndsWith(Path.DirectorySeparatorChar))
+            {
+                sPath += Path.DirectorySeparatorChar;
+            }
+
+            string sZipFilePath = sPath + sAttachmentName;
+
+            try
+            {
+                ZipFile.ExtractToDirectory(sZipFilePath, sPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+
+                throw ex;
+            }
         }
 
         public async Task<PrimitiveResult> ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting)
