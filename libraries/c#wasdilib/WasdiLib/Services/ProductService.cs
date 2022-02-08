@@ -37,5 +37,11 @@ namespace WasdiLib.Services
             return _repository.DeleteProduct(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sProduct).GetAwaiter().GetResult();
         }
 
+        public bool UploadFile(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sSavePath, string sFileName)
+        {
+            _logger.LogDebug("UploadFile({0}, {1}, {2})", sWorkspaceId, sSavePath, sFileName);
+
+            return _repository.UploadFile(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sSavePath, sFileName).GetAwaiter().GetResult();
+        }
     }
 }

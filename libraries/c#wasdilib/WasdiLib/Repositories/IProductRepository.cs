@@ -10,5 +10,7 @@ namespace WasdiLib.Repositories
 
         Task<PrimitiveResult> DeleteProduct(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sProduct);
 
+        Task<bool> UploadFile(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sSavePath, string sFileName);
+
     }
 }

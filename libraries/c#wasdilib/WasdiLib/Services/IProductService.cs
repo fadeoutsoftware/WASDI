@@ -11,5 +11,7 @@ namespace WasdiLib.Services
 
         PrimitiveResult DeleteProduct(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sProduct);
 
+        bool UploadFile(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sSavePath, string sFileName);
+
     }
 }

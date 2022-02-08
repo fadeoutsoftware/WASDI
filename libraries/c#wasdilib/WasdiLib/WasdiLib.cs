@@ -2192,7 +2192,6 @@ namespace WasdiLib
         {
             _logger.LogDebug("AsynchExecuteProcessor( " + sProcessorName + ", Map<string, object> aoParams )");
 
-
             try
             {
                 // Initialize
@@ -2216,9 +2215,9 @@ namespace WasdiLib
                 _logger.LogError(ex.StackTrace);
                 return "";
             }
-
-
         }
+
+
         public string ExecuteProcessor(string sProcessorName, string sEncodedParams)
         {
             return WaitProcess(AsynchExecuteProcessor(sProcessorName, sEncodedParams));
@@ -2278,11 +2277,6 @@ namespace WasdiLib
             return "ERROR";
         }
 
-
-
-
-
-
         public void WasdiLog(string sLogRow)
         {
             if (m_bIsOnServer)
@@ -2313,12 +2307,6 @@ namespace WasdiLib
             else
                 _logger.LogInformation(sLogRow);
         }
-
-
-
-
-
-
 
         public string CreateWorkspace(string workspaceName, string nodeCode = null)
         {
@@ -2526,8 +2514,25 @@ namespace WasdiLib
         }
 
 
-        private void UploadFile(string sFileName)
-        { }
+        public bool UploadFile(string sFileName)
+        {
+            _logger.LogDebug("UploadFile({0})", sFileName);
+
+            if (String.IsNullOrEmpty(sFileName))
+                throw new Exception("WasdiLib.UploadFile: file name is null or empty");
+
+            //local file
+            string sSavePath = GetSavePath();
+            string sFullPath = sSavePath + sFileName;
+
+            if (!File.Exists(sFullPath))
+                throw new Exception("WasdiLib.UploadFile: file not found");
+
+            bool success = _productService.UploadFile(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, sSavePath, sFileName);
+            _logger.LogDebug("UploadFile " + (success ? "succeeded" : "failed"));
+
+            return success;
+        }
 
 
     }

@@ -87,7 +87,7 @@ namespace WasdiLib.Test
 
         [Test]
         [Ignore("Ignore this test as it is not generic")]
-        public void Test_66_downloadFile()
+        public void Test_66_DownloadFile()
         {
             string workspaceName = "ERA5_WORKSPACE_TEST";
             string workspaceId = "8474061b-3c7c-4f72-9289-4ff9a67a8432";
@@ -114,6 +114,28 @@ namespace WasdiLib.Test
             Assert.AreEqual(expectedFullPath, sFullPath);
         }
 
+        [Test]
+        [Ignore("Ignore this test as it is not generic")]
+        public void Test_67_UploadFile()
+        {
+            string workspaceName = "TestWorkspace";
+            string workspaceId = "31bfbff7-8f68-40b4-8ca3-d3a38af5e331";
+
+            string foundWorkspaceId = wasdi.GetWorkspaceIdByName(workspaceName);
+            Assert.AreEqual(workspaceId, foundWorkspaceId);
+
+            string openedWorkspaceId = wasdi.OpenWorkspace(workspaceName);
+            Assert.AreEqual(foundWorkspaceId, openedWorkspaceId);
+
+            string activeWorkspaceId = wasdi.GetActiveWorkspace();
+            Assert.AreEqual(foundWorkspaceId, activeWorkspaceId);
+
+            string sFileName = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525.zip";
+
+            bool bSuccess = wasdi.UploadFile(sFileName);
+
+            Assert.True(bSuccess);
+        }
 
         [Test]
         public void Test_82_GetWorkspaceIdByName_And_GettWorkspaceOwnerByName_And_GettWorkspaceOwnerById()
