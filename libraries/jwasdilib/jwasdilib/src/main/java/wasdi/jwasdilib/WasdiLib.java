@@ -2027,7 +2027,7 @@ public class WasdiLib {
 			if (sInputIgnoreValue != null) {
 				try {
 					Integer oInputIgnoreValue = Integer.parseInt(sInputIgnoreValue);
-					oMosaicSetting.setNoDataValue(oInputIgnoreValue);
+					oMosaicSetting.setInputIgnoreValue(oInputIgnoreValue);
 				}
 				catch (Exception e) {
 					log("InternalMosaic: InputIgnoreValue is not a valid integer, set null");
