@@ -47,7 +47,7 @@ namespace WasdiLib.Services
             return _repository.CatalogDownload(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sSavePath, sFileName).GetAwaiter().GetResult();
         }
 
-        PrimitiveResult AsynchCopyFileToSftp(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sRelativePath, string sFileName, string sProcessId)
+        public PrimitiveResult AsynchCopyFileToSftp(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sRelativePath, string sFileName, string sProcessId)
         {
             _logger.LogDebug("AsynchCopyFileToSftp()");
 
@@ -94,6 +94,13 @@ namespace WasdiLib.Services
             _logger.LogDebug("ProcessingSubset()");
 
             return _repository.ProcessingSubset(sBaseUrl, sSessionId, sWorkspaceId, sInputFile, sOutputFile, sSubsetSetting).GetAwaiter().GetResult();
+        }
+
+        public PrimitiveResult ProcessingMultisubset(string sBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sInputFile, string sProcessId, Dictionary<string, object> payloadDictionary)
+        {
+            _logger.LogDebug("ProcessingMultisubset()");
+
+            return _repository.ProcessingMultisubset(sBaseUrl, sSessionId, sWorkspaceId, bIsOnServer, sInputFile, sProcessId, payloadDictionary).GetAwaiter().GetResult();
         }
 
         public RunningProcessorViewModel ProcessorsRun(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProcessorName, string sEncodedParams)

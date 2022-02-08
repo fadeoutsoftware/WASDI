@@ -2128,40 +2128,39 @@ namespace WasdiLib
         {
             _logger.LogDebug("Subset()");
 
-            string sReturn = "ERROR";
+
+            // Check minimun input values
+            if (sInputFile == null)
+            {
+                _logger.LogError("input file must not be null");
+                return "";
+            }
+
+            if (sInputFile == "")
+            {
+                _logger.LogError("input file must not be empty");
+                return "";
+            }
+
+            if (sOutputFile == null)
+            {
+                _logger.LogError("sOutputFile must not be null");
+                return "";
+            }
+
+            if (sOutputFile == "")
+            {
+                _logger.LogError("sOutputFile must not empty string");
+                return "";
+            }
+
+
+            // Fill the Setting Object
+            string sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }";
+
 
             try
             {
-
-                // Check minimun input values
-                if (sInputFile == null)
-                {
-                    _logger.LogError("input file must not be null");
-                    return "";
-                }
-
-                if (sInputFile == "")
-                {
-                    _logger.LogError("input file must not be empty");
-                    return "";
-                }
-
-                if (sOutputFile == null)
-                {
-                    _logger.LogError("sOutputFile must not be null");
-                    return "";
-                }
-
-                if (sOutputFile == "")
-                {
-                    _logger.LogError("sOutputFile must not empty string");
-                    return "";
-                }
-
-
-                // Fill the Setting Object
-                string sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }";
-
                 PrimitiveResult primitiveResult = _wasdiService.ProcessingSubset(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, sInputFile, sOutputFile, sSubsetSetting);
 
                 if (primitiveResult != null)
@@ -2180,7 +2179,95 @@ namespace WasdiLib
                 _logger.LogError(ex.StackTrace);
             }
 
-            return sReturn;
+            return "ERROR";
+        }
+
+        public string MultiSubset(string sInputFile, List<string> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE)
+        {
+            _logger.LogDebug("MultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE )");
+            return WaitProcess(AsynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE));
+        }
+
+        public string MultiSubset(string sInputFile, List<string> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE, bool bBigTiff)
+        {
+            _logger.LogDebug("MultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE, " + bBigTiff + " )");
+            return WaitProcess(AsynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigTiff));
+        }
+
+        public string AsynchMultiSubset(string sInputFile, List<string> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE)
+        {
+            _logger.LogDebug("AsynchMultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE )");
+            return AsynchMultiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, true);
+        }
+
+        public string AsynchMultiSubset(string sInputFile, List<string> asOutputFiles, List<Double> adLatN, List<Double> adLonW, List<Double> adLatS, List<Double> adLonE, bool bBigTiff)
+        {
+            _logger.LogDebug("AsynchMultiSubset( " + sInputFile + ", asOutputFiles, adLatN, adLonW, adLatS, adLonE, " + bBigTiff + " )");
+
+
+            if (String.IsNullOrEmpty(sInputFile))
+            {
+                _logger.LogError("MultiSubset: input file null or empty, aborting");
+                return null;
+            }
+
+            if (asOutputFiles == null || asOutputFiles.Count == 0)
+            {
+                _logger.LogError("Multisubset: output files null or empty, aborting");
+                return null;
+            }
+
+            if (adLonW == null || adLonW.Count == 0)
+            {
+                _logger.LogError("Multisubset: adLonW null or empty, aborting");
+                return null;
+            }
+
+            if (adLonW == null || adLonW.Count == 0)
+            {
+                _logger.LogError("Multisubset: adLonW null or empty, aborting");
+                return null;
+            }
+
+            if (adLatS == null || adLatS.Count == 0)
+            {
+                _logger.LogError("Multisubset: adLatS null or empty, aborting");
+                return null;
+            }
+
+            if (adLonE == null || adLonE.Count == 0)
+            {
+                _logger.LogError("Multisubset: adLonE null or empty, aborting");
+                return null;
+            }
+
+            Dictionary<string, object> aoPayload = new Dictionary<string, object>();
+            aoPayload.Add("outputNames", asOutputFiles);
+            aoPayload.Add("latNList", adLatN);
+            aoPayload.Add("lonWList", adLonW);
+            aoPayload.Add("latSList", adLatS);
+            aoPayload.Add("lonEList", adLonE);
+
+            if (bBigTiff)
+                aoPayload.Add("bigTiff", true);
+
+
+            bool bIsOnServer = GetIsOnServer();
+            string sProcessId = GetMyProcId();
+
+            try
+            {
+                PrimitiveResult primitiveResult = _wasdiService.ProcessingMultisubset(m_sBaseUrl, m_sSessionId, m_sActiveWorkspace, bIsOnServer, sInputFile, sProcessId, aoPayload);
+
+                if (primitiveResult != null)
+                    return primitiveResult.StringValue;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+            }
+
+            return null;
         }
 
         public string ExecuteProcessor(string sProcessorName, Dictionary<string, object> aoParams)
@@ -2581,10 +2668,11 @@ namespace WasdiLib
                 return null;
             }
 
+            bool bIsOnServer = GetIsOnServer();
+            string sProcessId = GetMyProcId();
+
             try
             {
-                bool bIsOnServer = GetIsOnServer();
-                string sProcessId = GetMyProcId();
                 PrimitiveResult primitiveResult = _wasdiService.AsynchCopyFileToSftp(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, bIsOnServer, sRelativePath, sFileName, sProcessId);
 
                 if (primitiveResult != null)

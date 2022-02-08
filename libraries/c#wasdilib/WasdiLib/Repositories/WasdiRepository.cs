@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using WasdiLib.Extensions;
+using WasdiLib.Helpers;
 using WasdiLib.Models;
 
 namespace WasdiLib.Repositories
@@ -29,6 +30,7 @@ namespace WasdiLib.Repositories
         private const string PROCESSORS_RUN_PATH = "processors/run";
 
         private const string PROCESING_SUBSET_PATH = "processing/subset";
+        private const string PROCESING_MULTISUBSET_PATH = "processing/multisubset";
 
         private const string FILEBUFFER_DOWNLOAD_PATH = "filebuffer/download";
 
@@ -481,6 +483,42 @@ namespace WasdiLib.Repositories
                 query = "?" + query;
 
             string url = sBaseUrl + PROCESING_SUBSET_PATH + query;
+
+            var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
+            response.EnsureSuccessStatusCode();
+
+            return await response.ConvertResponse<PrimitiveResult>();
+        }
+
+        public async Task<PrimitiveResult> ProcessingMultisubset(string sBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sInputFile, string sProcessId, Dictionary<string, object> payloadDictionary)
+        {
+            _logger.LogDebug("ProcessingMultisubset()");
+
+
+            var json = SerializationHelper.ToJson(payloadDictionary);
+
+            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json");
+
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("source", sInputFile);
+            parameters.Add("workspace", sWorkspaceId);
+
+            if (bIsOnServer)
+                parameters.Add("parent", sProcessId);
+
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+            string url = sBaseUrl + PROCESING_MULTISUBSET_PATH + query;
 
             var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
             response.EnsureSuccessStatusCode();
