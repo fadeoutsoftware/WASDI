@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using WasdiLib.Extensions;
+using WasdiLib.Helpers;
 using WasdiLib.Models;
 
 namespace WasdiLib.Repositories
@@ -19,15 +20,17 @@ namespace WasdiLib.Repositories
         private const string LOGIN_PATH = "auth/login";
         private const string CHECK_SESSION_PATH = "auth/checksession";
 
-        private const string CATALOG_CHECK_FILE_EXISTS_ON_WASDI_PATH = "/catalog/checkdownloadavaialibitybyname";
-        private const string CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH = "/catalog/fileOnNode";
+        private const string CATALOG_CHECK_FILE_EXISTS_ON_WASDI_PATH = "catalog/checkdownloadavaialibitybyname";
+        private const string CATALOG_CHECK_FILE_EXISTS_ON_NODE_PATH = "catalog/fileOnNode";
         private const string CATALOG_DOWNLOAD_PATH = "catalog/downloadbyname";
-        private const string CATALOG_UPLOAD_INGEST_PATH = "/catalog/upload/ingestinws";
+        private const string CATALOG_UPLOAD_INGEST_PATH = "catalog/upload/ingestinws";
+        private const string CATALOG_COPY_TO_SFPT_PATH = "catalog/copytosfpt";
 
         private const string PROCESSORS_LOGS_ADD_PATH = "processors/logs/add";
         private const string PROCESSORS_RUN_PATH = "processors/run";
 
         private const string PROCESING_SUBSET_PATH = "processing/subset";
+        private const string PROCESING_MULTISUBSET_PATH = "processing/multisubset";
 
         private const string FILEBUFFER_DOWNLOAD_PATH = "filebuffer/download";
 
@@ -171,6 +174,44 @@ namespace WasdiLib.Repositories
 
             string sUrl = sWorkspaceBaseUrl;
             sUrl += CATALOG_UPLOAD_INGEST_PATH;
+            sUrl += query;
+
+            var response = await _wasdiHttpClient.GetAsync(sUrl);
+
+            var content = response.Content;
+            if (content != null)
+                _logger.LogDebug(content.ToString());
+
+            return await response.ConvertResponse<PrimitiveResult>();
+        }
+
+        public async Task<PrimitiveResult> AsynchCopyFileToSftp(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sRelativePath, string sFileName, string sProcessId)
+        {
+            _logger.LogDebug("AsynchCopyFileToSftp()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("file", sFileName);
+            parameters.Add("workspace", sWorkspaceId);
+
+            if (bIsOnServer)
+                parameters.Add("parent", sProcessId);
+
+            if (!String.IsNullOrEmpty(sRelativePath))
+                parameters.Add("path", sRelativePath);
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+
+            string sUrl = sWorkspaceBaseUrl;
+            sUrl += CATALOG_COPY_TO_SFPT_PATH;
             sUrl += query;
 
             var response = await _wasdiHttpClient.GetAsync(sUrl);
@@ -442,6 +483,42 @@ namespace WasdiLib.Repositories
                 query = "?" + query;
 
             string url = sBaseUrl + PROCESING_SUBSET_PATH + query;
+
+            var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
+            response.EnsureSuccessStatusCode();
+
+            return await response.ConvertResponse<PrimitiveResult>();
+        }
+
+        public async Task<PrimitiveResult> ProcessingMultisubset(string sBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sInputFile, string sProcessId, Dictionary<string, object> payloadDictionary)
+        {
+            _logger.LogDebug("ProcessingMultisubset()");
+
+
+            var json = SerializationHelper.ToJson(payloadDictionary);
+
+            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json");
+
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("source", sInputFile);
+            parameters.Add("workspace", sWorkspaceId);
+
+            if (bIsOnServer)
+                parameters.Add("parent", sProcessId);
+
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+            string url = sBaseUrl + PROCESING_MULTISUBSET_PATH + query;
 
             var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
             response.EnsureSuccessStatusCode();
