@@ -47,6 +47,13 @@ namespace WasdiLib.Services
             return _repository.CatalogDownload(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, sSavePath, sFileName).GetAwaiter().GetResult();
         }
 
+        PrimitiveResult AsynchCopyFileToSftp(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, bool bIsOnServer, string sRelativePath, string sFileName, string sProcessId)
+        {
+            _logger.LogDebug("AsynchCopyFileToSftp()");
+
+            return _repository.AsynchCopyFileToSftp(sWorkspaceBaseUrl, sSessionId, sWorkspaceId, bIsOnServer, sRelativePath, sFileName, sProcessId).GetAwaiter().GetResult();
+        }
+
         public PrimitiveResult CatalogUploadIngest(string sWorkspaceBaseUrl, string sSessionId, string sWorkspaceId, string sFileName, string sStyle)
         {
             _logger.LogDebug("CatalogUploadIngest()");

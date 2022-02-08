@@ -2534,6 +2534,70 @@ namespace WasdiLib
             return success;
         }
 
+        public string CopyFileToSftp(string sFileName)
+        {
+            _logger.LogDebug("CopyFileToSftp( " + sFileName + " )");
+
+            return CopyFileToSftp(sFileName, null);
+        }
+
+        public string CopyFileToSftp(string sFileName, string sRelativePath)
+        {
+            _logger.LogDebug("CopyFileToSftp( " + sFileName + ", " + sRelativePath + " )");
+
+            return WaitProcess(AsynchCopyFileToSftp(sFileName, sRelativePath));
+        }
+
+        public string AsynchCopyFileToSftp(string sFileName)
+        {
+            return AsynchCopyFileToSftp(sFileName, null);
+        }
+
+        public string AsynchCopyFileToSftp(string sFileName, string sRelativePath)
+        {
+            _logger.LogDebug("AsynchCopyFileToSftp({0}, {1})", sFileName, sRelativePath);
+
+            if (String.IsNullOrEmpty(sFileName))
+            {
+                _logger.LogError("AsynchCopyFileToSftp: invalid file name, aborting");
+                return null;
+            }
+
+            //upload file if it is not on WASDI yet
+            try
+            {
+                if (GetUploadActive())
+                {
+                    if (!FileExistsOnWasdi(sFileName))
+                    {
+                        _logger.LogDebug("AsynchCopyFileToSftp: file " + sFileName + " is not on WASDI yet, uploading...");
+                        UploadFile(sFileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.StackTrace);
+                return null;
+            }
+
+            try
+            {
+                bool bIsOnServer = GetIsOnServer();
+                string sProcessId = GetMyProcId();
+                PrimitiveResult primitiveResult = _wasdiService.AsynchCopyFileToSftp(m_sWorkspaceBaseUrl, m_sSessionId, m_sActiveWorkspace, bIsOnServer, sRelativePath, sFileName, sProcessId);
+
+                if (primitiveResult != null)
+                    return primitiveResult.StringValue;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("AsynchCopyFileToSftp: could not HTTP GET to /catalog/copytosfpt due to: " + ex + ", aborting");
+                return null;
+            }
+
+            return null;
+        }
 
     }
 }
