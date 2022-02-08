@@ -2182,7 +2182,6 @@ public class ProcessorsResource  {
      */
 	private boolean unzipProcessor(File oProcessorZipFile, String sSessionId, String sProcessorId) {
 		try {
-			ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
 
 			//get containing dir 
 			String sProcessorFolder = oProcessorZipFile.getParent();
@@ -2190,6 +2189,7 @@ public class ProcessorsResource  {
 
 			//unzip
 			try {
+				ZipFileUtils oZipExtractor = new ZipFileUtils(sSessionId + " : " + sProcessorId);
 				String sTmpFolder = oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
 				Utils.debugLog("ProcessorsResource.unzipProcessor: temporary dir: " + sTmpFolder );
 			} catch (IOException | SecurityException oE) {

@@ -102,11 +102,27 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	@Override
 	public Product getSnapProduct() {
 		try {
+			String sBase = m_oProductFile.getAbsolutePath();
+			if(sBase.endsWith(".zip")) {
+				sBase = sBase.replaceAll(".zip", ".SEN3");
+			}
+			sBase += File.separator;
 			//save File pointing to directory
-			m_oProductFile = new File(m_oProductFile.getAbsolutePath() + File.separator + "xfdumanifest.xml");
+			m_oProductFile = new File(sBase + "xfdumanifest.xml");
 			//business as usual
 			if (m_bSnapReadAlreadyDone == false) {
 				m_oProduct = readSnapProduct();
+			}
+			
+			if(null==m_oProduct) {
+				//maybe it's one of those unsupported Sentinel-3 readings, such as the altimeter
+				//let's see if we can read the nc directly
+				m_oProductFile = new File(sBase + "measurement.nc");
+				m_oProduct = readSnapProduct();
+			}
+			
+			if(null!=m_oProduct) {
+				m_bSnapReadAlreadyDone = true;
 			}
 			//reset the File pointer
 			m_oProductFile = m_oProductFile.getParentFile();
