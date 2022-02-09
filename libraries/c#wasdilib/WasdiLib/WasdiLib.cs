@@ -2713,5 +2713,28 @@ namespace WasdiLib
             return "";
         }
 
+        public void PrintStatus()
+        {
+            string info = $@"
+wasdi: user: {GetUser()}
+wasdi: password: ***********************
+wasdi: session id: {GetSessionId()}
+wasdi: active workspace id: {GetActiveWorkspace()}
+wasdi: workspace owner: {m_sWorkspaceOwner}
+wasdi: base path: {GetBasePath()}
+wasdi: is on server: {GetIsOnServer()}
+wasdi: download active: {GetDownloadActive()}
+wasdi: upload active: {GetDownloadActive()}
+wasdi: verbose: {GetVerbose()}
+wasdi: parameters file path: {GetParametersFilePath()}
+wasdi: params: {GetParamsAsJsonString()}
+wasdi: proc id: {GetMyProcId()}
+wasdi: base url: {GetBaseUrl()}
+wasdi: workspace base URL: {GetWorkspaceBaseUrl()}
+                ";
+
+            _logger.LogInformation(info);
+        }
+
     }
 }
