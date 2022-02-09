@@ -11,6 +11,8 @@ namespace WasdiLib.Services
 
         ProcessWorkspace GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId);
 
+        ProcessWorkspace SetSubPid(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, int iSubPid);
+
         string GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds);
 
         string GetProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessObjId);

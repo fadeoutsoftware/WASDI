@@ -11,6 +11,8 @@ namespace WasdiLib.Repositories
 
         Task<ProcessWorkspace> GetProcessWorkspaceByProcessId(string sWorkspaceBaseUrl, string sSessionId, string sProcessId);
 
+        Task<ProcessWorkspace> SetSubPid(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, int iSubPid);
+
         Task<string> GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds);
 
         Task<string> GetProcessPayload(string sWorkspaceBaseUrl, string sSessionId, string sProcessObjId);

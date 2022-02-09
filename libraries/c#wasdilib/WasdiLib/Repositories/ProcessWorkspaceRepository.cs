@@ -17,6 +17,7 @@ namespace WasdiLib.Repositories
         private const string PROCESSES_UPDATE_PATH = "/process/updatebyid";
         private const string PROCESSES_UPDATE_PAYLOAD_PATH = "/process/setpayload";
         private const string PROCESS_PAYLOAD_PATH = "/process/payload";
+        private const string PROCESS_SETSUBPID_PATH = "process/setsubpid";
 
         private readonly ILogger<ProcessWorkspaceRepository> _logger;
 
@@ -104,6 +105,30 @@ namespace WasdiLib.Repositories
                 query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_PROCESS_ID_PATH + query;
+            var response = await _wasdiHttpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            return await response.ConvertResponse<ProcessWorkspace>();
+        }
+
+        public async Task<ProcessWorkspace> SetSubPid(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, int iSubPid)
+        {
+            _logger.LogDebug("SetSubPid()");
+
+            _wasdiHttpClient.DefaultRequestHeaders.Clear();
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+            _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
+
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("procws", sProcessId);
+            parameters.Add("subpid", iSubPid.ToString());
+
+            var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
+            string query = formUrlEncodedContent.ReadAsStringAsync().Result;
+            if (!String.IsNullOrEmpty(query))
+                query = "?" + query;
+
+            string url = sWorkspaceBaseUrl + PROCESS_SETSUBPID_PATH + query;
             var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 

@@ -38,6 +38,13 @@ namespace WasdiLib.Services
             return _repository.GetProcessWorkspaceByProcessId(sWorkspaceBaseUrl, sSessionId, sProcessId).GetAwaiter().GetResult();
         }
 
+        public ProcessWorkspace SetSubPid(string sWorkspaceBaseUrl, string sSessionId, string sProcessId, int iSubPid)
+        {
+            _logger.LogDebug("SetSubPid({0}, {1})", sProcessId, iSubPid);
+
+            return _repository.SetSubPid(sWorkspaceBaseUrl, sSessionId, sProcessId, iSubPid).GetAwaiter().GetResult();
+        }
+
         public string GetProcessesStatus(string sWorkspaceBaseUrl, string sSessionId, List<string> asIds)
         {
             _logger.LogDebug("GetProcessesStatus()");

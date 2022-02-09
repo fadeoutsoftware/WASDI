@@ -2687,5 +2687,31 @@ namespace WasdiLib
             return null;
         }
 
+        public string SetSubPid(string sProcessId, int iSubPid)
+        {
+            _logger.LogDebug("SetSubPid({0}, {1})", sProcessId, iSubPid);
+
+            if (String.IsNullOrEmpty(sProcessId))
+            {
+                _logger.LogError("SetSubPid: process ID null or empty, aborting");
+                return "";
+            }
+
+            try
+            {
+                ProcessWorkspace processWorkspace = _processWorkspaceService.SetSubPid(m_sWorkspaceBaseUrl, m_sSessionId, sProcessId, iSubPid);
+
+                if (processWorkspace != null)
+                    return processWorkspace.Status;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SetSubPid: could not HTTP GET due to: " + ex + ", aborting");
+                return "";
+            }
+
+            return "";
+        }
+
     }
 }
