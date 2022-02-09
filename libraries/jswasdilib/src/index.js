@@ -304,7 +304,7 @@ class Wasdi {
             }
         });
 
-        xhr.open("GET",  url + params, false);
+        xhr.open("GET", url + params, false);
         xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
         xhr.setRequestHeader("x-session-token", this._m_sSessionId);
 
@@ -337,14 +337,14 @@ class Wasdi {
     }
 
     workspaceList() {
-        var workspaceList = this.#getObject(this._m_sBaseUrl +"/ws/byuser", "");
+        var workspaceList = this.#getObject(this._m_sBaseUrl + "/ws/byuser", "");
         console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
         workspaceList.forEach(a => console.log(a.workspaceName + " - Id" + a.workspaceId));
         return workspaceList;
     }
 
     productListByActiveWs() {
-        let productList = this.#getObject(this._m_sBaseUrl +"/product/byws", "?workspace=" + this.ActiveWorkspace)
+        let productList = this.#getObject(this._m_sBaseUrl + "/product/byws", "?workspace=" + this.ActiveWorkspace)
         console.log("[INFO] jswasdilib.productListByActiveWs: Products in the active workspace ");
         productList.forEach(a => console.log(a.name));
         return productList;
@@ -404,7 +404,7 @@ class Wasdi {
     launchProcessor(appname) {
         if (this._m_sActiveWorkspace) {
             let response = this.#postObject(this._m_sWorkspaceBaseUrl + "/processors/run", "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace)
-            if (response.processingIdentifier){
+            if (response.processingIdentifier) {
                 this._m_aoRunningProcessId.push(response.processingIdentifier);
             }
             return response;
@@ -418,9 +418,9 @@ class Wasdi {
      * @param sProcessId the processId to add the payload
      * @param data JSON string containing the payload
      */
-    setProcessPayload(sProcessId,data){
-        return this.#getObject(this._m_sWorkspaceBaseUrl + "/process/setpayload","?procws="+sProcessId+
-            "&payload="+ encodeURIComponent(data));
+    setProcessPayload(sProcessId, data) {
+        return this.#getObject(this._m_sWorkspaceBaseUrl + "/process/setpayload", "?procws=" + sProcessId +
+            "&payload=" + encodeURIComponent(data));
     }
 
 
@@ -455,9 +455,37 @@ class Wasdi {
     /**
      * Prints details about the status if the processes launched during the last session
      */
-    printProcesses(){
+    printProcesses() {
         this._m_aoRunningProcessId.forEach(a => this.getProcessStatus(a));
     }
+
+    getProductsActiveWorkspace() {
+        return this.#getObject(this._m_sWorkspaceBaseUrl + "/product/byws", "?workspace=" + this._m_sActiveWorkspace);
+    }
+
+    publishBand(fileName, bandName) {
+        // search filename in the current workspace
+        let file = this.getProductsActiveWorkspace().find(a => a.fileName == fileName);
+        if (file && file.bandsGroups) {
+            let band = file.bandsGroups.bands.find(b => b.name == bandName);
+            if (band) {
+                console.log("[INFO] jswasdilib.publishBand: Band found, begin publish");
+                let published = this.#getObject(
+                    this._m_sWorkspaceBaseUrl + "/filebuffer/publishband",
+                    "?fileUrl=" + fileName +
+                    "&workspace=" + this._m_sActiveWorkspace +
+                    "&band=" + bandName);
+                return published.payload;
+            } else {
+                console.log("[INFO] jswasdilib.publishBand: Band not found found");
+            }
+
+        } else {
+            console.log("[INFO] jswasdilib.publishBand: File " + fileName + " not found in the current workspace");
+        }
+
+    }
+
 
     get User() {
         return this._m_sUser;
