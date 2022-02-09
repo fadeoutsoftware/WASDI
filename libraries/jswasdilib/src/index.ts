@@ -422,7 +422,7 @@ export default class Wasdi {
      * Retrieves a list of applications available on the WASDI marketplace
      */
     getDeployed() {
-        let object = this.getObject("https://test.wasdi.net/wasdiwebserver/rest", "/processors/getdeployed");
+        let object = this.getObject(this._m_sBaseUrl, "/processors/getdeployed");
         let ret: string [];
         if (object[0].processorName) {
             object.forEach((a: { processorName: string; }) => {
